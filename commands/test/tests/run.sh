@@ -46,7 +46,11 @@ run() {
 run -j 2
 [ "$status" = 1 ]
 grep -Fxq 'files: 1 passed, 1 failed; tests: 1 passed, 1 failed' "$WORK/out"
-[ "$(sed -n '1p' "$WORK/out")" = 'ok passing' ]
+# Each file's results follow its name; locations are relative to the
+# working directory.
+[ "$(sed -n '1,2p' "$WORK/out")" = "$(printf 'Testing a_test.x\nok passing')" ]
+grep -Fxq 'Testing tests/deep/b.x' "$WORK/out"
+grep -q '^FAIL failing (tests/deep/b.x:' "$WORK/out"
 # Filters ignore unmatched files and select across the complete run.
 run -j 2 --filter pass
 [ "$status" = 0 ]
@@ -106,7 +110,7 @@ run -j 2 "$WORK/scheduling"
 [ "$status" = 0 ]
 printf 'first reported\nsecond reported\nthird reported\nfiles: 3 passed, 0 failed; tests: 0 passed, 0 failed\n' \
   >"$WORK/scheduling/expected"
-cmp "$WORK/scheduling/expected" "$WORK/out"
+grep -v '^Testing ' "$WORK/out" | cmp "$WORK/scheduling/expected" -
 # The command recognizes both filename patterns and deduplicates operands.
 cp "$WORK/project/a_test.x" "$WORK/project/test_copy.x"
 run a_test.x test_copy.x a_test.x --quiet
@@ -202,6 +206,7 @@ run native_header_check.x
 grep -Fxq 'files: 1 passed, 0 failed; tests: 1 passed, 0 failed' "$WORK/out"
 run "$WORK/empty"
 [ "$status" = 2 ]
+grep -Fq 'test: no test files found in ' "$WORK/out"
 for jobs in 0 -1 nope ''; do
   run -j "$jobs"
   [ "$status" = 2 ]

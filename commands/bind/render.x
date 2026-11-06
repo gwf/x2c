@@ -124,11 +124,15 @@ String Survey.readme(Survey s, BindRequest request) {
     2. Check `PACKAGE_LINK` in the `Makefile` against the native build profile.
     3. Check that each release accepts NULL, since `auto` releases the value it
        saved even when acquisition returned NULL.
-    4. List the tasks a developer brings to this library, and write the ordinary
-       x2c surface after the region: errors, Strings, collections, and
-       iteration. Generated parameters are positional (the receiver's initial,
-       `arg1`, ...) because collection records parameter types without names.
-    5. Write `tests/` and `examples/`, as described in `packages/AGENTS.md`.
+    4. List the tasks a developer brings to this library, and write the
+       ordinary x2c surface after the region: errors, Strings, collections,
+       and iteration. Generated parameters are positional (the receiver's
+       initial, `arg1`, ...) because collection records parameter types
+       without names.
+    5. Write `tests/` and `examples/`, as described in [Wrapping a C
+       Library][wrapping] in the x2c book.
+
+    [wrapping]: https://x2c-lang.dev/docs/guide/wrapping-c-libraries.html
     "));
   return out;
 }

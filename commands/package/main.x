@@ -23,7 +23,12 @@ int main(int argc, char **argv) {
       Usage:
         x2c package <install|remove|list> [options]
 
-      x2c install, remove, and list are equivalent short forms."));
+      Install, remove, and list packages under the x2c home. 'x2c install',
+      'x2c remove', and 'x2c list' are equivalent short forms; run
+      'x2c help install' for an operation's options.
+
+      Options:
+        -h, --help                  Show help and exit"));
     return operation ? 0 : 2;
   }
   if (operation == "ensure") return _ensure(args.cdr());

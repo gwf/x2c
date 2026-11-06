@@ -37,6 +37,9 @@ static macro Stmt $report.install.version_pinned(
 static macro Stmt $report.install.spec_unknown(Expr $spec) =>
   _error(%"unknown package spec '$($spec)'");
 
+static macro Stmt $report.install.source_missing(Expr $spec) =>
+  _error(%"no such package directory or archive '$($spec)'");
+
 static macro Stmt $report.install.name_invalid(Expr $name) =>
   _error(%"'$($name)' is not a package name");
 
@@ -72,9 +75,8 @@ static macro Stmt $report.install.home_missing(Expr $command) =>
   Diagnostics.driver_error(
     %"$($command): no x2c home: install the compiler or set X2C_HOME");
 
-static macro Stmt $report.install.tool_failed(
-  Expr $what, Expr $arguments, Expr $errors) =>
-  _error(%"$($what) failed ($($arguments.car())): $($errors.strip(" \n"))");
+static macro Stmt $report.install.tool_failed(Expr $what, Expr $detail) =>
+  _error(%"$($what) failed: $($detail)");
 
 static macro Stmt $report.install.digest_mismatch(
   Expr $p, Expr $expected, Expr $actual) =>
@@ -100,10 +102,12 @@ static macro Stmt $report.install.installed(Expr $packages, Expr $name) =>
 static macro Stmt $report.install.removed(Expr $target) =>
   fprintf(stderr, "x2c: removed %s\n", $target);
 
+static macro Stmt $report.install.none_installed(Expr $packages) =>
+  fprintf(stderr, "x2c: no packages are installed in %s\n", $packages);
+
 static macro Expression $report.install.start_failed(
   Expr $program, Expr $error) =>
-  %"x2c: unable to execute $($program): $(
-    String.new(strerror((int) $error)))\n";
+  %"cannot run $($program): $(String.new(strerror((int) $error)))";
 
 // the packages lock
 
@@ -236,6 +240,8 @@ static void _locate(Install &i) {
   else if (Path.exists(spec)) i.source = spec;
   else if (spec.is_identifier())
     _resolve(i, _index_row(i.request, spec, i.work));
+  else if ("/" in spec || spec.endswith(".tar.gz"))
+    $report.install.source_missing(spec);
   else $report.install.spec_unknown(spec);
 }
 
@@ -308,7 +314,8 @@ static void _publish(String staged, String packages, String name) {
 
 // bundles and source packages
 
-static void _check_bundle(PackageOptions request, String package, String name) {
+static void _check_bundle(
+  PackageOptions request, String package, String name) {
   String built = _marker_string(%"$package/BUNDLE.json", "x2c_version");
   String current = Compiler.version();
   if (!built) $report.install.bundle_version_missing(name);
@@ -483,8 +490,11 @@ static void _run(List arguments, const char *what) {
   }
   int status = job ? job.status() : 127;
   if (job) errors = job.errors_text;
-  if (status)
-    $report.install.tool_failed(what, arguments, errors);
+  if (!status) return;
+  // A tool's own message names the tool, as `curl: (6) ...` does.
+  String detail = errors ? errors.strip(" \n") : NULL;
+  if (!detail) detail = %"$(arguments.car()) exited with status $status";
+  $report.install.tool_failed(what, detail);
 }
 
 static int _remote(String spec) =>
@@ -559,12 +569,15 @@ static void _check_removable(String target, String name) {
 /** Lists installed packages as `name version kind` lines and returns 0. */
 int PackageOptions.list_packages(PackageOptions request) {
   String packages = _home_packages("list");
+  int listed = 0;
   foreach (String name, Path.is_dir(packages) ? _entries(packages) : NULL) {
     String package = %"$packages/$name", kind = _installed_kind(package);
     if (!kind) continue;
     String version = _installed_version(package);
     printf("%s %s %s\n", name, version ? version : "-", kind);
+    listed++;
   }
+  if (!listed) $report.install.none_installed(packages);
   return 0;
 }
 

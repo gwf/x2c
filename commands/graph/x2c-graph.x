@@ -2805,17 +2805,29 @@ static int _clone_minimum(String text) {
   return errno || *end || value < 1 || value > INT_MAX ? 0 : value;
 }
 
+/* Names the problem that `Args.parse` found, or the unknown subcommand. */
+static void _usage_error(String verb, List rows, List detail) {
+  String why = detail.assoc(<reason>), option = detail.assoc(<option>);
+  String problem = !verb ? "expected a subcommand"
+    : !rows ? %"unknown subcommand '$verb'"
+    : why && option ? %"$verb: $why '$option'"
+    : %"$verb: invalid arguments";
+  Diagnostics.driver_fail(
+    %"graph: $problem", "run 'x2c graph --help' for usage");
+}
+
 String x2c_embedded_identity(void);
 
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   if (argc == 2 && (!strcmp(argv[1], "--help") ||
                     !strcmp(argv[1], "-h"))) {
-    $output.graph.usage(Stdout, argv[0]);
+    $output.graph.usage(Stdout);
     return 0;
   }
   String verb = argc > 1 ? String.new(argv[1]) : "";
-  if (verb in %("snapshot" "status" "query" "serve" "diff" "_snapshot-members"))
+  if (verb in
+      %("snapshot" "status" "query" "serve" "diff" "_snapshot-members"))
     return graph_snapshot_command(argc, argv);
   int datasets = verb == "datasets", compare = verb == "compare";
   List rows = _command_rows(verb), words = Args.from_argv(argc, argv).cdr();
@@ -2847,10 +2859,7 @@ int main(int argc, char **argv) {
          !_add_inputs(inputs, subtrees, command_files["inputs"], <commands>)))
       raise %(bad-arg);
   }
-  catch %(bad-arg *): {
-    $output.graph.usage(Stderr, argv[0]);
-    return 2;
-  }
+  catch %(bad-arg *detail): _usage_error(verb, rows, detail);
   String name = options.getdefault("NAME", NULL);
   String left = options.getdefault("LEFT", NULL);
   String right = options.getdefault("RIGHT", NULL);
@@ -2926,22 +2935,22 @@ int main(int argc, char **argv) {
       Stdout.printf("%s\n", result.repr());
   }
   catch %(not-found *): {
-    Stderr.printf("x2c-graph: cannot find a compiler input\n");
+    Stderr.printf("x2c: error: graph: cannot find a compiler input\n");
     status = 1;
   }
   catch %(io-fail *): {
     Stderr.printf(
-      datasets ? "x2c-graph: cannot read input or write datasets\n"
-               : "x2c-graph: cannot read compiler support files\n"
+      datasets ? "x2c: error: graph: cannot read input or write datasets\n"
+               : "x2c: error: graph: cannot read compiler support files\n"
     );
     status = 1;
   }
   catch %(incomplete *): {
-    Stderr.printf("x2c-graph: incomplete compiler input\n");
+    Stderr.printf("x2c: error: graph: incomplete compiler input\n");
     status = 1;
   }
   catch %(malformed *): {
-    Stderr.printf("x2c-graph: malformed compiler input\n");
+    Stderr.printf("x2c: error: graph: malformed compiler input\n");
     status = 1;
   }
   command.close();

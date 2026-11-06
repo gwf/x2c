@@ -14,7 +14,7 @@ Output options:
       --dep-target <target>   Override the depfile target (one input only)
       --no-phony-deps         Omit phony rules for included files
 
-Source options:
+Translation options:
   -I <dir>                    Add a shared x2c/C include directory
       --x-include-dir <dir>   Add an x2c-only include directory
       --package-dir <dir>     Add a directory of x2c packages
@@ -25,7 +25,7 @@ Source options:
       --cpp-symbols           Use CPP collection for this translation
 
 C compiler options:
-      --meta-cc <program>     Use <program> to build meta code, whatever --cc is
+      --meta-cc <program>     Build meta code with <program>, whatever --cc is
   -D <name>[=<value>]         Define a C preprocessor macro
   -U <name>                   Undefine a C preprocessor macro
 
@@ -37,7 +37,7 @@ Inspection options:
       --dump-ast              Print the parsed AST and stop
       --dump-expansions       Print bound macro expansions and stop
       --dump-transforms       Print the transformed AST and stop
-      --dump-definitions      Print each definition's location and documentation and stop
+      --dump-definitions      Print definition locations and docs and stop
       --dump-code             Print unformatted generated code and stop
       --dump-symbols          Print the source symbol table and stop
       --dump-cpp-symbols      Print the CPP symbol table and stop
@@ -55,7 +55,7 @@ General options:
       --debug                 Enable compiler debug logging
       --max-errors <count>    Stop after <count> errors per unit (default: 20)
       --diagnostics-file <file>
-                              Write compiler diagnostics to <file> as JSON Lines
+                              Write diagnostics to <file> as JSON Lines
   @<file>                     Read additional arguments from a response file
   --                          End option parsing
 

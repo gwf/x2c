@@ -1,5 +1,5 @@
 Usage:
-  x2c list
+  x2c list [options]
 
 List installed packages as 'name version kind' lines.
 

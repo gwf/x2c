@@ -188,7 +188,7 @@ PATH="$BUILD/broken-tools" "$x2c" install -q "$BUILD/src/greet.tar.gz" \
 broken_status=$?
 set -e
 [[ $broken_status == 2 ]] || fail "unrunnable tar exited $broken_status"
-grep -q "extract failed (tar)" "$BUILD/broken-tar.stderr" ||
+grep -q "extract failed: cannot run tar" "$BUILD/broken-tar.stderr" ||
   fail "unrunnable tar diagnostic"
 # A receipt is action output, so it goes to standard error.
 "$x2c" install "$BUILD/src/greet" >"$BUILD/receipt.stdout" \

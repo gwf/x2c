@@ -16,21 +16,23 @@
 String x2c_embedded_identity(void);
 
 static List options_spec = %(
-  (-h --help (help "Show this help"))
-  (--package (value NAME) (help "Name the package and its entry unit"))
-  (--header (value FILE) (help "Bind the C header FILE"))
-  (--prefix (value PREFIX)
-    (help "Strip PREFIX from method names (default: shared prefix)"))
-  (-I (value DIR) repeated (help "Search DIR for the headers FILE includes"))
-  (-l (value LIB) repeated (help "Link consumers with library LIB"))
-  (-o (value DIR) (help "Write the package in DIR (default: packages/NAME)")));
+  (-h --help (help "Show help and exit"))
+  (--package (value name) (help "Name the package and its entry unit"))
+  (--header (value file) (help "Bind the C header <file>"))
+  (--prefix (value prefix)
+    (help "Method-name prefix to strip (default: shared)"))
+  (-I (value dir) repeated
+    (help "Search <dir> for headers the header includes"))
+  (-l (value lib) repeated (help "Link consumers with library <lib>"))
+  (-o (value dir) (help "Output directory (default: packages/<name>)")));
 
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   Map options = NULL;
   try options = Args.parse(Args.from_argv(argc, argv), options_spec);
-  catch %(bad-arg (operation "Args.parse") (reason ?why) *): {
-    Diagnostics.driver_error(%"bind: $why");
+  catch %(bad-arg (operation "Args.parse") (reason ?why) *detail): {
+    String option = detail.assoc(<option>);
+    Diagnostics.driver_error(option ? %"bind: $why '$option'" : %"bind: $why");
   }
   if (options["help"].integer()) {
     fputs(Args.usage("x2c bind", options_spec), stdout);
@@ -102,7 +104,8 @@ static int _write(Survey s, BindRequest request) {
     : s.entry_unit(request);
   if (!text) {
     fprintf(
-      stderr, "x2c bind: %s has no complete x2c bind region; not changed\n",
+      stderr,
+      "x2c: error: bind: %s has no complete x2c bind region; not changed\n",
       entry);
     return 1;
   }

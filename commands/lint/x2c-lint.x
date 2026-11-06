@@ -1,9 +1,10 @@
 #pragma indent
 /*  x2c-lint.x -- report x2c source that is not this repository's idiom
 
-    Usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... FILE...
-           x2c-lint --fmt-check [--fmt-diff] FILE...
-           x2c-lint --rules
+    Usage: x2c lint [--all | --rule <code>]... [--fix] [-I <dir>]...
+                    <file>...
+           x2c lint --fmt-check [--fmt-diff] <file>...
+           x2c lint --rules
 
     Prints each finding as `FILE:LINE: KIND CODE RULE-ID: MESSAGE`, in line
     order. The language rules run unless `--all` or `--rule` selects rules;
@@ -52,20 +53,34 @@
 #include <stdio.h>
 #include <string.h>
 
-static void _usage(File out):
-  fputs($dedent(%"
-    usage: x2c-lint [--all | --rule CODE]... [--fix] [-I DIR]... FILE...
-           x2c-lint --fmt-check [--fmt-diff] FILE...
-           x2c-lint --rules
-    function-reading-order requires --rule (excluded from --all).
-    "), out)
+static void _usage(void):
+  puts($dedent(%"
+    Usage:
+      x2c lint [--all | --rule <code>]... [--fix] [-I <dir>]... <file>...
+      x2c lint --fmt-check [--fmt-diff] <file>...
+      x2c lint --rules
+
+    Report x2c source that departs from the repository's style and idioms.
+
+    Options:
+      -h, --help                  Show help and exit
+          --all                   Select the language and style rules
+          --rule <code>           Select one rule; may be repeated
+          --fix                   Apply fixes that keep generated C identical
+      -I <dir>                    Add an include directory
+          --rules                 Print the rule table and exit
+          --fmt-check             Report files whose spacing would change
+          --fmt-diff              Also print the formatting difference
+
+    Without --all or --rule, the language rules run. --all does not select
+    function-reading-order; select it with --rule."))
 
 static void _preprocessor_errors(String text):
   fputs(text, stderr)
 
 static void _input_error(List detail):
   Var path = detail.assoc(<path>), error = detail.assoc(<errno>)
-  fprintf(stderr, "x2c-lint: %s: %s\n",
+  fprintf(stderr, "x2c: error: lint: %s: %s\n",
           path is <string> ? path.string() : "compiler support files",
           error.is_integer() ? strerror(error.int()) : "cannot read input")
 
@@ -177,25 +192,23 @@ int main(int argc, char **argv):
     (-h --help) (--rules) (--fmt-check) (--fmt-diff) (--fix) (--all)
     (--rule (value CODE) repeated) (-I (value DIR) repeated)
     (inputs repeated)))
-  catch %(bad-arg *):
-    _usage(Stderr)
-    return 2
+  catch %(bad-arg (operation "Args.parse") (reason ?why) *detail):
+    String option = detail.assoc(<option>)
+    Diagnostics.driver_error(
+      option ? %"lint: $why '$option'" : %"lint: $why")
   if options["rules"]:
     Rule.print_table()
     return 0
   if options["help"]:
-    _usage(Stdout)
+    _usage()
     return 0
   Map selected = {}
   foreach String code in options["rule"].list():
     if !Rule.find(code):
-      fprintf(stderr, "x2c-lint: unknown rule '%s'\n", code)
-      return 2
+      Diagnostics.driver_error(%"lint: unknown rule '$code'")
     selected[code] = 1
   Array inputs = options["inputs"].list()
-  if !inputs.len():
-    _usage(Stderr)
-    return 2
+  if !inputs.len(): Diagnostics.driver_error("lint: no input files")
   if options["fmt-check"] || options["fmt-diff"]:
     return _format_check(inputs, options["fmt-diff"].int())
   if options["all"]:
@@ -214,7 +227,8 @@ int main(int argc, char **argv):
     return 1
   Array translate = fix ? _translate(request) : NULL
   if fix && !translate:
-    fputs("x2c-lint: the matching x2c compiler is unavailable\n", stderr)
+    fputs("x2c: error: lint: the matching x2c compiler is unavailable\n",
+          stderr)
     return 1
   Path work = fix ? Path.temp_dir() : NULL
   int status = 0, count = 0

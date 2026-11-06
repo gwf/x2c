@@ -21,8 +21,8 @@ Output options:
   -o, --output <file>         Name the executable, library, or single object
       --build-dir <dir>       Store generated C, objects, deps, and state here
       --compile-commands <file>
-                              Write native compile commands and retain generated files
-      --save-temps[=<dir>]    Retain and reuse intermediates (default: .x2c-build)
+                              Write compile commands; keep generated files
+      --save-temps[=<dir>]    Reuse kept intermediates (default: .x2c-build)
 
 Translation options:
   -I <dir>                    Add a shared x2c/C include directory
@@ -31,7 +31,7 @@ Translation options:
       --c-system-dir <dir>    Add a C-only system include directory
       --package-dir <dir>     Add a directory of x2c packages
       --native-module <file>  Load a native module for compile-time calls
-      --extension <dir>       Link a package's compile-time part into a compiler
+      --extension <dir>       Add a package's compile-time part to a compiler
       --cpp                   Expand C macros for existing C compatibility
       --no-cpp                Skip symbol collection and preprocessing
       --live-symbols          Collect symbols through the host preprocessor
@@ -42,19 +42,19 @@ Package options:
 
 C compiler options:
       --cc <program>          Use <program> as the host C compiler
-      --meta-cc <program>     Use <program> to build meta code, whatever --cc is
+      --meta-cc <program>     Build meta code with <program>, whatever --cc is
       --ar <program>          Use <program> as the static-library archiver
   -O0, -O1, -O2, -O3, -Os     Set C optimization
   -g                          Emit debug information
   -D <name>[=<value>]         Define a C preprocessor macro
   -U <name>                   Undefine a C preprocessor macro
   -Xcc <arg>                  Pass one argument only to C compilation
-  -pthread                    Enable native threading for compilation and linking
+  -pthread                    Enable native threads when compiling and linking
 
 Linker options:
   -L <dir>                    Add a library search directory
   -l <name>                   Link library <name>
-      --rpath <dir>           Search <dir> for shared libraries when the program runs
+      --rpath <dir>           Search <dir> for shared libraries at run time
   -Wl,<arg>[,<arg>...]        Pass comma-separated arguments to the linker
   -framework <name>           Link a native framework on macOS
   -Xlinker <arg>              Pass one argument to the linker
@@ -70,7 +70,7 @@ General options:
       --debug                 Enable compiler debug logging
       --max-errors <count>    Stop after <count> errors per unit (default: 20)
       --diagnostics-file <file>
-                              Write compiler diagnostics to <file> as JSON Lines
+                              Write diagnostics to <file> as JSON Lines
   @<file>                     Read additional arguments from a response file
   --                          End option parsing
 

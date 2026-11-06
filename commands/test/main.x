@@ -19,14 +19,16 @@ static typedef struct Run {
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   List spec = %(
-    (-h --help (help "Show this help"))
-    (-j (value N) (default "1") (help "Run up to N test files concurrently"))
-    (--filter (value substring) repeated (help "Select test names containing substring"))
+    (-h --help (help "Show help and exit"))
+    (-j (value n) (default "1") (help "Run up to <n> test files concurrently"))
+    (--filter (value substring) repeated
+      (help "Select test names containing <substring>"))
     (--list (help "List matching tests"))
     (-q --quiet (help "Suppress successful test lines"))
     (--manifest-path (value file)
       (help "Read this project manifest"))
-    (--target (value name) (help "Use this manifest target's include directories"))
+    (--target (value name)
+      (help "Use this manifest target's include directories"))
     (--profile (value name) (help "Use this manifest profile"))
     (inputs repeated (help "Test files or directories")));
   Map options = NULL;
@@ -41,10 +43,7 @@ int main(int argc, char **argv) {
   }
   Run run = _configure(options);
   Array files = _discover(options["inputs"], run.root);
-  if (!files.len()) {
-    fputs("x2c test: no test files found\n", stderr);
-    return 2;
-  }
+  if (!files.len()) _no_tests(options["inputs"], run.root);
   _run_files(run, files);
   printf("files: %d passed, %d failed; tests: %d passed, %d failed\n",
     run.files_passed, run.files_failed, run.tests_passed, run.tests_failed);
@@ -62,11 +61,13 @@ static Run _configure(Map options) {
   project.target = options["target"];
   project.profile = options["profile"];
   String manifest = project.project_manifest();
-  Path root = manifest ? Path.dirname(Path.absolute(manifest)) : Path.absolute(".");
+  Path root =
+    manifest ? Path.dirname(Path.absolute(manifest)) : Path.absolute(".");
   if (manifest) {
     project.manifest = manifest;
     // The selected target follows all its dependencies.
-    for (ProjectBuild node = ProjectBuild.plan(project); node; node = node.next)
+    for (ProjectBuild node = ProjectBuild.plan(project); node;
+         node = node.next)
       project = node.request;
   }
   Array args = [];
@@ -79,6 +80,14 @@ static Run _configure(Map options) {
   return (Run) {.root = root, .project = project,
     .program_args = args.list(), .jobs = count,
     .filtered = !!options["filter"].list()};
+}
+
+/* Says where discovery looked and what it selects. */
+static void _no_tests(List operands, Path root) {
+  String searched = operands ? " ".join(operands) : _shown(root);
+  Diagnostics.driver_fail(
+    %"test: no test files found in $searched",
+    "tests are *_test.x and test_*.x files, and .x files in tests/");
 }
 
 static Array _discover(List operands, Path root) {
@@ -109,8 +118,8 @@ static void _discover_directory(
   while (pending.len()) {
     Path file = pending.take_last();
     String relative = file.remove_prefix(prefix);
-    if (relative.startswith(".x2c-build/") ||
-        "/.x2c-build/" in relative || file.basename() == ".x2c-build") continue;
+    if (relative.startswith(".x2c-build/") || "/.x2c-build/" in relative ||
+        file.basename() == ".x2c-build") continue;
     if (file.is_file()) {
       String name = file.basename();
       if (name.endswith("_test.x") ||
@@ -140,27 +149,39 @@ static void _run_files(Run &run, Array files) {
     while (reported < ordered.len()) {
       Job job = ordered[reported];
       if (!job.finished) break;
-      _report(run, job);
+      _report(run, job, files[reported], files.len() > 1);
       reported++;
     }
     Job.wait_any(pending);
   }
 }
 
-static void _report(Run &run, Job job) {
+/* Prints a file's output, its locations relative to the working
+   directory, under the file's name when the run has several files. */
+static void _report(Run &run, Job job, Path file, int named) {
   int status = job.status();
   String output = status ? job.output_text : job.output();
   int passed, failed, skipped;
   int counts = _summary_counts(output, passed, failed, skipped);
   if (run.filtered && status == 2 && counts &&
       !passed && !failed && !skipped) return;
-  if (output) fputs(output, stdout);
+  String shown = _shown(file);
+  if (named) printf("Testing %s\n", shown);
+  if (output) fputs(output.replace(%"$file:", %"$shown:"), stdout);
   if (status) run.files_failed++;
   else run.files_passed++;
   if (counts) {
     run.tests_passed += passed;
     run.tests_failed += failed;
   }
+}
+
+/* `path` relative to the working directory when it lies in it. */
+static String _shown(Path path) {
+  String directory = Path.absolute(".").rstrip("/");
+  if (path == directory) return ".";
+  String prefix = %"$directory/";
+  return path.startswith(prefix) ? path.remove_prefix(prefix) : path;
 }
 
 static int _summary_counts(

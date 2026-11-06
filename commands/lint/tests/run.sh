@@ -237,7 +237,7 @@ builds/0/x2c lint --all "$tests/src/style.x" >"$work/dispatched"
 cmp "$work/direct" "$work/dispatched"
 
 builds/0/x2c help lint >"$work/help"
-grep -q '^usage: x2c-lint ' "$work/help"
+grep -q '^  x2c lint --rules$' "$work/help"
 
 # The driver exposes the same binding-aware lifetime rule.
 builds/0/x2c lint --rule compound-auto "$tests/src/compound-auto.x" \

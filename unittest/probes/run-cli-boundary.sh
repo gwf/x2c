@@ -114,7 +114,7 @@ for command, option in [('build', '--output'), ('translate', '--out-dir')]:
             [compiler, command, *value, str(build / 'space dir/quoted.x')],
             cwd=build, capture_output=True, text=True)
         assert result.returncode == 2, (value, result)
-        assert result.stderr == f"x2c: error: option requires a value '{option}'\n", result
+        assert result.stderr == f"x2c: error: option '{option}' requires a value\n", result
 assert not (build / 'a.out').exists()
 PY
 
@@ -1886,7 +1886,7 @@ set +e
 joined_status=$?
 set -e
 [[ $joined_status == 2 ]] || exit 1
-grep -Fq "option takes no value '--plain=yes'" "$joined/value.stderr"
+grep -Fq "option '--plain' takes no value" "$joined/value.stderr"
 
 # Manifest options describe a manifest build, so operands refuse them.
 set +e

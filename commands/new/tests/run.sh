@@ -16,6 +16,9 @@ starter_status=$?
 set -e
 [ "$starter_status" = 2 ] || exit 1
 grep -Fq "exists and is not an empty directory" "$BUILD/starter/again.stderr"
+"$X2C" new "$BUILD/next" 2>"$BUILD/next.stderr"
+grep -Fxq "Run 'x2c run' in $BUILD/next to build and run it." \
+  "$BUILD/next.stderr"
 cmp "$BUILD/starter/x2c.toml.before" "$starter/x2c.toml"
 
 # An empty operand names no directory, and a link names itself.

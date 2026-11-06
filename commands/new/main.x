@@ -31,7 +31,9 @@ static macro Expression $source.project.ignore() =>
   ".x2c-build/\n";
 
 static macro Stmt $report.project.created(Expr $directory) {
-  fprintf(stderr, "x2c: created %s\n", $directory);
+  fprintf(
+    stderr, "x2c: created %s\nRun 'x2c run' in %s to build and run it.\n",
+    $directory, $directory);
 }
 
 static macro Stmt $report.project.name_invalid(Expr $name) {
@@ -42,7 +44,7 @@ static macro Stmt $report.project.name_invalid(Expr $name) {
 
 static macro Stmt $report.project.directory_occupied(Expr $dir) {
   Diagnostics.driver_error(
-    %"new: $($dir) exists and is not an empty directory");
+    %"new: '$($dir)' exists and is not an empty directory");
 }
 
 // new projects

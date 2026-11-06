@@ -30,24 +30,28 @@ int main(int argc, char **argv) {
   List arguments = Args.from_argv(argc, argv);
   if ("--help" in arguments || "-h" in arguments) {
     puts($dedent(%"
-      usage: x2c repl [OPTIONS] [SOURCES|HEADERS|NATIVE-INPUTS...]
+      Usage:
+        x2c repl [options] [<input>...]
 
-      Start a persistent native library playground. Enter :help for commands.
+      Start a persistent native library playground. Inputs are x2c sources,
+      C headers, and native inputs. Enter :help for commands.
 
-        --dump                 Print typed syntax and retained native artifacts
-        --stats                Print worker statistics at exit
-        --verbose-stats        Print detailed worker statistics at exit
-        -I DIR                 Add an x2c/C include directory
-        --x-include-dir DIR    Add an x2c include directory
-        --c-include-dir DIR    Add a C include directory
-        -D NAME[=VALUE]        Define a preprocessor macro
-        -L DIR, -l LIB         Configure native library linkage
-        -Xcc ARG, -Wl,ARG      Pass native compiler/linker options
-        --package-dir DIR      Add a package directory
-        --native-module FILE   Select a compile-time module
-        --manifest-path FILE   Use a project manifest
-        --target NAME          Select its target
-        --profile NAME         Select its build profile
+      Options:
+        -h, --help                  Show help and exit
+            --dump                  Print typed syntax and native artifacts
+            --stats                 Print worker statistics at exit
+            --verbose-stats         Print detailed worker statistics at exit
+        -I <dir>                    Add an x2c/C include directory
+            --x-include-dir <dir>   Add an x2c include directory
+            --c-include-dir <dir>   Add a C include directory
+        -D <name>[=<value>]         Define a preprocessor macro
+        -L <dir>, -l <lib>          Configure native library linkage
+        -Xcc <arg>, -Wl,<arg>       Pass native compiler and linker options
+            --package-dir <dir>     Add a package directory
+            --native-module <file>  Select a compile-time module
+            --manifest-path <file>  Use a project manifest
+            --target <name>         Select its target
+            --profile <name>        Select its build profile
 
       Native build options use the same spellings as x2c build.
       Successful loading and reloading clear prompt and library state."));

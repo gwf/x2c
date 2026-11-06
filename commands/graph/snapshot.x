@@ -129,7 +129,8 @@ static void _snapshot_analyze(Map snapshot, ProjectBuild plan) {
       "extensions": request.extensions, "cc": request.cc,
       "meta_cc": request.meta_cc, "no_cpp": request.no_cpp,
       "cpp_expansion": request.cpp_expansion,
-      "live_symbols": request.live_symbols, "cpp_symbols": request.cpp_symbols};
+      "live_symbols": request.live_symbols,
+      "cpp_symbols": request.cpp_symbols};
     foreach (String input, inputs) {
       // Collection cache rows outlive their compiler's source declarations.
       // A saved-analysis unit needs fresh declaration provenance as well.
@@ -272,7 +273,8 @@ int graph_snapshot_command(int argc, char **argv) {
         result = _snapshot_status(snapshot, x2c_get_executable());
       else if (verb == "query" && argc == 4) {
         Var query = Json.read_file(String.new(argv[3]));
-        if (query is not <map>) raise %(bad-arg (reason "query object required"));
+        if (query is not <map>)
+          raise %(bad-arg (reason "query object required"));
         result = graph_snapshot_query(snapshot, query);
       }
       else if (verb == "diff" && argc == 4)
@@ -284,7 +286,7 @@ int graph_snapshot_command(int argc, char **argv) {
     return 0;
   }
   catch %(*failure): {
-    fprintf(stderr, "x2c graph %s: %s\n", verb, failure.repr());
+    fprintf(stderr, "x2c: error: graph: %s: %s\n", verb, failure.repr());
     return 2;
   }
 }
