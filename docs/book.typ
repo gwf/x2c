@@ -33,6 +33,10 @@
   #v(8mm)
   #text(size: 17pt, fill: luma(35%))[The language, standard library, and compiler]
   #v(1fr)
+$if(version)$
+  #text(size: 11pt)[Version $version$]
+  #v(3mm)
+$endif$
   #text(size: 11pt)[The x2c authors]
   #v(3mm)
   #link("https://x2c-lang.dev")[x2c-lang.dev]
