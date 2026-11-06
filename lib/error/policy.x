@@ -31,10 +31,10 @@ void Error.policy_set(Symbol code, Symbol disposition) {
   if (!Error.ready()) return;
   if (disposition != <abort> && disposition != <log> &&
       disposition != <collect> && disposition != <ignore>)
-    raise %(bad-arg (operation "Error.policy_set") (dispositio $disposition));
+    raise %(bad-arg (operation "Error.policy_set") (policy $disposition));
   if (_never_returns(code) && disposition != <abort>)
     raise %(bad-arg (operation "Error.policy_set") (code $code)
-                   (dispositio $disposition));
+                   (policy $disposition));
   ErrorThreadState state = _thread();
   state.floor_only++;
   int pushed = _scope_push(
