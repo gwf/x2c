@@ -2,11 +2,12 @@
 name: Bug report
 about: A crash, miscompile, wrong output, or failing command
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 ---
 
-Do not report security vulnerabilities here; follow SECURITY.md instead.
+Do not report security vulnerabilities here; follow
+[SECURITY.md](https://github.com/gwf/x2c/blob/main/SECURITY.md) instead.
 
 **x2c version**
 
