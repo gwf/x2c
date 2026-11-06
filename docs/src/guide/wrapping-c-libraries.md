@@ -96,8 +96,8 @@ Document the build you provide: version and URL, archive and public-header
 hashes, compile options and disabled features, static or dynamic linkage,
 dependencies and platform frameworks, licenses and required notices, and any
 x2c limits on foreign declarations. The available raw API depends on these
-choices. `packages/FOREIGN-C-QUALIFIERS.md` records where
-x2c's observed types drop a `const` that the upstream header declares.
+choices. `packages/FOREIGN-C-QUALIFIERS.md` states when x2c checks the
+qualifiers an upstream header declares and which header forms it cannot read.
 
 ## Keep the raw API reachable
 

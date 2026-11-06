@@ -171,11 +171,10 @@ archive's member count and undefined symbols depend on the kernel set:
 platform, run `tools/record-blis-profile.sh` on that machine. `LICENSES/`
 records the incorporated notices.
 
-x2c preserves imported C qualifiers and rejects conversions that silently
-drop them. `bli_info_get_version_str` returns `const char *`;
-`Blis.version` copies that result into `String`. Raw callers must retain the
-upstream qualifiers. [Foreign C qualifiers](../FOREIGN-C-QUALIFIERS.md)
-describes the compiler behavior and its earlier limitation.
+`bli_info_get_version_str` returns `const char *`; `Blis.version` copies
+that result into `String`. Raw callers must keep the upstream qualifiers.
+[Foreign C qualifiers](../FOREIGN-C-QUALIFIERS.md) states when x2c checks
+them.
 
 ## Build and test
 

@@ -140,10 +140,9 @@ facilities.
 owning `JsonDocument` is freed; the value pointer remains owned by that
 document and must not be freed separately.
 
-x2c preserves imported C qualifiers and rejects conversions that silently
-drop them. Raw callers must retain the upstream header's `const` qualifiers.
-[Foreign C qualifiers](../FOREIGN-C-QUALIFIERS.md) describes the compiler
-behavior and its earlier limitation.
+Raw callers must keep the upstream header's `const` qualifiers.
+[Foreign C qualifiers](../FOREIGN-C-QUALIFIERS.md) states when x2c checks
+them.
 
 ## Build and test
 

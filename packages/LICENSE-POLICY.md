@@ -70,21 +70,17 @@ terms; those remain part of the dependency review.
 
 Each package pins source and build facts in
 `packages/<name>/dependency.json`, keeps required terms under `LICENSES/`,
-and explains accepted behavior or unresolved research in its README. A compact
-profile file may retain facts that materially inform review. Generated API or
-compiled-source inventories stay outside Git and may be regenerated from the
-pinned source when needed. Candidate research keeps concise evidence under
-`plans/` while active. Completed outcomes belong in
-[the history](../plans/HISTORY.md#packages-applications-and-releases), with
-full originals retained in Git, so later reviews can distinguish a changed
-upstream profile from a repeated investigation.
+and documents its behavior and limits in its README. A compact profile file
+may retain build and license facts. Generated API or compiled-source
+inventories stay outside Git and may be regenerated from the pinned source
+when needed.
 
-## Approved libtorch OpenMP exception (2026-11-02)
+## libtorch OpenMP runtime
 
-The project admits the unmodified libgomp runtime in the pinned libtorch
-2.10.0 Linux CPU bundle under GPL-3.0-or-later with the GCC Runtime Library
-Exception 3.1. This exception applies only to that runtime in the recorded
-Torch profile; it does not admit GPL libraries generally. Its GPL text and
-runtime exception travel in `packages/torch/LICENSES/`. The macOS libomp
-runtime retains its LLVM OpenMP terms there too. Upstream runtime terms,
-source-distribution obligations, and required notices remain applicable.
+The pinned libtorch 2.10.0 Linux CPU bundle includes the unmodified libgomp
+runtime, licensed under GPL-3.0-or-later with the GCC Runtime Library
+Exception 3.1. That runtime, in the recorded torch profile, is the one
+exception to the default screen; it does not admit GPL libraries generally.
+Its GPL text and runtime exception travel in `packages/torch/LICENSES/`. The
+macOS libomp runtime keeps its LLVM OpenMP terms there too. Upstream runtime
+terms, source-distribution obligations, and required notices still apply.

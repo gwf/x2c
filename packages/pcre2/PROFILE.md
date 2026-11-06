@@ -22,8 +22,8 @@
 - Known x2c foreign-declaration limitations: two function results and six
   record fields lose `const` in x2c's semantic type table. The generated C
   declarations still come from the upstream headers; callers must preserve
-  those `const` obligations. The shared [foreign-qualifier contract](../FOREIGN-C-QUALIFIERS.md)
-  explains the boundary; focused foreign-qualifier fixtures own regressions.
+  those `const` obligations.
+  [Foreign C qualifiers](../FOREIGN-C-QUALIFIERS.md) states the rule.
 
 `dependency.json` is the machine-readable source and build record. The client
 uses the prepared headers through `src/pcre2-8.h` and `src/pcre2-posix.h`.

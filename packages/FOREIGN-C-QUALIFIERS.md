@@ -1,70 +1,39 @@
 # Foreign C qualifiers
 
-x2c stores imported `const`, `volatile`, and `restrict` on the outer
-function-result, global-object, and record-field type path. It rejects a
-conversion that would silently drop one. For example:
+x2c keeps the `const`, `volatile`, and `restrict` qualifiers that a C header
+declares on a function result, a global object, or a record field. It
+rejects a conversion that would silently drop one. Given
 
 ```c
 const char *GetMonitorName(int monitor);
 ```
 
-The call expression has type `(* const char)`. Assigning it to a mutable
-pointer stops translation with `cannot convert (* const char) to (* char)`.
-A conversion through a converter function copies the value, so
-`String owned = name;` works through `String_new`.
+the call `GetMonitorName(0)` has type `(* const char)`, and assigning it to
+a `char *` stops translation with
+`cannot convert (* const char) to (* char)`. The note that follows names the
+two repairs.
 
-## Declared types and lookup types
+Keep the qualifier, as in `const char *name = GetMonitorName(0);`, or copy
+the value when the program needs to own it, as in
+`String name = GetMonitorName(0);`. Conversions to `void *` follow the same
+rule, and qualified typedefs such as `typedef const char *(*fn)(int);` keep
+their qualifiers.
 
-`Sym.declare` stores `Type.declared()`. Both `declared` and `canonicalize`
-drop storage classes and `inline`, which describe the declaration itself;
-only `canonicalize` drops qualifiers. Function return conversion, identity
-bindings in `Sym.bind_identity`, and the `_Generic` signature asserted by a
-foreign alias preserve declared qualifiers.
+A package author treats the upstream header as authoritative. Spell each
+upstream qualifier exactly as the header does in client source. Do not add
+renamed pointer types, copied records, casts, or forwarding functions to work
+around a qualifier; they obscure the upstream API.
 
-Type lookup uses the unqualified form: a `const` receiver has the same
-aggregate, fields, methods, protocol conformance, and `Var` tag as its
-unqualified type. The func-landing thunk in `src/emit/emit.x` also uses an
-unqualified result type because it declares a result variable and assigns to
-it afterwards. Unit interfaces (`.xi`) record the qualifiers, so a unit
-read from its interface and a unit collected from source have the same
-declared types.
+x2c checks the declarations it reads: those in headers found on an `-I` or
+`--x-include-dir` path. A package's native headers usually reach only the C
+compiler, through `--c-include-dir`. x2c does not check a call into such a
+header; the C compiler does, and it warns when an initialization or
+assignment discards a qualifier.
 
-Qualified typedefs, including `typedef const char *(*fn)(int);` and
-`typedef const int cint;`, preserve their qualifiers. Conversions to `void *`
-are checked for qualifier loss, and `$x2c.foreign.alias` accepts
-pointer-returning targets while checking their declared signatures.
-
-## Examples and tests
-
-Imported declarations retain these types:
-
-| Symbol | Type |
-|---|---|
-| `sqlite3_libversion` | `((func ((void))) * const char)` |
-| `sqlite3_version` | `((dim) const char)` |
-| `struct sqlite3_vfs zName` | `(* const char)` |
-
-`unittest/compiler-fixtures/foreign-qualifier*` covers calls, globals,
-fields, a callback typedef with a `const char *` result, foreign aliases,
-the symbol table, and generated C against `foreign-qualifier-upstream.h`.
-Companion fixtures check rejection of qualifier-dropping assignments from
-results, globals, and fields. `qualifier-void-pointer` and
-`foreign-alias-pointer-result` cover the corresponding pointer conversions
-and aliases.
-
-Collection reads headers without expanding macros. A macro before or among
-a declaration's specifiers is read as its definition: nothing, a storage
-class, an attribute, builtin type words, or a type-wrapping function-like
-macro. A trailing attribute macro is kept as text. A header whose declarations
-depend on other macro expansion, such as a macro that supplies grammar, is
-not collected correctly.
-
-## Package source
-
-Packages treat upstream headers and raw function names as authoritative,
-and client source spells upstream qualifiers exactly as upstream does. Do
-not introduce renamed pointer types, copied records, casts, or forwarding
-functions to work around a qualifier: they obscure the upstream API. Assign
-an imported `const` result, global, or field to a pointer that preserves its
-qualifier, or use a converter that copies the value when ownership is
-needed.
+x2c reads C headers without expanding macros. A macro among a declaration's
+specifiers is read through its definition when that definition is empty, a
+storage class, an attribute, builtin type words, or a type-wrapping
+function-like macro. A header whose declarations depend on other macro
+expansion, such as a macro that supplies grammar, is not read correctly.
+A package's `PROFILE.md` lists the upstream declarations whose qualifiers x2c
+does not record.

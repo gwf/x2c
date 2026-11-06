@@ -66,6 +66,5 @@ results: `uv_dlerror`, `uv_err_name`, `uv_fs_get_path`,
 `uv_cpu_info_s.model`, `uv_dirent_s.name`, `uv_fs_s.new_path`, `uv_fs_s.path`,
 `uv_pipe_s.pipe_fname`, `uv_process_options_s.cwd`, and
 `uv_process_options_s.file`. Raw callers must preserve the upstream
-read-only meaning. The measured rows are retained in
-the focused foreign-qualifier fixtures described in
-`../FOREIGN-C-QUALIFIERS.md`.
+read-only meaning. [Foreign C qualifiers](../FOREIGN-C-QUALIFIERS.md)
+states the rule.

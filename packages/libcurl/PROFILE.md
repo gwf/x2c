@@ -44,8 +44,6 @@ The default CA bundle is pinned to `/etc/ssl/cert.pem` on macOS and
 not inherit a configure-host probe result. A caller can select another trust
 store through the raw `CURLOPT_CAINFO` or `CURLOPT_CAPATH` options.
 
-Imported declarations preserve upstream `const`, `volatile`, and `restrict`
-qualifiers. Treat read-only results and fields as their upstream declarations
-require; x2c rejects conversions that discard these qualifiers. The
-[qualifier notes](../FOREIGN-C-QUALIFIERS.md) describe the compiler change
-and its regression fixtures.
+Treat read-only results and fields as their upstream declarations require.
+[Foreign C qualifiers](../FOREIGN-C-QUALIFIERS.md) states when x2c checks
+the upstream `const`, `volatile`, and `restrict` qualifiers.
