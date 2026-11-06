@@ -427,7 +427,8 @@ if [[ $(id -u) != 0 ]]; then
   set -e
   chmod 644 "$BUILD/denied/input.x"
   [[ $denied_status == 1 ]] || exit 1
-  grep -Fq 'reason: Permission denied' "$BUILD/denied/input.stderr"
+  grep -Fq "cannot read input file '$BUILD/denied/input.x': Permission denied" \
+    "$BUILD/denied/input.stderr"
 fi
 
 # An inspection covers every input, so a later input's error fails it.
