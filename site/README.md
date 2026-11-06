@@ -13,9 +13,9 @@ make site-build
 make site-serve
 ```
 
-`make site` starts Astro and mdBook at Astro's printed `/x2c/` URL. It reloads
+`make site` starts Astro and mdBook at Astro's printed URL. It reloads
 landing, About, component, style, site-content, and book changes; the book is
-available under `/x2c/docs/`. `make doc-serve` starts only mdBook at its
+available under `/docs/`. `make doc-serve` starts only mdBook at its
 printed URL with live reload for book changes.
 
 `make site-build` builds the complete production site. `make site-serve`
@@ -27,13 +27,13 @@ using the default port.
 fragments, canonical metadata, sitemap, and both site-to-book directions under
 the selected `SITE_URL` and `SITE_BASE`.
 
-The default URL is the repository Pages path at
-`https://gwf.github.io/x2c/`. When a custom domain is acquired, set
-`SITE_URL` to its origin and `SITE_BASE=/` for both local and Pages builds. To
-rehearse those custom-domain routes and canonical URLs locally, run:
+The site is served from the custom domain `https://x2c-lang.dev` at the root
+path, and builds use that origin and `SITE_BASE=/` by default. Set `SITE_URL`
+and `SITE_BASE` only to build for another origin or path, for example to
+rehearse a subpath deployment locally:
 
 ```sh
-SITE_URL=https://x2c-lang.dev SITE_BASE=/ make site-serve
+SITE_URL=https://example.github.io SITE_BASE=/x2c make site-serve
 ```
 
 Check copy, layout, interactions, routes, fragments, and canonical metadata

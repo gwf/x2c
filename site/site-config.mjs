@@ -1,9 +1,9 @@
-const DEFAULT_SITE_URL = "https://gwf.github.io";
-const DEFAULT_SITE_BASE = "/x2c";
+export const productionSiteUrl = "https://x2c-lang.dev";
+const DEFAULT_SITE_BASE = "/";
 const requestedSiteBase = process.env.SITE_BASE || DEFAULT_SITE_BASE;
 
 export const siteUrl = new URL(
-  process.env.SITE_URL || DEFAULT_SITE_URL
+  process.env.SITE_URL || productionSiteUrl
 ).origin;
 export const siteBase = requestedSiteBase === "/"
   ? "/"
