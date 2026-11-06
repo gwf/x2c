@@ -39,7 +39,14 @@ Terminate HTTPS at the deployment's reverse proxy. Configure its request
 body limit to 64 KiB and its response timeout above 20 seconds.
 
 Build the static site with `PLAYGROUND_URL=https://compile.example`.
-The client appends `/compile` to this service base URL. Browser preflight
+The client appends `/compile` to this service base URL.
+
+The site does not require this service. When `emcc`, `builds/0/x2c`, and the
+output of `make wasm-runtime` are present, `npm --prefix site run build`
+precompiles each playground example into `site/dist/playground/programs`.
+Run then works for an unedited example. Without a service, an edited example
+cannot run until it is reset. Without the service and the precompiled
+programs, the site hides its playground links and the Run button. Browser preflight
 and responses allow only origins listed in `PLAYGROUND_ORIGINS`.
 Requests without an Origin header can be made by command-line clients.
 The handler uses the socket client address and ignores forwarded headers.

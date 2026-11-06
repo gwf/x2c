@@ -2,31 +2,40 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
-import { playgroundExamples } from "../lib/examples";
+import { playgroundExamples, playgroundRuns, playgroundService as service } from "../lib/examples";
 import "../styles/playground.css";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
-const service = import.meta.env.PLAYGROUND_URL || "";
+// Without a service, the precompiled examples run as published.
+const programs = playgroundExamples.some((example) => example.program)
+  ? `${import.meta.env.BASE_URL}playground/programs/` : undefined;
+const description = service
+  ? "Edit an x2c program and run it in your browser as WebAssembly."
+  : programs ? "Run the x2c examples in your browser as WebAssembly."
+  : "Explore and edit the x2c examples.";
 ---
-<BaseLayout title="Playground - x2c" description="Edit an x2c program and run it in your browser as WebAssembly.">
+<BaseLayout title="Playground - x2c" description={description}>
   <Fragment slot="header"><SiteHeader /></Fragment>
-  <section class="playground plain-editor" data-playground data-service={service}>
+  <section class="playground plain-editor" data-playground data-service={service || undefined} data-programs={programs}>
     <p class="about-eyebrow">playground</p>
     <h1>Try x2c.</h1>
-    <p class="playground-intro">Edit a program. Run it in your browser.</p>
+    <p class="playground-intro">{service ? "Edit a program. Run it in your browser."
+      : programs ? "Run an example in your browser. Edited code cannot run here, because this build has no compile service."
+      : "Explore and edit the examples."}</p>
     <div class="playground-toolbar">
       <label for="playground-example">Example</label>
       <select id="playground-example">
         {playgroundExamples.map((example) => <option value={example.id}>{example.label}</option>)}
       </select>
-      <button type="button" data-run hidden={!service}>Run</button>
+      <button type="button" data-run hidden={!playgroundRuns}>Run</button>
       <button type="button" data-stop hidden>Stop</button>
+      <button type="button" data-reset hidden>Reset example</button>
     </div>
     <div class="playground-workspace">
       <div class="playground-source">
         <label for="playground-source">Source</label>
         <div class="playground-editor">
           <pre aria-hidden="true" data-highlight></pre>
-          <textarea id="playground-source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="playground-support">{playgroundExamples[0]?.source}</textarea>
+          <textarea id="playground-source" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby={playgroundRuns ? "playground-support" : undefined}>{service ? playgroundExamples[0]?.source : playgroundExamples[0]?.visible}</textarea>
         </div>
       </div>
       <div class="playground-result">
@@ -34,9 +43,13 @@ const service = import.meta.env.PLAYGROUND_URL || "";
         <pre data-output role="log" aria-label="Program output"></pre>
       </div>
     </div>
-    <p data-status role="status">{service ? "Ready." : "Running programs is unavailable in this build. You can still explore and edit the examples."}</p>
-    <p id="playground-support" class="playground-support">Requires WebAssembly Memory64 (Chrome 133+, Firefox 134+). Safari support is checked in your browser. Programs stop after 10 seconds and can use up to 256 MB of WebAssembly memory.</p>
-    <p class="playground-support">Source is sent to the compile service. Programs run here, with a temporary in-memory filesystem. Processes, File.popen, threads, channels, dispatch, pool workers, native TCP sockets, and HTTP servers are unavailable.</p>
+    <p data-status role="status">{playgroundRuns ? "Ready." : "Running programs is unavailable in this build. You can still explore and edit the examples."}</p>
+    {playgroundRuns && <>
+      <p id="playground-support" class="playground-support">Requires WebAssembly Memory64 (Chrome 133+, Firefox 134+). Safari support is checked in your browser. Programs stop after 10 seconds and can use up to 256 MB of WebAssembly memory.</p>
+      {service
+        ? <p class="playground-support">Source is sent to the compile service. Programs run here, with a temporary in-memory filesystem. Processes, File.popen, threads, channels, dispatch, pool workers, native TCP sockets, and HTTP servers are unavailable.</p>
+        : <p class="playground-support">The examples are compiled to WebAssembly when the site is built. Programs run here, with a temporary in-memory filesystem.</p>}
+    </>}
     <noscript><p>JavaScript is required to select examples and run programs.</p></noscript>
     <script type="application/json" data-theme set:html={JSON.stringify(x2cDarkTheme).replaceAll("<", "\\u003c")} />
     <script type="application/json" data-examples set:html={JSON.stringify(playgroundExamples).replaceAll("<", "\\u003c")} />

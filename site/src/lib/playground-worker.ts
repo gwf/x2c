@@ -4,7 +4,10 @@ self.onmessage = async ({ data }) => {
   }));
   try {
     const { default: createModule } = await import(/* @vite-ignore */ loaderUrl);
-    const wasmBinary = Uint8Array.from(atob(data.wasm), (c) => c.charCodeAt(0));
+    // The compile service sends base64 text; a precompiled program sends bytes.
+    const wasmBinary = typeof data.wasm === "string"
+      ? Uint8Array.from(atob(data.wasm), (c) => c.charCodeAt(0))
+      : new Uint8Array(data.wasm);
     await createModule({
       instantiateWasm: (imports: WebAssembly.Imports,
         receive: (instance: WebAssembly.Instance, module: WebAssembly.Module) => void) => {

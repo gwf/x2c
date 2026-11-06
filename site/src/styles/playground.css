@@ -5,7 +5,7 @@
 .playground-toolbar select { max-width: 60%; padding: 10px; border: 1px solid var(--line); background: var(--paper); font: inherit; }
 .playground-toolbar button { border: 0; background: var(--red); color: white; padding: 11px 24px; font: inherit; }
 .playground-toolbar button:disabled { opacity: .5; cursor: default; }
-.playground-toolbar [data-stop] { background: var(--dark); }
+.playground-toolbar [data-stop], .playground-toolbar [data-reset] { background: var(--dark); }
 .playground-workspace { display: grid; grid-template-columns: 3fr 2fr; gap: 1px; background: var(--line); }
 .playground-source, .playground-result { min-width: 0; background: var(--code); color: var(--code-ink); }
 .playground-source > label, .playground-result h2 { display: block; margin: 0; padding: 15px 20px; font-size: .8rem; font-weight: 500; color: var(--muted-light); border-bottom: 1px solid var(--hairline-on-dark); }

@@ -18,21 +18,48 @@ export const articleFor = (slug: string) =>
   articles.find((article) =>
     !article.frontmatter.customPage && article.frontmatter.slide === slug);
 
-// Only self-contained gallery programs with browser runtime support.
+// Gallery programs the playground can run in the browser. Without a compile
+// service, only examples with precompiled programs can run, and only as
+// published.
 import gallery from "../../../examples/gallery.json";
+import {
+  selectPlaygroundExamples,
+} from "../../scripts/playground-examples.mjs";
 const sources = import.meta.glob("../../../examples/{love,magic,power}/*.x", {
   query: "?raw", import: "default", eager: true,
 });
-export const playgroundExamples = gallery.flatMap((entry) => {
-  if (!entry.example || entry.optional || entry.language) return [];
-  const source = sources[`../../../examples/${entry.example}.x`] as string;
-  if (/^(love\/files|power\/counting)$/.test(entry.example)) return [];
-  if (!source || /\b(Thread|Channel|Dispatch|Job)\b|Pool\.start|File\.popen/.test(source))
-    return [];
-  const slide = slides.find((item) => item.file?.endsWith(`/${entry.slide}`));
-  return [{ id: entry.example, source,
-    slug: slide?.frontmatter.slug,
-    label: entry.example.replaceAll("/", " / ") }];
+const slideSources = import.meta.glob("../content/slides/*.md", {
+  query: "?raw", import: "default", eager: true,
 });
-export const playgroundFor = (slug: string) =>
-  playgroundExamples.find((entry) => entry.slug === slug);
+const built = Object.values(import.meta.glob(
+  "../../../builds/wasm/playground/programs.json",
+  { import: "default", eager: true },
+))[0] as string[] | undefined;
+export const playgroundService: string =
+  import.meta.env.PLAYGROUND_URL || "";
+const programs = new Set(import.meta.env.PROD ? built ?? [] : []);
+
+// The slide's code without the "~" lines it hides, as the site shows it.
+const visibleCode = (slide: string, source: string) => {
+  const block = (slideSources[`../content/slides/${slide}`] as string ?? "")
+    .match(/```x2c\n([\s\S]*?)\n```/)?.[1];
+  return block?.split("\n").filter((line) => !line.trimStart().startsWith("~"))
+    .join("\n").trim() ?? source;
+};
+
+const sourceFor = (id: string) =>
+  sources[`../../../examples/${id}.x`] as string | undefined;
+export const playgroundExamples = selectPlaygroundExamples(gallery, sourceFor)
+  .filter((entry) =>
+    playgroundService || !programs.size || programs.has(entry.id))
+  .map(({ id, slide, source }) => ({
+    id, source, program: programs.has(id),
+    visible: visibleCode(slide, source),
+    slug: slides.find((item) => item.file?.endsWith(`/${slide}`))
+      ?.frontmatter.slug,
+    label: id.replaceAll("/", " / "),
+  }));
+// The playground runs programs with a service or precompiled programs.
+export const playgroundRuns = Boolean(playgroundService) || programs.size > 0;
+export const playgroundFor = (slug: string) => playgroundRuns
+  ? playgroundExamples.find((entry) => entry.slug === slug) : undefined;
