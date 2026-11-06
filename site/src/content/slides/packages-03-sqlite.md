@@ -55,3 +55,6 @@ Output:
 /source: HTTP 200, 3100000 us
 /reference: HTTP 503, 40000 us
 ```
+
+SQLite has no release bundle. Build it from a checkout with
+`make -C packages/sqlite run`.
