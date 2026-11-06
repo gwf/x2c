@@ -6,8 +6,13 @@
 #define PCRE2_CODE_UNIT_WIDTH 8
 #include <pcre2.h>
 
+/* A missing header reports itself; skip the version checks. */
+#if __has_include(<pcre2.h>)
+
 #if PCRE2_MAJOR != 10 || PCRE2_MINOR != 48
 #error The x2c PCRE2 client requires PCRE2 10.48.
+#endif
+
 #endif
 
 #endif

@@ -5,9 +5,14 @@
 
 #include <uv.h>
 
+/* A missing header reports itself; skip the version checks. */
+#if __has_include(<uv.h>)
+
 #if UV_VERSION_MAJOR != 1 || UV_VERSION_MINOR != 52 || \
     UV_VERSION_PATCH != 1
 #error The x2c libuv client requires libuv 1.52.1.
+#endif
+
 #endif
 
 #endif

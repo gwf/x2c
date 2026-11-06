@@ -3,6 +3,9 @@
 
 #include <blis/blis.h>
 
+/* A missing header reports itself; skip the version checks. */
+#if __has_include(<blis/blis.h>)
+
 #if BLIS_VERSION_MAJOR != 2 || BLIS_VERSION_MINOR != 1
 #error "x2c BLIS client requires BLIS 2.1"
 #endif
@@ -13,6 +16,8 @@
 
 #ifndef BLIS_DISABLE_CBLAS
 #error "x2c BLIS client requires CBLAS compatibility disabled"
+#endif
+
 #endif
 
 #endif

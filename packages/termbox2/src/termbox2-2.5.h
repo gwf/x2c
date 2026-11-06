@@ -9,6 +9,9 @@
 
 #include <termbox2.h>
 
+/* A missing header reports itself; skip the version checks. */
+#if __has_include(<termbox2.h>)
+
 #ifndef TB_VERSION_STR
 #error The x2c termbox2 client requires termbox2 2.5.0.
 #endif
@@ -28,5 +31,7 @@ typedef char x2c_termbox2_version_abi[
 typedef char x2c_termbox2_attr_abi[
   sizeof(uintattr_t) == sizeof(uint64_t) ? 1 : -1
 ];
+
+#endif
 
 #endif
