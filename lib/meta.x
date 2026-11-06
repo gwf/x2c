@@ -39,8 +39,10 @@ typedef List Macro;
 /** Semantic type syntax with canonical List-pool lifetime. */
 typedef List Type;
 
-/* Shared qualifier classification is implemented by the Type module. */
+/* Shared qualifier classification and source spelling are implemented by
+   the Type module. */
 int Symbol.is_type_qualifier(Symbol symbol);
+String Type.spelling(Type type);
 
 /* Consume the qualifiers at the front of one type and report them as a set.
    The cursor advances past them so a caller can walk a pointer chain one
