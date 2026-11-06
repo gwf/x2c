@@ -5,7 +5,8 @@ tab: scopes
 ---
 
 ```x2c
-~/* Run with X2C_SCOPE_ACCOUNTING=1 to enable the allocation assertions. */
+~/* Allocation counts are zero unless X2C_SCOPE_ACCOUNTING=1 is set, so the
+~   assertions that expect live allocations check only with accounting. */
 ~#include <assert.h>
 ~int main(void) {
 ~// Prepare the catch before measuring reclaimable working storage.
@@ -24,7 +25,8 @@ while (wait_for_day()) auto {
 ~    assert(Scope.stats().live_allocations == daily);
     Map findings = inspect_file(path);
     save_findings(path, findings);
-~    assert(Scope.stats().live_allocations > daily);
+~    assert(!Scope.accounting_enabled() ||
+~           Scope.stats().live_allocations > daily);
     total++;
   }
 ~  assert(Scope.stats().live_allocations == daily);
@@ -56,7 +58,8 @@ printf("processed: %zu files\n", total);
 ~  size_t before = Scope.stats().live_allocations;
 ~  try auto {
 ~    Map findings = inspect_file("failure.dat");
-~    assert(Scope.stats().live_allocations > before);
+~    assert(!Scope.accounting_enabled() ||
+~           Scope.stats().live_allocations > before);
 ~    raise %(oops);
 ~  }
 ~  catch %(oops): {}

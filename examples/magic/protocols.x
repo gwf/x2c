@@ -15,10 +15,10 @@ protocol Meters(T) {
 int main(void) {
   auto {
     Km trip = Km.new(3);
-    Cm pencil = Cm.new(1800);
+    Cm pool = Cm.new(2500);
 
     printf("%s is %ld m\n", trip.describe(), trip.magnitude());
-    printf("%s is %ld m\n", pencil.describe(), pencil.magnitude());
+    printf("%s is %ld m\n", pool.describe(), pool.magnitude());
   }
   return 0;
 }

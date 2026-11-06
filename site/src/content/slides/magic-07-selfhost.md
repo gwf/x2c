@@ -11,8 +11,7 @@ make build-safe
 
 # Let the compiler build successive versions of itself.
 make stage-3
-make bootstrap-refresh       # Refresh the checked-in bootstrap C.
-make stage-diff-all    # Compare generated C and headers.
+make stage-diff-all  # Compare generated C and headers.
 
 # Inspect parsed syntax and the compiler's transformations.
 ./x2c translate --dump-ast examples/foreach.x

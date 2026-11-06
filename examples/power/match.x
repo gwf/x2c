@@ -3,12 +3,15 @@ int main(void) {
 List code = %(block
   (if (not ready) (call wait) (call start))
   (if true (call save) (call discard)));
-puts(simplify(code).str());
-// ( block ( if ready ( call start ) ( call wait )) ( call save ))
-assert(simplify(code) == %(block (if ready (call start) (call wait)) (call save)));
+puts(simplify(code).repr());
+// (block (if ready (call start) (call wait)) (call save))
+assert(simplify(code) ==
+       %(block (if ready (call start) (call wait)) (call save)));
 assert(simplify(%(if false (call wrong) (call right))) == %(call right));
 assert(simplify(%(if (not true) (call wrong) (call right))) == %(call right));
-assert(simplify(%(if ready (if true (call yes) (call wrong)) (if false (call wrong) (call no)))) == %(if ready (call yes) (call no)));
+assert(simplify(%(if ready (if true (call yes) (call wrong))
+                          (if false (call wrong) (call no)))) ==
+       %(if ready (call yes) (call no)));
 assert(simplify(%(block)) == %(block));
 assert(simplify(%(call untouched)) == %(call untouched));
 return 0;

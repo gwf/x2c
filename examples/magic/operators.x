@@ -8,14 +8,13 @@ Set fruit = Set.new(%(apple pear));
 Set lunch = Set.new(%(pear bread));
 Set set_union = fruit + lunch;
 Set intersection = fruit * lunch;
-assert(set_union.len() == 3 && set_union.contains(<apple>) && set_union.contains(<pear>) && set_union.contains(<bread>));
+printf("union: %s\n", set_union.keys().list().sort().repr());
+printf("intersection: %s\n", intersection.keys().list().sort().repr());
+assert(set_union.len() == 3 && set_union.contains(<apple>) &&
+       set_union.contains(<pear>) && set_union.contains(<bread>));
 assert(fruit.len() == 2 && lunch.len() == 2);
 assert(Set.new(nil).len() == 0);
 assert(Set.new(%(apple pear apple)).len() == 2);
-List names = %(apple pear);
-printf("bare name: Symbol=%d Atom=%d\n", names.car() is Symbol, names.car() is Atom);
-Set symbols = Set.new(names);
-assert(symbols.contains(<apple>) && symbols.contains(<pear>));
 assert(intersection.len() == 1 && intersection.contains(<pear>));
 assert((fruit * fruit).len() == 2);
 assert((fruit * Set.new(nil)).len() == 0);

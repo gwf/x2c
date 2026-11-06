@@ -138,6 +138,7 @@ check_example() {
   run_args=()
   [[ -n "$arguments" ]] && read -r -a run_args <<<"$arguments"
   set +e
+  # Scopes runs either way; with accounting its allocation assertions check.
   (cd "$case_build" || exit
     if [[ "$name" == power/scopes ]]; then export X2C_SCOPE_ACCOUNTING=1; fi
     "$program" ${run_args[@]+"${run_args[@]}"}) \
