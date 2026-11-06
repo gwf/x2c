@@ -4,234 +4,162 @@ The source workflows live in `.github/workflows`: `candidate.yml` builds an
 exact source commit, `stage.yml` publishes and verifies staging, `promote.yml`
 promotes tested archives, `verify.yml` supplies the shared platform checks, and
 `restore-pages.yml` restores a previously verified production site. This
-folder owns their transport helpers and the staging repository's Pages template.
+folder owns their transport helpers and the staging repository's Pages
+template.
 
-Everyday integration uses dev; main is the published-release branch. Releases
-0.15.0 and 0.15.1 were promoted through these workflows. The legacy
-`pages.yml` source remains unchanged with its workflow registration disabled
-until Gary retires it, as described under "Recovery baseline" below.
+Everyday integration uses `dev`; `main` is the published-release branch.
+Release tasks follow [releasing](../../agents/releasing.md) and this document.
+The source repository is the public `gwf/x2c`. The public `gwf/x2c-staging`
+stores generated output and immutable candidates; it is not a development
+source tree.
 
-The [historical record](../../plans/HISTORY.md#packages-applications-and-releases)
-summarizes the workflow's implementation and staging history. Current release
-operations follow [releasing](../../agents/releasing.md) and this document.
-The source repository stays public at `gwf/x2c`. `gwf/x2c-staging` stores generated
-output and immutable candidates; it is not another development source tree.
-
-## Provisioning state (2026-09-19)
-
-Local GitHub authentication is `gwf` with ADMIN access to `gwf/x2c`; it already
-covers repository administration. No additional personal token is needed.
-Remote `dev` was created at fresh main
-`b265e2582df4e6d9172f70de3add039e7df3b41b`. The public staging repository exists,
-with its Pages workflow installed at
-`294be71157d8b809c5f346d90b5f44a55715ac0d`. Pages is configured for
-`staging.x2c-lang.dev`.
-
-Source `staging-publication` permits dev; `production-publication` permits main
-and requires Gary's review. Production Pages still permits only main and keeps
-its existing `x2c-lang.dev` configuration. Dispatch promotion and restoration
-with `--ref main`, after Gary's separately authorized main advance has carried
-their source there. They could not run from pre-cutover main, which lacked
-them.
-
-The legacy tag-driven release and Pages workflow registrations are disabled.
-The legacy Pages source remains unchanged, so Gary can explicitly re-enable it
-for an agreed baseline recovery operation. It is not a callable competing
-publication path while disabled. No production deployment or release had run
-when this section was written. Disabling a workflow leaves the currently
-served site intact.
-
-Staging provisioning completed 2026-09-20 through the account settings:
-Name.com CNAME `staging` -> `gwf.github.io` (TTL 300), GitHub Pages HTTPS
-enforcement, and verified ownership of `staging.x2c-lang.dev`. The
-`x2c-staging-publisher` App (ID `5010037`) is installed only on
-`gwf/x2c-staging`, with Contents and Actions read/write access. Its App ID
-and private key are configured in the source `staging-publication`
-environment. Staging run `35510839910`, attempt 2, deployed candidate build
-`35510273856` from source `44fa25e30ed593683c7e4269d41af2b0bec47842`.
-HTTPS responds successfully, and installation verification passed on all
-four Linux/macOS Intel/ARM platforms. Production promotion remains separate.
+The release owner approves production publication, advances `main`, and
+creates release tags. The workflows never create or move `main` or a
+production tag.
 
 ## Account setup
 
-Gary needs account access, not secrets pasted into a conversation:
+The release setup consists of these account settings. They hold
+permissions and one credential, not values embedded in source.
 
-1. Create the authorized public `gwf/x2c-staging`. Initialize `main` with its
-   minimal Pages workflow (the staging-pages.yml template installed as
-   `.github/workflows/pages.yml`). Enable Actions and select GitHub Actions as
-   its Pages source. The output publisher requires an existing main commit.
-2. Create/install a GitHub App limited to that staging repository with Contents
-   read/write and Actions read/write. Install its App ID as `STAGING_APP_ID`
-   and its private key as `STAGING_APP_PRIVATE_KEY` in the source repository's
-   protected `staging-publication` environment through GitHub's settings UI.
-   Build jobs never receive this key. An expiring fine-grained token is an
-   alternative only if Gary explicitly selects that design.
-3. Give the staging repository's `github-pages` environment access to its
-   main branch. Enable Pages token permissions (`pages: write`,
-   `id-token: write`) there. Source publication jobs cannot use their own Pages
-   token to deploy another repository.
-4. Configure staging Pages' domain as `staging.x2c-lang.dev`, add its DNS CNAME
-   to `gwf.github.io`, verify the domain with the owning account, and enable
-   HTTPS. Keep production's domain assignment unchanged.
-5. Configure source `production-publication` and `github-pages` environments
-   with Gary's release approval authority. Confirm repository settings allow
-   the workflow token to write release assets. The workflow never creates or
-   moves `main` or a production tag; Gary performs those explicit operations.
-6. Confirm allowed Actions, artifact retention (30 days), App policy and the
-   branch/tag rules using real account settings. Keep publicly staged assets
-   and promoted candidates indefinitely until a different retention contract
-   is explicitly approved. Artifact expiration must not delete durable assets.
+1. `gwf/x2c-staging` has a `main` branch with its minimal Pages workflow
+   (the `staging-pages.yml` template installed as
+   `.github/workflows/pages.yml`). Actions are enabled, and GitHub Actions is
+   its Pages source. The output publisher requires an existing `main` commit.
+2. A GitHub App installed only on the staging repository has Contents and
+   Actions read/write access. Its App ID is `STAGING_APP_ID` and its private
+   key is `STAGING_APP_PRIVATE_KEY` in the source repository's protected
+   `staging-publication` environment. Build jobs never receive this key.
+3. The staging repository's `github-pages` environment permits its `main`
+   branch and grants `pages: write` and `id-token: write`. Source
+   publication jobs cannot use their own Pages token to deploy another
+   repository.
+4. Staging Pages serves `staging.x2c-lang.dev` over enforced HTTPS, through a
+   DNS CNAME to `gwf.github.io` and a domain verified by the owning account.
+   Production Pages serves `x2c-lang.dev` from `main`.
+5. In the source repository, `staging-publication` permits `dev`, and
+   `production-publication` permits `main` and requires the release owner's
+   review. Repository settings allow the workflow token to write release
+   assets.
+6. Allowed Actions, App policy, and branch and tag rules match these
+   workflows. Workflow artifacts expire after 30 days; publicly staged assets
+   and promoted candidates are kept indefinitely, so artifact expiration
+   never deletes a durable asset.
 
-The App key is the only additional transport credential in the recommended
-setup. Domain access and repository/environment administration are account
-permissions, not values to embed in source. Rotate/revoke the key in account
-settings, and never put it in logs, checkout files or chat.
+The App key is the only transport credential. Rotate or revoke it in the
+account settings, and never put it in logs, checkout files, or chat.
 
-## Activation checklist
-
-- The approved initial dev baseline is fresh origin/main at
-  `b265e2582df4e6d9172f70de3add039e7df3b41b`. Preserve individual commits when
-  integrating this preparation and future work. Existing sessions retain their
-  own routing until Gary explicitly transitions them.
-- Dev is the chosen default branch for everyday integration and PR bases.
-  Keep main release-only and retain Gary's existing tag/promotion authority.
-  Configure the publication environments before dispatching their workflows.
-- Disable the legacy release workflow before activating candidate.yml; the
-  legacy release.yml is removed from dev. A v-tag must not trigger a second
-  compiler/package build through a workflow still registered on main.
-- Keep legacy pages.yml unchanged until the first-cutover recovery prerequisite
-  below is resolved. The new promotion/restore workflows deploy retained site
-  archives directly and never dispatch legacy pages.yml.
-- Install staging-pages.yml only in the output repository as
-  `.github/workflows/pages.yml`. Review the installed template revision and
-  ensure it is dispatchable from that repository's default branch.
-- Finish repository/account provisioning, routing documentation and the existing
-  applicable gate before publication. Keep ordinary precommit, sanity-check,
-  agent-pr-check and doc-check unchanged. These manually requested release jobs
-  are never required ordinary statuses.
+Dispatch promotion and restoration with `--ref main`. The `pages.yml` source
+workflow builds the site from source; its registration is disabled, so it is
+not a publication path. The release owner can re-enable it for a site
+recovery that has no retained site archive. These manually requested release
+jobs are never required statuses for ordinary changes.
 
 ## Candidate and release operation
 
-Run `candidate.yml` from dev with a full reviewed source SHA. Each compiler
+Run `candidate.yml` from `dev` with a full reviewed source SHA. Each compiler
 and package job checks out that SHA; its matrices come from
 [the released set](../../agents/releasing.md#released-packages). Assembly
 uses the built Linux compiler once and retains the resulting archives,
-manifest, two index variants and two complete site archives. Native
+manifest, two index variants, and two complete site archives. Native
 archive bytes never change during promotion.
 
-A candidate ID contains source SHA, run ID and attempt. A fresh full build gets
-a fresh ID even for the same compiler version. Download-only publication jobs
-use reviewed workflow/helper code, not source scripts from the candidate.
-Select the exact successful build run and identity for staging, plus the
-currently observed output-repository main SHA. The publisher uploads complete
-immutable assets first, then compare-and-swaps the entire generated `public/`
-tree, dispatches its exact commit and waits for Pages completion. Existing
-same-name assets must match; there is no clobber operation. Never infer selection
-from "latest". A superseded staging dispatch fails before deployment.
+A candidate ID contains the source SHA, run ID, and attempt. A fresh full
+build gets a fresh ID even for the same compiler version. Download-only
+publication jobs use reviewed workflow and helper code, not source scripts
+from the candidate. Select the exact successful build run and identity for
+staging, plus the currently observed output-repository `main` SHA. The
+publisher uploads complete immutable assets first, then compare-and-swaps the
+entire generated `public/` tree, dispatches its exact commit, and waits for
+Pages completion. Existing same-name assets must match; there is no clobber
+operation. Never infer the selection from "latest". A superseded staging
+dispatch fails before deployment.
 
-Use a fresh scratch prefix and the candidate's explicit package index. Compiler
-version compatibility checks cannot establish identity between same-version
-candidates. Keep `--index https://staging.x2c-lang.dev/packages/index.txt` on
-subsequent staging package commands; an ordinary compiler's default index
-remains production. Do not use `--force` to hide mismatches.
+Verify staging with a fresh scratch prefix and the candidate's explicit
+package index. Compiler version checks cannot tell apart two candidates with
+the same version. Keep
+`--index https://staging.x2c-lang.dev/packages/index.txt` on staging package
+commands; an ordinary compiler's default index is production. Do not use
+`--force` to hide mismatches.
 
 Complete the final full rebuild before the final live staging verification.
 Retain successful aggregate receipts for all four platforms with their
-manifest/site hashes, run URLs and attempts. Receipts use append-only names
-per run/attempt; a failed receipt-upload run cannot replace a prior receipt.
-Promotion accepts only a receipt whose exact staging workflow attempt has
-completed successfully. Gary selects one exact verified candidate, fast-forwards
-main preserving commits and creates its annotated version tag. Promotion
-checks both point to the selected source, uploads those same bytes to a draft
-release, verifies remote assets, publishes it and deploys the retained complete
-production site. Production success requires live verification, not merely a
-successful upload or Pages job. Dev may continue throughout candidate testing.
+manifest and site hashes, run URLs, and attempts. Receipts use append-only
+names per run and attempt, so a failed receipt upload cannot replace a prior
+receipt. Promotion accepts only a receipt whose exact staging workflow attempt
+completed successfully.
 
-## Recovery and rehearsal
+The release owner selects one exact verified candidate, fast-forwards `main`
+preserving commits, and creates its annotated version tag. Promotion checks
+that both point to the selected source, uploads those same bytes to a draft
+release, verifies the remote assets, publishes the release, and deploys the
+retained complete production site. Production success requires live
+verification, not only a successful upload or Pages job. `dev` may continue
+throughout candidate testing.
 
-Publication is coordinated, not atomic across main, tags, Releases and Pages.
-Keep partial deployment receipts and inspect the last completed step before
-retrying. Missing matching assets can be resumed; conflicting bytes stop the
-operation. Never rebuild an expired candidate during promotion, move an exposed
-tag or force-reset main. If durable candidate assets are lost, build and verify
-a new candidate.
+## Recovery
+
+Publication is coordinated, not atomic across `main`, tags, Releases, and
+Pages. Keep partial deployment receipts and inspect the last completed step
+before retrying. Missing matching assets can be resumed; conflicting bytes
+stop the operation. Never rebuild an expired candidate during promotion, move
+an exposed tag, or force-reset `main`. If durable candidate assets are lost,
+build and verify a new candidate.
 
 If the output commit was written but dispatch failed, dispatch staging Pages
-with that recorded exact output SHA while holding the staging publication lock.
-Do not replay an old expected-output SHA and overwrite a newer selection. If a
-Pages run is still running after a timeout, let it finish or have Gary resolve
-it before starting another publication. All ordinary publication workflows
-serialize per destination without cancelling running publication.
+with that recorded exact output SHA while holding the staging publication
+lock. Do not replay an old expected-output SHA and overwrite a newer
+selection. If a Pages run is still running after a timeout, let it finish or
+have the release owner resolve it before starting another publication.
+Publication workflows serialize per destination without cancelling a running
+publication.
 
-`restore-pages.yml` supplies the executable production
-rollback path for a previously promoted candidate. Gary selects its exact
-identity and the currently observed production version, then dispatches from
-the approved trusted workflow ref (main), for example:
+`restore-pages.yml` is the production rollback path for a previously promoted
+candidate. The release owner selects its exact identity and the currently
+observed production version, then dispatches from `main`:
 
 ```sh
 gh workflow run restore-pages.yml --repo gwf/x2c --ref main \
   -f identity="$candidate" -f expected_version="$current_version"
 ```
 
-Set those two shell variables to the deliberately selected candidate and
-observed current version first. The workflow retrieves the retained site and
+Set those two shell variables to the selected candidate and the observed
+current version first. The workflow retrieves the retained site and
 production verification receipts, requires a successful original promotion
 attempt, guards the current site version, deploys the complete previous site,
-and runs the existing four-platform live checks. Only after those succeed does
-it restore the latest-release designation. It does not run compiler/package
-builds, reupload archives, move main or move tags. Its run summary and retained
-restoration receipt state both main and restored source SHAs; a discrepancy
-requires a patch release and return of that fix to dev. A failure after site
-restoration leaves an explicitly partial recovery; inspect the run before
-retrying with the now-current site version. This is a manually requested
-recovery operation, not an additional ordinary gate.
+and runs the four-platform live checks. Only after those succeed does it
+restore the latest-release designation. It does not build the compiler or
+packages, reupload archives, or move `main` or tags. Its run summary and
+retained restoration receipt state both the `main` and restored source SHAs;
+a discrepancy requires a patch release and return of that fix to `dev`. A
+failure after site restoration leaves a partial recovery; inspect the run
+before retrying with the now-current site version.
 
-This command requires an earlier candidate with production proof. It cannot
-claim to restore a legacy release that predates retained candidate/site
-artifacts. Record a separate approved legacy-site recovery route before the
-first cutover if that is the production baseline.
+Restoration requires an earlier candidate with production receipts, so it
+restores only releases that this pipeline promoted. A site rebuilt from source
+is a new site, not the previously deployed one.
 
 A release may become visible before Pages succeeds; report this partial state
-and retry the retained site. On failed production verification restore the
-previous entire site/version/index and previous latest-release designation;
-keep immutable assets/tags available for lockfiles. Report that main may lead
-the restored site and follow with a patch release. Production fixes return to
-dev without discarding later dev work.
+and retry the retained site. If production verification fails, restore the
+previous site, version, index, and latest-release designation; keep immutable
+assets and tags available for lockfiles. Report that `main` may lead the
+restored site, and follow with a patch release. Production fixes return to
+`dev` without discarding later `dev` work.
 
-Before the first release, stage two same-version candidates and verify old URLs
-still work, production did not move, and each staging installer/index selects
-its own bytes. Rehearse interrupted upload, conflicting bytes and stale output
-selection using mocks/local data. Then rebuild the final candidate, verify it
-on all four platforms (torch on its released platforms), inspect HTTPS,
-site/book/search and the retained production variant, and promote that identity.
-Compare archive digests across staging and production and check prior URLs.
+## Cost
 
-Release cost is one build job per compiler platform and per released bundle
-for each explicitly requested full candidate; removing tag rebuilds avoids
-repeating that matrix. Live checks add four small install/run jobs after
-staging and four after production. First-release fault/two-candidate
-rehearsal is one-time. Activation must have the agreed cost approval; do not
-invent a new ordinary gate.
-
-## Recovery baseline
-
-The restoration workflow accepts releases produced and verified by this
-pipeline. The 0.15.0 (2026-10-17) and 0.15.1 (2026-10-17) releases were
-promoted through it with their receipts, so recovery restores the newest of
-those receipts. The pre-cutover Pages artifact expired before it was
-captured, and no SHA-256 or deployment ID was recorded, so the site that
-preceded 0.15.0 cannot be restored from a receipt; do not label a fresh
-site rebuild the previously deployed site. The legacy Pages source stays
-with its registration disabled until Gary retires it. It does not
-authorize inspection or changes to ongoing sessions.
+Each requested full candidate costs one build job per compiler platform and
+per released bundle. Tags do not trigger a rebuild. Live checks add four
+small install-and-run jobs after staging and four after production.
 
 ## Local verification
 
 Run `python3 tools/test-release-candidate.py` for offline candidate integrity,
-conflicting upload, receipt retry and restoration-proof cases. Run
-`npm --prefix site test` for destination rendering. The existing installer
-check covers same-version candidate selection as well as production defaults.
-Run `actionlint` against the installed source workflows. Validate the separate
-staging-pages.yml deployment template in a temporary workflow tree as needed. None of these adds a gate. Finish with the unchanged
-`tools/gate-state.py ensure agent-pr-check`; a sandboxed checkout can set
-`X2C_CACHE_DIR` to a writable scratch directory.
+conflicting upload, receipt retry, and restoration-proof cases. Run
+`npm --prefix site test` for destination rendering. The installer check
+(`tools/check-install-script.sh`) covers same-version candidate selection as
+well as production defaults. Run `actionlint` against the source workflows.
+Validate the `staging-pages.yml` template in a temporary workflow tree as
+needed. None of these adds a gate. Finish a change to the release workflows
+or helpers with `tools/gate-state.py ensure agent-pr-check`; in a sandboxed
+checkout, set `X2C_CACHE_DIR` to a writable scratch directory.

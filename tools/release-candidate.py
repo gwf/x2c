@@ -446,7 +446,8 @@ def guard(candidate):
     while obj['type'] == 'tag':
         obj = json.loads(run('gh', 'api', f"{repo}/git/tags/{obj['sha']}"))['object']
     if main != manifest['source_sha'] or obj['type'] != 'commit' or obj['sha'] != main:
-        raise ValueError('Gary must advance main and tag to the selected source before promotion')
+        raise ValueError('the release owner must advance main and tag to the '
+                         'selected source before promotion')
 
 
 def main():
