@@ -14,26 +14,22 @@ links:
 ```x2c,ignore
 import "blis" with Blis, BlisObject;
 
-BlisObject rank = BlisObject.copy_vector(
+// links is the matrix; ones is a vector of ones.
+BlisObject rank = auto BlisObject.copy_vector(
   %(0.2 0.2 0.2 0.2 0.2), BLIS_DOUBLE
 );
-defer rank.free();
 
-// links is the matrix; ones is a vector of ones.
 double shift = 1.0;
 int round = 0;
 for (; shift > 1e-15 && round < 100; round++) {
-  Scope.open();
-  {
-    defer Scope.close();
+  auto {
     BlisObject next = links.matmul(rank);
     next = next.scale(1.0 / next.dotv(ones));
     shift = (next - rank).normfv();
     rank.copy_from(next);
   }
 }
-printf("converged after %d rounds, shift %.1e\n",
-       round, shift);
+printf("converged after %d rounds, shift %.1e\n", round, shift);
 ```
 
 Multiply a link matrix by a rank vector, normalize the scores, and

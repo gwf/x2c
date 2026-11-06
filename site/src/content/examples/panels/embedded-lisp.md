@@ -18,18 +18,16 @@ $lisp.binding(game, "wins?")
 static Var _wins(int square, String player) {
   if (!_empty(square)) return %();
   char saved = board[square - 1];
-  board[square - 1] = player == %"X" ? 'X' : 'O';
+  board[square - 1] = player == "X" ? 'X' : 'O';
   int won = _won(board[square - 1]);
   board[square - 1] = saved;
   if (won) return <true>;
   return %();
 }
 
-Lisp lisp = Lisp.new();
-defer lisp.destroy();
+auto Lisp lisp = Lisp.new();
 $lisp.install(lisp, game);
-File strategy = File.open(argv[1], "r");
-defer strategy.close();
+auto File strategy = File.open(argv[1], "r");
 Lisp.eval_file(lisp, strategy);
 
 // On each O turn:

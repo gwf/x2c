@@ -17,19 +17,6 @@ import "termbox2" with Termbox;
 #include <stdlib.h>
 #include <time.h>
 
-static void _draw(Termbox term, ArrayChar cells, int width, int height) {
-  term.clear();
-  for (int y = 0; y < height; y++)
-    for (int x = 0; x < width; x++) {
-      if (!cells[y * width + x]) continue;
-      int run = 1;
-      while (x + run < width && cells[y * width + x + run]) run++;
-      term.fill(x, y, run, 1, %"#", TB_GREEN | TB_BOLD, TB_DEFAULT);
-      x += run - 1;
-    }
-  term.present();
-}
-
 static ArrayChar _world(int width, int height) {
   ArrayChar cells = ArrayChar.new();
   for (int i = 0; i < width * height; i++)
@@ -51,24 +38,36 @@ static void _advance(ArrayChar cells, ArrayChar next, int width, int height) {
     }
 }
 
+static void _draw(Termbox terminal, ArrayChar cells, int width, int height) {
+  terminal.clear();
+  for (int y = 0; y < height; y++)
+    for (int x = 0; x < width; x++) {
+      if (!cells[y * width + x]) continue;
+      int run = 1;
+      while (x + run < width && cells[y * width + x + run]) run++;
+      terminal.fill(x, y, run, 1, "#", TB_GREEN | TB_BOLD, TB_DEFAULT);
+      x += run - 1;
+    }
+  terminal.present();
+}
+
 int main(void) {
   srand((unsigned int) time(NULL));
-  Termbox term = Termbox.open();
-  defer term.close();
-  term.hide_cursor();
+  Termbox terminal = auto Termbox.open();
+  terminal.hide_cursor();
 
-  int width = term.width(), height = term.height();
+  int width = terminal.width(), height = terminal.height();
   ArrayChar cells = _world(width, height), next = _world(width, height);
 
   while (1) {
-    if (width != term.width() || height != term.height()) {
-      width = term.width();
-      height = term.height();
+    if (width != terminal.width() || height != terminal.height()) {
+      width = terminal.width();
+      height = terminal.height();
       cells = _world(width, height);
       next = _world(width, height);
     }
-    _draw(term, cells, width, height);
-    if (term.peek(80).is_key()) break;
+    _draw(terminal, cells, width, height);
+    if (terminal.peek(80).is_key()) break;
     _advance(cells, next, width, height);
     ArrayChar swap = cells;
     cells = next;
@@ -81,7 +80,7 @@ int main(void) {
 The animation records this program. `_draw` paints each run of adjacent
 living cells with one `fill` call, then presents the frame.
 
-<section class="code-note" data-code-line="19">
+<section class="code-note" data-code-line="6">
 
 ### The rules of Life.
 
@@ -107,8 +106,8 @@ a sparser starting population.
 ### Keep the world running.
 
 Opening the terminal and registering its cleanup sit together:
-`defer term.close()` restores it when the function exits. Hiding the cursor
-keeps it out of the animation.
+`auto` closes the terminal and restores it when the function exits.
+Hiding the cursor keeps it out of the animation.
 
 The world takes its dimensions from the terminal. Resizing replaces both
 arrays with fresh random cells at the new size.

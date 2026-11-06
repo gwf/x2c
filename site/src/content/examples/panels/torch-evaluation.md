@@ -8,22 +8,20 @@ codeLabel: Evaluation function / excerpt
 <!-- ignore: evaluation excerpt; package imports are in the full example. -->
 ```x2c,ignore
 static double _accuracy(Module model, Tensor images, Tensor targets) {
-  Scope.open();
-  defer Scope.close();
-  Torch.no_grad();
-  model.eval();
-  long total = images.size(0), correct = 0;
-  for (long start = 0; start < total; start += 1000) {
-    Scope.open();
-    defer Scope.close();
-    long span = total - start < 1000 ? total - start : 1000;
-    Tensor batch = images.narrow(0, start, span);
-    Tensor predicted = model.forward(batch).argmax(1, 0);
-    correct += predicted.eq(targets.narrow(0, start, span)).sum()
-      .item().integer();
+  auto {
+    Torch.no_grad();
+    model.eval();
+    long total = images.size(0), correct = 0;
+    for (long start = 0; start < total; start += 1000) auto {
+      long span = total - start < 1000 ? total - start : 1000;
+      Tensor batch = images.narrow(0, start, span);
+      Tensor predicted = model.forward(batch).argmax(1, 0);
+      correct += predicted.eq(targets.narrow(0, start, span)).sum()
+        .item().integer();
+    }
+    model.train();
+    return (double) correct / (double) total;
   }
-  model.train();
-  return (double) correct / (double) total;
 }
 ```
 

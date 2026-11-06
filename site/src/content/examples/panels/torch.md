@@ -25,12 +25,11 @@ static Module _model(void) {
 Torch.manual_seed(0);
 Module model = _model();
 Optimizer adam = Optimizer.adam(model, 0.001);
-Scheduler anneal = Scheduler.cosine(adam, batches, 0.0001);
+Scheduler anneal = Scheduler.cosine(adam, batches * epochs, 0.0001);
 
-Tensor order = Torch.randperm(rows);
-for (long batch = 0; batch < batches; batch++) {
-  Scope.open();
-  defer Scope.close();
+// ... for each epoch:
+Tensor order = Torch.randperm(rows).to_device(device, XT_INT64, 0, 0);
+for (long batch = 0; batch < batches; batch++) auto {
   Tensor pick = order.narrow(0, batch * BATCH, BATCH);
   adam.zero_grad();
   Tensor loss = Tensor.cross_entropy(

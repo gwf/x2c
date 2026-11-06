@@ -12,21 +12,26 @@ links:
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
 ```x2c,ignore
+#include "system-macros.x"
 import "libuv" with UvLoop, UvProcess;
 
 UvLoop loop = auto UvLoop.new();
 
 UvProcess normalized =
   auto loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
-normalized.write("alpha\nbeta\ngamma\n").close_stdin();
+normalized.write($dedent(%"
+  alpha
+  beta
+  gamma
+")).close_stdin();
 
 UvProcess counted = auto loop.spawn(%("/usr/bin/wc" "-l"));
-counted.write("alpha\nbeta\ngamma\n").close_stdin();
+// ... write the same three lines and close its input ...
 loop.run(UV_RUN_DEFAULT);
 
 printf("normalized:\n");
-foreach(String line in normalized.stdout().lines())
-  printf("  %s\n", line);
+foreach(String line, normalized.stdout().lines()) printf("  %s\n", line);
+
 printf("line count: %s", counted.stdout());
 ```
 

@@ -5,7 +5,7 @@ tab: autodiff
 title: Fit a growth curve.
 ---
 
-<!-- ignore: the macros import from the autodiff package path. -->
+<!-- ignore: the import needs the autodiff package directory. -->
 ```x2c,ignore
 ~// Fit the two parameters of a logistic growth model to observations by
 ~// gradient descent. The loss integrates the model with 4000 Euler steps and
@@ -13,10 +13,9 @@ title: Fit a growth curve.
 ~// through a long loop with a branch inside; $ad.checkpoint keeps the tape
 ~// small by replaying the loop in blocks of 64 steps.
 ~#include "x2c.x"
-~#include "typed-array.x"
 ~#include <stdio.h>
 ~#include <math.h>
-#include "autodiff-macros.x"
+import "autodiff";
 
 ~// The observations come from the same model with rate 0.9 and capacity 50.
 ~static double observed(double t) => 50.0 / (1.0 + 49.0 * exp(-0.9 * t));
@@ -39,9 +38,12 @@ int main(void) {
   double rate = 0.5, capacity = 30.0, d_rate, d_capacity, h = 1e-6;
   double value = loss_grad(rate, capacity, &d_rate, &d_capacity);
 ~  printf("loss %.6f\n", value);
-~  printf("d/drate     %.6f  finite difference %.6f\n", d_rate,
+~  // Three decimals: the central difference subtracts two losses near 4702
+~  // that differ by about 0.03, which leaves ten or eleven good digits, so
+~  // printing six decimals would show digits that vary between platforms.
+~  printf("d/drate     %.3f  finite difference %.3f\n", d_rate,
 ~         (loss(rate + h, capacity) - loss(rate - h, capacity)) / (2 * h));
-~  printf("d/dcapacity %.6f  finite difference %.6f\n", d_capacity,
+~  printf("d/dcapacity %.3f  finite difference %.3f\n", d_capacity,
 ~         (loss(rate, capacity + h) - loss(rate, capacity - h)) / (2 * h));
   for (int i = 1; i <= 200; i++) {
     value = loss_grad(rate, capacity, &d_rate, &d_capacity);

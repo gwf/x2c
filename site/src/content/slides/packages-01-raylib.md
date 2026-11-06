@@ -20,16 +20,16 @@ import "raylib";
 
 Image chart = Image.new(2160, 960, paper);
 defer chart.free();
+// ... draw the title and the temperature grid ...
 Vector2 origin = { 84, 252 }, previous = { 0 };
 int index = 0;
-foreach(int high in highs) {
+foreach(int high, highs) {
   Vector2 offset = { index * 94, -(high - 60) * 6 };
   Vector2 point = origin + offset;
-  // ... fill the area below each segment ...
-  if (index)
-    chart.draw_line(
-      previous.scale(3), point.scale(3), 9, teal
-    );
+  if (index) {
+    // ... fill the area below the segment ...
+    chart.draw_line(previous.scale(3), point.scale(3), 9, teal);
+  }
   previous = point;
   index++;
 }

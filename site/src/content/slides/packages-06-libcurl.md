@@ -20,19 +20,13 @@ static String page_title(String html) {
 }
 
 List pages = %("/guide" "/reference" "/source");
-CurlEasy curl = CurlEasy.new().timeouts(1000, 3000);
-defer curl.free();
-List urls = pages.map(
-  %!(String page) => site + page
-);
+CurlEasy curl = auto CurlEasy.new().timeouts(1000, 3000);
 
-CurlBatch batch = curl.get_all(urls, 3);
-defer batch.free();
+List urls = pages.map(%!(String page) => site + page);
+CurlBatch batch = auto curl.get_all(urls, 3);
 for (int i = 0; i < batch.len(); i++)
-  printf("%s: %s\n",
-    pages[i].string()[1:],
-    page_title(batch.response(i).text())
-  );
+  printf("%s: %s\n", pages[i].string()[1:],
+    page_title(batch.response(i).text()));
 ```
 
 Fetch three URLs concurrently and print their page titles. A lambda
