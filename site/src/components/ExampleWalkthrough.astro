@@ -16,7 +16,7 @@ const { panels, codeLabel } = Astro.props;
   </div>
   <div class="walkthrough-notes">
     {panels.map((panel, index) => <ExamplePanel slide={panel} part="notes"
-      section={index} />)}
+      section={index} heading="h2" />)}
   </div>
 </div>
 

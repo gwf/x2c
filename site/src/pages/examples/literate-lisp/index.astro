@@ -30,7 +30,7 @@ const html = await codeToHtml(source, {
   transformers: [{ line(node, line) { node.properties.id = `line-${line}`; node.properties["data-line"] = line; } }],
 });
 ---
-<BaseLayout title={`${page.title} - x2c`} description={page.description}>
+<BaseLayout title={`${page.title.replace(/\.$/, "")} \u2014 x2c`} description={page.description}>
   <Fragment slot="header"><SiteHeader /></Fragment>
   <article class="example-page literate-page" data-example="literate-lisp"
     data-section="magic" data-surface="detail">

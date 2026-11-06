@@ -12,12 +12,15 @@ import "../../../styles/example-pages.css";
 import { articles } from "../../../lib/examples";
 
 const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
-const page = articles.find(article => article.frontmatter.slug === "notes")!.frontmatter;
+const current = articles.findIndex(article => article.frontmatter.slug === "notes");
+const page = articles[current].frontmatter;
+const previous = articles[(current + articles.length - 1) % articles.length];
+const next = articles[(current + 1) % articles.length];
 const html = await codeToHtml(source, {
   lang: { ...grammar, name: "x2c" }, theme: x2cDarkTheme,
 });
 ---
-<BaseLayout title={`${page.title} - x2c`} description={page.description}>
+<BaseLayout title={`${page.title.replace(/\.$/, "")} \u2014 x2c`} description={page.description}>
   <Fragment slot="header"><SiteHeader /></Fragment>
   <article class="example-page" data-example="notes" data-section="magic"
     data-surface="detail">
@@ -51,6 +54,16 @@ make -C examples/apps/notes check`} />
         aria-label="Source code; scroll horizontally on narrow screens"
         set:html={html} />
     </section>
+    <nav class="example-next" aria-label="Browse examples">
+      <a href={local(`examples/${previous.frontmatter.slug}/`)} rel="prev">
+        <small>Previous example</small>
+        <span><span aria-hidden="true">&larr;</span> {previous.frontmatter.title}</span>
+      </a>
+      <a href={local(`examples/${next.frontmatter.slug}/`)} rel="next">
+        <small>Next example</small>
+        <span>{next.frontmatter.title} <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </nav>
   </article>
   <SiteFooter />
 </BaseLayout>

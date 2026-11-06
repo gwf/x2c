@@ -7,9 +7,12 @@ interface Props {
   part?: "code" | "notes";
   section?: number;
   expanded?: { href: string; title: string };
+  heading?: "h2" | "h3";
 }
 
-const { slide, codeLabel, part, section, expanded } = Astro.props;
+const {
+  slide, codeLabel, part, section, expanded, heading: Heading = "h3"
+} = Astro.props;
 const panel = slide.frontmatter;
 const html = await slide.compiledContent();
 
@@ -41,7 +44,7 @@ const runnable = playgroundFor(panel.slug);
 </div>}
 {part !== "code" && <div class="feature-copy" data-annotation-section={section}>
   {panel.status && <small class="feature-status">{panel.status}</small>}
-  {panel.title && <h3>{panel.title}</h3>}
+  {panel.title && <Heading>{panel.title}</Heading>}
   {panel.image && (
     <div data-result-media>
       <img

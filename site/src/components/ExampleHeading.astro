@@ -6,7 +6,7 @@ const canonicalUrl = new URL(local(`examples/${page.slug}/`), Astro.site).href;
 ---
 <header class="example-heading">
   <nav class="example-eyebrow example-breadcrumb" aria-label="Breadcrumb">
-    <a href={local("#top")}>x2c</a>{" / examples / "}
+    <a href={local("#top")}>x2c</a>{" / "}
     <span aria-current="page">{page.navTitle}</span>
   </nav>
   <h1>{page.title}</h1>

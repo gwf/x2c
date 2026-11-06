@@ -194,8 +194,17 @@ main:focus {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
 }
 
+.tagline-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .not-found {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--landing-header-height, 69px));
   padding: clamp(32px, 8vw, 90px) clamp(20px, 4vw, 44px);
   display: grid;
   place-items: center;
@@ -242,6 +251,10 @@ main:focus {
   font:
     500 13px/1 "JetBrains Mono",
     monospace;
+}
+
+.not-found-card a + a {
+  margin-left: 12px;
 }
 
 .about-landing {
@@ -792,7 +805,7 @@ html:has(.landing-header) {
   border-top-color: var(--hairline-on-dark);
 }
 
-.feature-copy h3 {
+.feature-copy :is(h2, h3) {
   margin: 0 0 12px;
   font:
     400 27px/1.06 "Instrument Serif",

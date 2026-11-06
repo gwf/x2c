@@ -41,7 +41,7 @@ const previous = articles[(current + articles.length - 1) % articles.length];
 ---
 
 <BaseLayout
-  title={`${page.title} - x2c`}
+  title={`${page.title.replace(/\.$/, "")} \u2014 x2c`}
   description={page.description}
   socialImage={`examples/${page.slug}.png`}
   socialImageAlt={`${page.title} ${page.description}`}
