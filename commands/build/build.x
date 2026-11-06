@@ -1114,8 +1114,9 @@ List Build.script_helpers(Build b) {
     candidates.push(path);
   }
   Map members = _script_members(b, candidates);
+  String self = Path.absolute(script);
   foreach (String path, candidates) {
-    if (path == script || path in members) continue;
+    if (path == self || path in members) continue;
     helpers.push(path);
     b.xlat_n++;
   }

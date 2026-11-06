@@ -30,8 +30,8 @@ static macro Stmt $fail.script_execute_failed(Expr $executable) =>
 /* cache entries
 
    Entries are `scripts/STEM-HASH` or `runs/STEM-HASH` under the cache root.
-   Each holds the executable `run`, the first input's path in `source`,
-   and `lock`, which one build holds at a time. */
+   Each holds the executable `run`, the first input's absolute path in
+   `source`, and `lock`, which one build holds at a time. */
 
 /** Points `c` at its program's cache directory and executes the cached
     executable when it is current; that path does not return. Otherwise it
@@ -43,17 +43,13 @@ static macro Stmt $fail.script_execute_failed(Expr $executable) =>
 int CliRequest.prepare_script(CliRequest c) {
   String root = Compiler.cache_root();
   if (!root) Diagnostics.driver_error("no cache directory: set X2C_CACHE_DIR");
-  String typed = c.inputs.car();
-  Array inputs = [];
-  foreach (String input, c.inputs) inputs.push(Path.absolute(input));
-  c.inputs = inputs.list_free();
   String script = c.inputs.car();
   c.build_dir = _entry(root, c);
   if (c.clean) {
     _clean(c.build_dir);
     return 1;
   }
-  if (!c.dry_run || c.command == <script>) _require_program(c, typed);
+  if (!c.dry_run || c.command == <script>) _require_program(c, script);
   _configure(c);
   if (c.dry_run) return 0;
   _exec_current(c);
@@ -63,17 +59,21 @@ int CliRequest.prepare_script(CliRequest c) {
   Path.lock_file(%"$(c.build_dir)/lock", 1);
   // A build of the same script may have finished while this one waited.
   _exec_current(c);
-  Path.write_text(%"$(c.build_dir)/source", script);
+  Path.write_text(%"$(c.build_dir)/source", Path.absolute(script));
   Compiler.prune_cache(%"$root/scripts");
   Compiler.prune_cache(%"$root/runs");
   c.output = %"$(c.output).$("%ld".printf((long) getpid()))";
   return 0;
 }
 
-/* The stem is interpolated, never a format: a path may contain a percent. */
+/* The program names its sources as they were typed, so the entry is keyed
+   by the absolute inputs and by those spellings. The stem is interpolated,
+   never a format: a path may contain a percent. */
 static String _entry(String root, CliRequest c) {
-  String stem = Path.stem(c.inputs.car());
-  String digest = "%08x".printf(String.hash("\n".join(c.inputs)));
+  List inputs = c.inputs.map(%!(input) => Path.absolute(input));
+  String stem = Path.stem(inputs.car());
+  String key = "\n".join(inputs.append(c.inputs));
+  String digest = "%08x".printf(String.hash(key));
   String directory = c.command == <script> ? "scripts" : "runs";
   return %"$root/$directory/$stem-$digest";
 }
@@ -129,7 +129,7 @@ static void _exec(CliRequest c) {
   if (c.verbose && !c.quiet) _print_run(c);
   char **argv = xcalloc(c.run_args.len() + 2, sizeof(char *));
   int n = 0;
-  argv[n++] = c.inputs.car().str();
+  argv[n++] = Path.absolute(c.inputs.car());
   // An empty word is a NULL String, which would end the vector early.
   foreach (String argument, c.run_args) argv[n++] = argument ? argument : "";
   fflush(NULL);
