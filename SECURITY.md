@@ -1,6 +1,6 @@
 # Security policy
 
-x2c is an early public release. Security reports are welcome and are handled
+x2c is experimental. Security reports are welcome and are handled
 privately. Fixes, when made, land in the next release; earlier releases are
 not patched.
 

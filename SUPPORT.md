@@ -13,4 +13,4 @@ and documentation problems. Include the revision, platform, and a small
 reproduction where possible. Reporting an issue does not imply a response
 or resolution commitment.
 
-There is no separate public discussion forum at launch.
+There is no separate public discussion forum.
