@@ -56,12 +56,12 @@ int main(void) {
 ```
 
 Always use the value returned by `Context.export`. Mutable `Array`s, `Map`s,
-`Block`s, `Bytes`, `Buffer`s, and wide scalar boxes retain their identity when their
-storage can be moved. Private `String`s, `Atom`s, and `List`s are canonicalized
-in the destination pool, so their pointers may change. Export walks nested
-`Array`s, `Map`s, and `List`s, including repeated references and `Array`/`Map`
-cycles. A registered custom value can provide its own `Context` exporter.
-`void` exports as `void`.
+`Block`s, `Bytes`, `Buffer`s, and wide scalar boxes retain their identity when
+their storage can be moved. Private `String`s, `Atom`s, and `List`s are
+canonicalized in the destination pool, so their pointers may change. Export
+walks nested `Array`s, `Map`s, and `List`s, including repeated references and
+`Array`/`Map` cycles. A registered custom value can provide its own `Context`
+exporter. `void` exports as `void`.
 
 The seven packed `Array`s from `typed-array.x` and the four packed `Map`s
 from `typed-map.x` follow the same rule. A container owned by the source
@@ -90,9 +90,9 @@ The complete program is in `examples/power/contexts.x`.
 ## Pass shared values to a worker
 
 `Thread.start(function, input)` calls a `Var`-to-`Var` function with one input.
-The input bits are copied, while referenced storage stays with its caller.
-Keep the input graph alive and read-only until join. This includes a Map's
-contents and the storage of wide boxed scalars. Join returns result bits without
+The input bits are copied, while referenced storage stays with its caller. Keep
+the input graph alive and read-only until join. This includes a Map's contents
+and the storage of wide boxed scalars. Join returns result bits without
 exporting or transferring storage. Preserve worker-created mutable output
 explicitly before the callback exits. Each concurrent worker needs exclusive
 access to its output owner; do not allocate into a shared caller scope.
@@ -141,11 +141,12 @@ after all their users have finished, including when a worker fails. A transfer
 moves the Map's record, buffers, and explicitly owned contents; it does not
 follow references or adopt inserted members.
 
-`Thread.start_raw` copies the input structure's bytes. It does not copy anything
-reached through pointers in that structure. A pointer, `String`, `List`, `Map`,
-or other handle therefore refers to the same parent object in the worker. The
-copied bytes have `max_align_t` alignment, matching ordinary allocation; do not
-pass a structure that requires extended alignment beyond that.
+`Thread.start_raw` copies the input structure's bytes. It does not copy
+anything reached through pointers in that structure. A pointer, `String`,
+`List`, `Map`, or other handle therefore refers to the same parent object in
+the worker. The copied bytes have `max_align_t` alignment, matching ordinary
+allocation; do not pass a structure that requires extended alignment beyond
+that.
 
 Parent immutable `String`s and `List`s can be read directly. Shared mutable
 objects can also be read or changed, but normal C data-race rules apply: a read
@@ -214,11 +215,11 @@ So `Thread.join` either returns the worker's result bits or transfers.
 A callback that returns `void` joins as `void`.
 
 Captured Error allocations have separate storage until join. Their canonical
-values use the shared pool. Join preserves the captured errors for its caller. A worker `Error` whose policy is `<log>`
-also passes through the global `Logger` error handler. `Logger` serializes
-its sinks. A memory sink copies worker `String`s and `List`s into the pool
-captured when its `Logger` was created, so logged entries stay valid after
-the worker exits.
+values use the shared pool. Join preserves the captured errors for its caller.
+A worker `Error` whose policy is `<log>` also passes through the global
+`Logger` error handler. `Logger` serializes its sinks. A memory sink copies
+worker `String`s and `List`s into the pool captured when its `Logger` was
+created, so logged entries stay valid after the worker exits.
 
 The more complete `examples/power/threads.x` uses two workers, parent
 `String`s and `List`s, a shared counter protected by a `Mutex`, explicitly
@@ -240,7 +241,8 @@ interned values with no lock protecting them.
 `Thread.run(jobs, completed)` accepts an Array of zero-argument `Func` values.
 It starts native workers and owns every handle until all jobs finish. Each
 successful joined result reaches `completed` on the calling thread. The
-callback is optional: `Thread.run(jobs)` discards result bits after joining. A void job result is also a successful completion.
+callback is optional: `Thread.run(jobs)` discards result bits after joining. A
+void job result is also a successful completion.
 
 Capturing lambdas already produce `Func` values. Bind a direct function or a
 noncapturing lambda to `Func` before putting it in an Array. This uses the
@@ -262,11 +264,11 @@ int main(void) {
 42
 ```
 
-Keep the jobs, their captures, callback code, and borrowed objects alive through
-`Thread.run`. Capturing a Map copies its handle; its contents can be changed by
-one designated writer while the caller waits. Changing a captured variable's
-binding itself requires `using &name`. The completion callback must perform
-short coordination and must not wait on participant progress.
+Keep the jobs, their captures, callback code, and borrowed objects alive
+through `Thread.run`. Capturing a Map copies its handle; its contents can be
+changed by one designated writer while the caller waits. Changing a captured
+variable's binding itself requires `using &name`. The completion callback must
+perform short coordination and must not wait on participant progress.
 
 Each job has bounded mutable work storage but starts with the shared process
 canonical pool active. Interned Strings and Lists therefore survive job exit.
@@ -299,7 +301,7 @@ keep stable native stacks, Error frames, and cleanup environments across
 suspension. They do not provide CPU parallelism. A blocking native call or
 computation that never waits delays every job in the batch.
 
-Use the same Channel operations and completion callback shape as Thread.run.
+Use the same Channel operations and completion callback shape as `Thread.run`.
 The callback runs after job cleanup, under restored caller state, and must
 not wait for participant progress. The executable
 `examples/power/channel-service.x` shows request/reply and closes requests
@@ -316,28 +318,29 @@ Lisp callback activations and recursive rendering paths also start fresh.
 Suspending either preserves that task's activation. Completion callbacks and
 the caller resume with their own activation restored.
 
-Keep all borrowed owners, Channels, jobs, and captures alive through Task.run.
-The call returns or raises only after all participants finish cleanup. Job or
-completion-callback failure stops unfinished jobs and preserves the primary
-failure. Escaping job Errors use the existing join-fail representation.
-Thread.stop on the native owner requests batch cancellation. A message already
-committed remains accepted; an uncommitted owned send retains rollback.
+Keep all borrowed owners, Channels, jobs, and captures alive through
+`Task.run`. The call returns or raises only after all participants finish
+cleanup. Job or completion-callback failure stops unfinished jobs and preserves
+the primary failure. Escaping job Errors are raised as `<join-fail>`, as
+`Thread.join` raises them. `Thread.stop` on the native owner requests batch
+cancellation. A message already committed stays accepted; an uncommitted owned
+send is rolled back.
 
-Source cleanup must not suspend. Channel.close is suitable for cleanup;
-Channel operations otherwise retain their stop and wait behavior. Stop is
-cooperative, and catching it can delay shutdown. Nested Task.run calls are
-not supported by this first API.
+Source cleanup must not suspend. `Channel.close` is suitable for cleanup;
+other Channel operations keep their usual stop and wait behavior. Stop is
+cooperative, and catching it can delay shutdown. `Task.run` does not support
+nested calls; a nested call raises `<bad-state>`.
 
-The first backend targets macOS and Linux on arm64 and x86_64. Each task uses
+Tasks run on macOS and Linux on arm64 and x86_64. Each task uses
 an 8 MiB usable, demand-paged stack plus a guard page. Set
 `X2C_TASK_STACK_BYTES` before the call to select another capacity of at least
 32 KiB; capacity rounds up to the native page size. Smaller stacks can exhaust
 space sooner. `Regex` compiling and matching, `Json` reading and writing, the
 Lisp reader, and Lisp evaluation stop before the stack runs out and raise
 their usual depth errors, so they allow less nesting on a small stack. Other
-overflow remains a native failure, without guaranteed cleanup.
-Tasks stay on their original native thread. Other targets retain synchronous
-support; requesting an unavailable task backend raises bad-state.
+overflow is a native failure, without guaranteed cleanup.
+Tasks stay on their original native thread. On other targets, `Task.run`
+raises `<bad-state>`.
 
 ## Cooperative stopping
 
@@ -362,9 +365,9 @@ The normal application protocol still closes Channels and drains accepted data.
 A batch can stop only its own jobs. It does not acquire cancellation authority
 over independently owned services or everyone using a borrowed Channel. A
 stopped client is not evidence that a service finished reading borrowed request
-bytes. Keep those bytes under an owner that survives actual borrower completion,
-including failure cleanup. Services shared outside the batch need an explicit
-failure-reply or dependency protocol.
+bytes. Keep those bytes under an owner that survives actual borrower
+completion, including failure cleanup. Services shared outside the batch need
+an explicit failure-reply or dependency protocol.
 
 ### Parallel mapping and explicit ownership
 
@@ -372,23 +375,23 @@ failure-reply or dependency protocol.
 workers and invokes the reducer on the caller in completion order. Each worker
 keeps its callback storage alive until the reducer returns. Returning a value
 or inserting it into a container does not transfer ownership. The reducer must
-explicitly transfer any worker-owned storage it retains, using the existing
-`move_to` operations. Untransferred storage is reclaimed by the worker.
+explicitly transfer any worker-owned storage it keeps, using the `move_to`
+operations. Untransferred storage is reclaimed by the worker.
 References can form cycles without changing this rule.
 
 With a `void` seed, the first result becomes the accumulator without a reducer
 call. Use that form only when the result survives worker cleanup independently.
 For worker-owned results, supply a seed and transfer storage in the reducer.
-`source.parallel_map_in(pool, callback, workers)` selects a borrowed String/List
-pool during callbacks. The caller keeps that pool and its ancestors alive until
-the fold finishes, including worker shutdown on failure. Workers restore their
-previous pool and never release the borrowed pool. Source traversal and the
-reducer continue in the caller's active pool. A shared temporary pool can thus
-collect worker text while the reducer interns surviving words in the caller's
-pool. All temporary canonical values remain until their owner releases the
-shared pool; concurrent interning uses the pool's existing locks.
+`source.parallel_map_in(pool, callback, workers)` selects a borrowed
+String/List pool during callbacks. The caller keeps that pool and its ancestors
+alive until the fold finishes, including worker shutdown on failure. Workers
+restore their previous pool and never release the borrowed pool. Source
+traversal and the reducer continue in the caller's active pool. A shared
+temporary pool can thus collect worker text while the reducer interns surviving
+words in the caller's pool. All temporary canonical values remain until their
+owner releases the shared pool; concurrent interning uses the pool's own locks.
 
-The ordinary `parallel_map` keeps its existing process-wide pool behavior.
+The ordinary `parallel_map` uses the process-wide pool.
 Canonical values use the shared pool; explicitly opened private pools retain
 their own lifetime rules. On failure, the fold requests stop on all workers
 before joining them. Channel waits cooperate; arbitrary native I/O does not.
