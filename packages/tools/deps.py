@@ -450,7 +450,8 @@ def _preflight(names: list[str]) -> int:
     if not cannot_inspect and _entry_complete(_context(path)):
       continue
     missing.update(_native_missing(manifest))
-  print("Terminal validation uses Expect; package builds do not require it.")
+  if "termbox2" in names and not shutil.which("expect"):
+    print("Terminal validation uses Expect; package builds do not require it.")
   if missing:
     print(_missing_message(missing), file=sys.stderr)
     return 1
