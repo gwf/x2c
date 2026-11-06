@@ -1,9 +1,8 @@
 // Differentiate a loop with a continue in reverse mode, then check the
 // gradient against a central finite difference.
-#include "typed-array.x"
 #include <assert.h>
 #include <math.h>
-#include "autodiff-macros.x"
+import "autodiff";
 
 $ad.reverse()
 static double energy(double x, double y, int n) {

@@ -1,15 +1,13 @@
-# torch
+# torch client
 
+This package provides an x2c interface to the pinned libtorch 2.10.0,
+PyTorch's C++ library: tensors, autograd, layers, optimizers, schedules,
+checkpoints, TorchScript inference, and MNIST. Its entry point is
+`src/torch.x`; the C ABI it compiles over is `src/torch-2.10.h`, implemented
+by `src/torch-shim.cpp`. libtorch has no C API and no stable C++ ABI, so the
+shim is this package's only C++ and it is tied to exactly the pinned version.
 The book's [Training and Inference with torch](../../docs/src/guide/torch.md)
 chapter explains the package through advanced workflows.
-
-Tensors, autograd, layers, optimizers, schedules,
-checkpoints, TorchScript inference, and MNIST over the pinned libtorch
-2.10.0, PyTorch's C++ library. The
-entry unit is `src/torch.x`; the C ABI it compiles over is
-`src/torch-2.10.h`, implemented by `src/torch-shim.cpp`. libtorch has no C
-API and no stable C++ ABI, so the shim is this package's only C++ and it is
-tied to exactly the pinned version.
 
 ```x2c
 import "torch" with Torch, Tensor;
@@ -25,14 +23,37 @@ error.backward();
 `double` beside a `Tensor` converts to a float64 scalar tensor and an `int`
 or `long` to an int64 one, so `2 * t` stays exact on an integer tensor.
 
+## Install
+
+Install the release bundle, then build a program that imports the package,
+such as [examples/fit-line.x](examples/fit-line.x):
+
+```sh
+x2c install torch
+x2c build --output fit-line fit-line.x
+./fit-line
+```
+
+Platforms: macOS arm64 (CPU and MPS) and Linux x86_64 (CPU).
+
+The bundle contains `libtorch`, `libtorch_cpu`, `libc10`, and the OpenMP
+runtime, plus the shim compiled into the package archive, so a consumer needs
+no libtorch download and no C++ compiler. A program built against it loads
+those shared libraries from the installed package at run time.
+
+From a checkout, prepare the package and run its examples:
+
 ```sh
 make -C packages/torch prepare build test run
 ```
 
-`prepare` downloads the pinned platform's libtorch archive into the shared
-dependency cache; nothing is built. `run` builds and runs the two examples
-that need nothing else; `run-mnist` and `verify-jit` are the commands for
-the two that need the MNIST files and a Python-scripted model.
+`prepare` downloads the pinned platform's libtorch archive, about 77 MB on
+macOS arm64, into the shared dependency cache; nothing is built. `run` builds
+and runs the two examples that need nothing else; `run-mnist` and
+`verify-jit` are the commands for the two that need the MNIST files and a
+Python-scripted model. Build a bundle with `make -C packages/torch bundle`;
+`packages/tools/check-bundle.sh` installs a bundle into a scratch prefix and
+runs a program against it.
 
 ## Values and dtypes
 
@@ -301,9 +322,9 @@ a sample against the pinned Python torch:
 
 Every record here, `Tensor`, `Module`, `Optimizer`, and `Scheduler`, is
 allocated with a `Scope` finalizer, so a value is released with the scope
-that created it. A training step is one `Scope.open` and `Scope.close`
-pair around the forward, backward, and update; the model and optimizer
-live in the enclosing scope. `free` releases a handle early and returns
+that created it. A training step is one `auto { ... }` region around the
+forward, backward, and update; the model and optimizer live in the
+enclosing scope. `free` releases a handle early and returns
 NULL.
 
 List results such as `parameters`, `named_parameters`, and generated tuples
@@ -332,9 +353,7 @@ previous mode, including the release a `defer` runs while an Error transfers
 out.
 
 ```x2c
-Scope.open();
-{
-  defer Scope.close();
+auto {
   Torch.no_grad();
   parameter.add_(parameter.grad(), -rate);
 }
@@ -479,20 +498,6 @@ rpath, and a torch program depends on the rpath directory at run time. In
 this checkout the rpath points into the prepared prefix; for an installed
 bundle it points at the bundle's `native/lib`.
 
-## Install the bundle
-
-Releases publish a torch bundle for macOS arm64 and Linux x86_64:
-
-```sh
-x2c install torch
-```
-
-It contains `libtorch`, `libtorch_cpu`, `libc10`, and the OpenMP runtime,
-plus the shim compiled into the package archive, so a consumer needs no
-libtorch download and no C++ compiler. Build locally with
-`make -C packages/torch bundle`; `packages/tools/check-bundle.sh` installs a
-bundle into a scratch prefix and runs a program against it.
-
 ## Limits
 
 - macOS arm64 CPU/MPS and Linux x86_64 CPU; no CUDA profile.
@@ -506,3 +511,8 @@ bundle into a scratch prefix and runs a program against it.
 - `torch.compile` and TorchScript capture of x2c code are not possible:
   they capture Python. x2c runs a TorchScript model but cannot produce
   one. Agreement with Python is to float32 tolerance, not bit exact.
+
+The client, tests, and examples are licensed under
+[Apache-2.0](../../LICENSE). libtorch and its OpenMP runtimes retain the
+terms reproduced under `LICENSES/`. See `../LICENSE-POLICY.md` for the
+project intake policy, including the libtorch OpenMP runtime terms.

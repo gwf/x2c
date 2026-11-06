@@ -25,8 +25,7 @@
   snapshot, and column-metadata builds are not part of this profile.
 - Vendored upstream implementation and local patches: none. Source, headers,
   objects, archive, and receipts live in the existing dependency cache.
-- Verified platform: macOS. The package interface and applications were
-  accepted on September 9, 2026. No additional platform support is claimed.
+- Platforms: source only; the package builds on macOS and Linux.
 
 `dependency.json` owns the reproducible native build and archive checksum.
 `make verify-pins` checks both complete public headers. The small

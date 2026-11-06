@@ -11,13 +11,9 @@ duplicate keys, and signed, unsigned, or real numeric intent.
 ```x2c
 import "yyjson" as json;
 
-int main(void) {
-  Scope.open();
-  defer Scope.close();
-
+auto int main(void) {
   json.JsonDocument document =
-    json.JsonDocument.read_file("releases.json");
-  defer document.free();
+    auto json.JsonDocument.read_file("releases.json");
   json.JsonObject root = document.root().object();
 
   foreach(json.JsonValue item in root["releases"].array()) {
@@ -31,12 +27,37 @@ int main(void) {
 }
 ```
 
-Build the package once with `make build`, then compile a consumer with
-`--package-dir <packages>` and `--c-include-dir <prefix>/include`; the driver
-adds the package's `builds` and `src` directories and links
-`builds/libyyjson.a`. `src/yyjson-0.12.h` stays public because the options
-methods take yyjson's own flag types, so a caller that wants the raw API can
-include it directly.
+The program reads a `releases.json` that you supply, such as
+`{"releases": [{"version": "1.0"}], "labels": {"channel": "stable"}}`.
+
+## Install
+
+Install the release bundle, then build a program that imports the package,
+such as the example above saved as `releases.x`:
+
+```sh
+x2c install yyjson
+x2c build --output releases releases.x
+./releases
+```
+
+Platforms: macOS (arm64, x86_64) and Linux (arm64, x86_64).
+
+From a checkout, build the package, then name the package directory and the
+prepared yyjson headers:
+
+```sh
+make -C packages/yyjson build
+./x2c build --package-dir packages \
+  --c-include-dir packages/yyjson/deps/include --output releases releases.x
+```
+
+The driver adds the package's `builds` and `src` directories to the C
+include path and links `builds/libyyjson.a`. `src/yyjson-0.12.h` stays public
+because the options methods take yyjson's own flag types, so a caller that
+wants the raw API can include it directly.
+
+## Documents and views
 
 `object[key]` returns the first matching member. `object.all(key)` returns all
 matching values in document order, and object iteration yields every

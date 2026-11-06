@@ -73,11 +73,11 @@ The compiled modules embed single-file libraries from raylib's own
 `src/external/`: `rlsw`, `stb_image`, `stb_image_write`,
 `stb_image_resize2`, `stb_perlin`, `stb_truetype`, `stb_rect_pack`, `sdefl`,
 and `sinfl`. Their notices remain in the pinned raylib source distribution;
-the package reproduces the licence files required by its admitted profiles,
+the package reproduces the license files required by its two profiles,
 including `LICENSES/rlsw-MIT.txt` for the memory renderer.
 
 `dependency.json` is the machine-readable source and build record.
-`make verify-pins` checks both admitted header hashes, and `make verify`
+`make verify-pins` checks both header hashes, and `make verify`
 additionally checks the exact PNG geometry both examples produce.
 
 ## The optional windowed profile
@@ -93,7 +93,7 @@ connection; the automated package checks run without a graphical login.
   `SUPPORT_MODULE_RSHAPES`.
 - Modules: `rcore.c`, `rshapes.c`, `rtextures.c`, `rtext.c`, and `rglfw.c` —
   five archive members. `rmodels.c` and `raudio.c` stay uncompiled, so there
-  is no 3D and no audio in the claim or the link line.
+  is no 3D and no audio in the archive or the link line.
 - `rglfw.c` compiles as Objective-C (`-x objective-c`, before the input, and
   `-U_GNU_SOURCE`), which is what raylib's own `src/Makefile` does on macOS.
 - Header hashes are the two above, unchanged: the profile changes the
@@ -103,11 +103,10 @@ connection; the automated package checks run without a graphical login.
   redistributed; building and running remain subject to Apple's SDK and
   platform terms, and nothing from the SDK is copied into this repository.
 - Bundled third-party code adds GLFW, vendored inside raylib at
-  `src/external/glfw` under the zlib licence, retained as
+  `src/external/glfw` under the zlib license, retained as
   `LICENSES/glfw-zlib.txt`.
 
 The two profiles are separate entries in the shared dependency cache, keyed
 on the manifest bytes, so preparing one neither invalidates nor replaces the
-other. macOS remains the only platform this package claims; the same profile
-on Linux would need X11 or Wayland development headers, which is a different
-intake.
+other. The windowed profile builds on macOS only; the same profile on Linux
+would need X11 or Wayland development headers.

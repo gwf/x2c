@@ -100,7 +100,7 @@ runs every standard application for that package.
   GET, HEAD, and POST, then downloads an artifact straight to a file.
 - [termbox2/examples/game-of-life.x](termbox2/examples/game-of-life.x): short. Conway's life on the terminal.
 - [termbox2/examples/incident-filter.x](termbox2/examples/incident-filter.x): broad. A filtered incident list with
-  per-severity colour, mouse selection, resize, and Unicode column widths.
+  per-severity color, mouse selection, resize, and Unicode column widths.
 - [blis/examples/page-rank.x](blis/examples/page-rank.x): short. Power iteration where the whole
   algorithm is `rank = links * rank` normalized until it converges.
 - [blis/examples/risk-report.x](blis/examples/risk-report.x): broad. Column views, mixed storage and

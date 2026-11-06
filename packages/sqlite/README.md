@@ -1,9 +1,10 @@
-# SQLite
+# SQLite client
 
-Store ordinary x2c values in a file or in-memory SQLite database, bind
-parameters without constructing SQL strings, and stream copied row Lists.
-The complete pinned SQLite C interface remains available for advanced use.
-The interface is accepted and verified on macOS.
+This package provides an x2c interface to the pinned SQLite 3.53.4
+amalgamation. Its entry point is `src/sqlite.x`; it stores ordinary x2c
+values in a file or in-memory database, binds parameters without
+constructing SQL strings, and streams copied row Lists. The complete pinned
+SQLite C interface remains available for advanced use.
 
 ## Start with an observation report
 
@@ -39,13 +40,27 @@ Expected output:
 /reference: HTTP 503, 40000 us
 ```
 
-From the repository root, with the compiler built:
+## Build from a checkout
+
+SQLite has no release bundle. From the repository root, with the compiler
+built, prepare the package and run its examples and tests:
 
 ```sh
 make -C packages/sqlite prepare
 make -C packages/sqlite build short-example example lisp-example
 make -C packages/sqlite test run run-lisp
 ```
+
+Then build a program that imports it, such as the example above saved as
+`report.x`. The package's native response file supplies the prepared SQLite
+headers:
+
+```sh
+./x2c build --package-dir packages --output report report.x
+./report
+```
+
+Platforms: source only; the package builds on macOS and Linux.
 
 The short application is [observations.x](examples/observations.x).
 [observation-history.x](examples/observation-history.x) reads a file of URL,
@@ -85,7 +100,7 @@ The explicit `@(...)` splice passes the row's values as separate bind
 parameters. Select columns in the record's declaration order.
 `Reading.columns()` returns those names as a List for callers that build a query.
 
-### Run the derive and test pilot
+### Run the record round-trip test
 
 The standalone [record round-trip test](tests/derive/reading_test.x) uses
 `$derive(Reading, <row>, <equal>)`, `test.x`, and `x2c test` together. It
@@ -99,12 +114,11 @@ repository root:
 builds/0/x2c test --manifest-path packages/sqlite/tests/derive/x2c.toml
 ```
 
-The pilot's manifest supplies the package search directory. SQLite's native
+The test's manifest supplies the package search directory. SQLite's native
 response file supplies its prepared dependency's pinned header directory.
-The pilot's own test project keeps discovery separate from the existing
-package test harness.
+The test project keeps discovery separate from the package test harness.
 Use `--list` to list the test, or `--filter round_trip --quiet` to select it.
-The pilot is optional and adds no build or publication gate.
+The test is optional and outside `make check`.
 
 ## Connections, statements, and values
 
@@ -195,7 +209,7 @@ and upstream defaults, linked statically with the platform threading and math
 libraries. Extension loading remains disabled per connection unless explicitly
 enabled through the raw API. Optional compile-time SQLite modules are not
 added. [PROFILE.md](PROFILE.md) records source/header hashes, options, native
-linkage, and license information. The package is initially verified on macOS.
+linkage, and license information.
 
 The public `sqlite-3.h` shim includes the complete pinned `sqlite3.h`; raw
 functions, constants, callbacks, and handles retain their SQLite spelling.
@@ -216,3 +230,7 @@ native dependency prefix together. The book's source-package recipe also
 applies: distribute this directory with `package.mk`, `dependency.mk`, and
 `tools/deps.py`; prepare its dependency in the consumer's selected cache.
 No system SQLite installation is required.
+
+The client and its tests are licensed under [Apache-2.0](../../LICENSE).
+SQLite's public-domain dedication is reproduced under `LICENSES/`. See
+`../LICENSE-POLICY.md` for the project intake policy.

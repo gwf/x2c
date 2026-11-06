@@ -6,17 +6,39 @@ reusable `CurlEasy` performs bounded synchronous HTTP requests and returns a
 copied `CurlResponse` with the status, ordered headers, and body.
 
 ```x2c
-import "libcurl" with CurlBatch, CurlEasy, CurlResponse;
+import "libcurl" with CurlEasy, CurlResponse;
 
 int main(void) {
-  CurlEasy curl = CurlEasy.new().timeouts(1000, 3000);
-  defer curl.free();
-
-  CurlResponse response = curl.get("https://example.com/guide");
-  defer response.free();
+  CurlEasy curl = auto CurlEasy.new().timeouts(1000, 3000);
+  CurlResponse response = auto curl.get("https://example.com/guide");
   printf("%ld %zu bytes\n", response.response_code(), response.body_size());
   return 0;
 }
+```
+
+## Install
+
+Install the release bundle, then build a program that imports the package,
+such as the example above saved as `fetch.x`:
+
+```sh
+x2c install libcurl
+x2c build --output fetch fetch.x
+./fetch
+```
+
+Platforms: macOS (arm64, x86_64) and Linux (arm64, x86_64). The bundle
+links libcurl and OpenSSL statically and reads the host's CA bundle,
+`/etc/ssl/cert.pem` on macOS and `/etc/ssl/certs/ca-certificates.crt` on
+Linux.
+
+From a checkout, build the package, then name the package directory and the
+prepared libcurl headers:
+
+```sh
+make -C packages/libcurl build
+./x2c build --package-dir packages \
+  --c-include-dir packages/libcurl/deps/include --output fetch fetch.x
 ```
 
 ## Requests
@@ -258,5 +280,7 @@ make run-lisp
 
 The applications and tests talk only to the package-local HTTP fixture
 started by `tools/run-fixture.py`. They do not depend on the public network.
-libcurl and OpenSSL retain the exact terms under `LICENSES/`; see
+
+The client and its tests are licensed under [Apache-2.0](../../LICENSE).
+libcurl and OpenSSL retain the terms reproduced under `LICENSES/`. See
 `../LICENSE-POLICY.md` for the project intake policy.

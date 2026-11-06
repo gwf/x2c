@@ -10,9 +10,7 @@ process-global terminal, drawing takes `String` text and termbox's own
 import "termbox2" with Termbox;
 
 int main(void) {
-  Termbox terminal = Termbox.open();
-  defer terminal.close();
-
+  Termbox terminal = auto Termbox.open();
   terminal.fill(0, 0, terminal.width(), 1, " ", TB_BLACK, TB_WHITE);
   terminal.print(0, 0, "press any key", TB_BLACK, TB_WHITE);
   terminal.box(0, 1, 20, 5, TB_CYAN, TB_DEFAULT);
@@ -21,6 +19,28 @@ int main(void) {
   terminal.poll();
   return 0;
 }
+```
+
+## Install
+
+Install the release bundle, then build a program that imports the package,
+such as the example above saved as `banner.x`, and run it in a terminal:
+
+```sh
+x2c install termbox2
+x2c build --output banner banner.x
+./banner
+```
+
+Platforms: macOS (arm64, x86_64) and Linux (arm64, x86_64).
+
+From a checkout, build the package, then name the package directory and the
+prepared termbox2 header:
+
+```sh
+make -C packages/termbox2 build
+./x2c build --package-dir packages \
+  --c-include-dir packages/termbox2/deps/include --output banner banner.x
 ```
 
 termbox2 is a single header, so `src/termbox2.c` instantiates it once and
@@ -194,3 +214,7 @@ The raw test calls representative declarations through the real pinned header.
 
 `make run` drives both applications under a deterministic pseudo-terminal and
 retains their raw transcripts under `builds/`.
+
+The client and its tests are licensed under [Apache-2.0](../../LICENSE).
+termbox2 retains the terms reproduced under `LICENSES/`. See
+`../LICENSE-POLICY.md` for the project intake policy.

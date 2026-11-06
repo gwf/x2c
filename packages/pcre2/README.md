@@ -21,6 +21,28 @@ int main(void) {
 }
 ```
 
+## Install
+
+Install the release bundle, then build a program that imports the package,
+such as the example above saved as `request.x`:
+
+```sh
+x2c install pcre2
+x2c build --output request request.x
+./request
+```
+
+Platforms: macOS (arm64, x86_64) and Linux (arm64, x86_64).
+
+From a checkout, build the package, then name the package directory and the
+prepared PCRE2 headers:
+
+```sh
+make -C packages/pcre2 build
+./x2c build --package-dir packages \
+  --c-include-dir packages/pcre2/deps/include --output request request.x
+```
+
 ## Splitting, computed replacement, quoting, and names
 
 `Regexp.split` returns the text between matches, keeping an empty field where
@@ -40,7 +62,7 @@ ASCII through, so a UTF-8 literal survives.
 `Regexp.capture_names` lists the names a pattern declares, in capture-group
 order. A name declared several times under `(?J)` is listed once per group.
 
-`examples/parse-log.x` is the short application (`make short-example`). In 35
+`examples/parse-log.x` is the short application (`make short-example`). In 33
 lines it summarizes a syslog batch: one expression with named captures pulls
 the time, program, and message out of each line, a second splits the message
 into fields, and unmatched lines are skipped. It is the shortest complete path

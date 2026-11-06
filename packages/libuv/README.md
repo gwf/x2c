@@ -12,17 +12,36 @@ watching.
 import "libuv" with UvLoop, UvProcess;
 
 int main(void) {
-  UvLoop loop = UvLoop.new();
-  defer loop.free();
-
-  UvProcess counted = loop.spawn(%("/usr/bin/wc" "-l"));
-  defer counted.free();
+  UvLoop loop = auto UvLoop.new();
+  UvProcess counted = auto loop.spawn(%("/usr/bin/wc" "-l"));
   counted.write("alpha\nbeta\ngamma\n").close_stdin();
   loop.run(UV_RUN_DEFAULT);
 
   printf("%s", %"lines: $(counted.stdout())");
   return 0;
 }
+```
+
+## Install
+
+Install the release bundle, then build a program that imports the package,
+such as the example above saved as `count.x`:
+
+```sh
+x2c install libuv
+x2c build --output count count.x
+./count
+```
+
+Platforms: macOS (arm64, x86_64) and Linux (arm64, x86_64).
+
+From a checkout, build the package, then name the package directory and the
+prepared libuv headers:
+
+```sh
+make -C packages/libuv build
+./x2c build --package-dir packages \
+  --c-include-dir packages/libuv/deps/include --output count count.x
 ```
 
 The archive is `builds/liblibuv.a`, deliberately not `libuv.a`, so it never

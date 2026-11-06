@@ -9,11 +9,9 @@ x2c values in bulk.
 ```x2c
 import "blis" with Blis, BlisObject;
 
-BlisObject rank = BlisObject.copy_vector(seed, BLIS_DOUBLE);
+BlisObject rank = auto BlisObject.copy_vector(seed, BLIS_DOUBLE);
 for (; shift > 1e-15 && round < 100; round++) {
-  Scope.open();
-  {
-    defer Scope.close();
+  auto {
     BlisObject next = links.matmul(rank);
     next = next.scale(1.0 / next.dotv(ones));
     shift = (next - rank).normfv();
@@ -21,6 +19,31 @@ for (; shift > 1e-15 && round < 100; round++) {
   }
 }
 ```
+
+## Install
+
+Install the release bundle, then build a program that imports the package,
+such as [examples/page-rank.x](examples/page-rank.x):
+
+```sh
+x2c install blis
+x2c build --output page-rank page-rank.x
+./page-rank
+```
+
+Platforms: macOS (arm64, x86_64) and Linux (arm64, x86_64).
+
+From a checkout, build the package, then name the package directory and the
+prepared BLIS headers:
+
+```sh
+make -C packages/blis build
+./x2c build --package-dir packages \
+  --c-include-dir packages/blis/deps/include \
+  --output page-rank packages/blis/examples/page-rank.x
+```
+
+## Applications
 
 `examples/page-rank.x` is the short application (`make short-example`). It
 ranks a five-page link graph by power iteration: the algorithm is the one
@@ -168,7 +191,9 @@ Each platform has its own `PROFILE-<system>-<machine>.json`, because the
 archive's member count and undefined symbols depend on the kernel set:
 `PROFILE-darwin-arm64.json`, `PROFILE-darwin-x86_64.json`,
 `PROFILE-linux-x86_64.json`, and `PROFILE-linux-aarch64.json`. To add a
-platform, run `tools/record-blis-profile.sh` on that machine. `LICENSES/`
+platform, run
+[tools/record-blis-profile.sh](../../tools/record-blis-profile.sh) on
+that machine. `LICENSES/`
 records the incorporated notices.
 
 `bli_info_get_version_str` returns `const char *`; `Blis.version` copies

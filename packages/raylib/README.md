@@ -1,9 +1,11 @@
 # raylib client
 
-This package provides an x2c interface to raylib 6.0 built for
-`PLATFORM_MEMORY`: raylib renders into main memory with no display and no
-GPU, so an `Image` is the whole product and an exported PNG is reproducible
-byte for byte. `PROFILE.md` records the admitted build.
+This package provides an x2c interface to raylib 6.0, pinned at upstream
+commit `dbc56a87da87d973a9c5baa4e7438a9d20121d28` with a local
+[image/text patch](patches/README.md), built for `PLATFORM_MEMORY`: raylib
+renders into main memory with no display and no GPU, so an `Image` is the
+whole product and an exported PNG is reproducible byte for byte.
+`PROFILE.md` records the build.
 
 It is an importable package: `src/raylib.x` is its entry unit and every
 public name compiles to `raylib__*`. raylib's own record types keep their own
@@ -13,9 +15,7 @@ spelling, so a program that names only those needs no `with` clause at all:
 import "raylib";
 
 int main(void) {
-  Image chart = Image.new(320, 120, Color.from_hex(0xf7f8fcff));
-  defer chart.free();
-
+  Image chart = auto Image.new(320, 120, Color.from_hex(0xf7f8fcff));
   Vector2 origin = { 20, 100 }, step = { 60, -18 };
   for (int index = 0; index < 5; index++)
     chart.draw_circle(origin + step.scale(index), 6, BLUE);
@@ -32,11 +32,25 @@ arrive through the published `src/raylib-6.0.h`. The package's own types,
 need `with` or the alias:
 `import "raylib" with ImagePixels, RaylibText, RaylibWindow;`.
 
-Build the package once with `make build`, then compile a consumer with
-`--package-dir <packages>`, `--c-include-dir <prefix>/include`, and
-`-I <prefix>/include`; the driver adds the package's `builds` and `src`
-directories and links `builds/libraylib.a`. The `-I` is what lets x2c's own
-collection read `raylib.h` and identify `Vector2` as a type.
+## Build from a checkout
+
+raylib has no release bundle. Build it from a checkout, then compile a
+program that imports it, such as the example above saved as `points.x`:
+
+```sh
+make -C packages/raylib build
+./x2c build --package-dir packages \
+  --c-include-dir packages/raylib/deps/include \
+  -I packages/raylib/deps/include --output points points.x
+./points
+```
+
+Platforms: source only. The memory-rendering profile builds on macOS and
+Linux; the optional desktop-window profile builds on macOS.
+
+The driver adds the package's `builds` and `src` directories and links
+`builds/libraylib.a`. The `-I` is what lets x2c's own collection read
+`raylib.h` and identify `Vector2` as a type.
 
 ## Images
 
@@ -57,8 +71,9 @@ return nothing, because they change pixels the `Image` already points at.
 
 `Image.new`, the `GenImage*` family (`gradient_linear`, `gradient_radial`,
 `gradient_square`, `checked`, `white_noise`, `perlin_noise`, `cellular`),
-and `Image.load` produce an image; `image.free()` releases it, and
-`defer image.free()` belongs on the line after. Scope owns no raylib memory.
+and `Image.load` produce an image; `image.free()` releases it. `Image`
+adopts `Cleanup`, so `Image chart = auto Image.new(...)` releases the image
+when its block exits. Scope owns no raylib memory.
 
 `Image.load` raises `<io-fail>` carrying `LoadImage` and the path when raylib
 cannot read the file; a missing image file is a failure, not an absence.
@@ -170,7 +185,7 @@ to its default bitmap font if the TrueType font cannot load.
 `examples/texture-sheet.x` is the broader application (`make example`). It
 generates four procedural tiles, writes each to disk, reads them back with
 `Image.load`, walks the noise tile's pixels and makes the dark ones
-transparent, composites everything onto one sheet with captions centred by
+transparent, composites everything onto one sheet with captions centered by
 measured width, draws a polygon badge, and reports what a missing tile does.
 
 ## Native API
@@ -180,7 +195,7 @@ release. Importing the package is enough to reach it: `tests/test-raw-api.x`
 uses only `import "raylib"` and then calls `ImageDrawTriangleEx`,
 `LoadImagePalette`, and `GetPixelDataSize` directly. Use it for interpolated
 triangles, palettes, raw and memory image loading, image-to-code export,
-codepoint and text utilities, and anything else the admitted profile
+codepoint and text utilities, and anything else the selected profile
 compiles.
 
 Everything outside that profile -- models, audio, and every non-PNG format
@@ -217,5 +232,5 @@ the memory-rendering profile.
 The client, tests, and examples are licensed under
 [Apache-2.0](../../LICENSE).
 raylib retains the zlib terms reproduced under `LICENSES/`, as does the GLFW
-copy vendored inside it and used only by the windowed profile. The dependency
-is admitted under the policy in `../LICENSE-POLICY.md`.
+copy vendored inside it and used only by the windowed profile. See
+`../LICENSE-POLICY.md` for the project intake policy.
