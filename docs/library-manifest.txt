@@ -76,9 +76,9 @@ lib/substring-map.x|optional|
 lib/typed-map.x|optional|
 lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.x`, in the one runtime unit that includes the ledger.
 lib/var/var.x|api|
-lib/cleanup.x|internal|Cleanup adoption templates used by runtime owners.
+lib/cleanup.x|internal|`Cleanup` adoption templates used by runtime owners.
 lib/error-macros.x|internal|Structured `Error` causes shared by runtime modules.
-lib/error-private.x|internal|Error transfer templates used by the exception machinery.
+lib/error-private.x|internal|`Error` transfer templates used by the exception machinery.
 lib/integer-ops.x|internal|Integer conversion and arithmetic templates shared by runtime owners.
 lib/native-scalar-types.x|internal|The exact C scalar ledger and its compile-time projections.
 lib/private-keywords.x|internal|Keyword aliases used by runtime implementation code.
