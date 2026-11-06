@@ -26,4 +26,4 @@ read -r -a ldflags <<< "${WASM_LDFLAGS:-}"
   -Wl,--whole-archive "$root/builds/wasm/libx2c.a" -Wl,--no-whole-archive \
   -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -sMODULARIZE=1 \
   -sEXPORT_ES6=1 -sENVIRONMENT=web,worker,node -sINITIAL_MEMORY=64MB \
-  -sMAXIMUM_MEMORY=256MB -sSTACK_SIZE=4MB "${ldflags[@]}"
+  -sMAXIMUM_MEMORY=256MB -sSTACK_SIZE=8MB "${ldflags[@]}"
