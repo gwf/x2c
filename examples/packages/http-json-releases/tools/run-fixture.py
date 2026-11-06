@@ -48,14 +48,15 @@ def main():
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
     try:
-        url = f"http://127.0.0.1:{server.server_port}/releases"
+        base = f"http://127.0.0.1:{server.server_port}"
         result = subprocess.run(
-            [executable, url], check=False, capture_output=True, text=True
+            [executable, f"{base}/releases", f"{base}/summary"],
+            check=False, capture_output=True, text=True
         )
         expected = (
             "3 releases\n"
             "  10.47  stable  2 assets\n"
-            "  10.48-RC1  preview  1 assets\n"
+            "  10.48-RC1  preview  1 asset\n"
             "  10.46  stable  3 assets\n"
             "stable: 2; preview: 1; assets: 6\n"
             "posted 35 bytes as application/json\n"

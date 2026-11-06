@@ -1,4 +1,8 @@
-/*  http-json-releases.x -- Fetch and summarize a JSON release catalog. */
+/*  http-json-releases.x -- Fetch and summarize a JSON release catalog.
+
+    Usage: http-json-releases [CATALOG-URL [SUMMARY-URL]]. With a summary
+    URL, the program also posts its summary there as one JSON document.
+*/
 
 import "libcurl" with CurlEasy, CurlResponse;
 import "yyjson" with Json;
@@ -36,22 +40,24 @@ int main(int argc, char **argv) {
       Array files = release["assets"];
       assets += files.len();
       String tag = release["tag_name"];
-      printf("%s", %"  $tag  $channel  $(files.len()) assets\n");
+      String noun = files.len() == 1 ? "asset" : "assets";
+      printf("%s", %"  $tag  $channel  $(files.len()) $noun\n");
     }
 
     Var stable = 0, preview = 0;
     channels.try_get("stable", stable);
     channels.try_get("preview", preview);
     printf("%s", %"stable: $stable; preview: $preview; assets: $assets\n");
+    if (argc < 3) return 0;
 
-    /*  The catalog the report just summarized goes back as one JSON document,
-        which is the other half of the composition: libcurl fetches the bytes
-        and yyjson decides what they mean.
+    /*  The summary goes back as one JSON document, which is the other half
+        of the composition: libcurl moves the bytes and yyjson decides what
+        they mean.
     */
     Var summary = { "stable": stable, "preview": preview,
                      "assets": assets };
     auto CurlResponse posted = curl.body("application/json", summary.json())
-      .request("POST", url + "/summary");
+      .request("POST", String.new(argv[2]));
     Map echoed = Json.parse(posted.text());
     printf("%s", %"posted $(echoed["length"]) bytes as $(echoed["type"])\n");
     return 0;
