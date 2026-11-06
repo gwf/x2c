@@ -36,11 +36,10 @@ static macro Stmt $fail.parse_collection_top(Expr $c, Expr $site) =>
     <parse>, "an evaluated collection is an expression, not a top-level form",
     $site, NULL);
 
-static macro Stmt $fail.parse_body_expected(
-  Expr $c, Expr $site, Expr $unexpected) =>
+static macro Stmt $fail.parse_body_expected(Expr $c, Expr $site) =>
   $c.report_error(
-    <parse>, "expected ';', '{', or '=>'",
-    $site, $("token:", $c.token.text, "symbol:", $unexpected.str()));
+    <parse>, %"expected ';', '{', or '=>', found '$($c.token.text)'",
+    $site, NULL);
 
 static macro Stmt $fail.parse_meta_function(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -186,8 +185,8 @@ static macro Stmt $fail.parse_atomic_type(Expr $c, Expr $site) =>
 static macro Stmt $fail.parse_method_member(
   Expr $c, Expr $site, Expr $owner) =>
   $c.report_error(
-    <parse>, "expected method name after dot",
-    $site, $("typedef:", $owner, "token:", $c.token.text));
+    <parse>, %"expected method name after dot, found '$($c.token.text)'",
+    $site, $("typedef:", $owner));
 
 static macro Stmt $fail.parse_function_body(Expr $c, Expr $site) =>
   $c.report_error(

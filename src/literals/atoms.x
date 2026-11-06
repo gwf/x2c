@@ -1,10 +1,9 @@
 /*  atoms.x -- scalar literals and Symbol decoding */
 
-static macro Stmt $fail.literals_atom_expected(
-  Expr $c, Expr $site, Expr $kind) =>
+static macro Stmt $fail.literals_atom_expected(Expr $c, Expr $site) =>
   $c.report_error(
-    <parse>, "expected atomic expression",
-    $site, $("token:", $c.token.text, "kind:", $kind.str()));
+    <parse>, %"expected atomic expression, found '$($c.token.text)'",
+    $site, NULL);
 
 static macro Stmt $fail.literals_number_range(
   Expr $c, Expr $site, Expr $text) =>
@@ -52,8 +51,7 @@ List Compiler.parse_atomic_literal(Compiler c) {
     c.next();
     return %(expr $(literal.cadr()) $literal);
   }
-  Symbol kind = c.peek(0);
-  $fail.literals_atom_expected(c, c.token, kind);
+  $fail.literals_atom_expected(c, c.token);
 }
 
 // scalar literals and Symbol decoding

@@ -345,8 +345,7 @@ static List _declaration_form(Compiler c, int skip_body) {
   if (c.test(<;>)) return _declared(c, decl, meta, first);
   if (body) return _defined(c, decl, meta, native, first);
   c.require_input();
-  Symbol unexpected = c.peek(0);
-  $fail.parse_body_expected(c, c.token, unexpected);
+  $fail.parse_body_expected(c, c.token);
 }
 
 /* Consumes the `meta` marker at the cursor and the contextual `native`

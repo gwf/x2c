@@ -31,8 +31,9 @@ static macro Stmt $fail.statements_match_default(Expr $c, Expr $site) =>
 
 static macro Stmt $fail.statements_match_arm(Expr $c, Expr $site) =>
   $c.report_error(
-    <parse>, "expected 'case' or 'default' in match statement",
-    $site, $("token:", $c.token.text));
+    <parse>,
+    %"expected 'case' or 'default' in match, found '$($c.token.text)'",
+    $site, NULL);
 
 static macro Stmt $fail.statements_match_pattern(
   Expr $c, Expr $origin, Expr $pattern) =>
