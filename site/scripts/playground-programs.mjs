@@ -77,8 +77,15 @@ async function compileOne(example, toolchain) {
     return false;
   const embed = data.map((directory) =>
     `--embed-file ${path.join(root, directory)}@${directory}`);
-  const ldflags = [process.env.WASM_LDFLAGS, ...embed].filter(Boolean);
   await mkdir(path.dirname(stem), { recursive: true });
+  // A gallery program finds its data beside its source file, which the
+  // browser does not have, so it receives the embedded copy as its argument.
+  if (data.length) {
+    await writeFile(`${stem}.pre.js`,
+      `Module["arguments"] = ${JSON.stringify([data[0]])};\n`);
+    embed.push(`--pre-js ${stem}.pre.js`);
+  }
+  const ldflags = [process.env.WASM_LDFLAGS, ...embed].filter(Boolean);
   const { status, log } = await run(wasmBuild,
     [path.join(root, "examples", `${example.id}.x`), stem],
     { ...process.env, WASM_LDFLAGS: ldflags.join(" ") });

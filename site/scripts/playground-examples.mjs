@@ -19,6 +19,9 @@ export function selectPlaygroundExamples(gallery, sourceFor) {
 }
 
 // A program that reads a directory under examples/data gets a copy of it in
-// its in-memory filesystem.
-export const embeddedData = (source) =>
-  [...new Set(source.match(/examples\/data\/[\w-]+/g) ?? [])];
+// its in-memory filesystem. Gallery programs name it as example_data("dir").
+export const embeddedData = (source) => [...new Set([
+  ...(source.match(/examples\/data\/[\w-]+/g) ?? []),
+  ...[...source.matchAll(/example_data\("([\w-]+)/g)]
+    .map((match) => `examples/data/${match[1]}`),
+])];
