@@ -273,7 +273,7 @@ Source: `lib/dispatch.x`
 
 #### x2c_register_tagged_descriptor
 
-`void x2c_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)`
+`void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods)`
 
 Registers an explicitly tagged type or raises `<bad-state>` for a null tag
 or name. Tag/name collisions follow the existing fatal descriptor
@@ -320,7 +320,7 @@ Source: `lib/dispatch.x`
 
 #### x2c_try_register_tagged_descriptor
 
-`int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)`
+`int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods)`
 
 Declares custom `tag` under full type `name` and merges descriptor
 callbacks. Unlike `x2c_try_register_descriptor`, the tag need not be the
@@ -577,7 +577,3 @@ Ordinary method lookup remains static.
 Equality, identity, and rendering can inspect `void`. Operations that need
 an ordinary value, including hashing, ordering, truthiness, and iteration,
 reject it as an invariant violation.
-
-## Tests and examples
-
-`make verify` (`unittest/test-var.x`).

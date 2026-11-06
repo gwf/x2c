@@ -6,7 +6,7 @@
 
 # `src/statements.x`
 
-X2c statement parsing.
+x2c statement parsing.
 
 ## Functions
 
@@ -138,7 +138,7 @@ Source: `src/statements.x`
 <a id="Compiler.typed_capture_declarations"></a>
 #### Compiler.typed_capture_declarations
 
-`List Compiler.typed_capture_declarations( Compiler c, List types, List &temporaries)`
+`List Compiler.typed_capture_declarations(Compiler c, List types, List &temporaries)`
 
 Declares typed pattern captures in a new scope, returning their native
 declarations and the preceding Var temporaries. The caller closes it.

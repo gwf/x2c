@@ -5,6 +5,8 @@
 
 Typed views over canonical List cells.
 
+Include it with `#include "typed-list.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -694,7 +696,3 @@ There is no long family. `Var.box_long` allocates a `Scope`-owned box, so
 a cell outliving that scope would hold a dangling car. `List.equal`
 compares car bits; two boxes of one number differ, so every cons would
 miss and the interning table would grow without bound.
-
-## Tests and examples
-
-`make verify` (`unittest/test-typed-list.x`).

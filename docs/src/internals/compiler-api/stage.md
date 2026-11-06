@@ -65,7 +65,7 @@ Source: `src/stage.x`
 <a id="Compiler.meta_argument"></a>
 #### Compiler.meta_argument
 
-`Var Compiler.meta_argument( Compiler c, List node, Type want, Token site, MetaCall call)`
+`Var Compiler.meta_argument(Compiler c, List node, Type want, Token site, MetaCall call)`
 
 Returns the value the argument expression `node` of a `$` call passes to
 a parameter of type `want`, or of no declared type when `want` is NULL:
@@ -90,7 +90,7 @@ Source: `src/stage.x`
 <a id="Compiler.meta_value_expression"></a>
 #### Compiler.meta_value_expression
 
-`List Compiler.meta_value_expression( Compiler c, Type declared, Var value, Token site)`
+`List Compiler.meta_value_expression(Compiler c, Type declared, Var value, Token site)`
 
 Returns literal code for a compile-time `value`, preserving `declared`
 when supplied. An Array or Map, at any depth, becomes a literal that

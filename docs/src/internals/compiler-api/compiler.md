@@ -215,7 +215,7 @@ Source: `src/compiler/parsing/tokens.x`
 <a id="Compiler.attach_source_references"></a>
 #### Compiler.attach_source_references
 
-`void Compiler.attach_source_references( Compiler c, List binding, Array capture)`
+`void Compiler.attach_source_references(Compiler c, List binding, Array capture)`
 
 Attaches a completed named-type capture to its existing declaration row.
 
@@ -331,7 +331,7 @@ Source: `src/compiler/patterns.x`
 <a id="Compiler.copy_source_declaration"></a>
 #### Compiler.copy_source_declaration
 
-`void Compiler.copy_source_declaration( Compiler c, Map target, Map source, List key)`
+`void Compiler.copy_source_declaration(Compiler c, Map target, Map source, List key)`
 
 Carries declaration metadata with one actual symbol contribution.
 
@@ -372,7 +372,7 @@ Source: `src/compiler/parsing/tokens.x`
 <a id="Compiler.finish_collected_declaration"></a>
 #### Compiler.finish_collected_declaration
 
-`void Compiler.finish_collected_declaration( Compiler c, List declaration, Token meta, int native)`
+`void Compiler.finish_collected_declaration(Compiler c, List declaration, Token meta, int native)`
 
 Records declaration visibility and meta facts, then skips its body.
 The declaration is already bound by the shared top-level parser.
@@ -490,7 +490,7 @@ Source: `src/compiler/patterns.x`
 <a id="Compiler.match_pattern_binders"></a>
 #### Compiler.match_pattern_binders
 
-`List Compiler.match_pattern_binders( Compiler c, List pattern, List &?possible)`
+`List Compiler.match_pattern_binders(Compiler c, List pattern, List &?possible)`
 
 Returns definite binders from a typed `Match` pattern AST.
 
@@ -528,7 +528,7 @@ Source: `src/compiler/patterns.x`
 <a id="Compiler.materialize_source_declaration"></a>
 #### Compiler.materialize_source_declaration
 
-`void Compiler.materialize_source_declaration( Compiler c, List binding, List declaration)`
+`void Compiler.materialize_source_declaration(Compiler c, List binding, List declaration)`
 
 Materializes one producer-owned source row and its captured references.
 Row fields are file, start, end, Type, method, optional capture, and
@@ -620,7 +620,7 @@ Source: `src/compiler/source-files.x`
 <a id="Compiler.pattern_binder_declarations"></a>
 #### Compiler.pattern_binder_declarations
 
-`List Compiler.pattern_binder_declarations( Compiler c, List bindings, List handle)`
+`List Compiler.pattern_binder_declarations(Compiler c, List bindings, List handle)`
 
 Builds ordinary declarations from a pattern scope's issued bindings.
 A catch reads through its handler; a match reads its capture slots.
@@ -730,7 +730,7 @@ Source: `src/compiler/source-locations.x`
 <a id="Compiler.record_source_declaration"></a>
 #### Compiler.record_source_declaration
 
-`void Compiler.record_source_declaration( Compiler c, List binding, Token first, Token after, int external)`
+`void Compiler.record_source_declaration(Compiler c, List binding, Token first, Token after, int external)`
 
 Records a physical declaration using the binding's actual scope and key.
 Occurrence rows retain their five-field prefix and append `<decl>`
@@ -741,7 +741,7 @@ Source: `src/compiler/source-locations.x`
 <a id="Compiler.record_source_reference"></a>
 #### Compiler.record_source_reference
 
-`void Compiler.record_source_reference( Compiler c, List binding, Type type, Token first, Token after)`
+`void Compiler.record_source_reference(Compiler c, List binding, Type type, Token first, Token after)`
 
 Records a resolved reference without inventing spans for constructed
 ASTs.
@@ -804,7 +804,7 @@ Source: `src/compiler/parsing/tokens.x`
 <a id="Compiler.select_declaration_defaults"></a>
 #### Compiler.select_declaration_defaults
 
-`Map Compiler.select_declaration_defaults( Compiler c, String path, Map symbols, Array parts, Map definitions, Map statics)`
+`Map Compiler.select_declaration_defaults(Compiler c, String path, Map symbols, Array parts, Map definitions, Map statics)`
 
 Selects the owning file's declaration defaults after all its segments.
 The selected signatures join ordinary declarations before protocol and

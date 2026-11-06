@@ -23,7 +23,7 @@ Brace initializer conversion.
 <a id="Compiler.convert_compound_literal"></a>
 #### Compiler.convert_compound_literal
 
-`List Compiler.convert_compound_literal( Compiler c, List value, Type type, Type native_type)`
+`List Compiler.convert_compound_literal(Compiler c, List value, Type type, Type native_type)`
 
 Keeps a compound literal's native type definition at its original scope.
 
@@ -32,7 +32,7 @@ Source: `src/initializers/conversion.x`
 <a id="Compiler.convert_initializer"></a>
 #### Compiler.convert_initializer
 
-`List Compiler.convert_initializer( Compiler c, List value, Type type, List target)`
+`List Compiler.convert_initializer(Compiler c, List value, Type type, List target)`
 
 Converts an initializer using its declared native object for array
 bounds.
@@ -53,7 +53,7 @@ Source: `src/initializers/conversion.x`
 <a id="Compiler.initializer_rows"></a>
 #### Compiler.initializer_rows
 
-`List Compiler.initializer_rows( Compiler c, Type root, List items, List target)`
+`List Compiler.initializer_rows(Compiler c, Type root, List items, List target)`
 
 Returns (original cases) rows; each case is
 (native-condition path destination value). Explicit braces start a nested

@@ -6,7 +6,7 @@
 
 # `src/project/project.x`
 
-X2c project manifests.
+x2c project manifests.
 
 ## Functions
 

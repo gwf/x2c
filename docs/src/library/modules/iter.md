@@ -695,7 +695,3 @@ Source: `lib/iter.x`
 Lazy operations borrow their source iterators and callbacks. The caller
 supplies iterator storage, which must outlive traversal. Iterators cannot
 yield `void`.
-
-## Tests and examples
-
-`make verify` (`unittest/test-iter.x`) and `make examples` (`iter-examples`).

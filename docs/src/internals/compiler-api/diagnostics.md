@@ -194,7 +194,7 @@ Source: `src/diagnostics.x`
 <a id="Compiler.report_error"></a>
 #### Compiler.report_error
 
-`void Compiler.report_error( Compiler compiler, Symbol code, String message, Token token, List notes)`
+`void Compiler.report_error(Compiler compiler, Symbol code, String message, Token token, List notes)`
 
 Submits a located compiler error, then transfers or exits.
 An explicit `token` wins; otherwise an active recorded origin is resolved
@@ -208,7 +208,7 @@ Source: `src/diagnostics.x`
 <a id="Compiler.report_problem"></a>
 #### Compiler.report_problem
 
-`void Compiler.report_problem( Compiler c, Symbol code, String message, Token token, List notes)`
+`void Compiler.report_problem(Compiler c, Symbol code, String message, Token token, List notes)`
 
 Records and emits a located compiler error, then returns so the
 translation continues; it fails when it finishes. Location and the
@@ -219,7 +219,7 @@ Source: `src/diagnostics.x`
 <a id="Compiler.report_warning"></a>
 #### Compiler.report_warning
 
-`void Compiler.report_warning( Compiler c, Symbol code, String message, Token token, List notes)`
+`void Compiler.report_warning(Compiler c, Symbol code, String message, Token token, List notes)`
 
 Records and emits a located warning without consuming the error limit.
 Location selection matches `Compiler.report_error`; NULL code becomes
@@ -231,7 +231,7 @@ Source: `src/diagnostics.x`
 <a id="Compiler.report_warning_at"></a>
 #### Compiler.report_warning_at
 
-`void Compiler.report_warning_at( Compiler compiler, Symbol code, String message, List location, List notes)`
+`void Compiler.report_warning_at(Compiler compiler, Symbol code, String message, List location, List notes)`
 
 Records and emits a warning at a location built earlier by
 `Compiler.token_location`, for a report raised after its token has been
@@ -410,7 +410,7 @@ Source: `src/diagnostics.x`
 <a id="Diagnostics.report"></a>
 #### Diagnostics.report
 
-`void Diagnostics.report( Diagnostics diag, Symbol code, String message, List location, List notes)`
+`void Diagnostics.report(Diagnostics diag, Symbol code, String message, List location, List notes)`
 
 Records and synchronously emits one diagnostic unless already limited.
 Entries retain publication order. NULL `code` becomes `<driver>`. A report

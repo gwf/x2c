@@ -189,7 +189,7 @@ Source: `src/collect/walk.x`
 <a id="Compiler.include_function_declarations"></a>
 #### Compiler.include_function_declarations
 
-`void Compiler.include_function_declarations( Compiler c, String target, int angle, Map available)`
+`void Compiler.include_function_declarations(Compiler c, String target, int angle, Map available)`
 
 Adds the public functions an included unit itself declares. Its collected
 include closure also contains private source includes, which its generated
@@ -203,7 +203,7 @@ Source: `src/collect/declarations.x`
 <a id="Compiler.include_type_dependencies"></a>
 #### Compiler.include_type_dependencies
 
-`List Compiler.include_type_dependencies( Compiler c, String target, int angle, Map seen)`
+`List Compiler.include_type_dependencies(Compiler c, String target, int angle, Map seen)`
 
 The semantic type rows reached by an ordinary source include. Each
 file contributes once to `seen`; the current unit does not contribute
@@ -214,7 +214,7 @@ Source: `src/collect/declarations.x`
 <a id="Compiler.include_typedef_names"></a>
 #### Compiler.include_typedef_names
 
-`List Compiler.include_typedef_names( Compiler c, String target, int angle, Map seen)`
+`List Compiler.include_typedef_names(Compiler c, String target, int angle, Map seen)`
 
 The typedef names published by the files that the current unit's
 include of `target` reaches, including its transitive includes.
@@ -240,7 +240,7 @@ Source: `src/collect/walk.x`
 <a id="Compiler.included_macros"></a>
 #### Compiler.included_macros
 
-`List Compiler.included_macros( Compiler c, String target, int angle, String dir, Map active)`
+`List Compiler.included_macros(Compiler c, String target, int angle, String dir, Map active)`
 
 Returns the `(name value)` macro rows that the file an `#include` of
 `target` from the directory `dir` names exports, or NULL when x2c does
@@ -375,7 +375,7 @@ Source: `src/collect/splice.x`
 <a id="Compiler.name_meta_provider_bindings"></a>
 #### Compiler.name_meta_provider_bindings
 
-`void Compiler.name_meta_provider_bindings( Compiler c, String path, int index)`
+`void Compiler.name_meta_provider_bindings(Compiler c, String path, int index)`
 
 Selects helper C spellings for public definitions owned by `path`.
 Bindings, rather than source tokens, keep unrelated private names and
@@ -470,7 +470,7 @@ Source: `src/collect/declarations.x`
 <a id="Compiler.record_generated_symbol"></a>
 #### Compiler.record_generated_symbol
 
-`void Compiler.record_generated_symbol( Compiler c, String name, Type signature)`
+`void Compiler.record_generated_symbol(Compiler c, String name, Type signature)`
 
 Records one generated public callable in the declaration map that the
 current file's collected entry contributes, which is the map its
@@ -505,7 +505,7 @@ Source: `src/collect/declarations.x`
 <a id="SourceView.resolve_include"></a>
 #### SourceView.resolve_include
 
-`String SourceView.resolve_include( SourceView s, List dirs, String includer_dir, String target, int angle)`
+`String SourceView.resolve_include(SourceView s, List dirs, String includer_dir, String target, int angle)`
 
 The file the include of `target` from `includer_dir` names, searched as
 collection searches `dirs`, or NULL.

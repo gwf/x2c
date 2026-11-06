@@ -6,7 +6,7 @@
 
 # `src/parse/parse.x`
 
-X2c declarations, parsed from source or constructed.
+x2c declarations, parsed from source or constructed.
 
 ## Functions
 
@@ -109,7 +109,7 @@ Source: `src/parse/binding.x`
 <a id="Compiler.bind_catch_arm"></a>
 #### Compiler.bind_catch_arm
 
-`List Compiler.bind_catch_arm( Compiler c, List pattern, Var body, Token start, List handle)`
+`List Compiler.bind_catch_arm(Compiler c, List pattern, Var body, Token start, List handle)`
 
 Binds one catch arm's `body` in a scope of its own, with declarations of
 the definite binders of `pattern`, read through `handle`, before it.
@@ -122,7 +122,7 @@ Source: `src/parse/binding.x`
 <a id="Compiler.bind_match_arm"></a>
 #### Compiler.bind_match_arm
 
-`List Compiler.bind_match_arm( Compiler c, List pattern, Var body, Token start, int binds, List types)`
+`List Compiler.bind_match_arm(Compiler c, List pattern, Var body, Token start, int binds, List types)`
 
 Binds one match arm's `body` in a scope of its own, which defines the
 definite binders of `pattern` when the arm `binds`. Binder diagnostics
@@ -134,7 +134,7 @@ Source: `src/parse/binding.x`
 <a id="Compiler.bind_match_condition"></a>
 #### Compiler.bind_match_condition
 
-`List Compiler.bind_match_condition( Compiler c, List subject, List pattern, List types, Token origin)`
+`List Compiler.bind_match_condition(Compiler c, List subject, List pattern, List types, Token origin)`
 
 Binds a pattern condition without publishing its captures to the caller.
 Its declarations belong to the successful path; visible rows retain the
@@ -165,7 +165,7 @@ Source: `src/parse/binding.x`
 <a id="Compiler.bind_syntax"></a>
 #### Compiler.bind_syntax
 
-`List Compiler.bind_syntax( Compiler c, Var syntax, Symbol context, Type return_type)`
+`List Compiler.bind_syntax(Compiler c, Var syntax, Symbol context, Type return_type)`
 
 Binds parser-shaped `syntax` at `context` into current compiler state.
 `context` is `<unit>`, `<block>`, `<field>`, `<enumerator>`, `<map-entry>`,
@@ -180,7 +180,7 @@ Source: `src/parse/binding.x`
 <a id="Compiler.bind_template_local"></a>
 #### Compiler.bind_template_local
 
-`void Compiler.bind_template_local( Compiler c, List key, List type, List context)`
+`void Compiler.bind_template_local(Compiler c, List key, List type, List context)`
 
 Installs a definition-local template binding or typedef provisionally.
 Later template types name a local typedef by its identity, so each
@@ -282,7 +282,7 @@ Source: `src/parse/placement.x`
 <a id="Compiler.finish_foreign_alias"></a>
 #### Compiler.finish_foreign_alias
 
-`List Compiler.finish_foreign_alias( Compiler c, List declaration, List native_syntax)`
+`List Compiler.finish_foreign_alias(Compiler c, List declaration, List native_syntax)`
 
 Constructs a foreign alias from one direct function declaration and target.
 `native_syntax` must resolve to a different direct identifier and, when
@@ -294,7 +294,7 @@ Source: `src/parse/units.x`
 <a id="Compiler.finish_initializers"></a>
 #### Compiler.finish_initializers
 
-`List Compiler.finish_initializers( Compiler c, List declaration, Token origin)`
+`List Compiler.finish_initializers(Compiler c, List declaration, Token origin)`
 
 Lowers block declarations whose declarators placed code after
 themselves, or that an after-initialization rewrite follows, to

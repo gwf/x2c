@@ -5,6 +5,8 @@
 
 Optional compound `List` selectors.
 
+Include it with `#include "list-selectors.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -503,7 +505,3 @@ module for the remaining Common Lisp selector spellings through depth 4.
 Names read from right to left: `a` applies car and `d` applies cdr. Every
 step is `nil`-safe, and selected tails share their canonical `List`
 structure.
-
-## Tests and examples
-
-`make verify` (`unittest/test-list.x`).

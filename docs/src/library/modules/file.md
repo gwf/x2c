@@ -412,7 +412,7 @@ Source: `lib/file.x`
 <a id="File.write"></a>
 #### File.write
 
-`inline size_t File.write( File file, const void *ptr, size_t size, size_t nitems)`
+`inline size_t File.write(File file, const void *ptr, size_t size, size_t nitems)`
 
 Writes up to `nitems` elements and returns the number written.
 
@@ -530,7 +530,3 @@ The standard streams are borrowed from the process.
 `String` adapters canonicalize through the active pool chain. A returned
 identity may already belong to an ancestor and lives until its actual
 owning pool is released; NULL is the empty `String`.
-
-## Tests and examples
-
-`make verify` (`unittest/test-file.x`) and `make examples` (`docs-word-count`).

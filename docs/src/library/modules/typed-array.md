@@ -5,6 +5,8 @@
 
 Packed typed `Array`s generated from shared methods.
 
+Include it with `#include "typed-array.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -3650,7 +3652,3 @@ promotions and result conversions follow C, so a shift count is checked
 against the promoted width. Integer division by zero, invalid shifts, and
 unsupported operators still raise the causes `Var.update` raises, before
 changing the element; the boxed path's `<conv-range>` is absent.
-
-## Tests and examples
-
-`make verify` (`unittest/test-typed-array.x`).

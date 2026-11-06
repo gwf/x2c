@@ -36,7 +36,7 @@ Source: `src/deps.x`
 <a id="Compiler.write_depfile"></a>
 #### Compiler.write_depfile
 
-`int Compiler.write_depfile( Compiler compiler, CliRequest request, String input, String output_dir)`
+`int Compiler.write_depfile(Compiler compiler, CliRequest request, String input, String output_dir)`
 
 Publishes the Make depfile for one completed translation.
 `compiler.deps` must reflect the translated `input`, and the selected

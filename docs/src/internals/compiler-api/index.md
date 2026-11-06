@@ -10,67 +10,67 @@ Functions and types exposed by each compiler module.
 
 | Module | Description |
 | --- | --- |
-| [`src/adapter-memo.x`](adapter-memo.md) | memoized compiler adapter construction. |
-| [`src/ast-rewrite.x`](ast-rewrite.md) | rewrite immediate AST children through canonical Lists. |
-| [`src/ast.x`](ast.md) | shared helpers for x2c compiler AST nodes. |
-| [`src/builtins.x`](builtins.md) | the built-in macros' compile-time algorithms. |
-| [`src/cache.x`](cache.md) | cached literal slots and deferred file-static initializers. |
+| [`src/adapter-memo.x`](adapter-memo.md) | Memoized compiler adapter construction. |
+| [`src/ast-rewrite.x`](ast-rewrite.md) | Rewrite immediate AST children through canonical Lists. |
+| [`src/ast.x`](ast.md) | Shared helpers for x2c compiler AST nodes. |
+| [`src/builtins.x`](builtins.md) | The built-in macros' compile-time algorithms. |
+| [`src/cache.x`](cache.md) | Cached literal slots and deferred file-static initializers. |
 | [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
-| [`src/diagnostics.x`](diagnostics.md) | compiler diagnostic storage and rendering. |
-| [`src/expressions-reports.x`](expressions-reports.md) | expression typing diagnostics. |
-| [`src/fields.x`](fields.md) | statements that copy or set named fields. |
-| [`src/format.x`](format.md) | code formatting helpers for the x2c compiler. |
-| [`src/frontend.x`](frontend.md) | configured compiler sessions and source units. |
-| [`src/grammar.x`](grammar.md) | the source forms that lowering recognizes. |
-| [`src/lambdas.x`](lambdas.md) | lambda parsing and capture resolution. |
-| [`src/linked-meta.x`](linked-meta.md) | shipped `meta` code compiled into the compiler. |
+| [`src/diagnostics.x`](diagnostics.md) | Compiler diagnostic storage and rendering. |
+| [`src/expressions-reports.x`](expressions-reports.md) | Expression typing diagnostics. |
+| [`src/fields.x`](fields.md) | Statements that copy or set named fields. |
+| [`src/format.x`](format.md) | Code formatting helpers for the x2c compiler. |
+| [`src/frontend.x`](frontend.md) | Configured compiler sessions and source units. |
+| [`src/grammar.x`](grammar.md) | The source forms that lowering recognizes. |
+| [`src/lambdas.x`](lambdas.md) | Lambda parsing and capture resolution. |
+| [`src/linked-meta.x`](linked-meta.md) | Shipped `meta` code compiled into the compiler. |
 | [`src/main.x`](main.md) | x2c command dispatch. |
-| [`src/meta-helper-client.x`](meta-helper-client.md) | the compiler's side of the project meta helper. |
-| [`src/meta-project.x`](meta-project.md) | the project meta build. |
-| [`src/operator-ledger.x`](operator-ledger.md) | binary operator facts and case projections. |
-| [`src/parse-reports.x`](parse-reports.md) | package, binding, and alias diagnostics. |
+| [`src/meta-helper-client.x`](meta-helper-client.md) | The compiler's side of the project meta helper. |
+| [`src/meta-project.x`](meta-project.md) | The project meta build. |
+| [`src/operator-ledger.x`](operator-ledger.md) | Binary operator facts and case projections. |
+| [`src/parse-reports.x`](parse-reports.md) | Package, binding, and alias diagnostics. |
 | [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
 | [`src/report.x`](report.md) | Command progress and completion receipts. |
-| [`src/sourceview.x`](sourceview.md) | request-owned source overlays. |
-| [`src/stage.x`](stage.md) | the values crossing between meta code and the program. |
+| [`src/sourceview.x`](sourceview.md) | Request-owned source overlays. |
+| [`src/stage.x`](stage.md) | The values crossing between meta code and the program. |
 | [`src/statements.x`](statements.md) | x2c statement parsing. |
 | [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
-| [`src/translation.x`](translation.md) | synchronous compiler translation requests. |
-| [`src/type-ledger.x`](type-ledger.md) | the compiler's Var tag tables, projected from the ledger. |
+| [`src/translation.x`](translation.md) | Synchronous compiler translation requests. |
+| [`src/type-ledger.x`](type-ledger.md) | The compiler's Var tag tables, projected from the ledger. |
 | [`src/type.x`](type.md) | x2c semantic types. |
 | [`src/utils.x`](utils.md) | System utilities for environment discovery and workers. |
-| [`src/callables/callables.x`](callables.md) | callable values lowered to C helpers. |
-| [`src/cleanup/cleanup.x`](cleanup.md) | cleanup regions and the transfers that leave them. |
+| [`src/callables/callables.x`](callables.md) | Callable values lowered to C helpers. |
+| [`src/cleanup/cleanup.x`](cleanup.md) | Cleanup regions and the transfers that leave them. |
 | [`src/cli/cli.x`](cli.md) | x2c command-line parsing and presentation. |
-| [`src/collect/collect.x`](collect.md) | source-ordered shallow symbol collection and replay. |
-| [`src/compiler/compiler.x`](compiler.md) | one x2c unit's translation state and its two parses. |
-| [`src/components/bracket-access.x`](bracket-access.md) | bracket access policy. |
+| [`src/collect/collect.x`](collect.md) | Source-ordered shallow symbol collection and replay. |
+| [`src/compiler/compiler.x`](compiler.md) | One x2c unit's translation state and its two parses. |
+| [`src/components/bracket-access.x`](bracket-access.md) | Bracket access policy. |
 | [`src/components/collection-literals.x`](collection-literals.md) | Array and Map literals. |
-| [`src/components/delegate-members.x`](delegate-members.md) | delegate fields. |
-| [`src/components/destructuring.x`](destructuring.md) | flat List destructuring. |
-| [`src/components/dynamic-operators.x`](dynamic-operators.md) | dynamic operators. |
-| [`src/components/interpolation.x`](interpolation.md) | interpolated Strings. |
-| [`src/components/lambda-functions.x`](lambda-functions.md) | lambda lowering. |
-| [`src/components/macro-mapping.x`](macro-mapping.md) | maps a source macro over compile-time rows. |
-| [`src/components/pattern-match.x`](pattern-match.md) | match statements. |
+| [`src/components/delegate-members.x`](delegate-members.md) | Delegate fields. |
+| [`src/components/destructuring.x`](destructuring.md) | Flat List destructuring. |
+| [`src/components/dynamic-operators.x`](dynamic-operators.md) | Dynamic operators. |
+| [`src/components/interpolation.x`](interpolation.md) | Interpolated Strings. |
+| [`src/components/lambda-functions.x`](lambda-functions.md) | Lambda lowering. |
+| [`src/components/macro-mapping.x`](macro-mapping.md) | Maps a source macro over compile-time rows. |
+| [`src/components/pattern-match.x`](pattern-match.md) | Match statements. |
 | [`src/components/printf-format.x`](printf-format.md) | Var values in printf-family formats. |
-| [`src/components/protocol-adapters.x`](protocol-adapters.md) | protocol adapters and Var descriptors. |
-| [`src/components/raise.x`](raise.md) | raise. |
-| [`src/components/string-switch.x`](string-switch.md) | switches on a String. |
-| [`src/components/try-catch.x`](try-catch.md) | try, catch, and finally. |
-| [`src/cpp/cpp.x`](cpp.md) | optional preprocessing for existing C compatibility. |
+| [`src/components/protocol-adapters.x`](protocol-adapters.md) | Protocol adapters and Var descriptors. |
+| [`src/components/raise.x`](raise.md) | Raise. |
+| [`src/components/string-switch.x`](string-switch.md) | Switches on a String. |
+| [`src/components/try-catch.x`](try-catch.md) | Try, catch, and finally. |
+| [`src/cpp/cpp.x`](cpp.md) | Optional preprocessing for existing C compatibility. |
 | [`src/emit/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
-| [`src/expressions/expressions.x`](expressions.md) | expression syntax and its resolution. |
-| [`src/generate/generate.x`](generate.md) | the generated header and source of one unit. |
-| [`src/initializers/initializers.x`](initializers.md) | brace initializer conversion. |
+| [`src/expressions/expressions.x`](expressions.md) | Expression syntax and its resolution. |
+| [`src/generate/generate.x`](generate.md) | The generated header and source of one unit. |
+| [`src/initializers/initializers.x`](initializers.md) | Brace initializer conversion. |
 | [`src/literals/literals.x`](literals.md) | x2c literal parsing. |
-| [`src/macros/macros.x`](macros.md) | source macros and the compile-time calls they run. |
-| [`src/meta-group/meta-group.x`](meta-group.md) | a unit's meta group, emitted as C. |
-| [`src/meta-native/meta-native.x`](meta-native.md) | meta functions and the native code they call. |
-| [`src/meta-sdk/meta-sdk.x`](meta-sdk.md) | compiler implementations of `lib/meta.x` operations. |
+| [`src/macros/macros.x`](macros.md) | Source macros and the compile-time calls they run. |
+| [`src/meta-group/meta-group.x`](meta-group.md) | A unit's meta group, emitted as C. |
+| [`src/meta-native/meta-native.x`](meta-native.md) | Meta functions and the native code they call. |
+| [`src/meta-sdk/meta-sdk.x`](meta-sdk.md) | Compiler implementations of `lib/meta.x` operations. |
 | [`src/parse/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
 | [`src/project/project.x`](project.md) | x2c project manifests. |
-| [`src/protocol/protocol.x`](protocol.md) | protocols from declaration to conform forms. |
-| [`src/regions/regions.x`](regions.md) | values that can outlive the region that allocated them. |
-| [`src/symtab/symtab.x`](symtab.md) | the compiler's semantic symbol table. |
+| [`src/protocol/protocol.x`](protocol.md) | Protocols from declaration to conform forms. |
+| [`src/regions/regions.x`](regions.md) | Values that can outlive the region that allocated them. |
+| [`src/symtab/symtab.x`](symtab.md) | The compiler's semantic symbol table. |
 | [`src/transform/transform.x`](transform.md) | x2c AST transformation pipeline. |

@@ -5,6 +5,8 @@
 
 JSON text to and from ordinary x2c values.
 
+Include it with `#include "json.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -221,7 +223,3 @@ Var, and true or false a `JsonBool`. A Map keeps neither member order nor
 duplicate names, so a repeated name keeps its last value and output
 writes names in byte order; `packages/yyjson` serves a program that
 needs either.
-
-## Tests and examples
-
-`make verify` (`unittest/test-json.x`).

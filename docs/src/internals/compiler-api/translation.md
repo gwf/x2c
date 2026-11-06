@@ -15,9 +15,7 @@ Synchronous compiler translation requests.
 | [`translate_print_command`](#translate_print_command) | Prints the translate command that writes `inputs` to `out_dir`, as verbose and dry-run requests show it, quoted as a dry-run tool action prints its arguments. |
 | [`translate_request`](#translate_request) | Translates a request synchronously. |
 
-### Functions
-
-#### translate_print_command
+### translate_print_command
 
 `void translate_print_command(CliRequest request, String out_dir, List inputs)`
 
@@ -27,9 +25,9 @@ prints its arguments.
 
 Source: `src/translation.x`
 
-#### translate_request
+### translate_request
 
-`int translate_request( CliRequest request, Map unit_dirs, void *context, void (*progress)(void *context, String input, int completed))`
+`int translate_request(CliRequest request, Map unit_dirs, void *context, void (*progress)(void *context, String input, int completed))`
 
 Translates a request synchronously. Optional per-input directories and a
 parent-process progress callback let a caller own build state. Without a

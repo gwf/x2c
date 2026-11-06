@@ -143,9 +143,7 @@ for source readers but are not supported as user API.
 | [`x2c_exception_execution_swap`](#x2c_exception_execution_swap) | Exchanges heads whose frames remain live on their execution's stack. |
 | [`x2c_exception_unwinding`](#x2c_exception_unwinding) | Reports whether any active frame is carrying an `Error` transfer. |
 
-### Functions
-
-#### x2c_exception_execution_free
+### x2c_exception_execution_free
 
 `void x2c_exception_execution_free(void *backing)`
 
@@ -153,7 +151,7 @@ Releases backing after its execution has left all protected regions.
 
 Source: `lib/exception.x`
 
-#### x2c_exception_execution_new
+### x2c_exception_execution_new
 
 `void *x2c_exception_execution_new(void)`
 
@@ -161,7 +159,7 @@ Allocates empty backing for one execution's native exception heads.
 
 Source: `lib/exception.x`
 
-#### x2c_exception_execution_swap
+### x2c_exception_execution_swap
 
 `void x2c_exception_execution_swap(void *backing)`
 
@@ -169,7 +167,7 @@ Exchanges heads whose frames remain live on their execution's stack.
 
 Source: `lib/exception.x`
 
-#### x2c_exception_unwinding
+### x2c_exception_unwinding
 
 `int x2c_exception_unwinding(void)`
 

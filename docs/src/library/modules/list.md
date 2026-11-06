@@ -1027,7 +1027,3 @@ cell keeps its ancestor's lifetime, and a miss belongs to the requested
 pool. Releasing a nested pool invalidates its unpromoted cells, while
 promotion keeps whole canonical List, String, and long-Atom structure at
 the same addresses. `void` is a terminal sentinel and never List data.
-
-## Tests and examples
-
-`make verify` (`unittest/test-list.x`) and `make examples` (`docs-tour`).

@@ -555,7 +555,7 @@ Source: `lib/common.x`
 <a id="Var.is_row"></a>
 #### Var.is_row
 
-`inline int Var.is_row( Var value, unsigned top, unsigned long mask, unsigned long bottom)`
+`inline int Var.is_row(Var value, unsigned top, unsigned long mask, unsigned long bottom)`
 
 Reports whether `value` occupies the encoding row at `top`/`bottom`.
 `mask` selects the bits the decoder discriminates on within `top`'s
@@ -1066,9 +1066,7 @@ for source readers but are not supported as user API.
 | [`x2c_mix64`](#x2c_mix64) | Avalanches one 64-bit word. |
 | [`x2c_native_check`](#x2c_native_check) | Aborts with `failure` and the native error number when `error` is nonzero. |
 
-### Functions
-
-#### x2c_fatal
+### x2c_fatal
 
 `void x2c_fatal(const char *message)`
 
@@ -1076,9 +1074,9 @@ Prints `message` on native stderr and aborts.
 
 Source: `lib/common.x`
 
-#### x2c_hash_bytes
+### x2c_hash_bytes
 
-`inline unsigned x2c_hash_bytes( unsigned long seed, const void *data, size_t width)`
+`inline unsigned x2c_hash_bytes(unsigned long seed, const void *data, size_t width)`
 
 Hashes an arbitrary byte block through the shared 64-bit mixer.
 `seed` distinguishes callers that hash the same bytes under different
@@ -1087,7 +1085,7 @@ padding.
 
 Source: `lib/common.x`
 
-#### x2c_hash_word
+### x2c_hash_word
 
 `inline unsigned x2c_hash_word(unsigned long word)`
 
@@ -1097,7 +1095,7 @@ ones; grouped Map storage marks occupancy in control bytes instead.
 
 Source: `lib/common.x`
 
-#### x2c_io_fail
+### x2c_io_fail
 
 `void x2c_io_fail(Var operation, int error)`
 
@@ -1106,7 +1104,7 @@ naming the call as a String or Symbol and `errno` holding `error`.
 
 Source: `lib/common.x`
 
-#### x2c_mix64
+### x2c_mix64
 
 `inline unsigned long x2c_mix64(unsigned long word)`
 
@@ -1118,7 +1116,7 @@ are as well distributed as its high ones, which is what `Map` masks. Use
 
 Source: `lib/common.x`
 
-#### x2c_native_check
+### x2c_native_check
 
 `void x2c_native_check(int error, const char *failure)`
 

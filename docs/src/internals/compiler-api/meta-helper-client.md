@@ -34,7 +34,7 @@ Source: `src/meta-helper-client.x`
 <a id="Compiler.meta_helper_call"></a>
 #### Compiler.meta_helper_call
 
-`Var Compiler.meta_helper_call( Compiler c, String name, Token site, List arguments, String provider)`
+`Var Compiler.meta_helper_call(Compiler c, String name, Token site, List arguments, String provider)`
 
 Calls the project `meta` function `name` in the helper with the values
 `arguments`, for the call at `site`, and returns its result. A warning
@@ -50,7 +50,7 @@ Source: `src/meta-helper-client.x`
 <a id="Compiler.report_meta_error"></a>
 #### Compiler.report_meta_error
 
-`void Compiler.report_meta_error( Compiler c, Var node, Symbol category, String message, Token site, List notes, int fatal)`
+`void Compiler.report_meta_error(Compiler c, Var node, Symbol category, String message, Token site, List notes, int fatal)`
 
 Reports a meta function's error `message` with `notes` under
 `category` at the position recorded first in or around `node`, or at

@@ -5,6 +5,8 @@
 
 Regular expressions over the bytes of a String.
 
+Include it with `#include "regex.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -302,7 +304,3 @@ offsets stay valid after the next match. Matching backtracks over a
 small node tree; a repeated single byte class runs as a loop, so the
 common `.*` and `\w+` forms do not recurse per byte. The syntax is the
 byte-oriented subset in the book's "Patterns" section.
-
-## Tests and examples
-
-`make verify` (`unittest/test-regex.x`).

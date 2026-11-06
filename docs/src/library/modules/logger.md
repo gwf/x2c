@@ -203,7 +203,7 @@ Source: `lib/logger.x`
 <a id="Logger.add_sink"></a>
 #### Logger.add_sink
 
-`LogSink Logger.add_sink( Logger logger, LogEmitter emit, LogFlusher flush, Var data)`
+`LogSink Logger.add_sink(Logger logger, LogEmitter emit, LogFlusher flush, Var data)`
 
 Appends a callback sink and returns its `Logger`-owned handle.
 A quiescent `Logger` returns NULL for a NULL emitter. The `Logger` borrows
@@ -564,7 +564,3 @@ Events carry one wall-clock timestamp and one monotonic elapsed timestamp.
 Every sink for an event observes the same immutable LogEvent. Built-in text
 sinks render through `Buffer` and `Var.write_repr` without constructing
 canonical presentation `String`s.
-
-## Tests and examples
-
-`make verify` (`unittest/test-logger.x`).

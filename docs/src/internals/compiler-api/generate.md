@@ -109,7 +109,7 @@ Source: `src/generate/initialization.x`
 <a id="Compiler.initializer_function"></a>
 #### Compiler.initializer_function
 
-`List Compiler.initializer_function( Compiler c, Type type, List name, List body)`
+`List Compiler.initializer_function(Compiler c, Type type, List name, List body)`
 
 Returns the function `type name(void)` running `body`.
 
@@ -118,7 +118,7 @@ Source: `src/generate/initialization.x`
 <a id="Compiler.place_source_prelude"></a>
 #### Compiler.place_source_prelude
 
-`List Compiler.place_source_prelude( Compiler c, List source, List declarations)`
+`List Compiler.place_source_prelude(Compiler c, List source, List declarations)`
 
 Places generated `declarations` after source types and includes, before
 the first function or captured initializer that can use them. An outer

@@ -5,6 +5,8 @@
 
 Blocking HTTP/1.1 routing and worker-pool service.
 
+Include it with `#include "http.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -353,6 +355,6 @@ request without a matching HEAD route uses the first matching GET route.
 
 Source: `lib/http.x`
 
-## Tests and examples
+## Examples
 
-`make verify` (`unittest/test-http.x`) and `make examples` (`apps/notes/notes`).
+- [`apps/notes/notes`](https://github.com/gwf/x2c/blob/main/examples/apps/notes/notes.x)

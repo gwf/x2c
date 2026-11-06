@@ -9,15 +9,6 @@ Variant type for dynamic typing.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_var_custom_descriptor`](#x2c_var_custom_descriptor) | Returns a boxed custom object's descriptor, or NULL for another value. |
-| [`x2c_var_declare`](#x2c_var_declare) | Returns the process-lifetime descriptor declared for custom `tag`, declaring it on first use. |
-| [`x2c_var_descriptor_index`](#x2c_var_descriptor_index) | Returns `value`'s dense built-in descriptor row, or `-1` when it has none. |
-| [`x2c_var_equal`](#x2c_var_equal) | Evaluates `==` on two `Var` operands. |
-| [`x2c_var_identical`](#x2c_var_identical) | Evaluates `===` on two `Var` operands. |
-| [`x2c_var_order`](#x2c_var_order) | Orders two `Var` operands for `<`, `<=`, `>`, and `>=`. |
-| [`x2c_var_postfix_volatile`](#x2c_var_postfix_volatile) | Applies `Var.postfix` semantics to a volatile destination in generated code. |
-| [`x2c_var_tag_descriptor_index`](#x2c_var_tag_descriptor_index) | Returns a built-in object or `Symbol` tag's descriptor row, or `-1`. |
-| [`x2c_var_update_volatile`](#x2c_var_update_volatile) | Applies `Var.update` semantics to a volatile destination in generated code. |
 | [`Var.add`](#Var.add) | Adds dynamic values through numeric, `String`, or registered `add` behavior. |
 | [`Var.binary`](#Var.binary) | Applies a dynamic arithmetic, bitwise, comparison, or logical operator. |
 | [`Var.box_record`](#Var.box_record) | Boxes a copy of the `size`-byte record at `record` as custom `tag`. |
@@ -49,105 +40,6 @@ Variant type for dynamic typing.
 | [`X2CVarNumeric.f32`](#X2CVarNumeric.f32) | Converts a decoded numeric value to native `float` without boxing. |
 | [`X2CVarNumeric.f64`](#X2CVarNumeric.f64) | Converts a decoded numeric value to native `double` without boxing. |
 | [`X2CVarNumeric.ldouble`](#X2CVarNumeric.ldouble) | Converts a decoded numeric value to native `long double` without boxing. |
-
-### Functions
-
-#### x2c_var_custom_descriptor
-
-`VarDescriptor *x2c_var_custom_descriptor(Var value)`
-
-Returns a boxed custom object's descriptor, or NULL for another value.
-
-Source: `lib/var/classes.x`
-
-#### x2c_var_declare
-
-`VarDescriptor *x2c_var_declare(Symbol tag)`
-
-Returns the process-lifetime descriptor declared for custom `tag`,
-declaring it on first use. The caller holds the descriptor lock and has
-checked that registration is open and `tag` is not built in.
-
-Source: `lib/var/classes.x`
-
-#### x2c_var_descriptor_index
-
-`int x2c_var_descriptor_index(Var value)`
-
-Returns `value`'s dense built-in descriptor row, or `-1` when it has none.
-The row is the tag's offset from `<array>` and includes the `Symbol` row.
-Numbers, pointers, references, custom tags, and invalid encodings have no
-built-in row.
-
-Source: `lib/var/encoding.x`
-
-#### x2c_var_equal
-
-`int x2c_var_equal(Var a, Var b)`
-
-Evaluates `==` on two `Var` operands.
-Two numbers compare as their native values do in C after the usual
-arithmetic conversions, so `3 == 3L` and `-1 == 4294967295u` hold and a
-NaN equals nothing. Other values compare through `Var.equal`.
-
-**Raises:** `<bad-enc>` when a numeric comparison meets invalid `Var` bits.
-
-Source: `lib/var/operators.x`
-
-#### x2c_var_identical
-
-`int x2c_var_identical(Var a, Var b)`
-
-Evaluates `===` on two `Var` operands.
-Two numbers are identical when they have the same tag and the same bits,
-so two boxes of one `long` are identical, `NaN === NaN` holds, and
-`+0.0 === -0.0` does not. Other values are identical when their `Var`
-bits are, as `Var.same` reports.
-
-Source: `lib/var/operators.x`
-
-#### x2c_var_order
-
-`double x2c_var_order(Var a, Var b)`
-
-Orders two `Var` operands for `<`, `<=`, `>`, and `>=`.
-Two numbers order as their native values do in C after the usual
-arithmetic conversions. The result is -1, 0, or 1, or NaN when a NaN
-leaves the pair unordered, so each relation to zero is false. Other
-values return the order `Var.compare` gives.
-
-**Raises:** `<void-op>` when either operand is `void`, and `<bad-enc>` when
-a numeric comparison meets invalid `Var` bits.
-
-Source: `lib/var/operators.x`
-
-#### x2c_var_postfix_volatile
-
-`Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)`
-
-Applies `Var.postfix` semantics to a volatile destination in generated
-code. Volatile preserves accesses across exception transfer, without
-providing thread synchronization.
-
-Source: `lib/var/operators.x`
-
-#### x2c_var_tag_descriptor_index
-
-`int x2c_var_tag_descriptor_index(Symbol tag)`
-
-Returns a built-in object or `Symbol` tag's descriptor row, or `-1`.
-
-Source: `lib/var/encoding.x`
-
-#### x2c_var_update_volatile
-
-`Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)`
-
-Applies `Var.update` semantics to a volatile destination in generated code.
-Volatile preserves accesses across exception transfer, without providing
-thread synchronization.
-
-Source: `lib/var/operators.x`
 
 ### `Var`
 
@@ -598,6 +490,14 @@ Source: `lib/var/conversion.x`
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_var_custom_descriptor`](#x2c_var_custom_descriptor) | Returns a boxed custom object's descriptor, or NULL for another value. |
+| [`x2c_var_declare`](#x2c_var_declare) | Returns the process-lifetime descriptor declared for custom `tag`, declaring it on first use. |
+| [`x2c_var_descriptor_index`](#x2c_var_descriptor_index) | Returns `value`'s dense built-in descriptor row, or `-1` when it has none. |
+| [`x2c_var_equal`](#x2c_var_equal) | Evaluates `==` on two `Var` operands. |
+| [`x2c_var_identical`](#x2c_var_identical) | Evaluates `===` on two `Var` operands. |
+| [`x2c_var_order`](#x2c_var_order) | Orders two `Var` operands for `<`, `<=`, `>`, and `>=`. |
+| [`x2c_var_postfix_volatile`](#x2c_var_postfix_volatile) | Applies `Var.postfix` semantics to a volatile destination in generated code. |
+| [`x2c_var_tag_descriptor_index`](#x2c_var_tag_descriptor_index) | Returns a built-in object or `Symbol` tag's descriptor row, or `-1`. |
 | [`x2c_var_update_f32`](#x2c_var_update_f32) | Applies a dynamic compound `op` to a native `float` lvalue. |
 | [`x2c_var_update_f64`](#x2c_var_update_f64) | Applies a dynamic compound `op` to a native `double` lvalue. |
 | [`x2c_var_update_i16`](#x2c_var_update_i16) | Applies a dynamic compound `op` to a native `short` lvalue. |
@@ -612,6 +512,7 @@ Source: `lib/var/conversion.x`
 | [`x2c_var_update_u8`](#x2c_var_update_u8) | Applies a dynamic compound `op` to a native `uchar` lvalue. |
 | [`x2c_var_update_ulong`](#x2c_var_update_ulong) | Applies a dynamic compound `op` to a native `ulong` lvalue. |
 | [`x2c_var_update_ulong_long`](#x2c_var_update_ulong_long) | Applies a dynamic compound `op` to a native `unsigned long long` lvalue. |
+| [`x2c_var_update_volatile`](#x2c_var_update_volatile) | Applies `Var.update` semantics to a volatile destination in generated code. |
 | [`Var.array`](#Var.array) | Extracts the `Array` payload of `value`. |
 | [`Var.as_iter`](#Var.as_iter) | Extracts the `Iter` payload of `value`. |
 | [`Var.block`](#Var.block) | Extracts the `Block` payload of `value`. |
@@ -658,6 +559,93 @@ Source: `lib/var/conversion.x`
 | [`Var.width_mask`](#Var.width_mask) | Returns a mask containing the low `bits` bits. |
 
 ### Functions
+
+#### x2c_var_custom_descriptor
+
+`VarDescriptor *x2c_var_custom_descriptor(Var value)`
+
+Returns a boxed custom object's descriptor, or NULL for another value.
+
+Source: `lib/var/classes.x`
+
+#### x2c_var_declare
+
+`VarDescriptor *x2c_var_declare(Symbol tag)`
+
+Returns the process-lifetime descriptor declared for custom `tag`,
+declaring it on first use. The caller holds the descriptor lock and has
+checked that registration is open and `tag` is not built in.
+
+Source: `lib/var/classes.x`
+
+#### x2c_var_descriptor_index
+
+`int x2c_var_descriptor_index(Var value)`
+
+Returns `value`'s dense built-in descriptor row, or `-1` when it has none.
+The row is the tag's offset from `<array>` and includes the `Symbol` row.
+Numbers, pointers, references, custom tags, and invalid encodings have no
+built-in row.
+
+Source: `lib/var/encoding.x`
+
+#### x2c_var_equal
+
+`int x2c_var_equal(Var a, Var b)`
+
+Evaluates `==` on two `Var` operands.
+Two numbers compare as their native values do in C after the usual
+arithmetic conversions, so `3 == 3L` and `-1 == 4294967295u` hold and a
+NaN equals nothing. Other values compare through `Var.equal`.
+
+**Raises:** `<bad-enc>` when a numeric comparison meets invalid `Var` bits.
+
+Source: `lib/var/operators.x`
+
+#### x2c_var_identical
+
+`int x2c_var_identical(Var a, Var b)`
+
+Evaluates `===` on two `Var` operands.
+Two numbers are identical when they have the same tag and the same bits,
+so two boxes of one `long` are identical, `NaN === NaN` holds, and
+`+0.0 === -0.0` does not. Other values are identical when their `Var`
+bits are, as `Var.same` reports.
+
+Source: `lib/var/operators.x`
+
+#### x2c_var_order
+
+`double x2c_var_order(Var a, Var b)`
+
+Orders two `Var` operands for `<`, `<=`, `>`, and `>=`.
+Two numbers order as their native values do in C after the usual
+arithmetic conversions. The result is -1, 0, or 1, or NaN when a NaN
+leaves the pair unordered, so each relation to zero is false. Other
+values return the order `Var.compare` gives.
+
+**Raises:** `<void-op>` when either operand is `void`, and `<bad-enc>` when
+a numeric comparison meets invalid `Var` bits.
+
+Source: `lib/var/operators.x`
+
+#### x2c_var_postfix_volatile
+
+`Var x2c_var_postfix_volatile(volatile Var &?lhs, Symbol op)`
+
+Applies `Var.postfix` semantics to a volatile destination in generated
+code. Volatile preserves accesses across exception transfer, without
+providing thread synchronization.
+
+Source: `lib/var/operators.x`
+
+#### x2c_var_tag_descriptor_index
+
+`int x2c_var_tag_descriptor_index(Symbol tag)`
+
+Returns a built-in object or `Symbol` tag's descriptor row, or `-1`.
+
+Source: `lib/var/encoding.x`
 
 #### x2c_var_update_f32
 
@@ -894,6 +882,16 @@ thread synchronization despite accepting a volatile pointer.
 `Var.convert`, or wide boxing. A transferring failure leaves the lvalue
 unchanged. If a delegated protocol operation returns `void`, the helper
 also leaves it unchanged and returns the native zero for `unsigned long long`.
+
+Source: `lib/var/operators.x`
+
+#### x2c_var_update_volatile
+
+`Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)`
+
+Applies `Var.update` semantics to a volatile destination in generated code.
+Volatile preserves accesses across exception transfer, without providing
+thread synchronization.
 
 Source: `lib/var/operators.x`
 
@@ -1717,7 +1715,3 @@ Var owns the one-word encoding of dynamic values. Doubles keep their IEEE
 pointers, `Symbol`s, and boxes for wide scalars and custom classes. A
 `Var` preserves its runtime kind, and `void` is excluded from
 value-bearing protocols.
-
-## Tests and examples
-
-`make verify` (`unittest/test-var.x` and `unittest/test-varops.x`) and `make examples` (`type-conversion-matrix`).

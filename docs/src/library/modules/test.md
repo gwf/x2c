@@ -5,6 +5,12 @@
 
 Registered tests and assertions for user programs.
 
+Include it with `#include "test.x"`.
+
+It defines the `$test`, `$test.main`, `$expect`, `$expect_eq`, and
+`$expect_raises` macros; [Testing your project](../../guide/testing.md)
+describes them.
+
 ## Primary API
 
 | Function | Summary |
@@ -51,7 +57,7 @@ Source: `lib/test.x`
 <a id="Test.register"></a>
 #### Test.register
 
-`void Test.register( const char *name, TestFunction function, const char *file, int line)`
+`void Test.register(const char *name, TestFunction function, const char *file, int line)`
 
 Registers a function, its name, and the location of its decoration.
 `$test` calls this before main, preserving declaration order.
@@ -91,7 +97,3 @@ Source: `lib/test.x`
 A registered test has no arguments and returns no value.
 
 Source: `lib/test.x`
-
-## Tests and examples
-
-`make verify` (`unittest/test-test.x`) and `make commands-check` (`commands/test/tests/run.sh`).

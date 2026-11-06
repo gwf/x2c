@@ -6,7 +6,7 @@
 
 # `src/main.x`
 
-X2c command dispatch.
+x2c command dispatch.
 
 ## Functions
 
@@ -14,9 +14,7 @@ X2c command dispatch.
 | --- | --- |
 | [`main`](#main) | Initializes x2c and dispatches one command from `argv`. |
 
-### Functions
-
-#### main
+### main
 
 `int main(int argc, char **argv)`
 

@@ -28,7 +28,7 @@ Command progress and completion receipts.
 
 #### report_configure
 
-`void report_configure( int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting)`
+`void report_configure(int quiet, int plain, Symbol color_mode, int verbose, int dry_run, int inspecting)`
 
 Resets process reporting for one command.
 Quiet, verbose, dry-run, and inspection modes disable receipts. Transient
@@ -77,7 +77,7 @@ Source: `src/report.x`
 
 #### report_phase
 
-`void report_phase( Symbol phase, int count, String noun, int cached, unsigned long microseconds)`
+`void report_phase(Symbol phase, int count, String noun, int cached, unsigned long microseconds)`
 
 Writes a muted phase receipt when receipts are enabled.
 A fully cached nonempty phase is marked up to date; a partial cache reports

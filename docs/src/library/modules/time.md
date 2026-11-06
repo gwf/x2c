@@ -5,6 +5,8 @@
 
 Clocks, durations, and calendar time.
 
+Include it with `#include "time.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -408,7 +410,3 @@ count, so each spans about 292 years either side of zero. Calendar
 fields come from `gmtime_r` for UTC and `localtime_r` for the C
 library's local zone; there is no time zone database. Formatting
 defaults to UTC, and `strftime` names follow the `C` locale.
-
-## Tests and examples
-
-`make verify` (`unittest/test-time.x`).

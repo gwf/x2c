@@ -493,7 +493,7 @@ for source readers but are not supported as user API.
 <a id="Map.export_to"></a>
 #### Map.export_to
 
-`void Map.export_to( Map map, Context source, VarExportContextFn export_value, Scope *scope)`
+`void Map.export_to(Map map, Context source, VarExportContextFn export_value, Scope *scope)`
 
 Exports every key and value and rebuilds the table under its record owner.
 The borrowed `export_value` callback runs synchronously for each stored
@@ -558,7 +558,3 @@ insertion cleans tombstones during rebuilding.
 Structural mutation invalidates traversal state. Keys and values are
 stored as `Var` bits; the `Map` does not free pointer-bearing payloads or
 canonical values reachable through them.
-
-## Tests and examples
-
-`make verify` (`unittest/test-map.x`) and `make examples` (`docs-word-count`).

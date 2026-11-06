@@ -50,7 +50,7 @@ Source: `src/protocol/resolution.x`
 <a id="Compiler.discard_helper"></a>
 #### Compiler.discard_helper
 
-`List Compiler.discard_helper( Compiler c, List binding, Type signature, String stem, int which)`
+`List Compiler.discard_helper(Compiler c, List binding, Type signature, String stem, int which)`
 
 Returns `(binding signature)` for a generated helper that calls the
 function `binding` of type `signature` and then discards the unnamed
@@ -141,7 +141,7 @@ Source: `src/protocol/declarations.x`
 <a id="Compiler.protocol_discard_helper"></a>
 #### Compiler.protocol_discard_helper
 
-`List Compiler.protocol_discard_helper( Compiler c, Type participant, String member, int which)`
+`List Compiler.protocol_discard_helper(Compiler c, Type participant, String member, int which)`
 
 The `discard_helper` for `participant`'s protocol `member`.
 
@@ -184,7 +184,7 @@ Source: `src/protocol/lookup.x`
 <a id="Compiler.protocol_rejects_direct_member"></a>
 #### Compiler.protocol_rejects_direct_member
 
-`int Compiler.protocol_rejects_direct_member( Compiler c, Type participant, String member)`
+`int Compiler.protocol_rejects_direct_member(Compiler c, Type participant, String member)`
 
 Reports whether conformance supersedes an ambient direct member: 0 when
 it does not, 1 when the participant's own adoption does, and 2 when an
@@ -197,7 +197,7 @@ Source: `src/protocol/lookup.x`
 <a id="Compiler.protocol_update_helper"></a>
 #### Compiler.protocol_update_helper
 
-`String Compiler.protocol_update_helper( Compiler c, Type participant, String member, int postfix, int discard_rhs)`
+`String Compiler.protocol_update_helper(Compiler c, Type participant, String member, int postfix, int discard_rhs)`
 
 Returns a generated helper for a direct protocol-backed update.
 The resolved member must have exactly `(Participant, RHS) -> Participant`,
@@ -212,7 +212,7 @@ Source: `src/protocol/call-helpers.x`
 <a id="Compiler.publish_protocol_node"></a>
 #### Compiler.publish_protocol_node
 
-`List Compiler.publish_protocol_node( Compiler c, List node, Token participant_token, Token representation_token)`
+`List Compiler.publish_protocol_node(Compiler c, List node, Token participant_token, Token representation_token)`
 
 Validates and installs one normalized protocol or adoption node.
 The node must carry a protocol record or supported adoption shape with its
@@ -239,7 +239,7 @@ Source: `src/protocol/registry.x`
 <a id="Compiler.record_source_typedef"></a>
 #### Compiler.record_source_typedef
 
-`void Compiler.record_source_typedef( Compiler c, String name, List declaration, int private)`
+`void Compiler.record_source_typedef(Compiler c, String name, List declaration, int private)`
 
 Records a source typedef's declaration and visibility, which native
 alias insertion reads for its participant.
@@ -261,7 +261,7 @@ Source: `src/protocol/resolution.x`
 <a id="Compiler.resolve_protocol_member"></a>
 #### Compiler.resolve_protocol_member
 
-`List Compiler.resolve_protocol_member( Compiler c, Type participant, String member_name)`
+`List Compiler.resolve_protocol_member(Compiler c, Type participant, String member_name)`
 
 Resolves a protocol member for `participant`.
 Returns a `(binding signature)` pair for the selected implementation or
@@ -287,7 +287,7 @@ Source: `src/protocol/resolution.x`
 <a id="Compiler.reverse_converter_spelling"></a>
 #### Compiler.reverse_converter_spelling
 
-`String Compiler.reverse_converter_spelling( Compiler c, String base_name, String infix, String participant)`
+`String Compiler.reverse_converter_spelling(Compiler c, String base_name, String infix, String participant)`
 
 Returns the conventional reverse converter spelling.
 A `Base.participant` reverse converter is declared under the participant's
@@ -301,7 +301,7 @@ Source: `src/protocol/registry.x`
 <a id="Compiler.wrapper_function"></a>
 #### Compiler.wrapper_function
 
-`List Compiler.wrapper_function( Compiler c, Type result, List binding, List params, List body)`
+`List Compiler.wrapper_function(Compiler c, Type result, List binding, List params, List body)`
 
 Returns the function `result name(params) { body }` bound in this
 unit. `result` is the storage class and result type, so static, inline

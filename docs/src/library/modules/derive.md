@@ -4,3 +4,8 @@
 # `lib/derive.x`
 
 Generate record mappings from declared fields.
+
+Include it with `#include "derive.x"`.
+
+It defines the `$derive` macro; [Deriving record
+mappings](../../guide/deriving-records.md) describes it.

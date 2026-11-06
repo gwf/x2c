@@ -200,7 +200,3 @@ bytes. The restricted form folds ASCII case and aliases underscore with
 hyphen; the general form retains only the low seven bits. Construction
 truncates beyond the selected capacity. Use `Atom` when every input byte
 must round-trip.
-
-## Tests and examples
-
-`make verify` (`unittest/test-symbol.x`) and `make examples` (`symbol-literal-demo`).

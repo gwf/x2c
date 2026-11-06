@@ -857,7 +857,3 @@ before the runtime calls `Scope.initialize`. Shutdown runs its hooks
 newest first and leaves the module terminal. Allocation accounting is
 enabled at initialization by `X2C_SCOPE_ACCOUNTING=1`; otherwise counters
 and automatic leak reporting are disabled.
-
-## Tests and examples
-
-`make verify` (`unittest/test-scope.x`) and `make examples` (`docs-tour`).

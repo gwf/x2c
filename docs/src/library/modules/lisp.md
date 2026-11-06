@@ -749,7 +749,3 @@ referents keep their own pool or caller owners and must outlive every
 session entry that refers to them. A session is not synchronized: its
 caller serializes evaluation and destroys it only after every call has
 returned.
-
-## Tests and examples
-
-`make verify` (`unittest/test-lisp.x`) and `make examples`.

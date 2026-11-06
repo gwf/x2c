@@ -45,7 +45,7 @@ Source: `lib/thread.x`
 <a id="Iter.parallel_map_in"></a>
 #### Iter.parallel_map_in
 
-`ParallelMap Iter.parallel_map_in( Iter i, Pool pool, ThreadValueFn function, int workers)`
+`ParallelMap Iter.parallel_map_in(Iter i, Pool pool, ThreadValueFn function, int workers)`
 
 Maps with a borrowed canonical-value pool active inside each callback.
 The pool and its ancestors must stay live until foldl finishes. The caller
@@ -85,7 +85,7 @@ with stop; arbitrary computation and native I/O need not. Cleanup keeps
 the primary Error. Native join failure leaving a worker live aborts.
 
 **Raises:** source, start, worker, allocation, accumulator, or stop causes,
-including <void-op> for a void worker result.
+including `<void-op>` for a void worker result.
 
 Source: `lib/thread.x`
 
@@ -209,7 +209,7 @@ Source: `lib/thread.x`
 <a id="Thread.start_raw"></a>
 #### Thread.start_raw
 
-`Thread Thread.start_raw( ThreadFn function, const void *input, size_t input_size)`
+`Thread Thread.start_raw(ThreadFn function, const void *input, size_t input_size)`
 
 Starts one worker and returns its heap-owned handle.
 `input_size` bytes are copied before native start and passed once to the
@@ -242,7 +242,7 @@ persists and wakes a registered Channel or completion wait. Computation
 and arbitrary native I/O are not interrupted. Repeated requests are safe
 while the handle remains live; stop does not join or free it.
 
-**Raises:** <bad-arg> for a null handle.
+**Raises:** `<bad-arg>` for a null handle.
 
 Source: `lib/thread.x`
 
@@ -285,9 +285,7 @@ for source readers but are not supported as user API.
 | [`x2c_thread_wait_stopped`](#x2c_thread_wait_stopped) | Tests a live borrowed wait token atomically. |
 | [`x2c_thread_wait_unlock`](#x2c_thread_wait_unlock) | Unlocks the internal completion monitor. |
 
-### Functions
-
-#### x2c_thread_cancel
+### x2c_thread_cancel
 
 `void x2c_thread_cancel(void)`
 
@@ -296,7 +294,7 @@ have been released. Explicit catches may handle this shared cause.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_channel_enter
+### x2c_thread_channel_enter
 
 `int x2c_thread_channel_enter(X2CChannelMonitor *monitor, Thread &owner)`
 
@@ -307,7 +305,7 @@ unregister or completion acknowledgement after releasing that mutex.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_channel_leave
+### x2c_thread_channel_leave
 
 `int x2c_thread_channel_leave(Thread owner, X2CChannelMonitor *monitor)`
 
@@ -317,7 +315,7 @@ mutex and acknowledge completion before allowing the monitor to expire.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_stopping
+### x2c_thread_stopping
 
 `int x2c_thread_stopping(void)`
 
@@ -325,7 +323,7 @@ Tests the current caller's pending stop atomically.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_wait
+### x2c_thread_wait
 
 `void x2c_thread_wait(pthread_cond_t *condition)`
 
@@ -336,7 +334,7 @@ Queue callers recheck predicates and stop before committing an operation.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_wait_lock
+### x2c_thread_wait_lock
 
 `void x2c_thread_wait_lock(void)`
 
@@ -345,7 +343,7 @@ Native synchronization failure aborts without entering Error dispatch.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_wait_owner
+### x2c_thread_wait_owner
 
 `Thread x2c_thread_wait_owner(void)`
 
@@ -354,7 +352,7 @@ unmanaged or cleanup-masked caller. Lookup reads only caller-local state.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_wait_stopped
+### x2c_thread_wait_stopped
 
 `int x2c_thread_wait_stopped(Thread owner)`
 
@@ -363,7 +361,7 @@ request. Stop publication and commitment hold the registered queue mutex.
 
 Source: `lib/thread.x`
 
-#### x2c_thread_wait_unlock
+### x2c_thread_wait_unlock
 
 `void x2c_thread_wait_unlock(void)`
 
@@ -465,7 +463,3 @@ Source: `lib/thread.x`
 Thread copies input and result bits. Callbacks explicitly preserve any
 output that must outlive their private work storage. Errors are captured
 separately for join; parallel reducers borrow from parked workers.
-
-## Tests and examples
-
-`make verify` (`unittest/test-thread.x` and `unittest/test-thread-batch.x`).

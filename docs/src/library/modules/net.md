@@ -5,6 +5,8 @@
 
 Blocking TCP sockets backed by File streams.
 
+Include it with `#include "net.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -229,7 +231,3 @@ Each socket owns separate input and output streams because stdio update
 streams require positioning between reading and writing. Listener.stop
 and Thread.stop are observed within one 50 ms poll interval. Close the
 listener only after its accepting thread has finished.
-
-## Tests and examples
-
-`make verify` (`unittest/test-net.x`).

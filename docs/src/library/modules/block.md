@@ -319,9 +319,7 @@ for source readers but are not supported as user API.
 | --- | --- |
 | [`x2c_block_bad_arg`](#x2c_block_bad_arg) | Raises `<bad-arg>` for a null handle in an inline Block removal. |
 
-### Functions
-
-#### x2c_block_bad_arg
+### x2c_block_bad_arg
 
 `void x2c_block_bad_arg(Symbol action)`
 

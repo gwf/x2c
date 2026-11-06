@@ -5,6 +5,11 @@
 
 The modules every script unit includes.
 
+Include it with `#include "scripting.x"`.
+
+Every script unit includes it. It includes `args.x`, `diff.x`, `digest.x`,
+`path.x`, `process.x`, and `regex.x`.
+
 ## Design notes
 
 A source file whose first line is a `#!` line is a script unit, and the

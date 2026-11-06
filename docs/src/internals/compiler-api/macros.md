@@ -144,7 +144,7 @@ Source: `src/macros/rewrites.x`
 <a id="Compiler.bind_code_value"></a>
 #### Compiler.bind_code_value
 
-`List Compiler.bind_code_value( Compiler c, List carrier, Symbol position, Type return_type)`
+`List Compiler.bind_code_value(Compiler c, List carrier, Symbol position, Type return_type)`
 
 Binds a code-value carrier that a meta call returned outside a macro
 value application as an application binds it, under a transaction that
@@ -155,7 +155,7 @@ Source: `src/macros/values.x`
 <a id="Compiler.bind_meta_statement"></a>
 #### Compiler.bind_meta_statement
 
-`List Compiler.bind_meta_statement( Compiler c, List value, Symbol context)`
+`List Compiler.bind_meta_statement(Compiler c, List value, Symbol context)`
 
 Binds a compile-time code `value` returned to a statement at
 `context`.
@@ -176,7 +176,7 @@ Source: `src/macros/values.x`
 <a id="Compiler.check_included_names"></a>
 #### Compiler.check_included_names
 
-`void Compiler.check_included_names( Compiler c, List names, Map globs, Token site)`
+`void Compiler.check_included_names(Compiler c, List names, Map globs, Token site)`
 
 Reports the first of `names`, aliases that `globs` did not bind before
 the include at `site`, that the include declared. That declaration
@@ -197,7 +197,7 @@ Source: `src/macros/aliases.x`
 <a id="Compiler.evaluate_declaration_recipe"></a>
 #### Compiler.evaluate_declaration_recipe
 
-`Var Compiler.evaluate_declaration_recipe( Compiler c, Atom callback, List arguments)`
+`Var Compiler.evaluate_declaration_recipe(Compiler c, Atom callback, List arguments)`
 
 Evaluates a declaration recipe after its owning source is collected.
 The callback is a built-in target name and arguments are retained
@@ -231,7 +231,7 @@ Source: `src/macros/templates.x`
 <a id="Compiler.evaluate_meta_value"></a>
 #### Compiler.evaluate_meta_value
 
-`Var Compiler.evaluate_meta_value( Compiler c, List expression, Token site, int slot)`
+`Var Compiler.evaluate_meta_value(Compiler c, List expression, Token site, int slot)`
 
 Evaluates the explicit meta call `expression` at `site` with the active
 expansion's captures visible to the SDK. A nonzero `slot` marks a
@@ -242,7 +242,7 @@ Source: `src/macros/templates.x`
 <a id="Compiler.expand_macro_invocation_node"></a>
 #### Compiler.expand_macro_invocation_node
 
-`List Compiler.expand_macro_invocation_node( Compiler c, Var stored, List arguments, Token invocation, Symbol position)`
+`List Compiler.expand_macro_invocation_node(Compiler c, Var stored, List arguments, Token invocation, Symbol position)`
 
 Expands canonical macro capture rows and binds the result at `position`.
 `stored` is a `macrodef` or visible macro name. The active expansion stack
@@ -285,7 +285,7 @@ Source: `src/macros/invocations/recognition.x`
 <a id="Compiler.land_quotation"></a>
 #### Compiler.land_quotation
 
-`List Compiler.land_quotation( Compiler c, List fresh, Var syntax, Symbol position, Type return_type)`
+`List Compiler.land_quotation(Compiler c, List fresh, Var syntax, Symbol position, Type return_type)`
 
 Binds quoted `syntax` with its `fresh` rows at `position`, as the
 expansion of its quotation would.
@@ -304,7 +304,7 @@ Source: `src/macros/aliases.x`
 <a id="Compiler.lift_meta_expression"></a>
 #### Compiler.lift_meta_expression
 
-`List Compiler.lift_meta_expression( Compiler c, Var value, Token invocation)`
+`List Compiler.lift_meta_expression(Compiler c, Var value, Token invocation)`
 
 Converts a compile-time value into a bound expression AST.
 Scalars, immutable values, representable Array/Map roots, compiler-issued
@@ -337,7 +337,7 @@ Source: `src/macros/rewrites.x`
 <a id="Compiler.lower_rewrite"></a>
 #### Compiler.lower_rewrite
 
-`List Compiler.lower_rewrite( Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site)`
+`List Compiler.lower_rewrite(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site)`
 
 Binds and lowers a replacement while its rule remains active. The
 source expressions the replacement holds lower outside the rule, so a
@@ -400,7 +400,7 @@ Source: `src/macros/expansion.x`
 <a id="Compiler.macro_pattern_at"></a>
 #### Compiler.macro_pattern_at
 
-`Token Compiler.macro_pattern_at( Compiler c, Token at, String &spelling, Var &stored)`
+`Token Compiler.macro_pattern_at(Compiler c, Token at, String &spelling, Var &stored)`
 
 Returns the `(` after a visible macro's `$NAME` at `at`, storing its
 spelling and definition, or NULL. The cursor does not move.
@@ -432,7 +432,7 @@ Source: `src/macros/invocations/recognition.x`
 <a id="Compiler.macro_tag_name"></a>
 #### Compiler.macro_tag_name
 
-`List Compiler.macro_tag_name( Compiler c, Symbol kind, String name, int definition)`
+`List Compiler.macro_tag_name(Compiler c, Symbol kind, String name, int definition)`
 
 Returns a template's local binding for tag `name` of `kind`, or NULL
 when it names a visible public tag. A tag the template defines or
@@ -466,7 +466,7 @@ Source: `src/macros/values.x`
 <a id="Compiler.marked_rewrite"></a>
 #### Compiler.marked_rewrite
 
-`List Compiler.marked_rewrite( Compiler c, Type aggregate, List source, Token site)`
+`List Compiler.marked_rewrite(Compiler c, Type aggregate, List source, Token site)`
 
 Matches the member rules registered for each field keyword that
 `aggregate` declares a field with, as `Compiler.rewrite` matches those
@@ -513,7 +513,7 @@ Source: `src/macros/aliases.x`
 <a id="Compiler.parse_alias_member"></a>
 #### Compiler.parse_alias_member
 
-`List Compiler.parse_alias_member( Compiler c, Symbol position, List context)`
+`List Compiler.parse_alias_member(Compiler c, Symbol position, List context)`
 
 Parses an alias among the members of an aggregate or enum body, where
 `position` is `<field>` or `<enumerator>` and `context` is the
@@ -675,7 +675,7 @@ Source: `src/macros/templates.x`
 <a id="Compiler.report_meta_failure"></a>
 #### Compiler.report_meta_failure
 
-`void Compiler.report_meta_failure( Compiler c, Token invocation, List error, String source)`
+`void Compiler.report_meta_failure(Compiler c, Token invocation, List error, String source)`
 
 Reports that the meta call `source` failed with `error` at
 `invocation`.
@@ -685,7 +685,7 @@ Source: `src/macros/diagnostics.x`
 <a id="Compiler.rewrite"></a>
 #### Compiler.rewrite
 
-`List Compiler.rewrite( Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site)`
+`List Compiler.rewrite(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site)`
 
 Matches registered patterns for one operation, then binds the first
 replacement. A translator declines with void, null, or its input itself.
@@ -698,7 +698,7 @@ Source: `src/macros/rewrites.x`
 <a id="Compiler.rewrite_lowered"></a>
 #### Compiler.rewrite_lowered
 
-`List Compiler.rewrite_lowered( Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site)`
+`List Compiler.rewrite_lowered(Compiler c, Symbol point, Var kind, List source, Symbol position, Type expected, Token site)`
 
 Matches registered patterns for the statement `source`, which the
 transform has lowered, then binds the first replacement as
@@ -710,7 +710,7 @@ Source: `src/macros/rewrites.x`
 <a id="Compiler.rewrite_written"></a>
 #### Compiler.rewrite_written
 
-`List Compiler.rewrite_written( Compiler c, Symbol kind, List source, Type expected)`
+`List Compiler.rewrite_written(Compiler c, Symbol kind, List source, Type expected)`
 
 Binds the replacement a shipped rule gives the lowered statement
 `source` of `kind`, which the kernel wrote while lowering, as
@@ -753,7 +753,7 @@ Source: `src/macros/invocations/recognition.x`
 <a id="Compiler.take_code_value"></a>
 #### Compiler.take_code_value
 
-`int Compiler.take_code_value( Compiler c, Var input, Var &value, int &retained)`
+`int Compiler.take_code_value(Compiler c, Var input, Var &value, int &retained)`
 
 Consumes a `(code-value STAGE CODE EFFECTS)` carrier a producer returned
 into a macro value application, or that `Compiler.bind_code_value`

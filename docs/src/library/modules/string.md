@@ -9,7 +9,6 @@ Canonical byte strings and core text operations.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_string_from_bytes`](#x2c_string_from_bytes) | Canonicalizes a known NUL-free byte span in the active pool chain. |
 | [`Split.iter`](#Split.iter) | Returns an iterator over a lazy `String` cursor. |
 | [`Split.try_next`](#Split.try_next) | Yields the next field and advances a caller-owned position on success. |
 | [`Split.var`](#Split.var) | Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross into compile-time code or a `Var` container. |
@@ -74,21 +73,6 @@ Canonical byte strings and core text operations.
 | [`String.words`](#String.words) | Returns a lazy cursor over whitespace-delimited words in `str`. |
 | [`String.write_str`](#String.write_str) | Appends `str` to `out` unchanged. |
 | [`Var.split`](#Var.split) | Unboxes a descriptor from a `Var` produced by `Split.var`. |
-
-### Functions
-
-#### x2c_string_from_bytes
-
-`String x2c_string_from_bytes(const char *bytes, int length)`
-
-Canonicalizes a known NUL-free byte span in the active pool chain.
-Copies bytes only when needed; the caller retains its input storage.
-Null input or a nonpositive length returns the empty String.
-
-**Raises:** `<size-limit>` for a span longer than `INT_MAX - 1` bytes, or
-`<alloc-fail>` if canonical storage cannot be allocated.
-
-Source: `lib/string/storage.x`
 
 ### `Split`
 
@@ -297,7 +281,7 @@ Source: `lib/string/search.x`
 <a id="String.find_within"></a>
 #### String.find_within
 
-`meta native int String.find_within( String str, String sub, int start, int end)`
+`meta native int String.find_within(String str, String sub, int start, int end)`
 
 Returns the first index of `sub` within `str[start:end]`, or -1.
 The returned index is absolute and counts from the start of `str`.
@@ -752,7 +736,7 @@ Source: `lib/string/building.x`
 <a id="String.replace"></a>
 #### String.replace
 
-`meta native String String.replace( String str, String old, String replacement)`
+`meta native String String.replace(String str, String old, String replacement)`
 
 Returns `str` with every occurrence of `old` replaced by `replacement`.
 Scanning runs left to right and matches do not overlap: each one
@@ -772,7 +756,7 @@ Source: `lib/string/editing.x`
 <a id="String.replace_n"></a>
 #### String.replace_n
 
-`meta native String String.replace_n( String str, String old, String replacement, int max_replacements)`
+`meta native String String.replace_n(String str, String old, String replacement, int max_replacements)`
 
 Replaces at most `max_replacements` non-overlapping occurrences of `old`.
 Scanning proceeds left to right and does not rescan replacement text. A
@@ -1064,6 +1048,7 @@ Source: `lib/string/cursors.x`
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_string_from_bytes`](#x2c_string_from_bytes) | Canonicalizes a known NUL-free byte span in the active pool chain. |
 | [`String.cached_hash`](#String.cached_hash) | Returns the content hash installed in `str`'s header, or zero for the empty `String` and an unfinished `String.malloc` buffer. |
 | [`String.compare`](#String.compare) | Compares `x` and `y` bytewise, returning negative, zero, or positive. |
 | [`String.equal`](#String.equal) | Reports whether `x` and `y` contain the same bytes. |
@@ -1086,6 +1071,21 @@ Source: `lib/string/cursors.x`
 | [`String.try_double`](#String.try_double) | Parses all of `str` as a floating-point number, writing `out`. |
 | [`String.try_long`](#String.try_long) | Parses all of `str` as an integer, writing it through `out`. |
 | [`String.write_repr`](#String.write_repr) | Appends a quoted escaped representation of `str` to borrowed `out`. |
+
+### Functions
+
+#### x2c_string_from_bytes
+
+`String x2c_string_from_bytes(const char *bytes, int length)`
+
+Canonicalizes a known NUL-free byte span in the active pool chain.
+Copies bytes only when needed; the caller retains its input storage.
+Null input or a nonpositive length returns the empty String.
+
+**Raises:** `<size-limit>` for a span longer than `INT_MAX - 1` bytes, or
+`<alloc-fail>` if canonical storage cannot be allocated.
+
+Source: `lib/string/storage.x`
 
 ### `String`
 
@@ -1569,7 +1569,3 @@ ancestor, and releasing that pool invalidates it unless it was promoted.
 A transient `String.malloc` buffer belongs to the active pool until it is
 interned or freed. Pool storage and registration causes transfer and
 never return to the constructing operation.
-
-## Tests and examples
-
-`make verify` (`unittest/test-string.x`, `unittest/test-string-classify.x`, `unittest/test-string-number.x`, and `unittest/test-split.x`) and `make examples` (`docs-word-count`).

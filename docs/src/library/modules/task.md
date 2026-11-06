@@ -49,9 +49,7 @@ for source readers but are not supported as user API.
 | [`x2c_task_current`](#x2c_task_current) | Returns the current borrowed task token, or NULL on native execution. |
 | [`x2c_task_stopping`](#x2c_task_stopping) | Reads a task's queue-ordered cooperative stop request. |
 
-### Functions
-
-#### x2c_task_channel_notify
+### x2c_task_channel_notify
 
 `void x2c_task_channel_notify(X2CChannelMonitor *monitor)`
 
@@ -59,7 +57,7 @@ Wakes parked task waiters while the Channel monitor is locked.
 
 Source: `lib/task.x`
 
-#### x2c_task_channel_sleep
+### x2c_task_channel_sleep
 
 `void x2c_task_channel_sleep(X2CChannelMonitor *monitor, Thread *owner)`
 
@@ -69,7 +67,7 @@ Unregister native Thread before parking, then register again on resume.
 
 Source: `lib/task.x`
 
-#### x2c_task_current
+### x2c_task_current
 
 `void *x2c_task_current(void)`
 
@@ -77,7 +75,7 @@ Returns the current borrowed task token, or NULL on native execution.
 
 Source: `lib/task.x`
 
-#### x2c_task_stopping
+### x2c_task_stopping
 
 `int x2c_task_stopping(void *value)`
 
@@ -100,6 +98,6 @@ Namespace for cooperative job batches; no public task handles exist.
 
 Source: `lib/task.x`
 
-## Tests and examples
+## Examples
 
-`make verify` (`unittest/test-task.x`) and `make examples` (`power/channel-service`).
+- [`power/channel-service`](https://github.com/gwf/x2c/blob/main/examples/power/channel-service.x)

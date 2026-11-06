@@ -5,6 +5,8 @@
 
 Pseudorandom numbers, system entropy, and UUIDs.
 
+Include it with `#include "random.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -181,7 +183,3 @@ Source: `lib/random.x`
 fast and unsuitable for secrets. `Random.secure_fill` reads the
 operating system's cryptographic generator, `arc4random_buf` on macOS
 and `getrandom` on Linux, and version 4 UUIDs take their bits from it.
-
-## Tests and examples
-
-`make verify` (`unittest/test-random.x`).

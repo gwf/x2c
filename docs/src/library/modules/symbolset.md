@@ -90,7 +90,3 @@ rejects nonmembers that happen to reach the same index. The set borrows
 its generated static storage; no operation retains or frees it.
 `SymbolSet.encode` builds the bytes the compiler emits, so this module
 owns both the layout and the hash.
-
-## Tests and examples
-
-`make verify` (compiler `SymbolSet` fixtures).

@@ -121,7 +121,7 @@ Source: `lib/error/handlers.x`
 
 #### x2c_error_catch_site_push
 
-`ErrorHandler x2c_error_catch_site_push( void *target, ErrorCatchSite *site, Var *patterns)`
+`ErrorHandler x2c_error_catch_site_push(void *target, ErrorCatchSite *site, Var *patterns)`
 
 Registers one compiler-generated transferring catch through its site.
 `target` names the `ExceptionFrame` that the caller pushes immediately
@@ -159,7 +159,7 @@ Source: `lib/error/dispatch.x`
 
 #### x2c_error_raise_n
 
-`void x2c_error_raise_n( const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)`
+`void x2c_error_raise_n(const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)`
 
 Raises one compiler-generated error from native key-value arguments.
 `pair_count` controls the following alternating `Var` keys and values;
@@ -542,7 +542,7 @@ Source: `lib/error/runtime.x`
 
 #### x2c_error_raise_operation
 
-`void x2c_error_raise_operation( const X2CErrorSite *site, Symbol code, const char *operation)`
+`void x2c_error_raise_operation(const X2CErrorSite *site, Symbol code, const char *operation)`
 
 Raises an internal allocator error with native operation text.
 Enters the raw error floor before copying text when Error is unavailable

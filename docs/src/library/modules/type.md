@@ -5,6 +5,10 @@
 
 Semantic type values and their structural operations.
 
+Include it with `#include "type.x"`.
+
+Its operations run at runtime and at compile time.
+
 ## Primary API
 
 | Function | Summary |
@@ -213,7 +217,7 @@ Source: `lib/type.x`
 <a id="Type.integer_literal_magnitude"></a>
 #### Type.integer_literal_magnitude
 
-`int Type.integer_literal_magnitude( Type type, String text, unsigned long long &value)`
+`int Type.integer_literal_magnitude(Type type, String text, unsigned long long &value)`
 
 Reads an integer literal of `type` spelled in digits, with any suffix,
 into `value`. Returns 0 for any other literal.
@@ -624,7 +628,3 @@ Source: `lib/type.x`
 
 These operations inspect captured types without compiler state. Name
 resolution and translation-unit registrations belong to the compiler.
-
-## Tests and examples
-
-`make verify` (`meta-type-values` compiler fixture).

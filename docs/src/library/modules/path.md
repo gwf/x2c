@@ -5,6 +5,8 @@
 
 Filesystem locations and the operations on them.
 
+Include it with `#include "path.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -376,6 +378,6 @@ one path component, `[...]` character classes, `**` for any number of
 components, and backslash to quote the next character. As in a shell, a
 wildcard does not match a leading dot; spell the dot to match it.
 
-## Tests and examples
+## Examples
 
-`make verify` (`unittest/test-path.x`) and `make examples` (`scripts/line-counts`).
+- [`scripts/line-counts`](https://github.com/gwf/x2c/blob/main/examples/scripts/line-counts.x)

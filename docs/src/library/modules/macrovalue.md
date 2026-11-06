@@ -48,7 +48,7 @@ Source: `lib/macrovalue/construction.x`
 <a id="Macro_case_capture_at"></a>
 #### Macro_case_capture_at
 
-`int Macro_case_capture_at( MacroCaseSite *site, List code, Macro t, List names, MatchCaptureBuffer *published)`
+`int Macro_case_capture_at(MacroCaseSite *site, List code, Macro t, List names, MatchCaptureBuffer *published)`
 
 Recognizes code built by `t` for the `case` whose site is `site`, which
 may be NULL, and publishes the captures under `names`. A pattern that
@@ -93,7 +93,7 @@ Source: `lib/macrovalue/recognition.x`
 <a id="Macro_case_root"></a>
 #### Macro_case_root
 
-`int Macro_case_root( List code, Macro t, List names, int statement, List &cursor, MatchCaptureBuffer *published)`
+`int Macro_case_root(List code, Macro t, List names, int statement, List &cursor, MatchCaptureBuffer *published)`
 
 Starts a macro-valued `case` whose derived pattern generated `match`
 code tests in place. Returns 1 when `code` is a retained invocation of
@@ -403,7 +403,3 @@ a pending invocation the compiler expands and binds at the insertion
 site; naming it in a `case` derives a Match pattern from the same body.
 Generated code calls these operations by name, so the module is part of
 the prelude.
-
-## Tests and examples
-
-`make verify` (`macro-values`, `macro-sequence-case`, and `macro-slot-recognition` compiler fixtures).

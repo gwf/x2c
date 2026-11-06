@@ -788,7 +788,3 @@ The declared `Block` protocol supplies `Array`'s generated `truth`, `pop`,
 Indexing and slicing normalize negative positions here. Positional
 mutation preserves the object identity, and structural mutation
 invalidates outstanding iterators.
-
-## Tests and examples
-
-`make verify` (`unittest/test-array.x`) and `make examples`.

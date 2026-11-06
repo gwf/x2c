@@ -5,6 +5,12 @@
 
 The compiler surface a `meta` function calls.
 
+Include it with `#include "meta.x"`.
+
+Every unit reaches it through the prelude's `var/var.x`; include it explicitly
+where `meta` functions are written. Pure builders also run at runtime;
+operations that query the compiler remain compile-time only.
+
 ## Primary API
 
 | Function | Summary |
@@ -13,9 +19,7 @@ The compiler surface a `meta` function calls.
 | [`type_declaration_parts`](#type_declaration_parts) | Returns `(base modifiers)` for reconstructing a declaration of `type`. |
 | [`type_name_error`](#type_name_error) | Returns the diagnostic for a `type` that names its type with an Atom other than a C type keyword, as `%(String)` and `%(* Point)` do, or `NULL`. |
 
-### Functions
-
-#### type_base_suffix
+### type_base_suffix
 
 `List type_base_suffix(List type)`
 
@@ -24,7 +28,7 @@ keyword, sharing `type`, or `NULL` when it has none.
 
 Source: `lib/meta.x`
 
-#### type_declaration_parts
+### type_declaration_parts
 
 `List type_declaration_parts(List type)`
 
@@ -34,7 +38,7 @@ declarator precedence.
 
 Source: `lib/meta.x`
 
-#### type_name_error
+### type_name_error
 
 `String type_name_error(List type)`
 
@@ -54,9 +58,7 @@ for source readers but are not supported as user API.
 | --- | --- |
 | [`declarator_append_modifiers`](#declarator_append_modifiers) | Appends a base type's modifiers, preserving the initializer. |
 
-### Functions
-
-#### declarator_append_modifiers
+### declarator_append_modifiers
 
 `List declarator_append_modifiers(List declarator, List modifiers)`
 
@@ -142,7 +144,3 @@ The library builds it as an optional module, but the prelude's
 `var/var.x` includes it for its own `meta` rows, so every unit sees its
 declarations. Include it explicitly where `meta` functions are written.
 Shared compile-time definitions use ordinary source includes.
-
-## Tests and examples
-
-`make verify` (`meta-comptime-only-call` and `meta-builder-compiler-only` compiler fixtures).

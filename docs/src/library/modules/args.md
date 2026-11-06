@@ -5,6 +5,8 @@
 
 Parse program arguments against a declarative spec.
 
+Include it with `#include "args.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -109,7 +111,3 @@ List with one row per option or operand. The result is a Map from each
 row's name to its value, words stay Strings, and bad input raises
 `<bad-arg>` so the caller decides whether to print `Args.usage` and which
 status to return.
-
-## Tests and examples
-
-`make verify` (`unittest/test-args.x`).

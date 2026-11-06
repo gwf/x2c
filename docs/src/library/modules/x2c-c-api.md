@@ -24,13 +24,13 @@ prefix.
 | [`x2c_error_catch_push`](error.md#x2c_error_catch_push) | `lib/error/error.x` | `ErrorHandler x2c_error_catch_push(void *target, unsigned arm_count, ...)` |
 | [`x2c_error_catch_selected`](error.md#x2c_error_catch_selected) | `lib/error/error.x` | `int x2c_error_catch_selected(ErrorHandler handle)` |
 | [`x2c_error_catch_site_pending`](error.md#x2c_error_catch_site_pending) | `lib/error/error.x` | `int x2c_error_catch_site_pending(ErrorCatchSite *site)` |
-| [`x2c_error_catch_site_push`](error.md#x2c_error_catch_site_push) | `lib/error/error.x` | `ErrorHandler x2c_error_catch_site_push( void *target, ErrorCatchSite *site, Var *patterns)` |
+| [`x2c_error_catch_site_push`](error.md#x2c_error_catch_site_push) | `lib/error/error.x` | `ErrorHandler x2c_error_catch_site_push(void *target, ErrorCatchSite *site, Var *patterns)` |
 | [`x2c_error_execution_free`](error.md#x2c_error_execution_free) | `lib/error/error.x` | `void x2c_error_execution_free(void *backing)` |
 | [`x2c_error_execution_new`](error.md#x2c_error_execution_new) | `lib/error/error.x` | `void *x2c_error_execution_new(void)` |
 | [`x2c_error_execution_swap`](error.md#x2c_error_execution_swap) | `lib/error/error.x` | `void x2c_error_execution_swap(void *backing)` |
 | [`x2c_error_raise`](error.md#x2c_error_raise) | `lib/error/error.x` | `void x2c_error_raise(Symbol code, List detail)` |
-| [`x2c_error_raise_n`](error.md#x2c_error_raise_n) | `lib/error/error.x` | `void x2c_error_raise_n( const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)` |
-| [`x2c_error_raise_operation`](error.md#x2c_error_raise_operation) | `lib/error/error.x` | `void x2c_error_raise_operation( const X2CErrorSite *site, Symbol code, const char *operation)` |
+| [`x2c_error_raise_n`](error.md#x2c_error_raise_n) | `lib/error/error.x` | `void x2c_error_raise_n(const X2CErrorSite *site, Symbol code, unsigned pair_count, ...)` |
+| [`x2c_error_raise_operation`](error.md#x2c_error_raise_operation) | `lib/error/error.x` | `void x2c_error_raise_operation(const X2CErrorSite *site, Symbol code, const char *operation)` |
 | [`x2c_exception_claim`](exception.md#x2c_exception_claim) | `lib/exception.x` | `int x2c_exception_claim(ExceptionFrame *frame)` |
 | [`x2c_exception_execution_free`](exception.md#x2c_exception_execution_free) | `lib/exception.x` | `void x2c_exception_execution_free(void *backing)` |
 | [`x2c_exception_execution_new`](exception.md#x2c_exception_execution_new) | `lib/exception.x` | `void *x2c_exception_execution_new(void)` |
@@ -42,22 +42,22 @@ prefix.
 | [`x2c_exception_push`](exception.md#x2c_exception_push) | `lib/exception.x` | `void x2c_exception_push(ExceptionFrame *e)` |
 | [`x2c_exception_unwinding`](exception.md#x2c_exception_unwinding) | `lib/exception.x` | `int x2c_exception_unwinding(void)` |
 | [`x2c_fatal`](common.md#x2c_fatal) | `lib/common.x` | `void x2c_fatal(const char *message)` |
-| [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func/func.x` | `void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
+| [`x2c_func_declared_reference_argument`](func.md#x2c_func_declared_reference_argument) | `lib/func/func.x` | `void *x2c_func_declared_reference_argument(Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)` |
 | [`x2c_func_map_splice_argument`](func.md#x2c_func_map_splice_argument) | `lib/func/func.x` | `FuncArg x2c_func_map_splice_argument(Func fn, unsigned index, Map entries)` |
 | [`x2c_func_pointer_argument`](func.md#x2c_func_pointer_argument) | `lib/func/func.x` | `void *x2c_func_pointer_argument(Func fn, const FuncArg *argv, unsigned i)` |
 | [`x2c_func_record_result`](func.md#x2c_func_record_result) | `lib/func/func.x` | `Var x2c_func_record_result(const void *bytes, size_t size)` |
-| [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func/func.x` | `void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)` |
+| [`x2c_func_reference_argument`](func.md#x2c_func_reference_argument) | `lib/func/func.x` | `void *x2c_func_reference_argument(Func fn, const FuncArg *argv, unsigned i, List want)` |
 | [`x2c_func_reference_type`](func.md#x2c_func_reference_type) | `lib/func/func.x` | `List x2c_func_reference_type(Func fn, unsigned argc, unsigned index)` |
 | [`x2c_func_shared`](func.md#x2c_func_shared) | `lib/func/func.x` | `Func x2c_func_shared(FuncAdapter adapter, List signature)` |
 | [`x2c_func_splice_argument`](func.md#x2c_func_splice_argument) | `lib/func/func.x` | `FuncArg x2c_func_splice_argument(Func fn, unsigned index, List items)` |
 | [`x2c_func_unrepresentable_argument`](func.md#x2c_func_unrepresentable_argument) | `lib/func/func.x` | `FuncArg x2c_func_unrepresentable_argument(Func fn, unsigned i, List source)` |
-| [`x2c_func_value_argument`](func.md#x2c_func_value_argument) | `lib/func/func.x` | `Var x2c_func_value_argument( Func fn, const FuncArg *argv, unsigned i, Symbol want)` |
+| [`x2c_func_value_argument`](func.md#x2c_func_value_argument) | `lib/func/func.x` | `Var x2c_func_value_argument(Func fn, const FuncArg *argv, unsigned i, Symbol want)` |
 | `x2c_get_executable` | `src/utils.x` | `String x2c_get_executable(void)` |
 | `x2c_get_root` | `src/utils.x` | `String x2c_get_root(void)` |
-| [`x2c_hash_bytes`](common.md#x2c_hash_bytes) | `lib/common.x` | `inline unsigned x2c_hash_bytes( unsigned long seed, const void *data, size_t width)` |
+| [`x2c_hash_bytes`](common.md#x2c_hash_bytes) | `lib/common.x` | `inline unsigned x2c_hash_bytes(unsigned long seed, const void *data, size_t width)` |
 | [`x2c_hash_word`](common.md#x2c_hash_word) | `lib/common.x` | `inline unsigned x2c_hash_word(unsigned long word)` |
 | [`x2c_initialize`](common.md#x2c_initialize) | `lib/common.x` | `void x2c_initialize(void)` |
-| `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment( const char *argv0, String embedded_identity)` |
+| `x2c_initialize_command_environment` | `src/utils.x` | `void x2c_initialize_command_environment(const char *argv0, String embedded_identity)` |
 | `x2c_initialize_environment` | `src/utils.x` | `void x2c_initialize_environment(const char *argv0)` |
 | [`x2c_initialize_protocols`](common.md#x2c_initialize_protocols) | `lib/common.x` | `void x2c_initialize_protocols(void)` |
 | [`x2c_io_fail`](common.md#x2c_io_fail) | `lib/common.x` | `void x2c_io_fail(Var operation, int error)` |
@@ -68,25 +68,25 @@ prefix.
 | [`x2c_match_initialize`](match.md#x2c_match_initialize) | `lib/match/match.x` | `void x2c_match_initialize(void)` |
 | [`x2c_match_pattern_retainable`](match.md#x2c_match_pattern_retainable) | `lib/match/match.x` | `int x2c_match_pattern_retainable(Var pattern)` |
 | [`x2c_match_site_match`](match.md#x2c_match_site_match) | `lib/match/match.x` | `List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)` |
-| [`x2c_match_site_match_replace`](match.md#x2c_match_site_match_replace) | `lib/match/match.x` | `List x2c_match_site_match_replace( MatchCaptureSite *site, List input, Var pat, Var template)` |
+| [`x2c_match_site_match_replace`](match.md#x2c_match_site_match_replace) | `lib/match/match.x` | `List x2c_match_site_match_replace(MatchCaptureSite *site, List input, Var pat, Var template)` |
 | [`x2c_match_site_prepare`](match.md#x2c_match_site_prepare) | `lib/match/match.x` | `MatchPlan x2c_match_site_prepare(MatchCaptureSite *site, Var pattern)` |
 | [`x2c_match_site_search`](match.md#x2c_match_site_search) | `lib/match/match.x` | `List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat)` |
-| [`x2c_match_site_search_replace`](match.md#x2c_match_site_search_replace) | `lib/match/match.x` | `List x2c_match_site_search_replace( MatchCaptureSite *site, List input, Var pat, Var template)` |
-| [`x2c_match_site_try_capture`](match.md#x2c_match_site_try_capture) | `lib/match/match.x` | `int x2c_match_site_try_capture( MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer &?captures)` |
-| [`x2c_match_site_try_match`](match.md#x2c_match_site_try_match) | `lib/match/match.x` | `int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List &?out_bindings)` |
-| [`x2c_match_site_try_match_replace`](match.md#x2c_match_site_try_match_replace) | `lib/match/match.x` | `int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var &?out)` |
-| [`x2c_match_site_try_search`](match.md#x2c_match_site_try_search) | `lib/match/match.x` | `int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var &?out_match, List &?out_bindings)` |
+| [`x2c_match_site_search_replace`](match.md#x2c_match_site_search_replace) | `lib/match/match.x` | `List x2c_match_site_search_replace(MatchCaptureSite *site, List input, Var pat, Var template)` |
+| [`x2c_match_site_try_capture`](match.md#x2c_match_site_try_capture) | `lib/match/match.x` | `int x2c_match_site_try_capture(MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer &?captures)` |
+| [`x2c_match_site_try_match`](match.md#x2c_match_site_try_match) | `lib/match/match.x` | `int x2c_match_site_try_match(MatchCaptureSite *site, List input, Var pat, List &?out_bindings)` |
+| [`x2c_match_site_try_match_replace`](match.md#x2c_match_site_try_match_replace) | `lib/match/match.x` | `int x2c_match_site_try_match_replace(MatchCaptureSite *site, List input, Var pat, Var template, Var &?out)` |
+| [`x2c_match_site_try_search`](match.md#x2c_match_site_try_search) | `lib/match/match.x` | `int x2c_match_site_try_search(MatchCaptureSite *site, List input, Var pat, Var &?out_match, List &?out_bindings)` |
 | [`x2c_match_thread_release`](match.md#x2c_match_thread_release) | `lib/match/match.x` | `void x2c_match_thread_release(void)` |
-| [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match/match.x` | `int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer &?captures)` |
+| [`x2c_match_try_capture`](match.md#x2c_match_try_capture) | `lib/match/match.x` | `int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer &?captures)` |
 | [`x2c_mix64`](common.md#x2c_mix64) | `lib/common.x` | `inline unsigned long x2c_mix64(unsigned long word)` |
 | [`x2c_native_check`](common.md#x2c_native_check) | `lib/common.x` | `void x2c_native_check(int error, const char *failure)` |
 | [`x2c_normalize_index`](common.md#x2c_normalize_index) | `lib/common.x` | `int x2c_normalize_index(int index, int length)` |
 | [`x2c_normalize_slice`](common.md#x2c_normalize_slice) | `lib/common.x` | `int x2c_normalize_slice(int &start, int &stop, int step, int length)` |
 | [`x2c_pool_exchange`](pool.md#x2c_pool_exchange) | `lib/pool/pool.x` | `Pool x2c_pool_exchange(Pool pool)` |
-| [`x2c_pool_lookup_string`](pool.md#x2c_pool_lookup_string) | `lib/pool/pool.x` | `String x2c_pool_lookup_string( Pool inner, const char *bytes, int length, unsigned hash)` |
+| [`x2c_pool_lookup_string`](pool.md#x2c_pool_lookup_string) | `lib/pool/pool.x` | `String x2c_pool_lookup_string(Pool inner, const char *bytes, int length, unsigned hash)` |
 | [`x2c_register_builtin_descriptor`](dispatch.md#x2c_register_builtin_descriptor) | `lib/dispatch.x` | `int x2c_register_builtin_descriptor(Symbol tag, VarMethods methods)` |
 | [`x2c_register_descriptor`](dispatch.md#x2c_register_descriptor) | `lib/dispatch.x` | `void x2c_register_descriptor(String name, VarMethods methods)` |
-| [`x2c_register_tagged_descriptor`](dispatch.md#x2c_register_tagged_descriptor) | `lib/dispatch.x` | `void x2c_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
+| [`x2c_register_tagged_descriptor`](dispatch.md#x2c_register_tagged_descriptor) | `lib/dispatch.x` | `void x2c_register_tagged_descriptor(Symbol tag, String name, VarMethods methods)` |
 | [`x2c_register_type`](dispatch.md#x2c_register_type) | `lib/dispatch.x` | `void x2c_register_type(String name)` |
 | [`x2c_render_path_exchange`](dispatch.md#x2c_render_path_exchange) | `lib/dispatch.x` | `RenderPath *x2c_render_path_exchange(RenderPath *path)` |
 | [`x2c_scope_execution_free`](scope.md#x2c_scope_execution_free) | `lib/scope/scope.x` | `void x2c_scope_execution_free(void *saved)` |
@@ -111,7 +111,7 @@ prefix.
 | [`x2c_thread_wait_stopped`](thread.md#x2c_thread_wait_stopped) | `lib/thread.x` | `int x2c_thread_wait_stopped(Thread owner)` |
 | [`x2c_thread_wait_unlock`](thread.md#x2c_thread_wait_unlock) | `lib/thread.x` | `void x2c_thread_wait_unlock(void)` |
 | [`x2c_try_register_descriptor`](dispatch.md#x2c_try_register_descriptor) | `lib/dispatch.x` | `int x2c_try_register_descriptor(String name, VarMethods methods)` |
-| [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor( Symbol tag, String name, VarMethods methods)` |
+| [`x2c_try_register_tagged_descriptor`](dispatch.md#x2c_try_register_tagged_descriptor) | `lib/dispatch.x` | `int x2c_try_register_tagged_descriptor(Symbol tag, String name, VarMethods methods)` |
 | [`x2c_var_add_lane`](common.md#x2c_var_add_lane) | `lib/common.x` | `inline Var x2c_var_add_lane(Var lhs, Var rhs)` |
 | [`x2c_var_custom_descriptor`](var.md#x2c_var_custom_descriptor) | `lib/var/var.x` | `VarDescriptor *x2c_var_custom_descriptor(Var value)` |
 | [`x2c_var_declare`](var.md#x2c_var_declare) | `lib/var/var.x` | `VarDescriptor *x2c_var_declare(Symbol tag)` |

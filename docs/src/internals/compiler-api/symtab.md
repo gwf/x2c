@@ -114,7 +114,7 @@ The compiler's semantic symbol table.
 <a id="Compiler.aggregate_name"></a>
 #### Compiler.aggregate_name
 
-`Var Compiler.aggregate_name( Compiler c, Symbol kind, Var name, int definition)`
+`Var Compiler.aggregate_name(Compiler c, Symbol kind, Var name, int definition)`
 
 Binds a local aggregate tag before its fields, preserving native spelling.
 A reference reuses the nearest visible tag; a definition or standalone
@@ -269,7 +269,7 @@ Source: `src/symtab/namespaces.x`
 <a id="Compiler.register_package_alias"></a>
 #### Compiler.register_package_alias
 
-`void Compiler.register_package_alias( Compiler c, String name, String alias, Token token)`
+`void Compiler.register_package_alias(Compiler c, String name, String alias, Token token)`
 
 Registers one local package alias.
 
@@ -282,7 +282,7 @@ Source: `src/symtab/namespaces.x`
 <a id="Compiler.register_package_member"></a>
 #### Compiler.register_package_member
 
-`void Compiler.register_package_member( Compiler c, String name, String member, String local, Token member_token, Token local_token)`
+`void Compiler.register_package_member(Compiler c, String name, String member, String local, Token member_token, Token local_token)`
 
 Registers one package member under a bare local spelling.
 

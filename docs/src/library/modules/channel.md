@@ -13,7 +13,7 @@ Var transport and explicit storage handoff.
 | [`Channel.close`](#Channel.close) | Ends sends and wakes waiters; accepted messages remain available to drain. |
 | [`Channel.free`](#Channel.free) | Closes and destroys an unused Channel's complete storage scope. |
 | [`Channel.iter`](#Channel.iter) | Initializes a borrowed iterator that blocks for each received message. |
-| [`Channel.new`](#Channel.new) | Creates a Channel constrained to an exact Var tag, with capacity zero for rendezvous, a nonnegative integer for bounded buffering, or <unbounded>. |
+| [`Channel.new`](#Channel.new) | Creates a Channel constrained to an exact Var tag, with capacity zero for rendezvous, a nonnegative integer for bounded buffering, or `<unbounded>`. |
 | [`Channel.receive`](#Channel.receive) | Receives one accepted Var. |
 | [`Channel.scope`](#Channel.scope) | Returns the Channel's own storage scope. |
 | [`Channel.send`](#Channel.send) | Sends non-void representation bits without changing referenced storage ownership. |
@@ -74,12 +74,13 @@ Source: `lib/channel.x`
 
 Creates a Channel constrained to an exact Var tag, with capacity zero
 for rendezvous, a nonnegative integer for bounded buffering, or
-<unbounded>. The <var> tag permits every non-void Var without conversion.
-Short forms are new(), new(capacity), and new(tag); omitted capacity
-means rendezvous. Queuing does not intern or export message contents.
+`<unbounded>`. The `<var>` tag permits every non-void Var without
+conversion. Short forms are new(), new(capacity), and new(tag); omitted
+capacity means rendezvous. Queuing does not intern or export message
+contents.
 
-**Raises:** <bad-arg> for an unknown tag or invalid capacity, <alloc-fail>
-for storage, or <io-fail> for native mutex or condition initialization.
+**Raises:** `<bad-arg>` for an unknown tag or invalid capacity, `<alloc-fail>`
+for storage, or `<io-fail>` for native mutex or condition initialization.
 
 Source: `lib/channel.x`
 
@@ -95,8 +96,8 @@ owner. Receiver failure cleanup reclaims received storage normally.
 Returns void only after close and draining; null remains ordinary data.
 A committed delivery succeeds despite a later stop request.
 
-**Raises:** <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
-<bad-state> for cooperative stop.
+**Raises:** `<bad-arg>` for NULL, `<alloc-fail>` preparing receiver storage, or
+`<bad-state>` for cooperative stop.
 
 Source: `lib/channel.x`
 
@@ -109,7 +110,7 @@ Returns the Channel's own storage scope. Owned queued payloads stay
 detached; ordinary messages remain borrowed. This scope is not a shared
 adoption destination for concurrent senders.
 
-**Raises:** <bad-arg> for NULL.
+**Raises:** `<bad-arg>` for NULL.
 
 Source: `lib/channel.x`
 
@@ -122,8 +123,8 @@ Sends non-void representation bits without changing referenced storage
 ownership. Waits for queue capacity or a rendezvous match. Acceptance
 commits under synchronization; later stop cannot retract that send.
 
-**Raises:** <bad-arg> for NULL, <void-op> for void, <bad-types> for a tag
-mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
+**Raises:** `<bad-arg>` for NULL, `<void-op>` for void, `<bad-types>` for a tag
+mismatch, `<bad-state>` for closure or cooperative stop, or `<alloc-fail>`
 for native buffered queue storage. Failure dispatch holds no queue lock.
 
 Source: `lib/channel.x`
@@ -146,7 +147,7 @@ must not be handed off twice. Canonical Strings/Lists and independent
 referenced objects are not implicitly adopted. Pointer provenance and
 ownership graphs remain caller responsibilities.
 
-**Raises:** the send causes, or <bad-arg> for a null/nonpointer payload.
+**Raises:** the send causes, or `<bad-arg>` for a null/nonpointer payload.
 
 Source: `lib/channel.x`
 
@@ -168,7 +169,7 @@ Source: `lib/channel.x`
 
 Reads a Channel handle with its exact tag. Ownership is unchanged.
 
-**Raises:** <bad-types> for another tag.
+**Raises:** `<bad-types>` for another tag.
 
 Source: `lib/channel.x`
 
@@ -196,6 +197,7 @@ Source: `lib/channel.x`
 Each queue owns its mutex; registered monitors order commitment with stop.
 Allocation, Error dispatch, and payload destruction stay outside it.
 
-## Tests and examples
+## Examples
 
-`make verify` (`unittest/test-channel.x` and `unittest/test-channel-batch.x`) and `make examples` (`power/channel-word-count`, `power/channel-service`).
+- [`power/channel-word-count`](https://github.com/gwf/x2c/blob/main/examples/power/channel-word-count.x)
+- [`power/channel-service`](https://github.com/gwf/x2c/blob/main/examples/power/channel-service.x)

@@ -307,7 +307,3 @@ Context owns one bounded unit of runtime work: a `Scope` lifetime with its
 pool. Export carries a value out before close reclaims the rest: it moves
 built-in storage the source `Scope` owns and recanonicalizes immutable
 values only when the source's private pool owns them.
-
-## Tests and examples
-
-`make verify` (`unittest/test-context.x`).

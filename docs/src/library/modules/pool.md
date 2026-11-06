@@ -9,7 +9,6 @@ Nested interning pools with region-backed object storage.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_pool_lookup_string`](#x2c_pool_lookup_string) | Finds an existing nonempty String from borrowed NUL-free bytes and their x2c_hash_bytes content hash, searching inner and its ancestors. |
 | [`Pool.close`](#Pool.close) | Closes the innermost open bracket and makes its parent active. |
 | [`Pool.current`](#Pool.current) | Returns the borrowed canonical-value pool active on this thread. |
 | [`Pool.detach`](#Pool.detach) | Removes the innermost open bracket without destroying it. |
@@ -18,19 +17,6 @@ Nested interning pools with region-backed object storage.
 | [`Pool.open`](#Pool.open) | Opens a child of the shared `String` and `List` canonical-value pool. |
 | [`Pool.open_named`](#Pool.open_named) | Opens and returns a named child of the pool active on this thread. |
 | [`Pool.stats`](#Pool.stats) | Returns this level's canonical counts plus process-wide storage counters. |
-
-### Functions
-
-#### x2c_pool_lookup_string
-
-`String x2c_pool_lookup_string( Pool inner, const char *bytes, int length, unsigned hash)`
-
-Finds an existing nonempty String from borrowed NUL-free bytes and their
-x2c_hash_bytes content hash, searching inner and its ancestors.
-Returns NULL on a miss and allocates nothing. Native comparisons cannot
-raise, so each acquired pool lock is released directly.
-
-Source: `lib/pool/interning.x`
 
 ### `Pool`
 
@@ -155,9 +141,23 @@ Source: `lib/pool/storage.x`
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_pool_lookup_string`](#x2c_pool_lookup_string) | Finds an existing nonempty String from borrowed NUL-free bytes and their x2c_hash_bytes content hash, searching inner and its ancestors. |
 | [`Pool.release`](#Pool.release) | Destroys one pool and returns its parent, or returns NULL for NULL input. |
 | [`Pool.retain`](#Pool.retain) | Returns an unnamed child of `inner`, without making it thread-active. |
 | [`Pool.retain_named`](#Pool.retain_named) | Returns a new named child of `inner` without making it thread-active. |
+
+### Functions
+
+#### x2c_pool_lookup_string
+
+`String x2c_pool_lookup_string(Pool inner, const char *bytes, int length, unsigned hash)`
+
+Finds an existing nonempty String from borrowed NUL-free bytes and their
+x2c_hash_bytes content hash, searching inner and its ancestors.
+Returns NULL on a miss and allocates nothing. Native comparisons cannot
+raise, so each acquired pool lock is released directly.
+
+Source: `lib/pool/interning.x`
 
 ### `Pool`
 
@@ -477,7 +477,3 @@ blocks to one process-wide depot and moves promoted survivors to the
 parent at the same address. Threads start at one shared process root and
 may open their own child levels. `String` and `List` lookup follows the
 active thread's chain of child and ancestor levels.
-
-## Tests and examples
-
-`make verify` (`unittest/test-pool.x`).

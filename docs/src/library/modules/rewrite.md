@@ -4,3 +4,9 @@
 # `lib/rewrite.x`
 
 Pattern registration for compiler rewrites.
+
+Include it with `#include "rewrite.x"`.
+
+It defines the `$rewrite` decorator; [Rewriting a function
+definition](../../guide/generating-code.md#rewriting-a-function-definition)
+describes it.

@@ -9,15 +9,6 @@ Pattern matching and transformation utilities for lists.
 
 | Function | Summary |
 | --- | --- |
-| [`x2c_match_initialize`](#x2c_match_initialize) | Registers process-wide `Match` cleanup exactly once. |
-| [`x2c_match_site_match`](#x2c_match_site_match) | Returns bindings through one compiler-owned site, or `nil` on a miss. |
-| [`x2c_match_site_match_replace`](#x2c_match_site_match_replace) | Returns the `List` replacement through one compiler-owned site. |
-| [`x2c_match_site_search`](#x2c_match_site_search) | Returns every matching subtree through one compiler-owned site. |
-| [`x2c_match_site_search_replace`](#x2c_match_site_search_replace) | Replaces every match through one compiler-owned site. |
-| [`x2c_match_site_try_match`](#x2c_match_site_try_match) | Matches through one compiler-owned site, writing bindings on success. |
-| [`x2c_match_site_try_match_replace`](#x2c_match_site_try_match_replace) | `Match`-replaces through one compiler-owned site. |
-| [`x2c_match_site_try_search`](#x2c_match_site_try_search) | Searches through one compiler-owned site, writing the first match. |
-| [`x2c_match_thread_release`](#x2c_match_thread_release) | Disposes this thread's default `Match` plan cache. |
 | [`List.replace`](#List.replace) | Replaces named binders in `template` according to `bindings`. |
 | [`List.search`](#List.search) | Returns every matching subtree of `input` with its bindings. |
 | [`List.search_replace`](#List.search_replace) | Replaces every matching subtree in `input` from the leaves upward. |
@@ -28,98 +19,6 @@ Pattern matching and transformation utilities for lists.
 | [`MatchCache.context_open`](#MatchCache.context_open) | Opens one `Context`-local default `Match`-cache state. |
 | [`MatchLease.plan`](#MatchLease.plan) | Borrows the acquired program until this active lease is released. |
 | [`MatchPlan.admits`](#MatchPlan.admits) | Reports whether `input`, seen through `view` when one is given, begins as one of the keys of prepared `plan` requires. |
-
-### Functions
-
-#### x2c_match_initialize
-
-`void x2c_match_initialize(void)`
-
-Registers process-wide `Match` cleanup exactly once.
-Repeated calls have no effect. Failure of the native once primitive writes
-a diagnostic and aborts the process.
-
-**Raises:** `<alloc-fail>` or `<size-limit>` while registering the shutdown
-hook.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_site_match
-
-`List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)`
-
-Returns bindings through one compiler-owned site, or `nil` on a miss.
-Results follow `List.match`.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_site_match_replace
-
-`List x2c_match_site_match_replace( MatchCaptureSite *site, List input, Var pat, Var template)`
-
-Returns the `List` replacement through one compiler-owned site.
-Results follow `List.match_replace`.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_site_search
-
-`List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat)`
-
-Returns every matching subtree through one compiler-owned site.
-Results follow `List.search`.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_site_search_replace
-
-`List x2c_match_site_search_replace( MatchCaptureSite *site, List input, Var pat, Var template)`
-
-Replaces every match through one compiler-owned site.
-Results follow `List.search_replace`.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_site_try_match
-
-`int x2c_match_site_try_match( MatchCaptureSite *site, List input, Var pat, List &?out_bindings)`
-
-Matches through one compiler-owned site, writing bindings on success.
-Results follow `List.try_match`.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_site_try_match_replace
-
-`int x2c_match_site_try_match_replace( MatchCaptureSite *site, List input, Var pat, Var template, Var &?out)`
-
-`Match`-replaces through one compiler-owned site.
-Results follow `List.try_match_replace`.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_site_try_search
-
-`int x2c_match_site_try_search( MatchCaptureSite *site, List input, Var pat, Var &?out_match, List &?out_bindings)`
-
-Searches through one compiler-owned site, writing the first match.
-Results follow `List.try_search`.
-
-Source: `lib/match/sites.x`
-
-#### x2c_match_thread_release
-
-`void x2c_match_thread_release(void)`
-
-Disposes this thread's default `Match` plan cache.
-`x2c_thread_state_release` calls it before `Scope` releases the `Scope`
-that holds that cache; a thread that never matched has no cache and
-nothing happens. All default-cache leases and `Context` states must
-already be closed.
-
-**Raises:** `<bad-state>` when a lease remains active.
-
-Source: `lib/match/cache.x`
 
 ### `List`
 
@@ -206,7 +105,7 @@ Source: `lib/match/operations.x`
 <a id="List.try_search"></a>
 #### List.try_search
 
-`int List.try_search( List input, Var pat, Var &?out_match, List &?out_bindings)`
+`int List.try_search(List input, Var pat, Var &?out_match, List &?out_bindings)`
 
 Searches `input` for `pat`, writing the first match and bindings.
 The depth-first order is head, tail, then containing `List`, with the same
@@ -276,9 +175,18 @@ Source: `lib/match/execution.x`
 
 | Function | Summary |
 | --- | --- |
+| [`x2c_match_initialize`](#x2c_match_initialize) | Registers process-wide `Match` cleanup exactly once. |
 | [`x2c_match_pattern_retainable`](#x2c_match_pattern_retainable) | Reports whether a compiler-owned site can retain `pattern`. |
+| [`x2c_match_site_match`](#x2c_match_site_match) | Returns bindings through one compiler-owned site, or `nil` on a miss. |
+| [`x2c_match_site_match_replace`](#x2c_match_site_match_replace) | Returns the `List` replacement through one compiler-owned site. |
 | [`x2c_match_site_prepare`](#x2c_match_site_prepare) | Returns the process-lifetime plan for one compiler-owned site. |
+| [`x2c_match_site_search`](#x2c_match_site_search) | Returns every matching subtree through one compiler-owned site. |
+| [`x2c_match_site_search_replace`](#x2c_match_site_search_replace) | Replaces every match through one compiler-owned site. |
 | [`x2c_match_site_try_capture`](#x2c_match_site_try_capture) | Matches through one compiler-owned static capture site. |
+| [`x2c_match_site_try_match`](#x2c_match_site_try_match) | Matches through one compiler-owned site, writing bindings on success. |
+| [`x2c_match_site_try_match_replace`](#x2c_match_site_try_match_replace) | `Match`-replaces through one compiler-owned site. |
+| [`x2c_match_site_try_search`](#x2c_match_site_try_search) | Searches through one compiler-owned site, writing the first match. |
+| [`x2c_match_thread_release`](#x2c_match_thread_release) | Disposes this thread's default `Match` plan cache. |
 | [`x2c_match_try_capture`](#x2c_match_try_capture) | Matches a runtime pattern into positional storage. |
 | [`List.match`](#List.match) | Returns bindings when `input` matches `pat`, or `nil` on a miss. |
 | [`List.match_replace`](#List.match_replace) | Returns the `List` replacement when `input` matches `pat`. |
@@ -289,6 +197,19 @@ Source: `lib/match/execution.x`
 
 ### Functions
 
+#### x2c_match_initialize
+
+`void x2c_match_initialize(void)`
+
+Registers process-wide `Match` cleanup exactly once.
+Repeated calls have no effect. Failure of the native once primitive writes
+a diagnostic and aborts the process.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while registering the shutdown
+hook.
+
+Source: `lib/match/sites.x`
+
 #### x2c_match_pattern_retainable
 
 `int x2c_match_pattern_retainable(Var pattern)`
@@ -296,6 +217,24 @@ Source: `lib/match/execution.x`
 Reports whether a compiler-owned site can retain `pattern`.
 A site borrows its pattern's values for the life of the process, so only a
 graph of values that outlives every call qualifies.
+
+Source: `lib/match/sites.x`
+
+#### x2c_match_site_match
+
+`List x2c_match_site_match(MatchCaptureSite *site, List input, Var pat)`
+
+Returns bindings through one compiler-owned site, or `nil` on a miss.
+Results follow `List.match`.
+
+Source: `lib/match/sites.x`
+
+#### x2c_match_site_match_replace
+
+`List x2c_match_site_match_replace(MatchCaptureSite *site, List input, Var pat, Var template)`
+
+Returns the `List` replacement through one compiler-owned site.
+Results follow `List.match_replace`.
 
 Source: `lib/match/sites.x`
 
@@ -312,9 +251,27 @@ the caller can name the fence.
 
 Source: `lib/match/sites.x`
 
+#### x2c_match_site_search
+
+`List x2c_match_site_search(MatchCaptureSite *site, List input, Var pat)`
+
+Returns every matching subtree through one compiler-owned site.
+Results follow `List.search`.
+
+Source: `lib/match/sites.x`
+
+#### x2c_match_site_search_replace
+
+`List x2c_match_site_search_replace(MatchCaptureSite *site, List input, Var pat, Var template)`
+
+Replaces every match through one compiler-owned site.
+Results follow `List.search_replace`.
+
+Source: `lib/match/sites.x`
+
 #### x2c_match_site_try_capture
 
-`int x2c_match_site_try_capture( MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer &?captures)`
+`int x2c_match_site_try_capture(MatchCaptureSite *site, List input, Var pattern, MatchCaptureBuffer &?captures)`
 
 Matches through one compiler-owned static capture site.
 Its first admissible pattern permanently binds the site; direct C callers
@@ -332,9 +289,50 @@ publishing or matching.
 
 Source: `lib/match/sites.x`
 
+#### x2c_match_site_try_match
+
+`int x2c_match_site_try_match(MatchCaptureSite *site, List input, Var pat, List &?out_bindings)`
+
+Matches through one compiler-owned site, writing bindings on success.
+Results follow `List.try_match`.
+
+Source: `lib/match/sites.x`
+
+#### x2c_match_site_try_match_replace
+
+`int x2c_match_site_try_match_replace(MatchCaptureSite *site, List input, Var pat, Var template, Var &?out)`
+
+`Match`-replaces through one compiler-owned site.
+Results follow `List.try_match_replace`.
+
+Source: `lib/match/sites.x`
+
+#### x2c_match_site_try_search
+
+`int x2c_match_site_try_search(MatchCaptureSite *site, List input, Var pat, Var &?out_match, List &?out_bindings)`
+
+Searches through one compiler-owned site, writing the first match.
+Results follow `List.try_search`.
+
+Source: `lib/match/sites.x`
+
+#### x2c_match_thread_release
+
+`void x2c_match_thread_release(void)`
+
+Disposes this thread's default `Match` plan cache.
+`x2c_thread_state_release` calls it before `Scope` releases the `Scope`
+that holds that cache; a thread that never matched has no cache and
+nothing happens. All default-cache leases and `Context` states must
+already be closed.
+
+**Raises:** `<bad-state>` when a lease remains active.
+
+Source: `lib/match/cache.x`
+
 #### x2c_match_try_capture
 
-`int x2c_match_try_capture( List input, Var pattern, MatchCaptureBuffer &?captures)`
+`int x2c_match_try_capture(List input, Var pattern, MatchCaptureBuffer &?captures)`
 
 Matches a runtime pattern into positional storage.
 The active default cache prepares the pattern on its first use and
@@ -547,7 +545,7 @@ Source: `lib/match/wordcode.x`
 <a id="MachineBuilder.emit"></a>
 #### MachineBuilder.emit
 
-`int MachineBuilder.emit( MachineBuilder &b, int op, int a, int operand_b, int c, int d, int target)`
+`int MachineBuilder.emit(MachineBuilder &b, int op, int a, int operand_b, int c, int d, int target)`
 
 Append one range-checked instruction and return its site. The opcode need
 only fit in a byte; a decoder reports unsupported words. `a` and `target`
@@ -599,7 +597,7 @@ Source: `lib/match/wordcode.x`
 <a id="MachineBuilder.patch"></a>
 #### MachineBuilder.patch
 
-`void MachineBuilder.patch( MachineBuilder &b, int *sites, int count, int target)`
+`void MachineBuilder.patch(MachineBuilder &b, int *sites, int count, int target)`
 
 Apply one validated target to the listed patch sites in order. Negative
 sites are ignored; each nonnegative site must name emitted code. An
@@ -646,7 +644,7 @@ Source: `lib/match/wordcode.x`
 <a id="MachineSlot.final_equal"></a>
 #### MachineSlot.final_equal
 
-`inline int MachineSlot.final_equal( MachineSlot *slot, List input, MachineStats *stats)`
+`inline int MachineSlot.final_equal(MachineSlot *slot, List input, MachineStats *stats)`
 
 Compares a captured value or span with an exact final List.
 
@@ -661,7 +659,7 @@ Source: `lib/match/wordcode.x`
 <a id="MachineSlot.prefix_equal"></a>
 #### MachineSlot.prefix_equal
 
-`inline int MachineSlot.prefix_equal( MachineSlot *slot, List input, int length, MachineStats *stats)`
+`inline int MachineSlot.prefix_equal(MachineSlot *slot, List input, int length, MachineStats *stats)`
 
 Compares a captured value or span with an exact List prefix.
 
@@ -676,7 +674,7 @@ Source: `lib/match/wordcode.x`
 <a id="MatchCache.acquire"></a>
 #### MatchCache.acquire
 
-`Symbol MatchCache.acquire( MatchCache m, Var pattern, MatchLease &lease, const char *owner)`
+`Symbol MatchCache.acquire(MatchCache m, Var pattern, MatchLease &lease, const char *owner)`
 
 Acquires a lease for a cached prepared pattern.
 `cache` and `lease` must be nonnull, and `owner` names the operation a
@@ -751,7 +749,7 @@ Source: `lib/match/cache.x`
 <a id="MatchCache.search"></a>
 #### MatchCache.search
 
-`int MatchCache.search( MatchCache cache, List input, Var pattern, List &out_results, const char *owner)`
+`int MatchCache.search(MatchCache cache, List input, Var pattern, List &out_results, const char *owner)`
 
 Searches through `cache`, writing every match.
 `out_results` must be nonnull. It receives the reverse-visitation result
@@ -767,7 +765,7 @@ Source: `lib/match/cache.x`
 <a id="MatchCache.search_replace"></a>
 #### MatchCache.search_replace
 
-`int MatchCache.search_replace( MatchCache cache, List input, Var pattern, Var template, List &out, const char *owner)`
+`int MatchCache.search_replace(MatchCache cache, List input, Var pattern, Var template, List &out, const char *owner)`
 
 Replaces every match through `cache` from the leaves upward.
 `out` must be nonnull. A completed prepared traversal returns 1 and writes
@@ -782,7 +780,7 @@ Source: `lib/match/cache.x`
 <a id="MatchCache.try_capture"></a>
 #### MatchCache.try_capture
 
-`int MatchCache.try_capture( MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures, const char *owner)`
+`int MatchCache.try_capture(MatchCache cache, List input, Var pattern, MatchCaptureBuffer &?captures, const char *owner)`
 
 Matches through `cache` into caller-owned positional storage.
 Returns 1 only after atomically committing a valid buffer. A miss,
@@ -797,7 +795,7 @@ Source: `lib/match/cache.x`
 <a id="MatchCache.try_match"></a>
 #### MatchCache.try_match
 
-`int MatchCache.try_match( MatchCache cache, List input, Var pattern, List &?out_bindings, const char *owner)`
+`int MatchCache.try_match(MatchCache cache, List input, Var pattern, List &?out_bindings, const char *owner)`
 
 Matches through `cache`, writing bindings on success.
 `out_bindings` must be nonnull. Returns 0 and leaves it unchanged for a
@@ -812,7 +810,7 @@ Source: `lib/match/cache.x`
 <a id="MatchCache.try_match_replace"></a>
 #### MatchCache.try_match_replace
 
-`int MatchCache.try_match_replace( MatchCache cache, List input, Var pattern, Var template, Var &?out, const char *owner)`
+`int MatchCache.try_match_replace(MatchCache cache, List input, Var pattern, Var template, Var &?out, const char *owner)`
 
 `Match`-replaces through `cache`, writing the replacement on success.
 `out` must be nonnull. Returns 0 and leaves it unchanged on a miss,
@@ -827,7 +825,7 @@ Source: `lib/match/cache.x`
 <a id="MatchCache.try_search"></a>
 #### MatchCache.try_search
 
-`int MatchCache.try_search( MatchCache cache, List input, Var pattern, Var &?out_match, List &?out_bindings, const char *owner)`
+`int MatchCache.try_search(MatchCache cache, List input, Var pattern, Var &?out_match, List &?out_bindings, const char *owner)`
 
 Searches through `cache`, writing the first match and bindings.
 Both outputs must be nonnull. Returns 0 and leaves them unchanged on a
@@ -953,7 +951,8 @@ Source: `lib/match/machine.x`
 Begins a valid Match program in opened, completed storage.
 Borrows its view and input Lists until finish. Zero undo entries prove
 every slot of the previous program was restored, so only the new program's
-binder slots are initialized. A dirty machine records <not-idle> and stops.
+binder slots are initialized. A dirty machine records `<not-idle>` and
+stops.
 
 Source: `lib/match/machine.x`
 
@@ -997,8 +996,8 @@ Source: `lib/match/machine.x`
 Materializes a borrowed span.
 A complete suffix shares the existing immutable List directly, an empty
 span returns nil, and a proper prefix copies through growable machine
-scratch once. An invalid end stores <bad-span>; allocation and consing can
-raise.
+scratch once. An invalid end stores `<bad-span>`; allocation and consing
+can raise.
 
 Source: `lib/match/machine.x`
 
@@ -1069,7 +1068,7 @@ Source: `lib/match/sites.x`
 <a id="MatchPlan.execute"></a>
 #### MatchPlan.execute
 
-`int MatchPlan.execute( MatchPlan plan, Var input, List &?out_bindings, MachineStats &?stats)`
+`int MatchPlan.execute(MatchPlan plan, Var input, List &?out_bindings, MachineStats &?stats)`
 
 Executes `plan` against `input` and publishes association bindings.
 Returns 1 and writes `out_bindings` on a match, 0 on a miss, and -1 for a
@@ -1086,7 +1085,7 @@ Source: `lib/match/execution.x`
 <a id="MatchPlan.execute_capture"></a>
 #### MatchPlan.execute_capture
 
-`int MatchPlan.execute_capture( MatchPlan m, Var input, MatchCaptureBuffer &?captures, MachineStats &?stats)`
+`int MatchPlan.execute_capture(MatchPlan m, Var input, MatchCaptureBuffer &?captures, MachineStats &?stats)`
 
 Executes a prepared plan into caller-owned positional storage.
 Returns 1 on a match, 0 on a miss, and -1 for a null or malformed plan, an
@@ -1161,7 +1160,7 @@ Source: `lib/match/traversal.x`
 <a id="MatchPlan.search_replace"></a>
 #### MatchPlan.search_replace
 
-`int MatchPlan.search_replace( MatchPlan plan, List input, Var template, List &?out)`
+`int MatchPlan.search_replace(MatchPlan plan, List input, Var template, List &?out)`
 
 Replaces every match of `plan` from the leaves upward.
 Returns 1 and writes the completed `List` even when nothing matched.
@@ -1177,7 +1176,7 @@ Source: `lib/match/traversal.x`
 <a id="MatchPlan.try_capture"></a>
 #### MatchPlan.try_capture
 
-`int MatchPlan.try_capture( MatchPlan plan, List input, MatchCaptureBuffer &?captures)`
+`int MatchPlan.try_capture(MatchPlan plan, List input, MatchCaptureBuffer &?captures)`
 
 Executes a prepared `List` match into caller-owned positional storage.
 This is `MatchPlan.execute_capture` without statistics and has the same
@@ -1199,7 +1198,7 @@ Source: `lib/match/execution.x`
 <a id="MatchPlan.try_match_replace"></a>
 #### MatchPlan.try_match_replace
 
-`int MatchPlan.try_match_replace( MatchPlan plan, List input, Var template, Var &?out)`
+`int MatchPlan.try_match_replace(MatchPlan plan, List input, Var template, Var &?out)`
 
 Executes `plan` and writes the instantiated `template` on success.
 Returns 1 after writing any `Var` result, 0 on a miss, and -1 for an
@@ -1214,7 +1213,7 @@ Source: `lib/match/templates.x`
 <a id="MatchPlan.try_search"></a>
 #### MatchPlan.try_search
 
-`int MatchPlan.try_search( MatchPlan plan, List input, Var &?out_match, List &?out_bindings)`
+`int MatchPlan.try_search(MatchPlan plan, List input, Var &?out_match, List &?out_bindings)`
 
 Searches `input` with `plan`, writing the first match and bindings.
 Traversal is depth-first head, tail, then containing `List`. Returns 1 on a
@@ -1505,7 +1504,3 @@ captures to caller-owned storage only after the whole match succeeds.
 Association-List results are published from committed captures. New
 Lists canonicalize through the active pool chain; a result may belong to
 an ancestor and lives until its owning pool is released.
-
-## Tests and examples
-
-`make verify` (`unittest/test-match.x`, `unittest/test-match-plan.x`, `unittest/test-match-cache.x`, and `unittest/test-machine.x`) and `make examples` (`match-nested`).

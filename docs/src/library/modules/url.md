@@ -5,6 +5,8 @@
 
 URL references and query strings.
 
+Include it with `#include "url.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -110,7 +112,3 @@ RFC 3986 names and keeps each as written, percent-encoding included;
 `String.percent_decode` decodes one. `Url.str` joins them again. The
 empty `String` is the null pointer, so an empty query or fragment is
 the same as an absent one, and formatting drops a bare `?` or `#`.
-
-## Tests and examples
-
-`make verify` (`unittest/test-url.x`).

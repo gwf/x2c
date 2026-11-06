@@ -105,7 +105,7 @@ Source: `src/callables/callbacks.x`
 <a id="Compiler.maybe_adapt_func_arg"></a>
 #### Compiler.maybe_adapt_func_arg
 
-`List Compiler.maybe_adapt_func_arg( Compiler c, List argument, List expected_type)`
+`List Compiler.maybe_adapt_func_arg(Compiler c, List argument, List expected_type)`
 
 Adapts a direct native function argument when `FuncAdapter` is expected.
 A noncapturing lambda is lowered to its direct function designator. Other

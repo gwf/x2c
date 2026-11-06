@@ -5,6 +5,8 @@
 
 SHA-256 digests of Strings and streams.
 
+Include it with `#include "digest.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -42,7 +44,3 @@ Source: `lib/digest.x`
 A digest is the 64-character lowercase hexadecimal `String` that
 `shasum -a 256` prints. A stream digest reads raw bytes, so a file that
 holds NUL bytes, which a `String` cannot, hashes like any other.
-
-## Tests and examples
-
-`make verify` (`unittest/test-digest.x`).

@@ -5,6 +5,8 @@
 
 UTF-8 code points and base64, hex, and percent encodings.
 
+Include it with `#include "encoding.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -295,7 +297,3 @@ ASCII text and back. A `String` cannot hold a NUL byte, so a decoder
 that returns a `String` raises `<malformed>` for one, and its `_bytes`
 form returns a `Block` of 1-byte elements instead. Invalid input raises
 `<malformed>` with the operation, a reason, and the input byte `offset`.
-
-## Tests and examples
-
-`make verify` (`unittest/test-encoding.x`).

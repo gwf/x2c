@@ -27,7 +27,7 @@ Lambda parsing and capture resolution.
 <a id="Compiler.begin_lambda_captures"></a>
 #### Compiler.begin_lambda_captures
 
-`void Compiler.begin_lambda_captures( Compiler c, List references, List supplied)`
+`void Compiler.begin_lambda_captures(Compiler c, List references, List supplied)`
 
 Opens lexical capture resolution while a lambda body is parsed or bound.
 `references` names explicitly shared surrounding bindings; `supplied`
@@ -39,7 +39,7 @@ Source: `src/lambdas.x`
 <a id="Compiler.bind_lambda_expression"></a>
 #### Compiler.bind_lambda_expression
 
-`List Compiler.bind_lambda_expression( Compiler c, Type type, List parameters, List supplied, List body)`
+`List Compiler.bind_lambda_expression(Compiler c, Type type, List parameters, List supplied, List body)`
 
 Binds a constructed lambda through the lexical capture operations used by
 source literals. Parameter declarations keep their existing declarators;

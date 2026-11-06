@@ -25,7 +25,7 @@ Values that can outlive the region that allocated them.
 <a id="Compiler.audit_regions"></a>
 #### Compiler.audit_regions
 
-`Map Compiler.audit_regions( Compiler c, List ast, Map seed, Map effects, Array findings)`
+`Map Compiler.audit_regions(Compiler c, List ast, Map seed, Map effects, Array findings)`
 
 Computes one unit's region summaries and findings for an optional
 project audit. `seed` contains prior project-round summaries indexed by

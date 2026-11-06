@@ -5,6 +5,8 @@
 
 Line differences between two texts.
 
+Include it with `#include "diff.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -30,7 +32,7 @@ Source: `lib/diff.x`
 <a id="Diff.unified"></a>
 #### Diff.unified
 
-`meta native String Diff.unified( String old, String new, String old_name, String new_name)`
+`meta native String Diff.unified(String old, String new, String old_name, String new_name)`
 
 Returns the unified difference between `old` and `new`, as `diff -u`
 prints it with `old_name` and `new_name` in the header and three lines
@@ -60,7 +62,3 @@ found with the Myers algorithm after trimming the lines both share at
 each end, and its unified spelling. Each search step keeps only its
 frontier, so the cost is the square of the edit distance; past `_LIMIT`
 edits the middle becomes one deletion run and one insertion run.
-
-## Tests and examples
-
-`make verify` (`unittest/test-diff.x`).

@@ -6,7 +6,7 @@
 
 # `src/cli/cli.x`
 
-X2c command-line parsing and presentation.
+x2c command-line parsing and presentation.
 
 ## Functions
 

@@ -6,7 +6,7 @@
 
 # `src/type.x`
 
-X2c semantic types.
+x2c semantic types.
 
 ## Functions
 
@@ -144,7 +144,7 @@ Source: `src/type.x`
 <a id="Type.var_tag_row"></a>
 #### Type.var_tag_row
 
-`int Type.var_tag_row( Symbol tag, unsigned long &top, unsigned long &mask, unsigned long &bottom)`
+`int Type.var_tag_row(Symbol tag, unsigned long &top, unsigned long &mask, unsigned long &bottom)`
 
 Reads the encoding row of `tag` into `top`, `mask`, and `bottom` and
 reports whether one exists. A tag whose decoded form carries a validity

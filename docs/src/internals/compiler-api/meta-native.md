@@ -71,7 +71,7 @@ Source: `src/meta-native/modules.x`
 <a id="Compiler.apply_meta_binding"></a>
 #### Compiler.apply_meta_binding
 
-`Var Compiler.apply_meta_binding( Compiler c, String name, Var function, List arguments)`
+`Var Compiler.apply_meta_binding(Compiler c, String name, Var function, List arguments)`
 
 Calls `function`, the binding of `name`, with `arguments`; what it
 allocates belongs to the unit's values Scope. A declared native
@@ -83,7 +83,7 @@ Source: `src/meta-native/calls.x`
 <a id="Compiler.apply_meta_function"></a>
 #### Compiler.apply_meta_function
 
-`Var Compiler.apply_meta_function( Compiler c, String name, List arguments, Token site)`
+`Var Compiler.apply_meta_function(Compiler c, String name, List arguments, Token site)`
 
 Applies the meta function spelled `name` to the evaluated `arguments`
 at `site`, outside any expansion. A call the project meta build leaves
@@ -149,7 +149,7 @@ Source: `src/meta-native/modules.x`
 <a id="Compiler.evaluate_meta_expression"></a>
 #### Compiler.evaluate_meta_expression
 
-`List Compiler.evaluate_meta_expression( Compiler c, List expression, Token site)`
+`List Compiler.evaluate_meta_expression(Compiler c, List expression, Token site)`
 
 Executes an explicit meta call and inserts its result at a code
 boundary.
@@ -159,7 +159,7 @@ Source: `src/meta-native/calls.x`
 <a id="Compiler.evaluate_meta_statement"></a>
 #### Compiler.evaluate_meta_statement
 
-`List Compiler.evaluate_meta_statement( Compiler c, List expression, Symbol context, Token site)`
+`List Compiler.evaluate_meta_statement(Compiler c, List expression, Symbol context, Token site)`
 
 Executes an explicit meta call written as a whole statement at
 `context`. A code List result binds there, so the call may return a
@@ -181,7 +181,7 @@ Source: `src/meta-native/modules.x`
 <a id="Compiler.install_collected_meta_function"></a>
 #### Compiler.install_collected_meta_function
 
-`void Compiler.install_collected_meta_function( Compiler c, List declaration, Token marker)`
+`void Compiler.install_collected_meta_function(Compiler c, List declaration, Token marker)`
 
 Installs the stub of the bodied `meta` definition `declaration` whose
 body collection skips, so a file-scope constant after it can call it in
@@ -195,7 +195,7 @@ Source: `src/meta-native/functions.x`
 <a id="Compiler.install_meta_declaration"></a>
 #### Compiler.install_meta_declaration
 
-`void Compiler.install_meta_declaration( Compiler c, List declaration, Token marker)`
+`void Compiler.install_meta_declaration(Compiler c, List declaration, Token marker)`
 
 Applies a contextual `meta` marker to one initialized file-static value.
 The unit's staged `meta` group holds the compile-time instance, which
@@ -231,7 +231,7 @@ Source: `src/meta-native/bindings.x`
 <a id="Compiler.install_native_meta_function"></a>
 #### Compiler.install_native_meta_function
 
-`void Compiler.install_native_meta_function( Compiler c, List declaration, Token marker)`
+`void Compiler.install_native_meta_function(Compiler c, List declaration, Token marker)`
 
 Installs a prototype-only `meta` function from the compiler's trusted
 native target registry. The declaration keeps its ordinary runtime form.
@@ -391,7 +391,7 @@ Source: `src/meta-native/modules.x`
 <a id="Compiler.record_native_meta_effect"></a>
 #### Compiler.record_native_meta_effect
 
-`void Compiler.record_native_meta_effect( Compiler c, List declaration, Token marker)`
+`void Compiler.record_native_meta_effect(Compiler c, List declaration, Token marker)`
 
 The shallow interface retains the advertisement separately from the C
 declaration. That lets a client install the trusted evaluator binding
@@ -402,7 +402,7 @@ Source: `src/meta-native/bindings.x`
 <a id="Compiler.record_project_meta_effect"></a>
 #### Compiler.record_project_meta_effect
 
-`void Compiler.record_project_meta_effect( Compiler c, List declaration, Token marker)`
+`void Compiler.record_project_meta_effect(Compiler c, List declaration, Token marker)`
 
 Records the provider of a public bodied meta function in its interface.
 The provider owns both its native body and its compile-time state.
@@ -412,7 +412,7 @@ Source: `src/meta-native/functions.x`
 <a id="Compiler.run_meta_call"></a>
 #### Compiler.run_meta_call
 
-`Var Compiler.run_meta_call( Compiler c, List expression, Token site, int slot)`
+`Var Compiler.run_meta_call(Compiler c, List expression, Token site, int slot)`
 
 Runs the explicit meta call `expression` at `site`. The project meta
 build's own parse leaves a project function's call for the translation:
@@ -436,7 +436,7 @@ Source: `src/meta-native/modules.x`
 <a id="Compiler.select_package_module"></a>
 #### Compiler.select_package_module
 
-`void Compiler.select_package_module( Compiler c, String name, String root, Token token)`
+`void Compiler.select_package_module(Compiler c, String name, String root, Token token)`
 
 Selects package `name`'s native module, when it has one, after the
 modules already selected, and records it as a prerequisite of the unit.

@@ -40,9 +40,7 @@ Shipped `meta` code compiled into the compiler.
 | [`test_register`](#test_register) | Keeps a decorated test and registers it at unit initialization. |
 | [`try_lowering`](#try_lowering) | Lowers the parsed try `node` to its landing form. |
 
-### Functions
-
-#### access_postfix
+### access_postfix
 
 `Code access_postfix(Code code)`
 
@@ -50,7 +48,7 @@ Stores the updated element and returns its previous value.
 
 Source: `src/linked-meta.x`
 
-#### access_prefix
+### access_prefix
 
 `Code access_prefix(Code code)`
 
@@ -58,7 +56,7 @@ Stores and returns the incremented or decremented element.
 
 Source: `src/linked-meta.x`
 
-#### access_read
+### access_read
 
 `Code access_read(Code code)`
 
@@ -66,7 +64,7 @@ Calls the getter bracket admission selected.
 
 Source: `src/linked-meta.x`
 
-#### access_store
+### access_store
 
 `Code access_store(Code code)`
 
@@ -75,7 +73,7 @@ participant's `setindex` member.
 
 Source: `src/linked-meta.x`
 
-#### access_update
+### access_update
 
 `Code access_update(Code code)`
 
@@ -84,7 +82,7 @@ participant's `updateindex` member.
 
 Source: `src/linked-meta.x`
 
-#### delegate_member
+### delegate_member
 
 `Code delegate_member(Code code)`
 
@@ -93,7 +91,7 @@ delegate field path that provides the method.
 
 Source: `src/linked-meta.x`
 
-#### destructure_declaration
+### destructure_declaration
 
 `Code destructure_declaration(Code node)`
 
@@ -104,7 +102,7 @@ its element.
 
 Source: `src/linked-meta.x`
 
-#### destructure_statement
+### destructure_statement
 
 `Code destructure_statement(Code node)`
 
@@ -112,7 +110,7 @@ Reads the source of `(a, b) = source;` into its targets in a block.
 
 Source: `src/linked-meta.x`
 
-#### destructure_value
+### destructure_value
 
 `Code destructure_value(Code node)`
 
@@ -121,7 +119,7 @@ source in a result local as the expression's value.
 
 Source: `src/linked-meta.x`
 
-#### dynamic_binary
+### dynamic_binary
 
 `Code dynamic_binary(Code code)`
 
@@ -133,7 +131,7 @@ and binding would search the whole remaining chain each time.
 
 Source: `src/linked-meta.x`
 
-#### dynamic_change
+### dynamic_change
 
 `Code dynamic_change(Code code)`
 
@@ -142,7 +140,7 @@ forms return the value before the change.
 
 Source: `src/linked-meta.x`
 
-#### dynamic_compound
+### dynamic_compound
 
 `Code dynamic_compound(Code code)`
 
@@ -151,7 +149,7 @@ through the update helper of its storage.
 
 Source: `src/linked-meta.x`
 
-#### dynamic_unary
+### dynamic_unary
 
 `Code dynamic_unary(Code code)`
 
@@ -159,7 +157,7 @@ Rejects a unary numeric operator on a `Var`.
 
 Source: `src/linked-meta.x`
 
-#### lambda_cells
+### lambda_cells
 
 `Code lambda_cells(Code node)`
 
@@ -173,7 +171,7 @@ as they are bound.
 
 Source: `src/linked-meta.x`
 
-#### lambda_closure
+### lambda_closure
 
 `Code lambda_closure(Code node)`
 
@@ -183,7 +181,7 @@ captured values and addresses.
 
 Source: `src/linked-meta.x`
 
-#### lambda_lift
+### lambda_lift
 
 `Code lambda_lift(Code node)`
 
@@ -192,7 +190,7 @@ is its value.
 
 Source: `src/linked-meta.x`
 
-#### linked_meta_hashes
+### linked_meta_hashes
 
 `Map linked_meta_hashes(void)`
 
@@ -200,7 +198,7 @@ Returns linked definition hashes and provider source dependencies.
 
 Source: `src/linked-meta.x`
 
-#### linked_meta_targets
+### linked_meta_targets
 
 `Map linked_meta_targets(void)`
 
@@ -209,7 +207,7 @@ The Map borrows shared Func handles that live for the program.
 
 Source: `src/linked-meta.x`
 
-#### match_condition_lowering
+### match_condition_lowering
 
 `Code match_condition_lowering(Code node)`
 
@@ -217,7 +215,7 @@ Lowers a pattern condition through the ordinary match tests.
 
 Source: `src/linked-meta.x`
 
-#### match_lowering
+### match_lowering
 
 `Code match_lowering(Code node)`
 
@@ -226,7 +224,7 @@ and bodies.
 
 Source: `src/linked-meta.x`
 
-#### printf_values
+### printf_values
 
 `Code printf_values(Code code)`
 
@@ -234,7 +232,7 @@ Reads the Var values a printf-family call's static format consumes.
 
 Source: `src/linked-meta.x`
 
-#### protocol_conformance
+### protocol_conformance
 
 `Code protocol_conformance(Code node)`
 
@@ -243,7 +241,7 @@ descriptor registration of one conformance.
 
 Source: `src/linked-meta.x`
 
-#### raise_lowering
+### raise_lowering
 
 `Code raise_lowering(Code node)`
 
@@ -252,7 +250,7 @@ already have their types.
 
 Source: `src/linked-meta.x`
 
-#### register_rewrite
+### register_rewrite
 
 `Code register_rewrite(Code function, Code pattern, List holes)`
 
@@ -260,7 +258,7 @@ Registers the decorated translator with its pattern and hole patterns.
 
 Source: `src/linked-meta.x`
 
-#### string_switch_lowering
+### string_switch_lowering
 
 `Code string_switch_lowering(Code node)`
 
@@ -269,7 +267,7 @@ index among the labels it owns, or declines another switch.
 
 Source: `src/linked-meta.x`
 
-#### test_register
+### test_register
 
 `List test_register(List function)`
 
@@ -277,7 +275,7 @@ Keeps a decorated test and registers it at unit initialization.
 
 Source: `src/linked-meta.x`
 
-#### try_lowering
+### try_lowering
 
 `Code try_lowering(Code node)`
 

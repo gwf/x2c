@@ -116,7 +116,7 @@ Source: `lib/mutex.x`
 <a id="Mutex.recursive_lock"></a>
 #### Mutex.recursive_lock
 
-`void Mutex.recursive_lock( pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void), const char *failure)`
+`void Mutex.recursive_lock(pthread_mutex_t *mutex, pthread_once_t *once, void (*initialize)(void), const char *failure)`
 
 Initializes through `once`, then locks the recursive mutex.
 On pthread failure, prints `failure` to native stderr and aborts.
@@ -137,7 +137,3 @@ Source: `lib/mutex.x`
 
 `Mutex` is an opaque native mutex. Its `Scope` owner must outlive every
 thread that can use it, and it may be freed only while unlocked.
-
-## Tests and examples
-
-`make verify` (`unittest/test-mutex.x`).

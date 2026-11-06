@@ -56,7 +56,7 @@ Source: `src/toolchain.x`
 <a id="ToolAction.new"></a>
 #### ToolAction.new
 
-`ToolAction ToolAction.new( Symbol phase, List arguments, int verbose, int dry_run)`
+`ToolAction ToolAction.new(Symbol phase, List arguments, int verbose, int dry_run)`
 
 Creates a `Scope`-owned action that reports nonzero status by default.
 The action retains `arguments` without copying them.
@@ -123,7 +123,7 @@ Source: `src/toolchain.x`
 <a id="Toolchain.archive_action"></a>
 #### Toolchain.archive_action
 
-`ToolAction Toolchain.archive_action( Toolchain t, String output, List objects)`
+`ToolAction Toolchain.archive_action(Toolchain t, String output, List objects)`
 
 Builds but does not start an `ar rcs` action in object-list order.
 The action does not remove an existing archive, so callers requiring exact
@@ -136,7 +136,7 @@ Source: `src/toolchain.x`
 <a id="Toolchain.compile_action"></a>
 #### Toolchain.compile_action
 
-`ToolAction Toolchain.compile_action( Toolchain t, String source, String object, String depfile, List gen_dirs)`
+`ToolAction Toolchain.compile_action(Toolchain t, String source, String object, String depfile, List gen_dirs)`
 
 Builds but does not start one C compilation action.
 Generated include directories precede the x2c include directory and
@@ -184,7 +184,7 @@ Source: `src/toolchain.x`
 <a id="Toolchain.module_action"></a>
 #### Toolchain.module_action
 
-`ToolAction Toolchain.module_action( Toolchain t, String output, List inputs, String loader)`
+`ToolAction Toolchain.module_action(Toolchain t, String output, List inputs, String loader)`
 
 Builds but does not start the link of a native module. The module leaves
 the x2c runtime unresolved and uses the loading process's copy. macOS
@@ -217,7 +217,7 @@ Source: `src/toolchain.x`
 <a id="Toolchain.preprocess"></a>
 #### Toolchain.preprocess
 
-`int Toolchain.preprocess( Toolchain t, const char *fname, List include_dirs, const char *imacros, String &output, String &errors, String &dependencies)`
+`int Toolchain.preprocess(Toolchain t, const char *fname, List include_dirs, const char *imacros, String &output, String &errors, String &dependencies)`
 
 Runs the configured C preprocessor without a shell.
 `include_dirs` precede the system directories, and the runtime header
@@ -241,7 +241,7 @@ Source: `src/toolchain.x`
 <a id="Toolchain.preprocess_action"></a>
 #### Toolchain.preprocess_action
 
-`ToolAction Toolchain.preprocess_action( Toolchain t, String source, String output, List gen_dirs)`
+`ToolAction Toolchain.preprocess_action(Toolchain t, String source, String output, List gen_dirs)`
 
 Builds the preprocessor action whose output identifies an object.
 It uses the compilation's native flags and include order and keeps line

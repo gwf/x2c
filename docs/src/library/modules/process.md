@@ -5,6 +5,8 @@
 
 Run commands and pipelines without a shell.
 
+Include it with `#include "process.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -317,6 +319,6 @@ status, with 128 plus the signal for a signalled stage. The calling
 process's own environment is read here too, beside the `env` option that
 sets a child's.
 
-## Tests and examples
+## Examples
 
-`make verify` (`unittest/test-process.x`) and `make examples` (`scripts/line-counts`).
+- [`scripts/line-counts`](https://github.com/gwf/x2c/blob/main/examples/scripts/line-counts.x)

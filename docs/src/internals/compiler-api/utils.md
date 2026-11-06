@@ -89,7 +89,7 @@ Source: `src/utils.x`
 
 #### x2c_initialize_command_environment
 
-`void x2c_initialize_command_environment( const char *argv0, String embedded_identity)`
+`void x2c_initialize_command_environment(const char *argv0, String embedded_identity)`
 
 Initializes an external command with the compiler identity embedded when
 it was built. A driver-supplied identity must match that compiler.
@@ -447,7 +447,7 @@ Source: `src/utils.x`
 <a id="SourceView.package_entry"></a>
 #### SourceView.package_entry
 
-`String SourceView.package_entry( SourceView sources, List roots, String name, String &directory)`
+`String SourceView.package_entry(SourceView sources, List roots, String name, String &directory)`
 
 Resolves the first readable package entry under `roots`, preferring `.x`
 to `.xp`, using the importing compiler's source view. Returns its directory

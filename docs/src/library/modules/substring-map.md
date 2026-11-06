@@ -5,6 +5,8 @@
 
 Native counts of borrowed String views.
 
+Include it with `#include "substring-map.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -147,7 +149,7 @@ Source: `lib/substring-map.x`
 <a id="MapSubInt.try_next"></a>
 #### MapSubInt.try_next
 
-`int MapSubInt.try_next( MapSubInt map, unsigned &cursor, Substr &word, int &count)`
+`int MapSubInt.try_next(MapSubInt map, unsigned &cursor, Substr &word, int &count)`
 
 Yields each unique view and its count without allocating.
 
@@ -215,6 +217,6 @@ preserves the table and exports the source Strings used by its views.
 
 Source: `lib/substring-map.x`
 
-## Tests and examples
+## Examples
 
-`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v4.x` demonstrates native word counts.
+- [`c2x2c/words-v4`](https://github.com/gwf/x2c/blob/main/examples/c2x2c/words-v4.x)

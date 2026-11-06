@@ -47,7 +47,7 @@ Source: `src/meta-group/staging.x`
 <a id="Compiler.emit_session_function"></a>
 #### Compiler.emit_session_function
 
-`List Compiler.emit_session_function( Compiler c, List declarations, Func prepare, String &failure)`
+`List Compiler.emit_session_function(Compiler c, List declarations, Func prepare, String &failure)`
 
 Emits one session factory without compiling or loading its module.
 The caller uses its configured native toolchain and retains the result.
@@ -160,7 +160,7 @@ Source: `src/meta-group/selection.x`
 <a id="Compiler.public_native_function"></a>
 #### Compiler.public_native_function
 
-`int Compiler.public_native_function( Compiler c, List function, String name)`
+`int Compiler.public_native_function(Compiler c, List function, String name)`
 
 Reports whether a definition has public native linkage.
 Main is excluded because its process entry needs a separate adapter.
@@ -170,7 +170,7 @@ Source: `src/meta-group/selection.x`
 <a id="Compiler.refuse_meta_call"></a>
 #### Compiler.refuse_meta_call
 
-`void Compiler.refuse_meta_call( Compiler c, String name, Token site, String why)`
+`void Compiler.refuse_meta_call(Compiler c, String name, Token site, String why)`
 
 Reports at `site` that the `meta` function `name` cannot run at compile
 time, and `why`.

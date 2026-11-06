@@ -14,9 +14,7 @@ Interpolated Strings.
 | --- | --- |
 | [`interpolation_lowering`](#interpolation_lowering) | Joins an interpolated String's parts. |
 
-### Functions
-
-#### interpolation_lowering
+### interpolation_lowering
 
 `meta Code interpolation_lowering(Code code)`
 

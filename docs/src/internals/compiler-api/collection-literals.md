@@ -15,9 +15,7 @@ Array and Map literals.
 | [`array_literal`](#array_literal) | Builds an Array literal from its elements. |
 | [`map_literal`](#map_literal) | Builds a Map literal from its keys and values, alternating. |
 
-### Functions
-
-#### array_literal
+### array_literal
 
 `meta Code array_literal(Code code)`
 
@@ -25,7 +23,7 @@ Builds an Array literal from its elements.
 
 Source: `src/components/collection-literals.x`
 
-#### map_literal
+### map_literal
 
 `meta Code map_literal(Code code)`
 

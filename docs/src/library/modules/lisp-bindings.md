@@ -14,9 +14,7 @@ for source readers but are not supported as user API.
 | --- | --- |
 | [`x2c_lisp_exchange`](#x2c_lisp_exchange) | Exchanges the borrowed Lisp activation at an execution boundary. |
 
-### Functions
-
-#### x2c_lisp_exchange
+### x2c_lisp_exchange
 
 `Lisp x2c_lisp_exchange(Lisp lisp)`
 

@@ -6,7 +6,7 @@
 
 # `src/transform/transform.x`
 
-X2c AST transformation pipeline.
+x2c AST transformation pipeline.
 
 ## Functions
 
@@ -74,7 +74,7 @@ Source: `src/transform/expressions.x`
 <a id="Compiler.shipped_support"></a>
 #### Compiler.shipped_support
 
-`void Compiler.shipped_support( Compiler c, Symbol kind, List source, String form)`
+`void Compiler.shipped_support(Compiler c, Symbol kind, List source, String form)`
 
 Adds to the unit's pending support the file-scope code a rule gives
 the form `source` of `kind`, bound and lowered with the support. The

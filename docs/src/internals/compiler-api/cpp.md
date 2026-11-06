@@ -45,7 +45,7 @@ Source: `src/cpp/macros.x`
 <a id="Compiler.cpp_directive"></a>
 #### Compiler.cpp_directive
 
-`Symbol Compiler.cpp_directive( Compiler c, Cpp cpp, Token token, String path, Map active)`
+`Symbol Compiler.cpp_directive(Compiler c, Cpp cpp, Token token, String path, Map active)`
 
 Applies the directive `token` of the file `path` to `cpp` and returns
 its conditional kind: `<open>`, `<branch>`, `<close>`, or 0 for another

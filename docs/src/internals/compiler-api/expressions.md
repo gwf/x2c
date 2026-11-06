@@ -44,7 +44,7 @@ Expression syntax and its resolution.
 <a id="Compiler.check_explicit_converter"></a>
 #### Compiler.check_explicit_converter
 
-`void Compiler.check_explicit_converter( Compiler c, List parsed, Type target, int context)`
+`void Compiler.check_explicit_converter(Compiler c, List parsed, Type target, int context)`
 
 Reports `parsed` when it is the explicit converter call resolved last
 and `target` converts its receiver on its own: either side is Var, the
@@ -313,7 +313,7 @@ Source: `src/expressions/resolution.x`
 <a id="Compiler.resolve_postfix_member"></a>
 #### Compiler.resolve_postfix_member
 
-`List Compiler.resolve_postfix_member( Compiler c, Type receiver_type, List field, Symbol access, int call_context, List &?binding)`
+`List Compiler.resolve_postfix_member(Compiler c, Type receiver_type, List field, Symbol access, int call_context, List &?binding)`
 
 Resolves one field or method selection without consuming parser tokens.
 `field` is a single-name `List` and `access` is `.` or `->`. The result is

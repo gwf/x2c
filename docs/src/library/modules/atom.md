@@ -158,7 +158,3 @@ to the canonical `String`. Canonicalization makes equal long `Atom`s
 bit-identical. Compact `Atom`s have value lifetime. A long `Atom` borrows
 its canonical spelling, which may belong to any pool in the active chain.
 The spelling lives until its owning pool is released.
-
-## Tests and examples
-
-`make verify` (`unittest/test-atom.x`).

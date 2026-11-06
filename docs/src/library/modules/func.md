@@ -54,7 +54,7 @@ Source: `lib/func/func.x`
 
 #### x2c_func_reference_argument
 
-`void *x2c_func_reference_argument( Func fn, const FuncArg *argv, unsigned i, List want)`
+`void *x2c_func_reference_argument(Func fn, const FuncArg *argv, unsigned i, List want)`
 
 Checks a reference argument whose stored pointee matches `want` exactly.
 
@@ -64,7 +64,7 @@ Source: `lib/func/func.x`
 
 #### x2c_func_value_argument
 
-`Var x2c_func_value_argument( Func fn, const FuncArg *argv, unsigned i, Symbol want)`
+`Var x2c_func_value_argument(Func fn, const FuncArg *argv, unsigned i, Symbol want)`
 
 Checks and converts value argument `i`, reporting its position.
 Generated adapters call this once per value parameter before unboxing, so a
@@ -168,7 +168,7 @@ Source: `lib/func/func.x`
 <a id="Func.new_context"></a>
 #### Func.new_context
 
-`Func Func.new_context( FuncAdapter adapter, List signature, const void *context, size_t context_size)`
+`Func Func.new_context(FuncAdapter adapter, List signature, const void *context, size_t context_size)`
 
 Builds a binding with copied context in the current `Scope`.
 A final `(.... "List")` or `(.... "Map")` signature parameter, the Type
@@ -295,7 +295,7 @@ for source readers but are not supported as user API.
 
 #### x2c_func_declared_reference_argument
 
-`void *x2c_func_declared_reference_argument( Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)`
+`void *x2c_func_declared_reference_argument(Func fn, const FuncArg *argv, unsigned i, List declared_target, List want)`
 
 Checks a generated adapter's declared pointee against the stored signature
 and its resolved `want` against the source address before casting.

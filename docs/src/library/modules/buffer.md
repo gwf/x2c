@@ -373,7 +373,3 @@ Source: `lib/buffer.x`
 position and leading indentation of the current line, supports nested
 tabstops, and provides bulk character writes for formatting hot paths.
 Embedded NUL is rejected because `Buffer` materializes canonical `String`s.
-
-## Tests and examples
-
-`make verify` (`unittest/test-buffer.x`).

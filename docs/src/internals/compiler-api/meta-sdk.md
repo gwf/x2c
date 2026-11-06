@@ -98,7 +98,7 @@ Source: `src/meta-sdk/syntax.x`
 
 #### x2c_diagnostic_error_at
 
-`void x2c_diagnostic_error_at( Var node, Symbol category, String message, List notes)`
+`void x2c_diagnostic_error_at(Var node, Symbol category, String message, List notes)`
 
 Implements `x2c_diagnostic_error_at`, declared in `lib/meta.x`.
 
@@ -114,7 +114,7 @@ Source: `src/meta-sdk/context.x`
 
 #### x2c_diagnostic_fail_at
 
-`void x2c_diagnostic_fail_at( Var node, Symbol category, String message, List notes)`
+`void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes)`
 
 Implements `x2c_diagnostic_fail_at`, declared in `lib/meta.x`.
 

@@ -5,6 +5,8 @@
 
 Typed `Map`s generated from shared storage.
 
+Include it with `#include "typed-map.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -1958,7 +1960,3 @@ Source: `lib/typed-map.x`
 These optional families store keys and values in native record fields.
 Their static operations do not box through `Var`. Separate methods provide
 `Var` conversion and `Iter` traversal.
-
-## Tests and examples
-
-`make verify` (`unittest/test-typed-map.x`).

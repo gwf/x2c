@@ -6,7 +6,7 @@
 
 # `src/literals/literals.x`
 
-X2c literal parsing.
+x2c literal parsing.
 
 ## Functions
 

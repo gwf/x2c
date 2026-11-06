@@ -32,7 +32,7 @@ Source: `src/cache.x`
 <a id="Compiler.setup_cache_init"></a>
 #### Compiler.setup_cache_init
 
-`List Compiler.setup_cache_init( Compiler c, List header, List source, String prefix, String guard_name, String initializer_name)`
+`List Compiler.setup_cache_init(Compiler c, List header, List source, String prefix, String guard_name, String initializer_name)`
 
 Materializes cached literals and deferred file-static initialization.
 `header` and `source` must be partitioned lowered AST regions from this

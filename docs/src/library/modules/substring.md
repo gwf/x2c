@@ -5,6 +5,8 @@
 
 Borrowed immutable views of String bytes.
 
+Include it with `#include "substring.x"`.
+
 ## Primary API
 
 | Function | Summary |
@@ -135,6 +137,6 @@ Construct views through Substring.new or String.substring.
 
 Source: `lib/substring.x`
 
-## Tests and examples
+## Examples
 
-`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v2.x` demonstrates borrowed word iteration.
+- [`c2x2c/words-v2`](https://github.com/gwf/x2c/blob/main/examples/c2x2c/words-v2.x)
