@@ -109,9 +109,10 @@ Source: `src/toolchain.x`
 `int ToolRun.wait(ToolRun execution)`
 
 Waits for an execution, forwards its captured streams, and returns its
-shell-style status. Signals return `128 + signal`, a tool that could not
-start returns 127, and a dry run returns 0. Captured output goes to
-stderr; program actions inherit standard streams.
+shell-style status. Signals return `128 + signal`, and a dry run
+returns 0. A tool that could not start reports why, with how to select
+another, and returns 127. Captured output goes to stderr; program
+actions inherit standard streams.
 
 **Raises:** `<io-fail>`, `<bad-arg>`, `<size-limit>`, or `<alloc-fail>` while
 reading either capture as a `String`.
@@ -288,7 +289,7 @@ Source: `src/toolchain.x`
 `typedef struct ToolRun { ToolAction action, Job job, String start_error; } *ToolRun`
 
 Tracks one `Scope`-owned started action and its job.
-A tool that could not start has no job and keeps the message its
+A tool that could not start has no job and keeps the error its
 `ToolRun.wait` reports. The borrowed action must remain valid through
 that wait.
 

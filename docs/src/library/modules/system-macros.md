@@ -10,7 +10,3 @@ Include it with `#include "system-macros.x"`.
 It defines the `$dedent`, `$assert`, and `$time` macros; [Include the rest of
 the set](../../guide/system-macros.md#include-the-rest-of-the-set) describes
 them.
-
-## Design notes
-
-Include this module to use its declarations.

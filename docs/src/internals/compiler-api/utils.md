@@ -39,8 +39,8 @@ System utilities for environment discovery and workers.
 | [`Compiler.stage_dir`](#Compiler.stage_dir) | Returns the directory of a compiler staged at `<home>/builds/<stage>/`, or NULL for any other compiler. |
 | [`Diagnostics.driver_error`](#Diagnostics.driver_error) | Reports `message` with no note and exits as `Diagnostics.driver_fail` does. |
 | [`Diagnostics.driver_fail`](#Diagnostics.driver_fail) | Reports `message` and `note` as `Diagnostics.driver_report` does and exits with status 2. |
-| [`Diagnostics.driver_report`](#Diagnostics.driver_report) | Prints `x2c: error: <message>` to stderr, then `note: <note>` when `note` is not NULL, after clearing a transient progress line. |
-| [`Diagnostics.host_error`](#Diagnostics.host_error) | Reports a caught `<not-found>` or `<io-fail>` through `Diagnostics.driver_error` as its operation, path or program, and system reason. |
+| [`Diagnostics.driver_report`](#Diagnostics.driver_report) | Prints `x2c: error: <message>` to stderr, then ` note: <note>` when `note` is not NULL, after clearing a transient progress line. |
+| [`Diagnostics.host_error`](#Diagnostics.host_error) | Reports a caught `<not-found>` or `<io-fail>` through `Diagnostics.driver_error` as `cannot <action> '<subject>': <reason>`: what the operation was doing, its path or program, and the system reason. |
 | [`Env.find_program`](#Env.find_program) | Returns the spelling of the first `PATH` candidate for the program `name` that this process may execute, searched as `execvp` searches, or NULL. |
 | [`Path.content_identity`](#Path.content_identity) | Returns the identity a compiler executable at `path` has when it runs: the FNV-1a hash of its bytes, or NULL when `path` is NULL or unreadable. |
 | [`Path.identifier_hash`](#Path.identifier_hash) | Hashes unit filename spelling for stable generated C identifiers. |
@@ -344,7 +344,7 @@ Source: `src/utils.x`
 
 `void Diagnostics.driver_report(const char *message, const char *note)`
 
-Prints `x2c: error: <message>` to stderr, then `note: <note>` when
+Prints `x2c: error: <message>` to stderr, then `  note: <note>` when
 `note` is not NULL, after clearing a transient progress line. The
 caller decides how the command ends.
 
@@ -356,7 +356,8 @@ Source: `src/utils.x`
 `void Diagnostics.host_error(List detail)`
 
 Reports a caught `<not-found>` or `<io-fail>` through
-`Diagnostics.driver_error` as its operation, path or program, and system
+`Diagnostics.driver_error` as `cannot <action> '<subject>': <reason>`:
+what the operation was doing, its path or program, and the system
 reason.
 
 Source: `src/utils.x`

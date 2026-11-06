@@ -1488,7 +1488,8 @@ Public functions:
 `Type.numeric_literal`, `Type.numeric_literal_value`,
 `Type.integer_literal_magnitude`, `Type.is_integral`, `Type.is_enum`,
 `Type.scalar_tag`, `Type.scalar`, `Symbol.is_storage_class`,
-`Symbol.is_inline`, `Symbol.is_type_qualifier`, `Macro.declaration`
+`Symbol.is_inline`, `Symbol.is_type_qualifier`, `Type.spelling`,
+`Macro.declaration`
 
 ### [lib/typed-array.x](../lib/typed-array.x)
 

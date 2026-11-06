@@ -22,7 +22,7 @@ Compiler diagnostic storage and rendering.
 | [`Compiler.error_count`](#Compiler.error_count) | Returns the number of counted diagnostics accepted since the last reset. |
 | [`Compiler.expanding_macro`](#Compiler.expanding_macro) | Returns the name of the C macro whose expansion produced `token` of the compiler's token stream, or NULL. |
 | [`Compiler.file_prefix`](#Compiler.file_prefix) | Returns the prefix that the statics of the module file holding the current token take, or NULL outside a module unit. |
-| [`Compiler.macro_expansion_note`](#Compiler.macro_expansion_note) | Returns the innermost source expansion's definition and input note. |
+| [`Compiler.macro_expansion_note`](#Compiler.macro_expansion_note) | Returns the note naming the innermost source expansion and the place that defines it, with the path shown as diagnostic headings show it. |
 | [`Compiler.origin_location`](#Compiler.origin_location) | Resolves a recorded occurrence through generated ancestry to its source. |
 | [`Compiler.print_diagnostic`](#Compiler.print_diagnostic) | Writes one structured diagnostic entry and source context to stderr, or one JSON line after `diagnostics_write_json`. |
 | [`Compiler.report_error`](#Compiler.report_error) | Submits a located compiler error, then transfers or exits. |
@@ -161,7 +161,8 @@ Source: `src/diagnostics.x`
 
 `String Compiler.macro_expansion_note(Compiler c)`
 
-Returns the innermost source expansion's definition and input note.
+Returns the note naming the innermost source expansion and the place
+that defines it, with the path shown as diagnostic headings show it.
 
 Source: `src/diagnostics.x`
 

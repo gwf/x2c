@@ -61,6 +61,7 @@ Its operations run at runtime and at compile time.
 | [`Type.rest_index`](#Type.rest_index) | Returns the fixed prefix length, or -1 for a callable without a rest parameter. |
 | [`Type.scalar`](#Type.scalar) | Returns the normalized builtin scalar spelling, or `NULL` when `t` is not one valid scalar combination. |
 | [`Type.scalar_tag`](#Type.scalar_tag) | Returns the fixed `Var` numeric tag for `type`, or zero when none exists. |
+| [`Type.spelling`](#Type.spelling) | Returns `type` as a declaration spells it without a name, such as `int *`, `struct S`, or `int (*)(int, char *)`, or its `repr` when part of it has no source spelling. |
 | [`Type.tag`](#Type.tag) | Returns the one-element tag `List` of an enum, struct, or union `Type`. |
 | [`Type.var_numeric_extractor`](#Type.var_numeric_extractor) | Returns the numeric `Var` reader for `type`, or `NULL` when unsupported. |
 | [`Type.var_numeric_update_helper`](#Type.var_numeric_update_helper) | Returns the native numeric update helper for `type`, or `NULL` when the scalar has no registered update helper. |
@@ -533,6 +534,17 @@ Source: `lib/type.x`
 `Symbol Type.scalar_tag(Type type)`
 
 Returns the fixed `Var` numeric tag for `type`, or zero when none exists.
+
+Source: `lib/type.x`
+
+<a id="Type.spelling"></a>
+#### Type.spelling
+
+`String Type.spelling(Type type)`
+
+Returns `type` as a declaration spells it without a name, such as
+`int *`, `struct S`, or `int (*)(int, char *)`, or its `repr` when part
+of it has no source spelling. Storage classes and `inline` are omitted.
 
 Source: `lib/type.x`
 
