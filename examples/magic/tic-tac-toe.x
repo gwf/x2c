@@ -1,4 +1,9 @@
-/*  tic-tac-toe.x -- You play X; an editable Lisp program plays O. */
+/*  tic-tac-toe.x -- You play X; an editable Lisp program plays O.
+
+    x2c run -q examples/magic/tic-tac-toe.x -- examples/magic/tic-tac-toe.xlisp
+*/
+
+#include "path.x"
 
 static char board[] = "123456789";
 static int lines[8][3] = {
@@ -28,6 +33,10 @@ int main(int argc, char **argv) {
   if (argc != 2) {
     Stderr.puts("usage: tic-tac-toe STRATEGY.xlisp\n");
     return 2;
+  }
+  if (!Path.is_file(argv[1])) {
+    Stderr.printf("tic-tac-toe: no strategy file at %s\n", argv[1]);
+    return 1;
   }
   auto Lisp lisp = Lisp.new();
   $lisp.install(lisp, game);

@@ -7,11 +7,17 @@
 
 int main(int argc, char **argv) {
   Path root = argc > 1 ? argv[1]
-    : "examples/data/power-channel-word-count/words";
+    : example_data("power-channel-word-count/words");
   Map counts = auto directory_count(root);
   Array words = auto counts.keys().array().sort();
   foreach (String word in words) puts(%"$word $(counts[word])");
   return 0;
+}
+
+// The checked-in data sits beside the examples wherever they live.
+static Path example_data(String name) {
+  Path source = String.new(__FILE__);
+  return source.dirname().join("../data").join(name);
 }
 
 static Map directory_count(Path root) {

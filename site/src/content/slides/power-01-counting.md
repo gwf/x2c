@@ -5,10 +5,11 @@ tab: counting
 ---
 
 ```x2c
+~#include "path.x"
 ~int main(int argc, char **argv) {
 // words.txt: "Tea coffee tea" then "Milk coffee tea".
 String path = argc > 1 ? argv[1]
-                      : "examples/data/power-counting/words.txt";
+                      : example_data("power-counting/words.txt");
 Map counts = word_count(path);
 
 // Rank by count, breaking ties by word in the same descending order.
@@ -31,6 +32,12 @@ Map word_count(String path) {
       counts[word] += 1;
   return counts;
 }
+
+~// The checked-in data sits beside the examples wherever they live.
+~String example_data(String name) {
+~  Path source = String.new(__FILE__);
+~  return source.dirname().join("../data").join(name);
+~}
 ```
 
 `File` iteration, `String.lower`, and `Map` updates count words without

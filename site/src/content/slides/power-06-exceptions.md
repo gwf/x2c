@@ -6,12 +6,13 @@ tab: exceptions
 
 ```x2c
 ~#include <assert.h>
+~#include "path.x"
 ~#include <fcntl.h>
 ~#include <errno.h>
 ~static int opened_fd = -1;
 ~int main(int argc, char **argv) {
 String directory = argc > 1 ? argv[1]
-                           : "examples/data/power-exceptions";
+                           : example_data("power-exceptions");
 ~assert(preview(%"$directory/document.txt") == "Meeting at noon.");
 ~assert(fcntl(opened_fd, F_GETFD) == -1 && errno == EBADF);
 // document.bin contains a NUL byte, which String cannot hold.
@@ -44,6 +45,12 @@ String read_text(String path) {
 ~opened_fd = input.fileno();
   return input.string();
 }
+
+~// The checked-in data sits beside the examples wherever they live.
+~String example_data(String name) {
+~  Path source = String.new(__FILE__);
+~  return source.dirname().join("../data").join(name);
+~}
 ```
 
 `File.string` rejects embedded NUL bytes, and `auto` closes the file

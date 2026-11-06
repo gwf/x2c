@@ -1,8 +1,9 @@
 #include <stdlib.h>
+#include "path.x"
 
 int main(int argc, char **argv) {
 String path = argc > 1 ? argv[1]
-                      : "examples/data/love-files/quantities.txt";
+                      : example_data("love-files/quantities.txt");
 
 // Read the whole text file and close it in one expression.
 String text = path.open("r").string_close();
@@ -21,4 +22,10 @@ foreach (String line in input) {
 }
 printf("total: %ld\n", total);
 return 0;
+}
+
+// The checked-in data sits beside the examples wherever they live.
+String example_data(String name) {
+  Path source = String.new(__FILE__);
+  return source.dirname().join("../data").join(name);
 }
