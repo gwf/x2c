@@ -8,7 +8,7 @@ const enabled = Boolean(analyticsSnippet(process.env, import.meta.env.DEV));
 ---
 
 <BaseLayout
-  title="Site measurement - x2c"
+  title={"Site measurement \u2014 x2c"}
   description="What x2c measures about visits and example discovery."
 >
   <Fragment slot="header"><SiteHeader /></Fragment>
@@ -24,8 +24,8 @@ const enabled = Boolean(analyticsSnippet(process.env, import.meta.env.DEV));
           </p>
         ) : (
           <p>
-            Analytics is disabled in this build. The optional measurement
-            described below is not collecting visits or example actions here.
+            This site does not measure visits or example actions. The
+            measurement described below is switched off.
           </p>
         )}
         <p>
@@ -46,6 +46,10 @@ const enabled = Boolean(analyticsSnippet(process.env, import.meta.env.DEV));
           We do not send source code, command text, or clipboard contents.
           Clicking a link or copying a command does not tell us whether you
           installed x2c or ran a program successfully.
+        </p>
+        <p>
+          Pages load their fonts from Google Fonts, which sends your IP
+          address to Google.
         </p>
       </div>
     </article>
