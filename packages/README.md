@@ -2,10 +2,16 @@
 
 These optional packages make C libraries available through x2c types and
 methods while preserving access to their native APIs. Choose a package for
-its examples, then follow its README to prepare dependencies and run it.
-Releases publish prebuilt bundles for some packages;
-[the released set](../agents/releasing.md#released-packages) lists them and
-their platforms. Build the others from this checkout.
+its examples, then follow its README to install it or to prepare its
+dependencies and run it from this checkout.
+
+Releases publish prebuilt bundles for PCRE2, yyjson, libcurl, termbox2,
+libuv, and BLIS on macOS (arm64, x86_64) and Linux (arm64, x86_64), and for
+torch on macOS arm64 and Linux x86_64. Autodiff and the
+[greet](../examples/packages/greet/) example are published as source
+packages. SQLite and raylib have no release bundle; build them from this
+checkout. [The package index](https://x2c-lang.dev/packages/index.txt) lists
+each release's archives, and `x2c install <name>` installs one.
 
 | Package | What it provides |
 | --- | --- |
@@ -32,6 +38,8 @@ make packages
 ```
 
 The first build fetches and prepares pinned dependencies in the shared cache.
+It downloads large archives, including libtorch (about 77 MB on macOS
+arm64), and builds OpenSSL from source for libcurl.
 Existing dependency hash and profile verification remains part of preparing
 usable packages. The standard raylib examples use its headless profile;
 a desktop window remains an explicit `make -C packages/raylib run-interactive`.
@@ -94,6 +102,12 @@ runs every standard application for that package.
 - [yyjson/examples/release-catalog.x](yyjson/examples/release-catalog.x): broad. Lossless document views, ordered
   and duplicate object members, exact numeric intent, explicit x2c-value
   conversion, Patch, and serialization.
+- [sqlite/examples/observations.x](sqlite/examples/observations.x): short.
+  Stores endpoint observations in memory and reports the slow or failed
+  ones.
+- [sqlite/examples/observation-history.x](sqlite/examples/observation-history.x):
+  broad. Imports a file batch in one transaction, then reopens the database
+  and reports counts, failures, and latency by URL.
 - [libcurl/examples/page-titles.x](libcurl/examples/page-titles.x): short. Fetches three pages and prints
   their titles.
 - [libcurl/examples/endpoint-report.x](libcurl/examples/endpoint-report.x): broad. Surveys six endpoints with
@@ -125,6 +139,20 @@ runs every standard application for that package.
 - [raylib/examples/chart.x](raylib/examples/chart.x) and [raylib/examples/live-chart.x](raylib/examples/live-chart.x): shared chart
   drawing and its optional desktop-window front end. The package checks compile both;
   only `make run-interactive` launches the window.
+- [torch/examples/fit-line.x](torch/examples/fit-line.x): short. Fits a
+  line by gradient descent through libtorch autograd.
+- [torch/examples/mlp.x](torch/examples/mlp.x): broad. Trains a composed
+  4-8-1 model with Adam, saves it, and reloads it.
+  [mnist.x](torch/examples/mnist.x) trains a convolutional network on MNIST,
+  and [jit-infer.x](torch/examples/jit-infer.x) runs a TorchScript model.
+- [autodiff/examples/autodiff.x](autodiff/examples/autodiff.x): short.
+  Differentiates one function with dual numbers, a forward-mode tangent, and
+  a reverse-mode gradient.
+  [energy-gradient.x](autodiff/examples/energy-gradient.x) checks a
+  reverse-mode gradient through a loop against a finite difference.
+- [autodiff/examples/autodiff-fit.x](autodiff/examples/autodiff-fit.x):
+  broad. Fits a growth model by gradient descent through a checkpointed
+  4000-step simulation.
 - [pcre2/examples/inline-lisp.x](pcre2/examples/inline-lisp.x), [yyjson/examples/inline-lisp.x](yyjson/examples/inline-lisp.x),
   [libcurl/examples/inline-lisp.x](libcurl/examples/inline-lisp.x), [sqlite/examples/inline-lisp.x](sqlite/examples/inline-lisp.x), and
   [torch/examples/inline-lisp.x](torch/examples/inline-lisp.x): each installs its package's Lisp surface
@@ -176,8 +204,7 @@ packages do not maintain a second hand-written prototype list.
 
 Applications that demonstrate two or more packages together are under
 `examples/packages/`. `http-json-releases` imports libcurl and yyjson and
-links both archives. Completed candidate and prerequisite research is summarized in
-[the history](../plans/HISTORY.md#packages-applications-and-releases).
+links both archives.
 
 ## Dependency terms
 
@@ -193,13 +220,11 @@ Package Makefiles prepare their pinned dependencies through `tools/deps.py`.
 By default it stores downloads, extracted source, and installed prefixes below
 the clone's common Git directory, at
 `$(git rev-parse --path-format=absolute --git-common-dir)/x2c-integrations`.
-All worktrees of that clone therefore reuse the same completed build. The
-cache keeps its older name so prefixes prepared before this tree was renamed
-stay valid.
+All worktrees of that clone therefore reuse the same completed build.
 
 ```sh
 make -C packages cache-path
-make -C packages prepare-checked
+make -C packages prepare
 make -C packages/pcre2 test
 make -C packages/yyjson test
 ```

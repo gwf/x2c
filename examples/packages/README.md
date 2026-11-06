@@ -5,6 +5,17 @@ maintained third-party adapter.
 
 - [greet](greet/): a minimal package used by the
   [Greet example](../power/greet-client.x). This is part of `make examples`.
+  Releases publish it as a source package; install it and build a program
+  that imports it:
+
+  ```sh
+  x2c install greet
+  x2c build --output greet-client greet-client.x
+  ./greet-client
+  ```
+
+  From a checkout, `x2c install ./examples/packages/greet` installs the
+  directory instead.
 - [HTTP and JSON releases](http-json-releases/): an application that combines
   libcurl requests with yyjson parsing. Its local fixture test is part of
   the optional `make packages-check`.
@@ -26,6 +37,7 @@ instructions.
 | [raylib](../../packages/raylib/examples/) | Images, charts, and optional windows | [raylib](../../packages/raylib/README.md) |
 | [sqlite](../../packages/sqlite/examples/) | Databases, bound parameters, and row Lists | [SQLite](../../packages/sqlite/README.md) |
 | [torch](../../packages/torch/examples/) | Tensors, training, MNIST, and TorchScript over libtorch | [torch](../../packages/torch/README.md) |
+| [autodiff](../../packages/autodiff/examples/) | Generated derivatives and gradient fitting | [autodiff](../../packages/autodiff/README.md) |
 
 ## Build and run
 
