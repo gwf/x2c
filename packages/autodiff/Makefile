@@ -4,7 +4,7 @@ include ../package.mk
 PACKAGE_C_FLAGS := --c-include-dir src
 PACKAGE_LINK :=
 
-EXAMPLES := autodiff autodiff-fit
+EXAMPLES := autodiff autodiff-fit energy-gradient
 EXAMPLE_PROGRAMS := $(addprefix builds/example-,$(EXAMPLES))
 
 .PHONY: fixtures fixtures-update run benchmark
