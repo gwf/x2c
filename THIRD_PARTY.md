@@ -19,6 +19,18 @@ Dependency terms are governed by
 [`packages/LICENSE-POLICY.md`](packages/LICENSE-POLICY.md) and each
 package's README.
 
+The torch package's Linux native bundle includes the unmodified libgomp
+OpenMP runtime from the pinned libtorch distribution, under GPL-3.0 with
+the GCC Runtime Library Exception 3.1. Its macOS bundle includes libomp
+under the LLVM OpenMP license. Those texts and PyTorch's notices are in
+[`packages/torch/LICENSES/`](packages/torch/LICENSES/), and
+[`packages/torch/PROFILE.md`](packages/torch/PROFILE.md) records their
+provenance.
+
+`packages/raylib/examples/fonts/Lato-Regular.ttf` is the Lato font under
+the SIL Open Font License 1.1, whose text is in
+[`OFL.txt`](packages/raylib/examples/fonts/OFL.txt) beside it.
+
 ## Vendored runtime sources
 
 `lib/task/minicoro.h` is minicoro v0.2.0 by Eduardo Bart, at upstream
@@ -39,11 +51,6 @@ embedded book. Those packages are downloaded by `npm ci`, are not stored in
 this repository, and remain governed by their own licenses. Nothing in a
 compiler, runtime, or release artifact depends on them.
 
-## Licensing contact
-
-Send licensing and provenance questions to
-[licensing@flake.org](mailto:licensing@flake.org).
-
 ## Hash-table benchmark adaptation
 
 `unittest/benchmarks/hash-table/jackson/string-blueprint.h` adapts Jackson
@@ -59,13 +66,25 @@ by their runners and retain their own terms.
 
 `site/src/layouts/BaseLayout.astro` and `docs/theme/head.hbs` request
 Instrument Serif, Archivo, and JetBrains Mono from Google Fonts. These fonts
-are served remotely; no font binaries are tracked in this repository. The
-website-toolchain notice above does not identify or license those fonts.
-Any future distribution of local font files must retain the notices shipped
-with the selected font versions.
+are served remotely; the website tracks no font files. The only tracked font
+file is the raylib example font described under optional native packages.
+The website-toolchain notice above does not identify or license the website
+fonts. Any future distribution of local font files must retain the notices
+shipped with the selected font versions.
 
 ## REPL line editing
 
 `commands/repl/repl-input.x` uses Linenoise. The vendored implementation
 retains its copyright notices, and the BSD 2-Clause terms ship in
 [LICENSES/linenoise-a473823d-BSD-2-Clause.txt](LICENSES/linenoise-a473823d-BSD-2-Clause.txt).
+
+## Agent skill
+
+`agents/skills/typesafe-ai/` is third-party agent guidance, Copyright (c)
+2026 TypeSafe AI, under the MIT License in
+[`agents/skills/typesafe-ai/LICENSE`](agents/skills/typesafe-ai/LICENSE).
+
+## Licensing contact
+
+Send licensing and provenance questions to
+[licensing@flake.org](mailto:licensing@flake.org).
