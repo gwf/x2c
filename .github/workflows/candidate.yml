@@ -172,8 +172,17 @@ jobs:
       - name: Install site build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cloc
+          sudo apt-get install -y cloc clang
           npm ci --prefix source/site
+      # The site build precompiles the playground examples to WebAssembly.
+      - uses: ./trusted/.github/actions/select-clang
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 6.0.13
+      - name: Build the compiler and wasm runtime for playground programs
+        run: |
+          make -C source build-safe
+          make -C source wasm-runtime
       - name: Build both destination sites at selected source
         env:
           SOURCE_SHA: ${{ needs.select.outputs.source_sha }}
