@@ -166,7 +166,7 @@ the source changes that the breaking entries below require.
 - The optional `test.x` registers tests and supplies assertions and a test
   program entry, and `derive.x` generates Map, JSON, equality, argument,
   and row mappings from struct fields. See [Testing](../guide/testing.md)
-  and [Deriving record mappings](../guide/deriving-records.md).
+  and [Deriving Record Mappings](../guide/deriving-records.md).
 - The optional `time.x`, `random.x`, `encoding.x`, and `url.x` add clocks
   and calendar time, seedable random values and UUIDs, base64, hex, and
   percent encodings, and URL parsing. See
@@ -200,7 +200,7 @@ the source changes that the breaking entries below require.
   evaluation. The prompt rejects `meta`, macro, protocol, and `import`
   declarations, which a loaded source file supplies. The command is
   experimental and checkout-only: `make install` and release payloads no
-  longer install it. See [Library playground](../guide/repl.md).
+  longer install it. See [Library Playground](../guide/repl.md).
 - Each playground session start removes the entries under `repl/` in the
   cache root whose recorded program source no longer exists, as script
   builds do under `scripts/` and `runs/`. `Compiler.prune_cache` in the

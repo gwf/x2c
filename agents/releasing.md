@@ -11,13 +11,13 @@ tags. Plan or implementation approval does not authorize those actions.
 Agents prepare candidates and carry out explicitly authorized staging or
 verification. The [release skill](skills/release-x2c/SKILL.md) owns task
 execution; [deployment operations](../etc/release/README.md) owns provisioning,
-recovery commands and the first-release rehearsal. Ordinary validation gates
+and recovery commands. Ordinary validation gates
 and their costs are unchanged.
 
 ## The pieces
 
 - `Compiler.version` in `src/cli/requests.x` identifies the compiler version.
-  The CLI boundary probe and installer example carry corresponding version strings.
+  The CLI boundary probe carries a corresponding version string.
 - `candidate.yml` manually builds the selected full source SHA. It builds
   the compiler on four platforms and the
   [released package bundles](#released-packages), then
@@ -69,9 +69,9 @@ and does not run the notes application.
 ## Cut a release
 
 1. Land intended work and version preparation on `dev`, including generated
-   bootstrap updates and the existing source gate. Update `src/cli/requests.x`,
-   the version expectations in `unittest/probes/run-cli-boundary.sh`, and the
-   installer comment example when changing the version. Select a full source
+   bootstrap updates and the existing source gate. Update `src/cli/requests.x`
+   and the version expectations in `unittest/probes/run-cli-boundary.sh` when
+   changing the version. Select a full source
    SHA containing that work and the published history.
 2. Dispatch the full candidate build at that exact SHA:
 

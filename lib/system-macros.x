@@ -1,6 +1,4 @@
 /*  system-macros.x -- convenience macros for text, timing, and processes
-
-    Include this module to use its declarations.
 */
 
 #pragma once

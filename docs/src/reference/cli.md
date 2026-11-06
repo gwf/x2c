@@ -910,7 +910,7 @@ Set `"x2c.semantic.enabled": false` to disable semantic execution.
 
 Translation reports each diagnostic on standard error as
 `file:line:column: code: message`, followed by the source line, a caret, and
-any notes. `file` follows the rule for the JSON `file` field below: relative
+any notes. A warning reads `file:line:column: warning: code: message`. `file` follows the rule for the JSON `file` field below: relative
 to the working directory for a source inside it and absolute otherwise. A
 unit stops after 20 errors. `--max-errors <count>` changes that
 bound for `translate`, `build`, `run`, and `script`, and `--max-errors 0`

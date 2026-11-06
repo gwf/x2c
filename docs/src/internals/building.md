@@ -130,13 +130,35 @@ WASM_LDFLAGS='--embed-file examples/data/power-exceptions' \
   tools/wasm-build examples/power/exceptions.x /tmp/exceptions
 ```
 
-Program memory starts at 64 MB and can grow to 256 MB; the stack is 4 MB.
+Program memory starts at 64 MB and can grow to 256 MB; the stack is 8 MB.
 Threads, process execution, native TCP sockets, and HTTP servers are
 unsupported in this single-threaded browser build. `Job`, `File.popen`,
 `Thread`, `Channel`, `Dispatch`, and pool workers cannot provide their native
 behavior. In-memory HTTP parsing, routing, and response construction remain
 available. Browser execution requires Memory64;
 check the playground's support notice before running a program.
+
+## Installation layouts and release candidates
+
+With no `PREFIX`, `make install` runs `make build-install`: it copies the
+development compiler to `bin/x2c-<branch>`, links `bin/x2c` to that copy, and
+installs the shipped commands under `libexec/x2c/`.
+
+`tools/check-install-script.sh` exercises the release installer against a
+release layout built from the current tree. The `check` workflow's
+`windows_spike` input tests the WSL2 and MSYS2 routes.
+
+Install a shared prefix from a tagged `main`, so a defect seen through it
+reproduces for every user. Validate a staging candidate in a fresh scratch
+prefix with its explicit package index, then remove that prefix. The staging
+site supplies the candidate installer and commands; a bare `x2c install`
+uses the production package index. The compiler version alone does not
+distinguish two candidates of the same version.
+
+The feature records in `etc/syntax/extensions.x` connect each syntax family
+to grammar productions, lexical rules, example spellings, and a reference
+section. The table in [What x2c Adds to C Syntax](../guide/x2c-syntax-map.md)
+is generated from those records.
 
 ## Checking book samples
 

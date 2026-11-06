@@ -41,7 +41,7 @@
   - [Lexical Specification](reference/syntax/lexical.md)
   - [Syntax as Data](reference/syntax/data.md)
   - [Lexical Data Inventory](reference/syntax/lexical-data.md)
-- [Command-line interface](reference/cli.md)
+- [Command-Line Interface](reference/cli.md)
 - [Release Notes](reference/release-notes.md)
 
 # Libraries and Packages
