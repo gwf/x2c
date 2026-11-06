@@ -6,8 +6,8 @@ The official specifications own the required algorithms, inputs, work, and
 output. These are local comparisons against contributed programs, not
 measurements published or accepted by the Benchmarks Game.
 
-[Current results and charts](results/README.md) are preserved in dev, including
-the full table, structured data, figures and plotting provenance.
+[Current results and charts](results/README.md) include the full table,
+structured data, figures, and plotting provenance.
 
 The comparison has eight columns, with coverage recorded per problem:
 
@@ -166,8 +166,9 @@ After the normal compiler build:
 make shoot-check
 ```
 
-This optional command builds every available implementation, checks the official
-fixtures, and compares the quick-profile outputs. PBM output is compared as
+This optional command builds every implementation, checks the official
+fixtures, and compares the quick-profile outputs. The reference builds need
+Go and a JDK as well as the dependencies below. PBM output is compared as
 binary data. N-body uses the official absolute tolerance of `1e-8`.
 
 To check a subset:
@@ -291,9 +292,8 @@ existing restrictions on comparisons between hosts.
 
 ## Saved reports and charts
 
-The [current snapshot](results/README.md) is tracked in dev. It includes the
-latest promoted report and all three chart forms in PNG/SVG/PDF, with CSV
-and provenance. A pull brings these files into the checkout.
+The [current snapshot](results/README.md) holds the latest promoted report
+and all three chart forms in PNG/SVG/PDF, with CSV and provenance.
 
 `make shoot-run` keeps scratch output under ignored `examples/build/shootout/`.
 `make shoot-update` promotes its report to tracked `results/current.json` and

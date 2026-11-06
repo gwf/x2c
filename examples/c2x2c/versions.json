@@ -1,6 +1,6 @@
 {
   "title": "c2x2c: word frequency",
-  "status": "Compiled and tested locally",
+  "status": "Build commands are in README.md",
   "note": "Inputs: docs/src/index.md (V0-5); either a file or directory (V6-8), normally docs/src/. Each word's aggregate count must fit in int (up to INT_MAX).",
   "versions": [
     {

@@ -1,4 +1,8 @@
-/*  mandelbrot.x -- render a deep zoom on native threads */
+/*  mandelbrot.x -- render a deep zoom on native threads
+
+    The image goes to mandelbrot.ppm in the working directory, or to the
+    path given as the first argument.
+*/
 
 #include "system-macros.x"
 #include <math.h>

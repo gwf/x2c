@@ -43,7 +43,7 @@ word order. A nonpositive k returns an empty List. The temporary ranking
 Array is freed; the returned List belongs to the caller's pool.
 
 ```sh
-builds/0/x2c build -O2 -I lib examples/c2x2c/words-v8.x \
+./x2c build -O2 -I lib examples/c2x2c/words-v8.x \
   examples/c2x2c/frequencies.x --output /tmp/c2x2c-v8 \
   --build-dir /tmp/c2x2c-v8-build
 /tmp/c2x2c-v8 docs/src
@@ -81,23 +81,23 @@ Frequencies.
 
 ## Build and run
 
-Run these commands from the repository root after building the local compiler.
-Version 0 uses the host C compiler. Versions 1-8 need the compiler and runtime
-additions saved with this tutorial; an older installed x2c is insufficient.
+Run these commands from the repository root after building x2c.
+Version 0 uses the host C compiler. Versions 1-8 need an x2c from the
+same release or checkout as these sources.
 
 ```sh
 cc -std=gnu11 examples/c2x2c/words-v0.c -o /tmp/c2x2c-v0
 /tmp/c2x2c-v0 docs/src/index.md
 
-builds/0/x2c build -I lib examples/c2x2c/words-v2.x \
+./x2c build -I lib examples/c2x2c/words-v2.x \
   --output /tmp/c2x2c-v2 --build-dir /tmp/c2x2c-v2-build
 /tmp/c2x2c-v2 docs/src/index.md
 
-builds/0/x2c build -I lib examples/c2x2c/words-v5.x \
+./x2c build -I lib examples/c2x2c/words-v5.x \
   --output /tmp/c2x2c-v5 --build-dir /tmp/c2x2c-v5-build
 /tmp/c2x2c-v5 docs/src/index.md
 
-builds/0/x2c build -I lib examples/c2x2c/words-v7.x \
+./x2c build -I lib examples/c2x2c/words-v7.x \
   --output /tmp/c2x2c-v7 --build-dir /tmp/c2x2c-v7-build
 /tmp/c2x2c-v7 docs/src
 ```
@@ -115,9 +115,9 @@ fixture: one file and one nested file. Versions 0-2 print that file as
 `1 beta`, `1 gamma`, `2 alpha`. Versions 6-7 print `1 delta`, `1 gamma`,
 `2 alpha`, `2 beta` for that directory.
 
-The eight x2c stages use `probe|none` in the existing example manifest.
-This preserves manual tutorial checks without adding recurring build work.
-The native C stage is outside that manifest's `.x`/`.xp` source contract.
+`make examples` does not build these stages: `examples/manifest.txt`
+lists the eight x2c stages as manual probes. The manifest lists only
+`.x` and `.xp` sources, so it omits the C version.
 
 ## Selectable benchmark
 

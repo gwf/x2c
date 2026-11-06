@@ -9,8 +9,7 @@
 Run **20261101T204543Z**, measured on **2026-11-01 UTC**, uses the local
 Apple M4 Max profile. All twenty x2c programs were checked and measured with
 twelve fresh processes each after one warmup. The source revision is
-`fed582d496606c11eb09e4a817f7fa9ddf2a2464`. These results measure that revision,
-not every later change on dev.
+`fed582d496606c11eb09e4a817f7fa9ddf2a2464`. These results measure that revision.
 
 Across the eight shared problems, tuned x2c takes **1.11x C elapsed time**
 and **0.95x Rust elapsed time**, using geometric means of matched workload
@@ -26,25 +25,20 @@ private Integer forwarding layer with flat elapsed time. Independent audits
 reproduce the source-size counts: tuned uses 0.953x C source lines but
 1.142x C normalized gzip bytes across the shared cohort.
 
-## Files preserved in dev
+## Files in this snapshot
 
-This directory is the tracked, promoted snapshot. A pull includes the report,
-all three charts in PNG/SVG/PDF, plotted measurements and summaries in CSV,
-and chart provenance. [Score history](history.md) retains compact headline
-ratios from published runs, with [structured history](history.json) for
-all language scores, cohorts and calibration identities. The report and figure bytes were recovered from
-`a9aeff5b843878fd102b31402a522d2f0a1d2d6c`; the provenance report path is
-relative so the snapshot works in another checkout.
+This directory holds the promoted snapshot: the report, all three charts in
+PNG/SVG/PDF, plotted measurements and summaries in CSV, and chart provenance.
+[Score history](history.md) retains compact headline ratios from published
+runs, with [structured history](history.json) for all language scores,
+cohorts and calibration identities. The provenance report path is relative,
+so the snapshot works in any checkout.
 
 - [Summary PDF](charts/runtime-source-size.pdf)
 - [Measurements CSV](charts/measurements.csv) and [summary CSV](charts/summaries.csv)
 - [Chart provenance](charts/provenance.json), including the report SHA-256
 - [Original run archive, profiles, raw samples and source audits](https://github.com/gwf/x2c/tree/a9aeff5b843878fd102b31402a522d2f0a1d2d6c/examples/shootout/results/runs/20261101T204543Z)
 
-Cleanup commit `8cb07e7c6` removed this latest snapshot along with historical
-runs and moved promoted reports into ignored build output. That made a pull
-omit the current results. The latest snapshot is tracked again; older runs
-remain available in Git history rather than being restored here.
 
 ## Refresh the promoted snapshot
 

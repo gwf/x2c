@@ -1,68 +1,55 @@
 [
   {
     "slide": "love-01-var.md",
-    "example": "love/values",
-    "optional": false
+    "example": "love/values"
   },
   {
     "slide": "love-02-strings.md",
-    "example": "love/strings",
-    "optional": false
+    "example": "love/strings"
   },
   {
     "slide": "love-03-symbols.md",
-    "example": "love/symbols",
-    "optional": false
+    "example": "love/symbols"
   },
   {
     "slide": "love-04-lists.md",
-    "example": "love/lists",
-    "optional": false
+    "example": "love/lists"
   },
   {
     "slide": "love-05-arrays.md",
-    "example": "love/arrays",
-    "optional": false
+    "example": "love/arrays"
   },
   {
     "slide": "love-06-maps.md",
-    "example": "love/maps",
-    "optional": false
+    "example": "love/maps"
   },
   {
     "slide": "love-06a-literals.md",
-    "example": "love/literals",
-    "optional": false
+    "example": "love/literals"
   },
   {
     "slide": "love-07-files.md",
-    "example": "love/files",
-    "optional": false
+    "example": "love/files"
   },
   {
     "slide": "love-11-methods.md",
-    "example": "love/methods",
-    "optional": false
+    "example": "love/methods"
   },
   {
     "slide": "magic-00-operators.md",
-    "example": "magic/operators",
-    "optional": false
+    "example": "magic/operators"
   },
   {
     "slide": "magic-01-macros.md",
-    "example": "magic/macros",
-    "optional": false
+    "example": "magic/macros"
   },
   {
     "slide": "magic-02-decorators.md",
-    "example": "magic/decorators",
-    "optional": false
+    "example": "magic/decorators"
   },
   {
     "slide": "magic-03-keywords.md",
-    "example": "magic/keywords",
-    "optional": false
+    "example": "magic/keywords"
   },
   {
     "slide": "magic-04-autodiff.md",
@@ -70,18 +57,15 @@
   },
   {
     "slide": "magic-05-compile-time-lisp.md",
-    "example": "magic/compile-time",
-    "optional": false
+    "example": "magic/compile-time"
   },
   {
     "slide": "magic-06-runtime-lisp.md",
-    "example": "magic/runtime",
-    "optional": false
+    "example": "magic/runtime"
   },
   {
     "slide": "magic-06a-ways-to-agree.md",
-    "example": "magic/ways-to-agree",
-    "optional": false
+    "example": "magic/ways-to-agree"
   },
   {
     "slide": "magic-07-selfhost.md",
@@ -90,38 +74,31 @@
   },
   {
     "slide": "power-01-counting.md",
-    "example": "power/counting",
-    "optional": false
+    "example": "power/counting"
   },
   {
     "slide": "power-04-indexing.md",
-    "example": "power/indexing",
-    "optional": false
+    "example": "power/indexing"
   },
   {
     "slide": "power-04-j-scopes.md",
-    "example": "power/scopes",
-    "optional": false
+    "example": "power/scopes"
   },
   {
     "slide": "power-04-match.md",
-    "example": "power/match",
-    "optional": false
+    "example": "power/match"
   },
   {
     "slide": "power-05-contexts-threads.md",
-    "example": "power/threads",
-    "optional": false
+    "example": "power/threads"
   },
   {
     "slide": "power-06-exceptions.md",
-    "example": "power/exceptions",
-    "optional": false
+    "example": "power/exceptions"
   },
   {
     "slide": "power-09a-generics.md",
-    "example": "power/generics",
-    "optional": false
+    "example": "power/generics"
   },
   {
     "slide": "power-10-imports.md",
