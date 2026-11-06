@@ -93,9 +93,8 @@ EXPECT_NEAR(m[mask].sum().item().double(), 7.0, 1e-12);
 Every record here, `Tensor`, `Module`, `Optimizer`, `Scheduler`, and
 `JitModule`, owns one libtorch handle and is allocated with a `Scope`
 finalizer, so a value is released with the scope that created it. A
-training step is one `Scope.open` and `Scope.close` pair around the
-forward, backward, and update, with the model and optimizer in the
-enclosing scope. `free` releases a handle early and returns NULL.
+training step is one `auto { ... }` region around the forward, backward, and
+update, with the model and optimizer in the enclosing scope. `free` releases a handle early and returns NULL.
 
 List results such as `parameters`, `named_parameters`, and generated tuples
 intern their wrapper references in the current List pool. Scope release does
@@ -471,17 +470,17 @@ sample variation limits conclusions about those differences. More threads
 did not improve every workload. These results do not measure preprocessing
 or establish a general speedup.
 
-The application rows come from the [original comparison][torch-results],
-with the [50-warmup-batch correction][torch-supplement] used for MNIST. The
-chains come from the separate [fresh remedy comparison][torch-remedies].
-These reports preserve the workload counts, individual samples, and methods;
-the applications were not all rerun with the remedies.
+The MNIST row uses 50 warmup batches. The chain rows come from a separate
+comparison of the two release styles; the applications were not all rerun
+with them. The
+[benchmark harness](https://github.com/gwf/x2c/blob/main/packages/torch/benchmarks/README.md)
+describes the workloads, their counts, and how to reproduce them.
 
 \*The stock-PyTorch comparison of explicit tabular training remains a failed
 numerical check: its validation-loss difference was 0.223%, above the 0.1%
 tolerance. The other training configurations passed their tolerances. All
-three applications passed a separate [Adam control][torch-matched] that
-follows libtorch's operation order; that control measured correctness only.
+three applications passed a separate Adam control that follows libtorch's
+operation order; that control measured correctness only.
 The chain checks and accumulated timing results agree exactly as reported to
 12 significant digits, without claiming bitwise equality of every tensor
 element.
@@ -505,28 +504,11 @@ cumulative process peak of 131 MB versus 257 MB. Repeated temporary creation
 with a per-request List pool ended at 143 MB versus 188 MB after 400,000
 requests. Despite that lower total, the pooled run's peak growth above its
 initial footprint was 2.24 times Python's. Native handles and canonical pool
-storage stayed bounded. These historical observations do not establish
+storage stayed bounded. These observations do not establish
 generally lower memory use.
-
-A later memory investigation of the pooled request profile
-on macOS arm64 CPU identified substantial allocator-reclaimable residency
-and ruled out its 2 KB Pool depot as the source of the multi-MB residual.
-It did not identify individual allocation stacks or separate every native
-library cache from allocator fragmentation. Python was not rerun, so this
-does not revise the earlier peak ratio or establish an indefinite memory
-bound or a GPU/Linux result.
 
 All measurements used one active desktop CPU system. They do not cover GPU
 performance, `torch.compile`, or workloads beyond these comparisons.
-
-[torch-results]:
-  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REPORT.md
-[torch-supplement]:
-  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/SUPPLEMENT.md
-[torch-remedies]:
-  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/REMEDIES.md
-[torch-matched]:
-  https://github.com/gwf/x2c/blob/b46aa0e12ab1e4356bd6b4942f1fc30ade5faff6/packages/torch/benchmarks/MATCHED.md
 
 ## Limits
 

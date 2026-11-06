@@ -51,17 +51,22 @@ second package may publish its own `Greeting` in the same program.
 
 ## Building one
 
-`packages/package.mk` holds the recipe. A package directly under `packages/`
-needs a two-line Makefile:
+`packages/package.mk` holds the recipe. A package directly under `packages/`,
+such as `packages/yyjson`, needs a two-line Makefile:
 
 ```make
-PACKAGE := greet
+PACKAGE := yyjson
 include ../package.mk
 ```
 
 A package elsewhere also sets `ROOT` to the repository root and includes the
-recipe through it, as `examples/packages/greet/Makefile` does with
-`ROOT := ../../..`.
+recipe by its relative path, as `examples/packages/greet/Makefile` does:
+
+```make
+PACKAGE := greet
+ROOT := ../../..
+include ../../../packages/package.mk
+```
 
 A package with a native dependency sets two more variables after the
 `include`. `PACKAGE_C_FLAGS` holds the native compile options for the
@@ -92,16 +97,15 @@ builds/greet.module      the compile-time part, only for a package that
 `builds/`. A package with a pinned native dependency adds a `dependency.json`
 and one more Makefile line, `DEPENDENCY_PREFIX_VAR := GREET_PREFIX`, naming
 the variable that overrides the cache prefix; `make prepare` then fetches and
-builds the dependency into a shared cache outside the worktree and leaves a
+builds the dependency into a shared cache outside the checkout and leaves a
 `deps` symlink in the package directory.
 
 ## Using one
 
-Build the package first with `make -C examples/packages/greet build`. Then,
-from the repository root, register the directory that holds packages and
-import by name. Use `./x2c` to select the current development compiler:
+Install the package, then import it by name. Save this program as
+`greeter.x`:
 
-<!-- ignore: an import needs a registered --package-dir root. -->
+<!-- ignore: an import needs an installed package or a --package-dir root. -->
 ```x2c,ignore
 import "greet" as g;
 
@@ -113,6 +117,21 @@ int main(void) {
 ```
 
 ```sh
+x2c install greet
+x2c build -o greeter greeter.x
+./greeter
+```
+
+The program prints `hello, x2c (1)`. `x2c install` places the package under
+`<home>/packages`, which every build searches; [Install
+packages](#install-packages) covers the forms it accepts.
+
+From a checkout, build the package in place instead and register the
+directory that holds it. Run these commands from the repository root; `./x2c`
+selects the development compiler:
+
+```sh
+make -C examples/packages/greet build
 ./x2c build --package-dir examples/packages -o greeter greeter.x
 ```
 
@@ -205,19 +224,9 @@ main.x:1:1: driver: package 'tally' was built by another compiler; rebuild it
 Modules load on macOS, Linux and WSL. On other platforms, importing a
 package that has a module reports that native modules are not supported.
 There, link the package's compile-time part into a compiler built from a
-checkout instead. From the repository root, after `make build-safe`, run
-this command in Bash:
-
-```sh
-compiler_sources=()
-while IFS= read -r source; do compiler_sources+=("$source"); done < <(
-  tools/sources.sh --root "$PWD")
-builds/0/x2c build --extension packages/tally \
-  --x-include-dir "$PWD/src" --c-include-dir "$PWD/builds/0/src" \
-  --output /tmp/x2c "${compiler_sources[@]}"
-```
-
-That compiler then calls `tally`'s `meta` functions through
+checkout instead, with `x2c build --extension`;
+[Build native artifacts](../reference/cli.md#build-native-artifacts) gives
+the command. That compiler then calls `tally`'s `meta` functions through
 `import "tally"` alone, never loads a module, and needs no
 `builds/tally.module`. The build translates the package's `src/*.x`
 and compiles its `src/*.c` with the compiler, so only a package without a
@@ -391,20 +400,18 @@ statement once and bind its parameters: `bind(a, b)` binds positional values,
 `bind(@values)` splices a List, and `bind_named` binds a Map of exact
 parameter names. Iterating the statement yields copied row Lists. Rows
 preserve column order and duplicate names; `Prepared.columns` returns the
-names separately. Free statements before closing their connection, with
-`defer` beside each acquisition.
+names separately. Both wrappers adopt `Cleanup`, so `auto` at each
+acquisition frees a statement before its connection closes.
 
 <!-- ignore: an import needs a registered --package-dir root. -->
 ```x2c,ignore
 import "sqlite" with Database, Prepared;
 
 void show_readings(String filename) {
-  Database db = Database.open(filename);
-  defer db.close();
-  Prepared query = db.prepare(
+  Database db = auto Database.open(filename);
+  Prepared query = auto db.prepare(
     "SELECT url, status FROM observation WHERE status >= ? ORDER BY url"
   );
-  defer query.free();
   query.bind(400);
   foreach (List row in query)
     printf("%s", %"$(row[0]): HTTP $(row[1])\n");
@@ -425,7 +432,8 @@ so use a database filename to retain changes between calls. Query results are
 ordinary nested Lists. The complete pinned raw SQLite API and the same native
 handles remain available for advanced operations. See
 `packages/sqlite/README.md` for ownership, the admitted native profile, and
-the executable examples. SQLite is verified on macOS; to check it alone:
+the executable examples. SQLite has no release bundle; to build and check
+it from a checkout:
 
 ```sh
 make -C packages/sqlite prepare
@@ -438,7 +446,6 @@ Package management runs in the shipped `x2c-package` command. The
 `x2c install`, `x2c remove`, and `x2c list` forms select its operations.
 Project builds use the same command to prepare declared dependencies and
 maintain `x2c.lock` before compilation starts.
-
 
 `x2c install` places a package under `<home>/packages`, where every build
 finds it without `--package-dir`:
@@ -468,8 +475,9 @@ The compiler translates it in package mode and archives it, the same two
 commands `packages/package.mk` runs, and records the origin and digest in
 `SOURCE.json`. A directory or archive carries no version of its own, so
 installing one over an installed package keeps the version that package
-recorded and a first install records none, which `x2c list` shows as `-`. A source package with native dependencies is refused; publish
-its bundle instead.
+recorded and a first install records none, which `x2c list` shows as `-`.
+A source package with native dependencies is refused; publish its bundle
+instead.
 
 Installed packages are not owned by the compiler's install inventory, so a
 compiler upgrade keeps them and `x2c remove` is the way to delete one. A
@@ -548,12 +556,12 @@ Arguments remain individual argv values even when an expanded path contains
 spaces. They are not shell commands and `@` does not expand another response
 file. Definitions do not change the preceding x2c source preprocessing.
 
-
 `make bundle` works for every package with native inputs. Releases publish
-bundles for some of them, on the platforms the
-[released set](https://github.com/gwf/x2c/blob/main/agents/releasing.md#released-packages)
-lists. Build any other package's bundle, including raylib's and SQLite's,
-from a checkout.
+bundles for PCRE2, yyjson, libcurl, termbox2, libuv, and BLIS on macOS
+(arm64, x86_64) and Linux (arm64, x86_64), and for torch on macOS arm64 and
+Linux x86_64; [the package index](https://x2c-lang.dev/packages/index.txt)
+lists them. Build any other package's bundle, including raylib's and
+SQLite's, from a checkout.
 Pure and mixed C/x2c packages with no external native inputs need no dependency
 manifest; their bundle carries an empty native response file. Distribute any
 other x2c package imports alongside them under the registered package root.
@@ -569,8 +577,8 @@ x2c build --package-dir native-packages \
   --x-include-dir native-packages/raylib/native/include chart.x --output chart
 ```
 
-The default raylib bundle uses the headless profile. To produce its separately
-admitted macOS desktop profile, select its dependency manifest explicitly:
+The default raylib bundle uses the headless profile. To produce its macOS
+desktop-window profile, select its dependency manifest explicitly:
 
 ```sh
 make -C packages/raylib clean-builds

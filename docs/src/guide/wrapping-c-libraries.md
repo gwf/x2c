@@ -83,9 +83,10 @@ callouts, partial matching, and binary subjects.
 
 A package with a native dependency carries a `dependency.json` naming the
 version, the source URL, the archive hash, and the build profile. `make
-prepare` fetches and builds it into a cache shared by every worktree of the
-clone and leaves a `deps` symlink in the package directory, so ordinary `make
-test` needs no network.
+prepare` fetches and builds it into a shared cache outside the checkout and
+leaves a `deps` symlink in the package directory, so ordinary `make test`
+needs no network. For the fictional `feedparse` package, the commands would
+be:
 
 ```sh
 make -C packages/feedparse prepare
@@ -550,7 +551,8 @@ error detail, and every deliberate conversion loss.
 
 One further test calls representative upstream declarations directly through
 the shim. This checks that the raw API is accessible without repeating
-upstream's own test suite.
+upstream's own test suite. For the fictional `feedparse` package, the tests
+would run with:
 
 ```sh
 make -C packages/feedparse test
