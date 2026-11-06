@@ -10,7 +10,7 @@ const char *GetMonitorName(int monitor);
 
 the call `GetMonitorName(0)` has type `(* const char)`, and assigning it to
 a `char *` stops translation with
-`cannot convert (* const char) to (* char)`. The note that follows names the
+`cannot convert const char * to char *`. The note that follows names the
 two repairs.
 
 Keep the qualifier, as in `const char *name = GetMonitorName(0);`, or copy
