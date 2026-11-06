@@ -5,8 +5,8 @@
 #   api       user-callable; gets a full generated page of signatures.
 #   contract  described by docs/src/library/overview.md; no user-callable
 #             surface of its own.
-#   optional  shipped but not in the implicit prelude; listed with the note
-#             that says how to include it.
+#   optional  shipped but not in the implicit prelude; its page shows the
+#             include line, then the note, if any.
 #   internal  runtime-internal; listed with its reason and nothing else.
 #
 # Every lib/*.x file needs exactly one row. tools/gen-api-reference fails
@@ -35,13 +35,13 @@ lib/lisp-bindings.x|api|
 lib/lisp-targets/lisp-targets.x|internal|The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
 lib/lisp/lisp.x|api|
 lib/list/list.x|api|
-lib/list-selectors.x|optional|Compound selectors beyond caar, cadr, cddr, and caddr; explicitly include `list-selectors.x` to use them.
+lib/list-selectors.x|optional|
 lib/logger.x|api|
 lib/macrovalue/macrovalue.x|api|
 lib/map/map.x|api|
 lib/match/match.x|api|
-lib/meta.x|optional|Syntax builders and compiler operations for `meta` functions. Pure builders also run at runtime; operations that query the compiler remain compile-time only. Every unit reaches it through the prelude's `var/var.x`; include `meta.x` explicitly where `meta` functions are written.
-lib/type.x|optional|Structural operations on captured Type values, available at runtime and compile time; include `type.x` to use them.
+lib/meta.x|optional|Every unit reaches it through the prelude's `var/var.x`; include it explicitly where `meta` functions are written. Pure builders also run at runtime; operations that query the compiler remain compile-time only.
+lib/type.x|optional|Its operations run at runtime and at compile time.
 lib/mutex.x|api|
 lib/pool/pool.x|api|
 lib/protocols.x|internal|The built-in `Cleanup`, `Block`, `Iter`, and `Var` protocol declarations used to generate runtime dispatch adapters.
@@ -55,38 +55,38 @@ lib/thread-state.x|internal|Native pthread-key storage for per-thread runtime st
 lib/thread.x|api|
 lib/task.x|api|
 lib/tokenizer.x|internal|Token stream used by the compiler and the Lisp reader.
-lib/json.x|optional|JSON text to and from ordinary `Map`, `Array`, `String`, and number values; explicitly include `json.x` to use it.
-lib/path.x|optional|Filesystem operations on path `String`s; explicitly include `path.x` to use them.
-lib/scripting.x|optional|The `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x` modules that every script unit includes; include `scripting.x` to use all six.
-lib/args.x|optional|Argument parsing against a declarative spec; explicitly include `args.x` to use it.
-lib/diff.x|optional|Line differences between two texts; explicitly include `diff.x` to use them.
-lib/regex.x|optional|Regular expressions over the bytes of a `String`; explicitly include `regex.x` to use them.
+lib/json.x|optional|
+lib/path.x|optional|
+lib/scripting.x|optional|Every script unit includes it. It includes `args.x`, `diff.x`, `digest.x`, `path.x`, `process.x`, and `regex.x`.
+lib/args.x|optional|
+lib/diff.x|optional|
+lib/regex.x|optional|
 lib/datum.x|internal|Values spelled as Lisp reader text, for interface files and the project meta helper's messages.
 lib/datum-reader.x|internal|The one Lisp reader grammar, shared by `Lisp.read` and the datum reader.
-lib/digest.x|optional|SHA-256 digests of `String`s and streams; explicitly include `digest.x` to use them.
-lib/time.x|optional|Clocks, durations, and RFC 3339 calendar time; explicitly include `time.x` to use them.
-lib/random.x|optional|Seedable pseudorandom numbers, system entropy, and UUIDs; explicitly include `random.x` to use them.
-lib/encoding.x|optional|UTF-8 code points and base64, hex, and percent encodings of `String`s; explicitly include `encoding.x` to use them.
-lib/url.x|optional|URL references and query strings; explicitly include `url.x` to use them.
-lib/process.x|optional|Commands, pipelines, and background jobs without a shell; explicitly include `process.x` to use them.
-lib/typed-array.x|optional|Packed typed storage with a raw native bracket; explicitly include `typed-array.x` to use it.
-lib/typed-list.x|optional|Typed views over canonical `List` cells; explicitly include `typed-list.x` to use them.
-lib/substring.x|optional|Borrowed immutable String views; explicitly include `substring.x` to use them.
-lib/substring-map.x|optional|Native Substr occurrence counts; explicitly include `substring-map.x` to use them.
-lib/typed-map.x|optional|Typed maps over native numeric or canonical `String` fields; explicitly include `typed-map.x` to use them.
+lib/digest.x|optional|
+lib/time.x|optional|
+lib/random.x|optional|
+lib/encoding.x|optional|
+lib/url.x|optional|
+lib/process.x|optional|
+lib/typed-array.x|optional|
+lib/typed-list.x|optional|
+lib/substring.x|optional|
+lib/substring-map.x|optional|
+lib/typed-map.x|optional|
 lib/var-ledger.x|internal|The `Var` tag tables and decoder table projected from `lib/var-tags.x`, in the one runtime unit that includes the ledger.
 lib/var/var.x|api|
 lib/cleanup.x|internal|Cleanup adoption templates used by runtime owners.
-lib/error-macros.x|internal|Structured Error causes shared by runtime modules.
+lib/error-macros.x|internal|Structured `Error` causes shared by runtime modules.
 lib/error-private.x|internal|Error transfer templates used by the exception machinery.
 lib/integer-ops.x|internal|Integer conversion and arithmetic templates shared by runtime owners.
 lib/native-scalar-types.x|internal|The exact C scalar ledger and its compile-time projections.
 lib/private-keywords.x|internal|Keyword aliases used by runtime implementation code.
-lib/system-macros.x|optional|Compile-time convenience macros; explicitly include system-macros.x to use them.
+lib/system-macros.x|optional|It defines the `$dedent`, `$assert`, and `$time` macros; [Include the rest of the set](../../guide/system-macros.md#include-the-rest-of-the-set) describes them.
 lib/var-adapters.x|internal|Pointer converter templates shared by runtime owners.
-lib/var-tags.x|internal|The Var tag ledger shared by runtime and compiler projections.
-lib/rewrite.x|optional|Register macro-pattern translators with the $rewrite decorator; include `rewrite.x`.
-lib/net.x|optional|Blocking TCP sockets and listeners; explicitly include `net.x` to use them.
-lib/http.x|optional|HTTP requests, responses, routing, and a blocking worker-pool server; explicitly include `http.x` to use them.
-lib/derive.x|optional|Generated record mappings from struct fields; explicitly include derive.x to use them.
-lib/test.x|optional|Test registration, assertions, and a test program entry; explicitly include test.x to use them.
+lib/var-tags.x|internal|The `Var` tag ledger shared by runtime and compiler projections.
+lib/rewrite.x|optional|It defines the `$rewrite` decorator; [Rewriting a function definition](../../guide/generating-code.md#rewriting-a-function-definition) describes it.
+lib/net.x|optional|
+lib/http.x|optional|
+lib/derive.x|optional|It defines the `$derive` macro; [Deriving record mappings](../../guide/deriving-records.md) describes it.
+lib/test.x|optional|It defines the `$test`, `$test.main`, `$expect`, `$expect_eq`, and `$expect_raises` macros; [Testing your project](../../guide/testing.md) describes them.

@@ -474,12 +474,14 @@ static void _callables(Array lines, Map module, List items):
   Array receivers = []
   foreach Map item in items:
     if !receivers.contains(item["receiver"]): receivers.push(item["receiver"])
+  int grouped = receivers.len() > 1 || receivers[0].string()
   foreach String receiver in receivers.list().sort():
-    lines.push(receiver ? %"### `$receiver`" : "### Functions")
-    lines.push("")
+    if grouped:
+      lines.push(receiver ? %"### `$receiver`" : "### Functions")
+      lines.push("")
     List owned = items.filter(%!(Map item) => item["receiver"] == receiver)
     foreach Map item in owned.sort_by(%!(Map item) => item["method"]):
-      _entry(lines, module, item, 4)
+      _entry(lines, module, item, grouped ? 4 : 3)
 
 static void _prose(Array lines, Map module):
   Array prose = module["prose"]
@@ -496,10 +498,31 @@ static String _text(Array lines) =>
 
 static String _lead(Map module):
   String summary = module["summary"]
+  if summary.startswith("x2c "): return summary
   return summary[:1].upper() + summary[1:]
+
+/* Links to the example programs that use a module, if any. */
+static void _examples(Array lines, String names):
+  if !names: return
+  _add(lines, %("## Examples" ""))
+  foreach String name in names.split(" "):
+    String path = %"examples/$name.x"
+    if !root.join(path).is_file():
+      _fatal(%"the evidence table names $path, which does not exist")
+    lines.push(%"- [`$name`](https://github.com/gwf/x2c/blob/main/$path)")
+  lines.push("")
+
+/* How an optional module's page says to include it, then its note. */
+static void _include(Array lines, Map module):
+  String name = module["path"].str()[4:]
+  lines.push(%"Include it with `#include \"$name\"`.")
+  lines.push("")
+  if module["note"]:
+    _add(lines, $(String.join("\n", Prose.wrap(module["note"], 79)), ""))
 
 static String _page(Map module):
   Array lines = [banner, "", %"# `$(module["path"])`", "", _lead(module), ""]
+  if module["visibility"] == "optional": _include(lines, module)
   List items = module["items"].array()
   int primary = 0
   foreach String tier in _tiers():
@@ -515,8 +538,7 @@ static String _page(Map module):
     _callables(lines, module, tiered)
   _types(lines, module)
   _prose(lines, module)
-  if primary:
-    _add(lines, $("## Tests and examples", "", evidence[module["stem"]], ""))
+  if primary: _examples(lines, evidence[module["stem"]])
   return _text(lines)
 
 static String _compiler_page(Map module):
@@ -568,7 +590,7 @@ static String _index(Array modules):
   foreach Map module in modules:
     if _published(module):
       lines.push(%"| [`$(module["path"])`]($(module["stem"]).md) | " +
-                 %"$(module["summary"]) |")
+                 %"$(_lead(module)) |")
   _module_list(lines, modules, "contract", $($dedent(%"
     ## Described by the overview
 
@@ -584,7 +606,7 @@ static String _index(Array modules):
       ")))
     foreach Map module in optional:
       lines.push(%"- [`$(module["path"])`]($(module["stem"]).md) - " +
-                 _note(module))
+                 _lead(module))
   _module_list(lines, modules, "internal", $($dedent(%"
     ## Runtime-internal
 
@@ -605,7 +627,7 @@ static String _compiler_index(Array modules):
     | --- | --- |").printf(compiler_banner, provisional)]
   foreach Map module in modules:
     lines.push(%"| [`$(module["path"])`]($(module["stem"]).md) | " +
-               %"$(module["summary"]) |")
+               %"$(_lead(module)) |")
   return _text(lines)
 
 static String _c_api(Array modules, Unit utils):
@@ -823,85 +845,64 @@ static int _check_paths(List requested):
          "%d types)\n", paths.len(), callables, declarations)
   return 0
 
-/* The executable evidence named on each page with primary API. */
-static const char *evidence_rows[][2] = {
-  {"args", "`make verify` (`unittest/test-args.x`)."},
-  {"array", "`make verify` (`unittest/test-array.x`) and `make examples`."},
-  {"atom", "`make verify` (`unittest/test-atom.x`)."},
-  {"buffer", "`make verify` (`unittest/test-buffer.x`)."},
-  {"channel", "`make verify` (`unittest/test-channel.x` and "
-              "`unittest/test-channel-batch.x`) and `make examples` "
-              "(`power/channel-word-count`, `power/channel-service`)."},
-  {"context", "`make verify` (`unittest/test-context.x`)."},
-  {"derive", "`make verify` (`unittest/test-derive.x`) and `make examples` "
-             "(`power/derive`)."},
-  {"diff", "`make verify` (`unittest/test-diff.x`)."},
-  {"digest", "`make verify` (`unittest/test-digest.x`)."},
-  {"encoding", "`make verify` (`unittest/test-encoding.x`)."},
-  {"random", "`make verify` (`unittest/test-random.x`)."},
-  {"time", "`make verify` (`unittest/test-time.x`)."},
-  {"url", "`make verify` (`unittest/test-url.x`)."},
-  {"regex", "`make verify` (`unittest/test-regex.x`)."},
-  {"dispatch", "`make verify` (`unittest/test-var.x`)."},
-  {"file", "`make verify` (`unittest/test-file.x`) and `make examples` "
-           "(`docs-word-count`)."},
-  {"http", "`make verify` (`unittest/test-http.x`) and `make examples` "
-           "(`apps/notes/notes`)."},
-  {"net", "`make verify` (`unittest/test-net.x`)."},
-  {"test", "`make verify` (`unittest/test-test.x`) and "
-           "`make commands-check` (`commands/test/tests/run.sh`)."},
-  {"iter", "`make verify` (`unittest/test-iter.x`) and `make examples` "
-           "(`iter-examples`)."},
-  {"lisp", "`make verify` (`unittest/test-lisp.x`) and `make examples`."},
-  {"list", "`make verify` (`unittest/test-list.x`) and `make examples` "
-           "(`docs-tour`)."},
-  {"json", "`make verify` (`unittest/test-json.x`)."},
-  {"list-selectors", "`make verify` (`unittest/test-list.x`)."},
-  {"logger", "`make verify` (`unittest/test-logger.x`)."},
-  {"macrovalue", "`make verify` (`macro-values`, `macro-sequence-case`, "
-                  "and `macro-slot-recognition` compiler fixtures)."},
-  {"map", "`make verify` (`unittest/test-map.x`) and `make examples` "
-          "(`docs-word-count`)."},
-  {"meta", "`make verify` (`meta-comptime-only-call` and "
-           "`meta-builder-compiler-only` compiler fixtures)."},
-  {"type", "`make verify` (`meta-type-values` compiler fixture)."},
-  {"rewrite", "`make verify` (`rewrite-index-entry-points`, "
-              "`rewrite-independent-rules`, and `rewrite-typed-operator` "
-              "compiler fixtures)."},
-  {"match", "`make verify` (`unittest/test-match.x`, "
-            "`unittest/test-match-plan.x`, `unittest/test-match-cache.x`, "
-            "and `unittest/test-machine.x`) and `make examples` "
-            "(`match-nested`)."},
-  {"match-recursive", "`make verify` (`unittest/test-match.x`)."},
-  {"mutex", "`make verify` (`unittest/test-mutex.x`)."},
-  {"pool", "`make verify` (`unittest/test-pool.x`)."},
-  {"path", "`make verify` (`unittest/test-path.x`) and `make examples` "
-           "(`scripts/line-counts`)."},
-  {"process", "`make verify` (`unittest/test-process.x`) and "
-              "`make examples` (`scripts/line-counts`)."},
-  {"scope", "`make verify` (`unittest/test-scope.x`) and `make examples` "
-            "(`docs-tour`)."},
-  {"substring", "`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v2.x` demonstrates borrowed word iteration."},
-  {"substring-map", "`make verify` (`unittest/test-substring.x`); `examples/c2x2c/words-v4.x` demonstrates native word counts."},
-  {"string", "`make verify` (`unittest/test-string.x`, "
-             "`unittest/test-string-classify.x`, "
-             "`unittest/test-string-number.x`, and `unittest/test-split.x`) "
-             "and `make examples` "
-             "(`docs-word-count`)."},
-  {"symbol", "`make verify` (`unittest/test-symbol.x`) and `make examples` "
-             "(`symbol-literal-demo`)."},
-  {"symbolset", "`make verify` (compiler `SymbolSet` fixtures)."},
-  {"thread", "`make verify` (`unittest/test-thread.x` and "
-             "`unittest/test-thread-batch.x`)."},
-  {"task", "`make verify` (`unittest/test-task.x`) and `make examples` "
-           "(`power/channel-service`)."},
-  {"typed-array", "`make verify` (`unittest/test-typed-array.x`)."},
-  {"typed-list", "`make verify` (`unittest/test-typed-list.x`)."},
-  {"typed-map", "`make verify` (`unittest/test-typed-map.x`)."},
-  {"var", "`make verify` (`unittest/test-var.x` and "
-          "`unittest/test-varops.x`) and `make examples` "
-          "(`type-conversion-matrix`)."},
-  {NULL, NULL}}
+/* The tests behind each module with primary API, then the example programs
+   its page links, as paths under `examples/` without `.x`. */
+static const char *evidence_rows[][3] = {
+  {"args", "unittest/test-args.x", ""},
+  {"array", "unittest/test-array.x", ""},
+  {"atom", "unittest/test-atom.x", ""},
+  {"buffer", "unittest/test-buffer.x", ""},
+  {"channel", "unittest/test-channel.x unittest/test-channel-batch.x",
+   "power/channel-word-count power/channel-service"},
+  {"context", "unittest/test-context.x", ""},
+  {"derive", "unittest/test-derive.x", "power/derive"},
+  {"diff", "unittest/test-diff.x", ""},
+  {"digest", "unittest/test-digest.x", ""},
+  {"encoding", "unittest/test-encoding.x", ""},
+  {"random", "unittest/test-random.x", ""},
+  {"time", "unittest/test-time.x", ""},
+  {"url", "unittest/test-url.x", ""},
+  {"regex", "unittest/test-regex.x", ""},
+  {"dispatch", "unittest/test-var.x", ""},
+  {"file", "unittest/test-file.x", ""},
+  {"http", "unittest/test-http.x", "apps/notes/notes"},
+  {"net", "unittest/test-net.x", ""},
+  {"test", "unittest/test-test.x commands/test/tests/run.sh", ""},
+  {"iter", "unittest/test-iter.x", ""},
+  {"lisp", "unittest/test-lisp.x", ""},
+  {"list", "unittest/test-list.x", ""},
+  {"json", "unittest/test-json.x", ""},
+  {"list-selectors", "unittest/test-list.x", ""},
+  {"logger", "unittest/test-logger.x", ""},
+  {"macrovalue", "macro-values macro-sequence-case macro-slot-recognition "
+                 "compiler fixtures", ""},
+  {"map", "unittest/test-map.x", ""},
+  {"meta", "meta-comptime-only-call meta-builder-compiler-only compiler "
+           "fixtures", ""},
+  {"type", "meta-type-values compiler fixture", ""},
+  {"rewrite", "rewrite-index-entry-points rewrite-independent-rules "
+              "rewrite-typed-operator compiler fixtures", ""},
+  {"match", "unittest/test-match.x unittest/test-match-plan.x "
+            "unittest/test-match-cache.x unittest/test-machine.x", ""},
+  {"match-recursive", "unittest/test-match.x", ""},
+  {"mutex", "unittest/test-mutex.x", ""},
+  {"pool", "unittest/test-pool.x", ""},
+  {"path", "unittest/test-path.x", "scripts/line-counts"},
+  {"process", "unittest/test-process.x", "scripts/line-counts"},
+  {"scope", "unittest/test-scope.x", ""},
+  {"substring", "unittest/test-substring.x", "c2x2c/words-v2"},
+  {"substring-map", "unittest/test-substring.x", "c2x2c/words-v4"},
+  {"string", "unittest/test-string.x unittest/test-string-classify.x "
+             "unittest/test-string-number.x unittest/test-split.x", ""},
+  {"symbol", "unittest/test-symbol.x", ""},
+  {"symbolset", "compiler SymbolSet fixtures", ""},
+  {"thread", "unittest/test-thread.x unittest/test-thread-batch.x", ""},
+  {"task", "unittest/test-task.x", "power/channel-service"},
+  {"typed-array", "unittest/test-typed-array.x", ""},
+  {"typed-list", "unittest/test-typed-list.x", ""},
+  {"typed-map", "unittest/test-typed-map.x", ""},
+  {"var", "unittest/test-var.x unittest/test-varops.x", ""},
+  {NULL, NULL, NULL}}
 
 Path self = String.new(argv[0])
 root = self.absolute().dirname().dirname()
@@ -914,7 +915,7 @@ plain_id = Regex.compile("^[a-z0-9_-]+$")
 evidence = {}
 for (int at = 0; evidence_rows[at][0]; at++):
   evidence[String.new(evidence_rows[at][0])] =
-    String.new(evidence_rows[at][1])
+    String.new(evidence_rows[at][2])
 
 String usage = %"usage: $(self.basename()) [-h] " +
                "[--write | --check | --check-path PATH]\n"
