@@ -49,12 +49,13 @@ List syntax_extensions(void) => %(
       (title "Expression aliases")
       (summary "Name an expression for the rest of a scope or for one body.")
       (grammar unit-alias block-item statement field enumerator-list
-               alias-head alias-name named-alias alias-wrapper
+               alias-head alias-name alias-to named-alias alias-wrapper
                alias-statement field-alias enumerator-alias unalias)
       (lexical c-tokens)
       (grammar-note "alias name to expression and alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; file-private static alias; and unalias name, which removes an alias the current scope declares.")
       (lexical-note "alias, unalias, as, and to are contextual words; an alias or unalias needs no comma among enumerators.")
-      (spellings "alias e as name;" "alias e as name { ... }"
+      (spellings "alias name to e;" "alias name to e { ... }"
+                 "alias e as name;" "alias e as name { ... }"
                  "alias e { ... _ ... }" "static alias e as name;"
                  "unalias name;")
       (reference "../reference/language.md#expression-aliases-with-alias"))

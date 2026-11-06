@@ -526,9 +526,16 @@ List syntax_grammar(void) => %(grammar
 
     (rule alias-name (seq (token "as") (ref identifier)))
 
-    (rule named-alias (seq (ref alias-head) (ref alias-name) (token ";")))
+    (rule alias-to
+      (seq (token "alias") (ref identifier) (token "to") (ref expression)))
 
-    (rule alias-wrapper (seq (ref alias-head) (optional (ref alias-name))))
+    (rule named-alias
+      (seq
+        (choice (seq (ref alias-head) (ref alias-name)) (ref alias-to))
+        (token ";")))
+
+    (rule alias-wrapper
+      (choice (seq (ref alias-head) (optional (ref alias-name))) (ref alias-to)))
 
     (rule alias-statement (seq (ref alias-wrapper) (ref raw-block)))
 
