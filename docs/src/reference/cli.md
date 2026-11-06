@@ -1,15 +1,21 @@
 # Command-line interface
 
-Run this chapter's `./x2c` examples from the repository root after building.
-The root link selects `builds/0/x2c`, the development compiler, without using
-`PATH`. `./bin/x2c` selects the bootstrap compiler until `make build-install`
-links it to an installed copy of the development compiler. Outside the
-checkout, use `x2c` after [installation and PATH setup](../guide/installation.md).
-Every invocation begins with a command. The driver provides `translate`,
-`build`, `run`, `new`, `script`, `env`, `install`, `remove`, `list`, and
-`help`. The [external commands](#commands) `test`, `lsp`, and `package`
-ship with the compiler. In a checkout, `make commands` also builds the
-experimental `bind`, `graph`, `lint`, and `repl`.
+After [installation and PATH setup](../guide/installation.md), run the
+compiler as `x2c`. Every invocation begins with a command. `x2c help` lists
+`translate`, `build`, `run`, `new`, `script`, `env`, `install`, `remove`,
+`list`, and `help`. The driver runs some of them through
+[external commands](#commands): `build`, `run`, and `script` through
+`x2c-build`, `new` through `x2c-new`, and `install`, `remove`, and `list`
+through `x2c-package`. An installed compiler also includes the external
+commands `test` and `lsp`.
+
+This chapter's examples use `./x2c` from the root of a source checkout, which
+selects `builds/0/x2c`, the development compiler, without using `PATH`. In a
+checkout, `make build-safe` builds the compiler and `x2c-build` only. Run
+`make commands` afterward to build `new`, `package`, `test`, and `lsp`, along
+with the experimental `bind`, `graph`, `lint`, and `repl`. `./bin/x2c`
+selects the bootstrap compiler until `make build-install` links it to an
+installed copy of the development compiler.
 
 The generated help is the short option reference:
 
@@ -290,6 +296,11 @@ it exits, and a translation binds only the modules its request names. When
 two of them define one name, the first supplies it and the declaration
 reports a warning. Modules work on macOS, Linux and WSL.
 
+Other shared libraries are unsupported: x2c does not build a `.so` or
+`.dylib` for ordinary programs to link. Supporting them requires
+platform-specific position-independent code, visibility, runtime linkage,
+library naming, and initialization rules.
+
 `--extension <dir>` links a package's compile-time part into the
 executable being built, which must be the compiler, and repeats. The
 package's `src/*.x` and `src/*.c` become inputs, and a generated unit
@@ -352,109 +363,6 @@ the previous file. `run` writes it before starting the program, and `-###`
 writes no database. This file describes native C compilation, not x2c syntax
 for an editor's C parser.
 
-### Language server
-
-Normal compiler installations include the language server. Checkout builds
-use `make commands` and the matching `builds/0/x2c` compiler. Run `x2c lsp`
-from the workspace root to serve editors over stdio. The server uses LSP 3.17 with UTF-16 positions and full
-document synchronization. One process serves one workspace and keeps the
-compiler resident. It provides frontend diagnostics, definition
-navigation, type hover, completion, symbols, references, and rename.
-It does not report errors left to the native C compiler, such as unresolved
-C identifiers.
-
-Set `initializationOptions.arguments` to ordinary `build` or `translate`
-arguments. An empty list discovers `x2c.toml` and its default target, or
-analyzes the current file when there is no project. For example, use
-`["build", "--target", "app", "--profile", "debug"]` to select a target.
-The selected target must include the source as an input. For a header or
-macro file outside that input list, open its owning source or configure a
-direct `translate` command with the needed include and package options.
-
-An editor that sends unsaved buffers gets diagnostics and locations from
-that text. Changes invalidate analyses of units that read the changed file.
-The compiler reparses whole units; the server does not incrementally parse
-or index the workspace in the background. Native CPP symbol modes cannot
-consume unsaved source text and report that limitation. Macro-generated
-syntax can lack a physical definition or identifier location.
-
-The server reclaims retained history at idle checkpoints while preserving the
-editor connection, current buffers, and exported results. The next analysis
-rebuilds compiler state. Each checkpoint resets macro and native-module
-process state.
-
-For Neovim with built-in LSP support:
-
-```lua
-vim.api.nvim_create_autocmd("FileType", { pattern = "x2c",
-  callback = function(ev)
-    vim.lsp.start({ name = "x2c", cmd = { "x2c", "lsp" },
-      root_dir = vim.fs.root(ev.buf, { "x2c.toml", ".git" }),
-      init_options = { arguments = {} } })
-  end })
-```
-
-Completion uses the compiler's grammar role and visible symbols. Document
-symbols list authored function and type definitions in the current file.
-Workspace symbols search only documents already analyzed; they do not start
-workspace indexing. References and rename analyze the selected target's
-inputs and build dependencies sequentially, using unsaved buffers. Without a
-manifest, they search
-only the current document. Rename requires a physical definition inside the
-workspace. Syntax coloring comes from the editor's syntax grammar; the server
-does not override it.
-
-Renaming a type updates related method-owner qualifiers and C spellings.
-A type rename is refused when its defining file is outside the selected source
-units. This includes imported package and header types whose
-owning units are not searched.
-Rename a method at `value.member` with the new member name. If you select a C
-spelling such as `Type_member`, keep the owner prefix in the new name when
-member calls use that binding.
-
-The server runs macros during analysis. Start it only for workspaces you
-trust. Formatting and native C compiler diagnostics are outside this server's
-current scope. Queued requests can be cancelled. A running request finishes
-before the server handles another message, including a reference or rename
-request that analyzes several inputs.
-
-### VS Code diagnostics, definitions, and hover
-
-Install the VSIX built from `etc/vsc-extension` with **Extensions: Install
-from VSIX**. VS Code 1.82 or newer is required. The extension starts
-`x2c lsp` and uses its standard language client for synchronization,
-diagnostics, definition navigation, hover, completion, symbols, references,
-rename, and cancellation.
-
-Normal compiler installations include the server. To select a particular
-installation or a checkout build, set:
-
-```json
-"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
-```
-
-Selection order is an explicit `x2c.semantic.compilerPath`, executable
-`./x2c` in the trusted workspace, then `x2c` on `PATH`. An explicit
-selection never switches to another compiler. Setup errors appear in the
-**x2c** Output channel. The extension does not build or install the compiler.
-
-Configure the server with ordinary compiler arguments:
-
-```json
-"x2c.semantic.arguments": ["build", "--target", "app", "--profile", "debug"]
-```
-
-The extension passes this list as `initializationOptions.arguments` and
-synchronizes open local buffers, including unsaved headers and manifests.
-It restarts the client when x2c settings or workspace folders change.
-Semantic execution requires a trusted local workspace because compilation
-can run macros. Untrusted and virtual workspaces retain syntax highlighting.
-Set `"x2c.semantic.enabled": false` to disable semantic execution.
-
-Shared libraries are unsupported. Supporting them requires platform-specific
-position-independent code, visibility, runtime linkage, library naming, and
-initialization rules.
-
 ## Build and run
 
 `run` builds an executable and launches it after the build succeeds:
@@ -463,8 +371,10 @@ initialization rules.
 ./x2c run examples/foreach.x -- first -second input.x
 ```
 
-When a build is needed, `run` prints one `Built executable PATH in N ms`
-line and then runs the program. Use `-v` for phase lines, build receipts,
+When a build is needed, a direct `run` prints one
+`Built executable PATH in N ms` line and then runs the program. A manifest
+`run` prints `Built target 'NAME' executable PATH in N ms` each time, because
+executables always relink. Use `-v` for phase lines, build receipts,
 and native commands.
 Use `-q` to suppress build progress and receipts while preserving program
 output. With explicit inputs, `run` caches its executable under `runs/` in
@@ -806,7 +716,7 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 `<home>/builds/0/libx2c.a`, the stage 0 runtime whose headers a source
 checkout's `include/x2c` names.
 
-There is no lowercase `-i`. `-D` and `-U` define and undefine a macro for
+`-D` and `-U` define and undefine a macro for
 x2c's optional [preprocessing](language.md#preprocessing) with `--cpp`, for
 requested host preprocessing, and for C compilation. `translate` accepts them
 too, and the C generated with them needs the same options. Optimization,
@@ -846,11 +756,10 @@ its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
 
 `x2c test [options] [files-or-directories...]` builds and runs project test
-programs. Normal compiler installations include the command, as do checkout
-builds. With no operands, it searches below the nearest `x2c.toml`, or the
-current directory. Discovery selects
-`*_test.x`, `test_*.x`, and `.x` files inside `tests/`, excluding
-`.x2c-build/`. Directory matching is relative to the selected project or
+programs. Installed compilers include the command; a checkout builds it with
+`make commands`. With no operands, it searches below the nearest `x2c.toml`,
+or the current directory. Discovery selects `*_test.x`, `test_*.x`, and `.x`
+files inside `tests/`, excluding `.x2c-build/`. Directory matching is relative to the selected project or
 search root; an ancestor named `tests` does not select application sources.
 
 `--manifest-path FILE` selects that manifest and `--target NAME` its
@@ -881,35 +790,121 @@ The command does not write the ordinary x2c surface, Error conversion,
 dependency pins, or license files; see
 [Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
 
-`x2c lint` is experimental and available in checkout builds; `make install`
-and release payloads do not install it.
-
-The style rule `compound-auto` enforces one leading `auto` for compound
-declarations whose bindings keep their acquired values. It checks bound
-writes, address escapes, and reference arguments before reporting a group.
-Use `x2c help lint` for rule-selection options. The same rule is available
-through `x2c-lint`. It reports the change without an automatic
-fix; mixed cleanup groups and bindings that can change keep initializer
-`auto`.
-
-The style candidate `function-reading-order` checks public placement and
-caller-before-callee dependencies within ordinary function runs. Select it
-through lint's rule option; selecting all ordinary rules does not enable it.
-Run `x2c help lint` for the invocation syntax. Pass a module's entry file to
-check its physical members in context. Public dependency paths include private
-or generated intermediates. The private check reports direct dependencies only
-when no earlier known consumer already explains the helper. Recursive groups,
-unrelated ties and later consumers calling earlier shared helpers are accepted.
-Macros, decorators, meta definitions and other source forms limit the checked
-runs. Coverage is printed on standard error; no finding does not establish
-full-file conformance. The candidate uses existing
-`lint: allow function-reading-order FI-4: reason` suppressions and proposes no
-automatic fix. Findings do not change lint's exit status.
+`x2c lint` checks x2c source style and idioms. It is experimental and
+available in checkout builds; `make install` and release payloads do not
+install it. Run `x2c help lint` for its rules and rule-selection options.
 
 `x2c lint` reports an unreadable input's path and system error on standard
 error and exits `1`, while checking the other readable inputs. This also
 applies when checking formatting or showing formatting differences. The lint
 command treats `-` as an ordinary file name in these modes.
+
+## Editors
+
+`x2c lsp` serves editors through the Language Server Protocol. Any editor
+with an LSP client can start it; the VS Code extension starts it for you.
+
+### Language server
+
+Installed compilers include the language server. A checkout builds it with
+`make commands` for the matching `builds/0/x2c` compiler. Run `x2c lsp` from
+the workspace root to serve editors over stdio. The server uses LSP 3.17 with
+UTF-16 positions and full document synchronization. One process serves one
+workspace and keeps the compiler resident. It provides frontend diagnostics,
+definition navigation, type hover, completion, symbols, references, and
+rename.
+It does not report errors left to the native C compiler, such as unresolved
+C identifiers.
+
+Set `initializationOptions.arguments` to ordinary `build` or `translate`
+arguments. An empty list discovers `x2c.toml` and its default target, or
+analyzes the current file when there is no project. For example, use
+`["build", "--target", "app", "--profile", "debug"]` to select a target.
+The selected target must include the source as an input. For a header or
+macro file outside that input list, open its owning source or configure a
+direct `translate` command with the needed include and package options.
+
+An editor that sends unsaved buffers gets diagnostics and locations from
+that text. Changes invalidate analyses of units that read the changed file.
+The compiler reparses whole units; the server does not incrementally parse
+or index the workspace in the background. Native CPP symbol modes cannot
+consume unsaved source text and report that limitation. Macro-generated
+syntax can lack a physical definition or identifier location.
+
+The server reclaims retained history at idle checkpoints while preserving the
+editor connection, current buffers, and exported results. The next analysis
+rebuilds compiler state. Each checkpoint resets macro and native-module
+process state.
+
+For Neovim with built-in LSP support:
+
+```lua
+vim.api.nvim_create_autocmd("FileType", { pattern = "x2c",
+  callback = function(ev)
+    vim.lsp.start({ name = "x2c", cmd = { "x2c", "lsp" },
+      root_dir = vim.fs.root(ev.buf, { "x2c.toml", ".git" }),
+      init_options = { arguments = {} } })
+  end })
+```
+
+Completion uses the compiler's grammar role and visible symbols. Document
+symbols list authored function and type definitions in the current file.
+Workspace symbols search only documents already analyzed; they do not start
+workspace indexing. References and rename analyze the selected target's
+inputs and build dependencies sequentially, using unsaved buffers. Without a
+manifest, they search
+only the current document. Rename requires a physical definition inside the
+workspace. Syntax coloring comes from the editor's syntax grammar; the server
+does not override it.
+
+Renaming a type updates related method-owner qualifiers and C spellings.
+A type rename is refused when its defining file is outside the selected source
+units. This includes imported package and header types whose
+owning units are not searched.
+Rename a method at `value.member` with the new member name. If you select a C
+spelling such as `Type_member`, keep the owner prefix in the new name when
+member calls use that binding.
+
+The server runs macros during analysis. Start it only for workspaces you
+trust. Formatting and native C compiler diagnostics are outside this server's
+current scope. Queued requests can be cancelled. A running request finishes
+before the server handles another message, including a reference or rename
+request that analyzes several inputs.
+
+### VS Code diagnostics, definitions, and hover
+
+Install the x2c extension, `x2c-lang.x2c-syntax`, from the VS Code
+Marketplace. From a source checkout, you can instead build a VSIX from
+`etc/vsc-extension` and install it with **Extensions: Install from VSIX**.
+VS Code 1.82 or newer is required. The extension starts
+`x2c lsp` and uses its standard language client for synchronization,
+diagnostics, definition navigation, hover, completion, symbols, references,
+rename, and cancellation.
+
+Installed compilers include the server. To select a particular
+installation or a checkout build, set:
+
+```json
+"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
+```
+
+Selection order is an explicit `x2c.semantic.compilerPath`, executable
+`./x2c` in the trusted workspace, then `x2c` on `PATH`. An explicit
+selection never switches to another compiler. Setup errors appear in the
+**x2c** Output channel. The extension does not build or install the compiler.
+
+Configure the server with ordinary compiler arguments:
+
+```json
+"x2c.semantic.arguments": ["build", "--target", "app", "--profile", "debug"]
+```
+
+The extension passes this list as `initializationOptions.arguments` and
+synchronizes open local buffers, including unsaved headers and manifests.
+It restarts the client when x2c settings or workspace folders change.
+Semantic execution requires a trusted local workspace because compilation
+can run macros. Untrusted and virtual workspaces retain syntax highlighting.
+Set `"x2c.semantic.enabled": false` to disable semantic execution.
 
 ## Compiler diagnostics
 
