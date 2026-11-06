@@ -229,21 +229,19 @@ String Diagnostics.macro_spelling(List definition, Token invocation) {
   return "$" + spelled.text;
 }
 
-/** Returns the innermost source expansion's definition and input note. */
+/** Returns the note naming the innermost source expansion and the place
+    that defines it, with the path shown as diagnostic headings show it.
+*/
 String Compiler.macro_expansion_note(Compiler c) {
   foreach (List active in c.macro_stack) {
     (List definition, List input, Var bindings, Token invocation) = active;
-    (void) bindings;
+    (void) input, (void) bindings;
     if (!invocation) continue;
     String name = Diagnostics.macro_spelling(definition, invocation);
-    String source = Diagnostics.macro_definition_note(definition)
-      .remove_prefix("definition: ");
-    Var syntax = Diagnostics.macro_expansion_input(input);
-    List lines = _expansion_note_syntax(syntax, {}).repr().split_lines(0);
-    String shown = " ".join(
-      lines.map(%!(line) => String.strip(line, NULL)));
-    if (shown.len() > 160) shown = %"$(shown[:157])...";
-    return %"in expansion of '$name' defined at $source; input: $shown";
+    List origin = definition.assoc(<origin>);
+    String file = _shown_path(c, origin.assoc(<file>));
+    int line = origin.assoc(<line>), column = origin.assoc(<column>);
+    return %"in expansion of '$name' defined at $file:$line:$column";
   }
   return NULL;
 }
@@ -424,7 +422,7 @@ void Compiler.print_diagnostic(Compiler compiler, List entry) {
       _write_json(compiler, code, severity, message, location, note);
       return;
     }
-    _write_heading(compiler, code, message, location);
+    _write_heading(compiler, code, severity, message, location);
     if (note) fprintf(stderr, "  note: %s\n", note);
     fprintf(stderr, "\n");
     fflush(stderr);
@@ -503,24 +501,6 @@ void Compiler.dump_cache(Compiler compiler) {
     printf("%s\t==>\t%s\n", value.repr(), key.repr());
 }
 
-static Var _expansion_note_syntax(Var value, Map caches) {
-  if (value is not <list> || value.is_nil()) return value;
-  match (value) {
-    case %(binding ? ?name): return name;
-    case %(cache ?id): {
-      Var ordinal;
-      if (!caches.try_get(id, ordinal)) {
-        ordinal = (int) caches.len();
-        caches[id] = ordinal;
-      }
-      return %(cache $ordinal);
-    }
-  }
-  List child;
-  $ast.rewrite_children(
-    value.list(), child, _expansion_note_syntax(child, caches));
-}
-
 // diagnostic emission
 
 static void _emit_entry(Diagnostics diag, List entry) {
@@ -585,18 +565,20 @@ static String _shown_path(Compiler compiler, String path) {
   return path.startswith(directory) ? path.remove_prefix(directory) : path;
 }
 
-/* A located heading names its source position and shows that line. */
+/* A located heading names its source position and shows that line. A
+   warning's code follows the word `warning`; an error shows its code alone. */
 static void _write_heading(
-  Compiler c, Symbol code, String message, List location) {
+  Compiler c, Symbol code, Symbol severity, String message, List location) {
+  String kind = severity == <warning> ? %"warning: $code" : code.str();
   if (location ~=
       %((file ?file) (line ?line) (column ?column) (length ?length)
         (position ?position))) {
     String place = %"$(_shown_path(c, file)):$line:$column";
-    fprintf(stderr, "%s: %s: %s\n", place, code.str(), message);
+    fprintf(stderr, "%s: %s: %s\n", place, kind, message);
     _show_source_context(c, line, column, length, position);
     return;
   }
-  fprintf(stderr, "%s: %s\n", code.str(), message);
+  fprintf(stderr, "%s: %s\n", kind, message);
 }
 
 /* Locations use one-based coordinates while source indexing is zero-based.
