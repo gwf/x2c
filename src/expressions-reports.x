@@ -62,10 +62,8 @@ macro Stmt $fail.expressions_function_private(
 macro Stmt $fail.expressions_index_unsupported(
   Expr $c, Expr $origin, Expr $receiver_type) =>
   $c.report_error(
-    <parse>, $receiver_type.is_typedef_name()
-    ? %"type $($receiver_type) does not support getindex"
-    : %"type $($receiver_type) does not support indexing",
-    $origin, %());
+    <type>, %"type $($receiver_type) does not support indexing",
+    $origin, NULL);
 
 macro Stmt $fail.expressions_optional_ref_index(Expr $c, Expr $origin) =>
   $c.report_error(
@@ -73,7 +71,8 @@ macro Stmt $fail.expressions_optional_ref_index(Expr $c, Expr $origin) =>
     $origin, NULL);
 
 macro Stmt $fail.expressions_index_missing(Expr $c, Expr $site, Expr $type) =>
-  $c.report_error(<type>, %"$($type.car()) has no getindex", $site, NULL);
+  $c.report_error(
+    <type>, %"type $($type.car()) does not support indexing", $site, NULL);
 
 macro Stmt $fail.expressions_index_symbol(Expr $c, Expr $site) =>
   $c.report_error(
@@ -216,7 +215,7 @@ macro Stmt $fail.expressions_ref_address(Expr $c, Expr $site) =>
 
 macro Stmt $fail.expressions_var_convert(Expr $c, Expr $site, Expr $target) =>
   $c.report_error(
-    <type>, %"cannot convert Var to type $($target.repr())", $site, NULL);
+    <type>, %"cannot convert Var to $($target.repr())", $site, NULL);
 
 macro Stmt $fail.expressions_var_address(Expr $c, Expr $site, Expr $target) =>
   $c.report_error(
@@ -264,7 +263,7 @@ macro Stmt $fail.expressions_typedef_crossing(
     $c.report_error(
       <type>, message,
       $site,
-      %("the names share one C type but not one meaning: declare the converter $($source.car())_$($target.car().str().lower()), or cast the expression to say so on purpose"));
+      %("the names share one C type but not one meaning: declare the converter $($source.car())_$($target.car().str().lower()), or cast the expression to make the conversion explicit"));
   }
 }
 
@@ -273,7 +272,7 @@ macro Stmt $fail.expressions_pointer_unrelated(
   $c.report_error(
     <type>, %"cannot convert $($source.repr()) to $($target.repr())",
     $site,
-    %("the pointer types are unrelated: cast the expression to say so on purpose"));
+    %("the pointer types are unrelated: cast the expression to make the conversion explicit"));
 
 macro Stmt $fail.expressions_pointer_integer(
   Expr $c, Expr $site, Expr $integer, Expr $target) =>
