@@ -1,13 +1,18 @@
 # Protocols
 
-[`Cleanup(T)`](system-macros.md#clean-up-an-initialized-local) declares
-`void T.cleanup(T)` for explicitly owned locals. Classes select their defaults
-and participate through the same protocol and method rules.
+A protocol is a compile-time relationship that lets several concrete types
+answer the same method calls and operators. Use one when values of different
+types should work with the same operations, such as `str` or indexing on a
+`Var`.
 
 A protocol declares methods that other concrete types can adopt. Its *base*
 is the type that declares those methods; a *participant* is a type that
 explicitly adopts them. The compiler selects each participant method or
 adapts a base method by converting its arguments and result.
+
+[`Cleanup(T)`](system-macros.md#clean-up-an-initialized-local) declares
+`void T.cleanup(T)` for explicitly owned locals. Classes select their defaults
+and participate through the same protocol and method rules.
 
 The selected methods support dot calls, operators, and, for `Var`, calls on
 boxed values. Adoption works at compile time; it creates no runtime interface
@@ -197,7 +202,7 @@ Before adding a protocol member, inspect the conformance dump for every
 participant homonym and its signature:
 
 ```sh
-./builds/0/x2c translate --dump-conformance path/to/unit.x
+x2c translate --dump-conformance path/to/unit.x
 ```
 
 An existing method with the same name must have both the intended meaning and

@@ -13,9 +13,8 @@ A region is an `auto` block, a `Scope.open` and `Scope.close` pair, a
 `auto (&slot)` push, a `Pool.open` bracket, a local with initializer `auto`, the
 storage of a `Scope` local that `Scope.destroy` ends, or the function's own
 locals and parameters, whose storage ends when the function returns.
-`src/regions/regions.x` analyzes these forms before the transform driver lowers
-them, so a region is still the call that opens it and the `defer` beside it
-that closes it.
+The compiler checks these forms before it lowers them, so a region is the call
+that opens it and the `defer` beside it that closes it.
 
 ## Exemptions
 
@@ -86,7 +85,7 @@ an unknown destination or a parameter's object is not an ordinary warning.
 The store may register a temporary borrow that cleanup removes before
 return. The pass does not prove that cleanup; the code must satisfy its C
 lifetime contract. Returned addresses, static stores, known retaining
-operations such as `Array.push`, and already ended regions retain their
+operations such as `Array.push`, and already ended regions keep their
 checks. The optional audit keeps the possible-escape finding, and meta
 functions keep the error.
 
@@ -118,6 +117,10 @@ without warnings is not proven memory safe.
 
 ## Optional lifetime proof
 
+The lifetime proof is experimental and runs only from a source checkout:
+`make install` and release payloads do not install `x2c-graph`. Build it in
+the checkout with `make commands`.
+
 `x2c-graph certify` checks selected entry points and the functions they can
 call across the supplied source units. It applies the same region ownership
 and parameter-effect rules as the compiler's local pass, then checks whether
@@ -133,8 +136,6 @@ warning or error. A project may provide explicit native effect contracts to
 the audit; they are assumptions of its result and do not change compilation.
 The optional command and its contract format are described in the
 [source graph reference](https://github.com/gwf/x2c/blob/main/commands/graph/README.md#conditional-lifetime-proof).
-The command is experimental and available in checkout builds; `make install`
-and release payloads do not install it.
 The proof concerns scoped ownership and lifetime. It does not establish
 general C memory safety or correctness of emitted code.
 
@@ -189,14 +190,19 @@ regions part of the type system of a C-like language and checked pointer
 lifetimes against them. From the ML Kit, x2c takes the idea that regions are
 the unit of deallocation; from Cyclone, the idea that a C program can be
 checked against them. The regions are the ones the author wrote with
-region `auto` and the `Scope.open` and `Scope.close` calls. The check adds nothing to the
-program text and produces only warnings, except in compile-time code.
+region `auto` and the `Scope.open` and `Scope.close` calls. The check adds
+nothing to the program text and produces only warnings, except in compile-time code.
 
 Rust and Swift put ownership and lifetime in the signature. Every call is
 checked locally against a declared contract, and a violation is an error.
 x2c has no lifetime annotations, so the check derives the same information,
 and derived facts are weaker than a declared contract. As a result, existing
 C-shaped code compiles unchanged, and ordinary code gets only warnings.
+
+## Where to go next
+
+- [Lifetime warnings](memory.md#lifetime-warnings) shows the warnings in
+  ordinary code.
 
 Go's escape analysis and Infer use the most similar methods. Go computes
 per-function escape facts and uses them to choose between stack and heap

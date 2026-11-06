@@ -1,4 +1,4 @@
-# What x2c adds to C syntax
+# What x2c Adds to C Syntax
 
 For a C reader, x2c adds twelve useful syntax families. Most declarations,
 expressions, and control flow keep their familiar shapes. Start with the
@@ -48,10 +48,10 @@ Ordinary C declarations, pointer declarators, expressions, control flow,
 designated initializers, compound literals, `_Static_assert`, `_Generic`,
 and `_Thread_local` are therefore absent from the short list.
 
-This is a reviewed classification of the extracted forms. It is not an
-automatically proven difference between the languages accepted by two
-complete parsers. Contextual binding, macro signatures, and lexical modes
-prevent a simple subtraction of production names from giving that result.
+The short list is a guide, not a proven difference between the languages
+that two complete parsers accept. Contextual binding, macro signatures, and
+lexical modes prevent a simple subtraction of production names from giving
+that result.
 
 Three boundaries keep the map useful:
 
@@ -85,10 +85,7 @@ User macros can add further source forms through the same typed positions.
 Consequently, the short list describes the built-in and shipped language
 surface; it cannot enumerate every future alias or macro invocation.
 
-## Where the table comes from
+## Where to go next
 
-The feature records in `etc/syntax/extensions.x` connect each family to
-grammar productions, lexical rules, example spellings, and a reference
-section. The table above is generated from those records. The grouping and
-C comparison are reviewed annotations; grammar and lexer data do not infer
-pedagogical categories themselves.
+- [Values and Var](values.md) introduces the value type behind most of these
+  forms.

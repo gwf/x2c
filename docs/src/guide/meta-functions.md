@@ -1,6 +1,10 @@
 # Meta Functions
 
-x2c extends C. A `meta` function uses the x2c backend and the host compiler
+A meta function is an x2c function that the compiler can run during
+translation; a `$name(...)` call inserts its result into the program. Use one
+when a value or a piece of code can be computed before the program runs.
+
+A `meta` function uses the x2c backend and the host compiler
 selected by `--meta-cc`. It runs as native code during translation, and its
 body is ordinary x2c: anything the unit can compile, it can run during
 translation. Two questions remain, both at the boundary between the

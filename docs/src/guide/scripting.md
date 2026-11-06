@@ -35,10 +35,11 @@ defines `main` runs, and the exit status of an uncaught failure.
 
 `x2c script` builds the file once and then runs the cached executable. The
 first run builds it; later runs start the cached executable in a few
-milliseconds until the script or something it uses changes:
+milliseconds until the script or something it uses changes. Save the script
+above as `changed.x`, then run it:
 
 ```sh
-x2c script tools/release-notes.x v0.12.0
+x2c script changed.x
 ```
 
 A script can include its own local `.x` modules, which `x2c script` builds

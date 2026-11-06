@@ -120,7 +120,8 @@ int main(void):
 
 ## Converting a file
 
-`tools/indent-convert FILE...` rewrites brace-form files in place, adding
+In a source checkout, `tools/indent-convert FILE...` rewrites brace-form files
+in place, adding
 `#pragma indent` so each keeps its name; an executable script stays
 runnable by name. Every block header, including one whose body had no
 braces, ends with a colon. The converter proves each conversion by
