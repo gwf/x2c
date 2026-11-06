@@ -1,5 +1,5 @@
 ###############################################################################
-# Makefile for the X2C compiler
+# Makefile for the x2c compiler
 ###############################################################################
 include etc/make-command.mk
 include etc/help.mk
@@ -208,9 +208,24 @@ check: build						## Run extended non-mutating checks
 check-after-precommit:
 	time $(MAKE) proof-artifact-atomicity
 	time $(MAKE) verify
-# Example checks are optional (Gary, 2026-09-01).
+# Example checks are optional.
 # Run `make examples doc-examples` manually.
 	time $(MAKE) doc-outputs
+
+clean:							## Remove ordinary generated output
+	$(MAKE) -C builds clean
+	$(MAKE) -C include clean
+	$(MAKE) -C examples clean
+	$(MAKE) -C unittest clean
+
+help: export PRINT_HELP_PYSCRIPT := $(PRINT_HELP_PYSCRIPT)
+help:							## Show grouped Make targets
+	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(firstword $(MAKEFILE_LIST))
+
+stats:							## Show repository statistics
+	@python3 tools/repo-metrics.py --summary --color="$(STATS_COLOR)"
+
+##@ Maintainer readiness
 
 # `stage-diff-0` requires the refreshed bootstrap to reproduce stage 0, so the
 # compiler is at its fixed point. Stage 1 adds the build with fatal warnings
@@ -233,7 +248,7 @@ precommit: build					## Readiness sequence, not a commit prerequisite; rewrites 
 AGENT_PR_STEPS = doc-check proof-cold-collection verify doc-outputs \
 	commands-check
 
-agent-pr-check:					## Run complete agent PR proof once; rewrites bootstrap/ and stale generated sources
+agent-pr-check:					## Run the complete pull request check once; rewrites bootstrap/ and stale generated sources
 	time $(MAKE) precommit
 	time $(MAKE) commands proof-artifact-atomicity
 	time tools/run-make-steps.sh debug/agent-pr-check \
@@ -242,19 +257,6 @@ agent-pr-check:					## Run complete agent PR proof once; rewrites bootstrap/ and
 sanity-check: bootstrap-refresh			## Prove bootstrap recovery and self-hosting; rewrites bootstrap/ and stale generated sources
 # Refresh compiles the clean bootstrap; stage-3 cleans and rebuilds stages 0-3.
 	$(MAKE) stage-3
-
-clean:							## Remove ordinary generated output
-	$(MAKE) -C builds clean
-	$(MAKE) -C include clean
-	$(MAKE) -C examples clean
-	$(MAKE) -C unittest clean
-
-help: export PRINT_HELP_PYSCRIPT := $(PRINT_HELP_PYSCRIPT)
-help:							## Show grouped Make targets
-	@python3 -c "$$PRINT_HELP_PYSCRIPT" < $(firstword $(MAKEFILE_LIST))
-
-stats:							## Show repository statistics
-	@python3 tools/repo-metrics.py --summary --color="$(STATS_COLOR)"
 
 ##@ Build and stages
 build-install: commands					## Install this compiler in bin
