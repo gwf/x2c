@@ -41,8 +41,17 @@ telemetry.
 
 ## Installation
 
-Run `npm ci && npm run build` in `etc/vsc-extension`, then install the resulting
-VSIX with **Extensions: Install from VSIX**.
+Install the extension from the Visual Studio Marketplace. Search the
+Extensions view for `x2c-lang.x2c-syntax`, or run:
+
+```sh
+code --install-extension x2c-lang.x2c-syntax
+```
+
+The Marketplace release can trail the version in this directory. To use the
+version that matches a checkout, run `npm ci && npm run build` in
+`etc/vsc-extension`, then install the resulting VSIX with **Extensions:
+Install from VSIX**.
 
 ## Compiler diagnostics, definitions, and hover
 
@@ -312,7 +321,8 @@ x2c form and the ordinary C syntax it could be confused with.
 ## Marketplace identity
 
 The Marketplace publisher is `x2c-lang`, displayed as x2c. The extension ID is
-`x2c-lang.x2c-syntax`. Version 0.4.1 retains the Preview label.
+`x2c-lang.x2c-syntax`. The extension is experimental, like x2c itself, and
+the Marketplace lists it as a Preview.
 
 ## License and support
 

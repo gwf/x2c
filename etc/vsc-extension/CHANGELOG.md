@@ -7,7 +7,6 @@ first.
 
 - Remove LSP semantic tokens; TextMate grammar owns syntax coloring.
 - Highlight C declaration keywords and `using` in braced macro headers.
-
 - Highlight named and unnamed `List @` and `Map @` rest parameters,
   including function pointers and signatures split across comments and lines.
   Keep call splices, macro sequence parameters, and C variadics distinct.
@@ -17,6 +16,8 @@ first.
   and the supported `typeof` spellings.
 - Highlight evaluated `${key: value}` Maps as code inside quoted collections.
   Match `$(...)` and `@(...)` brackets and remove the retired `@{...}` pair.
+- Name the Marketplace listing `x2c-lang.x2c-syntax` as the usual install
+  route in the README; a locally built VSIX installs a checkout's version.
 
 ## 0.4.0 - 2026-10-28
 
