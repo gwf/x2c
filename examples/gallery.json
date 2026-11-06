@@ -53,7 +53,7 @@
   },
   {
     "slide": "magic-04-autodiff.md",
-    "source": "packages/autodiff/examples/autodiff.x"
+    "source": "packages/autodiff/examples/energy-gradient.x"
   },
   {
     "slide": "magic-05-compile-time-lisp.md",
