@@ -29,16 +29,14 @@
 static int lookahead = ' ';
 
 int main(void) {
-  /* The outer scope owns the mutable top-level environment. auto releases
+  /* The top-level environment lives until process exit. auto releases
      temporary Buffers, Arrays, and call Maps at their lexical scope exits.
      Strings and Lists belong to the default interning pool until process
      shutdown, so returned values outlive those temporary containers. There
      is no tracing collector or per-expression pool to invalidate bindings. */
-  auto {
-    Map environment = {};
-    for (_skip(); lookahead != EOF; _skip())
-      puts(_eval(_read(), environment).str());
-  }
+  Map environment = {};
+  for (_skip(); lookahead != EOF; _skip())
+    puts(_eval(_read(), environment).str());
   return 0;
 }
 
