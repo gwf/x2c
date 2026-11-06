@@ -1,13 +1,12 @@
 # Syntax specifications
 
 x2c's syntax is specified here as a token grammar plus lexical transition
-rules that describe the current parser. The first extraction matched revision
-`48715bde` on `dev`. Parser changes update these pages and `etc/syntax/` by
-hand. `tools/syntax-spec check` verifies grammar references and reports
-generated files that differ from their data. It does not compare the data
-with the parser, and no gate runs it. The
-[language reference](../language.md) supplies the meaning and constraints of
-the forms.
+rules that describe the parser. The specification data in `etc/syntax/` is
+written by hand, so it may lag behind the parser; the compiler is
+authoritative. `tools/syntax-spec check` verifies grammar references and
+reports generated files that differ from their data. It does not compare the
+data with the parser. The [language reference](../language.md) supplies the
+meaning and constraints of the forms.
 
 - [Source grammar](grammar.md): EBNF, precedence, contextual decisions, and
   macro extension contracts. The [EBNF file](x2c.ebnf) is the same grammar

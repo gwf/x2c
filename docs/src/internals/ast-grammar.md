@@ -5,11 +5,11 @@ a literal AST construction, a structural pattern, or an AST dump. The
 [source grammar](../reference/syntax/grammar.md) describes tokens; this
 chapter describes the values those tokens become.
 
-The reference was reconciled against revision
-`ff3aba2aac3d58a31db6fd53b5cfaeeef230b695`. Source links select that revision.
-The structures describe current implementation contracts, not a promise that
-internal representations remain compatible between compiler versions. Language
-meaning remains in the [language reference](../reference/language.md).
+This chapter describes the implementation and may lag behind it; the source
+on `main` is authoritative. The structures are implementation contracts, not a
+promise that internal representations remain compatible between compiler
+versions. Language meaning remains in the
+[language reference](../reference/language.md).
 
 ## Representation and notation
 
@@ -1015,31 +1015,26 @@ capture storage types, and reference capture expressions. The
 expressions and that the handler follows the complete row List. These children
 cannot be interpreted by looking only at a `capture` or `args` head.
 
-## Reconciliation and coverage
+## Owners by family
 
-The archived [canonical grammar appendix][historical-appendix] was the starting
-inventory. Every family below was checked against current producers and
-consumers. Searches covered literal constructions and structural matches
-through `src/`, plus runtime, built-in, command, and tool users in `lib/`,
-`etc/`, `commands/`, and `tools/`. Dynamic heads, helper constructors,
-String-headed forms, and untagged rows were checked separately. This is a
-source reconciliation, not a machine proof of a closed semantic grammar.
+Each family of forms below has the listed producers and consumers.
+Literal constructions and structural matches in `src/`, `lib/`, `etc/`,
+`commands/`, and `tools/` use these layouts.
 
-| Family | Current owners | Reconciliation |
-| --- | --- | --- |
-| Roots, names, origins | [ast][ast], [binding][binding], [identifiers][identifiers], [Code][sdk-syntax] | Retained; added spelling/global carriers and distinguished source records. |
-| Expressions, operators, access | [syntax][expression-syntax], [resolution][resolution], [access][access], [calls][calls], [operators][operators] | Retained; clarified void call operand, raw callees, nested shells, `_Alignof`, and offsetof tokens. |
-| Literals and interpolation | [atoms][atoms], [Lists][quotation-reader], [collections][collection-reader], [Strings][string-reader], [interpolation][interpolation-component] | Added numeric-zero String content and consumer-only `segraw`. |
-| Declarations and Types | [declarations][declarations], [declarators][declarators], [types][type-parser], [Type conversion][compiler-type], [runtime Type][runtime-type] | Retained; distinguished semantic aggregate bodies, modifier chains, generated prototype variant, and `unqual`. |
-| Lambdas and callbacks | [lambdas][lambdas], [lambda lowering][lambda-component], [callbacks][callbacks] | Added bare lambda parameters and pre-binding capture targets; distinguished adaptation stages. |
-| Statements, match, catch, raise | [statements][statements], [binding][binding], [match][match-component], [try][try-component], [raise][raise-component] | Retained; corrected default/guard rows and documented three return layouts. |
-| Macro/template values | [definitions][macro-definitions], [captures][invocation-captures], [quotations][macro-quotations], [templates][macro-templates], [runtime Macro][macro-construction] | Added String-headed syntax, descriptor rebuild/leaf/static/env rows, scalar/sequence captures, and code values. |
-| Retained declarations | [units][units], [production][declaration-production], [defaults][declaration-defaults], [portable syntax][portable-syntax] | Added retained initializers; separated replay and transport metadata. |
-| Protocols and imports | [protocol declarations][protocol-declarations], [registry][protocol-registry], [units][units] | Retained; distinguished protocol String head and package-import metadata. |
-| Initializer alternatives | [subobjects][initializer-subobjects], [conversion][initializer-conversion], [emission][emit-initialization] | Corrected paths to untagged stack frames; kept native operand placeholders. |
-| Cleanup and generation | [defer][cleanup-defer], [statics][cleanup-statics], [transfers][cleanup-transfers], [generation][generation-projection], [cache][cache-owner] | Added landing/staticinit/kernel forms and ordered substitution rows. |
-| Emission and cache | [dispatch][emit-dispatch], [initializers][emit-initialization], [cache values][literal-cache], [output][generation-output] | Distinguished payloads/output; retained generic C fragments and compatibility consumers. |
-| Historical-only forms | Current source search and the owners above | `matchcases`, `managed-init`, `vpair`, Lisp String slots, and Lisp/import replay events removed from the current inventory; their historical layouts are not current contracts. |
+| Family | Current owners |
+| --- | --- |
+| Roots, names, origins | [ast][ast], [binding][binding], [identifiers][identifiers], [Code][sdk-syntax] |
+| Expressions, operators, access | [syntax][expression-syntax], [resolution][resolution], [access][access], [calls][calls], [operators][operators] |
+| Literals and interpolation | [atoms][atoms], [Lists][quotation-reader], [collections][collection-reader], [Strings][string-reader], [interpolation][interpolation-component] |
+| Declarations and Types | [declarations][declarations], [declarators][declarators], [types][type-parser], [Type conversion][compiler-type], [runtime Type][runtime-type] |
+| Lambdas and callbacks | [lambdas][lambdas], [lambda lowering][lambda-component], [callbacks][callbacks] |
+| Statements, match, catch, raise | [statements][statements], [binding][binding], [match][match-component], [try][try-component], [raise][raise-component] |
+| Macro/template values | [definitions][macro-definitions], [captures][invocation-captures], [quotations][macro-quotations], [templates][macro-templates], [runtime Macro][macro-construction] |
+| Retained declarations | [units][units], [production][declaration-production], [defaults][declaration-defaults], [portable syntax][portable-syntax] |
+| Protocols and imports | [protocol declarations][protocol-declarations], [registry][protocol-registry], [units][units] |
+| Initializer alternatives | [subobjects][initializer-subobjects], [conversion][initializer-conversion], [emission][emit-initialization] |
+| Cleanup and generation | [defer][cleanup-defer], [statics][cleanup-statics], [transfers][cleanup-transfers], [generation][generation-projection], [cache][cache-owner] |
+| Emission and cache | [dispatch][emit-dispatch], [initializers][emit-initialization], [cache values][literal-cache], [output][generation-output] |
 
 ### Adjacent data is not program syntax
 
@@ -1300,93 +1295,92 @@ stage no longer has that type field. A match on `(capture ...)` must know
 whether it is reading a lambda capture or a macro invocation capture. Use this
 chapter's production and stage together when reading such patterns.
 
-[binding]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/parse/binding.x
-[ast]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/ast.x
-[identifiers]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/expressions/identifiers.x
-[macro-values]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/values.x
-[units]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/parse/units.x
-[sdk-syntax]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/meta-sdk/syntax.x
-[atoms]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/literals/atoms.x
-[expression-syntax]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/expressions/syntax.x
-[resolution]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/expressions/resolution.x
-[emit-expressions]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/emit/expressions.x
-[operators]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/operator-ledger.x
-[access]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/expressions/access.x
-[calls]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/expressions/calls.x
-[bracket-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/bracket-access.x
-[emit-dispatch]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/emit/dispatch.x
-[quotation-reader]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/literals/quotation.x
-[collection-reader]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/literals/collections.x
-[string-reader]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/literals/strings.x
-[collection-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/collection-literals.x
-[interpolation-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/interpolation.x
-[literal-cache]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/compiler/literal-cache.x
-[initializer-conversion]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/initializers/conversion.x
-[destructuring-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/destructuring.x
-[lambdas]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/lambdas.x
-[lambda-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/lambda-functions.x
-[callbacks]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/callables/callbacks.x
-[declarations]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/parse/declarations.x
-[functions]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/parse/functions.x
-[type-parser]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/parse/types.x
-[generation-projection]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/generate/projection.x
-[emit-declarations]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/emit/declarations.x
-[declarators]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/parse/declarators.x
-[compiler-type]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/type.x
-[runtime-type]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/lib/type.x
-[declaration-parts]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/lib/meta.x
-[statements]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/statements.x
-[transform-expressions]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/transform/expressions.x
-[transform-traversal]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/transform/traversal.x
-[cleanup-transfers]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/cleanup/transfers.x
-[grammar-owner]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/grammar.x
-[try-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/try-catch.x
-[match-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/pattern-match.x
-[raise-component]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/components/raise.x
-[invocation-targets]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/invocations/targets.x
-[invocation-expressions]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/invocations/expressions.x
-[invocation-captures]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/invocations/captures.x
-[macro-slots]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/definitions/slots.x
-[expansion]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/expansion.x
-[macro-construction]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/lib/macrovalue/construction.x
-[macro-quotations]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/definitions/quotations.x
-[macro-templates]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/templates.x
-[macro-recognition]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/lib/macrovalue/recognition.x
-[macro-patterns]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/lib/macrovalue/patterns.x
-[macro-definitions]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/definitions/templates.x
-[macro-reading]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/definitions/reading.x
-[meta-library]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/lib/meta.x
-[declaration-defaults]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/compiler/declarations/defaults.x
-[declaration-production]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/compiler/declarations/production.x
-[protocol-declarations]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/protocol/declarations.x
-[protocol-registry]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/protocol/registry.x
-[initializer-subobjects]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/initializers/subobjects.x
-[emit-initialization]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/emit/initialization.x
-[cleanup-defer]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/cleanup/defer.x
-[cleanup-statics]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/cleanup/statics.x
-[cache-owner]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/cache.x
-[transform-literals]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/transform/literals.x
-[generation-output]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/generate/output.x
-[format-owner]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/format.x
-[historical-appendix]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/plans/archive/compiler-dual-macro-contract.md#canonical-grammar-appendix
-[portable-syntax]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/compiler/declarations/portable-syntax.x
-[symbol-bindings]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/symtab/bindings.x
-[binding-facts]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/compiler/binding-facts.x
-[callable-adapters]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/callables/adapters.x
-[callable-values]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/callables/values.x
-[regions-owner]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/regions/regions.x
-[invocation-recognition]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/invocations/recognition.x
-[rewrites]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/macros/rewrites.x
-[definition-output]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/generate/definitions.x
+[binding]: https://github.com/gwf/x2c/blob/main/src/parse/binding.x
+[ast]: https://github.com/gwf/x2c/blob/main/src/ast.x
+[identifiers]: https://github.com/gwf/x2c/blob/main/src/expressions/identifiers.x
+[macro-values]: https://github.com/gwf/x2c/blob/main/src/macros/values.x
+[units]: https://github.com/gwf/x2c/blob/main/src/parse/units.x
+[sdk-syntax]: https://github.com/gwf/x2c/blob/main/src/meta-sdk/syntax.x
+[atoms]: https://github.com/gwf/x2c/blob/main/src/literals/atoms.x
+[expression-syntax]: https://github.com/gwf/x2c/blob/main/src/expressions/syntax.x
+[resolution]: https://github.com/gwf/x2c/blob/main/src/expressions/resolution.x
+[emit-expressions]: https://github.com/gwf/x2c/blob/main/src/emit/expressions.x
+[operators]: https://github.com/gwf/x2c/blob/main/src/operator-ledger.x
+[access]: https://github.com/gwf/x2c/blob/main/src/expressions/access.x
+[calls]: https://github.com/gwf/x2c/blob/main/src/expressions/calls.x
+[bracket-component]: https://github.com/gwf/x2c/blob/main/src/components/bracket-access.x
+[emit-dispatch]: https://github.com/gwf/x2c/blob/main/src/emit/dispatch.x
+[quotation-reader]: https://github.com/gwf/x2c/blob/main/src/literals/quotation.x
+[collection-reader]: https://github.com/gwf/x2c/blob/main/src/literals/collections.x
+[string-reader]: https://github.com/gwf/x2c/blob/main/src/literals/strings.x
+[collection-component]: https://github.com/gwf/x2c/blob/main/src/components/collection-literals.x
+[interpolation-component]: https://github.com/gwf/x2c/blob/main/src/components/interpolation.x
+[literal-cache]: https://github.com/gwf/x2c/blob/main/src/compiler/literal-cache.x
+[initializer-conversion]: https://github.com/gwf/x2c/blob/main/src/initializers/conversion.x
+[destructuring-component]: https://github.com/gwf/x2c/blob/main/src/components/destructuring.x
+[lambdas]: https://github.com/gwf/x2c/blob/main/src/lambdas.x
+[lambda-component]: https://github.com/gwf/x2c/blob/main/src/components/lambda-functions.x
+[callbacks]: https://github.com/gwf/x2c/blob/main/src/callables/callbacks.x
+[declarations]: https://github.com/gwf/x2c/blob/main/src/parse/declarations.x
+[functions]: https://github.com/gwf/x2c/blob/main/src/parse/functions.x
+[type-parser]: https://github.com/gwf/x2c/blob/main/src/parse/types.x
+[generation-projection]: https://github.com/gwf/x2c/blob/main/src/generate/projection.x
+[emit-declarations]: https://github.com/gwf/x2c/blob/main/src/emit/declarations.x
+[declarators]: https://github.com/gwf/x2c/blob/main/src/parse/declarators.x
+[compiler-type]: https://github.com/gwf/x2c/blob/main/src/type.x
+[runtime-type]: https://github.com/gwf/x2c/blob/main/lib/type.x
+[declaration-parts]: https://github.com/gwf/x2c/blob/main/lib/meta.x
+[statements]: https://github.com/gwf/x2c/blob/main/src/statements.x
+[transform-expressions]: https://github.com/gwf/x2c/blob/main/src/transform/expressions.x
+[transform-traversal]: https://github.com/gwf/x2c/blob/main/src/transform/traversal.x
+[cleanup-transfers]: https://github.com/gwf/x2c/blob/main/src/cleanup/transfers.x
+[grammar-owner]: https://github.com/gwf/x2c/blob/main/src/grammar.x
+[try-component]: https://github.com/gwf/x2c/blob/main/src/components/try-catch.x
+[match-component]: https://github.com/gwf/x2c/blob/main/src/components/pattern-match.x
+[raise-component]: https://github.com/gwf/x2c/blob/main/src/components/raise.x
+[invocation-targets]: https://github.com/gwf/x2c/blob/main/src/macros/invocations/targets.x
+[invocation-expressions]: https://github.com/gwf/x2c/blob/main/src/macros/invocations/expressions.x
+[invocation-captures]: https://github.com/gwf/x2c/blob/main/src/macros/invocations/captures.x
+[macro-slots]: https://github.com/gwf/x2c/blob/main/src/macros/definitions/slots.x
+[expansion]: https://github.com/gwf/x2c/blob/main/src/macros/expansion.x
+[macro-construction]: https://github.com/gwf/x2c/blob/main/lib/macrovalue/construction.x
+[macro-quotations]: https://github.com/gwf/x2c/blob/main/src/macros/definitions/quotations.x
+[macro-templates]: https://github.com/gwf/x2c/blob/main/src/macros/templates.x
+[macro-recognition]: https://github.com/gwf/x2c/blob/main/lib/macrovalue/recognition.x
+[macro-patterns]: https://github.com/gwf/x2c/blob/main/lib/macrovalue/patterns.x
+[macro-definitions]: https://github.com/gwf/x2c/blob/main/src/macros/definitions/templates.x
+[macro-reading]: https://github.com/gwf/x2c/blob/main/src/macros/definitions/reading.x
+[meta-library]: https://github.com/gwf/x2c/blob/main/lib/meta.x
+[declaration-defaults]: https://github.com/gwf/x2c/blob/main/src/compiler/declarations/defaults.x
+[declaration-production]: https://github.com/gwf/x2c/blob/main/src/compiler/declarations/production.x
+[protocol-declarations]: https://github.com/gwf/x2c/blob/main/src/protocol/declarations.x
+[protocol-registry]: https://github.com/gwf/x2c/blob/main/src/protocol/registry.x
+[initializer-subobjects]: https://github.com/gwf/x2c/blob/main/src/initializers/subobjects.x
+[emit-initialization]: https://github.com/gwf/x2c/blob/main/src/emit/initialization.x
+[cleanup-defer]: https://github.com/gwf/x2c/blob/main/src/cleanup/defer.x
+[cleanup-statics]: https://github.com/gwf/x2c/blob/main/src/cleanup/statics.x
+[cache-owner]: https://github.com/gwf/x2c/blob/main/src/cache.x
+[transform-literals]: https://github.com/gwf/x2c/blob/main/src/transform/literals.x
+[generation-output]: https://github.com/gwf/x2c/blob/main/src/generate/output.x
+[format-owner]: https://github.com/gwf/x2c/blob/main/src/format.x
+[portable-syntax]: https://github.com/gwf/x2c/blob/main/src/compiler/declarations/portable-syntax.x
+[symbol-bindings]: https://github.com/gwf/x2c/blob/main/src/symtab/bindings.x
+[binding-facts]: https://github.com/gwf/x2c/blob/main/src/compiler/binding-facts.x
+[callable-adapters]: https://github.com/gwf/x2c/blob/main/src/callables/adapters.x
+[callable-values]: https://github.com/gwf/x2c/blob/main/src/callables/values.x
+[regions-owner]: https://github.com/gwf/x2c/blob/main/src/regions/regions.x
+[invocation-recognition]: https://github.com/gwf/x2c/blob/main/src/macros/invocations/recognition.x
+[rewrites]: https://github.com/gwf/x2c/blob/main/src/macros/rewrites.x
+[definition-output]: https://github.com/gwf/x2c/blob/main/src/generate/definitions.x
 
-[stage-owner]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/stage.x
+[stage-owner]: https://github.com/gwf/x2c/blob/main/src/stage.x
 
-[initializer-fixture]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/unittest/compiler-fixtures/type-initializer.ast
+[initializer-fixture]: https://github.com/gwf/x2c/blob/main/unittest/compiler-fixtures/type-initializer.ast
 
-[leaf-fixture]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/unittest/compiler-fixtures/ast-leaf-contract.ast
+[leaf-fixture]: https://github.com/gwf/x2c/blob/main/unittest/compiler-fixtures/ast-leaf-contract.ast
 
-[lambda-fixture]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/unittest/compiler-fixtures/captured-lambda-lowering.ast
+[lambda-fixture]: https://github.com/gwf/x2c/blob/main/unittest/compiler-fixtures/captured-lambda-lowering.ast
 
-[catch-fixture]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/unittest/compiler-fixtures/catch-filter-arms.ast
+[catch-fixture]: https://github.com/gwf/x2c/blob/main/unittest/compiler-fixtures/catch-filter-arms.ast
 
-[placement-owner]: https://github.com/gwf/x2c/blob/ff3aba2aac3d58a31db6fd53b5cfaeeef230b695/src/parse/placement.x
+[placement-owner]: https://github.com/gwf/x2c/blob/main/src/parse/placement.x
