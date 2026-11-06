@@ -11,6 +11,7 @@ import SiteFooter from "../components/SiteFooter.astro";
 import FeatureCarousel from "../components/FeatureCarousel.astro";
 import FeatureTable from "../components/FeatureTable.astro";
 import HeroTitle from "../components/HeroTitle.astro";
+import CopyButton from "../components/CopyButton.astro";
 import { articles, inSection, slides } from "../lib/examples";
 import { inlineMarkdown } from "../lib/inline-markdown";
 import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
@@ -40,6 +41,8 @@ const statistics = JSON.parse(execFileSync(
   "python3", ["tools/repo-metrics.py", "--summary-json"],
   { cwd: import.meta.env.X2C_REPOSITORY_ROOT, encoding: "utf8" }
 ));
+const releaseInstall = installExample(install.run.trim());
+const sourceInstall = `${coreSetup}\n${install.source.trim()}`;
 const number = (value: number) => value.toLocaleString("en-US");
 const sourceLines = (name: string) =>
   `${number(statistics.source[name].code)} / ` +
@@ -175,6 +178,11 @@ const [titleHtml, kickerHtml] = await Promise.all([
           </div>
         </header>
         <p>
+          <strong>Platforms.</strong>{" "}
+          macOS 15 or later (arm64, x86_64); Linux with glibc 2.38 or later
+          (x86_64, aarch64); Windows through WSL2.
+        </p>
+        <p>
           <strong>Install a release.</strong>{" "}
           One command downloads the compiler, runtime, headers, and
           examples for your platform into <code>{destination.staging
@@ -203,10 +211,21 @@ const [titleHtml, kickerHtml] = await Promise.all([
         </p>
       </div>
       <figure class="install-window">
-        <figcaption>{install.caption}</figcaption>
+        <figcaption class="install-label">
+          <span>{install.caption}</span>
+          <CopyButton text={releaseInstall} label="Copy commands"
+            action="copy-run" />
+        </figcaption>
         <div class="install-code">
-          <Code code={`${coreSetup}\n\n${installExample(install.run.trim())}`} lang="sh"
-            theme={x2cDarkTheme} />
+          <Code code={releaseInstall} lang="sh" theme={x2cDarkTheme} />
+        </div>
+        <div class="install-label install-source">
+          <span>or build from a source checkout</span>
+          <CopyButton text={sourceInstall} label="Copy commands"
+            action="copy-run" />
+        </div>
+        <div class="install-code">
+          <Code code={sourceInstall} lang="sh" theme={x2cDarkTheme} />
         </div>
       </figure>
     </div>
@@ -234,8 +253,10 @@ const [titleHtml, kickerHtml] = await Promise.all([
             <div class="install-code" set:html={await packageBuildCode()} />
           </figure>
           <p class="package-note">
-            Packages need their native libraries prepared first. Release bundles are
-            built on macOS and Linux, on both arm64 and x86_64.
+            Packages need their native libraries prepared first. Release
+            bundles cover macOS and Linux on arm64 and x86_64; torch bundles
+            cover macOS arm64 and Linux x86_64 only. raylib and SQLite have
+            no release bundle and build from a source checkout.
           </p>
         </div>
       </div>

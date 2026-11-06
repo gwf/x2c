@@ -557,7 +557,8 @@ main:focus {
   font-style: italic;
 }
 
-.install-window figcaption {
+.install-window figcaption,
+.install-window .install-label {
   margin: 0;
   padding: 11px 16px;
   border-bottom: 1px solid var(--hairline-on-dark);
@@ -565,6 +566,18 @@ main:focus {
   font:
     500 11.5px/1 "JetBrains Mono",
     monospace;
+}
+
+.install-window .install-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.install-window .install-source {
+  border-top: 1px solid var(--hairline-on-dark);
 }
 
 .feature-code,
