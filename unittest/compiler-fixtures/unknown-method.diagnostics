@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/unknown-method.x:5:16: type: type ("Buffer") has no method append
+unittest/compiler-fixtures/unknown-method.x:5:16: type: type Buffer has no method append
     buffer.append("missing");
                  ^
 

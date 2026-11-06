@@ -965,7 +965,7 @@ x2c creates or truncates the file when the command starts, so a command with
 no diagnostics leaves it empty. Each line is one JSON object:
 
 ```text
-{"code":"type","message":"operator 'is' requires Var on the left","severity":"error","file":"app.x","line":9,"column":16,"length":2,"position":120,"notes":["operand type: (int)"]}
+{"code":"type","message":"operator 'is' requires Var on the left","severity":"error","file":"app.x","line":9,"column":16,"length":2,"position":120,"notes":["operand type: int"]}
 ```
 
 - `code` is the diagnostic category, such as `parse`, `type`, `macro`,

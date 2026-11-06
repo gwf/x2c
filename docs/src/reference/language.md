@@ -899,7 +899,7 @@ three emit `_Thread_local`.
 
 Where C reports a pointer type mismatch as a warning, x2c reports an error:
 passing a `struct Rec *` to a parameter declared `List`, `String`, `Map`, or
-`Array` is `cannot convert (* "Rec") to ("List")`. Typedef spelling is not a
+`Array` is `cannot convert Rec * to List`. Typedef spelling is not a
 mismatch, so `Ast` and `List` are the same type here. The rule applies only
 when both sides point at a named struct, union, or enum or at a builtin scalar;
 `void *`, function pointers, arrays, and types from system headers convert as C

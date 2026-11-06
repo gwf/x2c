@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/protocol-no-fake-member-dot.x:21:12: type: type ("Vec") has no method add
+unittest/compiler-fixtures/protocol-no-fake-member-dot.x:21:12: type: type Vec has no method add
     value.add(value);
              ^
 

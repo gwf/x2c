@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/foreach-macro-incompatible-tag.x:9:3: type: cannot convert Var to (struct "Pair")
+unittest/compiler-fixtures/foreach-macro-incompatible-tag.x:9:3: type: cannot convert Var to struct Pair
     foreach (struct Pair pair in values) (void) pair;
     ^^^^^^^
   note: in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1

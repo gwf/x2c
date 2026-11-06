@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/list-index-compound.x:5:3: xform: type ("List") does not support indexed compound assignment
+unittest/compiler-fixtures/list-index-compound.x:5:3: xform: type List does not support indexed compound assignment
     values[0] += 1;
     ^^^^^^
 

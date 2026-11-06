@@ -1,9 +1,9 @@
-unittest/compiler-fixtures/region-buffer-views.x:42:51: warning: conversion: unnecessary conversion: .block() where ("Block") is expected
+unittest/compiler-fixtures/region-buffer-views.x:42:51: warning: conversion: unnecessary conversion: .block() where Block is expected
     auto { ArrayInt values = []; return values.block(); }
                                                     ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/region-buffer-views.x:46:68: warning: conversion: unnecessary conversion: .array() where ("Array") is expected
+unittest/compiler-fixtures/region-buffer-views.x:46:68: warning: conversion: unnecessary conversion: .array() where Array is expected
     auto { Block values = Block.new(sizeof(Var)); return values.array(); }
                                                                      ^
   note: remove the call; the destination converts the value

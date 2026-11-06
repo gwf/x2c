@@ -3,7 +3,7 @@ unittest/compiler-fixtures/protocol-generated-collision.x:39:1: protocol: member
   ^^^^^^^^
   note: FirstTruth default source: FirstTruth_truth SecondTruth default source: SecondTruth_truth
 
-unittest/compiler-fixtures/protocol-generated-collision.x:45:22: type: type ("Choice") has no method truth
+unittest/compiler-fixtures/protocol-generated-collision.x:45:22: type: type Choice has no method truth
     return choice.truth();
                        ^
 

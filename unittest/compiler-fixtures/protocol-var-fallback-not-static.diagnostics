@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/protocol-var-fallback-not-static.x:19:26: type: type ("StaticGap") has no method hash
+unittest/compiler-fixtures/protocol-var-fallback-not-static.x:19:26: type: type StaticGap has no method hash
     return (int) value.hash();
                            ^
 

@@ -1375,7 +1375,7 @@ Writing is where the immutable/mutable split shows up in the syntax:
 <!-- ignore: `List` has no indexed assignment; this is a compile error -->
 ```x2c,ignore
 List letters = %(a b c);
-// xform: type ("List") does not support bracket assignment
+// xform: type List does not support bracket assignment
 letters[0] = "z";
 ```
 
