@@ -88,6 +88,10 @@ const distinctScopes = [
   "storage.modifier.threaded.x2c",
   "storage.modifier.meta.x2c",
   "storage.modifier.native.x2c",
+  // The grammar also scopes meta and native as keyword.other, the innermost
+  // scope, which GitHub Light colours as an ordinary keyword.
+  "keyword.other.meta.x2c",
+  "keyword.other.native.x2c",
   "keyword.control.import.x2c",
   "keyword.control.with.x2c",
   "keyword.declaration.protocol.x2c",
