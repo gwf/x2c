@@ -24,33 +24,54 @@ int main(void) {
 ```
 
 Array literals and iteration work alongside ordinary C functions. The runtime
-is available without an explicit include. The [language tour](examples/tours/language.x)
-shows more: dynamic values, destructuring, maps, lambdas, matching, memory
-scopes, and embedded Lisp.
+is available without an explicit include. The
+[language tour](examples/tours/language.x) shows more: dynamic values,
+destructuring, maps, lambdas, matching, memory scopes, and embedded Lisp.
 
-## Build and run
+## Install a release
 
-From a checkout, you need a GCC- or Clang-compatible C compiler, `ar`, GNU Make,
-and Bash. You do not need an existing x2c compiler: the checkout
-contains generated C for the bootstrap.
+x2c runs on macOS 15 or later and on Linux with glibc 2.38 or later, on arm64
+and x86_64, and on Windows through WSL2. It needs a C compiler named `cc`.
+Install the latest release into `~/.local/x2c` and run the example:
 
 ```sh
-make build-safe
-./x2c run hello.x
-./x2c run hello.x -- first second
+curl -fsSL https://x2c-lang.dev/install.sh | sh
+export PATH="$HOME/.local/x2c/bin:$PATH"
+x2c run -q hello.x
 ```
 
-`run` compiles and executes the program. `--` starts the program's arguments.
+```text
+Hello, Ada!
+Hello, Grace!
+Hello, Linus!
+```
+
+`run` compiles and executes the program, and `-q` omits the build report.
 To keep an executable instead:
 
 ```sh
-./x2c build hello.x -o hello
+x2c build -q hello.x -o hello
 ./hello
 ```
 
-For a ready-made program, try `./x2c run examples/foreach.x`. For installation
-outside the checkout, follow the [installation guide](docs/src/guide/installation.md).
-It covers release installation and building an installed compiler from source.
+## Build from source
+
+A source build needs a GCC- or Clang-compatible C compiler, `ar`, GNU Make,
+Git, and Bash. You do not need an existing x2c compiler: the checkout
+contains generated C for the bootstrap.
+
+```sh
+git clone https://github.com/gwf/x2c.git
+cd x2c
+make build-safe
+make commands
+./x2c run -q examples/foreach.x
+```
+
+`make build-safe` builds the compiler as `./x2c`. `make commands` builds the
+commands it runs, such as `x2c new`, `x2c test`, and `x2c repl`. The
+[installation guide](docs/src/guide/installation.md) lists supported
+platforms and covers installing from source, a first project, and upgrades.
 
 ## What to explore
 
@@ -64,8 +85,9 @@ It covers release installation and building an installed compiler from source.
 - [Command-line reference](docs/src/reference/cli.md): compilation, projects,
   scripts, inspection, and build options. `./x2c --help` lists commands.
 - [Benchmarks Game](examples/shootout/README.md): official problems with
-  idiomatic and tuned x2c, plus contributed C, Python, Rust, C++, Go, and Java references.
-  [Current results and charts](examples/shootout/results/README.md) are preserved in dev.
+  idiomatic and tuned x2c, plus contributed C, Python, Rust, C++, Go, and
+  Java references. See the
+  [results and charts](examples/shootout/results/README.md).
 
 ## Status and compatibility
 
@@ -90,14 +112,14 @@ entry file and implementation members.
 | --- | --- |
 | [src/](src/README.md) | Compiler, driver, compile-time operations, and syntax lowering. |
 | [lib/](docs/src/library/overview.md) | Runtime values, collections, memory, IO, concurrency, and Lisp. |
-| [commands/](commands/manifest.txt) | External commands such as project creation, packages, and the REPL. |
+| `commands/` | External commands such as project creation, packages, and the REPL. |
 | [examples/](examples/README.md) | Executable language examples and applications. |
 | [packages/](packages/README.md) | Optional adapters for third-party C libraries. |
 | [unittest/](unittest/) | Runtime tests, compiler fixtures, and focused probes. |
 | [bootstrap/](bootstrap/) | Generated C used to build the first compiler. |
 | [builds/](builds/) | Working compiler stages and generated build outputs. |
 | [docs/](docs/src/index.md) | The book's source. |
-| [site/](site/) | The public website. |
+| [site/](site/README.md) | The public website. |
 
 [Compiler architecture](docs/src/internals/architecture.md) explains the
 phases. [Building the compiler](docs/src/internals/building.md) explains
@@ -119,15 +141,17 @@ bootstrap C through the build targets.
 | **Prelude** | Definitions made available automatically when compiling a source unit, including the standard runtime and shipped syntax rules. |
 | **Bootstrap** | The checked-in generated C used to build x2c without an existing x2c compiler. Later builds use x2c to compile its own source. |
 
-See the language reference for [module blocks](docs/src/reference/language.md#module-blocks)
-and [packages and imports](docs/src/reference/language.md#packages-and-import).
+See the language reference for
+[module blocks](docs/src/reference/language.md#module-blocks) and
+[packages and imports](docs/src/reference/language.md#packages-and-import).
 
 ## License and project policy
 
 x2c is available under the [Apache License 2.0](LICENSE). Forks are welcome.
 The project is not accepting external code contributions; see
-[CONTRIBUTING.md](CONTRIBUTING.md). Development follows the author's priorities,
-without a promised roadmap, release schedule, or support commitment.
+[CONTRIBUTING.md](CONTRIBUTING.md). Development follows the author's
+priorities, without a promised roadmap, release schedule, or support
+commitment.
 
 See [THIRD_PARTY.md](THIRD_PARTY.md) for dependency notices,
 [SECURITY.md](SECURITY.md) for vulnerability reporting, and

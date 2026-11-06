@@ -63,9 +63,8 @@ matching.
 - The [standard library](library/overview.md) describes the available modules
   and links to their API reference, generated from the source.
 - [Compiler architecture](internals/architecture.md) explains the self-hosting
-  implementation for readers who want to study or contribute to it.
+  implementation for readers who want to study or modify it.
 
-The book describes implemented behavior. The optional `make doc-examples`
-translates its x2c samples and compiles them to objects. `make doc-outputs`
-also links and runs samples with expected output. The optional `make examples`
-runs the showcase programs and checks their output.
+The book describes implemented behavior. Its x2c samples compile with the
+current compiler, and a sample followed by its output runs and produces that
+output.
