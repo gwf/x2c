@@ -170,6 +170,12 @@ lib/match/match.x|advanced|List.match,List.match_replace,Var.is_atom_binder
 lib/match/match.x|advanced|Var.is_binder,Var.is_list_binder,Var.is_match_op
 lib/match/match.x|advanced|x2c_match_pattern_retainable,x2c_match_site_prepare
 lib/match/match.x|advanced|x2c_match_site_try_capture,x2c_match_try_capture
+lib/match/match.x|advanced|x2c_match_initialize,x2c_match_site_match
+lib/match/match.x|advanced|x2c_match_site_match_replace,x2c_match_site_search
+lib/match/match.x|advanced|x2c_match_site_search_replace
+lib/match/match.x|advanced|x2c_match_site_try_match
+lib/match/match.x|advanced|x2c_match_site_try_match_replace
+lib/match/match.x|advanced|x2c_match_site_try_search,x2c_match_thread_release
 lib/match/match.x|internal|MatchCaptureBuffer.has,MatchCaptureLayout.analyze
 lib/match/match.x|internal|MatchCaptureLayout.definite_list,MatchCaptureLayout.free
 lib/match/match.x|internal|MatchCaptureLayout.index,MatchCaptureLayout.possible_list
@@ -182,6 +188,7 @@ lib/match/match.x|internal|MatchCaptureBuffer,MatchCaptureLayout
 lib/match/match.x|internal|MatchCaptureSite,MatchKey
 lib/mutex.x|internal|Mutex.recursive_initialize,Mutex.recursive_lock,Mutex.recursive_unlock
 lib/pool/pool.x|advanced|Pool.retain,Pool.retain_named,Pool.release
+lib/pool/pool.x|advanced|x2c_pool_lookup_string
 lib/pool/pool.x|internal|Pool.free,Pool.promote,Pool.own
 lib/pool/pool.x|internal|Pool.initialize,Pool.thread_initialize,Pool.shutdown
 lib/pool/pool.x|internal|Pool.lookup,Pool.insert,Pool.intern,Pool.malloc
@@ -214,6 +221,7 @@ lib/string/string.x|advanced|String.malloc,String.new_fill,String.new_len
 lib/string/string.x|advanced|String.new_in
 lib/string/string.x|advanced|String.printf,String.promote
 lib/string/string.x|advanced|String.str,String.symbol
+lib/string/string.x|advanced|x2c_string_from_bytes
 lib/string/string.x|internal|String.is_permanent,String.try_own
 lib/string/string.x|internal|StringHeader
 lib/symbol.x|advanced|Symbol.compare,Symbol.decode,Symbol.first,Symbol.new_len
@@ -244,6 +252,10 @@ lib/var/var.x|advanced|x2c_var_update_long_double,x2c_var_update_f32
 lib/var/var.x|advanced|x2c_var_update_schar,x2c_var_update_ulong_long
 lib/var/var.x|advanced|x2c_var_update_u16,x2c_var_update_u32
 lib/var/var.x|advanced|x2c_var_update_ulong,x2c_var_update_u8
+lib/var/var.x|advanced|x2c_var_custom_descriptor,x2c_var_declare
+lib/var/var.x|advanced|x2c_var_descriptor_index,x2c_var_tag_descriptor_index
+lib/var/var.x|advanced|x2c_var_equal,x2c_var_identical,x2c_var_order
+lib/var/var.x|advanced|x2c_var_postfix_volatile,x2c_var_update_volatile
 lib/match/match.x|internal|MachineBuilder,MachineBuilder.binder,MachineBuilder.cleanup,MachineBuilder.constant
 lib/match/match.x|internal|MachineBuilder.drop,MachineBuilder.emit,MachineBuilder.free,MachineBuilder.freeze
 lib/match/match.x|internal|MachineBuilder.init,MachineBuilder.new,MachineBuilder.patch,MachineBuilder.set_target
