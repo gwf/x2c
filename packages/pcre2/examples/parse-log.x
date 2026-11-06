@@ -28,6 +28,6 @@ int main(void) {
   }
 
   foreach(Var (program, count), counts)
-    printf("%s", %"$program: $count lines\n");
+    printf("%s", %"lines from $program: $count\n");
   return 0;
 }
