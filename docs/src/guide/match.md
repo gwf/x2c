@@ -83,11 +83,10 @@ errors propagate normally. The guard uses ordinary expression truth rules.
 
 A typed name has the same type throughout its arm, including other
 occurrences written as `?name` and occurrences in alternative patterns.
-Repeated names still require equal values. `!quote` remains opaque, and the
-existing rule that each binder must be assigned in every alternative still
-applies. Explicit `(!is ?name type string)` keeps `name` as a `Var`.
+Repeated names require equal values. `!quote` stays opaque, and each binder
+must be assigned in every alternative. Explicit `(!is ?name type string)` keeps `name` as a `Var`.
 
-The shorthand lowers to the existing `!is` pattern predicate and ordinary
+The shorthand lowers to the `!is` pattern predicate and ordinary
 typed local declarations. An expression guard lowers to an ordinary `if`;
 both forms match exactly as the explicit patterns do.
 

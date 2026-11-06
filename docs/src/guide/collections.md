@@ -977,13 +977,10 @@ printf("%d %d index=%d\n", array.find(over_ten).int(),
 20 20 index=1
 ```
 
-For Array searches written for 0.15.x, see
-[Upgrading from 0.15.x](installation.md#upgrading-from-015x).
-
 Use `sort_by` to order by a computed key, or `sort_with` for a comparator.
 Both preserve the input order of ties. Arrays change in place and return the
-same object; Lists return a sorted copy. The existing `sort()` still uses
-`Var.compare` and does not promise stable ties.
+same object; Lists return a sorted copy. `sort()` uses `Var.compare` and does
+not promise stable ties.
 
 ```x2c
 Array rows = [];
@@ -1378,8 +1375,8 @@ Writing is where the immutable/mutable split shows up in the syntax:
 <!-- ignore: `List` has no indexed assignment; this is a compile error -->
 ```x2c,ignore
 List letters = %(a b c);
-letters[0] = "z";   // xform: type ( List ) does not support bracket
-                     // assignment
+// xform: type ("List") does not support bracket assignment
+letters[0] = "z";
 ```
 
 Slicing is `value[start:stop:step]`, available on `Array`, `List`, and

@@ -127,7 +127,7 @@ object.free();
 ~}
 ```
 
-The heap constructor allocates in the current Scope. Its generated `free`
+The heap constructor allocates in the active scope. Its generated `free`
 allows early release; otherwise the Scope reclaims that allocation. Generated
 cleanup does not recursively free fields and is not a Scope finalizer.
 Positional fields include native numeric values and enums, Symbol, Var/Atom,

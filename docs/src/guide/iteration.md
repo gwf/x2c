@@ -436,7 +436,7 @@ printf("first over two = %s\n",
 ```
 
 `iter.list()` and `iter.array()` build a fresh `List` or `Array` under the
-current scope, and a `List` or `Array` destination calls them for you, as
+active scope, and a `List` or `Array` destination calls them for you, as
 above. The aggregates are `count`, `sum`, `product`, `min`, `max`,
 `foldl`, `any`, `all`, and `find`. `sum` and `product` use `Var` arithmetic
 promotion. `min` and `max` use total `Var` ordering and keep the first of

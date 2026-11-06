@@ -888,7 +888,7 @@ compiler must construct code representing that value.
 
 An inserted Array or Map is a snapshot of the compile-time result. It becomes
 an ordinary `[...]` or `{...}` literal, so each runtime execution of the
-expression allocates fresh collections in the current Scope, at every depth;
+expression allocates fresh collections in the active scope, at every depth;
 assigning the result to another variable still aliases it. Array order and
 element types are preserved. Map keys use their ordinary runtime key
 semantics, but reconstruction does not promise the same traversal order.

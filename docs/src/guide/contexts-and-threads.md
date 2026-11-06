@@ -307,7 +307,7 @@ not wait for participant progress. The executable
 `examples/power/channel-service.x` shows request/reply and closes requests
 after both clients finish.
 
-Each task borrows the caller's active Scope and Pool through the batch. It
+Each task borrows the caller's active scope and pool through the batch. It
 has its own default Scope slot, starts with no current Context, and copies
 effective Error policies and the error bound. Handlers, records, marks, and
 cleanup obligations start fresh. Opening a Context inside a job remains

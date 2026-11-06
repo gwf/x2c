@@ -98,7 +98,7 @@ until their reads finish.
 and owned contents for transfer. A failed send restores its original owner.
 After acceptance, the `Channel` holds the detached payload without adopting it
 as a child. The receiver recovers its scope from the allocation header, moves
-ordinary container storage to its private current scope, and destroys the empty
+ordinary container storage to its private active scope, and destroys the empty
 transport scope before returning. Prepared custom subtrees attach beneath that
 private scope. Abandoned payloads are destroyed after all `Channel` users
 finish. See [Channels](channels.md) for the transport contract.

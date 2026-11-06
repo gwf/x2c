@@ -1,11 +1,14 @@
-# Library playground
+# Library Playground
 
-`x2c repl` is a persistent command-line session for experimenting with C and
-x2c libraries. Load a source file, discover its functions, create an object,
-and call operations on that object across successive submissions. The
-command is experimental and available in checkout builds; neither
-`make install` nor a release payload installs it. From the root of a
-checkout, run `make commands`, then start it as `./x2c repl`.
+The library playground is experimental and runs only from a source checkout:
+neither `make install` nor a release payload installs it. From the root of a
+checkout, run `make commands`. Every command in this chapter uses the
+checkout's `./x2c`.
+
+`x2c repl` starts the playground, a persistent command-line session for
+experimenting with C and x2c libraries. Load a source file, discover its
+functions, create an object, and call operations on that object across
+successive submissions.
 
 Executable submissions compile through the ordinary compiler. Prompt objects
 and library objects share one native worker process, so native pointers,
@@ -46,7 +49,7 @@ void point_move(Point *p, int dx) { p->x += dx; }
 void point_free(Point *p) { free(p); }
 ```
 
-Start the REPL, then enter these submissions:
+Start the playground, then enter these submissions:
 
 ```text
 :load "points.c"
@@ -75,20 +78,16 @@ If a file-static name conflicts with a name from another loaded source file,
 the load fails with both paths and preserves the active session. Load those
 files in separate sessions when their private names overlap.
 
-For a complete program, run the checked-in [N-body demo][nbody-demo] from the
-repository root:
+For a complete program, run the N-body demo from the checkout root:
 
 ```sh
 ./x2c repl < commands/repl/examples/nbody.repl
 ```
 
-The [input script][nbody-input] loads the unchanged C benchmark, discovers
-its functions, shows a function definition, and inspects the `bodies` array
-before and after calls. The walkthrough also shows how to enter each command
-interactively.
-
-[nbody-demo]: https://github.com/gwf/x2c/blob/dev/commands/repl/examples/README.md
-[nbody-input]: https://github.com/gwf/x2c/blob/dev/commands/repl/examples/nbody.repl
+The input script loads the unchanged C benchmark, discovers its functions,
+shows a function definition, and inspects the `bodies` array before and after
+calls. The walkthrough in `commands/repl/examples/README.md` also shows how to
+enter each command interactively.
 
 A C library often exposes an opaque handle. Inspect the pointer's declared
 type and use `:members` to find related operations. Use the library's query
@@ -178,11 +177,11 @@ policy.
 
 Pointers display their type, nullness, and address. Inspection never follows
 a raw pointer automatically. Write `:inspect *p` or `:inspect p[2]` when you
-want that native read. A raw `char *` remains a pointer too; use an explicit
+want that native read. A raw `char *` is a pointer too; use an explicit
 `String.new(p)` or a library length/query operation to inspect text.
 
 Unions display their type and member choices. Select a member explicitly to
-read it; the REPL does not guess which member is active. Automatic traversal
+read it; the playground does not guess which member is active. Automatic traversal
 skips volatile fields and labels them. Explicit expressions preserve ordinary
 volatile semantics. Bitfields use native field access.
 
@@ -202,8 +201,8 @@ read can terminate the worker, just as a bad library call can.
 | `:quit` | Run session cleanup and leave the playground. |
 
 Every successful load or reload clears **all prompt and library state**.
-This includes loading an additional file or an unchanged file. The REPL
-announces the reset. A failed build, link, or candidate initialization keeps
+This includes loading an additional file or an unchanged file. The
+playground announces the reset. A failed build, link, or candidate initialization keeps
 the previous session. Ctrl-C during candidate preparation cancels the
 candidate and preserves the active session.
 
@@ -212,7 +211,7 @@ or header does not change that snapshot. An explicitly linked shared library
 that changed on disk requires `:reload` before a new worker can use it.
 
 Prompt variables can be assigned new values. Duplicate prompt definitions
-remain rejected. To change a function or type, reset or reload and rerun the
+are rejected. To change a function or type, reset or reload and rerun the
 needed submissions. No native object, saved callback, or apparent address
 survives a session replacement.
 
@@ -228,9 +227,9 @@ cannot reproduce.
 The top-level prompt is one session scope. Persistent variables and direct
 top-level `defer` registrations live until orderly quit, reset, or successful
 replacement. Cleanup runs in reverse registration order. Function calls and
-explicit blocks retain their ordinary automatic lifetimes.
+explicit blocks keep their ordinary automatic lifetimes.
 
-The distinction between managed declarations and managed initializers remains:
+Managed declarations and managed initializers differ as they do in a program:
 
 - `auto T x = ...` cleans `x`'s current value at scope exit.
 - `T x = auto acquire()` saves and cleans the acquired value despite a later
@@ -239,7 +238,7 @@ The distinction between managed declarations and managed initializers remains:
 
 Raw C pointers do not acquire a destructor from their names or types. Release
 library allocations with the library's documented operation. Escaping a
-pointer to an expired automatic object remains an ordinary C lifetime error.
+pointer to an expired automatic object is an ordinary C lifetime error.
 A forced stop or native crash cannot guarantee cleanup or undo external
 effects.
 
@@ -261,15 +260,15 @@ from the last successful program. Native exit, assertion failure, and crashes
 follow the same recovery rule. There is no short default timeout for ordinary
 library calls. A hanging cleanup can also be stopped explicitly.
 
-Native standard output and standard error retain their usual streams.
+Native standard output and standard error keep their usual streams.
 Interactive native standard input uses the terminal while a call runs. With
-piped REPL source, native standard input gets EOF; it cannot consume later
+piped playground input, native standard input gets EOF; it cannot consume later
 source submissions.
 
 Syntax, type, and link errors publish no new definitions. A failed
 initializer publishes none of its declaration's new names. Mutations already
 made to older objects and external effects remain. An ordinary caught x2c
-Error can return control to the existing worker.
+Error can return control to the running worker.
 
 With piped input, any command or submission error makes the final exit status
 1, while later input continues. Interactive recovered errors do not change a
@@ -292,6 +291,10 @@ boundary.
 
 Use source/header roots for includes, package imports, and user-authored
 macro/meta/protocol surfaces. Live configuration-changing directives and
-incremental definitions of those surfaces are outside this first playground
-scope. The ordinary compiler and host C dialect still determine which native
-libraries and calling conventions the selected toolchain supports.
+incremental definitions of those surfaces are not supported. The ordinary
+compiler and host C dialect determine which native libraries and calling
+conventions the selected toolchain supports.
+
+## Where to go next
+
+- [Indentation Syntax](indentation.md) writes x2c blocks by indentation.

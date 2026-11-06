@@ -9,7 +9,9 @@ decide when each allocation is freed. x2c storage is of three kinds:
 - Mutable storage belongs to a *scope*. A scope frees its allocations
   together.
 
-The [system macros](system-macros.md) provide `auto` for an open
+A *region* is a stretch of code whose allocations end together, such as an
+`auto` block; [The Region Model](regions.md) lists every form. The
+[system macros](system-macros.md) provide `auto` for an open
 region, `auto (pointer)` for a temporary destination, and initializer `auto` for an
 explicitly owned local. Classes can also supply early `free` operations.
 The [standard library overview](../library/overview.md) links to the detailed
@@ -62,7 +64,7 @@ puts(word);
 xfree(word);
 ```
 
-New allocations belong to the current active scope. A nested open region
+New allocations belong to the active scope. A nested open region
 or pushed scope becomes the destination for new allocations. Resizing an
 existing block preserves its owner. Allocations left in a scope are reclaimed
 when that scope ends; the default root ends at thread or process shutdown.
@@ -79,7 +81,7 @@ allocated by `getline` must use native `free`. Passing that buffer to `xfree`
 or `xrealloc`, or passing managed memory to native `free` or `realloc`, is
 undefined behavior.
 
-`Scope.open` opens a new region on the currently active scope slot;
+`Scope.open` opens a new region on the active scope slot;
 `Scope.close` frees everything allocated inside it. Between them, the
 allocation calls go into the open region:
 
@@ -163,13 +165,6 @@ be destroyed through its head.
 To close a region on every exit from a block, write it as `auto` or put
 the close in a `defer`. [Errors and
 Cleanup](exceptions.md#finally-and-defer) gives the exit rules.
-
-### Migrating existing Scope code
-
-`Scope.open` and `Scope.close` replace `Scope.retain` and `Scope.release`.
-Their region behavior is unchanged; the old names have no compatibility aliases.
-`Scope.up` has been removed without a replacement. Code that inspects the
-Scope layout must be updated and rebuilt with the matching runtime.
 
 ## Bounding temporary canonical Lists
 
@@ -502,11 +497,11 @@ cover, the exemptions, and how the check works. To observe a dangling read
 at run time, link the program against `libx2c.a` and compile with
 `cc -fsanitize=address,undefined`.
 
-## Ordinary C storage still works
+## Ordinary C storage
 
 x2c is a superset of C, and it does not change automatic or static storage.
-Locals, arrays, and `struct` values still live on the stack and end at the
-closing brace; `static` and file-scope objects still last for the program.
+Locals, arrays, and `struct` values live on the stack and end at the
+closing brace; `static` and file-scope objects last for the program.
 `Scope`s govern only what you explicitly allocate through them.
 
 Many library types store their state in memory the caller provides, so a
@@ -526,10 +521,8 @@ parameter you assigned directly keeps its value when a `raise` transfers
 control to a `catch`. Your source needs no optimization-specific qualifiers
 for that.
 
-## Where to look next
+## Where to go next
 
-Read the [standard library overview](../library/overview.md) and the
-[language reference](../reference/language.md) for the rules.
-[Idioms](idioms.md) shows how scopes combine with other x2c features.
-[The Region Model](regions.md) covers the lifetime check: its guarantees,
-its limits, and how it compares with the checks in other languages.
+- [Contexts and Threads](contexts-and-threads.md) gives work and threads their
+  own scopes.
+- [The Region Model](regions.md) covers the lifetime check.
