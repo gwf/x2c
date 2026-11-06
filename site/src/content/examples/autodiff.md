@@ -7,7 +7,9 @@ title: Differentiate a function.
 description: Generate derivatives with a decorator written in x2c meta functions, then use them to fit a growth curve.
 source: packages/autodiff/examples/autodiff-fit.x
 output: packages/autodiff/examples/expected/autodiff-fit.stdout
-run: make -C packages/autodiff run
+run: |
+  make -C packages/autodiff example
+  ./packages/autodiff/builds/example-autodiff-fit
 runIntro: Build x2c, then run the fitting example shown in the output above.
 guide: docs/guide/autodiff.html
 ---
