@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>{{ title }}</title>
+        <title>{{#if (eq chapter_title book_title)}}{{ book_title }}{{else}}{{ title }}{{/if}}</title>
         {{#if is_print }}
         <meta name="robots" content="noindex">
         {{/if}}
@@ -233,6 +233,14 @@
                     <main>
                         {{{ content }}}
                     </main>
+                    <script>
+                        // A generated page is edited through its generator.
+                        if ([...document.querySelector('#mdbook-content main').childNodes]
+                                .some(node => node.nodeType === Node.COMMENT_NODE &&
+                                      node.textContent.includes('Do not edit by hand'))) {
+                            document.querySelector('a[rel="edit"]')?.remove();
+                        }
+                    </script>
 
                     <nav class="x2c-pager" aria-label="Page navigation">
                         {{#if previous}}
