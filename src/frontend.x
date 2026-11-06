@@ -53,8 +53,8 @@ static macro Stmt $fail.frontend_input_read(
   Expr $c, Expr $site, Expr $filename, Expr $reason) =>
   $c.report_error(
     <driver>,
-    "cannot read input file",
-    $site, %("stage: driver" "file: $($filename)" "reason: $($reason)"));
+    %"cannot read input file '$($filename)': $($reason)",
+    $site, NULL);
 
 static macro Stmt $fail.frontend_script_symbols(Expr $c, Expr $site) =>
   $c.report_error(
