@@ -270,9 +270,8 @@ printf("%s\n", row);
 keeps every identity it contains. `Atom.promote` is for a standalone atom.
 See [Scopes and Lifetime](memory.md) for the lifetime rules.
 
-## Where to look next
+## Where to go next
 
-- [The language reference](../reference/language.md) has the literal
-  and representation rules.
-- [The standard library overview](../library/overview.md) has the runtime
-  rules, including identity and equality for the other types.
+- [Strings, Lists, Arrays, and Maps](collections.md) covers the containers.
+- The [language reference](../reference/language.md) has the literal and
+  representation rules.

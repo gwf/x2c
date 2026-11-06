@@ -681,7 +681,7 @@ int main(void) {
 
 Include `meta.x` when the calculation needs compiler operations for
 diagnostics, identifiers, types, bindings, source text or function bodies.
-The [meta-function guide](meta-functions.md) introduces these operations;
+The [Meta Functions](meta-functions.md) chapter introduces these operations;
 the [language reference](../reference/language.md#compile-time-calls-and-operations)
 specifies them.
 
@@ -744,3 +744,7 @@ into its derivative.
 For the complete hole grammar, result validation, hygiene rules, limits, and
 compiler operations, see [Compile-time macros in the language
 reference](../reference/language.md#compile-time-macros).
+
+## Where to go next
+
+- [Meta Functions](meta-functions.md) runs x2c code during translation.

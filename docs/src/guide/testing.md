@@ -1,4 +1,4 @@
-# Testing your project
+# Testing Your Project
 
 Include `test.x` to write a test program. Decorate each
 `static void name(void)` function with `$test()`, and finish the file with
@@ -100,3 +100,7 @@ tests matching the filters are omitted from output and file counts. The
 command returns 2 when filters select no tests across the entire run,
 including with `--list`. Discovery with no files also returns 2. Build
 errors and test failures return 1 even if other files have no matching tests.
+
+## Where to go next
+
+- [Packages](packages.md) adds third-party code to a project.

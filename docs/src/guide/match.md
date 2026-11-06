@@ -421,3 +421,7 @@ is reserved and is not a working predicate.
 
 The [generated Match reference](../library/modules/match.md) lists the runtime
 operations by API tier.
+
+## Where to go next
+
+- [Iteration](iteration.md) covers `foreach` and lazy pipelines.

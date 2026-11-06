@@ -1,4 +1,4 @@
-# Deriving record mappings
+# Deriving Record Mappings
 
 Include `derive.x` to generate conversions and operations from a struct's
 fields. `$derive` uses the declared field order and writes ordinary public
@@ -162,3 +162,7 @@ protocol Var(Reading);
 This policy boxes a new Map snapshot and reads that Map when unboxing.
 The [protocol chapter](protocols.md) describes descriptor behavior and
 alternative representations.
+
+## Where to go next
+
+- [Testing Your Project](testing.md) writes and runs tests.

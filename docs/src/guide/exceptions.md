@@ -354,3 +354,7 @@ shutdown. `Logger` then reports any collected root errors once and closes its
 handler. Finally, `Error` destroys its empty handler chain, stack, policy,
 pools, and `Scope`. A `raise` after that point terminates without allocating.
 The raw `Scope` leak report runs after all shutdown hooks.
+
+## Where to go next
+
+- [Protocols](protocols.md) lets several types share methods and operators.

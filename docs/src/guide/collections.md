@@ -1491,12 +1491,9 @@ foreach(List entry in ranked) {
 }
 ```
 
-## Where to look next
+## Where to go next
 
-- The [standard library overview](../library/overview.md) links to the
-  API reference for each collection.
-- [The language reference](../reference/language.md) has the percent
+- [Pattern Matching](match.md) takes `List`s apart.
+- [Iteration](iteration.md) covers `foreach` and lazy pipelines.
+- The [language reference](../reference/language.md) has the percent
   literal, indexing, and slicing rules.
-- [Iteration](iteration.md) for `foreach` and lazy pipelines,
-  [Pattern Matching](match.md) for taking `List`s apart, and
-  [Idioms](idioms.md) for recommended usage.

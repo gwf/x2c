@@ -225,3 +225,7 @@ https://example.com:8443/docs/a%20b?page=3&q=x%26y
 
 The empty `String` is the null pointer, so an empty query or fragment is
 the same as an absent one. A port the URL does not name is 0.
+
+## Where to go next
+
+- [Sockets and HTTP](networking.md) covers TCP and HTTP.

@@ -7,7 +7,7 @@ x2c translates to C and uses the native compiler, linker, object layout, and
 calling conventions. Scalars, aggregates, pointers, arrays, and ordinary
 functions remain useful representations. Each `.x` unit also loads the
 standard runtime prelude. `Var`, collections, protocols, and closures add
-operations where you use them. Memory ownership remains explicit: there is
+operations where you use them. Memory ownership is explicit: there is
 no garbage collector or reference counting.
 
 ## Files, visibility, and the native build
@@ -319,7 +319,8 @@ build disables. A macro such a branch defines stays for the C compiler. See
   A computed format with a Var argument is rejected. For native arguments,
   respect the native variadic ABI.
 
-The [x2c syntax map](x2c-syntax-map.md) lists every addition. The
-[syntax specifications](../reference/syntax/index.md) give the exact
-productions, and the [language reference](../reference/language.md) states
-the exact rules. [Idioms](idioms.md) shows how to combine them.
+## Where to go next
+
+- [What x2c Adds to C Syntax](x2c-syntax-map.md) lists every addition.
+- [Values and Var](values.md) introduces the dynamic value type.
+- The [language reference](../reference/language.md) states the exact rules.

@@ -275,7 +275,7 @@ Scope.destroy(keep);
 [ 1, 2, 3 ]
 ```
 
-[Explicit storage ownership](storage-ownership.md) describes `move_to` and
+[Explicit Storage Ownership](storage-ownership.md) describes `move_to` and
 owned contents.
 
 A `String` or a `List` needs no move, because canonical values

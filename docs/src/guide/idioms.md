@@ -350,3 +350,7 @@ The generated [module reference](../library/modules/index.md) separates:
 - runtime-internal callables documented only for source readers.
 
 Start with primary APIs; use the others when you need their specific behavior.
+
+## Where to go next
+
+- The [language reference](../reference/language.md) states the exact rules.

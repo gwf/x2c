@@ -525,17 +525,13 @@ int clamp(int value, int low, int high) {
 }
 ```
 
-## Where to go next
-
-- [Symbols and atoms](symbols.md) for the `<name>` values used above as tags
-  and outcome codes.
-- [Strings, lists, arrays, and maps](collections.md) for the containers that
-  store `Var`.
-- [Iteration](iteration.md) for `Iter`, `try_next`, and the exhaustion rule
-  that `void` participates in.
-- [Scopes and lifetime](memory.md) for what owns a boxed wide value.
-- [Idioms](idioms.md) for practical usage, and
-  [the language reference](../reference/language.md) for the full rules.
-
 The generated [Var reference](../library/modules/var.md) lists every
 callable, including conversion and operators, by API tier.
+
+## Where to go next
+
+- [Symbols and Atoms](symbols.md) covers the `<name>` values used above as
+  tags and outcome codes.
+- [Strings, Lists, Arrays, and Maps](collections.md) covers the containers
+  that store `Var`.
+- [Iteration](iteration.md) covers `Iter`, `try_next`, and exhaustion.

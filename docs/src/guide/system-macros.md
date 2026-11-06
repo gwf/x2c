@@ -3,8 +3,9 @@
 The compiler ships a small set of macros and keywords for declaring ordinary
 types and managing block lifetimes. They use the same methods, protocols,
 allocation, and `defer` rules as handwritten x2c. They are available without
-an import; runtime operations still require their ordinary declarations,
-usually supplied by `#include "x2c.x"`.
+an import. The runtime operations they call are declared by the standard
+runtime prelude, which every unit loads; see
+[Source files and visibility](../reference/language.md#source-files-and-visibility).
 
 | Facility | Availability | Purpose |
 | --- | --- | --- |
@@ -637,3 +638,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 ```
+
+## Where to go next
+
+- [Compile-time Macros](macros.md) writes new source forms.

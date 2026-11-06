@@ -121,7 +121,7 @@ int main(void) {
 The arguments must be resolvable during compilation. They may be computed
 expressions and calls to other meta functions, rather than only literals.
 An unresolved runtime input is an error; the explicit call cannot fall back
-to runtime execution. An existing macro with the same name takes precedence.
+to runtime execution. A visible macro with the same name takes precedence.
 Inside an executing meta body, arguments use that evaluation's current values.
 
 ## Dynamic runtime calls
@@ -982,14 +982,14 @@ compile-time helper build and the runtime build are separate.
 ## Meta functions and runtime Lisp
 
 Compile-time code is x2c. The compiler does not evaluate Lisp. `$(...)` and
-`@(...)` now build and splice
+`@(...)` build and splice
 [evaluated collections](../reference/language.md#evaluated-lists-and-maps),
-so a former Lisp form such as `$(import "file.xlisp")` at file scope reports
+so a Lisp form such as `$(import "file.xlisp")` at file scope reports
 `an evaluated collection is an expression, not a top-level form`. The
 builtin macros are ordinary x2c in `etc/compiler-prelude.x`, and the
 operations a macro calls are the `meta` prototypes in `lib/meta.x`.
 
-A `meta` function can still use runtime
+A `meta` function can use runtime
 [Lisp](../library/overview.md#embed-lisp) as a library. A project `meta`
 function runs in the project helper, which links the full runtime, so its body
 can create a session and evaluate forms:
@@ -1016,3 +1016,8 @@ compiler's core runtime exports, which omit Lisp, so a function that needs
 Lisp belongs in the project helper. Session rules such as inherited names,
 closures, and `eval` are in the
 [language reference](../reference/language.md#runtime-lisp).
+
+## Where to go next
+
+- [Generating Code](generating-code.md) builds program code from
+  compile-time values.

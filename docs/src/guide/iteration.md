@@ -487,4 +487,6 @@ Drive an `Iter` by hand when:
 - the traversal has to be paused, handed to another function, or resumed.
   The loop form cannot express that.
 
-[Idioms](idioms.md) shows how iteration combines with other x2c features.
+## Where to go next
+
+- [Scopes and Lifetime](memory.md) explains who frees each allocation.

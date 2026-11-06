@@ -133,3 +133,7 @@ reports without writing.
 A `.xp` file writes macros the same way. The
 [language reference](../reference/language.md#indentation-syntax) lists
 every layout rule. `examples/tours/indentation.xp` is a complete program.
+
+## Where to go next
+
+- [Programming Idioms](idioms.md) shows how the features combine.

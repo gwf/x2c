@@ -357,3 +357,8 @@ public adoption places them in the participant's generated header. If the
 protocol, participant, native target, or adoption is private, both remain in
 the participant's C file. Variadic native targets and unsafe conversion
 directions are rejected.
+
+## Where to go next
+
+- [Classes and System Macros](system-macros.md) declares types with their
+  defaults.

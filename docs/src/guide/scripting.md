@@ -549,8 +549,8 @@ expected output stored in a file:
 ~#include "path.x"
 ~#include "process.x"
 ~int main(void) {
-String expected = Path.read_text("unittest/expected/help.txt");
-String actual = %(./x2c --help).job().output();
+String expected = Path.read_text("expected/help.txt");
+String actual = %(x2c --help).job().output();
 String report = Diff.unified(expected, actual, "expected", "actual");
 if (report) Stderr.printf("%s", report);
 ~  return report ? 1 : 0;
@@ -662,3 +662,8 @@ names, and whether a number was signed, unsigned, or real. Its converted
 integers are `long long` or `unsigned long long` values, which do not compare
 equal to an `int` literal such as the 5 in `{n: 5}`. The package raises
 `<malformed>` for malformed text.
+
+## Where to go next
+
+- [Time, Random Values, and Encodings](time-random-encodings.md) covers
+  clocks, random values, and text encodings.

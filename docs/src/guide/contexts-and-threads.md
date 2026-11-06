@@ -395,3 +395,8 @@ The ordinary `parallel_map` uses the process-wide pool.
 Canonical values use the shared pool; explicitly opened private pools retain
 their own lifetime rules. On failure, the fold requests stop on all workers
 before joining them. Channel waits cooperate; arbitrary native I/O does not.
+
+## Where to go next
+
+- [Explicit Storage Ownership](storage-ownership.md) moves storage between
+  owners and threads.
