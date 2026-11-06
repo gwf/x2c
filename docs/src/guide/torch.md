@@ -94,7 +94,8 @@ Every record here, `Tensor`, `Module`, `Optimizer`, `Scheduler`, and
 `JitModule`, owns one libtorch handle and is allocated with a `Scope`
 finalizer, so a value is released with the scope that created it. A
 training step is one `auto { ... }` region around the forward, backward, and
-update, with the model and optimizer in the enclosing scope. `free` releases a handle early and returns NULL.
+update, with the model and optimizer in the enclosing scope. `free` releases
+a handle early and returns NULL.
 
 List results such as `parameters`, `named_parameters`, and generated tuples
 intern their wrapper references in the current List pool. Scope release does
