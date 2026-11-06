@@ -27,7 +27,8 @@ examples/apps/notes/builds/notes --host 127.0.0.1 --port 8081 \
 ```
 
 Relative paths use the process's working directory. The `--store` path names
-an SQLite database. Existing JSON store files remain at their current paths.
+an SQLite database. The server refuses any other file, such as a JSON store,
+and leaves it unchanged.
 The server speaks plain HTTP; use a TLS reverse proxy for deployment.
 
 ## API

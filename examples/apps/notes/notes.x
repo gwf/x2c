@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
     return 2;
   }
   catch %(?cause *detail): {
-    Stderr.printf("notes: %s %s\n", cause.str(), detail);
+    Stderr.printf("notes: %s %s\n", cause, detail.repr());
     return 1;
   }
 }

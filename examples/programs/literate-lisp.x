@@ -476,6 +476,7 @@ static int _repl(Interp &self) {
   Buffer source = auto Buffer.new(0);                                            // Release Buffer on block exit.
   Repl repl = { .source = source, .interactive = isatty(Stdin.fileno()) };       // Named fields; POSIX terminal check.
   defer repl.storage.destroy();                                                  // Destroy remaining tokens on exit.
+  int failed = 0;                                                                // Written by catch, so kept apart.
   while (!repl.done) {                                                           // Same dot for a stack struct value.
     Var form = repl.read_unit();                                                 // Receiver call borrows repl.
     if (form is void) continue;                                                  // Test the distinct void value.
@@ -485,10 +486,10 @@ static int _repl(Interp &self) {
     }
     catch %(?code *detail): {                                                    // Pattern destructures the error.
       Stderr.printf("error: %s\n", cons(code, detail).repr());                   // Construct List, then format it.
-      repl.failed = 1;
+      failed = 1;
     }
   }
-  return !repl.failed;
+  return !failed && !repl.failed;
 }
 
 /* Evaluation: the language in three rules -----------------------------------------------------------------------------
@@ -532,9 +533,9 @@ static List Interp.eval_args(Interp &self, LispEnv *env, List forms) {
   Array values = auto [];                                                        // Array literal; cleanup on exit.
   foreach (Var form in forms) {                                                  // Typed List iteration.
     Var value = self.eval(env, form);                                            // Evaluate each argument once.
-    if (value is void)                                                           // Lisp application excludes void values.
-      $fail(<void-op>, "apply", <index>, (int) values.len());                          // Report the argument position.
-    values.push(value);                                                         // Preserve argument order.
+    if (value is void)                                                           // Application excludes void values.
+      $fail(<void-op>, "apply", <index>, (int) values.len());                    // Report the argument position.
+    values.push(value);                                                          // Preserve argument order.
   }
   return values;                                                                 // Build List before Array cleanup.
 }
@@ -719,7 +720,7 @@ static Var _eval_text(Interp &self, String source) {
 
 static Var _import_file(Interp &self, String path) {
   File source = auto path.open("r");                                             // Close File on block exit.
-  return _eval_text(self, source.string());                                      // File owns decoding and size failures.
+  return _eval_text(self, source.string());                                      // File reports decode and size errors.
 }
 
 /* Name lookup and captured bindings -----------------------------------------------------------------------------------
@@ -790,7 +791,7 @@ static void Interp.capture(
   Var callable;                                                                  // Var holds functions and closures.
   if (!head.is_atom() || head in bound ||                                        // The function is not yet known.
       !_local_value(env, head, callable)) {                                      // Globals may change before the call.
-    foreach (Var part in items.cdr())                                              // Iterate forms without copying them.
+    foreach (Var part in items.cdr())                                            // Iterate forms without copying them.
       self.capture(env, part, bound, -1, captures);                              // Unknown calls may evaluate data.
     return;
   }
