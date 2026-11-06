@@ -72,11 +72,12 @@ protocol Iter(Channel);
 
 /** Creates a Channel constrained to an exact Var tag, with capacity zero
     for rendezvous, a nonnegative integer for bounded buffering, or
-    <unbounded>. The <var> tag permits every non-void Var without conversion.
-    Short forms are new(), new(capacity), and new(tag); omitted capacity
-    means rendezvous. Queuing does not intern or export message contents.
-    Raises: <bad-arg> for an unknown tag or invalid capacity, <alloc-fail>
-    for storage, or <io-fail> for native mutex or condition initialization.
+    `<unbounded>`. The `<var>` tag permits every non-void Var without
+    conversion. Short forms are new(), new(capacity), and new(tag); omitted
+    capacity means rendezvous. Queuing does not intern or export message
+    contents.
+    Raises: `<bad-arg>` for an unknown tag or invalid capacity, `<alloc-fail>`
+    for storage, or `<io-fail>` for native mutex or condition initialization.
 */
 Channel Channel.new(Var type, Var capacity) {
   if (capacity is void) {
@@ -112,7 +113,7 @@ Channel Channel.new(Var type, Var capacity) {
 /** Returns the Channel's own storage scope. Owned queued payloads stay
     detached; ordinary messages remain borrowed. This scope is not a shared
     adoption destination for concurrent senders.
-    Raises: <bad-arg> for NULL.
+    Raises: `<bad-arg>` for NULL.
 */
 Scope Channel.scope(Channel channel) {
   if (!channel) raise %(bad-arg (operation "Channel.scope"));
@@ -124,8 +125,8 @@ Scope Channel.scope(Channel channel) {
 /** Sends non-void representation bits without changing referenced storage
     ownership. Waits for queue capacity or a rendezvous match. Acceptance
     commits under synchronization; later stop cannot retract that send.
-    Raises: <bad-arg> for NULL, <void-op> for void, <bad-types> for a tag
-    mismatch, <bad-state> for closure or cooperative stop, or <alloc-fail>
+    Raises: `<bad-arg>` for NULL, `<void-op>` for void, `<bad-types>` for a tag
+    mismatch, `<bad-state>` for closure or cooperative stop, or `<alloc-fail>`
     for native buffered queue storage. Failure dispatch holds no queue lock.
 */
 void Channel.send(Channel c, Var value) => _send(c, value, 0);
@@ -142,7 +143,7 @@ void Channel.send(Channel c, Var value) => _send(c, value, 0);
     must not be handed off twice. Canonical Strings/Lists and independent
     referenced objects are not implicitly adopted. Pointer provenance and
     ownership graphs remain caller responsibilities.
-    Raises: the send causes, or <bad-arg> for a null/nonpointer payload.
+    Raises: the send causes, or `<bad-arg>` for a null/nonpointer payload.
 */
 void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
 
@@ -174,7 +175,7 @@ void Channel.close(Channel channel) {
 Var Channel.var(Channel channel) => Var.new(<channel>, channel);
 
 /** Reads a Channel handle with its exact tag. Ownership is unchanged.
-    Raises: <bad-types> for another tag.
+    Raises: `<bad-types>` for another tag.
 */
 Channel Var.channel(Var value) {
   if (value is not <channel>) raise %(bad-types (operation "Var.channel"));
@@ -193,8 +194,8 @@ Iter Channel.iter(Channel c, Iter dest) => dest.init(c, _next, void);
     owner. Receiver failure cleanup reclaims received storage normally.
     Returns void only after close and draining; null remains ordinary data.
     A committed delivery succeeds despite a later stop request.
-    Raises: <bad-arg> for NULL, <alloc-fail> preparing receiver storage, or
-    <bad-state> for cooperative stop.
+    Raises: `<bad-arg>` for NULL, `<alloc-fail>` preparing receiver storage, or
+    `<bad-state>` for cooperative stop.
 */
 Var Channel.receive(Channel channel) {
   if (!channel) raise %(bad-arg (operation "Channel.receive"));

@@ -52,8 +52,8 @@ int MatchMachine.step(MatchMachine &m) {
 /** Materializes a borrowed span.
     A complete suffix shares the existing immutable List directly, an empty
     span returns nil, and a proper prefix copies through growable machine
-    scratch once. An invalid end stores <bad-span>; allocation and consing can
-    raise.
+    scratch once. An invalid end stores `<bad-span>`; allocation and consing
+    can raise.
 */
 List MatchMachine.materialize_span(MatchMachine &m, MachineSpan span) {
   if (m.stats) m.stats.materialization_requests++;
@@ -75,7 +75,8 @@ List MatchMachine.materialize_span(MatchMachine &m, MachineSpan span) {
 /** Begins a valid Match program in opened, completed storage.
     Borrows its view and input Lists until finish. Zero undo entries prove
     every slot of the previous program was restored, so only the new program's
-    binder slots are initialized. A dirty machine records <not-idle> and stops.
+    binder slots are initialized. A dirty machine records `<not-idle>` and
+    stops.
 */
 void MatchMachine.begin(MatchMachine &m, MachineView program, Var input) {
   if (m.running || m.undo_count || m.fp) {

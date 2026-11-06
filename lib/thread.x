@@ -308,7 +308,7 @@ ParallelMap Iter.parallel_map_in(
     with stop; arbitrary computation and native I/O need not. Cleanup keeps
     the primary Error. Native join failure leaving a worker live aborts.
     Raises: source, start, worker, allocation, accumulator, or stop causes,
-    including <void-op> for a void worker result.
+    including `<void-op>` for a void worker result.
 */
 Var ParallelMap.foldl(ParallelMap map, Var seed, Func accumulate) {
   if (!map) return seed;
@@ -411,7 +411,7 @@ void x2c_thread_cancel(void) {
     persists and wakes a registered Channel or completion wait. Computation
     and arbitrary native I/O are not interrupted. Repeated requests are safe
     while the handle remains live; stop does not join or free it.
-    Raises: <bad-arg> for a null handle.
+    Raises: `<bad-arg>` for a null handle.
 */
 void Thread.stop(Thread t) {
   if (!t) raise %(bad-arg (operation "Thread.stop"));
