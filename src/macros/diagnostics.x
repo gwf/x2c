@@ -38,11 +38,22 @@ static macro Stmt $fail.macros_macro_result(Expr $c, Expr $site) =>
     <parse>, "macro definition requires a result kind before '$'",
     $site, %("write the result kind between 'macro' and the macro name"));
 
+/* The two unknown-kind reports expand in `definitions/reading.x`, beside
+   the `macro_categories` table whose spellings their notes list. */
 static macro Stmt $fail.macros_macro_unknown_kind(
-  Expr $c, Expr $origin, Expr $spelling) =>
-  $c.report_error(
-    <parse>, %"unknown macro result kind '$($spelling)'",
-    $origin, NULL);
+  Expr $c, Expr $origin, Expr $spelling) {
+  {
+    Array kinds = [];
+    for (int i = 0; i < MACRO_CATEGORY_COUNT; i++)
+      if (macro_categories[i].result)
+        kinds.push(String.new(macro_categories[i].spelling));
+    String shown = ", ".join(kinds.list_free());
+    String note = %"result kinds: $(shown)";
+    $c.report_error(
+      <parse>, %"unknown macro result kind '$($spelling)'",
+      $origin, $(note));
+  }
+}
 
 static macro Stmt $fail.macros_macro_reserved(
   Expr $c, Expr $origin, Expr $spelling) {
@@ -93,10 +104,11 @@ static macro Stmt $fail.macros_expression_single(Expr $c, Expr $site) =>
 
 static macro Stmt $fail.macros_macro_value(Expr $c, Expr $site) =>
   $c.report_error(
-    <macro>, "Macro argument requires a compile-time macro value", $site, NULL);
+    <macro>, "a 'Macro' argument requires a compile-time macro value",
+    $site, NULL);
 
 static macro Stmt $fail.macros_macro_singular(Expr $c, Expr $site) =>
-  $c.report_error(<parse>, "Macro holes must be singular", $site, NULL);
+  $c.report_error(<parse>, "a 'Macro' hole must be singular", $site, NULL);
 
 static macro Stmt $fail.macros_local_target(
   Expr $c, Expr $origin, Expr $target) =>
@@ -132,10 +144,18 @@ static macro Stmt $fail.macros_hole_untyped(
     $origin, %("annotate holes the template does not use"));
 
 static macro Stmt $fail.macros_hole_unknown_kind(
-  Expr $c, Expr $site, Expr $spelling) =>
-  $c.report_error(
-    <parse>, %"unknown macro hole kind '$($spelling)'",
-    $site, NULL);
+  Expr $c, Expr $site, Expr $spelling) {
+  {
+    Array kinds = [];
+    for (int i = 0; i < MACRO_CATEGORY_COUNT; i++)
+      if (macro_categories[i].hole)
+        kinds.push(String.new(macro_categories[i].spelling));
+    String shown = ", ".join(kinds.list_free());
+    String note = %"hole kinds: $(shown)";
+    $c.report_error(
+      <parse>, %"unknown macro hole kind '$($spelling)'", $site, $(note));
+  }
+}
 
 static macro Stmt $fail.macros_hole_name(Expr $c, Expr $site) =>
   $c.report_error(
@@ -222,10 +242,14 @@ static macro Stmt $fail.macros_macro_name(Expr $c, Expr $origin) =>
     $origin, NULL);
 
 static macro Stmt $fail.macros_macro_unbound(
-  Expr $c, Expr $origin, Expr $spelling) =>
-  $c.report_error(
-    <parse>, %"unknown or forward-referenced macro '$($spelling)'",
-    $origin, NULL);
+  Expr $c, Expr $origin, Expr $spelling) {
+  {
+    String sigil = $origin.type == <$> ? "$" : "";
+    $c.report_error(
+      <parse>, %"unknown or forward-referenced macro '$(sigil)$($spelling)'",
+      $origin, NULL);
+  }
+}
 
 static macro Stmt $fail.macros_macro_extra_args(Expr $c, Expr $site) =>
   $c.report_error(
