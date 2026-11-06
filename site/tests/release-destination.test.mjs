@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  releaseDestination, finalizeDestination, installExample
+  releaseDestination, finalizeDestination, installExample, robotsText
 } from "../release-destination.mjs";
 
 const sha = "a".repeat(40);
@@ -26,8 +26,15 @@ test("candidate builds pin source links and retain invisible provenance", () => 
   assert.ok(!html.includes("/main"));
   assert.ok(html.includes(candidate));
   assert.ok(html.includes('name="x2c-candidate"'));
+  assert.ok(html.includes('<meta name="robots" content="noindex">'));
   assert.ok(!html.includes("<aside"));
   assert.ok(!html.includes("<pre"));
+});
+
+test("only staging disallows crawlers", () => {
+  assert.ok(robotsText(releaseDestination({})).includes("Allow: /"));
+  assert.ok(robotsText(staging).includes("Disallow: /"));
+  assert.ok(!robotsText(staging).includes("Sitemap"));
 });
 
 test("staging cannot silently use moving main or missing candidate identity", () => {

@@ -2,10 +2,12 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import { destination, robotsText } from "../release-destination.mjs";
 import {
   absoluteSiteUrl,
   htmlFileRoute,
   isIndexedHtmlFile,
+  productionSiteUrl,
   siteBase,
   sitePath,
   siteUrl,
@@ -250,17 +252,22 @@ async function checkMetadata(relativeFile, html) {
     return;
   }
 
-  if (robots.some((value) => value.includes("noindex"))) {
-    fail(`${relativeFile}: indexed page has noindex`);
+  const noindex = robots.some((value) => value.includes("noindex"));
+  if (noindex !== destination.staging) {
+    fail(`${relativeFile}: indexed page ` +
+      (noindex ? "has noindex" : "is missing staging noindex"));
   }
 
   const canonical = absoluteSiteUrl(htmlFileRoute(relativeFile));
+  const preferred = destination.staging
+    ? new URL(sitePath(htmlFileRoute(relativeFile)), productionSiteUrl).href
+    : canonical;
   const images = metadataValues(html, "property", "og:image");
   const image = images[0];
   const title = titleValue(html);
   const descriptions = metadataValues(html, "name", "description");
 
-  expectOne(relativeFile, canonicals, canonical, "canonical URL");
+  expectOne(relativeFile, canonicals, preferred, "canonical URL");
   expectOne(relativeFile, ogUrls, canonical, "og:url");
   expectOne(
     relativeFile,
@@ -410,12 +417,7 @@ async function checkSitemap(indexedFiles) {
 }
 
 async function checkRobots() {
-  const expected = [
-    "User-agent: *",
-    `Allow: ${sitePath("/")}`,
-    `Sitemap: ${absoluteSiteUrl("/sitemap.xml")}`,
-    ""
-  ].join("\n");
+  const expected = robotsText();
   let actual;
 
   try {

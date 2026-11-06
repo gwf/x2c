@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { finalizeDestination } from "../release-destination.mjs";
+import { finalizeDestination, robotsText } from "../release-destination.mjs";
 import { analyticsSnippet } from "../analytics-snippet.mjs";
 
 import {
@@ -179,15 +179,8 @@ async function writePublicationFiles() {
     "</urlset>",
     ""
   ].join("\n");
-  const robots = [
-    "User-agent: *",
-    `Allow: ${sitePath("/")}`,
-    `Sitemap: ${absoluteSiteUrl("/sitemap.xml")}`,
-    ""
-  ].join("\n");
-
   await writeFile(path.join(siteOutput, "sitemap.xml"), sitemap);
-  await writeFile(path.join(siteOutput, "robots.txt"), robots);
+  await writeFile(path.join(siteOutput, "robots.txt"), robotsText());
 }
 
 const result = spawnSync(

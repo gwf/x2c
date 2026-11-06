@@ -1,4 +1,6 @@
-import { absoluteSiteUrl } from "./site-config.mjs";
+import {
+  absoluteSiteUrl, productionSiteUrl, sitePath, siteUrl
+} from "./site-config.mjs";
 
 export function releaseDestination(env = process.env) {
   const sourceRef = env.SITE_SOURCE_REF || "main";
@@ -42,9 +44,23 @@ export function finalizeDestination(html, config = destination) {
         `https://github.com/gwf/x2c/archive/${config.sourceRef}.zip`);
   }
   if (config.staging) {
+    // Staging is never indexed, and its canonical URLs name production.
     const metadata = `<meta name="x2c-release-channel" content="staging">` +
-      `<meta name="x2c-candidate" content="${escapeHtml(config.candidate)}">`;
-    html = html.replace(/(<head\b[^>]*>)/i, `$1${metadata}`);
+      `<meta name="x2c-candidate" content="${escapeHtml(config.candidate)}">` +
+      `<meta name="robots" content="noindex">`;
+    const robots = /\s*<meta\b(?=[^>]*\bname=["']robots["'])[^>]*>/gi;
+    html = html.replace(robots, "")
+      .replace(/(<head\b[^>]*>)/i, `$1${metadata}`)
+      .replaceAll(`rel="canonical" href="${siteUrl}/`,
+        `rel="canonical" href="${productionSiteUrl}/`);
   }
   return html;
+}
+
+export function robotsText(config = destination) {
+  const rules = config.staging
+    ? ["Disallow: /"]
+    : [`Allow: ${sitePath("/")}`,
+      `Sitemap: ${absoluteSiteUrl("/sitemap.xml")}`];
+  return ["User-agent: *", ...rules, ""].join("\n");
 }
