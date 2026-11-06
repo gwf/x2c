@@ -463,9 +463,7 @@ static String _location_file(List location) {
 module String _adoption_spelling(Type base, Type participant) =>
   %"$(_type_spelling(base))($(_type_spelling(participant)))";
 
-// Prefer a typedef's bare diagnostic spelling.
-module String _type_spelling(Type type) =>
-  type.is_bare_typedef_name() ? type.car() : type.repr();
+module String _type_spelling(Type type) => type.spelling();
 
 static List _node(AdoptionDraft &a) => _adoption_node(
   a.base, a.participant, a.storage, a.representation, a.tag_expression,

@@ -675,6 +675,103 @@ static Type _integer_literal_type(
   return %(unsigned long long);
 }
 
+// source spelling
+
+/** Returns `type` as a declaration spells it without a name, such as
+    `int *`, `struct S`, or `int (*)(int, char *)`, or its `repr` when part
+    of it has no source spelling. Storage classes and `inline` are omitted.
+*/
+String Type.spelling(Type type) {
+  String text = _source_text(type);
+  return text ? text : type.repr();
+}
+
+/* Modifiers apply outermost first, so a pointer prefixes the declarator and
+   an array or function suffix parenthesizes a prefixed one. */
+static String _source_text(Type type) {
+  Type base = type_base_suffix(type);
+  String declarator = NULL, qualifiers = NULL;
+  int prefixed = 0;
+  for (; type !== base; type = type.cdr()) {
+    Var item = type.car();
+    String pointer = _pointer_text(item);
+    if (pointer) {
+      if (qualifiers) pointer = _spaced(pointer + qualifiers, declarator);
+      else if (declarator) pointer = pointer + declarator;
+      declarator = pointer;
+      qualifiers = NULL;
+      prefixed = 1;
+    } else if (item is <symbol> && item.symbol().is_type_qualifier()) {
+      qualifiers = _spaced(qualifiers, item.str());
+    } else if (item is <list>) {
+      String suffix = qualifiers ? NULL : _suffix_text(item);
+      if (!suffix) return NULL;
+      declarator = prefixed ? %"($declarator)$suffix"
+                            : declarator ? declarator + suffix : suffix;
+      prefixed = 0;
+    } else if (!_is_placement(item)) return NULL;
+  }
+  String head = _base_text(base, qualifiers);
+  return head ? _spaced(head, declarator) : NULL;
+}
+
+static String _pointer_text(Var item) {
+  switch (item is <symbol> ? item.symbol() : (Symbol) 0) {
+    case <*>: return "*";
+    case <&>: return "&";
+    case <opt-ref>: return "&?";
+    case <^>: return "^";
+    default: return NULL;
+  }
+}
+
+static String _suffix_text(List modifier) {
+  match (modifier) {
+    case %(dim): return "[]";
+    case %(dim (?(String size))): return %"[$size]";
+    case %(func ?(List parameters)): return _parameters_text(parameters);
+  }
+  return NULL;
+}
+
+static String _parameters_text(List parameters) {
+  String text = NULL;
+  foreach (List parameter in parameters) {
+    String spelled = _source_text(parameter.type());
+    if (!spelled) return NULL;
+    text = text ? %"$text, $spelled" : spelled;
+  }
+  return %"($(text ? text : ""))";
+}
+
+/* A tag's name precedes any body, which the spelling omits. */
+static String _base_text(Type base, String text) {
+  if (!base) return NULL;
+  int tag = 0;
+  foreach (Var item in base) {
+    if (item is <list> && tag == 2) continue;
+    if (item is not <symbol> && item is not <string>) return NULL;
+    if (_is_placement(item)) continue;
+    if (item is <symbol> && _is_tag_keyword(item)) tag = 1;
+    else if (item is <string> && tag == 1) tag = 2;
+    text = _spaced(text, item.str());
+  }
+  return text;
+}
+
+/* Storage, `inline`, `meta`, and `unqual` place a declaration or value; a
+   source spelling of its type omits them. */
+static int _is_placement(Var item) {
+  if (item is not <symbol>) return 0;
+  Symbol symbol = item;
+  return symbol.is_storage_class() || symbol.is_inline() ||
+         symbol == <meta> || symbol == <unqual>;
+}
+
+/* `left` and `right` with one space between when both are present. */
+static String _spaced(String left, String right) =>
+  !left ? right : !right ? left : %"$left $right";
+
 // declarations
 
 /** Constructs a declaration, moving type modifiers to each binding. */
