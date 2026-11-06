@@ -701,15 +701,17 @@ static String _source_text(Type type) {
       declarator = pointer;
       qualifiers = NULL;
       prefixed = 1;
-    } else if (item is <symbol> && item.symbol().is_type_qualifier()) {
+    }
+    else if (item is <symbol> && item.symbol().is_type_qualifier())
       qualifiers = _spaced(qualifiers, item.str());
-    } else if (item is <list>) {
+    else if (item is <list>) {
       String suffix = qualifiers ? NULL : _suffix_text(item);
       if (!suffix) return NULL;
       declarator = prefixed ? %"($declarator)$suffix"
                             : declarator ? declarator + suffix : suffix;
       prefixed = 0;
-    } else if (!_is_placement(item)) return NULL;
+    }
+    else if (!_is_placement(item)) return NULL;
   }
   String head = _base_text(base, qualifiers);
   return head ? _spaced(head, declarator) : NULL;
@@ -737,7 +739,7 @@ static String _suffix_text(List modifier) {
 static String _parameters_text(List parameters) {
   String text = NULL;
   foreach (List parameter in parameters) {
-    String spelled = _source_text(parameter.type());
+    String spelled = _source_text(parameter);
     if (!spelled) return NULL;
     text = text ? %"$text, $spelled" : spelled;
   }
