@@ -57,6 +57,11 @@ static void _fatal(String why):
 static String _flat(String text) =>
   text ? whitespace.replace_all(text, " ").strip(NULL) : NULL
 
+/* A declaration on one line, without the space a line break left after
+   its opening parenthesis. */
+static String _one_line(String text) =>
+  _flat(text).replace("( ", "(").replace(" )", ")")
+
 static String _relative(Path path):
   String text = path
   return text[root.len() + 1:]
@@ -79,6 +84,29 @@ static String _first_sentence(String doc):
                                      (at + 1 < length && flat[at + 1] == '.'))
       if !ellipsis && (at + 1 == length || flat[at + 1] == ' '):
         return flat[:at + 1]
+    at++
+  return NULL
+
+/* The first `<name>` outside code spans, which Markdown reads as an HTML
+   tag and browsers hide, or NULL. */
+static String _bare_tag(String doc):
+  String flat = _flat(doc)
+  int ticks = 0, at = 0, length = flat ? flat.len() : 0
+  while at < length:
+    if flat[at] == '`':
+      int end = at
+      while end < length && flat[end] == '`': end++
+      if !ticks: ticks = end - at
+      else if ticks == end - at: ticks = 0
+      at = end
+      continue
+    if !ticks && flat[at] == '<':
+      int end = at + 1
+      while end < length && (flat[end] >= 'a' && flat[end] <= 'z' ||
+                             flat[end] == '-'):
+        end++
+      if end > at + 1 && end < length && flat[end] == '>':
+        return flat[at:end + 1]
     at++
   return NULL
 
@@ -117,6 +145,10 @@ static String _public_doc(String label, String name, int line, String doc):
   if !_first_sentence(doc):
     _fatal(%"$label $name at line $line needs a punctuated first-sentence " +
            "summary outside code spans and ellipses")
+  String tag = _bare_tag(doc)
+  if tag:
+    _fatal(%"$label $name at line $line writes $tag outside a code span; " +
+           %"Markdown hides it as HTML, so write `$tag`")
   return doc
 
 static String _api_doc(String name, int line, String doc, String tier):
@@ -143,7 +175,7 @@ static Map _item(List definition, String tier, String label):
   item["name"] = name
   item["receiver"] = parts.cadr() ? parts.car() : ""
   item["method"] = parts.cadr() ? parts.caddr() : name
-  item["signature"] = signature
+  item["signature"] = _one_line(signature)
   item["line"] = line
   item["path"] = source.car()
   item["tier"] = tier
@@ -201,7 +233,7 @@ static List _public_surface(Unit unit, int compiler):
     Map item = {}
     item["name"] = name
     item["kind"] = row["kind"].str()
-    item["signature"] = row["text"]
+    item["signature"] = _one_line(row["text"])
     item["line"] = line
     List source = row["source"]
     item["path"] = source ? source.car() : path
@@ -452,6 +484,10 @@ static void _callables(Array lines, Map module, List items):
 static void _prose(Array lines, Map module):
   Array prose = module["prose"]
   if !prose.len(): return
+  String tag = _bare_tag(String.join("\n", prose))
+  if tag:
+    _fatal(%"$(module["path"]) module comment writes $tag outside a code " +
+           %"span; Markdown hides it as HTML, so write `$tag`")
   _add(lines, %("## Design notes" ""))
   foreach String paragraph in prose: _add(lines, $(paragraph, ""))
 
