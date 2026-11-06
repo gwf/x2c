@@ -181,9 +181,9 @@ want that native read. A raw `char *` is a pointer too; use an explicit
 `String.new(p)` or a library length/query operation to inspect text.
 
 Unions display their type and member choices. Select a member explicitly to
-read it; the playground does not guess which member is active. Automatic traversal
-skips volatile fields and labels them. Explicit expressions preserve ordinary
-volatile semantics. Bitfields use native field access.
+read it; the playground does not guess which member is active. Automatic
+traversal skips volatile fields and labels them. Explicit expressions preserve
+ordinary volatile semantics. Bitfields use native field access.
 
 `:info`, `:members`, and `:source` do not run the inspected expression.
 `:inspect` can have the expression's ordinary effects. A bad native pointer
@@ -200,11 +200,11 @@ read can terminate the worker, just as a bad library call can.
 | `:replay "PATH"` | Start fresh and explicitly rerun a saved transcript, stopping at the first failure. |
 | `:quit` | Run session cleanup and leave the playground. |
 
-Every successful load or reload clears **all prompt and library state**.
-This includes loading an additional file or an unchanged file. The
-playground announces the reset. A failed build, link, or candidate initialization keeps
-the previous session. Ctrl-C during candidate preparation cancels the
-candidate and preserves the active session.
+Every successful load or reload clears **all prompt and library state**. This
+includes loading an additional file or an unchanged file. The playground
+announces the reset. A failed build, link, or candidate initialization keeps
+the previous session. Ctrl-C during candidate preparation cancels the candidate
+and preserves the active session.
 
 `:reset` uses the exact retained program and declarations. Editing a source
 or header does not change that snapshot. An explicitly linked shared library

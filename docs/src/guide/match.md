@@ -50,12 +50,12 @@ Arm order is also cost order, so put cheap, common shapes first.
 
 ### Typed captures and expression guards
 
-Write `?(typename name)` to capture a value as a native typed local. The pattern
-tests the value's `Var` tag; a different tag fails the pattern without
-converting the value. The tag test precedes the native local declaration.
-The supported types are the same as for `value is typename`.
-The `?(` opener must be adjacent; `? (String text)` remains a wildcard
-followed by a sublist pattern.
+Write `?(typename name)` to capture a value as a native typed local. The
+pattern tests the value's `Var` tag; a different tag fails the pattern without
+converting the value. The tag test precedes the native local declaration. The
+supported types are the same as for `value is typename`. The `?(` opener must
+be adjacent; `? (String text)` remains a wildcard followed by a sublist
+pattern.
 
 Inside `?(`, `typename` uses ordinary source type syntax, so write
 `?(String text)` or `?(List payload)`. This is an exception to the pattern's
@@ -81,10 +81,11 @@ An optional `if (expression)` before the colon runs after the pattern
 matches, with its captures in scope. A false guard tries the next arm;
 errors propagate normally. The guard uses ordinary expression truth rules.
 
-A typed name has the same type throughout its arm, including other
-occurrences written as `?name` and occurrences in alternative patterns.
-Repeated names require equal values. `!quote` stays opaque, and each binder
-must be assigned in every alternative. Explicit `(!is ?name type string)` keeps `name` as a `Var`.
+A typed name has the same type throughout its arm, including other occurrences
+written as `?name` and occurrences in alternative patterns. Repeated names
+require equal values. `!quote` stays opaque, and each binder must be assigned
+in every alternative. Explicit `(!is ?name type string)` keeps `name` as a
+`Var`.
 
 The shorthand lowers to the `!is` pattern predicate and ordinary
 typed local declarations. An expression guard lowers to an ordinary `if`;

@@ -10,12 +10,11 @@ decide when each allocation is freed. x2c storage is of three kinds:
   together.
 
 A *region* is a stretch of code whose allocations end together, such as an
-`auto` block; [The Region Model](regions.md) lists every form. The
-[system macros](system-macros.md) provide `auto` for an open
-region, `auto (pointer)` for a temporary destination, and initializer `auto` for an
-explicitly owned local. Classes can also supply early `free` operations.
-The [standard library overview](../library/overview.md) links to the detailed
-API reference.
+`auto` block; [The Region Model](regions.md) lists every form. The [system
+macros](system-macros.md) provide `auto` for an open region, `auto (pointer)`
+for a temporary destination, and initializer `auto` for an explicitly owned
+local. Classes can also supply early `free` operations. The [standard library
+overview](../library/overview.md) links to the detailed API reference.
 
 ## Where each value is stored
 

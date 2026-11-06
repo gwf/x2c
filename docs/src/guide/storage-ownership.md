@@ -31,10 +31,9 @@ parent.cleanup();
 
 `move_to` moves the child's record, backing buffers, and any owned-content
 scope together. The insertion stores a reference. These are separate
-operations. After the move, destroying the parent destroys the child as
-well. Do not
-schedule another cleanup through an alias to that child. Every pointer into
-either destroyed container becomes invalid.
+operations. After the move, destroying the parent destroys the child as well.
+Do not schedule another cleanup through an alias to that child. Every pointer
+into either destroyed container becomes invalid.
 
 `container.move_to(&destination)` preserves addresses and moves a fixed
 number of allocation records plus any owned-content scope. The destination
