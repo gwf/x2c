@@ -147,7 +147,7 @@ function renderMemberFiles(gs) {
           mx = (a.x + b.x) / 2 + (b.y - a.y) * bend,
           my = (a.y + b.y) / 2 - (b.x - a.x) * bend,
           color = row.public > row.module ? TIER_COLOR.public : TIER_COLOR.module;
-        return `<path class="member-link" d="M${a.x} ${a.y}Q${mx} ${my} ${b.x} ${b.y}" stroke="${color}" stroke-width="${1 + Math.log2(row.calls)}" marker-end="url(#member-arrow)"><title>${esc(names.get(from))} → ${esc(names.get(to))}: ${row.calls} call sites (${row.module} to module, ${row.public} to public functions)</title></path>`;
+        return `<path class="member-link" d="M${a.x} ${a.y}Q${mx} ${my} ${b.x} ${b.y}" stroke="${color}" stroke-width="${1 + Math.log2(row.calls)}" marker-end="url(#member-arrow)"><title>${esc(names.get(from))} \u2192 ${esc(names.get(to))}: ${row.calls} call sites (${row.module} to module, ${row.public} to public functions)</title></path>`;
       })
       .join(""),
     leaderMarkup = [...L.points]
@@ -162,16 +162,16 @@ function renderMemberFiles(gs) {
     boxMarkup = files
       .map((p) => {
         const b = L.boxes.get(p), t = byFile.get(p);
-        return `<g class="member-box"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="6"/><text x="${b.x + 10}" y="${b.y + 20}">${esc(names.get(p))}</text><text class="member-counts" x="${b.x + 10}" y="${b.y + 34}">${t.static.length} static · ${t.module.length} module · ${t.public.length} public</text></g>`;
+        return `<g class="member-box"><rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="6"/><text x="${b.x + 10}" y="${b.y + 20}">${esc(names.get(p))}</text><text class="member-counts" x="${b.x + 10}" y="${b.y + 34}">${t.static.length} static \u00b7 ${t.module.length} module \u00b7 ${t.public.length} public</text></g>`;
       })
       .join(""),
     dotMarkup = [...L.points]
       .map(([v, q]) => {
         const f = D.functions[v];
-        return `<g class="member-dot" data-member-fn="${v}" transform="translate(${q.x} ${q.y})"><title>${esc(f.n)} · ${f.v}${f.r ? " · callers need " + f.r : " · no resolved callers"} · ${esc(f.p)}</title>${widerThanNeeded(f) ? '<circle class="member-wider" r="6.5"/>' : ""}<circle r="3.6" fill="${TIER_COLOR[f.v]}" class="${v === fn ? "selected" : ""}"/></g>`;
+        return `<g class="member-dot" data-member-fn="${v}" transform="translate(${q.x} ${q.y})"><title>${esc(f.n)} \u00b7 ${f.v}${f.r ? " \u00b7 callers need " + f.r : " \u00b7 no resolved callers"} \u00b7 ${esc(f.p)}</title>${widerThanNeeded(f) ? '<circle class="member-wider" r="6.5"/>' : ""}<circle r="3.6" fill="${TIER_COLOR[f.v]}" class="${v === fn ? "selected" : ""}"/></g>`;
       })
       .join("");
-  host.innerHTML = `<div class="member-view"><div class="member-legend"><span style="color:${TIER_COLOR.static}">● File static: inside its file</span><span style="color:${TIER_COLOR.module}">● Module: on its file's border</span><span style="color:${TIER_COLOR.public}">● Public: on the outer border</span><span><span class="member-ring">◌</span> Storage wider than its resolved callers need</span></div><svg class="member-svg" viewBox="0 0 ${L.width} ${L.height}" width="${L.width}" height="${L.height}" role="img" aria-label="Member files by storage tier"><defs><marker id="member-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L8 4L0 8z" fill="#9aa9ad"/></marker></defs><rect class="member-frame" x="${L.frame.x}" y="${L.frame.y}" width="${L.frame.w}" height="${L.frame.h}" rx="10"/>${linkMarkup}${leaderMarkup}${boxMarkup}<g id="member-trace"></g>${dotMarkup}</svg>${memberMatrix(files, names, calls)}${memberWider(wider)}</div>`;
+  host.innerHTML = `<div class="member-view"><div class="member-legend"><span style="color:${TIER_COLOR.static}">\u25cf File static: inside its file</span><span style="color:${TIER_COLOR.module}">\u25cf Module: on its file's border</span><span style="color:${TIER_COLOR.public}">\u25cf Public: on the outer border</span><span><span class="member-ring">\u25cc</span> Storage wider than its resolved callers need</span></div><svg class="member-svg" viewBox="0 0 ${L.width} ${L.height}" width="${L.width}" height="${L.height}" role="img" aria-label="Member files by storage tier"><defs><marker id="member-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L8 4L0 8z" fill="#9aa9ad"/></marker></defs><rect class="member-frame" x="${L.frame.x}" y="${L.frame.y}" width="${L.frame.w}" height="${L.frame.h}" rx="10"/>${linkMarkup}${leaderMarkup}${boxMarkup}<g id="member-trace"></g>${dotMarkup}</svg>${memberMatrix(files, names, calls)}${memberWider(wider)}</div>`;
   const trace = host.querySelector("#member-trace");
   host.querySelectorAll("[data-member-fn]").forEach((e) => {
     const v = +e.dataset.memberFn;
@@ -208,7 +208,7 @@ function memberMatrix(files, names, calls) {
   if (files.length < 2) return "";
   const cell = (from, to) => {
     const row = calls.get(from + "\n" + to);
-    if (!row) return "<td>·</td>";
+    if (!row) return "<td>\u00b7</td>";
     return from === to
       ? `<td class="member-internal" title="Calls within the file">${row.calls}</td>`
       : `<td title="${row.module} to module, ${row.public} to public functions">${row.calls}</td>`;
@@ -220,7 +220,7 @@ function memberWider(wider) {
     .sort((a, b) => D.functions[a].p.localeCompare(D.functions[b].p) || D.functions[a].n.localeCompare(D.functions[b].n))
     .map((v) => {
       const f = D.functions[v];
-      return `<div class="connection"><button data-wider-fn="${v}">${esc(f.n)}</button><small>${f.v} → ${f.r} · ${esc(f.p)}</small></div>`;
+      return `<div class="connection"><button data-wider-fn="${v}">${esc(f.n)}</button><small>${f.v} \u2192 ${f.r} \u00b7 ${esc(f.p)}</small></div>`;
     })
     .join("")}`;
 }

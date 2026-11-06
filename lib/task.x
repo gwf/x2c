@@ -1,4 +1,5 @@
-/* task.x -- cooperative Channel jobs on stable native stacks */
+/*  task.x -- cooperative Channel jobs on stable native stacks
+*/
 #pragma once
 #include "channel.x"
 #include "thread-state.x"

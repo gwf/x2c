@@ -214,10 +214,10 @@ def tree_content() -> dict[str, str]:
     """Content hash of every file git can see, keyed by path.
 
     A pure function of the working tree: it does not depend on which commit
-    `HEAD` points at or on what happens to be staged. That is deliberate.
-    `AGENTS.md` says a commit, review, push, or elapsed time does not
-    invalidate green evidence, and nothing in this build reads git state, so
-    identical files mean an identical build no matter where they are recorded.
+    `HEAD` points at or on what happens to be staged. `AGENTS.md` says a
+    commit, review, push, or elapsed time does not invalidate green
+    evidence, and nothing in this build reads git state, so identical files
+    mean an identical build no matter where they are recorded.
     Ignored paths are excluded, so scratch under `debug/` is irrelevant.
 
     Tracked files use the index blob hash, which costs no file reads. Only

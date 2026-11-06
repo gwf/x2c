@@ -32,6 +32,11 @@ static String _owned(String dump):
     if owned.match(line): rows.push(line + "\n")
   return String.join("", rows.list_free())
 
+if args.contains("-h") || args.contains("--help"):
+  printf("usage: tools/check-conformance-coherence\n\n"
+         "Compare runtime conformance rows between prelude and live symbol "
+         "modes.\nX2C names the compiler; it defaults to builds/0/x2c.\n")
+  return 0
 Path root = Path.new(argv[0]).absolute().dirname().dirname()
 x2c = Env.get("X2C")
 if !x2c: x2c = root.join("builds/0/x2c")

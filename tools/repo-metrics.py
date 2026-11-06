@@ -255,7 +255,7 @@ def cloc_lines(paths: list[pathlib.Path]) -> dict[str, int]:
 
 
 def unit_tests(root: pathlib.Path = ROOT) -> int:
-    """Count registered runnable and deliberately skipped unit tests."""
+    """Count registered runnable and intentionally skipped unit tests."""
     count = 0
     for path in sorted((root / "unittest").glob("test-*.x")):
         if path.name in TEST_SUPPORT:
@@ -310,7 +310,7 @@ def collect_summary(root: pathlib.Path = ROOT) -> dict:
 
 
 def color_enabled(mode: str, stream=sys.stdout, environ=os.environ) -> bool:
-    """Resolve an explicit or automatic terminal colour choice."""
+    """Resolve an explicit or automatic terminal color choice."""
     if mode == "always":
         return True
     if mode == "never":
@@ -386,7 +386,7 @@ def main() -> int:
     )
     parser.add_argument(
         "--color", choices=("auto", "always", "never"), default="auto",
-        help="control summary colour (default: auto)",
+        help="control summary color (default: auto)",
     )
     args = parser.parse_args()
     if args.summary or args.summary_json:

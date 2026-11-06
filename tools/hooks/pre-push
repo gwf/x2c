@@ -3,8 +3,8 @@
 #
 # A worker hands its commits to its orchestrator and pushes nothing. Other
 # contexts that do not deliver directly push work branches but not dev or
-# main. Explicit roles apply to any worktree name. Legacy agent-* worktrees
-# retain the dev and main restriction when no delivery context exists.
+# main. Explicit roles apply to any worktree name. A worktree named agent-*
+# that has no delivery context keeps the dev and main restriction.
 root=$(git rev-parse --show-toplevel) || exit 1
 policy=$(python3 "$root/tools/agent_context.py" pushes --root "$root")
 case "$policy" in

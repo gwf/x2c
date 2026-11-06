@@ -222,8 +222,8 @@ if args.contains("-h") || args.contains("--help"):
     %s
     options:
       -h, --help  show this help message and exit
-      --write
-      --check
+      --write     write site/public/llms.txt and llms-full.txt
+      --check     report whether the written files are current
   "), usage)
   return 0
 List spec = %((--write) (--check))

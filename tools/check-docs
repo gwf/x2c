@@ -6,7 +6,7 @@
     numbers, compiler flags, workflows, example classifications, module
     counts, and the project name. Links are resolved without their anchors in
     those pages and in the Markdown below agents/skills, plans, and packages.
-    `site/` is absent on purpose: its links are URLs on the rendered site,
+    `site/` is excluded because its links are URLs on the rendered site,
     which `make site-check` resolves against the built output.
 */
 static Path root
@@ -410,6 +410,11 @@ static void _check_summary(void):
     if page != relative && !listed.contains(page):
       errors.push(%"$page: page is not reachable from docs/src/SUMMARY.md")
 
+if args.contains("-h") || args.contains("--help"):
+  printf("usage: tools/check-docs\n\n"
+         "Audit repository paths, cited line numbers, compiler flags, and "
+         "links in\nthe documentation. Nothing is written.\n")
+  return 0
 root = Path.new(argv[0]).absolute().dirname().dirname()
 /* The generated references are rendered from the stage compiler's
    definitions. */

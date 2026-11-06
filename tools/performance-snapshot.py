@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Run and retain the representative x2c performance snapshot.
 
-Performance evidence is deliberately separate from correctness and publication
-gates. Complete output is kept under a persistent history directory, with one
+Performance evidence stays separate from correctness and publication gates.
+Complete output is kept under a persistent history directory, with one
 compact JSONL row per attempt for longitudinal reporting.
 """
 

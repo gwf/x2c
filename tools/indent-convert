@@ -356,6 +356,10 @@ if (!x2c)
   x2c = Path.new(argv[0]).absolute().dirname().dirname().join("builds/0/x2c");
 int check = 0, failed = 0;
 foreach (String arg, args) {
+  if (arg == "-h" || arg == "--help") {
+    printf("usage: tools/indent-convert [--check] FILE...\n");
+    return 0;
+  }
   if (arg == "--check") {
     check = 1;
     continue;

@@ -4,7 +4,7 @@
 
     A fence tagged `x2c` must build with the stage-0 compiler. A sample that
     cannot must be tagged `x2c,ignore` below an `<!-- ignore: reason -->`
-    comment, so an unverified sample is a deliberate, explained exception.
+    comment, so every unverified sample is a chosen, explained exception.
 
     Each sample is built as written, in case it is file-scope declarations,
     and then wrapped in `main`, in case it is statements. Only a sample that
@@ -157,6 +157,13 @@ static void _advance(List attempt):
             %"      stdout:   $(_repr(output))\n" +
             %"      stderr:   $(_repr(errors))")
 
+if args.contains("-h") || args.contains("--help"):
+  printf("usage: tools/check-doc-examples [--outputs]\n\n"
+         "Compile every x2c sample in the book and the site, and compare "
+         "recorded\noutputs. --outputs checks only the book samples with "
+         "recorded outputs.\nBUILD_JOBS sets parallel builds; CC selects the "
+         "C compiler.\n")
+  return 0
 root = Path.new(argv[0]).absolute().dirname().dirname()
 compiler = root.join("builds/0/x2c")
 if !compiler.exists():
