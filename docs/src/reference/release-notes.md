@@ -101,20 +101,20 @@ the source changes that the breaking entries below require.
   empty String. It previously returned the empty String. Array, typed Array,
   List, and String now reject zero steps consistently.
 
-Array value search is now `index(value)`, including on typed Arrays. It
-returns the first equal element's position, or `-1`. `find` now takes a
-predicate and returns the first accepted element as a `Var`, or `void`.
-The old `indexof` name is removed, and there are no compatibility aliases.
-The native signatures change, so rebuild native code that calls them. List
-and Iter `find` keep their contracts.
+- Array value search is now `index(value)`, including on typed Arrays. It
+  returns the first equal element's position, or `-1`. `find` now takes a
+  predicate and returns the first accepted element as a `Var`, or `void`.
+  The old `indexof` name is removed, and there are no compatibility aliases.
+  The native signatures change, so rebuild native code that calls them. List
+  and Iter `find` keep their contracts.
 
-| 0.15.1 | Now |
-| --- | --- |
-| `array.find(value)`, returning an index | `array.index(value)` |
-| `array.indexof(value)` | `array.index(value)` |
-| `int Array_find(Array, Var)` | `int Array_index(Array, Var)` |
-| `int Array_indexof(Array, Var)` | removed |
-| none | `Var Array_find(Array, Func)` |
+  | 0.15.1 | Now |
+  | --- | --- |
+  | `array.find(value)`, returning an index | `array.index(value)` |
+  | `array.indexof(value)` | `array.index(value)` |
+  | `int Array_find(Array, Var)` | `int Array_index(Array, Var)` |
+  | `int Array_indexof(Array, Var)` | removed |
+  | none | `Var Array_find(Array, Func)` |
 
 - `Task.run` runs zero-argument jobs cooperatively on the calling native
   thread, using existing Channels. Results keep ordinary ownership, and every
@@ -246,6 +246,8 @@ packages need rebuilding.
 - The REPL continues a list literal across lines, and code it loads
   boxes classes, expands its own meta functions, and calls protocol
   defaults as an ordinary build does.
+- REPL input and compiled prompt functions can call C's `printf` and
+  `puts`.
 - The book gains this release notes page, and the repository gains a
   security policy, a pull request template, and a bug report template.
 
