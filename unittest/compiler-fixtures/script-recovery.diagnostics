@@ -1,10 +1,8 @@
-unittest/compiler-fixtures/script-recovery.x:4:30: parse: expected atomic expression
+unittest/compiler-fixtures/script-recovery.x:4:30: parse: expected atomic expression, found ';'
   int broken(void) { return 1 +; }
                                ^
-  note: token: ; kind: ;
 
-unittest/compiler-fixtures/script-recovery.x:8:35: parse: expected atomic expression
+unittest/compiler-fixtures/script-recovery.x:8:35: parse: expected atomic expression, found ';'
   int also_broken(void) { return 2 +; }
                                     ^
-  note: token: ; kind: ;
 

@@ -1,34 +1,34 @@
-unittest/compiler-fixtures/region-raw-stores.x:27:3: region: the address of 'value' can outlive the local storage it points into when stored through a parameter
+unittest/compiler-fixtures/region-raw-stores.x:27:3: warning: region: the address of 'value' can outlive the local storage it points into when stored through a parameter
     out.push(&value);
     ^^^
   note: local storage ends when the function returns
 
-unittest/compiler-fixtures/region-raw-stores.x:28:3: region: the address of 'value' can outlive the local storage it points into when stored through a parameter
+unittest/compiler-fixtures/region-raw-stores.x:28:3: warning: region: the address of 'value' can outlive the local storage it points into when stored through a parameter
     map.set("value", &value);
     ^^^
   note: local storage ends when the function returns
 
-unittest/compiler-fixtures/region-raw-stores.x:29:3: region: the address of 'value' can outlive the local storage it points into when stored through a parameter
+unittest/compiler-fixtures/region-raw-stores.x:29:3: warning: region: the address of 'value' can outlive the local storage it points into when stored through a parameter
     retain_again(out, &value);
     ^^^^^^^^^^^^
   note: local storage ends when the function returns
 
-unittest/compiler-fixtures/region-raw-stores.x:30:3: region: the address of 'value' can outlive the local storage it points into when stored through an unknown pointer
+unittest/compiler-fixtures/region-raw-stores.x:30:3: warning: region: the address of 'value' can outlive the local storage it points into when stored through an unknown pointer
     retain_unknown(&value);
     ^^^^^^^^^^^^^^
   note: local storage ends when the function returns
 
-unittest/compiler-fixtures/region-raw-stores.x:31:3: region: an address from 'item' can outlive the local storage it points into when stored through a parameter
+unittest/compiler-fixtures/region-raw-stores.x:31:3: warning: region: an address from 'item' can outlive the local storage it points into when stored through a parameter
     out[0] = (Array) &item;
     ^^^
   note: local storage ends when the function returns
 
-unittest/compiler-fixtures/region-raw-stores.x:32:3: region: an address from 'item' can outlive the local storage it points into when stored through a parameter
+unittest/compiler-fixtures/region-raw-stores.x:32:3: warning: region: an address from 'item' can outlive the local storage it points into when stored through a parameter
     map["item"] = (Array) &item;
     ^^^
   note: local storage ends when the function returns
 
-unittest/compiler-fixtures/region-raw-stores.x:41:3: region: 'value' is used after the region that allocated it ended
+unittest/compiler-fixtures/region-raw-stores.x:41:3: warning: region: 'value' is used after the region that allocated it ended
     borrow_again(out, value);
     ^^^^^^^^^^^^
   note: region opened at line 38

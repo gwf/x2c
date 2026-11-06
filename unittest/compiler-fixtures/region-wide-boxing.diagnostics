@@ -1,49 +1,49 @@
-unittest/compiler-fixtures/region-wide-boxing.x:7:5: region: 'v' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-wide-boxing.x:7:5: warning: region: 'v' can outlive the region it was allocated in when returned
       return v;
       ^^^^^^
   note: region opened at line 5
 
-unittest/compiler-fixtures/region-wide-boxing.x:15:5: region: 'v' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-wide-boxing.x:15:5: warning: region: 'v' can outlive the region it was allocated in when returned
       return v;
       ^^^^^^
   note: region opened at line 13
 
-unittest/compiler-fixtures/region-wide-boxing.x:23:5: region: 'v' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-wide-boxing.x:23:5: warning: region: 'v' can outlive the region it was allocated in when returned
       return v;
       ^^^^^^
   note: region opened at line 21
 
-unittest/compiler-fixtures/region-wide-boxing.x:31:5: region: 'v' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-wide-boxing.x:31:5: warning: region: 'v' can outlive the region it was allocated in when returned
       return v;
       ^^^^^^
   note: region opened at line 29
 
-unittest/compiler-fixtures/region-wide-boxing.x:39:5: region: 'v' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-wide-boxing.x:39:5: warning: region: 'v' can outlive the region it was allocated in when returned
       return v;
       ^^^^^^
   note: region opened at line 37
 
-unittest/compiler-fixtures/region-wide-boxing.x:47:5: region: a fresh allocation can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-wide-boxing.x:47:5: warning: region: a fresh allocation can outlive the region it was allocated in when returned
       return big;
       ^^^^^^
   note: region opened at line 46
 
-unittest/compiler-fixtures/region-wide-boxing.x:54:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-wide-boxing.x:54:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(big);
       ^^^
   note: region opened at line 53
 
-unittest/compiler-fixtures/region-wide-boxing.x:61:5: region: a fresh allocation can outlive the region it was allocated in when stored into an object of an outer region
+unittest/compiler-fixtures/region-wide-boxing.x:61:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored into an object of an outer region
       List items = $(big);
       ^^^^
   note: region opened at line 60
 
-unittest/compiler-fixtures/region-wide-boxing.x:69:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-wide-boxing.x:69:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out[0] = big;
       ^^^
   note: region opened at line 68
 
-unittest/compiler-fixtures/region-wide-boxing.x:79:5: region: 'v' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-wide-boxing.x:79:5: warning: region: 'v' can outlive the region it was allocated in when returned
       return v;
       ^^^^^^
   note: region opened at line 77

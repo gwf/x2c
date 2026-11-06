@@ -1,84 +1,84 @@
-unittest/compiler-fixtures/region-copy-escapes.x:7:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:7:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 5
 
-unittest/compiler-fixtures/region-copy-escapes.x:15:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:15:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 13
 
-unittest/compiler-fixtures/region-copy-escapes.x:23:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:23:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 21
 
-unittest/compiler-fixtures/region-copy-escapes.x:31:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:31:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 29
 
-unittest/compiler-fixtures/region-copy-escapes.x:39:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:39:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 37
 
-unittest/compiler-fixtures/region-copy-escapes.x:47:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:47:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 45
 
-unittest/compiler-fixtures/region-copy-escapes.x:55:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:55:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 53
 
-unittest/compiler-fixtures/region-copy-escapes.x:63:5: region: 'm' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:63:5: warning: region: 'm' can outlive the region it was allocated in when returned
       return m;
       ^^^^^^
   note: region opened at line 61
 
-unittest/compiler-fixtures/region-copy-escapes.x:71:5: region: 'm' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-copy-escapes.x:71:5: warning: region: 'm' can outlive the region it was allocated in when returned
       return m;
       ^^^^^^
   note: region opened at line 69
 
-unittest/compiler-fixtures/region-copy-escapes.x:79:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-copy-escapes.x:79:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(items.array());
       ^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/region-copy-escapes.x:80:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-copy-escapes.x:80:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(ulong.var(n));
       ^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/region-copy-escapes.x:81:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-copy-escapes.x:81:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(Var.box_ulong(n));
       ^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/region-copy-escapes.x:82:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-copy-escapes.x:82:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(Var.box_long_long(n));
       ^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/region-copy-escapes.x:83:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-copy-escapes.x:83:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(Var.box_ulong_long(n));
       ^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/region-copy-escapes.x:84:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-copy-escapes.x:84:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(Var.box_long_double(x));
       ^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/region-copy-escapes.x:85:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-copy-escapes.x:85:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(Var.clone_wide(out[0]));
       ^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/region-copy-escapes.x:94:3: region: 'items' is used after the region that allocated it ended
+unittest/compiler-fixtures/region-copy-escapes.x:94:3: warning: region: 'items' is used after the region that allocated it ended
     return items;
     ^^^^^^
   note: region opened at line 91

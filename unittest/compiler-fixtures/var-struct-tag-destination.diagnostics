@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/var-struct-tag-destination.x:12:3: type: cannot convert Var to type (struct "Point")
+unittest/compiler-fixtures/var-struct-tag-destination.x:12:3: type: cannot convert Var to (struct "Point")
     struct Point point = value;
     ^^^^^^
 

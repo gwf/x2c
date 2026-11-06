@@ -1,5 +1,4 @@
-unittest/compiler-fixtures/keyword-alias-import-bare-collision.x:7:17: parse: expected atomic expression
+unittest/compiler-fixtures/keyword-alias-import-bare-collision.x:7:17: parse: expected atomic expression, found '='
     private_scope = 1;
                   ^
-  note: token: = kind: =
 

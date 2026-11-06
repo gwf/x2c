@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-export-at-line.x:5:13: parse: unknown or forward-referenced macro 'm.value'
+unittest/compiler-fixtures/macro-export-at-line.x:5:13: parse: unknown or forward-referenced macro '$m.value'
   int early = $m.value();
               ^
 

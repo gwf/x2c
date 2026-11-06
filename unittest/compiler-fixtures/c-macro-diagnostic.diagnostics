@@ -1,5 +1,5 @@
-unittest/compiler-fixtures/c-macro-diagnostic.x:8:15: parse: expected atomic expression
+unittest/compiler-fixtures/c-macro-diagnostic.x:8:15: parse: expected atomic expression, found ')'
     int value = HALF(4);
                 ^
-  note: token: ) kind: ) in expansion of 'HALF' defined at unittest/compiler-fixtures/c-macro-diagnostic.x:5
+  note: in expansion of 'HALF' defined at unittest/compiler-fixtures/c-macro-diagnostic.x:5
 

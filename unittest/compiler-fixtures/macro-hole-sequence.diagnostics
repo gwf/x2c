@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-hole-sequence.x:1:23: parse: Macro holes must be singular
+unittest/compiler-fixtures/macro-hole-sequence.x:1:23: parse: a 'Macro' hole must be singular
   macro Stmt $all(Macro @values) { }
                         ^
 

@@ -1,5 +1,4 @@
-unittest/compiler-fixtures/diagnostic-width.x:1:18: parse: expected ';', '{', or '=>'
+unittest/compiler-fixtures/diagnostic-width.x:1:18: parse: expected ';', '{', or '=>', found 'unexpected'
   int broken(void) unexpected
                    ^^^^^^^^^^
-  note: token: unexpected symbol: ident
 

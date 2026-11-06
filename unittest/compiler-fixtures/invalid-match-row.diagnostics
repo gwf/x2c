@@ -1,5 +1,4 @@
-unittest/compiler-fixtures/invalid-match-row.x:11:12: parse: expected 'case' or 'default' in match statement
+unittest/compiler-fixtures/invalid-match-row.x:11:12: parse: expected 'case' or 'default' in match, found 'hit'
     $pick(x, hit = 2);
              ^^^
-  note: token: hit
 

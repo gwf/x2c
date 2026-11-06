@@ -1,64 +1,64 @@
-unittest/compiler-fixtures/region-buffer-views.x:42:51: conversion: unnecessary conversion: .block() where ("Block") is expected
+unittest/compiler-fixtures/region-buffer-views.x:42:51: warning: conversion: unnecessary conversion: .block() where ("Block") is expected
     auto { ArrayInt values = []; return values.block(); }
                                                     ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/region-buffer-views.x:46:68: conversion: unnecessary conversion: .array() where ("Array") is expected
+unittest/compiler-fixtures/region-buffer-views.x:46:68: warning: conversion: unnecessary conversion: .array() where ("Array") is expected
     auto { Block values = Block.new(sizeof(Var)); return values.array(); }
                                                                      ^
   note: remove the call; the destination converts the value
 
-unittest/compiler-fixtures/region-buffer-views.x:6:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:6:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_str(output); }
                                           ^^^^^^
   note: region opened at line 6
 
-unittest/compiler-fixtures/region-buffer-views.x:10:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:10:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_repr(output); }
                                           ^^^^^^
   note: region opened at line 10
 
-unittest/compiler-fixtures/region-buffer-views.x:14:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:14:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_str(output); }
                                           ^^^^^^
   note: region opened at line 14
 
-unittest/compiler-fixtures/region-buffer-views.x:18:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:18:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_repr(output); }
                                           ^^^^^^
   note: region opened at line 18
 
-unittest/compiler-fixtures/region-buffer-views.x:22:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:22:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_str(output); }
                                           ^^^^^^
   note: region opened at line 22
 
-unittest/compiler-fixtures/region-buffer-views.x:26:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:26:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_repr(output); }
                                           ^^^^^^
   note: region opened at line 26
 
-unittest/compiler-fixtures/region-buffer-views.x:30:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:30:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_str(output); }
                                           ^^^^^^
   note: region opened at line 30
 
-unittest/compiler-fixtures/region-buffer-views.x:34:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:34:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return value.write_repr(output); }
                                           ^^^^^^
   note: region opened at line 34
 
-unittest/compiler-fixtures/region-buffer-views.x:38:41: region: 'output' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:38:41: warning: region: 'output' can outlive the region it was allocated in when returned
     auto { Buffer output = Buffer.new(0); return output.write_code_point(65); }
                                           ^^^^^^
   note: region opened at line 38
 
-unittest/compiler-fixtures/region-buffer-views.x:42:32: region: 'values' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:42:32: warning: region: 'values' can outlive the region it was allocated in when returned
     auto { ArrayInt values = []; return values.block(); }
                                  ^^^^^^
   note: region opened at line 42
 
-unittest/compiler-fixtures/region-buffer-views.x:46:49: region: 'values' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-buffer-views.x:46:49: warning: region: 'values' can outlive the region it was allocated in when returned
     auto { Block values = Block.new(sizeof(Var)); return values.array(); }
                                                   ^^^^^^
   note: region opened at line 46

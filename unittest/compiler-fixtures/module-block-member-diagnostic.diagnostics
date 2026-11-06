@@ -1,5 +1,4 @@
-unittest/compiler-fixtures/module-block-member-diagnostic/second.x:4:13: parse: expected atomic expression
+unittest/compiler-fixtures/module-block-member-diagnostic/second.x:4:13: parse: expected atomic expression, found ';'
     return 1 +;
               ^
-  note: token: ; kind: ;
 

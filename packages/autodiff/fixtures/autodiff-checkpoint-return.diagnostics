@@ -1,5 +1,5 @@
 packages/autodiff/fixtures/autodiff-checkpoint-return.x:8:1: macro: ad: a checkpointed loop cannot contain return
   $ad.checkpoint(2)
   ^
-  note: (at 1 (return (double) (expr (double) (literal (double) "1.0")))) in expansion of 'ad.gradient' defined at packages/autodiff/src/autodiff-macros.x:1327:1; input: (args (static double) "early_grad" ("ArrayDbl") "ArrayDbl_new" ((param (double) (bind "x" ()))) ((at 2 (for (decl (int) (bindings (op = (bind "i" ()) (expr (...
+  note: (at 1 (return (double) (expr (double) (literal (double) "1.0")))) in expansion of 'ad.gradient' defined at packages/autodiff/src/autodiff-macros.x:1327:1
 

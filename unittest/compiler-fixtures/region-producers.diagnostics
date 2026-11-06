@@ -1,34 +1,34 @@
-unittest/compiler-fixtures/region-producers.x:12:5: region: 'b' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-producers.x:12:5: warning: region: 'b' can outlive the region it was allocated in when returned
       return b;
       ^^^^^^
   note: region opened at line 10
 
-unittest/compiler-fixtures/region-producers.x:19:5: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-producers.x:19:5: warning: region: a fresh allocation can outlive the region it was allocated in when stored through a parameter
       out.push(values.array());
       ^^^
   note: region opened at line 18
 
-unittest/compiler-fixtures/region-producers.x:26:5: region: 'm' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-producers.x:26:5: warning: region: 'm' can outlive the region it was allocated in when returned
       return m;
       ^^^^^^
   note: region opened at line 24
 
-unittest/compiler-fixtures/region-producers.x:34:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-producers.x:34:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return a;
       ^^^^^^
   note: region opened at line 32
 
-unittest/compiler-fixtures/region-producers.x:42:5: region: 'm' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-producers.x:42:5: warning: region: 'm' can outlive the region it was allocated in when returned
       return m;
       ^^^^^^
   note: region opened at line 40
 
-unittest/compiler-fixtures/region-producers.x:50:5: region: 'm' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-producers.x:50:5: warning: region: 'm' can outlive the region it was allocated in when returned
       return m;
       ^^^^^^
   note: region opened at line 48
 
-unittest/compiler-fixtures/region-producers.x:58:5: region: 'b' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-producers.x:58:5: warning: region: 'b' can outlive the region it was allocated in when returned
       return b;
       ^^^^^^
   note: region opened at line 56

@@ -1,64 +1,64 @@
-unittest/compiler-fixtures/managed-acquired-regions.x:34:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:34:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 31
 
-unittest/compiler-fixtures/managed-acquired-regions.x:42:3: region: 'text' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:42:3: warning: region: 'text' can outlive the region it was allocated in when returned
     return text;
     ^^^^^^
   note: region opened at line 41
 
-unittest/compiler-fixtures/managed-acquired-regions.x:50:3: region: 'text' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:50:3: warning: region: 'text' can outlive the region it was allocated in when returned
     return text;
     ^^^^^^
   note: region opened at line 49
 
-unittest/compiler-fixtures/managed-acquired-regions.x:56:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:56:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 54
 
-unittest/compiler-fixtures/managed-acquired-regions.x:62:3: region: a closure can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:62:3: warning: region: a closure can outlive the region it was allocated in when returned
     return %!() => a.len();
     ^^^^^^
   note: region opened at line 60
 
-unittest/compiler-fixtures/managed-acquired-regions.x:68:3: region: a fresh allocation can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:68:3: warning: region: a fresh allocation can outlive the region it was allocated in when returned
     return Scope.malloc_in(&slot, 8);
     ^^^^^^
   note: region opened at line 66
 
-unittest/compiler-fixtures/managed-acquired-regions.x:74:3: region: 'result' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:74:3: warning: region: 'result' can outlive the region it was allocated in when returned
     return result;
     ^^^^^^
   note: region opened at line 72
 
-unittest/compiler-fixtures/managed-acquired-regions.x:80:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:80:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 78
 
-unittest/compiler-fixtures/managed-acquired-regions.x:86:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:86:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 84
 
-unittest/compiler-fixtures/managed-acquired-regions.x:92:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:92:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 90
 
-unittest/compiler-fixtures/managed-acquired-regions.x:98:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:98:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 96
 
-unittest/compiler-fixtures/managed-acquired-regions.x:104:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:104:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 102
 
-unittest/compiler-fixtures/managed-acquired-regions.x:110:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/managed-acquired-regions.x:110:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 108

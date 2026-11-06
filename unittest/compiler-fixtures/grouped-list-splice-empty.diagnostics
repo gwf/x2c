@@ -1,5 +1,4 @@
-unittest/compiler-fixtures/grouped-list-splice-empty.x:4:21: parse: expected atomic expression
+unittest/compiler-fixtures/grouped-list-splice-empty.x:4:21: parse: expected atomic expression, found ')'
     return %(prefix @() suffix);
                       ^
-  note: token: ) kind: )
 

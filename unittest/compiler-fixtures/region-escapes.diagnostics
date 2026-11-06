@@ -1,68 +1,68 @@
-unittest/compiler-fixtures/region-escapes.x:25:3: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-escapes.x:25:3: warning: region: 'a' can outlive the region it was allocated in when returned
     return a;
     ^^^^^^
   note: region opened at line 23
 
-unittest/compiler-fixtures/region-escapes.x:33:5: region: 'a' can outlive the region it was allocated in when assigned to a local declared outside the region
+unittest/compiler-fixtures/region-escapes.x:33:5: warning: region: 'a' can outlive the region it was allocated in when assigned to a local declared outside the region
       out = a;
       ^^^
   note: region opened at line 31
 
-unittest/compiler-fixtures/region-escapes.x:43:5: region: 'n' can outlive the region it was allocated in when stored into a static
+unittest/compiler-fixtures/region-escapes.x:43:5: warning: region: 'n' can outlive the region it was allocated in when stored into a static
       global_node = n;
       ^^^^^^^^^^^
   note: region opened at line 40
 
-unittest/compiler-fixtures/region-escapes.x:52:3: region: 'l' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-escapes.x:52:3: warning: region: 'l' can outlive the region it was allocated in when returned
     return l;
     ^^^^^^
   note: region opened at line 49
 
-unittest/compiler-fixtures/region-escapes.x:59:3: after-free: 'a' is used after it was freed
+unittest/compiler-fixtures/region-escapes.x:59:3: warning: after-free: 'a' is used after it was freed
     return (int) a.len() + l.len();
     ^^^^^^
 
-unittest/compiler-fixtures/region-escapes.x:66:5: region: 'n' can outlive the region it was allocated in when stored through a parameter
+unittest/compiler-fixtures/region-escapes.x:66:5: warning: region: 'n' can outlive the region it was allocated in when stored through a parameter
       _link(holder, n);
       ^^^^^
   note: region opened at line 64
 
-unittest/compiler-fixtures/region-escapes.x:74:5: region: 'names' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-escapes.x:74:5: warning: region: 'names' can outlive the region it was allocated in when returned
       return names;
       ^^^^^^
   note: region opened at line 72
 
-unittest/compiler-fixtures/region-escapes.x:83:5: region: 'a' can outlive the region it was allocated in when stored into an object of an outer region
+unittest/compiler-fixtures/region-escapes.x:83:5: warning: region: 'a' can outlive the region it was allocated in when stored into an object of an outer region
       saved = cons(a, saved);
       ^^^^^
   note: region opened at line 81
 
-unittest/compiler-fixtures/region-escapes.x:92:5: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
+unittest/compiler-fixtures/region-escapes.x:92:5: warning: region: a fresh allocation can outlive the region it was allocated in when assigned to a local declared outside the region
       n = _fresh_node();
       ^
   note: region opened at line 91
 
-unittest/compiler-fixtures/region-escapes.x:96:3: region: 'n' is used after the region that allocated it ended
+unittest/compiler-fixtures/region-escapes.x:96:3: warning: region: 'n' is used after the region that allocated it ended
     return n;
     ^^^^^^
   note: region opened at line 89
 
-unittest/compiler-fixtures/region-escapes.x:103:5: region: 'a' can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-escapes.x:103:5: warning: region: 'a' can outlive the region it was allocated in when returned
       return flag ? a : NULL;
       ^^^^^^
   note: region opened at line 101
 
-unittest/compiler-fixtures/region-escapes.x:112:5: region: 'a' can outlive the region it was allocated in when stored into an object of an outer region
+unittest/compiler-fixtures/region-escapes.x:112:5: warning: region: 'a' can outlive the region it was allocated in when stored into an object of an outer region
       return %($a);
       ^^^^^^
   note: region opened at line 110
 
-unittest/compiler-fixtures/region-escapes.x:120:3: region: a closure can outlive the region it was allocated in when returned
+unittest/compiler-fixtures/region-escapes.x:120:3: warning: region: a closure can outlive the region it was allocated in when returned
     return %!() => a.len();
     ^^^^^^
   note: region opened at line 119
 
-unittest/compiler-fixtures/region-escapes.x:131:5: region: 'a' can outlive the region it was allocated in when stored into an object of an outer region
+unittest/compiler-fixtures/region-escapes.x:131:5: warning: region: 'a' can outlive the region it was allocated in when stored into an object of an outer region
       _keep_two(a, a);
       ^^^^^^^^^
   note: region opened at line 129

@@ -3,7 +3,7 @@ unittest/compiler-fixtures/macro-export-private-parallel.x:4:13: type: 'p_meta' 
               ^^^^^^
   note: it is defined in 'unittest/compiler-fixtures/macro-export-hidden.x'; remove 'static' so other units can call it
 
-unittest/compiler-fixtures/macro-export-private-parallel.x:5:18: parse: unknown or forward-referenced macro 'p.value'
+unittest/compiler-fixtures/macro-export-private-parallel.x:5:18: parse: unknown or forward-referenced macro '$p.value'
   int expression = $p.value();
                    ^
 

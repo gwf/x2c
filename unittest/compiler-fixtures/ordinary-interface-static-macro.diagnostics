@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/ordinary-interface-static-macro.x:2:14: parse: unknown or forward-referenced macro 'ordinary.private_step'
+unittest/compiler-fixtures/ordinary-interface-static-macro.x:2:14: parse: unknown or forward-referenced macro '$ordinary.private_step'
   int answer = $ordinary.private_step(41);
                ^
 

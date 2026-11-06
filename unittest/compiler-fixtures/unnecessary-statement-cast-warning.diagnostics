@@ -1,9 +1,9 @@
-unittest/compiler-fixtures/unnecessary-statement-cast-warning.x:7:3: conversion: unnecessary conversion: the operand already has type (int)
+unittest/compiler-fixtures/unnecessary-statement-cast-warning.x:7:3: warning: conversion: unnecessary conversion: the operand already has type (int)
     (int)n;
     ^
   note: remove the cast
 
-unittest/compiler-fixtures/unnecessary-statement-cast-warning.x:8:3: conversion: unnecessary conversion: the operand already has type (* char)
+unittest/compiler-fixtures/unnecessary-statement-cast-warning.x:8:3: warning: conversion: unnecessary conversion: the operand already has type (* char)
     (char *)p;
     ^
   note: remove the cast

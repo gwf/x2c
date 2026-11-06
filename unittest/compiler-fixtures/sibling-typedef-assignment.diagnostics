@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/sibling-typedef-assignment.x:7:3: type: cannot convert ("ArrayDbl") to ("ArrayInt")
     ArrayInt counts = ratios;
     ^^^^^^^^
-  note: the names share one C type but not one meaning: declare the converter ArrayDbl_arrayint, or cast the expression to say so on purpose
+  note: the names share one C type but not one meaning: declare the converter ArrayDbl_arrayint, or cast the expression to make the conversion explicit
 
