@@ -108,14 +108,14 @@ prelude. Include one explicitly to use its declarations.
 
 These modules implement the runtime and are not public APIs.
 
-- `lib/cleanup.x` - Cleanup adoption templates used by runtime owners.
+- `lib/cleanup.x` - `Cleanup` adoption templates used by runtime owners.
 - `lib/clibc.x` - C library prototypes for integer and string conversions, and string comparison, marked `meta` so compile-time code calls the native functions; it includes the C headers it declares from.
 - `lib/cmath.x` - C99 `<math.h>` prototypes, declared so a `Var` argument unboxes at a math call; the unit still includes `<math.h>`.
 - `lib/compiler-meta.x` - Compiler-private operator facts and `meta` prototypes for native operations supplied to the compiler's shipped sources.
 - `lib/datum-reader.x` - The one Lisp reader grammar, shared by `Lisp.read` and the datum reader.
 - `lib/datum.x` - Values spelled as Lisp reader text, for interface files and the project meta helper's messages.
 - `lib/error-macros.x` - Structured `Error` causes shared by runtime modules.
-- `lib/error-private.x` - Error transfer templates used by the exception machinery.
+- `lib/error-private.x` - `Error` transfer templates used by the exception machinery.
 - `lib/error_init.x` - Type-owned initialization shim that preserves `Error`'s pre-initialization boundary.
 - `lib/integer-ops.x` - Integer conversion and arithmetic templates shared by runtime owners.
 - `lib/lisp-targets/lisp-targets.x` - The native operations a `Lisp` session can bind, built outside the implicit prelude so the optional modules that supply them stay out of it.
