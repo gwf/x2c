@@ -111,9 +111,12 @@ module CliOption cli_options[] = {
   { <jobs>, %<translate build run script>, <target>, "-j",
     "<count>", "Maximum parallel translation and compilation jobs", 0,
     .alias = "--jobs" },
-  { <output>, %<build run>, <output>, "-o", "<file>",
+  { <output>, %<build>, <output>, "-o", "<file>",
     "Name the executable, library, or single object", 0,
     .alias = "--output", CLI_FIELD(<text>, output) },
+  { <output>, %<run>, <output>, "-o", "<file>",
+    "Name the executable", 0, .alias = "--output",
+    CLI_FIELD(<text>, output) },
   { <rebuild>, %<run script>, <output>, "--rebuild", NULL,
     "Build even when the cached executable is current", 0,
     CLI_FIELD(<flag>, rebuild) },
@@ -434,6 +437,8 @@ static void _help_command(Array args) {
   if (name == "help" || name == "--help" || name == "-h")
     _help_exit(<help>, 0);
   CliCommand *asked = name ? _command_row(name) : NULL;
+  if (!asked && name && _external_listed(name))
+    $fail.utils_command_missing(name);
   if (!asked) $fail.cli_help_unknown(name);
   _help_exit(asked.name, 0);
 }
@@ -483,7 +488,7 @@ static Given _take_option(Array args, int &i, Symbol command) {
   Given given = {_find_option(written, command, suffix), written};
   if (!given.option) return given;
   if (equals > 2 && !given.option.value)
-    $fail.cli_option_value_forbidden(arg);
+    $fail.cli_option_value_forbidden(written);
   given.value = equals > 2 ? joined : suffix;
   given.attached = suffix != NULL;
   if (given.option.value && !given.value && equals <= 2) {
@@ -599,10 +604,16 @@ static void _cli_fail_output_command(void) {
     "use '--out-dir' for translation directories");
 }
 
+/* A first word that is no built-in command names an external command that
+   is not built, an input given without a command, or nothing x2c knows. */
 static void _cli_fail_expected_command(String arg) {
-  Diagnostics.driver_fail(
-    %"expected a command before '$arg'",
-    %"use 'x2c translate $arg'");
+  if (_external_listed(arg)) $fail.utils_command_missing(arg);
+  String help = "run 'x2c help' to list commands";
+  if (Path.is_x2c_source(arg))
+    help = %"use 'x2c run $arg' or 'x2c translate $arg'";
+  else if (!Path.exists(arg))
+    Diagnostics.driver_fail(%"unknown command '$arg'", help);
+  Diagnostics.driver_fail(%"expected a command before '$arg'", help);
 }
 
 /* translate corrects a one-dash long option. */

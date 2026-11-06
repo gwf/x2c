@@ -99,6 +99,11 @@ static macro Stmt $report.build_replace_failed(Expr $output, Expr $reason) =>
   Diagnostics.driver_report(
     %"cannot replace $($output): $(String.new($reason))", NULL);
 
+static macro Stmt $report.build_output_unwritable(
+  Expr $output, Expr $reason) =>
+  Diagnostics.driver_report(
+    %"cannot write $($output): $(String.new($reason))", NULL);
+
 static macro Stmt $warn.build_cleanup_failed(Expr $directory) =>
   fprintf(
     stderr, "x2c: warning: cannot remove temporary build directory: %s\n",
@@ -887,11 +892,17 @@ static String _input_noun(Symbol phase, int count) {
    path. The staged file keeps the output's basename, which a linker may
    record in the file (the macOS ad-hoc signature does), so its bytes carry
    no process-specific name. Returns -1 when a relinked module is
-   unchanged. */
+   unchanged, and reports and returns 1 when the output's directory cannot
+   hold the staging directory. */
 static int _publish(Build b, List inputs) {
   String name = Path.basename(b.output);
   String staging = %"$(Path.dirname(b.output))/.$name.$(_process_suffix())";
-  Path.make_dirs(staging);
+  try Path.make_dirs(staging);
+  catch %((!or not-found io-fail) *detail): {
+    long error = detail.assoc(<"errno">);
+    $report.build_output_unwritable(b.output, strerror((int) error));
+    return 1;
+  }
   String staged = %"$staging/$name";
   int status = _replace(b, _final_action(b, staged, inputs), staged);
   Path.remove_tree(staging);
@@ -1127,7 +1138,8 @@ static Map _script_members(Build b, List candidates) {
 }
 
 /** Moves a script's built executable, and its debug symbols on macOS, to
-    `executable` and records what it was built from, so
+    `executable`, which becomes the build's output for its receipt, and
+    records what it was built from, so
     `CliRequest.script_current` can reuse it. The record lists the script's
     translation and compile prerequisites, package archives, the libraries
     its `-l` selections may name, the runtime archive, and the directories
@@ -1143,6 +1155,7 @@ void Build.publish_script(Build b, String executable) {
     symbols.remove_tree();
     Path.move_to(%"$(b.output).dSYM", symbols);
   }
+  b.output = executable;
   unlink(%"$(b.state_root)/script");
   List files = _script_files(b), libraries = NULL;
   List directories = _script_directories(b, files);

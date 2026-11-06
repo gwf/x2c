@@ -108,10 +108,11 @@ static HelpPage help_pages[] = {
       Usage:
         x2c script [options] <file> [<argument>...]
 
-      Run an x2c source file as a script. The first run builds an executable in
-      the per-user cache; later runs start it directly until the script, a file
-      it includes or imports, the compiler, the runtime, or an option changes."),
-    "Read additional options from a response file", NULL,
+      Run an x2c source file as a script. The first run builds an executable
+      in the per-user cache; later runs start it directly until the script, a
+      file it includes or imports, the compiler, the runtime, or an option
+      changes."),
+    "Read additional arguments from a response file", NULL,
     $dedent(%"
       Every word after <file> is passed unchanged to the script, including
       words that begin with - or @. A script whose first line is the shebang
@@ -123,9 +124,11 @@ static HelpPage help_pages[] = {
       Usage:
         x2c env [options] [name]
 
-      Print the home, executable, include directory, runtime archive, command
-      directory, identity, package roots, host tools, and script cache this
-      compiler resolved, one 'name = value' line each, or only one value."),
+      Print the home, executable, command directory, identity, include
+      directory, runtime archive, prelude interface and the runtime units
+      it lacks interfaces for, package roots, host tools, and script cache
+      this compiler resolved, one 'name = value' line each, or only one
+      value."),
     "Read additional arguments from a response file", NULL,
     $dedent(%"
       The home is X2C_HOME when set; otherwise the nearest directory above
@@ -155,7 +158,7 @@ static HelpPage help_pages[] = {
   { <list>,
     $dedent(%"
       Usage:
-        x2c list
+        x2c list [options]
 
       List installed packages as 'name version kind' lines."),
     "Read additional arguments from a response file" },
@@ -229,6 +232,20 @@ static void _print_external_commands(void) {
   manifest.close();
 }
 
+/* Reports whether `name` is an external command this compiler should
+   have: one in a checkout's command manifest, or one an installed home
+   lists in `commands.txt`. */
+module int _external_listed(String name) {
+  String libexec = Compiler.home_libexec(), manifest = NULL;
+  if (Compiler.stage_dir())
+    manifest = %"$(x2c_get_root())/commands/manifest.txt";
+  else if (libexec) manifest = %"$libexec/commands.txt";
+  if (!manifest || !Path.is_file(manifest)) return 0;
+  foreach (String line in Path.read_text(manifest).split_lines(0))
+    if (line.startswith(%"$name|")) return 1;
+  return 0;
+}
+
 static HelpPage *_help_page(Symbol command) {
   for (HelpPage *page = help_pages; page.command; page++)
     if (page.command == command) return page;
@@ -259,16 +276,13 @@ static void _print_options(Symbol command) {
     _print_group(command, *group);
 }
 
-/* A group's title prints only above options the command lists. Translate
-   names its source group for what it reads. */
+/* A group's title prints only above options the command lists. */
 static void _print_group(Symbol command, CliGroup &group) {
   CliOption *option = cli_options;
   while (option.spelling && !_in_group(*option, command, group.group))
     option++;
   if (!option.spelling) return;
-  const char *title = command == <translate> && group.group == <source> ?
-                      "Source options:" : group.title;
-  printf("\n%s\n", title);
+  printf("\n%s\n", group.title);
   for (; option.spelling; option++)
     if (_in_group(*option, command, group.group)) _print_option(*option);
 }
@@ -288,15 +302,23 @@ static void _print_option(const CliOption &option) {
   _print_help_row(label, option.description, label.startswith("--") ? 6 : 2);
 }
 
+/* A long label puts its description on the next line, and a description
+   wraps at spaces to stay within 79 columns. */
 static void _print_help_row(
   const char *label, const char *description, int indent) {
-  const int description_column = 30, int width = indent + (int) strlen(label);
-  if (width >= description_column) {
-    printf("%*s%s\n", indent, "", label);
-    printf("%*s%s\n", description_column, "", description);
+  const int column = 30, int room = 79 - column;
+  int width = indent + (int) strlen(label);
+  printf("%*s%s", indent, "", label);
+  if (width >= column) {
+    puts("");
+    width = 0;
   }
-  else {
-    printf("%*s%s", indent, "", label);
-    printf("%*s%s\n", description_column - width, "", description);
+  String rest = String.new(description);
+  while (rest.len() > room) {
+    int cut = rest[:room + 1].rfind(" ");
+    printf("%*s%s\n", column - width, "", rest[:cut]);
+    rest = rest[cut + 1:];
+    width = 0;
   }
+  printf("%*s%s\n", column - width, "", rest);
 }

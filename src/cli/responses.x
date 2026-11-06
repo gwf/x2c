@@ -74,7 +74,8 @@ static String _read_response_file(String path) {
   catch %(bad-arg *): _response_error(path, 1, "embedded NUL byte");
   catch %((!or not-found io-fail) *detail): {
     long error = detail.assoc(<"errno">);
-    _response_error(path, 1, strerror((int) error));
+    String reason = String.new(strerror((int) error));
+    Diagnostics.driver_error(%"cannot read response file '$path': $reason");
   }
   if (!text.is_utf8()) _response_error(path, 1, "input is not valid UTF-8");
   return text;

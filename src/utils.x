@@ -43,14 +43,17 @@ static macro Stmt $fail.utils_lock_failed(Expr $p) =>
   Diagnostics.driver_error(%"cannot lock $($p)");
 
 static macro Stmt $fail.utils_host_failed(
-  Expr $detail, Expr $subject, Expr $error) =>
+  Expr $action, Expr $subject, Expr $error) =>
   Diagnostics.driver_error(
-    %"$($detail.assoc(<operation>)) $($subject): $(
-      String.new(strerror($error)))");
+    %"cannot $($action) '$($subject)': $(String.new(strerror($error)))");
 
+/* A checkout builds its commands with `make commands`; an installed
+   compiler needs the commands of its own release. */
 macro Stmt $fail.utils_command_missing(Expr $name) =>
   Diagnostics.driver_error(
-    %"missing x2c-$($name) command; install the matching x2c commands");
+    %"missing x2c-$($name) command; $(Compiler.stage_dir() ?
+      "run 'make commands' in this checkout" :
+      "install the matching x2c commands")");
 
 // environment state
 
@@ -424,7 +427,8 @@ void Compiler.configure_logging(int debugging) {
 }
 
 /** Reports a caught `<not-found>` or `<io-fail>` through
-    `Diagnostics.driver_error` as its operation, path or program, and system
+    `Diagnostics.driver_error` as `cannot <action> '<subject>': <reason>`:
+    what the operation was doing, its path or program, and the system
     reason.
 */
 void Diagnostics.host_error(List detail) {
@@ -432,17 +436,18 @@ void Diagnostics.host_error(List detail) {
   if (subject is void) subject = detail.assoc(<program>);
   // Quoted, the key survives a host preprocessor that expands `errno`.
   long error = detail.assoc(<"errno">);
-  $fail.utils_host_failed(detail, subject, error);
+  String action = _host_action(%"$(detail.assoc(<operation>))");
+  $fail.utils_host_failed(action, subject, error);
 }
 
-/** Prints `x2c: error: <message>` to stderr, then `note: <note>` when
+/** Prints `x2c: error: <message>` to stderr, then `  note: <note>` when
     `note` is not NULL, after clearing a transient progress line. The
     caller decides how the command ends.
 */
 void Diagnostics.driver_report(const char *message, const char *note) {
   report_suspend();
   fprintf(stderr, "x2c: error: %s\n", message);
-  if (note) fprintf(stderr, "note: %s\n", note);
+  if (note) fprintf(stderr, "  note: %s\n", note);
 }
 
 /** Reports `message` and `note` as `Diagnostics.driver_report` does and
@@ -557,4 +562,21 @@ static void _prepare_include_dirs(void) {
   String src_dir = %"$root_path/src", lib_dir = %"$root_path/lib";
   default_includes = cons(include_dir, NULL);
   cpp_includes = Path.is_dir(src_dir) ? $(lib_dir, src_dir) : $(lib_dir);
+}
+
+// driver error helpers
+
+/* What a host operation in a driver error was doing, in a reader's words. */
+static String _host_action(String operation) {
+  switch (operation) {
+    case "Path.make_dirs": return "create directory";
+    case "Path.list_dir": return "read directory";
+    case "open": case "Path.read_text": return "read";
+    case "Path.write_text": return "write";
+    case "Path.copy_file": case "Path.copy_tree": return "copy to";
+    case "Path.remove_file": case "Path.remove_tree": return "remove";
+    case "Path.move_to": case "rename": return "replace";
+    case "Job.start": case "popen": return "run";
+  }
+  return "access";
 }

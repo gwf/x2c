@@ -62,10 +62,10 @@ static int _build_target(CliRequest request, Array commands, int cached) {
     b.cleanup(0);
     return status;
   }
-  b.report_success();
   if (cached && !request.dry_run)
     b.publish_script(%"$(request.build_dir)/run");
-  else if (!cached && request.command == <run>) status = b.run_program();
+  b.report_success();
+  if (!cached && request.command == <run>) status = b.run_program();
   b.cleanup(1);
   return status;
 }

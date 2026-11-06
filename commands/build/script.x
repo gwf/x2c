@@ -18,8 +18,10 @@
 
 // command reports
 
-static macro Stmt $fail.script_source_missing(Expr $script) =>
-  Diagnostics.driver_error(%"script does not exist: $($script)");
+static macro Stmt $fail.script_not_source(Expr $script) =>
+  Diagnostics.driver_fail(
+    %"script is not x2c source: $($script)",
+    "a script is a .x or .xp file, or a file whose first line starts '#!'");
 
 static macro Stmt $fail.script_execute_failed(Expr $executable) =>
   Diagnostics.driver_error(
@@ -35,11 +37,13 @@ static macro Stmt $fail.script_execute_failed(Expr $executable) =>
     executable when it is current; that path does not return. Otherwise it
     locks the directory against concurrent builds, prunes entries whose first
     input no longer exists, and returns 0; the caller builds `c` and calls
-    `CliRequest.run_script`. A `--clean` request removes the entry and returns 1.
+    `CliRequest.run_script`. A `--clean` request removes the entry and
+    returns 1.
 */
 int CliRequest.prepare_script(CliRequest c) {
   String root = Compiler.cache_root();
   if (!root) Diagnostics.driver_error("no cache directory: set X2C_CACHE_DIR");
+  String typed = c.inputs.car();
   Array inputs = [];
   foreach (String input, c.inputs) inputs.push(Path.absolute(input));
   c.inputs = inputs.list_free();
@@ -49,8 +53,7 @@ int CliRequest.prepare_script(CliRequest c) {
     _clean(c.build_dir);
     return 1;
   }
-  if ((!c.dry_run || c.command == <script>) && !Path.is_file(script))
-    $fail.script_source_missing(script);
+  if (!c.dry_run || c.command == <script>) _require_program(c, typed);
   _configure(c);
   if (c.dry_run) return 0;
   _exec_current(c);
@@ -73,6 +76,14 @@ static String _entry(String root, CliRequest c) {
   String digest = "%08x".printf(String.hash("\n".join(c.inputs)));
   String directory = c.command == <script> ? "scripts" : "runs";
   return %"$root/$directory/$stem-$digest";
+}
+
+/* The first input must exist as typed. A script must also be x2c source,
+   because every word after it is the script's argument. */
+static void _require_program(CliRequest c, String input) {
+  CliRequest.require_input(input);
+  if (c.command == <script> && !Path.is_x2c_source(input))
+    $fail.script_not_source(input);
 }
 
 /* Removes the entry once no build holds it. */

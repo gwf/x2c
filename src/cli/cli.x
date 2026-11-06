@@ -76,10 +76,10 @@ static macro Stmt $fail.cli_help_unknown(Expr $name) =>
   Diagnostics.driver_error(%"unknown help command '$($name)'");
 
 static macro Stmt $fail.cli_option_value_forbidden(Expr $arg) =>
-  Diagnostics.driver_error(%"option takes no value '$($arg)'");
+  Diagnostics.driver_error(%"option '$($arg)' takes no value");
 
 static macro Stmt $fail.cli_option_value_required(Expr $arg) =>
-  Diagnostics.driver_error(%"option requires a value '$($arg)'");
+  Diagnostics.driver_error(%"option '$($arg)' requires a value");
 
 static macro Stmt $fail.cli_color_invalid(Expr $value) =>
   Diagnostics.driver_error(%"invalid color mode '$($value)'");
