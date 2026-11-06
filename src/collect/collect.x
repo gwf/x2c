@@ -45,11 +45,11 @@ static macro Stmt $fail.collect_include_read(
 }
 
 static macro Stmt $fail.collect_package_unknown(
-  Expr $c, Expr $site, Expr $name) {
+  Expr $c, Expr $site, Expr $name, Expr $search) {
   $c.report_error(
     <driver>,
     %"unknown package '$($name)'",
-    $site, %( "searched: <root>/$($name)/src/$($name).{x,xp}, <root>/$($name)/$($name).{x,xp}" ));
+    $site, %("$($search)"));
 }
 
 static macro Stmt $fail.collect_package_read(

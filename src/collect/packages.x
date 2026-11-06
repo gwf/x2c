@@ -51,7 +51,19 @@ static String _find_package(
   Compiler c, String name, String &root, Token token) {
   String entry = c.sources.package_entry(c.package_dirs, name, root);
   if (entry) return entry;
-  $fail.collect_package_unknown(c, token, name);
+  $fail.collect_package_unknown(
+    c, token, name, _package_search(name, c.package_dirs));
+}
+
+/* Where an unknown package was looked for. A root inside the working
+   directory is named relative to it, as diagnostics name sources. */
+static String _package_search(String name, List roots) {
+  if (!roots)
+    return "no package roots are configured; add one with --package-dir";
+  String here = %"$(Path.absolute("."))/";
+  List shown = roots.map(%!(root) => Path.absolute(root).remove_prefix(here));
+  String each = %"<root>/$name/src/$name.{x,xp} and <root>/$name/$name.{x,xp}";
+  return %"searched $each for each <root> of: $(", ".join(shown))";
 }
 
 /* The package's files enter the cache from their entries, or from one cold
