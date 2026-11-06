@@ -46,6 +46,7 @@ const analytics = analyticsSnippet(process.env, import.meta.env.DEV);
     {canonical && <meta name="twitter:image:alt" content={socialImageAlt} />}
     {canonical && <link rel="canonical" href={canonicalUrl} />}
     <link rel="icon" href={local("x2c-naked.svg")} type="image/svg+xml" />
+    <link rel="apple-touch-icon" href={local("apple-touch-icon.png")} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
