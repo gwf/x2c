@@ -173,7 +173,7 @@ void terminal_register_exit(void) { atexit(terminal_exit_hook); }
         failed.send_signal(signal.SIGCONT)
         output, errors = failed.communicate(timeout=TIMEOUT)
         require(failed.returncode == 1 and b"absent" in errors and
-                b"session unchanged:" in errors and
+                b"x2c: error: repl: " in errors and
                 b"native worker exited" not in errors, (output, errors))
     finally:
         if failed.poll() is None:

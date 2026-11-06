@@ -163,7 +163,11 @@ static int _replace(
     .previous = client.worker, .input = client.input
   });
   if (candidate.failure) {
-    fprintf(stderr, "session unchanged: %s\n", candidate.failure);
+    // Before the first session there is no session to keep.
+    fprintf(
+      stderr,
+      client.worker ? "session unchanged: %s\n" : "x2c: error: repl: %s\n",
+      candidate.failure);
     repl_worker_close(candidate);
     if (artifact != client.artifact) _artifact_remove(artifact);
     return 0;
