@@ -99,7 +99,9 @@ Astro pages and components:
 - `about.md` is the About page copy.
 - `love.md`, `power.md`, and `magic.md` hold the three section introductions;
   each single-word title is frontmatter and its overview is ordinary Markdown.
-- `install.md` is the installation code window.
+- `install.md` is the installation code window. `run` holds the release
+  install commands; `source` holds the commands that follow the source build
+  from `core-setup.ts`.
 - `packages.md` introduces the package example gallery. Its slides contain
   excerpts from `packages/*/examples/`, links to the complete programs, and
   captured output. Refresh the excerpt and result together when its example
@@ -139,10 +141,12 @@ retain their existing defaults.
 For candidate output, also set `SITE_RELEASE_CHANNEL=staging`,
 `SITE_CANDIDATE_ID=candidate-<full-sha>-<run-id>-<attempt>`,
 `SITE_URL=https://staging.x2c-lang.dev` and `SITE_BASE=/`. Every rendered page
-shows the candidate identity and instructions using a fresh `X2C_PREFIX` and
-explicit staging package index. Book examples continue documenting ordinary
-production behavior; the staging banner identifies those defaults and supplies
-the candidate commands. The compiler's default package index does not change.
+carries the candidate identity in `x2c-release-channel` and `x2c-candidate`
+metadata and a `noindex` robots tag, and its canonical URL names the
+production page. `robots.txt` disallows all crawling. The landing install
+commands use a fresh `X2C_PREFIX` and the explicit staging package index.
+Book examples continue documenting ordinary production behavior. The
+compiler's default package index does not change.
 
 Run the complete `npm run build`, not just `astro build`: the final book step
 also applies destination links and banners across the complete site. Release
