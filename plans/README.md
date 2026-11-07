@@ -13,6 +13,13 @@ The book owns language/library contracts. Source owners and current repository
 guidance own implementation and workflow. A historical rejection does not
 forbid a different design or a new workload-supported investigation.
 
+## Public release proposal
+
+[Public release readiness](public-release-readiness.md) is the authorized
+implementation plan based on `68ebfece6`. It records bounded repairs,
+performance decisions, packaging work, and deferred items. Implementation is in progress;
+website work belongs to a separate session.
+
 ## Current work
 
 Checked against `a7a01924c` on 2026-11-02. These are the remaining items from
