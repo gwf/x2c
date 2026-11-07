@@ -29,6 +29,9 @@ done
 x2c="$BUILD/home/bin/x2c"
 [[ "$("$x2c" env home)" == "$BUILD/home" ]] || fail "home not resolved"
 [[ -z "$("$x2c" env prelude_missing)" ]] || fail "installed prelude is incomplete"
+for notice in LICENSE NOTICE; do
+  cmp "$ROOT/$notice" "$BUILD/home/licenses/$notice" || fail "compiler $notice"
+done
 for results in shootout/results apps/notes/bench/results; do
   [[ ! -e "$BUILD/home/examples/$results" ]] || fail "installed history"
 done
@@ -197,6 +200,9 @@ grep -q "extract failed: cannot run tar" "$BUILD/broken-tar.stderr" ||
 grep -q "^x2c: installed .*/packages/greet$" "$BUILD/receipt.stderr" ||
   fail "install receipt on stderr"
 [[ "$("$x2c" list)" == "greet - source" ]] || fail "list after directory"
+for notice in LICENSE NOTICE; do
+  cmp "$ROOT/$notice" "$BUILD/home/packages/greet/$notice" || fail "source $notice"
+done
 [[ -f "$BUILD/home/packages/greet/builds/libgreet.a" ]] || fail "no archive"
 [[ -f "$BUILD/home/packages/greet/builds/greet.native.rsp" ]] ||
   fail "no native response file"
@@ -367,6 +373,7 @@ rm -rf "$BUILD/home/packages/mine"
 for name in pure mixed; do
   directory="$BUILD/src/$name"
   mkdir -p "$directory/src"
+  cp "$ROOT/LICENSE" "$ROOT/NOTICE" "$directory/"
   printf 'PACKAGE := %s\nROOT := %s\nX2C := %s\nPACKAGE_C_FLAGS := --c-include-dir src\ninclude %s/packages/package.mk\n' \
     "$name" "$ROOT" "$X2C" "$ROOT" >"$directory/Makefile"
   if [[ "$name" == pure ]]; then
@@ -390,6 +397,9 @@ for key in ('package', 'platform', 'machine', 'x2c_version', 'x2c_sha256',
     assert identity[key], (key, identity)
 PYTHON
   "$x2c" install -q "$bundle"
+  for notice in LICENSE NOTICE; do
+    cmp "$ROOT/$notice" "$BUILD/home/packages/$name/$notice" || fail "bundle $notice"
+  done
   printf 'import "%s" as sample;\nint main(void) { return sample.answer() != 42; }\n' \
     "$name" >"$BUILD/$name-client.x"
   "$x2c" run -q "$BUILD/$name-client.x" || fail "$name bundle consumer"

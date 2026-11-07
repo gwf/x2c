@@ -311,7 +311,12 @@ module List _call(Compiler c, List ast) {
     }
     // A typedef names the signature of a call through a function pointer.
     List parameters = NULL;
-    if (c.sym.resolve_key(callee.cadr()).function_parts(parameters, NULL))
+    Type signature = c.sym.resolve_key(callee.cadr());
+    if (signature.function_parts(parameters, NULL))
+      return _typed_call(c, callee, parameters, arguments);
+    if (signature.is_pointer() &&
+        c.sym.resolve_key(signature.dereference())
+          .function_parts(parameters, NULL))
       return _typed_call(c, callee, parameters, arguments);
   }
   return ast;

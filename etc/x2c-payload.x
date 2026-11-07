@@ -83,7 +83,7 @@ static void copy_support(Path destination) {
     ("builds/0/lib" ("*.h") ("include/x2c"))
     ("etc" ("*.xlisp" "*.x") ("etc"))
     ("LICENSES" ("*.txt") ("licenses"))
-    ("." ("LICENSE") ("licenses")));
+    ("." ("LICENSE" "NOTICE") ("licenses")));
   /* The task backend's vendored coroutine header is private to the
      runtime's own C and is not an x2c include. */
   List private = %("minicoro.h");

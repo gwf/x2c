@@ -68,7 +68,7 @@ CliRequest CliRequest.new(Symbol command) {
 }
 
 /** Returns the version line `--version` prints, without a newline. */
-String Compiler.version(void) => "x2c 0.15.1";
+String Compiler.version(void) => "x2c 0.16.0";
 
 /** Returns whether `request` selects a terminating inspection or dump mode. */
 int CliRequest.inspects(CliRequest request) => request.dump != 0;

@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/callback-adapt-result-qualifiers.x:10:22: type: typed callback adapter return type mismatch
+  static Namer namer = $x2c.callback.adapt(Namer, name_of);
+                       ^
+  note: target signature: (* (func (("Var"))) * char) source signature: ((func (("Symbol"))) * const char)
+
