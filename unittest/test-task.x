@@ -606,6 +606,7 @@ static void task_configured_stack_sizes_and_invalid_settings(void) {
    floor and raises its own cause instead of overflowing. */
 static void task_small_stack_bounds_library_recursion(void) {
   $test.scoped();
+  Regex nested_groups = Regex.compile("(".repeat(2000) + "a" + ")".repeat(2000));
   String pairs = "ab".repeat(1990);
   String groups = %"$("(".repeat(1000))a$(")".repeat(1000))";
   String arrays = %"$("[".repeat(512))$("]".repeat(512))";
@@ -615,9 +616,11 @@ static void task_small_stack_bounds_library_recursion(void) {
   Lisp lisp = Lisp.new();
   defer lisp.destroy();
   int matched = 0, compiled = 0, parsed = 0, written = 0, read = 0;
-  int evaluated = 0;
+  int evaluated = 0, nested_matched = 0;
   Func job = %!(void) using &matched, &compiled, &parsed, &written, &read,
-                            &evaluated, &lisp => {
+                            &evaluated, &nested_matched, &lisp => {
+    try nested_groups.match("a");
+    catch %(size-limit (operation "Regex.match") *): nested_matched = 1;
     try Regex.compile("^(?:ab)*$").match(pairs);
     catch %(size-limit (operation "Regex.match") *): matched = 1;
     try Regex.compile(groups);
@@ -651,6 +654,7 @@ static void task_small_stack_bounds_library_recursion(void) {
   EXPECT_INT_EQ(written, 1);
   EXPECT_INT_EQ(read, 1);
   EXPECT_INT_EQ(evaluated, 1);
+  EXPECT_INT_EQ(nested_matched, 1);
 }
 
 void task_suite(void) {

@@ -393,17 +393,21 @@ passed six repeated nested-Make probes, and help output remains byte-identical.
 
 ## Outstanding Items
 
-### Regex matching and deep List rendering overflow the stack
+### Regex matching repaired; deep List rendering still overflows
 
-On 2026-11-02, after `Regex.compile` learned to stop at the group-nesting
-limit or the stack floor, matching still recurses through groups without a
-floor check: only `_iterate` (repeated groups) checks it. Sixty thousand
-groups in sequence matched on the 8 MiB main thread exit 139, and 2,000
-nested groups matched in a 32 KiB task exit 138. A floor check at the top of
-`_run` is the likely repair, but `_run` is the matcher's hot path, so the
-repair needs a paired measurement. Until then the contexts chapter's
-statement that matching stops before the stack runs out holds only for
-repetition. `Var.repr` of a 100,000-deep List overflows the same way.
+The minimal `_run` stack-floor check now turns 60,000 sequential capture groups
+on the main stack and 2,000 nested groups on a 32 KiB task stack into catchable
+`size-limit` errors. Focused Regex and Task coverage includes both cases and a
+shallow control. Gary approved the repair after generated-C, assembly, and
+controlled-relink comparisons. The original binary pair's roughly 11% byte-loop
+slowdown was not established as inherent check overhead; helper inlining and
+hot-loop instruction counts are unchanged. See the
+[release plan](../plans/public-release-readiness.md#6-regex-decision-and-bounded-experiment)
+for measurements and limits. Existing error wording can describe a repeated
+group and report limit zero for the new floor failure; it remains unchanged.
+
+`Var.repr` of a 100,000-deep List still overflows. That separate repair remains
+deferred.
 
 ### Constructed array-dimension macro (repaired)
 

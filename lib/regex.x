@@ -693,6 +693,7 @@ static RegexMatch _search(Regex regex, String subject, int offset) {
 /* Runs the sequence from `n` at `pos`, then the rest `k`, and returns
    whether the whole pattern matched. */
 static int _run(Matcher &m, _RegexNode n, int pos, Rest k) {
+  if (_x2c_stack_below(m.floor)) _too_deep(m);
   for (; n; n = n.next) {
     switch (n.kind) {
       case <set>: case <any>:

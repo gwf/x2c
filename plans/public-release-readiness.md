@@ -1,9 +1,9 @@
 # Public release readiness
 
-> Status: small fixes ready for shared integration, 2026-11-06.
+> Status: initial fixes integrated; approved Regex follow-up, 2026-11-07.
 > Baseline: `68ebfece63702c3e1ecc249bd8bbd85e5997ad8f` from `origin/dev`.
 > Four bounded compiler repairs, packaging, and version preparation are complete.
-> Version 0.16.0 is prepared. Regex was measured and remains unaccepted.
+> Version 0.16.0 is prepared. Gary approved the minimal Regex repair.
 
 ## Result and scope
 
@@ -223,7 +223,7 @@ Two supported matching workloads crash: 60,000 consecutive `(a)` groups on
 the main stack, and 2,000 nested groups matched on a 32 KiB task stack. Shallow
 controls pass. The book promises catchable Regex depth errors on small stacks.
 
-**Measured private experiment.** Add only the existing floor check at
+**Approved minimal repair.** Add only the existing floor check at
 entry to `_run` in `lib/regex.x`, reusing `m.floor` and `_too_deep`. Every
 recursive match route reaches this owner. Retain `_iterate`'s existing depth
 and floor protection initially. No new counters, limits, records, or API.
@@ -261,20 +261,54 @@ differ between the baseline and candidate runtime archives.
 The first byte-repetition ranges were disjoint: 0.752949-0.786097 seconds
 baseline and 0.810869-0.896394 seconds candidate. Reversing the first run order
 for seven further pairs gave 0.759482 versus 0.837084 seconds (+10.22%), with
-noisier overlapping ranges. A short parent rerun was also noisy; the precise
-native-code cause has not been investigated. These are not instruction counts
-or whole-compiler performance measurements.
+noisier overlapping ranges. These are elapsed-time measurements, not CPU
+instruction counts or whole-compiler performance measurements.
+
+**Generated-code investigation.** Generated C differs only by the floor check
+and a diagnostic line number. Apple Clang 17 retains the same helper inlining;
+the new floor helper also inlines. The hot byte loop has the same 15 ARM64
+instructions, with a bound register and branch addresses changed. No per-byte
+call or spill is added. The check executes twice per successful `a*b` match.
+`_run` retains its 112-byte stack frame and grows from 1,404 to 1,428 bytes.
+The original hot loop moves 96 bytes; register allocation and block placement
+change. Lost inlining does not explain the observed slowdown.
+
+Seven further rounds used the same 10,000-match workload, rotated/reversed
+binary order, and a 1,000-match warmup. Scratch relinks shared one benchmark
+object and baseline runtime archive, replacing only the Regex object. The
+three relink controls had the same `_run` address and text-section alignment.
+The alignment control pads before the hot loop without changing the repair.
+
+| Binary | Median seconds | Minimum | Maximum |
+| --- | ---: | ---: | ---: |
+| Original baseline | 0.743023 | 0.694392 | 0.813299 |
+| Original repair | 0.836799 | 0.694189 | 0.881090 |
+| Controlled relink baseline | 0.758057 | 0.738796 | 0.849691 |
+| Controlled relink repair | 0.758862 | 0.717880 | 0.909654 |
+| Controlled relink repair, aligned loop | 0.764103 | 0.684650 | 0.791933 |
+
+The original binaries differ by 12.6%; the controlled relinks differ by 0.1%.
+Explicit loop alignment does not improve the checked relink median. Broad,
+overlapping ranges limit precision. These results support code-layout
+sensitivity, but do not isolate instruction fetch, cache behavior, or branch
+prediction as the cause. A 64-byte boundary explanation is not established.
+The initial 11% slowdown belongs to that binary pair and workload; it is not
+established as an inherent cost of the repair. Nor do these results establish
+zero overhead across workloads or platforms.
 
 Both reported crashes become catchable size-limit errors; 31 focused Regex
-and Task tests pass. Production code changes by one line. The existing error
-text still describes a repeated group and can report limit zero for this new
-floor failure; that wording would need correction if the experiment is kept.
+and Task tests pass with 364 assertions. Production code changes by one line.
+The existing error text describes a repeated group and can report limit zero
+for the new floor failure. That diagnostic wording remains a known limitation;
+Gary approved keeping the minimal repair without expanding it.
 
-**Decision pending.** The experiment is held in a private commit and is not
-included in the release branch. Gary has been asked to defer it, accept the
-measured tradeoff, or authorize a narrower-placement investigation. The
-recommendation is deferral rather than silently accepting this cost. No
-broader alternative, new benchmark target, or contract change is authorized.
+**Decision, 2026-11-07.** Gary approved including the unchanged one-line repair
+and its focused tests in the release fixes. The initial release fixes merged
+through PR #649; the Regex repair is a follow-up from that integrated revision.
+No broader alternative, recurring benchmark target, or contract change is added.
+Raw local evidence is retained in
+`/tmp/x2c-release-regex-deb7/debug/regex-evidence/` and
+`/tmp/x2c-regex-codegen-deb7-1107/`; the findings above are the durable record.
 
 ## 7. Version and final release evidence
 
@@ -356,7 +390,8 @@ planning baseline.
 The release work branch contains the four compiler repairs, package notices,
 and version 0.16.0 preparation. The compiler repairs add 28 lines and remove
 12 across five source files. No helper, analysis pass, runtime check, or public
-ABI was added. The Regex experiment is not part of that branch.
+ABI was added by those compiler repairs. The approved follow-up adds the
+one-line Regex floor check and focused regression coverage.
 
 The combined tree passed `make build`, all eleven focused compiler fixtures,
 `make command-artifacts`, and `unittest/probes/run-package-install.sh`.
@@ -381,6 +416,14 @@ refresh, broad publication checks, actual platform archives, and website
 integration remain the integration/release owner's work. No site files were
 changed or site checks run during implementation.
 
+The approved Regex follow-up starts at integrated revision
+`2ecd835b7524145c57e33079cf1c3dec0e7fa4fc`. It passed `make build-safe`,
+`make -C unittest test-all`, and both `regex_suite` and `task_suite` with scope
+accounting enabled: 31 passed, 364 assertions, no failures or skips. The
+production diff remains exactly the measured one-line check. No site files
+changed. This is focused submission evidence, not final platform publication
+validation.
+
 ## Plan review
 
 - Existing declarations establish callable types; normalization interprets
@@ -393,13 +436,13 @@ changed or site checks run during implementation.
   representation, framework, or traversal is proposed.
 - Changes use structural matches and existing x2c owners. License assets add
   text rather than a second packaging implementation. Ordinary call fast paths
-  remain intact; the sole proposed runtime check is the optional Regex change.
+  remain intact; the sole added runtime check is the approved Regex entry check.
 - Proposed negative coverage is bounded: callback qualifier mismatch protects
   its generated thunk contract; meta receiver-return cases preserve existing
-  compile-time lifetime errors; Regex exhaustion cases, if selected, protect
+  compile-time lifetime errors; Regex exhaustion cases protect
   the documented catchable failure. All reuse existing error owners. No new
   validator or diagnostic is proposed. Pointer/dimension fixtures are positive
   correctness cases; archive inventories inspect actual distribution outputs.
-- Regex acceptance is the outstanding decision; 0.16.0 is selected. Any
+- Gary approved the minimal Regex repair; 0.16.0 is selected. Any
   material growth in runtime work, code, or caller obligations returns to Gary
   with alternatives instead of being treated as routine implementation.
