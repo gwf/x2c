@@ -604,8 +604,8 @@ module String _syntax_exact_name(Var value) {
   return NULL;
 }
 
-/* Constructed function modifiers have not passed through the parameter
-   parser. Bind their parameter types in the same temporary prototype scope. */
+/* Constructed modifiers bind dimensions and prototype parameters through
+   the same expression and parameter owners as parsed declarators. */
 module List _finish_fnmods(Compiler c, List declarator) {
   match (declarator) {
     case %(op = ?binding ?value):
@@ -621,8 +621,12 @@ module List _finish_fnmods(Compiler c, List declarator) {
 }
 
 static Var _finish_fnmod(Compiler c, Var modifier) {
-  if (modifier ~= %(fnmod (params *parameters)))
-    return %(fnmod (params @(_finish_prototype(c, parameters))));
+  match (modifier) {
+    case %(fnmod (params *parameters)):
+      return %(fnmod (params @(_finish_prototype(c, parameters))));
+    case %(dim ?expression):
+      return %(dim $(c.bind_syntax(expression, <expression>, NULL)));
+  }
   return modifier;
 }
 

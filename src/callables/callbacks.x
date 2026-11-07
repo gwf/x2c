@@ -41,7 +41,7 @@ static macro Stmt $fail.callable_callback_parameter(
    and converts its result to the callback result. */
 static typedef struct Callback {
   Compiler c;
-  Type target, source, result, source_result;
+  Type target, source, result;
   List params, source_params, source_binding;
 } Callback;
 
@@ -120,7 +120,7 @@ static void _split(Callback &c) {
     $fail.callable_callback_target(c);
   // The helper's result keeps the qualifiers its callback type declares.
   c.result = c.target.apply();
-  if (!source.function_parts(c.source_params, c.source_result))
+  if (!source.function_parts(c.source_params, NULL))
     $fail.callable_callback_source(c);
   if (_typed_params_variadic(c.params) ||
       _typed_params_variadic(c.source_params))
@@ -133,8 +133,8 @@ static void _check_signature(Callback &cb) {
   if (target_count != source_count) {
     $fail.callable_callback_arity(cb, target_count, source_count);
   }
-  Type result = cb.result.canonicalize();
-  Type source_result = cb.source_result.canonicalize();
+  Type result = _x2c_type_unqualified(cb.result.declared());
+  Type source_result = _x2c_type_unqualified(cb.source.apply().declared());
   if (result === %(void) || source_result === %(void))
     $fail.callable_callback_void_return(cb);
   if (result != source_result) $fail.callable_callback_result(cb);
@@ -188,7 +188,7 @@ static List _function(Callback &cb, List binding) {
   (List declarations, List arguments) = c.forward_parameters(cb.params);
   List source = $!($(cb.source)){ $(cb.source_binding) };
   List call = _func_call(
-    c, cb.source.apply().canonicalize(), source, arguments);
+    c, cb.source.apply(), source, arguments);
   List body = cb.result === %(void) ? %((stmnt $call))
     : %((return $(cb.result) $(c.convert_expression(call, cb.result))));
   return c.wrapper_function(
