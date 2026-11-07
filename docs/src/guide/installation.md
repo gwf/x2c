@@ -277,6 +277,8 @@ Code written for 0.15.x needs these changes:
 | --- | --- |
 | `%<<a b>>` | `%<a b>` |
 | an object or function named `expand` | another name |
+| `$let(place, value) { ... }` | `with (place = value) { ... }` |
+| `with expr as name { ... }` | `{ alias expr as name; ... }` |
 | `Scope.retain()` | `Scope.open()` |
 | `Scope.release()` | `Scope.close()` |
 | `array.find(value)` | `array.index(value)` |

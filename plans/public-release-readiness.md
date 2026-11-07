@@ -1,6 +1,6 @@
 # Public release readiness
 
-> Status: initial fixes integrated; approved Regex follow-up, 2026-11-07.
+> Status: code fixes integrated; non-site release preparation, 2026-11-07.
 > Baseline: `68ebfece63702c3e1ecc249bd8bbd85e5997ad8f` from `origin/dev`.
 > Four bounded compiler repairs, packaging, and version preparation are complete.
 > Version 0.16.0 is prepared. Gary approved the minimal Regex repair.
@@ -329,7 +329,7 @@ the older 0.15.1 source; current local tests are not its replacement proof.
 The release owner coordinates the separate website deliverable.
 
 The pipeline's installed-bundle checks cover PCRE2 and Torch, but not five
-other released packages. Recommend bounded, one-time evidence using the
+other released packages. Gary approved bounded, one-time evidence using the
 actual candidate compiler and matching candidate packages on their four
 promised platforms:
 
@@ -351,6 +351,73 @@ Unavailability of a target is missing evidence, not a demonstrated defect.
 Publication remains the release owner's separate action after the final
 candidate is selected and verified. Website checks and deployment are not
 assigned to this implementation plan.
+
+## Remaining release preparation and hold
+
+Gary approved the five-package verification on 2026-11-07. Run it once on
+all four promised platforms against the final candidate compiler and matching
+archives. This is 20 package/platform cases, not a recurring gate or new CI
+matrix. PCRE2 and Torch retain their existing release checks.
+
+PRs #649 and #650 are merged. The reviewed source tip is
+`ee8730a234b99428bda1345480cbbc456ae5fa25`, not a selected final candidate.
+The release notes now include Regex. Upgrade instructions cover the existing
+source/ABI changes, including explicit `$let`/`with` and alias migration rows.
+Keep `0.16.0 (unreleased)` until the release date is known. No `v0.16.0` tag
+existed at this review; recheck before tagging.
+
+Staging and publication are explicitly held until the website session is
+ready. Do not advance `main`, create a release tag, or dispatch staging or
+promotion while that hold is active. The candidate workflow assembles complete
+sites as well as native archives, so defer the final candidate selection and
+build to the coordinated release owner. No candidate archive exists yet for
+this source; current local tests cannot complete candidate verification.
+
+The integration owner must retain generated-refresh and publication-gate
+proof for the final tree. The merged PRs' focused evidence does not establish
+that proof. Do not duplicate the broad gate here or generate website files.
+
+### One-time installed-package procedure
+
+Use the final candidate identity, full source SHA, manifest, and archive
+hashes. On each of `darwin-arm64`, `darwin-x86_64`, `linux-aarch64`, and
+`linux-x86_64`, install the matching candidate compiler into an isolated
+prefix. Verify archive hashes against `candidate.json` before use. Take
+examples and fixture helpers from that same source revision. Use Python 3,
+`expect`, and the platform's normal compiler; record missing tools as blocked
+coverage rather than silently substituting another workload.
+
+Install the five matching native archives with that prefix's absolute
+`bin/x2c install -q ARCHIVE` command. Do not use `make install`, the production
+package index, checkout native build outputs, or `--force`. Copy each example
+into its own scratch application directory outside the checkout and compile
+there with the candidate compiler. Retain compiler version output, installed
+package identities, build/run exit codes, stdout, stderr, and archive hashes.
+
+| Package | Build and execution in its scratch application directory | Required observation |
+| --- | --- | --- |
+| yyjson | Build `release-catalog.x` with `x2c build -q --output program release-catalog.x`; run `./program`. | Exit 0; published service is `edge-api`, stable downloads are 2270, duplicate region entries are retained. |
+| libcurl | Build `page-titles.x` as `program`; run `python3 run-fixture.py ./program` using the copied package helper. | Exit 0; guide, reference, and source titles match the helper's local HTTP responses. |
+| termbox2 | Create `builds/`; build `game-of-life.x` as `builds/game-of-life`; run `expect run-life.expect` using the copied existing helper. | PTY sees a live cell, sends `q`, and observes exit 0 within its timeout. |
+| libuv | Build `process-report.x` as `program`; run `./program`. | Both children exit 0, normalized output is ALPHA/BETA/GAMMA, line count is 3; PIDs vary. |
+| BLIS | Build `page-rank.x` as `program`; run `./program`. | Exit 0, finite scores for all five pages, convergence before the 100-round cap; inspect numeric output rather than requiring identical floating-point text. |
+
+Use the full installed compiler path in every build command above. The
+`libcurl` helper starts and stops its own local HTTP server. The termbox2
+helper owns its PTY and exits it; no desktop browser or interactive handoff is
+needed. On macOS, use the existing `check-bundle.sh` linkage inspection to
+check installed dylibs for build-machine Homebrew references, without running
+that script's checkout compiler installation.
+
+Retain one result row per candidate/package/platform, with command, expected
+observation, actual output, status, and log paths. Inspect LICENSE and NOTICE
+in these actual archives as well. Any failed case needs diagnosis against the
+same bytes; rebuilding creates a new candidate and invalidates the old
+candidate's verification. A missing platform remains explicitly unverified.
+
+No package/platform row is marked passed yet. Execute this procedure after
+candidate assembly; existing four-platform staging proof and final promotion
+remain separate steps under the hold above.
 
 ## Deferred work
 
