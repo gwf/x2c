@@ -38,3 +38,23 @@ unittest/compiler-fixtures/region-returned-arguments.x:64:5: warning: region: 'a
       ^^^^^^
   note: region opened at line 62
 
+unittest/compiler-fixtures/region-returned-arguments.x:80:5: warning: region: 'a' can outlive the region it was allocated in when returned
+      return a.update_n(0);
+      ^^^^^^
+  note: region opened at line 78
+
+unittest/compiler-fixtures/region-returned-arguments.x:88:5: warning: region: 'm' can outlive the region it was allocated in when returned
+      return m.update_n(0);
+      ^^^^^^
+  note: region opened at line 86
+
+unittest/compiler-fixtures/region-returned-arguments.x:96:5: warning: region: 'm' can outlive the region it was allocated in when returned
+      return m.merge_with(other, NULL);
+      ^^^^^^
+  note: region opened at line 94
+
+unittest/compiler-fixtures/region-returned-arguments.x:104:5: warning: region: an address from 'm' can outlive the region it was allocated in when returned
+      return m.merge_with(other, NULL);
+      ^^^^^^
+  note: region opened at line 102
+

@@ -75,4 +75,4 @@ fixture expectations. `make benchmark` builds
 measures tape memory and time of the reverse-mode variants.
 
 The package, its tests, and its examples are licensed under
-[Apache-2.0](../../LICENSE).
+[Apache-2.0](LICENSE).

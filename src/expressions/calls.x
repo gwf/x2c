@@ -348,8 +348,12 @@ static List _finish(
   List receiver) {
   if (result_type === %(<macro-expr>)) result_type = NULL;
   Type applied = callee_type.apply();
-  if (!applied && callee_type)
-    applied = k.c.sym.resolve_key(callee_type).apply();
+  if (!applied && callee_type) {
+    Type signature = k.c.sym.resolve_key(callee_type);
+    applied = signature.apply();
+    if (!applied && signature.is_pointer())
+      applied = k.c.sym.resolve_key(signature.dereference()).apply();
+  }
   List arguments = _resolve_call_arguments(
     k.c, receiver, k.supplied, k.origin);
   if (!callee_type && !k.c.macro_holes)

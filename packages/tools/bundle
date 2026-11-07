@@ -104,7 +104,8 @@ foreach (String pattern, %("*.h" "*.xi" "*.module"))
     copy(generated, stage.join("builds").join(generated.basename()));
 String archive = %"lib$name.a";
 copy(package.join("builds").join(archive), stage.join("builds").join(archive));
-foreach (String pattern, %("README*" "LICENSE*" "PROFILE*" "dependency*.json"))
+foreach (String pattern,
+         %("README*" "LICENSE*" "NOTICE*" "PROFILE*" "dependency*.json"))
   foreach (Path source, Path.glob(package.join(pattern)))
     copy(source, stage.join(source.basename()));
 foreach (Map item, distribution.getdefault("copies", [])) {
