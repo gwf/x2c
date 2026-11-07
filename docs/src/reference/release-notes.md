@@ -4,7 +4,7 @@ Each section summarizes what changed for a user of the compiler, runtime,
 commands, and packages since the previous release. The
 [installation chapter](../guide/installation.md) carries the upgrade steps.
 
-## Unreleased
+## 0.16.0 (unreleased)
 
 [Upgrading from 0.15.x](../guide/installation.md#upgrading-from-015x) gives
 the source changes that the breaking entries below require.
