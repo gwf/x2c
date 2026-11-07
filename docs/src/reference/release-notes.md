@@ -209,6 +209,15 @@ the source changes that the breaking entries below require.
 
 ### Fixed defects
 
+- Calls through a pointer to a function typedef now convert arguments as
+  calls through a function-pointer typedef do, including boxing into `Var`.
+- An array dimension constructed by a macro can contain another expression
+  macro; the ordinary binder resolves it before interface emission.
+- Typed callback adapters retain pointee qualifiers in their result checks
+  and generated calls. A const result cannot become a mutable pointer result.
+- Region diagnostics now follow receiver returns from `Array.update_n`,
+  `Map.update_n`, and `Map.merge_with`, including compile-time definitions.
+
 - A `~=` pattern condition whose false branch continues with `else if` now
   places that continuation inside a block, so the generated C keeps the
   branch and compiles without a dangling-else warning.

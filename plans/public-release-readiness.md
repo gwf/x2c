@@ -1,9 +1,9 @@
 # Public release readiness
 
-> Status: implementation authorized, 2026-11-06; work in progress.
+> Status: small fixes ready for shared integration, 2026-11-06.
 > Baseline: `68ebfece63702c3e1ecc249bd8bbd85e5997ad8f` from `origin/dev`.
-> Four bounded compiler repairs and packaging work are specified below.
-> Version 0.16.0 is selected. Measure the minimal Regex repair before acceptance.
+> Four bounded compiler repairs, packaging, and version preparation are complete.
+> Version 0.16.0 is prepared. Regex was measured and remains unaccepted.
 
 ## Result and scope
 
@@ -33,7 +33,7 @@ and `/tmp`; the essential reproductions are also described here.
 The local macOS baseline passed 1,217 unit tests, 140 book output examples,
 65 curated examples, shipped-command smoke tests, and the scratch installed
 package/command probe. This does not establish final candidate readiness or
-Linux behavior. No source repair has been made.
+Linux behavior. The verification above predates the repairs; submission evidence follows below.
 
 ## Order of work
 
@@ -67,28 +67,29 @@ With `name_of(Var value) => value.repr()`, calling a `NamerFunction *` with
 `42` currently emits an unboxed integer and fails native compilation. The
 `NamerPointer` control builds and prints `42`.
 
-**Change.** Reuse `Sym.normalize_declared_type` from `src/symtab/types.x`.
-It already resolves typedef bases beneath declarator modifiers.
+**Implemented change.** Preserve the direct-signature paths and existing
+`resolve_key` fallback. Only if a pointer still has no callable signature,
+resolve its pointee typedef with `resolve_key` and use existing `apply`,
+`function_parts`, and `_typed_call` operations.
 
-- In `src/expressions/calls.x`, `_finish`, retain `callee_type.apply()` as
-  the fast path. Change only the unsuccessful fallback from
-  `resolve_key(...).apply()` to `normalize_declared_type(...).apply()`.
-- In `src/transform/expressions.x`, `_call`, retain both direct-signature
-  match arms. Change only its fallback lookup to `normalize_declared_type`,
-  then reuse `Type.function_parts` and `_typed_call`.
+This belongs in `_finish` in `src/expressions/calls.x` and `_call` in
+`src/transform/expressions.x`. Result typing does not rewrite the callee's
+source spelling, so both sites need the narrow interpretation.
 
-Both sites are necessary: result typing does not rewrite the callee's stored
-source spelling. Do not introduce a resolver or normalize every call eagerly.
-Do not broaden `_check_arity`, Iter completion, or rest-call reconstruction
-without a separate reproduced problem selected for repair.
+The proposed `normalize_declared_type` replacement was too broad: it resolved
+result identities such as `Var` into their underlying union and caused six
+runtime-source build errors. The final repair preserves those identities.
+No new resolver or global normalization was added. `_check_arity`, Iter
+completion, and rest-call reconstruction are unchanged.
 
 **Verification.** Extend `call-pointer-arguments` with the function-typedef
 pointer form, integer boxing, and an expression that uses its String result.
 Keep the existing pointer-typedef control. Require successful translation,
 native compilation, and the expected output through the existing fixture.
 
-**Cost.** Two existing fallback lookups change. Direct-call fast paths and
-emitted function calling conventions remain unchanged. No runtime checks.
+**Cost.** Only unresolved pointer signatures take an extra pointee lookup.
+Direct-call fast paths and calling conventions remain unchanged. No runtime
+checks are added.
 
 ## 2. Constructed array dimensions
 
@@ -130,9 +131,10 @@ requires an exact non-void result type; this is not a new native-C policy.
 
 **Change.** Keep responsibility in `src/callables/callbacks.x`:
 
-- In `_check_signature`, compare the normalized declared results from
-  `cb.result` and `cb.source.apply()` using `Sym.normalize_declared_type`.
-  Do not compare results after `canonicalize` has erased qualifiers.
+- In `_check_signature`, compare `cb.result.declared()` and
+  `cb.source.apply().declared()` after `_x2c_type_unqualified` removes only
+  outer copied-value qualifiers. Retain pointee qualifiers and semantic
+  typedef identities; do not normalize them into underlying representations.
 - Remove `Callback.source_result`. `_split` needs `function_parts` only for
   the source parameters; request no result from that lossy operation.
 - In `_function`, pass `cb.source.apply()` unchanged to `_func_call`.
@@ -140,10 +142,10 @@ requires an exact non-void result type; this is not a new native-C policy.
 - Reuse the existing callback result-mismatch diagnostic. Do not introduce
   another conversion validator or change opaque foreign-header handling.
 
-The exact declared-result comparison rejects qualifier differences that the
-callback contract already excludes. It must preserve matching qualified
-results and ordinary supported typedef equivalence. Do not propagate this
-strict callback rule into general C assignments or calls.
+The comparison rejects pointee qualifier differences while preserving prior
+acceptance of harmless outer copied-value qualifiers. Matching qualified
+results and semantic typedef identities remain intact. General C assignments
+and calls are unchanged.
 
 **Verification.** Keep `callback-adapt-const-result` as the positive control.
 Add one focused rejection fixture for const-source/mutable-target using the
@@ -221,7 +223,7 @@ Two supported matching workloads crash: 60,000 consecutive `(a)` groups on
 the main stack, and 2,000 nested groups matched on a 32 KiB task stack. Shallow
 controls pass. The book promises catchable Regex depth errors on small stacks.
 
-**Recommended experiment, if selected.** Add only the existing floor check at
+**Measured private experiment.** Add only the existing floor check at
 entry to `_run` in `lib/regex.x`, reusing `m.floor` and `_too_deep`. Every
 recursive match route reaches this owner. Retain `_iterate`'s existing depth
 and floor protection initially. No new counters, limits, records, or API.
@@ -243,22 +245,46 @@ literal search. Report workload counts, absolute baseline/candidate elapsed
 times, run spread, and percentages. PCRE2 regex-redux is a different engine
 and cannot measure this change. Do not add a recurring benchmark target.
 
-**Gary's decision.** Choose the bounded measurement experiment or defer this
-repair for the release. No measured performance result exists yet. If the
-experiment has material cost or needs more machinery, return with the actual
-tradeoff before acceptance. Deferral must explicitly acknowledge the gap in
-the documented guarantee; do not silently weaken the contract or disguise the
-crash as fixed. Other implementation work can proceed independently.
+**Measured result.** On macOS arm64 with Apple Clang 17 and `-O2`, seven
+alternating pairs gave these match-loop wall-time medians. Pattern compilation
+was outside the timed interval. Only `regex.o` and the archive symbol index
+differ between the baseline and candidate runtime archives.
+
+| Workload | Matches/run | Baseline seconds | Candidate seconds | Change |
+| --- | ---: | ---: | ---: | ---: |
+| `a*b`, 200,000 a bytes then b | 10,000 | 0.775520 | 0.864207 | +11.44% |
+| `(?:a)*b`, 1,000 a bytes then b | 30,000 | 0.468654 | 0.448571 | -4.29% |
+| Captures and alternation on abcd | 1,000,000 | 0.607531 | 0.600995 | -1.08% |
+| Failed nested repetition on 12 a bytes | 2,500 | 0.468401 | 0.440687 | -5.92% |
+| Failed literal search through 200,000 a bytes | 1,500 | 0.664949 | 0.591619 | -11.03% |
+
+The first byte-repetition ranges were disjoint: 0.752949-0.786097 seconds
+baseline and 0.810869-0.896394 seconds candidate. Reversing the first run order
+for seven further pairs gave 0.759482 versus 0.837084 seconds (+10.22%), with
+noisier overlapping ranges. A short parent rerun was also noisy; the precise
+native-code cause has not been investigated. These are not instruction counts
+or whole-compiler performance measurements.
+
+Both reported crashes become catchable size-limit errors; 31 focused Regex
+and Task tests pass. Production code changes by one line. The existing error
+text still describes a repeated group and can report limit zero for this new
+floor failure; that wording would need correction if the experiment is kept.
+
+**Decision pending.** The experiment is held in a private commit and is not
+included in the release branch. Gary has been asked to defer it, accept the
+measured tradeoff, or authorize a narrower-placement investigation. The
+recommendation is deferral rather than silently accepting this cost. No
+broader alternative, new benchmark target, or contract change is authorized.
 
 ## 7. Version and final release evidence
 
-Recommend **0.16.0**, subject to Gary's choice. The compiler still reports
-0.15.1, that public release already exists, and the Unreleased notes describe
-source and ABI breaks. Do not overwrite existing release identities.
+Gary selected **0.16.0**. The compiler and CLI expectations now use that
+version; the release-notes heading says `0.16.0 (unreleased)`. Existing
+release identities remain unchanged.
 
-After selection, change `Compiler.version` in `src/cli/requests.x`, both
+The version preparation changes `Compiler.version` in `src/cli/requests.x`, both
 version expectations in `unittest/probes/run-cli-boundary.sh`, and the
-Unreleased heading/date in `docs/src/reference/release-notes.md`. Review the
+Unreleased heading in `docs/src/reference/release-notes.md`. Publication date remains unset. Review the
 upgrade instructions against the included changes. Do not replace historical
 0.15.x references globally. Generated bootstrap changes belong to the existing
 regeneration/publication procedure, not hand edits.
@@ -325,13 +351,43 @@ and generated refresh once. No broad rebuild or package campaign is required
 for a private checkpoint. Final evidence must name the final tree, not this
 planning baseline.
 
+## Implementation evidence
+
+The release work branch contains the four compiler repairs, package notices,
+and version 0.16.0 preparation. The compiler repairs add 28 lines and remove
+12 across five source files. No helper, analysis pass, runtime check, or public
+ABI was added. The Regex experiment is not part of that branch.
+
+The combined tree passed `make build`, all eleven focused compiler fixtures,
+`make command-artifacts`, and `unittest/probes/run-package-install.sh`.
+The focused cases are call-pointer-arguments, macro-construction-regressions,
+macro-argument-kinds, callback-adapt-result-qualifiers,
+callback-adapt-const-result, callback-adapt-return, callback-adapt-nullary,
+lambda-adapter-wide-return, region-returned-arguments, meta-heap-regions, and
+iter-chain-pointer. The dimension counter and callback outer-value-qualifier
+controls also pass in the isolated compiler repair.
+
+All eighteen license/notice files match their repository owners. Both actual
+source archives were regenerated on the combined tree and contain those
+bytes. The installed probe checks the compiler payload, source installation,
+and inert pure/mixed native bundles. No native dependency downloads were
+needed. The CLI boundary probe passed on the version-preparation revision,
+before the compiler repairs were combined; the version expectations remain
+unchanged in the combined tree.
+
+No new compiler capability is adopted by compiler/runtime source, so no local
+bootstrap transition was required. Final bootstrap and generated-document
+refresh, broad publication checks, actual platform archives, and website
+integration remain the integration/release owner's work. No site files were
+changed or site checks run during implementation.
+
 ## Plan review
 
 - Existing declarations establish callable types; normalization interprets
   those declarations instead of validating them again. Constructed dimensions
   use the same expression binder as ordinary syntax, without origin checks.
   Runtime methods already establish the three receiver-return facts.
-- Reuse `normalize_declared_type`, `bind_syntax`, `_typed_call`, existing
+- Reuse `resolve_key`, `bind_syntax`, `_typed_call`, existing
   callback diagnostics, `_typed_families`, archive walkers, and copy lists.
   Delete the lossy callback result field/canonicalization. No lasting cache,
   representation, framework, or traversal is proposed.
@@ -344,6 +400,6 @@ planning baseline.
   the documented catchable failure. All reuse existing error owners. No new
   validator or diagnostic is proposed. Pointer/dimension fixtures are positive
   correctness cases; archive inventories inspect actual distribution outputs.
-- Regex acceptance and release version are the outstanding decisions. Any
+- Regex acceptance is the outstanding decision; 0.16.0 is selected. Any
   material growth in runtime work, code, or caller obligations returns to Gary
   with alternatives instead of being treated as routine implementation.

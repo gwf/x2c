@@ -405,32 +405,15 @@ repair needs a paired measurement. Until then the contexts chapter's
 statement that matching stops before the stack runs out holds only for
 repetition. `Var.repr` of a 100,000-deep List overflows the same way.
 
-### Constructed array-dimension macro
+### Constructed array-dimension macro (repaired)
 
-On 2026-10-28, `160828e5f` reproduces an unresolved macro in a constructed
-array dimension, before the retained-expansion inspection prototype. Save
-this source as `/tmp/dimension.x`:
-
-```x2c
-macro Expr $width() => 3;
-macro Unit $make(Name $name) { int $name[$width()]; }
-$make(values);
-int main(void) { return sizeof(values); }
-```
-
-`builds/0/x2c translate --dump-code /tmp/dimension.x` emits
-`int values[macro-invoke m-invoke];`. Ordinary translation with
-`--out-dir /tmp/dimension-output` exits 1 with
-`emit: failed to write interface file`. Parsed and transformed dumps both
-retain the unresolved invocation. Passing `$width()` as an Expr argument to
-`$make` instead produces `int values[3];` and translates successfully.
-
-`src/parse/declarators.x` `_finish_fnmod` completes function parameters but
-leaves dimension modifiers unchanged. Constructed declaration binding calls
-that helper; transformation preserves the uninitialized declarator, and
-`src/emit/declarations.x` `_array_declarator` tokenizes its dimension. This
-is a separate compiler follow-up; inspection neither loses an executed
-expansion in this probe nor causes the normal translation failure.
+The public-release repair binds constructed dimension expressions through the
+existing declaration modifier owner. `macro-construction-regressions` now
+covers nested dimension macros at file scope, in a block, and in a constructed
+parameter. A temporary compile-time counter probe produced `1 2`, confirming
+retained expansion was not evaluated twice. Focused fixtures pass; final
+combined-tree publication validation remains with the integrator. See
+[the release plan](../plans/public-release-readiness.md#2-constructed-array-dimensions).
 
 Adding `List cached = %("stack-check"); (void) cached;` at the start of
 `static-local-flat-chain`'s `main` makes translation of its 4,000 additions

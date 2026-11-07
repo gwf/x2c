@@ -13,27 +13,26 @@ The book owns language/library contracts. Source owners and current repository
 guidance own implementation and workflow. A historical rejection does not
 forbid a different design or a new workload-supported investigation.
 
-## Public release proposal
+## Public release work
 
 [Public release readiness](public-release-readiness.md) is the authorized
 implementation plan based on `68ebfece6`. It records bounded repairs,
-performance decisions, packaging work, and deferred items. Implementation is in progress;
+performance decisions, packaging work, and deferred items. The small fixes are implemented;
 website work belongs to a separate session.
 
 ## Current work
 
 Checked against `a7a01924c` on 2026-11-02. These are the remaining items from
 the former active plans, verified during consolidation. This cleanup does not
-implement them. Completed and superseded items are explained in the history.
+implement them. The public-release plan above records the callable and region
+repairs completed on its work branch; remaining rows below are unchanged.
+Completed and superseded items are explained in the history.
 
 | Remaining work | Current evidence and owner | Next bounded action |
 | --- | --- | --- |
 | File-scope diagnostic location | A five-line Iter initializer reports `6:1`; [transform traversal](../src/transform/traversal.x) does not select the recorded definition span. | Anchor that diagnostic through the existing source-location owner. |
-| Pointer to a typedef'd function type | A `Namer *` call emits an integer argument where its Var parameter requires boxing; [call typing](../src/expressions/calls.x) and [call transformation](../src/transform/expressions.x). | Normalize this callable shape through the existing argument-conversion path. |
-| Callback result qualifiers | A const-char result adapted to mutable char passes translation and warns in C; [callback adapters](../src/callables/callbacks.x). | Preserve the existing qualifier contract at adapter construction. |
 | Alias collisions | Member-wrapper and declaration-before-included-alias cases still translate; [aggregate parsing](../src/parse/types.x), [aliases](../src/macros/aliases.x). | Repair these shapes through their existing binding checks. |
 | Regex and List rendering recursion | [Regex](../lib/regex.x) checks repeated-group iteration but not all recursive matching; [List rendering](../lib/list/rendering.x) has no recursive floor check. [STATUS](../unittest/STATUS.md) retains prior overflow evidence; large crashes were not rerun. | Bound the respective recursive paths; pair Regex changes with focused hot-path measurements. |
-| Receiver-return region summaries | Translation misses escapes through `Map.merge_with`, `Map.update_n`, and `Array.update_n`; their rows are absent from [runtime summaries](../src/regions/runtime.x). | Reuse the existing receiver-return summary model. |
 | First hover on an unopened script | First hover returns null, identical second/opened hover finds the value; [LSP requests](../commands/lsp/lsp.x) compute the cursor before [analysis](../commands/lsp/analysis.x) rewrites stored script text. | Preserve original cursor coordinates through the existing mapping. |
 | Optional native-module probe | [The probe](../unittest/probes/run-native-modules.sh) submits a REPL meta declaration that the current playground explicitly rejects. | Use source loading for that check while preserving compile-time native coverage. |
 | Lint member documentation tier | Entry-only internal manifest classification does not reach its member; [comment checks](../commands/lint/comments.x) use the member path despite an existing entry field. | Reuse the entry's classification and cover the module case. |
