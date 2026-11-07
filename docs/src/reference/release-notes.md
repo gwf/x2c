@@ -209,6 +209,8 @@ the source changes that the breaking entries below require.
 
 ### Fixed defects
 
+- Regex matching checks the stack floor for sequential and nested groups,
+  so excessive matching recursion raises a catchable size-limit error.
 - Calls through a pointer to a function typedef now convert arguments as
   calls through a function-pointer typedef do, including boxing into `Var`.
 - An array dimension constructed by a macro can contain another expression
