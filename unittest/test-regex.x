@@ -290,7 +290,19 @@ static void regex_compile_bounds_group_nesting(void) {
   EXPECT_STR_EQ(nested.match("xay")[64], "a");
 }
 
+static void regex_match_bounds_group_recursion(void) {
+  $test.scoped();
+  Regex sequence = Regex.compile("(a)".repeat(60000));
+  int limited = 0;
+  try sequence.match("a".repeat(60000));
+  catch %(size-limit (operation "Regex.match") *): limited = 1;
+  EXPECT_INT_EQ(limited, 1);
+  EXPECT_STR_EQ(Regex.compile("(a)".repeat(10)).match("a".repeat(10))[0],
+                "a".repeat(10));
+}
+
 void regex_suite(void) {
+  $test.run(regex_match_bounds_group_recursion);
   $test.run(regex_matches_literals_and_sets);
   $test.run(regex_classes_anchors_and_boundaries);
   $test.run(regex_repeats_greedy_and_lazy);
