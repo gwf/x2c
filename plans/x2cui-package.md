@@ -1,7 +1,8 @@
 # x2cui: a first-class x2c package over CUI
 
 > Status: plan and specification with all open decisions accepted by Gary
-> on 2026-11-10. Implementation is not started and not yet authorized.
+> on 2026-11-10. Delivery 0 is submitted as gwf/x2c#653. Delivery 1 is
+> not started.
 > Baseline: x2c `988bc47e7` (0.16.0), CUI `v1.3.1`.
 > Every "verified" statement below was compiled and run on macOS arm64
 > during planning. Statements marked "not verified" were not.
@@ -120,34 +121,38 @@ No pair of functions collides under the method naming rule below.
 Three x2c defects were found. Each is separate `fix-x2c-bug` work delivered
 to `dev` on its own. The package work does not repair them.
 
-**P1. A prefix macro from an included header fails before a non-builtin
-type. Blocks the package.** x2c cannot read `cui_app.h` or `cui_render.h`.
+**P1. An unseen prefix macro before a type name misreads a collected
+header. Blocked the package. Repaired in gwf/x2c#653, submitted to the
+integrator on 2026-11-10 and not yet published.** x2c could not read
+`cui_app.h` or `cui_render.h`.
 
 ```c
-/* h1.h */
-#ifndef API
-# if defined(__GNUC__) && defined(SHARED)
-#  define API __attribute__((visibility("default")))
-# else
-#  define API
-# endif
-#endif
-#include <stdbool.h>
-typedef struct ctx ctx;
+/* api.h */
+#define API
+typedef struct handle handle;
 
-/* h2.h */
-#include "h1.h"
-API ctx *mk(int x);
-API bool use(ctx *a);     /* parse: expected ')' at the '*' */
+/* device.h */
+#include "api.h"
+API handle *open_device(void);      /* was read as a variable named handle */
+API bool ready(handle *device);     /* was: parse: expected ')' */
 ```
 
-`API int use(ctx *a);` parses. The same declarations inside `h1.h` parse.
-Defining `CUI_API` empty in the shim before the includes does not help.
-The lookup is `c.object_macros` in `_test_declaration_start`,
-`src/parse/declarations.x`. The cause is not traced. `plans/README.md`
-already lists a related evidence question, "Included-header attribute
-macros". The documented behavior is in "Macro-visible syntax" in
-`docs/src/reference/language.md` (the prefix macro paragraph).
+Cause: collection walks each included file in a compiler of its own, so a
+macro that `api.h` defines has no visible definition in `device.h`.
+`_unseen_prefix` in `src/parse/types.x` read such a name as a prefix only
+before a declaration keyword. Before a type name the parser took the prefix
+as the type and the type as the declared name. That shadowed the type, and
+a declaration such as `API bool ready(void);` was dropped with no
+diagnostic. The repair reads an undeclared name before a second name that a
+declarator follows as a prefix.
+
+With the repair, a program that includes all four CUI headers through the
+shim builds and runs, and x2c checks calls to `cui_app_*` and `cui_sw_*`
+declarations by arity and type. Verified.
+
+The repair covers collected `.h` files. A unit that itself writes a
+declaration with a prefix macro from an included header still fails. The
+package does not need that case.
 
 **P2. `expand` over a macro whose body splices a meta result crashes the
 compiler. Does not block.** The compiler exits with status 139 and no
@@ -175,6 +180,11 @@ emits `.width = 5` unchanged, and C brace elision sets the wrong member
 without a diagnostic. A `Symbol` converter in the same initializer is
 applied. x2cui does not depend on converters: sizes are written
 `CUI_PX(560)`, as in C.
+
+A header-defined string macro next to a string literal, as in
+`CUI_ICON_CHECK " ok"`, does not parse in a unit, because the unit sees no
+definition for the macro. Programs write `%"$(CUI_ICON_CHECK) ok"` or pass
+the icon through an option field. Not planned.
 
 Two smaller observations, reported but not planned: a `foreach (Type t in
 types)` over `Type.parameters` yields an empty type where indexed access
@@ -402,9 +412,11 @@ optional.
 
 ### Delivery 0: compiler fix P1
 
-Reproduce with the two headers above, trace the lookup, repair it at its
-owner, and add one compiler fixture. P2 and P3 are filed and fixed in the
-same batch only if their repairs are small; otherwise they wait.
+Done as gwf/x2c#653: the repair in `_unseen_prefix`, the reference
+paragraph, and the extended `c-unseen-prefix-macro` fixture. Focused
+evidence: that fixture, 91 header and preprocessor fixtures, `make
+stage-2`, and the header cache probe. It waits for the integrator. P2 and
+P3 are not repaired.
 
 ### Delivery 1: package, regular components, gallery
 
@@ -678,5 +690,5 @@ validator and no dedicated diagnostic. Its checks are the compile of the
 table against `cui.h`, the completeness test, and the headless render
 check. The completeness test protects a deliberate public claim: every
 pinned component has an x2c form. The compiler work in Delivery 0 adds one
-fixture for P1, which protects documented behavior: a legal C header that
-the reference says x2c reads currently fails to parse.
+fixture case for P1, which protects against wrong output: a header
+declaration that was dropped or misread without a diagnostic.
