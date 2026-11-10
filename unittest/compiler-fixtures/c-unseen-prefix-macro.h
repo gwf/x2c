@@ -12,6 +12,12 @@ extern int unit;
 
 int scale(int value);
 
+Point origin(void);
+
+Point * nearest(Point * from);
+
+bool positive(int value);
+
 int main(void);
 
 
