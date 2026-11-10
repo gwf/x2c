@@ -20,6 +20,13 @@ implementation plan based on `68ebfece6`. It records bounded repairs,
 performance decisions, packaging work, and deferred items. The small fixes are implemented;
 website work belongs to a separate session.
 
+## x2cui package
+
+[x2cui](x2cui-package.md) is a proposed plan and specification for a package
+over the CUI user-interface library. Gary accepted its decisions on
+2026-11-10; implementation is not started. It
+records three reproduced compiler defects, one of which blocks the package.
+
 ## Current work
 
 Checked against `a7a01924c` on 2026-11-02. These are the remaining items from
