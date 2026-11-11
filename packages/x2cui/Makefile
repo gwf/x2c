@@ -13,16 +13,33 @@ PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CUI_INCLUDE) \
 PACKAGE_LINK := $(CUI_PREFIX)/lib/libcui.a -Wl,-framework,Cocoa \
 	-Wl,-framework,QuartzCore -Wl,-framework,OpenGL
 
-.PHONY: run run-interactive
+# The gallery's scenes are separate files under examples/gallery.
+PACKAGE_X_FLAGS += --x-include-dir examples
+
+.PHONY: run run-interactive run-gallery
 
 check: test run
 
 short-example: builds/todo
 
-# The gated run draws the application off screen and writes a PNG. A window
-# needs a WindowServer connection, which no gate has.
-run: builds/todo
+example: builds/gallery
+
+# The gated runs draw off screen and write PNGs. A window needs a
+# WindowServer connection, which no gate has.
+run: builds/todo builds/gallery
 	./builds/todo --shot builds/todo.png
+	./builds/gallery --shots builds/shots
 
 run-interactive: builds/todo
 	./builds/todo
+
+run-gallery: builds/gallery
+	./builds/gallery
+
+# Each file under examples/gallery is a unit of its own beside the entry.
+GALLERY_UNITS := $(wildcard examples/gallery/*.x)
+
+builds/gallery: examples/gallery.x $(GALLERY_UNITS) \
+		$(PACKAGE_CONSUMER_DEPS) | builds
+	$(X2C) build --output $@ --build-dir builds/gallery-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $< $(GALLERY_UNITS)
