@@ -33,7 +33,7 @@ run: builds/todo builds/scenes builds/stress
 	./builds/scenes --check $(CUI_INCLUDE)/cui/cui.h
 
 run-interactive: builds/todo
-	./builds/todo
+	./builds/todo builds/todo.txt
 
 run-gallery: builds/gallery
 	./builds/gallery

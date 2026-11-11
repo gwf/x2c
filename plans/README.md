@@ -22,10 +22,10 @@ website work belongs to a separate session.
 
 ## x2cui package
 
-[x2cui](x2cui-package.md) is a proposed plan and specification for a package
-over the CUI user-interface library. Gary accepted its decisions on
-2026-11-10; implementation is not started. It
-records three reproduced compiler defects, one of which blocks the package.
+[x2cui](x2cui-package.md) is the plan, specification, and running record of
+the package over the CUI user-interface library. Gary accepted its
+decisions on 2026-11-10. The package is implemented on macOS and in a
+browser; its Linux profile is written and has not been built.
 
 ## Current work
 
