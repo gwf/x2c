@@ -170,10 +170,17 @@ static List _method_arguments(
   Compiler c, List definition, List receiver, List supplied) {
   List rest = cons(receiver, _call_values(supplied));
   Array values = [];
-  foreach (List hole in definition.assoc(<parameters>).list()) {
+  for (List holes = definition.assoc(<parameters>); holes;
+       holes = holes.cdr()) {
+    List hole = holes.car();
     if (hole.assoc(<sequence>).int()) {
-      values.push(rest);
-      rest = NULL;
+      // A sequence before the final Entry rows stops at the first row.
+      Array taken = [];
+      while (rest && !(holes.cdr() && rest.car() ~= %(map-entry ? ?))) {
+        taken.push(rest.car());
+        rest = rest.cdr();
+      }
+      values.push(taken.list_free());
       continue;
     }
     if (!rest) $fail.macros_macro_missing_args(c, c.token);
@@ -270,15 +277,19 @@ static Array _meta_arguments(Compiler c, List parameters, Symbol head) {
 }
 
 /* A hole passed alone passes the value it captures, and a sequence hole
-   passes its captured items as one List. */
+   passes its captured items as one List; spliced as `@name`, its items
+   are separate arguments, as a rest parameter takes them. */
 static List _meta_argument(Compiler c) {
   List hole = c.peek_macro_hole();
   Symbol next = hole ? c.after_hole().type : 0;
   int direct = next == <,> || next == <)>;
   if (direct && hole.assoc(<sequence>).int()) {
-    c.expect(<$>);
+    int splice = c.test(<@>);
+    if (!splice) c.expect(<$>);
     c.next();
-    return %(expr ("List") (meta-cap ($(_hole_key(hole, "value")))));
+    List items =
+      %(expr ("List") (meta-cap ($(_hole_key(hole, "value")))));
+    return splice ? %(expr ("List") (splice $items)) : items;
   }
   Symbol kind = hole ? hole.assoc(<kind>) : 0;
   List argument = direct

@@ -159,8 +159,20 @@ static void _parameter(Definition &d, Array params, List hole) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target) _take_target(d, hole);
   else params.push(hole);
-  if (hole.assoc(<sequence>).int() && c.peek(0) == <,>)
+  if (hole.assoc(<sequence>).int() && c.peek(0) == <,> &&
+      (hole.assoc(<kind>) == <map-entry> || !_final_entry_rows(c)))
     $fail.macros_hole_final(c, c.token);
+}
+
+/* After a sequence hole's `,`, a final `Entry @rows` hole may follow; it
+   takes the `key: value` arguments, and the sequence takes the others. */
+static int _final_entry_rows(Compiler c) {
+  Token token = Token.skip_trivia(c.token + 1);
+  if (token.text != "Entry") return 0;
+  token = Token.skip_trivia(token + 1);
+  if (token.type != <@>) return 0;
+  token = Token.skip_trivia(Token.skip_trivia(token + 1) + 1);
+  return token.type == <)>;
 }
 
 /* A Unit target hole projects its captured source, and the definition

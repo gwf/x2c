@@ -62,6 +62,9 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
 */
 List Compiler.parse_macro_expression_target(Compiler c) => _parse_cast(c);
 
+/** Reports whether a `key: value` call argument begins at the cursor. */
+int Compiler.at_map_entry(Compiler c) => _at_map_entry(c);
+
 /** Parses the argument list at the cursor as a call of `callee`. */
 List Compiler.parse_call(Compiler c, List callee) =>
   _parse_postfix_apply(c, callee);
