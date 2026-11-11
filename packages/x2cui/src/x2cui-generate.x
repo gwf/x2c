@@ -125,7 +125,7 @@ meta List cui_method(String function) {
   Type last = types[count - 1];
   int options = count > 1 && _const_pointer(last) &&
                 _option_record(Type.element(last));
-  List form = _method_form(name, declared.len() - 1 - options, options);
+  List form = _method_form(name, options);
   return form ? %($unit $form) : $(unit);
 }
 
@@ -143,24 +143,24 @@ macro Unit $cui.method(Name $target) { @cui_method($target) }
     The form of a component is an Expression macro `$Ui.NAME`; the form of
     a block component, whose C functions are `cui_NAME_begin` and
     `cui_NAME_end`, is a decorator `$Ui.NAME`. Written in its own template,
-    `ui.NAME(...)` is the method the form wraps. Each form is one of the
-    templates below, one for each count of ordinary arguments, which takes
-    its name from the method. A component's form calls its method with
-    the arguments `cui_arguments` returns, and a block's form calls its
-    begin method through `cui_begin`; both read the method's parameter
-    types and lower each value by its type; see x2cui-options.x.
+    `ui.NAME(...)` is the method the form wraps. Each form is one of the two
+    templates below, which takes its name from the method; its ordinary
+    arguments are those before the first `name: value`. A component's
+    form calls its method with the arguments `cui_arguments` returns, and
+    a block's form calls its begin method through `cui_begin`; both read
+    the method's parameter types and lower each value by its type; see
+    x2cui-options.x.
 */
 
 /* CUI's own block macros, `cui_NAME(ui, ...) { ... }`, which run their
    block between `cui_NAME_begin` and `cui_NAME_end`. Each has a block
    form. Those that CUI writes with `CUI__SCOPE_IF` run the block only
    while the begin call reports the block open. A table has its own form,
-   with a template of columns, a data grid keeps `$cui.data_grid`, and a
-   virtual list keeps `$cui.virtual_list`. */
+   with a template of columns. */
 meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
   "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
   "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
-  "menu_bar" "toolbar" "status_bar");
+  "menu_bar" "toolbar" "status_bar" "virtual_list");
 meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
   "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
   "user_menu" "menu_bar_menu" "inspector" "tree");
@@ -174,170 +174,40 @@ meta List cui_begin(List ui, String block, List options, List @args) {
   return block in _openings ? call : $!( ($call, 1) );
 }
 
-/* The component templates. */
-
-macro Unit $cui.widget0(Name $method) {
-  macro Expression $Ui.$method(Expr $ui, Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options));
+/* The template of a component's form. */
+macro Unit $cui.widget(Name $method) {
+  macro Expression $Ui.$method(Expr $ui, Expr @args, Entry @options) =>
+    $ui.$method(@cui_arguments($ui, $method, $options, @args));
 }
 
-macro Unit $cui.widget1(Name $method) {
-  macro Expression $Ui.$method(Expr $ui, Expr $a, Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options, $a));
-}
-
-macro Unit $cui.widget2(Name $method) {
-  macro Expression $Ui.$method(Expr $ui, Expr $a, Expr $b, Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b));
-}
-
-macro Unit $cui.widget3(Name $method) {
-  macro Expression $Ui.$method(
-    Expr $ui, Expr $a, Expr $b, Expr $c, Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c));
-}
-
-macro Unit $cui.widget4(Name $method) {
-  macro Expression $Ui.$method(
-    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c, $d));
-}
-
-macro Unit $cui.widget5(Name $method) {
-  macro Expression $Ui.$method(
-    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c, $d, $e));
-}
-
-macro Unit $cui.widget6(Name $method) {
-  macro Expression $Ui.$method(
-    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f,
-    Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c, $d, $e, $f));
-}
-
-macro Unit $cui.widget7(Name $method) {
-  macro Expression $Ui.$method(
-    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g,
-    Entry @options) =>
-    $ui.$method(
-      @cui_arguments($ui, $method, $options, $a, $b, $c, $d, $e, $f, $g));
-}
-
-macro Unit $cui.widget8(Name $method) {
-  macro Expression $Ui.$method(
-    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g,
-    Expr $h, Entry @options) =>
-    $ui.$method(@cui_arguments(
-      $ui, $method, $options, $a, $b, $c, $d, $e, $f, $g, $h));
-}
-
-/* The block templates. The receiver is evaluated once; the end call is
-   deferred, so it also runs when the block leaves early; a block whose
-   begin call reports whether it is open runs only while it is open. */
-
-macro Unit $cui.block0(Name $block, Name $end) {
-  macro Decorator $Ui.$block(Stmt $body, Expr $ui, Entry @options) {
-    {
-      typeof($ui) ui = $ui;
-      if ($cui_begin(ui, $block, $options)) {
-        defer ui.$end();
-        $body
-      }
-    }
-  }
-}
-
-macro Unit $cui.block1(Name $block, Name $end) {
-  macro Decorator $Ui.$block(Stmt $body, Expr $ui, Expr $a, Entry @options) {
-    {
-      typeof($ui) ui = $ui;
-      if ($cui_begin(ui, $block, $options, $a)) {
-        defer ui.$end();
-        $body
-      }
-    }
-  }
-}
-
-macro Unit $cui.block2(Name $block, Name $end) {
+/* The template of a block's form. The receiver is evaluated once; the end
+   call is deferred, so it also runs when the block leaves early; a block
+   whose begin call reports whether it is open runs only while it is
+   open. */
+macro Unit $cui.block(Name $block, Name $end) {
   macro Decorator $Ui.$block(
-    Stmt $body, Expr $ui, Expr $a, Expr $b, Entry @options) {
+    Stmt $body, Expr $ui, Expr @args, Entry @options) {
     {
       typeof($ui) ui = $ui;
-      if ($cui_begin(ui, $block, $options, $a, $b)) {
+      if ($cui_begin(ui, $block, $options, @args)) {
         defer ui.$end();
         $body
       }
     }
   }
-}
-
-macro Unit $cui.block3(Name $block, Name $end) {
-  macro Decorator $Ui.$block(
-    Stmt $body, Expr $ui, Expr $a, Expr $b, Expr $c, Entry @options) {
-    {
-      typeof($ui) ui = $ui;
-      if ($cui_begin(ui, $block, $options, $a, $b, $c)) {
-        defer ui.$end();
-        $body
-      }
-    }
-  }
-}
-
-macro Unit $cui.block4(Name $block, Name $end) {
-  macro Decorator $Ui.$block(
-    Stmt $body, Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d,
-    Entry @options) {
-    {
-      typeof($ui) ui = $ui;
-      if ($cui_begin(ui, $block, $options, $a, $b, $c, $d)) {
-        defer ui.$end();
-        $body
-      }
-    }
-  }
-}
-
-meta static Macro _widget_form(int count) {
-  switch (count) {
-    case 0: return $cui.widget0;
-    case 1: return $cui.widget1;
-    case 2: return $cui.widget2;
-    case 3: return $cui.widget3;
-    case 4: return $cui.widget4;
-    case 5: return $cui.widget5;
-    case 6: return $cui.widget6;
-    case 7: return $cui.widget7;
-    case 8: return $cui.widget8;
-  }
-  return NULL;
-}
-
-meta static Macro _block_form(int count) {
-  switch (count) {
-    case 0: return $cui.block0;
-    case 1: return $cui.block1;
-    case 2: return $cui.block2;
-    case 3: return $cui.block3;
-    case 4: return $cui.block4;
-  }
-  return NULL;
 }
 
 /* A row and a column end as a box does. */
 meta static String _end_method(String block) =>
   block == "row" || block == "column" ? "box_end" : %"$(block)_end";
 
-/* The method form of `method`, which takes `count` ordinary arguments and,
-   when `options` is set, an option record; NULL when it has none. */
-meta static List _method_form(String method, int count, int options) {
+/* The method form of `method`, which takes an option record last when
+   `options` is set; NULL when it has none. */
+meta static List _method_form(String method, int options) {
   String block = method.endswith("_begin") ? method[:method.len() - 6] : NULL;
   if (block && (block in _scopes || block in _openings))
-    return Macro_apply(_block_form(count), %($block $(_end_method(block))));
-  Macro form = options && !block ? _widget_form(count) : NULL;
-  return form ? Macro_apply(form, %($method)) : NULL;
+    return Macro_apply($cui.block, %($block $(_end_method(block))));
+  return options && !block ? Macro_apply($cui.widget, %($method)) : NULL;
 }
 
 /** Returns the method form of `method`, a `Ui` method written in x2c
@@ -346,8 +216,7 @@ meta static List _method_form(String method, int count, int options) {
 meta List cui_form(String method) {
   Type ui = $!Type{ Ui };
   List types = Type.parameters(Type.resolve_member(ui, method, 1)[2]);
-  int options = _option_record(types[types.len() - 1]);
-  List form = _method_form(method, types.len() - 1 - options, options);
+  List form = _method_form(method, _option_record(types[types.len() - 1]));
   return form ? $(form) : %();
 }
 

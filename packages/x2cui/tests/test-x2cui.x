@@ -387,6 +387,22 @@ static void an_item_reports_what_the_pointer_did(void) {
   EXPECT_INT_EQ(p.clicked, 2);
 }
 
+/* A form takes any count of ordinary arguments: the virtual list's six,
+   with `fill` lowered for its `cui_size` height. */
+static void a_virtual_list_draws_the_rows_in_view(void) {
+  Offscreen screen = auto Offscreen.open(200, 120);
+  int first = 0, last = 0;
+  for (int pass = 0; pass < 3; pass++) {
+    screen.begin();
+    Ui ui = screen.ui();
+    ui.virtual_list ("rows", 1000, 24, fill, first, last)
+      for (int i = first; i < last; i++) ui.text(%"row $i");
+    screen.end();
+  }
+  EXPECT_INT_EQ(first, 0);
+  EXPECT_TRUE(last > 0 && last < 1000);
+}
+
 void x2cui_suite(void) {
   $test.run(offscreen_draws_and_writes_a_png);
   $test.run(write_png_raises_io_failure);
@@ -402,6 +418,7 @@ void x2cui_suite(void) {
   $test.run(method_forms_draw_what_the_c_calls_draw);
   $test.run(a_table_takes_its_columns_from_a_map);
   $test.run(an_item_reports_what_the_pointer_did);
+  $test.run(a_virtual_list_draws_the_rows_in_view);
 }
 
 int main(void) {
