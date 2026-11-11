@@ -329,7 +329,7 @@ static void _reference_bindings(Compiler c, List syntax, Map replacements) {
 /* An invocation is claimed where its result fits. A statement or map entry
    that does not fit parses as an expression. Elsewhere a `$` name, or an
    identifier with arguments, is claimed so that its target parser reports
-   the position diagnostic; a local expression macro at block scope and an
+   the position diagnostic; an expression macro at block scope and an
    evaluated `$(...)` or `${...}` collection remain expressions. */
 static int _claims(Compiler c, List definition, Symbol position) {
   Symbol kind = definition ? _result_kind(definition) : 0;
@@ -345,8 +345,7 @@ static int _claims(Compiler c, List definition, Symbol position) {
     return c.peek(0) == <$> && next != <(> && next != <"{">;
   }
   return !_bare(c.token, definition) &&
-    (position != <block> || kind != <expression> ||
-     !definition.assoc(<local>).int());
+    (position != <block> || kind != <expression>);
 }
 
 /* Returns the type of the identifier a `$` meta call reads, as in
