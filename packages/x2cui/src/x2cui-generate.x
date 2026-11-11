@@ -49,10 +49,8 @@ meta List cui_method(Code target, Code buffer, Code strings) {
   Type signature = Code.type(target);
   List types = Type.parameters(signature);
   Type result = Type.return_type(signature);
-  /* Returned text lives in CUI's frame memory; a String outlives the frame.
-     The compiler reports a `const char *` result without its `const`, and
-     no CUI function returns writable text. */
-  if (_spelled(result, "(* char)")) result = $!Type{ String };
+  // Returned text lives in CUI's frame memory; a String outlives the frame.
+  if (_spelled(result, "(* const char)")) result = $!Type{ String };
   Array params = [], args = [];
   List ui = x2c_ident("ui");
   params.push($!Param{ cui_ctx *$ui });
