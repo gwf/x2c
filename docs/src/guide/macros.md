@@ -553,8 +553,9 @@ section 2
 
 `panel.section() TARGET` is `$Panel.section(panel) TARGET`, and
 `panel.label(3)` is `$Panel.label(panel, 3)`. The macro shadows the method
-of the same name in source code. Inside the macro's template,
-`$panel.label($n)` is still the method, so the macro wraps it. The
+of the same name. While `$Panel.label` expands, `$panel.label($n)` in its
+template is the method, so the macro wraps it. Other templates can use
+method forms too, as `$panel.section() ...` with a hole receiver. The
 [method-form rules](../reference/language.md#method-form-macros) state when
 a statement is a decorator application.
 

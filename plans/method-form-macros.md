@@ -3,8 +3,10 @@
 > Status: Gary accepted decisions 1 to 5 with the postfix-dot recognition
 > design on 2026-11-11. Decisions 1 to 4, the compiler semantics, are
 > implemented on branch `gwf/method-form-compiler`, based on `dev` at
-> `069ad6363`, with compiler fixtures and a book section. Decision 5 and the
-> x2cui macros are package work on the x2cui branch.
+> `069ad6363`, with compiler fixtures and a book section. On 2026-11-11
+> Gary also directed "Make method forms work inside templates too. Fix
+> Entry @options too."; both are implemented on the same branch. Decision
+> 5 and the x2cui macros are package work on the x2cui branch.
 > The prototype that preceded the implementation is on the local branch
 > `gwf/scratch-x2cui-method-ui` on top of `x2cui` at `b393dd58c`.
 > Every "verified" statement below was compiled and run on macOS arm64 with
@@ -124,16 +126,25 @@ That free name resolves where the expansion lands. In an importing file it
 emitted a C call to `Ui_text` without the package prefix, which failed to
 link. Verified with the prototype.
 
-The implementation gets the rule from the template parse. A template's
-receivers have no types when it is parsed, so no template recognizes a
-method form, and `receiver.name(...)` there is always the method. This is
-broader than decision 3 as written: inside the template of another macro,
-`receiver.other(...)` is also the method `T.other`, even when `$T.other`
-exists. A template invokes a method-form macro by its explicit spelling,
-`$T.other(receiver, ...)`. Verified: in a second template,
-`$Meter.read($meter, $raw)` is the macro and `$meter.read($raw)` is the
-method. Decision 4 therefore holds in source code, not in templates. The
-prototype behaved the same way. The book states this rule.
+Method forms work in templates too. A receiver that is a hole has its type
+only where the template expands, so the form is recognized when the
+template's syntax is bound there; a receiver whose type the template
+already knows, such as a typed local, is recognized when the template is
+parsed. The rule is enforced against the active expansions: while
+`$T.NAME` is on `c.macro_stack`, at any depth, `receiver.NAME(...)` is the
+method. Mutual use therefore terminates without a recursion limit: inside
+`$Pen.dot` expanding `$Pen.dash`, `pen.dot(...)` is the method. Verified:
+`pen.dot(1)` and `pen.dash(1)` give `2000 3000` in
+`macro-method-form-templates`. Decision 4 holds in templates as in source.
+
+### Entry rows forwarded into a call
+
+An `Entry @options` hole spliced into a call's argument list forwards its
+`key: value` rows as the call's entries. The rows reach a `Map @rest`
+function or method, or another macro's `Entry` hole; no rows forward no
+entries. Verified in `macro-entry-forwarding`. Before this change the
+template was rejected where it was defined, with "macro hole 'options' has
+ambiguous kind", for an ordinary function call as well as a method form.
 
 ### Package types
 
@@ -178,6 +189,16 @@ The x2cui package changes are not part of it.
 | `src/symtab/namespaces.x` | `Compiler.package_source_name` |
 | `src/protocol/registry.x` | `reverse_converter_spelling` calls `package_source_name` |
 
+The template and Entry changes add 138 lines and remove 27 in five files:
+
+| File | Change |
+| --- | --- |
+| `src/macros/invocations/expressions.x` | `bind_method_macro`, `bind_method_decorator`, the deferred statement form, the stack check, and the capture rows of a template's call arguments |
+| `src/expressions/calls.x` | `_method` offers a call in an expansion to `bind_method_macro`; a forwarded Entry row becomes a `key: value` argument |
+| `src/expressions/syntax.x` | `Compiler.parse_call`; an Entry hole in a call's arguments parses in the Map-entry role |
+| `src/parse/binding.x` | The `(method-decorator CALL TARGET)` statement |
+| `src/macros/templates.x` | `_template_arguments` becomes a module operation |
+
 ### Recognition
 
 Both forms are recognized in `_parse_postfix_dot`, which already has the
@@ -204,6 +225,27 @@ next statement. A statement after a block that begins with `*` or `(`, as in
 larger expression, as in `k = ui.row (1) { }`, `-ui.row (1) { }`, or
 `printf("%d", ui.row (1) { })`, is not recognized and gets the ordinary
 error, "type Ui has no method row". Verified.
+
+In a template, a statement form whose receiver has no type yet raises
+`<method-dec>` with no definition. `parse_method_decorator` then parses the
+arguments with the ordinary call parser and the target as a statement, and
+returns `(method-decorator CALL TARGET)`. Binding resolves the receiver,
+finds the decorator `$T.NAME`, and builds the same `macro-invoke` node a
+source application builds. A missing decorator is the existing error
+"unknown or forward-referenced macro '$T.NAME'". An Expression form in a
+template is an ordinary call until `_method` in `src/expressions/calls.x`
+binds it inside an expansion; `bind_method_macro` then takes it. Both build
+their capture rows with `_template_arguments`, the owner that meta template
+calls already use, so a template's arguments are read as a call's:
+expressions, `key: value` entries, and splices, with a sequence hole taking
+the rest.
+
+For Entry forwarding, `_parse_postfix_apply` parses an `Entry` hole in a
+call's arguments in the Map-entry role, which that hole kind already
+accepts, instead of the argument role, which rejected it. A forwarded row
+arrives as a bare `(map-entry KEY VALUE)`, and `_resolve_call_arguments`
+gives it the `(expr ("Map") ...)` spelling that `parse_call_entry` gives a
+source entry.
 
 The definition travels in a field, not in the raised details, because a
 raised value is copied, and expansion keys its state by the definition's
@@ -238,15 +280,12 @@ until that was fixed. The postfix design deletes all of that.
   forms. Verified with the prototype in the to-do example.
 - Decision 4 is a deliberate change for types that define such macros: the
   macro replaces the method at method-form call sites.
-- A method-form Expression macro takes `name: value` arguments as captured
-  syntax, so a method with a `Map @rest` parameter cannot also have a macro of
-  the same name that forwards those arguments as a Map. Verified, and the
-  limit is not specific to method forms: a template that passes an
-  `Entry @options` hole to a `Map @rest` call is rejected where it is
-  defined, with "macro hole 'options' has ambiguous kind". The same error
-  comes from `$ui.label($text, @options)`, `Ui.label($ui, $text, @options)`,
-  `$ui.label($text, @({@options}))`, and an ordinary function call
-  `label($text, @options)` in `$label`.
+- A method with a `Map @rest` parameter can have a macro of the same name
+  that forwards its `Entry @options` rows to it, as
+  `$ui.caption($text, @options)`. Verified.
+- An `Entry` hole spliced anywhere other than a call's arguments is
+  unchanged: `$ui.label($text, @({@options}))` is still rejected with
+  "macro hole 'options' has ambiguous kind".
 
 ## Performance
 
@@ -284,15 +323,20 @@ The prototype's compiler shortcuts are settled:
   Compatibility. `_expression_statement` sets it for every expression
   statement, including one that begins with `(`.
 - **The self-call check.** The prototype skipped a definition already on
-  `c.macro_stack`. No template recognizes a method form, so that check
-  could not fire, and it is deleted.
+  `c.macro_stack`. Templates now recognize method forms, so the check is
+  restored and owns decision 3.
+- **Method forms in templates** and **Entry forwarding** are implemented.
 - **Fixtures and book** (limit 10) are written.
 
 What remains:
 
 - Method forms work in statement and expression positions only, not at file
   scope (prototype limit 7), and only with `.`.
-- Inside a template, every method form is a method; see the self-call rule.
+- In a template, a statement form whose receiver has no type yet takes a
+  statement target, so such a form cannot apply an `Expr`-target decorator.
+- In a template, a form recognized where the template expands reads its
+  arguments as a call's arguments, not by its holes' kinds. A `Type`,
+  `Stmt`, or other non-expression hole cannot take such an argument.
 - Package work for x2cui, outside the compiler, keeps the prototype's
   numbers:
   1. Keys are read by position, `row[1][2][2]`, instead of through a syntax
@@ -317,7 +361,9 @@ What remains:
   `macro-method-form-decorators`, `macro-method-form-expression`, and
   `macro-method-form-in-expression`, and, for package source names,
   `package-method-form` and `import-method-form` over the toy package
-  `unittest/compiler-fixtures/packages/panels`.
+  `unittest/compiler-fixtures/packages/panels`. Templates and forwarding:
+  `macro-method-form-templates`, `macro-entry-forwarding`, and a hole
+  receiver in `import-method-form`.
 - The x2cui to-do `--shot` image stays byte-identical to the one drawn with
   `$cui.row`; it is, for every prototype commit.
 - `make stage-3`, `make verify-fixtures`, and `precommit`.
@@ -331,16 +377,20 @@ What remains:
 - **Reuse and new mechanism.** Invocation, argument capture, hygiene,
   `_decorate`, expansion, `Token.after_group`, and the package-prefix owner
   are reused. New mechanism: two `Compiler` fields, the `<method-dec>`
-  signal and its one catch, and the start token passed along the postfix
-  tail. The forward scan, trial parse, and existence check of the first
+  signal and its one catch, the start token passed along the postfix
+  tail, and the `(method-decorator CALL TARGET)` statement that defers a
+  template's statement form to binding. The forward scan, trial parse, and existence check of the first
   design are deleted, and so are the prototype's group scanner, its `__`
   split, its `postfix_start` field, and its self-call check.
 - **Idiomatic x2c.** Both forms are new invocation positions for existing
   macro kinds. Option lowering is an ordinary `meta` function over
   `Entry @rows`. Nothing is imported from another language's framework.
 - **Validators and diagnostics.** No diagnostic is added. Errors come from
-  the ordinary parse, ordinary typing, or the C compiler. One existing
-  diagnostic gains a caller: a `$T.NAME` with no parameters has no place
+  the ordinary parse, ordinary typing, or the C compiler. Existing
+  diagnostics gain callers: a template's statement form with no decorator
+  reports "unknown or forward-referenced macro", and a form recognized
+  where its template expands reports too few or too many arguments as a
+  `$T.NAME(...)` call does. A `$T.NAME` with no parameters has no place
   for the receiver, so `receiver.NAME()` reports "macro invocation has too
   many arguments" instead of dropping the receiver unevaluated. The
   fixtures listed above protect deliberate public behavior.

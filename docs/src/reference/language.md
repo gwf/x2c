@@ -1672,7 +1672,30 @@ The `@items` position is part of the macro template; `$(expression)`
 inside an ordinary quoted `Array` still inserts one value.
 
 `Entry` holes capture one `key: value` row; `Entry @rows` captures and
-forwards zero or more complete rows.
+forwards zero or more complete rows. Spliced into a call's arguments,
+`@rows` passes its rows as the call's `key: value` arguments, so a template
+forwards them to a function with a [`Map` rest
+parameter](#map-rest-parameters) or to another macro's `Entry` hole:
+
+```x2c
+~#include "x2c.x"
+String label(String text, Map @options) {
+  int size = options.getdefault(<size>, 12).integer();
+  return %"$text@$size";
+}
+
+macro Expression $label(Expr $text, Entry @options) =>
+  label($text, @options);
+
+int main(void) {
+  printf("%s %s\n", $label("a"), $label("b", size: 20));
+  return 0;
+}
+```
+
+```text
+a@12 b@20
+```
 
 A `Captures` hole holds a complete lambda capture clause as one value.
 In a template, `%!(@params) using $captures => $body` preserves its
@@ -2153,11 +2176,20 @@ and the method's absence is the ordinary error "type Ui has no method row".
 
 In any expression, `RECEIVER.NAME(ARGUMENTS)` invokes the Expression macro
 `$T.NAME` the same way. When `$T.NAME` is visible, it takes every method-form
-call of `NAME` in source code, even where a method `T.NAME` exists. A macro
-template is parsed before its receivers have types, so inside a template
-`RECEIVER.NAME(...)` is always the method. A macro can therefore wrap the
-method it shadows, and a template invokes another method-form macro by its
-`$T.NAME(receiver, ...)` spelling:
+call of `NAME`, even where a method `T.NAME` exists.
+
+Method forms also work in macro templates. A receiver there may be a hole,
+whose type is known only where the template expands, so the form is
+recognized then. A statement form needs the same statement start and the
+same following target as in source; its target is a statement. The
+arguments of a form recognized this way are read as a call's arguments:
+expressions, `key: value` entries, and splices, with a sequence hole taking
+the rest.
+
+While `$T.NAME` expands, including inside the macros its expansion invokes,
+`RECEIVER.NAME(...)` is the method `T.NAME`. A macro can therefore wrap the
+method it shadows. Two macros that use each other's method forms stop
+there: inside `$T.a` expanding `$T.b`, `RECEIVER.a(...)` is the method.
 
 ```x2c
 ~#include <stdio.h>
@@ -2169,18 +2201,22 @@ macro Expression $Meter.read(Expr $meter, Expr $raw) =>
   $meter.read($raw) + 1;
 
 macro Expression $Meter.read_twice(Expr $meter, Expr $raw) =>
-  $Meter.read($meter, $raw) + $meter.read($raw);
+  $meter.read($raw) + $meter.read($raw);
 
 int main(void) {
   Meter meter = { 10 };
-  printf("%d %d\n", meter.read(4), meter.read_twice(4));
+  printf("%d %d
+", meter.read(4), meter.read_twice(4));
   return 0;
 }
 ```
 
 ```text
-41 81
+41 82
 ```
+
+In `$Meter.read`, `$meter.read($raw)` is the method. In `$Meter.read_twice`,
+each `$meter.read($raw)` is the macro `$Meter.read`.
 
 A package's type `Ui` is `x2cui__Ui` in generated C, but its macros keep the
 source spelling `$Ui.row`. A method form looks for `$T.NAME` under the
