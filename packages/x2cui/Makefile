@@ -84,7 +84,9 @@ $(WASM_RUNTIME):
 	@exit 1
 
 # The link inputs: the gallery's objects, the package's archive, x2c's
-# browser runtime, and CUI's browser archive.
+# browser runtime, and CUI's browser archive. The list keeps its time
+# while it names the same inputs and none of them is newer, so the link
+# runs only after a change.
 builds/web/objects.rsp: examples/gallery.x $(GALLERY_UNITS) \
 		$(PACKAGE_CONSUMER_DEPS) $(WASM_MANIFEST) tools/wasm-cc \
 		| builds/web
@@ -102,7 +104,11 @@ builds/web/objects.rsp: examples/gallery.x $(GALLERY_UNITS) \
 	  echo builds/web/libx2cui.a; \
 	  echo -Wl,--whole-archive; echo $(WASM_RUNTIME); \
 	  echo -Wl,--no-whole-archive; \
-	  echo $(WASM_CUI)/lib/libcui.a; } > $@
+	  echo $(WASM_CUI)/lib/libcui.a; } > $@.new
+	if cmp -s $@.new $@ && \
+	    [ -z "$$(find builds/web/gallery/obj builds/web/libx2cui.a \
+	               -type f -newer $@)" ]; \
+	  then rm -f $@.new; else mv $@.new $@; fi
 
 builds/web/gallery.js: builds/web/objects.rsp $(WASM_RUNTIME)
 	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) -sMODULARIZE=1 -sEXPORT_ES6=1 \
