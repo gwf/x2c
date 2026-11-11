@@ -19,6 +19,8 @@ Source macros and the compile-time calls they run.
 | [`Compiler.applying_shipped`](#Compiler.applying_shipped) | Whether the rule whose meta function now runs is shipped, so that the names it calls resolve to the copies the compiler links. |
 | [`Compiler.bind_code_value`](#Compiler.bind_code_value) | Binds a code-value carrier that a meta call returned outside a macro value application as an application binds it, under a transaction that also covers its effects. |
 | [`Compiler.bind_meta_statement`](#Compiler.bind_meta_statement) | Binds a compile-time code `value` returned to a statement at `context`. |
+| [`Compiler.bind_method_decorator`](#Compiler.bind_method_decorator) | Applies a template's `(method-decorator CALL TARGET)` as the decorator `$T.name` of the call's receiver, at `position`. |
+| [`Compiler.bind_method_macro`](#Compiler.bind_method_macro) | Expands a template's method-form call `receiver.name(supplied)` as the Expression macro `$T.name` once the receiver has its type where the template expands. |
 | [`Compiler.capture_macro_value`](#Compiler.capture_macro_value) | Returns an anonymous macro definition as a `Macro` value. |
 | [`Compiler.check_included_names`](#Compiler.check_included_names) | Reports the first of `names`, aliases that `globs` did not bind before the include at `site`, that the include declared. |
 | [`Compiler.enter_alias_body`](#Compiler.enter_alias_body) | Starts a declaration body whose aliases end at its closing brace, and returns the alias state that `Compiler.leave_alias_body` restores. |
@@ -36,6 +38,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.local_macro_form_is_definition`](#Compiler.local_macro_form_is_definition) | Returns whether the current tokens begin a local macro definition. |
 | [`Compiler.lower_replacement`](#Compiler.lower_replacement) | Lowers `replacement`, which `Compiler.rewrite_lowered` bound for the lowered statement `source`, and keeps each part of `source` it holds as it is, so no statement rule is offered that part again. |
 | [`Compiler.lower_rewrite`](#Compiler.lower_rewrite) | Binds and lowers a replacement while its rule remains active. |
+| [`Compiler.macro_definition_name`](#Compiler.macro_definition_name) | Returns a definition's name: `name` itself, or the name a template computed, `(macro-name PART ...)` with its holes filled, joined as `PART.PART`. |
 | [`Compiler.macro_form_is_definition`](#Compiler.macro_form_is_definition) | Returns whether the current tokens have macro-definition introducer form. |
 | [`Compiler.macro_introduced_name`](#Compiler.macro_introduced_name) | Returns the current declaration's definition-local identity. |
 | [`Compiler.macro_invocation_collection`](#Compiler.macro_invocation_collection) | Returns how collection treats the macro invocation at the cursor. |
@@ -46,6 +49,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.macro_tag_name`](#Compiler.macro_tag_name) | Returns a template's local binding for tag `name` of `kind`, or NULL when it names a visible public tag. |
 | [`Compiler.macro_targets_unit`](#Compiler.macro_targets_unit) | Reports whether the macro invocation at the cursor produces file-scope syntax, directly or through the target it decorates. |
 | [`Compiler.macro_value_literal`](#Compiler.macro_value_literal) | Returns the literal expression that carries `value`, a macro definition or one of its references, as run-time data. |
+| [`Compiler.mark_method_call`](#Compiler.mark_method_call) | Marks a template's call `receiver.name(...)` written in the template of a macro `$T.name` as `(expr () (method-call DEFINITION CALL))`, so that where the template expands the call is `$T.name`'s method, not the macro. |
 | [`Compiler.marked_rewrite`](#Compiler.marked_rewrite) | Matches the member rules registered for each field keyword that `aggregate` declares a field with, as `Compiler.rewrite` matches those keyed by a receiver type. |
 | [`Compiler.meta_call_starts_declaration`](#Compiler.meta_call_starts_declaration) | Returns whether tokens after an explicit meta call continue a declaration. |
 | [`Compiler.named_alias_expression`](#Compiler.named_alias_expression) | Resolves a visible alias by spelling for parsed and constructed names. |
@@ -55,6 +59,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.parse_keyword_definition`](#Compiler.parse_keyword_definition) | Parses and installs one source-local `keyword` alias. |
 | [`Compiler.parse_macro_definition`](#Compiler.parse_macro_definition) | Parses the macro definition at the current token into a `macrodef` `List`. |
 | [`Compiler.parse_macro_quotation`](#Compiler.parse_macro_quotation) | Parses a quotation at `$!` into the code it builds from the locals its body names. |
+| [`Compiler.parse_method_decorator`](#Compiler.parse_method_decorator) | Parses the method-form decorator application whose arguments begin at the cursor, after `try_parse_method_macro` raised `<method-dec>` for the expression statement that begins at `start`. |
 | [`Compiler.peek_macro_hole`](#Compiler.peek_macro_hole) | Returns the registered hole descriptor for a named or expression hole. |
 | [`Compiler.place`](#Compiler.place) | Places `code` where `where` says, under the active expansion's transaction: `(after-statement)` after the enclosing block item or initialized declarator; `(block-exit)` on every exit from the enclosing block from that point on, as a `defer` placed after it; `(function-entry)` at the entry of the enclosing function, at parse or transform time, in placement order before its first statement; `(unit-support)` among the unit's support declarations, once per KEY with `(unit-support KEY)`; or `(unit-init)` in the unit's file initialization, in AREA with `(unit-init AREA)`. |
 | [`Compiler.print_macro_expansion`](#Compiler.print_macro_expansion) | Prints one invocation frame and the bound result of its expansion. |
@@ -78,6 +83,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.try_parse_macro_slot`](#Compiler.try_parse_macro_slot) | Parses a macro hole or meta call slot for `role` while reading a template. |
 | [`Compiler.try_parse_macro_subpattern`](#Compiler.try_parse_macro_subpattern) | Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern, into the pattern for code NAME builds with each argument pattern in its hole. |
 | [`Compiler.try_parse_macro_target_at`](#Compiler.try_parse_macro_target_at) | Parses a direct or keyword-alias macro at the requested syntax position. |
+| [`Compiler.try_parse_method_macro`](#Compiler.try_parse_method_macro) | Expands `receiver.name(...)` as the Expression macro `$T.name` of the receiver's named type `T`, with the receiver as its first explicit argument. |
 | [`Compiler.unbound_alias_names`](#Compiler.unbound_alias_names) | Returns the names of the unit's file-scope aliases that `globs`, the unit's names in source order, does not bind. |
 | [`Compiler.watched_step`](#Compiler.watched_step) | Lowers `ast` when it is a value the active lowering watches; NULL otherwise. |
 
@@ -161,6 +167,28 @@ Binds a compile-time code `value` returned to a statement at
 `context`.
 
 Source: `src/macros/templates.x`
+
+<a id="Compiler.bind_method_decorator"></a>
+#### Compiler.bind_method_decorator
+
+`List Compiler.bind_method_decorator(Compiler c, List call, List target, Symbol position)`
+
+Applies a template's `(method-decorator CALL TARGET)` as the decorator
+`$T.name` of the call's receiver, at `position`.
+
+Source: `src/macros/invocations/expressions.x`
+
+<a id="Compiler.bind_method_macro"></a>
+#### Compiler.bind_method_macro
+
+`List Compiler.bind_method_macro(Compiler c, List receiver, String name, List supplied, Var own)`
+
+Expands a template's method-form call `receiver.name(supplied)` as the
+Expression macro `$T.name` once the receiver has its type where the
+template expands. Returns NULL when no such macro applies, or when the
+call was written in the template of the macro `own` that it names.
+
+Source: `src/macros/invocations/expressions.x`
 
 <a id="Compiler.capture_macro_value"></a>
 #### Compiler.capture_macro_value
@@ -353,6 +381,17 @@ captured values.
 
 Source: `src/macros/rewrites.x`
 
+<a id="Compiler.macro_definition_name"></a>
+#### Compiler.macro_definition_name
+
+`Atom Compiler.macro_definition_name(Var name)`
+
+Returns a definition's name: `name` itself, or the name a template
+computed, `(macro-name PART ...)` with its holes filled, joined as
+`PART.PART`.
+
+Source: `src/macros/invocations/recognition.x`
+
 <a id="Compiler.macro_form_is_definition"></a>
 #### Compiler.macro_form_is_definition
 
@@ -463,6 +502,18 @@ or one of its references, as run-time data.
 
 Source: `src/macros/values.x`
 
+<a id="Compiler.mark_method_call"></a>
+#### Compiler.mark_method_call
+
+`List Compiler.mark_method_call(Compiler c, List call, Var member)`
+
+Marks a template's call `receiver.name(...)` written in the template of
+a macro `$T.name` as `(expr () (method-call DEFINITION CALL))`, so that
+where the template expands the call is `$T.name`'s method, not the
+macro. Returns `call` unchanged otherwise.
+
+Source: `src/macros/invocations/expressions.x`
+
 <a id="Compiler.marked_rewrite"></a>
 #### Compiler.marked_rewrite
 
@@ -566,6 +617,19 @@ Parses a quotation at `$!` into the code it builds from the locals its
 body names.
 
 Source: `src/macros/definitions/quotations.x`
+
+<a id="Compiler.parse_method_decorator"></a>
+#### Compiler.parse_method_decorator
+
+`List Compiler.parse_method_decorator(Compiler c, Token start, Symbol position)`
+
+Parses the method-form decorator application whose arguments begin at
+the cursor, after `try_parse_method_macro` raised `<method-dec>` for
+the expression statement that begins at `start`. In a template whose
+receiver has no type yet, the result is `(method-decorator CALL
+TARGET)`, which `bind_method_decorator` applies where it expands.
+
+Source: `src/macros/invocations/expressions.x`
 
 <a id="Compiler.peek_macro_hole"></a>
 #### Compiler.peek_macro_hole
@@ -836,6 +900,24 @@ deferred `(seq (macro-invoke ...))`, and ordinary parsing returns the bound
 expansion.
 
 Source: `src/macros/invocations/targets.x`
+
+<a id="Compiler.try_parse_method_macro"></a>
+#### Compiler.try_parse_method_macro
+
+`List Compiler.try_parse_method_macro(Compiler c, List receiver, Token start, Token dot)`
+
+Expands `receiver.name(...)` as the Expression macro `$T.name` of the
+receiver's named type `T`, with the receiver as its first explicit
+argument. The receiver's postfix expression begins at `start`, and
+`dot` is its `.`. Returns NULL, consuming nothing, when no such macro
+applies; the call is then an ordinary method call.
+
+**Raises:** `<method-dec>` when `start` begins an expression statement, a
+target follows the arguments, and `$T.name` is a decorator or, in a
+template other than `$T.name`'s own, may be one where the template
+expands. The statement continues with `parse_method_decorator`.
+
+Source: `src/macros/invocations/expressions.x`
 
 <a id="Compiler.unbound_alias_names"></a>
 #### Compiler.unbound_alias_names
