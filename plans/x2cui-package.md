@@ -563,7 +563,27 @@ and data grid:
   x axis labels are a `List` parameter, not two option fields.
 
 Gary reviews the chart, table, and data grid scenes in
-`examples/gallery/data.x` before the other components are converted.
+`examples/scenes/data.x` before the other components are converted. That
+review is still open.
+
+#### The gallery is a port of CUI's gallery
+
+On 2026-11-10 Gary ran the first x2c gallery and found it did not look
+like CUI's. It was not a port: it showed one component at a time, modeled
+on CUI's `tests/component_shots.c`, where CUI's gallery shows many
+components on topic pages. Gary chose to have both:
+
+- `examples/gallery.x` is a port of CUI's `examples/gallery_ui.c` and
+  `examples/gallery_more.c`, page for page, with each page in a file under
+  `examples/gallery/`. It is the application to browse and to read beside
+  the C original.
+- `examples/scenes.x` keeps the per-component scenes as a check that draws
+  off screen and opens no window. The completeness test compares its
+  scene names with CUI's header.
+
+The nine core pages need only six array forms. The seventeen extended
+pages use about 55 of the array components, so porting them completes
+most of Delivery 2's forms.
 
 ### Delivery 3: browser
 

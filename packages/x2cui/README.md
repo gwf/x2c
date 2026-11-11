@@ -171,12 +171,18 @@ removes a task, confirms before clearing the finished ones, and saves the
 list to a file after each change. `make run-interactive` opens it.
 `todo --shot IMAGE.png` draws three sample tasks off screen.
 
-`examples/gallery.x` is the broader application (`make example`). It has
-140 scenes, one for each component that has an x2c form, named for the
-component and grouped into six families under `examples/gallery/`. A menu
-that opens only on a click is drawn closed off screen. `make run-gallery`
-opens it as a browser of scenes. `gallery --shots DIR` draws every scene
-off screen to `DIR/NAME.png`, and `gallery --list` prints the scene names.
+`examples/gallery.x` is the broader application (`make example`). It is
+a port of CUI's own gallery, `examples/gallery_ui.c` and
+`examples/gallery_more.c` in CUI's source: the same pages, sections, and
+layout, with each page in a file under `examples/gallery/`. Read a page
+beside its C original to compare the two forms. `make run-gallery` opens
+it, and `gallery --shots DIR` draws every page off screen.
+
+`examples/scenes.x` is a check, not an application. It has one small
+scene for each component that has an x2c form, named for the component
+and grouped into families under `examples/scenes/`. `scenes --shots DIR`
+draws every scene off screen to `DIR/NAME.png`, and `scenes --list` prints
+the names. A menu that opens only on a click is drawn closed.
 
 ## Native API
 
@@ -204,5 +210,5 @@ make run
 make check
 ```
 
-`make run` draws the to-do application and every gallery scene off screen.
+`make run` draws the to-do application and every scene off screen.
 No check opens a window, because a window needs a display.
