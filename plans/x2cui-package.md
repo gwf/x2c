@@ -581,6 +581,14 @@ components on topic pages. Gary chose to have both:
   off screen and opens no window. The completeness test compares its
   scene names with CUI's header.
 
+State on 2026-11-10: the frame and the nine core pages are ported and
+drawn off screen; `gallery --shots DIR` draws each page on a tall surface.
+The whole gallery ran 13,500 frames under random input with freed memory
+scribbled, with no crash. Its resident memory is flat over 51,000 frames,
+as CUI's C gallery is. An earlier version grew up to 250 bytes a frame:
+the string-list table was a `Map`, which boxed an address on every lookup.
+It is now a small open-addressed table. The extended pages are not ported.
+
 The nine core pages need only six array forms. The seventeen extended
 pages use about 55 of the array components, so porting them completes
 most of Delivery 2's forms.

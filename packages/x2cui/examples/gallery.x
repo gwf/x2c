@@ -15,9 +15,26 @@
 #include "path.x"
 #include "gallery/state.x"
 #include "gallery/overview.x"
+#include "gallery/buttons.x"
+#include "gallery/inputs.x"
+#include "gallery/selection.x"
+#include "gallery/navigation.x"
+#include "gallery/overlays.x"
+#include "gallery/feedback.x"
+#include "gallery/data.x"
+#include "gallery/charts.x"
 
+// In the order of the PAGE_ constants.
 static Page pages[] = {
   { "Overview", CUI_ICON_LAYOUT_DASHBOARD, page_overview },
+  { "Buttons", CUI_ICON_ZAP, page_buttons },
+  { "Inputs", CUI_ICON_TYPE, page_inputs },
+  { "Selection", CUI_ICON_SLIDERS_HORIZONTAL, page_selection },
+  { "Navigation", CUI_ICON_COMPASS, page_navigation },
+  { "Overlays", CUI_ICON_LAYERS, page_overlays },
+  { "Feedback", CUI_ICON_BELL, page_feedback },
+  { "Data display", CUI_ICON_DATABASE, page_data },
+  { "Charts", CUI_ICON_CHART_LINE, page_charts },
 };
 
 static int page_total(void) => sizeof pages / sizeof *pages;
@@ -225,13 +242,14 @@ static void draw(Ui ui, Gallery g) {
   dialogs(ui, g);
 }
 
-/* Draws every page off screen. A few frames settle layout, fonts, and
-   opening animations before each page is written. */
+/* Draws every page off screen, on a surface tall enough to show a whole
+   page. A few frames settle layout, fonts, and opening animations before
+   each page is written. */
 static int shoot(Gallery g, Path directory) {
   directory.make_dirs();
   int empty = 0;
   for (int page = 0; page < page_total(); page++) {
-    Offscreen screen = auto Offscreen.open(1240, 820);
+    Offscreen screen = auto Offscreen.open(1240, 2400);
     g.page = page;
     for (int frame = 0; frame < 6; frame++) {
       screen.begin();

@@ -205,6 +205,13 @@ static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
   return opts;
 }
 
+/** Begins a tree node and returns true while it is open. A leaf has no
+    open flag: pass NULL for `open` and set `.leaf` in `opts`.
+*/
+bool Ui.tree_begin(Ui ui, String label, bool &?open, cui_tree_opts opts) =>
+  open ? cui_tree_begin(ui, label, &open, &opts)
+       : cui_tree_begin(ui, label, NULL, &opts);
+
 /** Draws a donut chart with one slice for each of `values`, named by the
     matching String of `labels`.
 */
@@ -258,21 +265,52 @@ void Ui.bar_chart(
 char *x2cui_buffer(TextField field) => field.buffer;
 
 /* One native array for each List of Strings a component has been given.
-   A List is canonical, so equal Lists are one List and one entry. */
-static Map string_arrays = {};
+   A List is canonical, so equal Lists are one List and one entry. The
+   table is keyed by the List's address and is open-addressed. A Map would
+   box each address it looks up, which allocates on every call. */
+typedef struct StringArray {
+  List items;
+  const char **names;
+} StringArray;
+
+static StringArray *string_arrays;
+static size_t string_array_slots, string_array_count;
+
+// Returns the slot that holds `items`, or the empty slot where it belongs.
+static StringArray *_string_slot(
+  StringArray *table, size_t slots, List items) {
+  size_t at = ((uintptr_t) items >> 4) * 0x9E3779B97F4A7C15ull;
+  for (at &= slots - 1; table[at].items && table[at].items != items;)
+    at = (at + 1) & (slots - 1);
+  return &table[at];
+}
+
+// Keeps the table at most half full, so a probe always ends.
+static void _reserve_string_slot(void) {
+  if (2 * (string_array_count + 1) <= string_array_slots) return;
+  size_t slots = string_array_slots ? 2 * string_array_slots : 64;
+  StringArray *table = calloc(slots, sizeof *table);
+  for (size_t i = 0; i < string_array_slots; i++)
+    if (string_arrays[i].items)
+      *_string_slot(table, slots, string_arrays[i].items) = string_arrays[i];
+  free(string_arrays);
+  string_arrays = table;
+  string_array_slots = slots;
+}
 
 /** Returns the Strings of `items` as the array a component reads. CUI may
     read the array until the frame ends, so the array is kept and is built
     once for each distinct List.
 */
 const char *const *x2cui_strings(List items) {
-  Var known;
-  if (string_arrays.try_get((long) items, known))
-    return (const char *const *) known.integer();
+  _reserve_string_slot();
+  StringArray *slot = _string_slot(string_arrays, string_array_slots, items);
+  if (slot.items) return slot.names;
   const char **names = malloc((items.len() + 1) * sizeof *names);
   int index = 0;
   foreach (String item in items) names[index++] = item;
-  string_arrays[(long) items] = (long) names;
+  *slot = (StringArray){ items, names };
+  string_array_count++;
   return names;
 }
 
@@ -424,7 +462,6 @@ $cui.method(cui_metric_ex);
 $cui.method(cui_meter);
 $cui.method(cui_accordion_begin);
 $cui.method(cui_accordion_end);
-$cui.method(cui_tree_begin);
 $cui.method(cui_tree_end);
 $cui.method(cui_tree_clicked);
 $cui.method(cui_list_item_ex);

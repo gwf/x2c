@@ -58,10 +58,7 @@ static void scene_accordion(Ui ui) {
 
 // A file in the tree; a leaf never opens, so it has no children to end.
 static void tree_file(Ui ui, String name, bool selected) {
-  // cui_tree_begin takes NULL for a leaf's `bool *open`, but
-  // the method's reference parameter refuses NULL, so a leaf passes a flag.
-  static bool leaf = false;
-  ui.tree_begin(name, leaf, { .leaf = true, .selected = selected });
+  ui.tree_begin(name, NULL, { .leaf = true, .selected = selected });
 }
 
 static void scene_tree(Ui ui) {

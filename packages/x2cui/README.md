@@ -155,8 +155,7 @@ An option record keeps its C field types. A field that is a pointer to
 caller state takes an address, as in `{ .toggle = &bold }`, and a field
 that is an array takes a C array.
 
-`ui.tree_begin` takes its open flag by reference, so a leaf, for which CUI
-accepts NULL, passes a flag it ignores.
+A tree leaf has no open flag: `ui.tree_begin(name, NULL, { .leaf = true })`.
 
 ## No Lisp surface
 
