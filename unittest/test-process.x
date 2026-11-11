@@ -24,7 +24,7 @@ static void process_job_runs_once(void) {
   Path dir = Path.temp_dir(), log = dir.join("log");
   try {
     Job job = %(sh -c "echo run >> \$1; echo out; echo err >&2" sh $log)
-      .job().options({stderr: <capture>});
+      .job().options(stderr: <capture>);
     EXPECT_FALSE(job.started);
     EXPECT_INT_EQ(job.status(), 0);
     EXPECT_STR_EQ(job.output(), "out\n");
@@ -48,7 +48,7 @@ static void process_status_reports_exit_and_signal(void) {
 static void process_status_and_errors_never_raise(void) {
   $test.scoped();
   Job job = %(sh -c "echo out; echo err >&2; exit 3").job()
-    .options({stderr: <capture>});
+    .options(stderr: <capture>);
   EXPECT_STR_EQ(job.errors(), "err\n");
   EXPECT_INT_EQ(job.status(), 3);
   EXPECT_NULL(%(sh -c "exit 2").job().errors());
@@ -79,7 +79,7 @@ static void process_failure_detail_carries_captures(void) {
     EXPECT_TRUE(detail.assoc(<errors>) is void);
   }
   try %(sh -c "echo out; echo err >&2; exit 5").job()
-    .options({stderr: <capture>}).lines();
+    .options(stderr: <capture>).lines();
   catch %(cmd-fail *detail): {
     caught++;
     EXPECT_INT_EQ(detail.assoc(<status>).integer(), 5);
@@ -87,7 +87,7 @@ static void process_failure_detail_carries_captures(void) {
     EXPECT_STR_EQ(detail.assoc(<errors>).string(), "err\n");
   }
   try %(sh -c "echo err >&2; exit 5").job()
-    .options({stdout: <inherit>, stderr: <capture>}).check();
+    .options(stdout: <inherit>, stderr: <capture>).check();
   catch %(cmd-fail *detail): {
     caught++;
     EXPECT_TRUE(detail.assoc(<output>) is void);
@@ -138,13 +138,13 @@ static void process_live_passes_output_through(void) {
 
 static void process_pipelines_join_stages(void) {
   $test.scoped();
-  EXPECT_STR_EQ(%(printf "b\na\nb\n").job().pipe(%(sort)).pipe(%(uniq))
+  EXPECT_STR_EQ(%(printf "b\na\nb\n").job().pipe(%(sort), %(uniq))
                   .output(),
                 "a\nb\n");
   EXPECT_STR_EQ(%(printf "x\ny\n").job().pipe(%(wc -l)).output()
                   .strip(" \n"),
                 "2");
-  Job three = %(printf "c\n").job().pipe(%(cat)).pipe(%(tr c d));
+  Job three = %(printf "c\n").job().pipe(%(cat), %(tr c d));
   EXPECT_INT_EQ(three.stages.len(), 3);
   EXPECT_STR_EQ(three.output(), "d\n");
   int caught = 0;
@@ -166,6 +166,13 @@ static void process_nested_pipelines_compose_with_pipe(void) {
   Job appended = %(printf "e\n").job().pipe(%((cat) (tr e f)));
   EXPECT_INT_EQ(appended.stages.len(), 3);
   EXPECT_STR_EQ(appended.output(), "f\n");
+
+  List commands = %((cat) (tr c d));
+  Job spliced = %(printf "c\n").job().pipe(@commands);
+  EXPECT_PTR_EQ(spliced.pipe(), spliced);
+  EXPECT_FALSE(spliced.started);
+  EXPECT_INT_EQ(spliced.stages.len(), 3);
+  EXPECT_STR_EQ(spliced.output(), "d\n");
   EXPECT_INT_EQ(%((sh -c "exit 4") (cat)).job().status(), 4);
   EXPECT_INT_EQ(%((sh -c "exit 4") (sh -c "cat; exit 5")).job().status(), 5);
   EXPECT_INT_EQ(%((false) (true)).job().status(), 1);
@@ -177,11 +184,11 @@ static void process_nested_pipelines_compose_with_pipe(void) {
   }
   EXPECT_INT_EQ(caught, 1);
   EXPECT_STR_EQ(%((sh -c "pwd; echo one >&2") (sh -c "cat; echo two >&2"))
-                  .job().options({dir: "/", input: "in\n", stderr: <stdout>})
+                  .job().options(dir: "/", input: "in\n", stderr: <stdout>)
                   .output(),
                 "/\none\ntwo\n");
   Job logged = %((sh -c "cat; echo one >&2") (sh -c "cat; echo two >&2"))
-    .job().options({input: "in\n", stderr: <capture>});
+    .job().options(input: "in\n", stderr: <capture>);
   EXPECT_STR_EQ(logged.output(), "in\n");
   EXPECT_TRUE(logged.errors() == "one\ntwo\n" ||
               logged.errors() == "two\none\n");
@@ -198,17 +205,22 @@ static void process_pipeline_status_is_last_failure(void) {
 
 static void process_options_route_streams(void) {
   $test.scoped();
-  EXPECT_STR_EQ(%(tr a-z A-Z).job().options({input: "shout"}).output(),
+  Map options = {input: "quiet", stderr: <capture>};
+  Job overridden = %(tr a-z A-Z).job().options(@options, input: "loud");
+  EXPECT_PTR_EQ(overridden.options(), overridden);
+  EXPECT_STR_EQ(overridden.output(), "LOUD");
+  EXPECT_STR_EQ(options[<input>].string(), "quiet");
+  EXPECT_STR_EQ(%(tr a-z A-Z).job().options(input: "shout").output(),
                 "SHOUT");
-  EXPECT_STR_EQ(%(pwd).job().options({dir: "/"}).output(), "/\n");
+  EXPECT_STR_EQ(%(pwd).job().options(dir: "/").output(), "/\n");
   EXPECT_STR_EQ(%(sh -c "echo \$X2C_PROCESS_TEST").job()
-                  .options({env: {X2C_PROCESS_TEST: "set"}}).output(),
+                  .options(env: {X2C_PROCESS_TEST: "set"}).output(),
                 "set\n");
   EXPECT_STR_EQ(%(sh -c "echo out; echo err >&2").job()
-                  .options({stderr: <stdout>}).output(),
+                  .options(stderr: <stdout>).output(),
                 "out\nerr\n");
   Job job = %(sh -c "echo err >&2; exit 6").job()
-    .options({stderr: <capture>}).start();
+    .options(stderr: <capture>).start();
   EXPECT_INT_EQ(job.status(), 6);
   EXPECT_STR_EQ(job.errors(), "err\n");
 }
@@ -217,12 +229,12 @@ static void process_options_write_files_and_merge(void) {
   $test.scoped();
   Path dir = Path.temp_dir(), output = dir.join("stdout");
   try {
-    %(printf hello).job().options({stdout: output}).check();
+    %(printf hello).job().options(stdout: output).check();
     EXPECT_STR_EQ(output.read_text(), "hello");
-    Job job = %(pwd).job().options({dir: "/", stdout: output})
-      .options({input: "x"}).live().options({stdout: <capture>});
+    Job job = %(pwd).job().options(dir: "/", stdout: output)
+      .options(input: "x").live().options(stdout: <capture>);
     EXPECT_STR_EQ(job.output(), "/\n");
-    EXPECT_STR_EQ(%(pwd).job().options({dir: "/"}).pipe(%(cat)).output(),
+    EXPECT_STR_EQ(%(pwd).job().options(dir: "/").pipe(%(cat)).output(),
                   "/\n");
   }
   finally dir.remove_tree();
@@ -233,7 +245,7 @@ static void process_changes_after_start_raise(void) {
   Job job = %(true);
   job.status();
   int caught = 0;
-  try job.options({dir: "/"});
+  try job.options(dir: "/");
   catch %(bad-arg *detail): {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<operation>).string(), "Job.options");
@@ -247,7 +259,7 @@ static void process_changes_after_start_raise(void) {
   catch %(bad-arg *): caught++;
   try job.run();
   catch %(bad-arg *): caught++;
-  try %(true).job().options({cwd: "/"});
+  try %(true).job().options(cwd: "/");
   catch %(bad-arg *detail): {
     caught++;
     EXPECT_TRUE(detail.assoc(<option>).symbol() == <cwd>);
@@ -264,7 +276,7 @@ static void process_null_job_contract(void) {
   pending.push(NULL);
   String raised = NULL;
   $record_raise(raised, job.pipe(%(cat)));
-  $record_raise(raised, job.options({dir: "/"}));
+  $record_raise(raised, job.options(dir: "/"));
   $record_raise(raised, job.live());
   $record_raise(raised, job.run());
   $record_raise(raised, job.start());
@@ -296,7 +308,7 @@ static void process_start_failures_raise(void) {
                   "x2c-process-test-missing-program");
     EXPECT_INT_EQ(detail.assoc(<"errno">).integer(), ENOENT);
   }
-  try %(pwd).job().options({dir: "/x2c-process-test-missing"}).run();
+  try %(pwd).job().options(dir: "/x2c-process-test-missing").run();
   catch %(not-found *detail): {
     caught++;
     EXPECT_STR_EQ(detail.assoc(<path>).string(), "/x2c-process-test-missing");
@@ -312,7 +324,7 @@ static void process_start_failures_raise(void) {
   int before = dup(STDERR_FILENO);
   close(before);
   for (int i = 0; i < 64; i++) {
-    try %(pwd).job().options({stderr: <capture>, dir: "/x2c-missing"})
+    try %(pwd).job().options(stderr: <capture>, dir: "/x2c-missing")
       .output();
     catch %(not-found *): caught++;
   }
@@ -337,7 +349,7 @@ static void process_empty_input_is_empty_stdin(void) {
   dup2(link[0], STDIN_FILENO);
   close(link[0]);
   String output = "unset";
-  try output = %(cat).job().options({input: ""}).output();
+  try output = %(cat).job().options(input: "").output();
   finally {
     dup2(saved, STDIN_FILENO);
     close(saved);
@@ -349,7 +361,7 @@ static void process_nul_capture_keeps_the_record(void) {
   $test.scoped();
   int before = _open_descriptors();
   Job job = %(sh -c "printf 'a\\000b'; printf 'c\\000d' >&2").job()
-    .options({stderr: <capture>});
+    .options(stderr: <capture>);
   EXPECT_INT_EQ(job.status(), 0);
   EXPECT_INT_EQ(job.status(), 0);
   int caught = 0;
@@ -373,10 +385,10 @@ static void process_failed_starts_close_descriptors(void) {
   $test.scoped();
   int before = _open_descriptors(), caught = 0;
   for (int i = 0; i < 16; i++) {
-    try %(cat).job().options({input: "x", stdout: "/x2c-missing/out"})
+    try %(cat).job().options(input: "x", stdout: "/x2c-missing/out")
       .check();
     catch %(io-fail *): caught++;
-    try %(cat).job().options({input: "x", stderr: "/x2c-missing/err"})
+    try %(cat).job().options(input: "x", stderr: "/x2c-missing/err")
       .output();
     catch %(io-fail *): caught++;
   }
@@ -406,11 +418,11 @@ static void process_child_stdio_without_parent_stdio(void) {
   for (int fd = 0; fd < 3; fd++) close(fd);
   String output = NULL, errors = NULL, merged = NULL;
   try {
-    output = %(cat).job().options({input: "in"}).output();
-    errors = %(sh -c "echo err >&2").job().options({stderr: <capture>})
+    output = %(cat).job().options(input: "in").output();
+    errors = %(sh -c "echo err >&2").job().options(stderr: <capture>)
       .errors();
     merged = %(sh -c "cat; echo err >&2").job()
-      .options({input: "in\n", stderr: <stdout>}).output();
+      .options(input: "in\n", stderr: <stdout>).output();
   }
   finally {
     for (int fd = 0; fd < 3; fd++) {
@@ -444,7 +456,7 @@ static void process_scope_end_reaps_an_abandoned_job(void) {
   time_t start = time(NULL);
   Scope.open();
   Job abandoned = %(sleep 30).job()
-    .options({stderr: <capture>}).start();
+    .options(stderr: <capture>).start();
   pid = abandoned.pids[0];
   int output_fd = fileno(abandoned.output_file);
   int errors_fd = fileno(abandoned.errors_file);
@@ -465,7 +477,7 @@ static void process_scope_end_reaps_an_abandoned_job(void) {
 static void process_capture_transfer_clears_owned_field(void) {
   $test.scoped();
   Scope.open();
-  Job job = %(true).job().options({stderr: <capture>}).start();
+  Job job = %(true).job().options(stderr: <capture>).start();
   job.output_file.close();
   job.output_file = fopen("/dev/null", "w");
   int output_fd = fileno(job.output_file);

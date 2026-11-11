@@ -267,7 +267,7 @@ int Toolchain.preprocess(
   /* The empty standard input is the main file, so the unit is an included
      file whose own `#pragma once` stops an include cycle from splicing it
      again. The host ignores that pragma in a main file. */
-  Job command = _captured(arguments).options({input: ""});
+  Job command = _captured(arguments).options(input: "");
   int status = _capture(command, arguments.car(), output, errors);
   /* The dependency file is consumed and removed even after host failure. The
      returned status tells the caller whether stdout is usable. */
@@ -388,7 +388,7 @@ static List _module_shape(String loader) {
 // tool execution
 
 static Job _captured(List arguments) =>
-  arguments.job().options({stdout: <capture>, stderr: <capture>});
+  arguments.job().options(stdout: <capture>, stderr: <capture>);
 
 /* A tool that cannot start has no job and leaves the error in `failure`.
    Callers give it the status 127 a shell gives a missing program. */

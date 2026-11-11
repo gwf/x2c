@@ -126,8 +126,8 @@ static void write_interfaces(Path stage) {
   $(
     stage.join("bin/x2c"), "translate", "--out-dir", ".x2c-interfaces",
     @(sources.list())).job()
-    .options({dir: stage, env: {"X2C_HOME": "."}, stdout: <capture>,
-              stderr: <capture>})
+    .options(dir: stage, env: {"X2C_HOME": "."}, stdout: <capture>,
+              stderr: <capture>)
     .check();
   foreach (Path source, sources) {
     String name = %"$(source.stem()).xi";

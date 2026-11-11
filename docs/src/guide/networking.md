@@ -77,7 +77,7 @@ int main(void) {
   routes.get("/hello/:name", %!(HttpRequest req, HttpResponse res) => {
     res.json({greeting: req.params["name"]});
   });
-  HttpServer server = HttpServer.new(routes, {port: 8080, workers: 8});
+  HttpServer server = HttpServer.new(routes, port: 8080, workers: 8);
   defer server.close();
   server.serve();
   return 0;

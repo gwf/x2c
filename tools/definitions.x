@@ -74,8 +74,8 @@ Array Unit.load(Path x2c, Path root, List paths):
     int last = (batch + 1) * pending.len() / batches
     for (int at = first; at < last; at++): share.push(pending[at])
     jobs.push(%($x2c translate --dump-definitions @(share.list_free())).job()
-              .options({dir: root, stdout: work.join(%"$batch"),
-                        stderr: <capture>}).start())
+              .options(dir: root, stdout: work.join(%"$batch"),
+                        stderr: <capture>).start())
   Map found = {}
   for (int batch = 0; batch < batches; batch++):
     Job job = jobs[batch]

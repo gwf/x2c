@@ -483,7 +483,7 @@ static String _platform(void) {
 static void _run(List arguments, const char *what) {
   Job job = NULL;
   String errors = NULL;
-  try job = arguments.job().options({stderr: <capture>}).start();
+  try job = arguments.job().options(stderr: <capture>).start();
   catch %((!or not-found io-fail) *detail): {
     long error = detail.assoc(<"errno">);
     errors = $report.install.start_failed(arguments.car(), error);

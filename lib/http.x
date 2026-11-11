@@ -270,13 +270,14 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
 }
 
 /** Binds immediately; port 0 selects an available port.
-    Options use Symbol keys.
+    Keyword options use Symbol keys. Splice an existing Map with
+    `@options`; omitted options use the server defaults.
     Raises: `<bad-arg>` for fewer than one worker, an idle timeout below one
     millisecond, a negative body limit, a NULL `logger`, or an invalid port,
     `<not-found>` when the host does not resolve, or `<io-fail>` on a host
     failure while binding, as `Listener.bind` does.
 */
-HttpServer HttpServer.new(Router router, Map options) {
+HttpServer HttpServer.new(Router router, Map @options) {
   HttpServer s = Scope.calloc(1, sizeof(struct HttpServer));
   int ready = 0;
   defer if (!ready && s.owns_logger) s.logger.free();

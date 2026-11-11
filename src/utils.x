@@ -150,7 +150,7 @@ int Compiler.run_command(String name, List arguments) {
   if (!path)
     $fail.utils_command_missing(name);
   Map options = {env: Compiler.command_environment(name), stdout: <inherit>};
-  try return $(path, @arguments).job().options(options).status();
+  try return $(path, @arguments).job().options(@options).status();
   catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
   return 2;
 }

@@ -32,7 +32,7 @@ static String _generated(List translate, Path path, Path work):
   Path.remove_tree(work)
   Path.make_dirs(work)
   List command = translate.append($("--out-dir", work, path))
-  if command.job().options({stderr: <capture>}).status(): return NULL
+  if command.job().options(stderr: <capture>).status(): return NULL
   String stem = path.stem()
   return work.join(%"$stem.c").read_text() + work.join(%"$stem.h").read_text()
 
