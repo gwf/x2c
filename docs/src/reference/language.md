@@ -4956,7 +4956,10 @@ prefix without a qualifier, then a prefix with one, such as zlib's
 In a collected header, a name with no visible definition directly before a
 builtin type word, qualifier, storage class, or `inline`, as in
 `API int f(void);` with `API` defined only for the C compiler, contributes
-nothing.
+nothing. So does an undeclared name directly before a second name that a
+declarator follows: in `API handle *open(void);` and
+`API bool ready(void);` the second name is the type. A macro that another
+header defines has no visible definition in the header that uses it.
 
 A GNU attribute or a function-like attribute macro after a declarator or
 parameter, `int a __attribute__((unused)) = 1, b = 2;` or

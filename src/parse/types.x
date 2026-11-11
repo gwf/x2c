@@ -614,13 +614,21 @@ module int _prefix_macro_words(Compiler c, int rank, Array words) {
 /* A collected C header may prefix a declaration with a macro defined only
    where collection cannot see it, such as on the C compile line. A name
    before a declaration keyword cannot be a type, so it expands to storage,
-   visibility, or attributes and contributes nothing to the collected type. */
+   visibility, or attributes and contributes nothing to the collected type.
+   Neither can an undeclared name before a second name that a declarator
+   follows: in `API handle *open(void);` and `API bool ready(void);` the
+   second name is the type. */
 static int _unseen_prefix(Compiler c) {
   if (!c.shallow || !c.filename.endswith(".h")) return 0;
-  Symbol next = c.peek(1);
-  return next.is_builtin_type() || next.is_type_modifier() ||
-         next.is_type_qualifier() || next.is_storage_class() ||
-         next.is_inline();
+  Token after = Token.skip_trivia(c.token + 1);
+  Symbol next = after.type;
+  if (next.is_builtin_type() || next.is_type_modifier() ||
+      next.is_type_qualifier() || next.is_storage_class() ||
+      next.is_inline())
+    return 1;
+  if (next != <ident> || c.sym.get($(c.token.text))) return 0;
+  Symbol declarator = Token.skip_trivia(after + 1).type;
+  return declarator == <*> || declarator == <ident>;
 }
 
 /* A template's enumerator is named by a hole, a meta-call slot, or a name
