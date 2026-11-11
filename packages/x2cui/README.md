@@ -222,6 +222,17 @@ opens it, and `gallery --shots DIR` draws every page off screen. Drawn
 that way, each page is the same image, byte for byte, as the same page of
 CUI's C gallery.
 
+`examples/stress.x` is an animation load with a displayed frame rate
+(`make run-stress`). It redraws on every frame and animates as many items
+as its slider asks for: moving circles on a canvas, or cards that each
+hold a spinner, a badge, and a moving progress bar. The header shows
+frames per second, the time between frames, the time the program spent
+describing the frame, and the frame's vertices and draw commands. A
+window waits for the display, so the rate stops at the display's rate;
+`stress --no-vsync` lifts that to CUI's limit of 120 frames per second.
+`stress --frames N [shapes|components [ITEMS]]` times N frames off screen
+with the software renderer and prints the means.
+
 `examples/scenes.x` is a check, not an application. It has one small
 scene for each of CUI's 201 components, named for the component and
 grouped into families under `examples/scenes/`. `scenes --shots DIR`
@@ -239,8 +250,9 @@ make wasm-runtime                 # at the repository root, once
 make -C packages/x2cui web-serve  # then open http://127.0.0.1:4399/
 ```
 
-`make web` writes `builds/web/gallery.js`, `gallery.wasm`, and
-`index.html`. It needs Emscripten. The program is 64-bit WebAssembly and
+`make web` writes `builds/web/gallery.js`, `gallery.wasm`, `stress.js`,
+`stress.wasm`, and `index.html`. `http://127.0.0.1:4399/?stress` opens the
+stress test in place of the gallery. It needs Emscripten. The program is 64-bit WebAssembly and
 draws with WebGL 2 through CUI's SDL2 window layer. The browser must
 support 64-bit WebAssembly memory and JavaScript Promise Integration;
 `web/index.html` says so where one is missing. `gallery.wasm` is 2.6 MB,

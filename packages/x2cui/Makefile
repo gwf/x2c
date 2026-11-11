@@ -16,7 +16,7 @@ PACKAGE_LINK := $(CUI_PREFIX)/lib/libcui.a -Wl,-framework,Cocoa \
 # Each example with files of its own keeps them in a directory beside it.
 PACKAGE_X_FLAGS += --x-include-dir examples
 
-.PHONY: run run-interactive run-gallery web web-check web-serve
+.PHONY: run run-interactive run-gallery run-stress web web-check web-serve
 
 check: test run
 
@@ -26,8 +26,9 @@ example: builds/gallery
 
 # The gated runs draw off screen and write PNGs. A window needs a
 # WindowServer connection, which no gate has.
-run: builds/todo builds/scenes
+run: builds/todo builds/scenes builds/stress
 	./builds/todo --shot builds/todo.png
+	./builds/stress --frames 30
 	./builds/scenes --shots builds/shots
 	./builds/scenes --check $(CUI_INCLUDE)/cui/cui.h
 
@@ -36,6 +37,10 @@ run-interactive: builds/todo
 
 run-gallery: builds/gallery
 	./builds/gallery
+
+# The frame rate stops at the display's rate; `stress --no-vsync` lifts it.
+run-stress: builds/stress
+	./builds/stress
 
 # Each file under examples/scenes is a unit of its own beside the entry.
 SCENE_UNITS := $(wildcard examples/scenes/*.x)
@@ -64,7 +69,7 @@ WASM_CUI = $(shell $(WASM_DEPS) path $(WASM_MANIFEST) prefix)
 WASM_LINK := -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 \
 	-sINITIAL_MEMORY=64MB -sMAXIMUM_MEMORY=1GB -sSTACK_SIZE=8MB
 
-web: builds/web/gallery.js builds/web/index.html
+web: builds/web/gallery.js builds/web/stress.js builds/web/index.html
 
 # Draws every page of the gallery off screen under Node.
 web-check: builds/web/gallery-node.cjs
@@ -83,11 +88,15 @@ $(WASM_RUNTIME):
 	@echo "missing $@: run 'make wasm-runtime' at the repository root"
 	@exit 1
 
-# The link inputs: the gallery's objects, the package's archive, x2c's
-# browser runtime, and CUI's browser archive. The list keeps its time
-# while it names the same inputs and none of them is newer, so the link
-# runs only after a change.
-builds/web/objects.rsp: examples/gallery.x $(GALLERY_UNITS) \
+# The link inputs of a browser program: its objects, the package's
+# archive, x2c's browser runtime, and CUI's browser archive. The list keeps
+# its time while it names the same inputs and none of them is newer, so
+# the link runs only after a change. WEB_UNITS names a program's other
+# units.
+builds/web/gallery.rsp: WEB_UNITS := $(GALLERY_UNITS)
+builds/web/gallery.rsp: $(GALLERY_UNITS)
+
+builds/web/%.rsp: examples/%.x \
 		$(PACKAGE_CONSUMER_DEPS) $(WASM_MANIFEST) tools/wasm-cc \
 		| builds/web
 	$(WASM_DEPS) prepare $(WASM_MANIFEST)
@@ -95,26 +104,30 @@ builds/web/objects.rsp: examples/gallery.x $(GALLERY_UNITS) \
 	  --output builds/web/libx2cui.a --build-dir builds/web/package \
 	  --c-include-dir src --c-include-dir $(WASM_CUI)/include \
 	  $(filter %.c,$(PACKAGE_GENERATED)) $(PACKAGE_NATIVE)
+	mkdir -p builds/web/$*/obj
 	$(X2C) build -c --cc $(WASM_CC) --meta-cc cc -Os \
-	  --build-dir builds/web/gallery --x-include-dir src \
+	  --build-dir builds/web/$* --x-include-dir src \
 	  --package-dir .. -I $(WASM_CUI)/include --x-include-dir examples \
 	  --c-include-dir src --c-include-dir $(WASM_CUI)/include \
-	  examples/gallery.x $(GALLERY_UNITS)
-	{ find builds/web/gallery/obj -name '*.o'; \
+	  $(if $(WEB_UNITS),,--output builds/web/$*/obj/$*.o) \
+	  $< $(WEB_UNITS)
+	{ find builds/web/$*/obj -name '*.o'; \
 	  echo builds/web/libx2cui.a; \
 	  echo -Wl,--whole-archive; echo $(WASM_RUNTIME); \
 	  echo -Wl,--no-whole-archive; \
 	  echo $(WASM_CUI)/lib/libcui.a; } > $@.new
 	if cmp -s $@.new $@ && \
-	    [ -z "$$(find builds/web/gallery/obj builds/web/libx2cui.a \
+	    [ -z "$$(find builds/web/$*/obj builds/web/libx2cui.a \
 	               -type f -newer $@)" ]; \
 	  then rm -f $@.new; else mv $@.new $@; fi
 
-builds/web/gallery.js: builds/web/objects.rsp $(WASM_RUNTIME)
+.PRECIOUS: builds/web/%.rsp
+
+builds/web/%.js: builds/web/%.rsp $(WASM_RUNTIME)
 	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) -sMODULARIZE=1 -sEXPORT_ES6=1 \
 	  -sENVIRONMENT=web -sJSPI -sMIN_WEBGL_VERSION=2 \
 	  -sMAX_WEBGL_VERSION=2 -sGL_ENABLE_GET_PROC_ADDRESS=1
 
-builds/web/gallery-node.cjs: builds/web/objects.rsp $(WASM_RUNTIME)
+builds/web/%-node.cjs: builds/web/%.rsp $(WASM_RUNTIME)
 	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) -sENVIRONMENT=node \
 	  -sNODERAWFS=1

@@ -946,3 +946,25 @@ Objective-C runtime in C; it does nothing on other platforms. Captures of
 a real window gave equal title bar and content pixels: (18, 18, 18) in
 the dark theme and (255, 255, 255) in the light theme. During the theme's
 fade the title bar is one frame behind the content.
+
+
+## Stress example (2026-11-11)
+
+CUI has no stress-test component and no frame-rate display; its
+`tests/bench.c` and `tests/soak.c` are headless. `examples/stress.x` is an
+x2c example built from existing components: a canvas of moving circles
+and a grid of animated cards, with a header of frame figures. `make run`
+times 30 frames of it off screen as a check. The browser build makes it
+too; `index.html?stress` opens it.
+
+Measured on this Mac on 2026-11-11, off screen at 1240 by 820 with the
+software renderer, mean of a whole frame: 2,000 shapes 0.96 ms native and
+4.9 ms under Node; 20,000 shapes 6.0 ms native; 2,000 components 2.2 ms
+native and 7.8 ms under Node. In a window with `--no-vsync`, 2,000 shapes
+ran at 110 frames per second, near CUI's limit of 120. The components
+load draws only the cards in view, so its vertex count stops growing once
+the window is full; its layout work still grows with the item count.
+
+The browser rule for a single-unit program passes `--output`, because
+`x2c build -c` of one unit writes its object beside the working
+directory, not under `--build-dir`.

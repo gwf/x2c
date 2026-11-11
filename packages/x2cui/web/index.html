@@ -38,14 +38,16 @@
   } else if (typeof WebAssembly.Suspending !== "function") {
     stop("This browser does not support JavaScript Promise Integration.");
   } else {
-    const { default: start } = await import("./gallery.js");
+    // index.html?stress opens the stress test in place of the gallery.
+    const program = location.search === "?stress" ? "stress" : "gallery";
+    const { default: start } = await import(`./${program}.js`);
     canvas.focus();
     canvas.addEventListener("pointerdown", () => canvas.focus());
     try {
       await start({ canvas, print: (line) => console.log(line),
                     printErr: (line) => console.error(line) });
     } catch (error) {
-      stop("The gallery stopped: " + error);
+      stop("The program stopped: " + error);
       throw error;
     }
   }
