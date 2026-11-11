@@ -1147,7 +1147,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _170 = String_new(".so");
   _171 = String_new("shared-library");
   _172 = String_new("shared-library is not supported by this compiler");
-  _173 = String_new("x2c 0.15.1");
+  _173 = String_new("x2c 0.16.0");
   _174 = String_new("input is a directory: ");
   _175 = String_new("input is not a regular file: ");
   _176 = String_new("input does not exist: ");

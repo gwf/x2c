@@ -624,6 +624,8 @@ static Var _finish_fnmod(Compiler c, Var modifier) {
   match (modifier) {
     case %(fnmod (params *parameters)):
       return %(fnmod (params @(_finish_prototype(c, parameters))));
+    // A dimension `Type.parts` copied from a Type is already its spelling.
+    case %(dim ((!is ? type string))): return modifier;
     case %(dim ?expression):
       return %(dim $(c.bind_syntax(expression, <expression>, NULL)));
   }

@@ -99,6 +99,7 @@ static int List_truth(List);
 static inline Var List_car(List lst);
 
 static inline int List_try_next(List lst, List * cursor, Var * out){
+  (void) lst;
   if(! cursor) return 0;
   if(! out) return 0;
   List rest =(* cursor);

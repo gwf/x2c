@@ -1681,7 +1681,7 @@ static List _call(Compiler c, List ast){
           }
 
         }
-        List parameters = NULL;  if(Type_function_parts(Sym_resolve_key(c -> sym, Var_type(Var_cadr(callee))), &(parameters), NULL)) return _typed_call(c, Var_list_payload(callee), parameters, arguments);
+        List parameters = NULL;  Type signature = Sym_resolve_key(c -> sym, Var_type(Var_cadr(callee)));  if(Type_function_parts(signature, &(parameters), NULL)) return _typed_call(c, Var_list_payload(callee), parameters, arguments);  if(Type_is_pointer(signature) && Type_function_parts(Sym_resolve_key(c -> sym, Type_dereference(signature)), &(parameters), NULL)) return _typed_call(c, Var_list_payload(callee), parameters, arguments);
       }
 
     }

@@ -1229,6 +1229,7 @@ static RegexMatch _search(Regex regex, String subject, int offset){
 }
 
 static int _run(Matcher * m, _RegexNode n, int pos, Rest k){
+  if(_x2c_stack_below((* m).floor)) _too_deep(&((* m)));
   for(;  n;  n = n -> next){
     switch(n -> kind){
       case 39272 : case 2994 : if(! _accepts(&((* m)), n, pos)) return 0;
@@ -1361,7 +1362,7 @@ _Noreturn static void _too_deep(Matcher * m){
     Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("a group repeated more times than one match allows")), NULL)));
     Var _x2c_gensym_literal_part_11 = int_var((* m).depth);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 830,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/regex.x",.function = "_too_deep",.line = 831,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_13, 1358596898646632, 4, Symbol_var(34096809266140), _x2c_gensym_literal_part_8, Symbol_var(34470112412), _x2c_gensym_literal_part_9, Symbol_var(1218550748), _x2c_gensym_literal_part_10, Symbol_var(25782888), _x2c_gensym_literal_part_11);
       __builtin_unreachable();
     }

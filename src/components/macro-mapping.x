@@ -4,8 +4,9 @@
 #include "compiler/compiler.x"
 #include "meta.x"
 
-/* The syntax prelude supplies the decorator. This helper returns pending
-   applications, so ordinary insertion owns their kind, binding and hygiene.
+/* The syntax prelude supplies the decorator. This helper returns one
+   invocation of the generator per row, written at the `expand` token, so
+   ordinary insertion owns their kind, binding and hygiene.
    A meta call's rows are read as its value, since rows of syntax such as
    names have no lifted expression. A call that returns an expression, and
    any other input, is read as a constant. */
@@ -35,7 +36,9 @@ meta List _x2c_expand_rows(List generator, List input) {
       x2c_diagnostic_fail(
         %"expand row $index expects $expected $noun; got $supplied", %());
     }
-    code.push(Macro_apply(generator, arguments));
+    List application =
+      c.evaluate_macro_slot(Macro_apply(generator, arguments));
+    code.push(%(macro-invoke @(application[1:3]) $(c.token)));
   }
   return %(seq @(code.list_free()));
 }

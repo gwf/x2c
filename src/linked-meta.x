@@ -1413,7 +1413,9 @@ List _x2c_expand_rows(List generator, List input) {
       x2c_diagnostic_fail(
         %"expand row $index expects $expected $noun; got $supplied", %());
     }
-    code.push(Macro_apply(generator, arguments));
+    List application =
+      c.evaluate_macro_slot(Macro_apply(generator, arguments));
+    code.push(%(macro-invoke @(application[1:3]) $(c.token)));
   }
   return %(seq @(code.list_free()));
 }

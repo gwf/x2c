@@ -194,6 +194,10 @@ static int _fills_whole(Compiler c, Type type, List value) {
   if (_resolve_shape(c, source) == resolved) return 1;
   if (c.sym.is_var_type(type)) return 1;
   if (_fills_char_array(c, type, value)) return 1;
+  /* A value the aggregate's declared converter accepts converts to the
+     whole aggregate, as it does outside braces. */
+  if (source && c.converter_call(
+    value, source.canonicalize(), type.canonicalize())) return 1;
   return !resolved.is_array() && !resolved.is_aggregate();
 }
 
