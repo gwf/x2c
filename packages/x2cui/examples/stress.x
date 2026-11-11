@@ -80,20 +80,42 @@ static float sweep(float phase) {
 
 typedef struct Field { int count; float clock; cui_color colors[6]; } Field;
 
-/* Each circle's path depends only on its index and the clock, so a frame
-   is the same wherever it is drawn. */
+/* Returns a number from 0 up to 1 for item `item` and its property
+   `property`. The numbers of different items and properties are
+   unrelated, as random draws are, and the same on every run. */
+static float chance(int item, int property) {
+  unsigned bits = (unsigned) item * 0x9e3779b9u + (unsigned) property;
+  bits = (bits ^ bits >> 16) * 0x85ebca6bu;
+  bits = (bits ^ bits >> 13) * 0xc2b2ae35u;
+  bits ^= bits >> 16;
+  return (bits >> 8) / 16777216.0f;
+}
+
+/* Returns where a point that left 0 and travelled `distance` is, when it
+   turns back at 0 and at `extent`. */
+static float reflected(float distance, float extent) {
+  float along = fmodf(fabsf(distance), 2 * extent);
+  return along < extent ? along : 2 * extent - along;
+}
+
+/* Each circle has its own start, direction, speed, size, and color, and
+   moves in a straight line that turns back at the edges. Its place
+   depends only on its index and the clock, so a frame is the same
+   wherever it is drawn. */
 static void paint_shapes(cui_ctx *context, cui_rect area, void *user) {
   Ui ui = context;
   Field *field = user;
   for (int i = 0; i < field.count; i++) {
-    float first = fraction(i * 0.6180339f), second = fraction(i * 0.7548777f);
-    float third = fraction(i * 0.5698403f);
-    float radius = 3 + 6 * third;
-    float across = sweep(field.clock * (0.04f + 0.2f * first) + second);
-    float down = sweep(field.clock * (0.04f + 0.2f * second) + third);
-    cui_vec2 centre = { area.x + radius + (area.w - 2 * radius) * across,
-                        area.y + radius + (area.h - 2 * radius) * down };
-    ui.draw_circle(centre, radius, field.colors[i % 6]);
+    float radius = 3 + 6 * chance(i, 0);
+    float wide = area.w - 2 * radius, high = area.h - 2 * radius;
+    float angle = 6.2831853f * chance(i, 1);
+    float travelled = (30 + 220 * chance(i, 2)) * field.clock;
+    cui_vec2 centre = {
+      area.x + radius + reflected(wide * chance(i, 3) +
+                                  travelled * cosf(angle), wide),
+      area.y + radius + reflected(high * chance(i, 4) +
+                                  travelled * sinf(angle), high) };
+    ui.draw_circle(centre, radius, field.colors[(int) (6 * chance(i, 5))]);
   }
 }
 
@@ -111,7 +133,8 @@ static void draw_components(Ui ui, Stress &stress) {
   $cui.row(ui, { .width = CUI_FILL, .height = CUI_FILL, .wrap = true,
                  .gap = 8, .scroll_y = true }) {
     for (int i = 0; i < count; i++) {
-      float value = sweep(stress.clock * 0.3f + i * 0.137f);
+      float value = sweep(stress.clock * (0.1f + 0.5f * chance(i, 6)) +
+                          chance(i, 7));
       $cui.id_index(ui, i)
       $cui.card(ui, { .width = CUI_PX(96), .pad = 8, .gap = 6 }) {
         $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
