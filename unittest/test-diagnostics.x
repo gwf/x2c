@@ -12,9 +12,9 @@ static void diagnostics_records_entries(void) {
   List first_notes = %( "initialize flag before use" );
   File file;
   int saved = Test_capture_stderr(file);
-  diag.report(<first>, "first", NULL, first_notes);
-  diag.report(<second>, "second", NULL, NULL);
-  diag.report(<third>, "third", NULL, NULL);
+  diag.report(<first>, "first", NULL, @first_notes);
+  diag.report(<second>, "second", NULL);
+  diag.report(<third>, "third", NULL);
   String printed = Test_captured_stderr(file, saved);
 
   EXPECT_INT_EQ(diag.count, 2);
@@ -58,14 +58,14 @@ static void diagnostics_release_keeps_or_discards(void) {
   int saved = Test_capture_stderr(file);
   DiagnosticsHold hold = diag.hold();
   EXPECT_NULL(diag.printer);
-  diag.report(<discarded>, "discarded", NULL, NULL);
+  diag.report(<discarded>, "discarded", NULL);
   diag.release(hold, 0);
   EXPECT_PTR_EQ(diag.printer, printer);
   EXPECT_INT_EQ(diag.count, 0);
   EXPECT_INT_EQ(diag.entries.len(), 0);
 
   hold = diag.hold();
-  diag.report(<kept>, "kept", NULL, NULL);
+  diag.report(<kept>, "kept", NULL);
   EXPECT_STR_EQ(Test_captured_stderr(file, saved), NULL);
   saved = Test_capture_stderr(file);
   diag.release(hold, 1);
@@ -78,8 +78,8 @@ static void diagnostics_reset_clears_state(void) {
   $test.scoped();
 
   Diagnostics diag = Diagnostics.new(NULL, 1);
-  diag.report(<once>, "only", NULL, NULL);
-  diag.report(<ignored>, "later", NULL, NULL);
+  diag.report(<once>, "only", NULL);
+  diag.report(<ignored>, "later", NULL);
 
   EXPECT_INT_EQ(1, diag.count);
   EXPECT_TRUE(diag.reached_limit());

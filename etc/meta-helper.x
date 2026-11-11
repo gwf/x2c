@@ -78,15 +78,14 @@ static Map helper_started = NULL;
 static Map helper_tables = NULL;
 
 /* Raises the failure a body reports, which the call replies with. */
-static void _fail(String message, List notes) {
+static void _fail(String message, List @notes) {
   raise %(meta-fail (message $message) (notes $notes));
 }
 
 static void _unavailable(String name) {
   _fail(
     %"$name is not available to project meta code",
-    %("reason: it reads compiler state; pass what it answers as an"
-      "argument"));
+    "reason: it reads compiler state; pass what it answers as an", "argument");
 }
 
 /* The compiler checked and selected this module before building the group.
@@ -100,21 +99,21 @@ void *x2c_meta_native_symbol(String path, String name) {
     if (!handle)
       _fail(
         "cannot load native module in project meta helper",
-        %("module: $path" "reason: $(String.new(dlerror()))"));
+        %"module: $path", %"reason: $(String.new(dlerror()))");
     helper_modules[path] = handle;
   }
   void *target = dlsym(handle, name);
   if (!target)
     _fail(
       "native module has no C target for project meta code",
-      %("module: $path" "function: $name"));
+      %"module: $path", %"function: $name");
   return target;
 }
 
 static void _check_notes(String operation, List notes) {
   foreach (Var note, notes)
     if (note is not <string>)
-      _fail(%"$operation notes must be Strings", %("value: $(note.repr())"));
+      _fail(%"$operation notes must be Strings", %"value: $(note.repr())");
 }
 
 /* --- the operations a body may call ------------------------------------- */
@@ -123,24 +122,24 @@ List x2c_ident(String spelling) {
   if (!spelling.is_identifier())
     _fail(
       "x2c_ident requires an identifier spelling",
-      %("value: $(spelling.repr())"));
+      %"value: $(spelling.repr())");
   return $("x2c.ident", spelling);
 }
 
-void x2c_diagnostic_fail(String message, List notes) {
+void x2c_diagnostic_fail(String message, List @notes) {
   _check_notes("x2c_diagnostic_fail", notes);
-  _fail(message, notes);
+  _fail(message, @notes);
 }
 
 /* The failure carries the node, whose position the compiler reports. */
 void x2c_diagnostic_fail_at(
-  Var node, Symbol category, String message, List notes) {
+  Var node, Symbol category, String message, List @notes) {
   _check_notes("x2c_diagnostic_fail_at", notes);
   raise %(meta-fail
     (message $message) (notes $notes) (at $node) (category $category));
 }
 
-void x2c_diagnostic_warn(String message, List notes) {
+void x2c_diagnostic_warn(String message, List @notes) {
   _check_notes("x2c_diagnostic_warn", notes);
   helper_notices.push(%(warning $message $notes));
 }
@@ -159,7 +158,7 @@ String Code.binding_spelling(Var syntax) {
   }
   _fail(
     "Code.binding_spelling requires an identifier or binding",
-    %("value: $(syntax.repr())"));
+    %"value: $(syntax.repr())");
 }
 
 String Code.name(Code function) {
@@ -204,15 +203,15 @@ String x2c_embed_text(Var path) {
   if (!spelling)
     _fail(
       "x2c_embed_text requires a captured String literal or an "
-      "absolute path", %("value: $(path.repr())"));
+      "absolute path", %"value: $(path.repr())");
   if (!spelling.len())
-    _fail("x2c_embed_text requires a non-empty path", NULL);
+    _fail("x2c_embed_text requires a non-empty path");
   if (file && !spelling.startswith("/"))
     spelling = %"$(Path.dirname(file))/$spelling";
   String target = Path.absolute(spelling), text = NULL;
   try text = Path.read_text(target);
   catch %((!or not-found io-fail) *):
-    _fail("cannot read embedded text", %("path: $target"));
+    _fail("cannot read embedded text", %"path: $target");
   helper_notices.push(%(dependency $target $("%08x".printf(text.hash()))));
   return text;
 }
@@ -256,7 +255,7 @@ static Var _ask(String operation, List arguments) {
   if (!_reply(%(query $operation $arguments)))
     _fail(
       %"$operation requires arguments the compiler can read",
-      %("value: $(arguments.repr())"));
+      %"value: $(arguments.repr())");
   for (;;) {
     Var request = _request(3, helper_input);
     match (request) case %(answer ?answer): return answer;

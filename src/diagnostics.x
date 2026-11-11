@@ -144,9 +144,9 @@ String Compiler.text_source(Compiler c, int position, int &offset) {
     is active. Without one, exits the process with status 1.
 */
 void Compiler.report_error(
-  Compiler compiler, Symbol code, String message, Token token, List notes) {
+  Compiler compiler, Symbol code, String message, Token token, List @notes) {
   report_suspend();
-  compiler.report_problem(code, message, token, notes);
+  compiler.report_problem(code, message, token, @notes);
   Diagnostics diag = compiler.diagnostics;
   if (compiler.recovery_depth > 0) raise %(malformed (category $code));
   /* A unit that holds its diagnostics until it finishes has no printer yet.
@@ -161,10 +161,10 @@ void Compiler.report_error(
     message default match `Compiler.report_error`.
 */
 void Compiler.report_problem(
-  Compiler c, Symbol code, String message, Token token, List notes) {
+  Compiler c, Symbol code, String message, Token token, List @notes) {
   message = message ? message : "compiler error";
   List location = _compiler_location(c, token);
-  c.diagnostics.report(code, message, location, _notes(c, location, notes));
+  c.diagnostics.report(code, message, location, @(_notes(c, location, notes)));
 }
 
 // reporting
@@ -178,7 +178,7 @@ void Compiler.report_problem(
     outlive the store and its snapshots.
 */
 void Diagnostics.report(
-  Diagnostics diag, Symbol code, String message, List location, List notes) {
+  Diagnostics diag, Symbol code, String message, List location, List @notes) {
   if (diag.limit > 0 && diag.count >= diag.limit) {
     if (!diag.limit_notified) {
       diag.limit_notified = 1;
@@ -203,9 +203,9 @@ void Diagnostics.report(
     returns without raising or changing the process exit status.
 */
 void Compiler.report_warning(
-  Compiler c, Symbol code, String message, Token token, List notes) {
+  Compiler c, Symbol code, String message, Token token, List @notes) {
   List location = _compiler_location(c, token);
-  c.report_warning_at(code, message, location, _notes(c, location, notes));
+  c.report_warning_at(code, message, location, @(_notes(c, location, notes)));
 }
 
 /** Reports whether `name` is the generated spelling of an anonymous macro
@@ -398,8 +398,7 @@ int Compiler.token_column(Compiler c, Token token) {
     consumed. Defaults match `Compiler.report_warning`.
 */
 void Compiler.report_warning_at(
-  Compiler compiler, Symbol code, String message, List location,
-  List notes) {
+  Compiler compiler, Symbol code, String message, List location, List @notes) {
   report_suspend();
   Diagnostics diag = compiler.diagnostics;
   message = message ? message : "compiler warning";

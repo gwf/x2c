@@ -33,7 +33,7 @@ static macro Stmt $fail.collect_runtime_read(
   $c.report_error(
     <driver>,
     "cannot read runtime source",
-    $site, %("path: $($runtime)"));
+    $site, %"path: $($runtime)");
 }
 
 static macro Stmt $fail.collect_include_read(
@@ -41,7 +41,7 @@ static macro Stmt $fail.collect_include_read(
   $c.report_error(
     <driver>,
     "cannot read include",
-    $site, %("stage: collect" "include: $($target)" "path: $($path)"));
+    $site, "stage: collect", %"include: $($target)", %"path: $($path)");
 }
 
 static macro Stmt $fail.collect_package_unknown(
@@ -49,7 +49,7 @@ static macro Stmt $fail.collect_package_unknown(
   $c.report_error(
     <driver>,
     %"unknown package '$($name)'",
-    $site, %("$($search)"));
+    $site, %"$($search)");
 }
 
 static macro Stmt $fail.collect_package_read(
@@ -57,7 +57,7 @@ static macro Stmt $fail.collect_package_read(
   $c.report_error(
     <driver>,
     %"cannot read package '$($package.package)'",
-    $site, %( "path: $($entry)" ));
+    $site, %"path: $($entry)");
 }
 
 static macro Stmt $fail.collect_package_prefix(
@@ -65,22 +65,23 @@ static macro Stmt $fail.collect_package_prefix(
   $c.report_error(
     <driver>,
     %"package '$($name)' exposes unprefixed top-level declaration '$($spelling)'",
-    $site, %( "'$($unit)' is x2c source outside the package; include it $($fix)" ));
+    $site,
+    %"'$($unit)' is x2c source outside the package; include it $($fix)");
 }
 
 static macro Stmt $fail.collect_module_block(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "malformed module block",
-    $site, %("a module block lists member paths as strings, separated by"
-    "commas, between braces"));
+    $site, "a module block lists member paths as strings, separated by",
+    "commas, between braces");
 }
 
 static macro Stmt $fail.collect_module_second(Expr $c, Expr $site) {
   $c.report_error(
     <driver>,
     "a file holds one module block",
-    $site, NULL);
+    $site);
 }
 
 static macro Stmt $fail.collect_module_prefix(
@@ -88,9 +89,9 @@ static macro Stmt $fail.collect_module_prefix(
   $c.report_error(
     <driver>,
     %"module member '$($member)' takes the static prefix of '$($other)'",
-    $site, %("a file's statics take its path with each non-identifier"
-    "character made '_' and trailing '_' dropped, then '___'; rename one of"
-    "the files"));
+    $site, "a file's statics take its path with each non-identifier",
+    "character made '_' and trailing '_' dropped, then '___'; rename one of",
+    "the files");
 }
 
 static macro Stmt $fail.collect_module_read(
@@ -98,7 +99,7 @@ static macro Stmt $fail.collect_module_read(
   $c.report_error(
     <driver>,
     "cannot read module member",
-    $site, %("path: $($path)"));
+    $site, %"path: $($path)");
 }
 
 static macro Stmt $fail.collect_module_cycle(
@@ -106,14 +107,14 @@ static macro Stmt $fail.collect_module_cycle(
   $c.report_error(
     <driver>,
     %"module member '$($member)' is already being spliced",
-    $site, %("path: $($path)"));
+    $site, %"path: $($path)");
 }
 
 static macro Stmt $fail.collect_interface_write(Expr $c, Expr $site) {
   $c.report_error(
     <emit>,
     "failed to write interface file",
-    $site, NULL);
+    $site);
 }
 
 module Scope process_cache_scope = NULL;

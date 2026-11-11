@@ -56,7 +56,7 @@ List Compiler.render_placed(Compiler c, List code, Map held) {
 
 /* Writes `parts` in order: each String or number as a token, and each node
    emitted in place; a Symbol heads a node of its own. */
-module void _write(Emitter &e, List parts) {
+module void _write(Emitter &e, List @parts) {
   foreach (Var part in parts) _node(e, part);
 }
 
@@ -204,11 +204,11 @@ module void _emit(Emitter &e, List ast) {
       _node(e, bits);
     }
     case %(cons ?item ?tail):
-      _write(e, %("cons(" $item ", " $tail ")"));
+      _write(e, "cons(", item, ", ", tail, ")");
     case %(append ?head ?tail):
-      _write(e, %("List_append(" $head ", " $tail ")"));
+      _write(e, "List_append(", head, ", ", tail, ")");
     case %(c-assert ?test ?message):
-      _write(e, %("_Static_assert(" $test "," $message ");"));
+      _write(e, "_Static_assert(", test, ",", message, ");");
     case %(initcode ?input ?body): {
       _put_all(e, _initializer_macro(e, input, body));
       _put(e, ";");
@@ -224,7 +224,7 @@ module void _emit(Emitter &e, List ast) {
     case %(expr ? ?content): _node(e, content);
     case %(postfix ?op ?argument): _postfix(e, op, argument);
     case %(generic ?control *rows): _generic(e, control, rows);
-    case %(va-arg ?expr ?decl): _write(e, %("va_arg(" $expr ", " $decl ")"));
+    case %(va-arg ?expr ?decl): _write(e, "va_arg(", expr, ", ", decl, ")");
     case %(offsetof ?type ?member): {
       _put(e, "offsetof(");
       _put_all(e, _semantic_type(e, type));
@@ -247,13 +247,13 @@ module void _emit(Emitter &e, List ast) {
     }
     case %(while ?test ?body): _keyword_group(e, "while", test, body);
     case %(do ?body ?test):
-      _write(e, %("do" $body "while" "(" $test ")" ";"));
+      _write(e, "do", body, "while", "(", test, ")", ";");
     case %(for ?initial ?test ?step ?body):
-      _write(e, %("for" "(" $initial ";" $test ";" $step ")" $body));
+      _write(e, "for", "(", initial, ";", test, ";", step, ")", body);
     case %(switch ?expr ?body): _keyword_group(e, "switch", expr, body);
     case %(return): _put(e, "return;");
     case %(return (!set ?expr (expr ? ?))): _return(e, expr);
-    case %(goto ?label): _write(e, %("goto" $label ";"));
+    case %(goto ?label): _write(e, "goto", label, ";");
     case %(error-site): _put_all(e, _error_site(e));
     case %(raise ?cause (args *args)):
       _put_all(e, _raise(e, ast, cause, args));

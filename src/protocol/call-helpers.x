@@ -104,7 +104,7 @@ List Compiler.discard_helper(
 */
 List Compiler.wrapper_function(
   Compiler c, Type result, List binding, List params, List body) {
-  List lowered = Code.lowered(%(seq @body), NULL);
+  List lowered = Code.lowered(%(seq @body));
   return _generated_function(
     c, binding, $!Unit{ $result $binding(@params) { $lowered } });
 }

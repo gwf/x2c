@@ -196,7 +196,7 @@ static List _defer_environment(
 static List _defer_callback(
   Compiler c, List callback, List opaque, List env_binding,
   List env_local, List rewritten) {
-  List body = Code.lowered(%(seq $rewritten), NULL);
+  List body = Code.lowered(%(seq $rewritten));
   if (env_binding) {
     Type type = $(Ast.binding_spelling(env_binding));
     return c.bind_syntax(

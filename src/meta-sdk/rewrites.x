@@ -4,10 +4,10 @@
 */
 
 static alias fail_rewrite_pattern to MetaContext.reject(
-  "unsupported rewrite pattern", NULL);
+  "unsupported rewrite pattern");
 
 static alias fail_initialization_pattern to MetaContext.reject(
-  "after-initialization requires a declaration pattern", NULL);
+  "after-initialization requires a declaration pattern");
 
 /** Implements `Code.register_rewrite`, declared in `lib/meta.x`: the
     pattern's form selects the family and its keys. A function rule is
@@ -109,7 +109,7 @@ static Code _rewrite_registration(
   Array rows = [];
   foreach (Var kind in kinds)
     rows.push(%(rewrite $point $kind $name $shape $holes));
-  return $(Code.bound(function, rows.list_free()));
+  return $(Code.bound(function, @(rows.list_free())));
 }
 
 /* A function pattern is keyed by the return type it spells, or by `<any>`

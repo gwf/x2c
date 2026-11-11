@@ -30,7 +30,8 @@ static macro Stmt $fail.meta_helper_client_helper_timeout(
   $c.report_error(
     <macro>,
     "%s%g s".printf("this meta call ran longer than ", $limit),
-    $site, %("function: $($name)" "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none"));
+    $site, %"function: $($name)",
+    "set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
 }
 
 static macro Stmt $fail.meta_helper_client_helper_stopped(
@@ -38,7 +39,7 @@ static macro Stmt $fail.meta_helper_client_helper_stopped(
   $c.report_error(
     <macro>,
     "this meta call stopped the compile-time helper",
-    $site, %("function: $($name)" "reason: $($reason)"));
+    $site, %"function: $($name)", %"reason: $($reason)");
 }
 
 /** Owns one compiled helper's configuration and process. Callers close it
@@ -90,8 +91,8 @@ void Compiler.report_meta_error(
   int origin = _syntax_origin(node);
   Token token = origin ? NULL : site;
   with (c.origin = origin ? origin : c.origin) {
-    if (fatal) c.report_error(category, message, token, notes);
-    c.report_problem(category, message, token, notes);
+    if (fatal) c.report_error(category, message, token, @notes);
+    c.report_problem(category, message, token, @notes);
   }
 }
 
@@ -168,11 +169,11 @@ static Var _call_helper(
       Var reply = _next_reply(call);
       match (reply) {
         case %(warning ?(String message) ?(List notes)):
-          c.report_warning(<macro>, message, site, notes);
+          c.report_warning(<macro>, message, site, @notes);
         case %(value ?value): return value;
         case %(void): return void;
         case %(error ?(String message) ?(List notes)):
-          c.report_error(<macro>, message, site, notes);
+          c.report_error(<macro>, message, site, @notes);
         case %(error ?(String message) ?(List notes) (at ?node ?category)):
           c.report_meta_error(node, category, message, site, notes, 1);
         case %(dependency ?(String path) ?(String hash)):

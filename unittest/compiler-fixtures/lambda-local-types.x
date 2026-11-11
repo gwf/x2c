@@ -6,7 +6,7 @@
 meta static Code check_original_definition(Code function, String rule) {
   if (Code.name(function) != "record_reference") return function;
   if (!Code.body(function).search(%(struct ? (fields *))))
-    x2c_diagnostic_fail("function rule lost the local definition", NULL);
+    x2c_diagnostic_fail("function rule lost the local definition");
   x2c_place(%(unit-init), $!{ printf("%s sees local definition\n", $rule); });
   return function;
 }

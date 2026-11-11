@@ -352,8 +352,8 @@ static void _held_parts(List source, Symbol point, Array found) {
 static Var _kept_lowered(Var result, List source, Array parts) {
   if (result ~= %(code-value "lowered" *)) return result;
   Map kept = auto {};
-  kept[(void *) source] = Code.lowered(source, NULL);
-  foreach (List part in parts) kept[(void *) part] = Code.lowered(part, NULL);
+  kept[(void *) source] = Code.lowered(source);
+  foreach (List part in parts) kept[(void *) part] = Code.lowered(part);
   return Ast.replace_nodes(result, kept);
 }
 

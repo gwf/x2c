@@ -32,11 +32,11 @@ typedef struct PrintfFn {
 
 static macro Stmt $fail.expressions_dynamic_const(Expr $c, Expr $site) =>
   $c.report_error(
-    <type>, "dynamic update cannot target a const object", $site, NULL);
+    <type>, "dynamic update cannot target a const object", $site);
 
 static macro Stmt $fail.expressions_dynamic_address(Expr $c, Expr $site) =>
   $c.report_error(
-    <type>, "dynamic update requires an addressable object", $site, NULL);
+    <type>, "dynamic update requires an addressable object", $site);
 
 #include "expressions-reports.x"
 

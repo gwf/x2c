@@ -16,14 +16,14 @@ meta void starts(void) {
   Job job = List.job(command);
   job.start();
   started = job.pids[0];
-  x2c_diagnostic_fail("failed with a job running", %());
+  x2c_diagnostic_fail("failed with a job running");
 }
 
 meta void after(void) {
   int gone = started > 0 && kill((pid_t) started, 0) == -1 && errno == ESRCH;
   x2c_diagnostic_fail(
     gone ? "translation continued with the job gone"
-         : "translation continued with the job running", %());
+         : "translation continued with the job running");
 }
 
 void first(void) { $starts(); }

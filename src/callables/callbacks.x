@@ -3,35 +3,35 @@
 static macro Stmt $fail.callable_callback_direct(Expr $cb) =>
   _fail(
     $cb, "typed callback adapter source must be a direct function",
-    %("supported: a free function or Type.method designator"));
+    "supported: a free function or Type.method designator");
 
 static macro Stmt $fail.callable_callback_target(Expr $cb) =>
-  _fail($cb, "typed callback adapter target is incomplete", NULL);
+  _fail($cb, "typed callback adapter target is incomplete");
 
 static macro Stmt $fail.callable_callback_source(Expr $cb) =>
-  _fail($cb, "typed callback adapter source is incomplete", NULL);
+  _fail($cb, "typed callback adapter source is incomplete");
 
 static macro Stmt $fail.callable_callback_variadic(Expr $cb) =>
-  _fail($cb, "typed callback adapter cannot be variadic", NULL);
+  _fail($cb, "typed callback adapter cannot be variadic");
 
 static macro Stmt $fail.callable_callback_arity(
   Expr $cb, Expr $target_count, Expr $source_count) {
   String detail = "target has %d parameters; source has %d".printf(
     $target_count, $source_count);
-  _fail($cb, "typed callback adapter arity mismatch", $(detail));
+  _fail($cb, "typed callback adapter arity mismatch", detail);
 }
 
 static macro Stmt $fail.callable_callback_void_return(Expr $cb) =>
-  _fail($cb, "typed callback adapter does not support void return", NULL);
+  _fail($cb, "typed callback adapter does not support void return");
 
 static macro Stmt $fail.callable_callback_result(Expr $cb) =>
-  _fail($cb, "typed callback adapter return type mismatch", NULL);
+  _fail($cb, "typed callback adapter return type mismatch");
 
 static macro Stmt $fail.callable_callback_parameter(
   Expr $cb, Expr $index, Expr $target, Expr $source) {
   String detail = "parameter %d: %s cannot adapt to %s".printf(
     $index + 1, $target.repr(), $source.repr());
-  _fail($cb, "typed callback adapter parameter mismatch", $(detail));
+  _fail($cb, "typed callback adapter parameter mismatch", detail);
 }
 
 // callback adapters
@@ -165,8 +165,8 @@ static int _allows(Callback &cb, Type target, Type source) {
   }
 }
 
-static void _fail(Callback &cb, String message, List details) {
-  _adapter_error(cb.c, message, cb.target, cb.source, details);
+static void _fail(Callback &cb, String message, List @details) {
+  _adapter_error(cb.c, message, cb.target, cb.source, @details);
 }
 
 static List _publish_typed(Callback &cb, Type spelling) {

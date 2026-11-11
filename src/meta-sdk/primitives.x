@@ -5,17 +5,17 @@
 
 static macro Stmt $fail.meta_sdk_symbol_set_value(Expr $value) =>
   MetaContext.reject(
-    "_x2c_symbol_set requires Symbols", $("value:", $value.repr()));
+    "_x2c_symbol_set requires Symbols", "value:", $value.repr());
 
 static macro Stmt $fail.meta_sdk_symbol_set_duplicate(
   Expr $values, Expr $duplicate) =>
   MetaContext.reject(
     "_x2c_symbol_set requires distinct Symbols",
-    $("symbol:", $values[$duplicate].repr()));
+    "symbol:", $values[$duplicate].repr());
 
 static alias fail_native_declarations to MetaContext.reject(
   "native module sources declare no meta function",
-  %("declare each exported function with a bodyless meta prototype"));
+  "declare each exported function with a bodyless meta prototype");
 
 /** Implements `x2c_meta_definition_hashes`, declared in `lib/meta.x`. */
 Map x2c_meta_definition_hashes(void) {

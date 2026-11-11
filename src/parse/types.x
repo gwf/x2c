@@ -137,7 +137,7 @@ List Compiler.parse_enumerator(Compiler c, Type context) {
 module List _type_qualifiers(Compiler c) {
   Array quals = auto [];
   loop {
-    _x2c_complete_here(c, <type>, _x2c_type_keywords());
+    _x2c_complete_here(c, <type>, @(_x2c_type_keywords()));
     Symbol symbol = c.peek(0);
     if (symbol.is_type_qualifier()) {
       quals.push(symbol);

@@ -9,7 +9,7 @@ static macro Stmt $fail.literals_macro_pattern_static(
   $c.report_error(
     <parse>,
     "a macro pattern's arguments are binders, macro patterns, or %(...)",
-    $origin, NULL);
+    $origin);
 
 static macro Stmt $fail.literals_insert_name(
   Expr $c, Expr $site, Expr $sigil) {
@@ -18,7 +18,7 @@ static macro Stmt $fail.literals_insert_name(
     String hint = $sigil == <@>
       ? "use '@(...)' to splice an expression"
       : "use '$(...)' to insert an expression";
-    $c.report_error(<parse>, message, $site, $(hint));
+    $c.report_error(<parse>, message, $site, hint);
   }
 }
 

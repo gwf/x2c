@@ -9,14 +9,14 @@ static macro Stmt $fail.literals_symbol_bare(
       ? "use raise %(code (key value)...);"
       : "use catch %(code (key pattern)...):";
     $c.report_error(
-      <parse>, %"$label $role must be a bare Symbol", $origin, $(hint));
+      <parse>, %"$label $role must be a bare Symbol", $origin, hint);
   }
 }
 
 static macro Stmt $fail.literals_catch_detail(Expr $c, Expr $origin) =>
   $c.report_error(
     <parse>, "catch filter detail must be '*' or '(key pattern)'",
-    $origin, %("wrap keyed detail patterns in parentheses"));
+    $origin, "wrap keyed detail patterns in parentheses");
 
 /* error payloads
 
@@ -100,11 +100,11 @@ static List _parse_bare_symbol(
    locates the pair at its `(`. */
 static List _parse_detail_value(
   Compiler c, Token origin, String arity, String spliced, List note) {
-  if (c.peek(0) == <)>) c.report_error(<parse>, arity, origin, NULL);
+  if (c.peek(0) == <)>) c.report_error(<parse>, arity, origin);
   List value = _parse_list_head(c);
   if ((value ~= %(expr ("List") (splice *))) || (value ~= %(splice *)))
-    c.report_error(<parse>, spliced, origin, note);
-  if (c.peek(0) != <)>) c.report_error(<parse>, arity, origin, NULL);
+    c.report_error(<parse>, spliced, origin, @note);
+  if (c.peek(0) != <)>) c.report_error(<parse>, arity, origin);
   c.expect(<)>);
   return value;
 }

@@ -5,7 +5,7 @@ static macro Stmt $warn.region_use_ended(
   _warn(
     (*$f.w), <region>, $site,
     %"$($subject) is used after the region that allocated it ended",
-    _opened((*$f.w), $region));
+    @(_opened((*$f.w), $region)));
 
 static macro Stmt $warn.region_local_escape(
   Expr $f, Expr $site, Expr $subject, Expr $exit) {
@@ -13,7 +13,7 @@ static macro Stmt $warn.region_local_escape(
     %"$($subject) can outlive the local storage it points into when $($exit)";
   _warn(
     (*$f.w), <region>, $site, message,
-    %("local storage ends when the function returns"));
+    "local storage ends when the function returns");
 }
 
 static macro Stmt $warn.region_escape(
@@ -21,7 +21,7 @@ static macro Stmt $warn.region_escape(
   _warn(
     (*$f.w), <region>, $site,
     %"$($subject) can outlive the region it was allocated in when $($exit)",
-    _opened((*$f.w), $region));
+    @(_opened((*$f.w), $region)));
 
 static alias reason_returned to "returned";
 static alias reason_static_store to "stored into a static";
@@ -177,7 +177,7 @@ static String _exit_reason(Flow &f, Fact target, Region region) {
 // warnings
 
 module void _warn(
-  Walk &w, Symbol code, int origin, String message, List notes) {
+  Walk &w, Symbol code, int origin, String message, List @notes) {
   w.warnings.push(
     w.audit ? $(w.function, code, origin, message, notes)
             : $(code, origin, message, notes));

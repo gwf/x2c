@@ -22,45 +22,45 @@ static keyword loop $private.loop;
 static macro Stmt $fail.statements_raise_payload(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
-    $site, %("use raise %(code (key value)...);"));
+    $site, "use raise %(code (key value)...);");
 
 static macro Stmt $fail.statements_match_default(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "match default arm must be last",
-    $site, %("move default after every case arm"));
+    $site, "move default after every case arm");
 
 static macro Stmt $fail.statements_match_arm(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     %"expected 'case' or 'default' in match, found '$($c.token.text)'",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.statements_match_pattern(
   Expr $c, Expr $origin, Expr $pattern) =>
   $c.report_error(
     <parse>, "match case pattern must be a %() list literal",
-    $origin, $("pattern:", $pattern.repr()));
+    $origin, "pattern:", $pattern.repr());
 
 static macro Stmt $fail.statements_try_handler(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected 'catch' or 'finally' after try block",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.statements_catch_default(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "catch default arm must be last",
-    $site, %("move catch: after every filtered arm"));
+    $site, "move catch: after every filtered arm");
 
 static macro Stmt $fail.statements_catch_pattern(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "catch filter requires a %() pattern literal",
-    $site, %("use catch %(code (key pattern)...):"));
+    $site, "use catch %(code (key pattern)...):");
 
 static macro Stmt $fail.statements_return_void(
   Expr $c, Expr $site, Expr $type) =>
   $c.report_error(
     <type>, %"cannot return a void expression from a function returning $(
-      $type.repr())", $site, NULL);
+      $type.repr())", $site);
 
 // conditionals and loops
 
@@ -182,7 +182,7 @@ List Compiler.parse_governed(Compiler c, Symbol position) {
     `(seq ...)` node containing several block items.
 */
 List Compiler.parse_block_item(Compiler c) {
-  _x2c_complete_here(c, <block>, _x2c_block_keywords());
+  _x2c_complete_here(c, <block>, @(_x2c_block_keywords()));
   if (c.test_static_assert()) return c.parse_static_assert();
   List slot = c.try_parse_macro_slot(<block>);
   if (slot) return slot;
@@ -233,7 +233,7 @@ List Compiler.finish_return_statement(Compiler c, List expr) {
 /* Directives before an `else` follow the arm it continues. */
 static List _then_arm(Compiler c) {
   List arm = c.parse_governed(<statement>);
-  _x2c_complete_here(c, <continue>, %("else"));
+  _x2c_complete_here(c, <continue>, "else");
   return c.peek(0) == <else> ? _continued(c, arm) : arm;
 }
 
@@ -370,7 +370,7 @@ static Symbol _handler(Compiler c) {
 
 /* A `try` needs a `catch` or a `finally` after its body. */
 static List _catches(Compiler c) {
-  _x2c_complete_here(c, <continue>, %("catch" "finally"));
+  _x2c_complete_here(c, <continue>, "catch", "finally");
   Symbol handler = _handler(c);
   if (handler == <catch>) { c.next(); return _catch_cases(c); }
   if (handler != <finally>)
@@ -379,7 +379,7 @@ static List _catches(Compiler c) {
 }
 
 static List _finally(Compiler c) {
-  _x2c_complete_here(c, <continue>, %("finally"));
+  _x2c_complete_here(c, <continue>, "finally");
   if (_handler(c) != <finally>) return NULL;
   c.next();
   return c.parse_governed(<statement>);
@@ -425,7 +425,7 @@ static List _catch_arm(Compiler c, int &is_default, List handle) {
 /* Directives before a later `catch` or `finally` follow the arm. */
 static List _catch_body(Compiler c) {
   List body = c.parse_governed(<statement>);
-  _x2c_complete_here(c, <continue>, %("catch" "finally"));
+  _x2c_complete_here(c, <continue>, "catch", "finally");
   return _handler(c) ? _continued(c, body) : body;
 }
 
@@ -437,7 +437,7 @@ static List _catch_body(Compiler c) {
    A meta call written as the whole statement binds its result at `position`.
 */
 static List _statement(Compiler c, Symbol position) {
-  _x2c_complete_here(c, <statement>, _statement_keywords());
+  _x2c_complete_here(c, <statement>, @(_statement_keywords()));
   List slot = c.try_parse_macro_slot(<statement>);
   if (slot) return slot;
   List label = _label_statement(c);
@@ -495,7 +495,7 @@ static List _block_items(Compiler c, int anchor_items) {
   List present_before = c.present_references();
   defer c.restore_reference_presence(present_before);
   loop {
-    _x2c_complete_here(c, <block>, _x2c_block_keywords());
+    _x2c_complete_here(c, <block>, @(_x2c_block_keywords()));
     if (c.token != c.directives_taken)
       foreach (List directive in c.leading_preproc()) block.push(directive);
     if (c.peek(0) == <"}">) break;
@@ -586,7 +586,7 @@ static List _paren_expr(Compiler c) {
 
 static List _return_statement(Compiler c) {
   c.expect(<return>);
-  _x2c_complete_here(c, <expr>, %());
+  _x2c_complete_here(c, <expr>);
   if (c.peek(0) == <;>) {
     c.next();
     return c.finish_return_statement(NULL);

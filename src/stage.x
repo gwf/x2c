@@ -30,7 +30,7 @@ static macro Stmt $fail.stage_argument_constant(Expr $c, Expr $site) {
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
-    $site, %("an argument must be a constant, captured syntax, or a meta call"));
+    $site, "an argument must be a constant, captured syntax, or a meta call");
 }
 
 static macro Stmt $fail.stage_function_only(
@@ -38,9 +38,8 @@ static macro Stmt $fail.stage_function_only(
   $c.report_error(
     <macro>,
     %"'$($name)' can only be called at compile time",
-    $site, %("reason: it reaches a compiler operation, so no unit emits a"
-    "definition for it; call it from a macro or another meta"
-    "function"));
+    $site, "reason: it reaches a compiler operation, so no unit emits a",
+    "definition for it; call it from a macro or another meta", "function");
 }
 
 /** Evaluates a nested `$` call among a call's arguments. */
@@ -353,7 +352,7 @@ static List _data_literal(Compiler c, Type declared, Var value, Token site) {
 static void _refuse(Compiler c, Var value, Token site) {
   Map marks = auto {};
   List problem = Var.independent_data_problem(value, marks);
-  if (problem) c.report_error(<macro>, problem.car(), site, problem.cadr());
+  if (problem) c.report_error(<macro>, problem.car(), site, @(problem.cadr()));
 }
 
 /* Builds the parser's form of one data value, which

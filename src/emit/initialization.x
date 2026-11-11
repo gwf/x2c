@@ -78,7 +78,7 @@ static macro Stmt $fail.emit_static_switch(Expr $c, Expr $site) {
       "or within one case block";
     $c.report_error(
       <emit>, "switch cannot bypass dynamic static initialization",
-      $site, $(note));
+      $site, note);
   }
 }
 
