@@ -60,3 +60,18 @@ test("staging commands use the configured custom domain and root base", async ()
     "--index https://staging.x2c-lang.dev/packages/index.txt"));
   assert.ok(!result.stdout.includes("https://x2c-lang.dev"));
 });
+
+test("website-only staging separates website source from retained release", () => {
+  const website = "b".repeat(40);
+  const config = releaseDestination({ SITE_SOURCE_REF: website,
+    SITE_STAGED_SOURCE_REF: sha, SITE_RELEASE_CHANNEL: "staging",
+    SITE_CANDIDATE_ID: candidate });
+  const html = finalizeDestination('<html><head></head><body>' +
+    '<a href="https://github.com/gwf/x2c/blob/main/example.x">source</a>', config);
+  assert.ok(html.includes(`/blob/${website}/example.x`));
+  assert.ok(html.includes(`name="x2c-site-source" content="${website}"`));
+  assert.ok(html.includes(`name="x2c-candidate" content="${candidate}"`));
+  assert.throws(() => releaseDestination({ SITE_SOURCE_REF: website,
+    SITE_STAGED_SOURCE_REF: "main", SITE_RELEASE_CHANNEL: "staging",
+    SITE_CANDIDATE_ID: candidate }));
+});

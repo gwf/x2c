@@ -22,7 +22,10 @@ def api(path, method="GET", data=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--candidate", type=Path, required=True)
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument("--candidate", type=Path)
+    source.add_argument("--site-archive", type=Path,
+                        help="prepared website-only archive retaining staged release files")
     parser.add_argument("--expected-output", required=True)
     parser.add_argument("--repository", default="gwf/x2c-staging")
     args = parser.parse_args()
@@ -34,7 +37,8 @@ def main():
         raise RuntimeError("staging changed since selection; select current output explicitly")
     commit = api(f"{prefix}/git/commits/{head}")
     old_tree = api(f"{prefix}/git/trees/{commit['tree']['sha']}")["tree"]
-    archive = args.candidate / "site-staging.tar.gz"
+    archive = (args.candidate / "site-staging.tar.gz"
+               if args.candidate else args.site_archive)
     # The caller verifies manifest/site receipts using the trusted helper first.
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)
@@ -66,14 +70,14 @@ def main():
                  "sha": site_tree["sha"]})
     new_tree = api(f"{prefix}/git/trees", "POST", {"tree": tree})
     new_commit = api(f"{prefix}/git/commits", "POST", {
-        "message": "deploy selected x2c candidate", "tree": new_tree["sha"],
+        "message": "deploy selected x2c staging output", "tree": new_tree["sha"],
         "parents": [head]})["sha"]
     # A concurrent commit makes this non-fast-forward, and GitHub rejects it.
     api(f"{prefix}/git/refs/heads/main", "PATCH", {"sha": new_commit, "force": False})
     receipt = {"previous_output": head, "output_sha": new_commit,
                "site_sha256": hashlib.sha256(archive.read_bytes()).hexdigest(),
                "state": "output-committed"}
-    receipt_path = args.candidate / "staging-deployment.json"
+    receipt_path = archive.parent / "staging-deployment.json"
     receipt_path.write_text(json.dumps(receipt, indent=2) + "\n")
     api(f"{prefix}/actions/workflows/pages.yml/dispatches", "POST", {
         "ref": "main", "inputs": {"output_sha": new_commit}})

@@ -1,0 +1,98 @@
+name: stage website only
+on:
+  workflow_call:
+    inputs:
+      source_sha:
+        required: true
+        type: string
+      expected_output:
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  website:
+    runs-on: ubuntu-24.04
+    environment: staging-publication
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: trusted
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.source_sha }}
+          path: source
+          persist-credentials: false
+      - uses: actions/checkout@v5
+        with:
+          repository: gwf/x2c-staging
+          ref: ${{ inputs.expected_output }}
+          path: staged
+          persist-credentials: false
+      - name: Select website and retained release
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          [[ "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_SHA"
+          git -C source fetch origin dev
+          git -C source merge-base --is-ancestor "$SOURCE_SHA" origin/dev
+          python3 - <<'PY'
+          import json, os
+          release = json.load(open('staged/public/release-candidate.json'))
+          assert release['destination'] == 'staging'
+          with open(os.environ['GITHUB_ENV'], 'a') as env:
+              env.write('SITE_STAGED_SOURCE_REF=' + release['source_sha'] + '\n')
+              env.write('SITE_CANDIDATE_ID=' + release['identity'] + '\n')
+          PY
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: source/site/package-lock.json
+      - uses: ./trusted/.github/actions/install-mdbook
+      - name: Install website dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cloc
+          npm ci --prefix source/site
+      - name: Build website without rebuilding release binaries
+        env:
+          SITE_SOURCE_REF: ${{ inputs.source_sha }}
+          SITE_RELEASE_CHANNEL: staging
+          SITE_URL: https://staging.x2c-lang.dev
+          SITE_BASE: /
+        run: npm --prefix source/site run build
+      - name: Retain staged release and check site
+        env:
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          python3 trusted/etc/release/prepare-website.py \
+            --site source/site/dist --staged staged/public \
+            --source-sha "$SOURCE_SHA" --output prepared/site-staging.tar.gz
+          cd source
+          node site/scripts/check-built-site.mjs
+      - uses: actions/create-github-app-token@v2
+        id: staging-token
+        with:
+          app-id: ${{ vars.STAGING_APP_ID }}
+          private-key: ${{ secrets.STAGING_APP_PRIVATE_KEY }}
+          owner: gwf
+          repositories: x2c-staging
+      - name: Deploy website through staging Pages
+        env:
+          GH_TOKEN: ${{ steps.staging-token.outputs.token }}
+          EXPECTED_OUTPUT: ${{ inputs.expected_output }}
+        run: |
+          python3 trusted/etc/release/deploy-staging.py \
+            --site-archive prepared/site-staging.tar.gz \
+            --expected-output "$EXPECTED_OUTPUT"
+      - name: Verify live website and retained release files
+        run: python3 trusted/etc/release/verify-website.py --site source/site/dist
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: website-staging
+          path: prepared

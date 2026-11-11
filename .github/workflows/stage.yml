@@ -3,13 +3,21 @@ name: stage candidate
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: Stage a full candidate or update only the website
+        type: choice
+        options: [candidate, website]
+        default: candidate
+      source_sha:
+        description: Exact dev source SHA for a website-only update
+        type: string
       build_run:
         description: Successful candidate build run ID
-        required: true
+        required: false
         type: string
       identity:
         description: Exact candidate identity selected from build manifest
-        required: true
+        required: false
         type: string
       expected_output:
         description: Current staging repository main commit (compare-and-swap)
@@ -24,7 +32,15 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  website:
+    if: inputs.mode == 'website'
+    uses: ./.github/workflows/staging-website.yml
+    with:
+      source_sha: ${{ inputs.source_sha }}
+      expected_output: ${{ inputs.expected_output }}
+    secrets: inherit
   stage:
+    if: inputs.mode != 'website'
     outputs:
       runners: ${{ steps.matrix.outputs.runners }}
     runs-on: ubuntu-24.04
