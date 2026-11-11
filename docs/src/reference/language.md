@@ -2082,6 +2082,113 @@ Decorator continues onto its next target. Defining a named decorator does
 not apply it. Constructing or storing a Macro value in ordinary code also
 does not consume following source.
 
+### Method-form macros
+
+A decorator or Expression macro named `$T.NAME`, where `T` is a named type,
+can also be invoked with method syntax on a receiver of type `T`. The
+receiver becomes the macro's first explicit argument, and the parenthesized
+arguments follow it:
+
+```x2c
+~#include <stdio.h>
+typedef struct Ui { int *depth; } Ui;
+
+int Ui.text(Ui ui, String text) =>
+  printf("%*s%s\n", *ui.depth * 2, "", text);
+
+macro Decorator $Ui.row(Stmt $body, Expr $ui, Expr $label) {
+  {
+    Ui row = $ui;
+    row.text($label);
+    (*row.depth)++;
+    $body
+    (*row.depth)--;
+  }
+}
+
+int main(void) {
+  int depth = 0;
+  Ui ui = { &depth };
+  ui.row ("outer")
+  ui.row ("inner") {
+    ui.text("hello");
+  }
+  return 0;
+}
+```
+
+```text
+outer
+  inner
+    hello
+```
+
+`ui.row ("inner") { ... }` is `$Ui.row(ui, "inner") { ... }`. A statement of
+the form
+
+```text
+RECEIVER . NAME ( ARGUMENTS ) TARGET
+```
+
+is a decorator application when all of these hold:
+
+- the statement begins with `RECEIVER`, and `RECEIVER` has a named type `T`;
+- a decorator `$T.NAME` is visible; and
+- the token after the closing `)` is `{`, `$`, or a word other than `is` and
+  `in`.
+
+An expression cannot continue with one of those tokens after a call, so the
+statement has no other reading; `is` and `in` are excluded because they are
+operators. Decorators stack as `$` applications do. `RECEIVER` may be any postfix
+expression: a name, a call, a field, an index, or a parenthesized
+expression, as in `app.ui().row (...)`, `app->ui.row (...)`, or
+`(ui_of(app)).row (...)`. It is captured like any other argument, so the
+expansion decides how often it is evaluated. A call followed by `(`, as in
+`ui.pick(0)(21)`, stays an ordinary call. The statement after a target may
+begin with `*` or `(`; it is not read as an operand of the call.
+
+The decorator form applies only to a whole statement. Inside a larger
+expression, such as `k = ui.row (1) { }`, the call is an ordinary method call,
+and the method's absence is the ordinary error "type Ui has no method row".
+
+In any expression, `RECEIVER.NAME(ARGUMENTS)` invokes the Expression macro
+`$T.NAME` the same way. When `$T.NAME` is visible, it takes every method-form
+call of `NAME` in source code, even where a method `T.NAME` exists. A macro
+template is parsed before its receivers have types, so inside a template
+`RECEIVER.NAME(...)` is always the method. A macro can therefore wrap the
+method it shadows, and a template invokes another method-form macro by its
+`$T.NAME(receiver, ...)` spelling:
+
+```x2c
+~#include <stdio.h>
+typedef struct Meter { int scale; } Meter;
+
+int Meter.read(Meter meter, int raw) => raw * meter.scale;
+
+macro Expression $Meter.read(Expr $meter, Expr $raw) =>
+  $meter.read($raw) + 1;
+
+macro Expression $Meter.read_twice(Expr $meter, Expr $raw) =>
+  $Meter.read($meter, $raw) + $meter.read($raw);
+
+int main(void) {
+  Meter meter = { 10 };
+  printf("%d %d\n", meter.read(4), meter.read_twice(4));
+  return 0;
+}
+```
+
+```text
+41 81
+```
+
+A package's type `Ui` is `x2cui__Ui` in generated C, but its macros keep the
+source spelling `$Ui.row`. A method form looks for `$T.NAME` under the
+receiver type's generated name and then under its source name, so the
+package's macros apply in the package and in every importing file. Method
+forms are recognized in statements and expressions, not at file scope, and
+only with `.`.
+
 ### Macro values
 
 A macro is also a compile-time value of type `Macro`, available to `meta`
