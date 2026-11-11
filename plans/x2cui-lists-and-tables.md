@@ -149,9 +149,11 @@ keeps `NULL` and `CUI_*` constants working.
 
 `src/x2cui-generate.x` gives every generated component whose last C
 parameter is an option record an Expression macro `$Ui.NAME`, and each of
-CUI's own block macros a decorator `$Ui.NAME`. Each form is a template
-for its count of ordinary arguments, whose macro takes its name from a
-Name hole, `$Ui.$method`. `tools/gen-arrays.py`
+CUI's own block macros a decorator `$Ui.NAME`. All component forms come
+from one template and all block forms from another: the macro takes its
+name from a Name hole, `$Ui.$method`, and an `Expr @args` hole before the
+final `Entry @options` hole takes the ordinary arguments, however many.
+The virtual list, with six, has a form. `tools/gen-arrays.py`
 writes the table of the methods written in x2c that also take an option
 record, so the array components, the charts, and `ui.tree` have forms too.
 A script migrated the gallery, scenes, stress example, and tests to the
@@ -184,14 +186,8 @@ the ones Gary approved. Verified.
 
 ## Limits
 
-1. A method form's ordinary arguments have a fixed count, because a
-   sequence hole must be last and a template cannot compute a parameter
-   list. The generator therefore keeps one template for each count: nine
-   for components and five for blocks. Computed macro names let each
-   template name its form `$Ui.$method` directly, but do not reduce the
-   number of templates. A component with more than eight ordinary
-   arguments, or a block with more than four, has no form (the virtual
-   list). The data grid keeps `$cui.data_grid`.
+1. The data grid has no block form; it keeps `$cui.data_grid`, because
+   CUI has no `cui_data_grid` block macro. The table has its own form.
 2. Short values need a meta function, so `Entry @options` rows are
    lowered by `cui_arguments`, `cui_call`, `cui_begin`, and
    `cui_table_begin`, not forwarded. Forwarding passes rows to a

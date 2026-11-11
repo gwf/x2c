@@ -984,6 +984,8 @@ method-form macros, not on `x2cui`.
   `src/x2cui-options.x`; a lower-case undeclared name is a short name for
   the CUI constant its field's C type selects. Options are no longer
   always written: `{}` is gone from method calls.
+- One template makes every component's form and one every block's form;
+  a form takes any count of ordinary arguments before its options.
 - `ui.each`, `ui.item`, `ui.table`, `ui.table_row`, `ui.cell`, and
   `ui.cell_text` are new. `examples/mail.x` and `examples/orders.x` use
   them, and `make run` draws both.
