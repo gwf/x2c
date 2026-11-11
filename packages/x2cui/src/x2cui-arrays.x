@@ -35,8 +35,9 @@ macro Expression $cui.count(Expr $array) =>
 macro Decorator $cui.table(
   Stmt $body, Expr $ui, Expr $id, Expr $columns, Expr $opts) {
   {
-    if ($ui.table_begin($id, $columns, $cui.count($columns), $opts)) {
-      defer cui_table_end($ui);
+    typeof($ui) ui = $ui;
+    if (ui.table_begin($id, $columns, $cui.count($columns), $opts)) {
+      defer cui_table_end(ui);
       $body
     }
   }
@@ -53,9 +54,10 @@ macro Decorator $cui.data_grid(
   Name $last, Expr $opts) {
   {
     int $first = 0, $last = 0;
-    if ($ui.data_grid_begin($id, $columns, $cui.count($columns), $rows,
+    typeof($ui) ui = $ui;
+    if (ui.data_grid_begin($id, $columns, $cui.count($columns), $rows,
                             $first, $last, $opts)) {
-      defer cui_data_grid_end($ui);
+      defer cui_data_grid_end(ui);
       $body
     }
   }

@@ -4,8 +4,8 @@
     python3 tools/gen-arrays.py deps/include/cui/cui.h
 
 A function in cui.h whose first parameter is `cui_ctx *` and which has no
-`$cui.method` row and no hand-written method in src/x2cui.x takes an array
-of records, numbers, or flags. This tool writes one `Ui` method for each,
+row in the `expand` table and no hand-written method in src/x2cui.x takes
+an array of records, numbers, or flags. This tool writes one `Ui` method for each,
 between markers in src/x2cui.x. The method takes each array as a pointer
 and its count, as CUI declares them; a call site passes a C array and
 `$cui.count(array)`. It keeps CUI's parameter names. Rerun it after
@@ -159,7 +159,8 @@ def main():
   begin = source.index(BEGIN % "methods")
   end = source.index(END % "methods")
   hand = source[:begin] + source[end:]
-  existing = set(re.findall(r"^\$cui\.method\((cui_\w+)\);", hand, flags=re.M))
+  table = re.search(r"^expand %\((.*?)\)$", hand, flags=re.M | re.S).group(1)
+  existing = set(table.split())
   for method in re.findall(r"\bUi\.(\w+)\(", hand):
     existing |= {"cui_" + method, "cui_" + method + "_ex"}
   methods = forms(header, existing)

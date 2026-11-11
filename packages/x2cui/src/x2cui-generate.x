@@ -42,10 +42,8 @@ meta static String _method_name(String function) {
 }
 
 /** Returns the `Ui` method that forwards to the C function `target`. */
-meta List cui_method(Code target, Code buffer, Code strings) {
-  /* A type name quoted here would lose its package prefix, so the
-     TextField type comes from a package function that takes one. */
-  Type field = Type.parameters(Code.type(buffer))[0];
+meta List cui_method(String function) {
+  List target = x2c_ident(function);
   Type signature = Code.type(target);
   List types = Type.parameters(signature);
   Type result = Type.return_type(signature);
@@ -66,15 +64,15 @@ meta List cui_method(Code target, Code buffer, Code strings) {
     }
     else if (_spelled(type, "(* char)") && next &&
              _spelled(next, "(\"size_t\")")) {
-      params.push($!Param{ $field $p });
-      args.push($!( $buffer($p) ));
+      params.push($!Param{ TextField $p });
+      args.push($!( x2cui_buffer($p) ));
       args.push($!( $p.capacity ));
       i++;
     }
     else if (_spelled(type, "(* const * const char)") && next &&
              _spelled(next, "(int)")) {
       params.push($!Param{ List $p });
-      args.push($!( $strings($p) ));
+      args.push($!( x2cui_strings($p) ));
       args.push($!( (int) $p.len() ));
       i++;
     }
@@ -105,7 +103,7 @@ meta List cui_method(Code target, Code buffer, Code strings) {
     }
   }
   List declared = params.list_free(), passed = args.list_free();
-  List method = x2c_ident(_method_name(Code.binding_spelling(target)));
+  List method = x2c_ident(_method_name(function));
   List unit = _spelled(result, "(void)")
     ? $!Unit{ inline void Ui.$method(@declared) { $target(@passed); } }
     : $!Unit{ inline $result Ui.$method(@declared) =>
@@ -113,13 +111,5 @@ meta List cui_method(Code target, Code buffer, Code strings) {
   return $(unit);
 }
 
-/* The package's own names reach the generator as captured syntax, which
-   resolves where the row is written. */
-macro Unit $cui.method_for(Expr $target, Expr $buffer, Expr $strings) {
-  @cui_method($target, $buffer, $strings)
-}
-
 /** Defines the `Ui` method for the CUI function `$target`. */
-macro Unit $cui.method(Expr $target) {
-  $cui.method_for($target, x2cui_buffer, x2cui_strings);
-}
+macro Unit $cui.method(Name $target) { @cui_method($target) }

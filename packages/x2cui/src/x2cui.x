@@ -355,364 +355,105 @@ const char *const *x2cui_strings(List items) {
   return names;
 }
 
-$cui.method(cui_heading);
-$cui.method(cui_destroy);
-$cui.method(cui_set_renderer);
-$cui.method(cui_set_viewport);
-$cui.method(cui_viewport_size);
-$cui.method(cui_dpi_scale);
-$cui.method(cui_begin_frame);
-$cui.method(cui_end_frame);
-$cui.method(cui_needs_redraw);
-$cui.method(cui_next_wakeup);
-$cui.method(cui_request_redraw);
-$cui.method(cui_request_wakeup);
-$cui.method(cui_time);
-$cui.method(cui_delta_time);
-$cui.method(cui_frame_count);
-$cui.method(cui_input_mouse_move);
-$cui.method(cui_input_mouse_button);
-$cui.method(cui_input_mouse_leave);
-$cui.method(cui_input_scroll);
-$cui.method(cui_input_key);
-$cui.method(cui_input_text);
-$cui.method(cui_input_focus);
-$cui.method(cui_input_file_hover);
-$cui.method(cui_input_file_drop);
-$cui.method(cui_dropped_file_count);
-$cui.method(cui_dropped_file);
-$cui.method(cui_file_drag_active);
-$cui.method(cui_set_platform);
-$cui.method(cui_get_cursor);
-$cui.method(cui_key_pressed);
-$cui.method(cui_key_down);
-$cui.method(cui_shortcut);
-$cui.method(cui_key_mods);
-$cui.method(cui_mouse_pos);
-$cui.method(cui_mouse_down);
-$cui.method(cui_mouse_clicked);
-$cui.method(cui_wants_keyboard);
-$cui.method(cui_wants_mouse);
-$cui.method(cui_set_theme);
-$cui.method(cui_get_theme_mode);
-$cui.method(cui_set_accent);
-$cui.method(cui_get_accent);
-$cui.method(cui_theme_get);
-$cui.method(cui_set_reduced_motion);
-$cui.method(cui_color_of);
-$cui.method(cui_set_strings);
-/* The generator cannot see the `const` of a pointer result. */
-inline const cui_strings *Ui.get_strings(Ui ui) => cui_get_strings(ui);
-$cui.method(cui_token_color);
-$cui.method(cui_font_load_memory);
-$cui.method(cui_font_load_file);
-$cui.method(cui_font_set_role);
-$cui.method(cui_font_add_fallback);
-$cui.method(cui_measure_text);
-$cui.method(cui_box_begin);
-$cui.method(cui_box_end);
-$cui.method(cui_row_begin);
-$cui.method(cui_column_begin);
-$cui.method(cui_spacer);
-$cui.method(cui_gap);
-$cui.method(cui_separator);
-$cui.method(cui_card_begin);
-$cui.method(cui_card_end);
-$cui.method(cui_scroll_begin);
-$cui.method(cui_scroll_end);
-$cui.method(cui_scroll_to);
-$cui.method(cui_split_begin);
-$cui.method(cui_split_next);
-$cui.method(cui_split_end);
-$cui.method(cui_make_id);
-$cui.method(cui_push_id);
-$cui.method(cui_push_id_int);
-$cui.method(cui_pop_id);
-$cui.method(cui_last_id);
-$cui.method(cui_last_rect);
-$cui.method(cui_get_rect);
-$cui.method(cui_last_hovered);
-$cui.method(cui_is_disabled);
-$cui.method(cui_push_disabled);
-$cui.method(cui_pop_disabled);
-$cui.method(cui_text_ex);
-$cui.method(cui_label);
-$cui.method(cui_secondary);
-$cui.method(cui_muted);
-$cui.method(cui_code);
-$cui.method(cui_kbd);
-$cui.method(cui_link);
-$cui.method(cui_icon);
-$cui.method(cui_button_ex);
-$cui.method(cui_icon_button_ex);
-$cui.method(cui_segmented_ex);
-$cui.method(cui_checkbox_ex);
-$cui.method(cui_switch_ex);
-$cui.method(cui_radio_ex);
-$cui.method(cui_radio_group);
-$cui.method(cui_slider_ex);
-$cui.method(cui_range_slider);
-$cui.method(cui_rating);
-$cui.method(cui_chip_ex);
-$cui.method(cui_input_ex);
-$cui.method(cui_textarea_ex);
-$cui.method(cui_search_ex);
-$cui.method(cui_number_ex);
-$cui.method(cui_select_ex);
-$cui.method(cui_calendar);
-$cui.method(cui_date_picker_ex);
-$cui.method(cui_color_picker);
-$cui.method(cui_tabs_ex);
-$cui.method(cui_nav_item_ex);
-$cui.method(cui_nav_section);
-$cui.method(cui_breadcrumb);
-$cui.method(cui_pagination);
-$cui.method(cui_stepper);
-$cui.method(cui_popover_begin);
-$cui.method(cui_popover_end);
-$cui.method(cui_popover_open);
-$cui.method(cui_popover_close);
-$cui.method(cui_popover_toggle);
-$cui.method(cui_popover_is_open);
-$cui.method(cui_menu_begin);
-$cui.method(cui_menu_end);
-$cui.method(cui_context_menu_begin);
-$cui.method(cui_context_menu_end);
-$cui.method(cui_menu_item_ex);
-$cui.method(cui_menu_separator);
-$cui.method(cui_menu_label);
-$cui.method(cui_tooltip);
-$cui.method(cui_dialog_begin);
-$cui.method(cui_dialog_end);
-$cui.method(cui_dialog_footer_begin);
-$cui.method(cui_dialog_footer_end);
-$cui.method(cui_sheet_begin);
-$cui.method(cui_sheet_end);
-$cui.method(cui_toast_action_clicked);
-$cui.method(cui_toast_ex);
-$cui.method(cui_toast_dismiss);
-$cui.method(cui_alert_ex);
-$cui.method(cui_progress_ex);
-$cui.method(cui_spinner);
-$cui.method(cui_skeleton);
-$cui.method(cui_badge_ex);
-$cui.method(cui_avatar_ex);
-$cui.method(cui_avatar_group);
-$cui.method(cui_empty_state_ex);
-$cui.method(cui_metric_ex);
-$cui.method(cui_meter);
-$cui.method(cui_accordion_begin);
-$cui.method(cui_accordion_end);
-$cui.method(cui_tree_end);
-$cui.method(cui_tree_clicked);
-$cui.method(cui_list_item_ex);
-$cui.method(cui_virtual_list_begin);
-$cui.method(cui_virtual_list_end);
-$cui.method(cui_table_begin_ex);
-$cui.method(cui_table_row);
-$cui.method(cui_table_cell);
-$cui.method(cui_table_cell_text);
-$cui.method(cui_table_end);
-$cui.method(cui_gauge);
-$cui.method(cui_image_create);
-$cui.method(cui_image_load);
-$cui.method(cui_image_destroy);
-$cui.method(cui_image_ex);
-$cui.method(cui_image_viewer_ex);
-$cui.method(cui_cropper_ex);
-$cui.method(cui_command_palette);
-$cui.method(cui_radio_cards_ex);
-$cui.method(cui_tag_input_ex);
-$cui.method(cui_button_group_begin);
-$cui.method(cui_button_group_end);
-$cui.method(cui_copy_button);
-$cui.method(cui_hold_button_ex);
-$cui.method(cui_password_strength);
-$cui.method(cui_timeline_item_ex);
-$cui.method(cui_reorder_end);
-$cui.method(cui_reorder_item_begin);
-$cui.method(cui_reorder_item_end);
-$cui.method(cui_progress_ring);
-$cui.method(cui_split_button_ex);
-$cui.method(cui_confirm_button_ex);
-$cui.method(cui_status_button_ex);
-$cui.method(cui_theme_switcher);
-$cui.method(cui_theme_toggle);
-$cui.method(cui_user_menu_begin);
-$cui.method(cui_user_menu_end);
-$cui.method(cui_swipe_item_end);
-$cui.method(cui_data_grid_begin_ex);
-$cui.method(cui_data_grid_row);
-$cui.method(cui_data_grid_cell_text);
-$cui.method(cui_data_grid_end);
-$cui.method(cui_data_grid_cell);
-$cui.method(cui_data_grid_cell_edit);
-$cui.method(cui_data_grid_edit);
-$cui.method(cui_tree_table_row);
-$cui.method(cui_tree_table_name);
-$cui.method(cui_tree_table_end);
-$cui.method(cui_tree_table_depth);
-$cui.method(cui_path_bar_ex);
-$cui.method(cui_path_bar_menu_begin);
-$cui.method(cui_path_bar_menu_end);
-$cui.method(cui_file_browser_ex);
-$cui.method(cui_file_picker_ex);
-$cui.method(cui_terminal_ex);
-$cui.method(cui_code_block_ex);
-$cui.method(cui_json_view_ex);
-$cui.method(cui_markdown_ex);
-$cui.method(cui_code_editor_ex);
-$cui.method(cui_code_editor_goto);
-$cui.method(cui_code_editor_select);
-$cui.method(cui_code_editor_find);
-$cui.method(cui_diff_view_ex);
-$cui.method(cui_chat_message_ex);
-$cui.method(cui_chat_divider);
-$cui.method(cui_typing_indicator);
-$cui.method(cui_comment_ex);
-$cui.method(cui_carousel_begin);
-$cui.method(cui_carousel_slide_begin);
-$cui.method(cui_carousel_slide_end);
-$cui.method(cui_carousel_end);
-$cui.method(cui_image_compare_ex);
-$cui.method(cui_card_stack_begin);
-$cui.method(cui_card_stack_item_begin);
-$cui.method(cui_card_stack_item_end);
-$cui.method(cui_card_stack_end);
-$cui.method(cui_counter_ex);
-$cui.method(cui_radial_gauge_ex);
-$cui.method(cui_shimmer_text_ex);
-$cui.method(cui_typewriter_ex);
-$cui.method(cui_text_reveal_ex);
-$cui.method(cui_word_rotate_ex);
-$cui.method(cui_number_roll_ex);
-$cui.method(cui_gradient_text_ex);
-$cui.method(cui_spotlight_begin);
-$cui.method(cui_spotlight_end);
-$cui.method(cui_loader_ex);
-$cui.method(cui_dock_begin);
-$cui.method(cui_dock_item_ex);
-$cui.method(cui_dock_separator);
-$cui.method(cui_dock_end);
-$cui.method(cui_control_tile_ex);
-$cui.method(cui_now_playing_ex);
-$cui.method(cui_reasoning_begin);
-$cui.method(cui_reasoning_end);
-$cui.method(cui_tool_call_ex);
-$cui.method(cui_agent_status_ex);
-$cui.method(cui_citation);
-$cui.method(cui_context_meter_ex);
-$cui.method(cui_response_actions_ex);
-$cui.method(cui_chat_composer_ex);
-$cui.method(cui_voice_orb_ex);
-$cui.method(cui_kanban_begin);
-$cui.method(cui_kanban_card_begin);
-$cui.method(cui_kanban_card_end);
-$cui.method(cui_kanban_column_end);
-$cui.method(cui_kanban_end);
-$cui.method(cui_kanban_column_begin_ex);
-$cui.method(cui_hover_card_begin);
-$cui.method(cui_hover_card_end);
-$cui.method(cui_confirm_popover_ex);
-$cui.method(cui_expandable_text_ex);
-$cui.method(cui_expandable_card_begin);
-$cui.method(cui_expandable_card_end);
-$cui.method(cui_toc_anchor);
-$cui.method(cui_banner_ex);
-$cui.method(cui_countdown_ex);
-$cui.method(cui_range_calendar);
-$cui.method(cui_date_range_picker_ex);
-$cui.method(cui_time_picker_ex);
-$cui.method(cui_wheel_picker_ex);
-$cui.method(cui_time_dial);
-$cui.method(cui_ruler_slider_ex);
-$cui.method(cui_knob_ex);
-$cui.method(cui_fader_ex);
-$cui.method(cui_signature_pad_ex);
-$cui.method(cui_signature_clear);
-$cui.method(cui_dropzone_ex);
-$cui.method(cui_avatar_upload);
-$cui.method(cui_inline_edit_ex);
-$cui.method(cui_scrub_ex);
-$cui.method(cui_money_input_ex);
-$cui.method(cui_shortcut_recorder_ex);
-$cui.method(cui_shortcut_label);
-$cui.method(cui_node_end);
-$cui.method(cui_node_link);
-$cui.method(cui_node_link_created);
-$cui.method(cui_node_link_removed);
-$cui.method(cui_node_deleted);
-$cui.method(cui_node_editor_end);
-$cui.method(cui_node_editor_begin_ex);
-$cui.method(cui_node_begin_ex);
-$cui.method(cui_node_input_ex);
-$cui.method(cui_node_output_ex);
-$cui.method(cui_node_content_begin);
-$cui.method(cui_node_content_end);
-$cui.method(cui_menu_bar_begin);
-$cui.method(cui_menu_bar_end);
-$cui.method(cui_menu_bar_menu_begin);
-$cui.method(cui_menu_bar_menu_end);
-$cui.method(cui_toolbar_begin);
-$cui.method(cui_toolbar_end);
-$cui.method(cui_toolbar_button_ex);
-$cui.method(cui_toolbar_separator);
-$cui.method(cui_toolbar_spacer);
-$cui.method(cui_status_bar_begin);
-$cui.method(cui_status_bar_end);
-$cui.method(cui_status_bar_spacer);
-$cui.method(cui_status_bar_text_ex);
-$cui.method(cui_status_bar_item_ex);
-$cui.method(cui_status_bar_progress_ex);
-$cui.method(cui_dock_panel_end);
-$cui.method(cui_dockspace_end);
-$cui.method(cui_dockspace_begin_ex);
-$cui.method(cui_dock_panel_begin_ex);
-$cui.method(cui_dock_save);
-$cui.method(cui_dock_load);
-$cui.method(cui_inspector_group);
-$cui.method(cui_inspector_end);
-$cui.method(cui_inspector_begin_ex);
-$cui.method(cui_prop_float_ex);
-$cui.method(cui_prop_int_ex);
-$cui.method(cui_prop_text_ex);
-$cui.method(cui_prop_bool_ex);
-$cui.method(cui_prop_enum_ex);
-$cui.method(cui_prop_color_ex);
-$cui.method(cui_log_view_ex);
-$cui.method(cui_emoji_font_load_file);
-$cui.method(cui_emoji_font_load_memory);
-$cui.method(cui_emoji_font_load_system);
-$cui.method(cui_emoji_supported);
-$cui.method(cui_draw_emoji);
-$cui.method(cui_emoji);
-$cui.method(cui_emoji_picker_ex);
-$cui.method(cui_hex_view_goto);
-$cui.method(cui_flame_span_rect);
-$cui.method(cui_schedule_picker_ex);
-$cui.method(cui_cron_describe);
-$cui.method(cui_regex_tester_ex);
-$cui.method(cui_request_bar_ex);
-$cui.method(cui_response_status);
-$cui.method(cui_draw_rect);
-$cui.method(cui_draw_rect_border);
-$cui.method(cui_draw_rect_gradient);
-$cui.method(cui_draw_shadow);
-$cui.method(cui_draw_line);
-$cui.method(cui_draw_circle);
-$cui.method(cui_draw_arc);
-$cui.method(cui_draw_text);
-$cui.method(cui_draw_icon);
-$cui.method(cui_draw_image);
-$cui.method(cui_push_clip);
-$cui.method(cui_pop_clip);
-$cui.method(cui_canvas);
-$cui.method(cui_state);
-$cui.method(cui_state_on_free);
-$cui.method(cui_animate);
-$cui.method(cui_animate_spring);
-/* The generator cannot see the `const` of a pointer result. */
-inline const cui_draw_data *Ui.get_draw_data(Ui ui) => cui_get_draw_data(ui);
+/* Each row is a CUI function whose parameters follow the generator's
+   conventions. `expand` defines the `Ui` method for each one. */
+expand %(
+  cui_heading cui_destroy cui_set_renderer cui_set_viewport cui_viewport_size
+  cui_dpi_scale cui_begin_frame cui_end_frame cui_needs_redraw
+  cui_next_wakeup cui_request_redraw cui_request_wakeup cui_time
+  cui_delta_time cui_frame_count cui_input_mouse_move cui_input_mouse_button
+  cui_input_mouse_leave cui_input_scroll cui_input_key cui_input_text
+  cui_input_focus cui_input_file_hover cui_input_file_drop
+  cui_dropped_file_count cui_dropped_file cui_file_drag_active
+  cui_set_platform cui_get_cursor cui_key_pressed cui_key_down cui_shortcut
+  cui_key_mods cui_mouse_pos cui_mouse_down cui_mouse_clicked
+  cui_wants_keyboard cui_wants_mouse cui_set_theme cui_get_theme_mode
+  cui_set_accent cui_get_accent cui_theme_get cui_set_reduced_motion
+  cui_color_of cui_set_strings cui_get_strings cui_token_color
+  cui_font_load_memory cui_font_load_file cui_font_set_role
+  cui_font_add_fallback cui_measure_text cui_box_begin cui_box_end
+  cui_row_begin cui_column_begin cui_spacer cui_gap cui_separator
+  cui_card_begin cui_card_end cui_scroll_begin cui_scroll_end cui_scroll_to
+  cui_split_begin cui_split_next cui_split_end cui_make_id cui_push_id
+  cui_push_id_int cui_pop_id cui_last_id cui_last_rect cui_get_rect
+  cui_last_hovered cui_is_disabled cui_push_disabled cui_pop_disabled
+  cui_text_ex cui_label cui_secondary cui_muted cui_code cui_kbd cui_link
+  cui_icon cui_button_ex cui_icon_button_ex cui_segmented_ex cui_checkbox_ex
+  cui_switch_ex cui_radio_ex cui_radio_group cui_slider_ex cui_range_slider
+  cui_rating cui_chip_ex cui_input_ex cui_textarea_ex cui_search_ex
+  cui_number_ex cui_select_ex cui_calendar cui_date_picker_ex
+  cui_color_picker cui_tabs_ex cui_nav_item_ex cui_nav_section cui_breadcrumb
+  cui_pagination cui_stepper cui_popover_begin cui_popover_end
+  cui_popover_open cui_popover_close cui_popover_toggle cui_popover_is_open
+  cui_menu_begin cui_menu_end cui_context_menu_begin cui_context_menu_end
+  cui_menu_item_ex cui_menu_separator cui_menu_label cui_tooltip
+  cui_dialog_begin cui_dialog_end cui_dialog_footer_begin
+  cui_dialog_footer_end cui_sheet_begin cui_sheet_end
+  cui_toast_action_clicked cui_toast_ex cui_toast_dismiss cui_alert_ex
+  cui_progress_ex cui_spinner cui_skeleton cui_badge_ex cui_avatar_ex
+  cui_avatar_group cui_empty_state_ex cui_metric_ex cui_meter
+  cui_accordion_begin cui_accordion_end cui_tree_end cui_tree_clicked
+  cui_list_item_ex cui_virtual_list_begin cui_virtual_list_end
+  cui_table_begin_ex cui_table_row cui_table_cell cui_table_cell_text
+  cui_table_end cui_gauge cui_image_create cui_image_load cui_image_destroy
+  cui_image_ex cui_image_viewer_ex cui_cropper_ex cui_command_palette
+  cui_radio_cards_ex cui_tag_input_ex cui_button_group_begin
+  cui_button_group_end cui_copy_button cui_hold_button_ex
+  cui_password_strength cui_timeline_item_ex cui_reorder_end
+  cui_reorder_item_begin cui_reorder_item_end cui_progress_ring
+  cui_split_button_ex cui_confirm_button_ex cui_status_button_ex
+  cui_theme_switcher cui_theme_toggle cui_user_menu_begin cui_user_menu_end
+  cui_swipe_item_end cui_data_grid_begin_ex cui_data_grid_row
+  cui_data_grid_cell_text cui_data_grid_end cui_data_grid_cell
+  cui_data_grid_cell_edit cui_data_grid_edit cui_tree_table_row
+  cui_tree_table_name cui_tree_table_end cui_tree_table_depth cui_path_bar_ex
+  cui_path_bar_menu_begin cui_path_bar_menu_end cui_file_browser_ex
+  cui_file_picker_ex cui_terminal_ex cui_code_block_ex cui_json_view_ex
+  cui_markdown_ex cui_code_editor_ex cui_code_editor_goto
+  cui_code_editor_select cui_code_editor_find cui_diff_view_ex
+  cui_chat_message_ex cui_chat_divider cui_typing_indicator cui_comment_ex
+  cui_carousel_begin cui_carousel_slide_begin cui_carousel_slide_end
+  cui_carousel_end cui_image_compare_ex cui_card_stack_begin
+  cui_card_stack_item_begin cui_card_stack_item_end cui_card_stack_end
+  cui_counter_ex cui_radial_gauge_ex cui_shimmer_text_ex cui_typewriter_ex
+  cui_text_reveal_ex cui_word_rotate_ex cui_number_roll_ex
+  cui_gradient_text_ex cui_spotlight_begin cui_spotlight_end cui_loader_ex
+  cui_dock_begin cui_dock_item_ex cui_dock_separator cui_dock_end
+  cui_control_tile_ex cui_now_playing_ex cui_reasoning_begin
+  cui_reasoning_end cui_tool_call_ex cui_agent_status_ex cui_citation
+  cui_context_meter_ex cui_response_actions_ex cui_chat_composer_ex
+  cui_voice_orb_ex cui_kanban_begin cui_kanban_card_begin cui_kanban_card_end
+  cui_kanban_column_end cui_kanban_end cui_kanban_column_begin_ex
+  cui_hover_card_begin cui_hover_card_end cui_confirm_popover_ex
+  cui_expandable_text_ex cui_expandable_card_begin cui_expandable_card_end
+  cui_toc_anchor cui_banner_ex cui_countdown_ex cui_range_calendar
+  cui_date_range_picker_ex cui_time_picker_ex cui_wheel_picker_ex
+  cui_time_dial cui_ruler_slider_ex cui_knob_ex cui_fader_ex
+  cui_signature_pad_ex cui_signature_clear cui_dropzone_ex cui_avatar_upload
+  cui_inline_edit_ex cui_scrub_ex cui_money_input_ex cui_shortcut_recorder_ex
+  cui_shortcut_label cui_node_end cui_node_link cui_node_link_created
+  cui_node_link_removed cui_node_deleted cui_node_editor_end
+  cui_node_editor_begin_ex cui_node_begin_ex cui_node_input_ex
+  cui_node_output_ex cui_node_content_begin cui_node_content_end
+  cui_menu_bar_begin cui_menu_bar_end cui_menu_bar_menu_begin
+  cui_menu_bar_menu_end cui_toolbar_begin cui_toolbar_end
+  cui_toolbar_button_ex cui_toolbar_separator cui_toolbar_spacer
+  cui_status_bar_begin cui_status_bar_end cui_status_bar_spacer
+  cui_status_bar_text_ex cui_status_bar_item_ex cui_status_bar_progress_ex
+  cui_dock_panel_end cui_dockspace_end cui_dockspace_begin_ex
+  cui_dock_panel_begin_ex cui_dock_save cui_dock_load cui_inspector_group
+  cui_inspector_end cui_inspector_begin_ex cui_prop_float_ex cui_prop_int_ex
+  cui_prop_text_ex cui_prop_bool_ex cui_prop_enum_ex cui_prop_color_ex
+  cui_log_view_ex cui_emoji_font_load_file cui_emoji_font_load_memory
+  cui_emoji_font_load_system cui_emoji_supported cui_draw_emoji cui_emoji
+  cui_emoji_picker_ex cui_hex_view_goto cui_flame_span_rect
+  cui_schedule_picker_ex cui_cron_describe cui_regex_tester_ex
+  cui_request_bar_ex cui_response_status cui_draw_rect cui_draw_rect_border
+  cui_draw_rect_gradient cui_draw_shadow cui_draw_line cui_draw_circle
+  cui_draw_arc cui_draw_text cui_draw_icon cui_draw_image cui_push_clip
+  cui_pop_clip cui_canvas cui_state cui_state_on_free cui_animate
+  cui_animate_spring cui_get_draw_data)
+macro Unit(Name $target) { $cui.method($target); }
 
 // Components that take arrays. Rerun tools/gen-arrays.py to refresh these.
 
