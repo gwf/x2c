@@ -241,15 +241,18 @@ static List _typeof_specifier(Compiler c) {
       type = NULL;
     }
   if (!type) {
-    List value = c.parse_expression();
-    Type known = value.cadr();
-    type = known && known !== %(<macro-expr>)
-      ? known : %("__typeof__" (parens $value));
+    type = _typeof_type(c.parse_expression());
   }
   c.expect(<)>);
   if (!unqualified) return type;
   if (type ~= %("__typeof__" *)) return %(unqual @type);
   return _x2c_type_unqualified(type);
+}
+
+static Type _typeof_type(List value) {
+  Type known = value.cadr();
+  return known && known !== %(<macro-expr>)
+    ? known : %("__typeof__" (parens $value));
 }
 
 /* Scalar words in any order. C11's `_Complex` among them makes an opaque
@@ -838,6 +841,10 @@ static Var _finish_type_spec(Compiler c, Var spec) {
     Type type = spec.type().canonicalize();
     return %(seq @type);
   }
+  /* A type name a package or module file's quotation spells bare names
+     that file-scope type where it binds, as a parsed reference does. */
+  if (spec is <string> && !c.macro_holes && (c.package || c.line_markers))
+    return _type_reference(c, 0, spec);
   if (spec is not <list>) return spec;
   match (spec) {
     case %((!or ?tag struct union) ?name):
@@ -850,6 +857,17 @@ static Var _finish_type_spec(Compiler c, Var spec) {
       return _finish_aggregate_type(c, <enum>, name, members);
     // Semantic types name an expanded template typedef by its spelling.
     case %(binding ? ?(String name)): return name;
+    /* A template's `typeof` operand is typed where the expansion binds. */
+    case %("__typeof__" (parens (!set ?value (expr (<macro-expr>) *))))
+      if (!c.macro_holes):
+      return _typeof_type(c.resolve_expression(value, c.token));
+    case %(unqual "__typeof__"
+             (parens (!set ?value (expr (<macro-expr>) *))))
+      if (!c.macro_holes): {
+      Type type = _typeof_type(c.resolve_expression(value, c.token));
+      if (type ~= %("__typeof__" *)) return %(unqual @type);
+      return _x2c_type_unqualified(type);
+    }
   }
   return spec;
 }

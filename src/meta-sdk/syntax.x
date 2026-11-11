@@ -286,6 +286,15 @@ Type Code.type(Code value) {
         type = active.expander.resolve_expression(value, active.site).cadr();
       return type.canonicalize();
     }
+    /* A name value and an untyped quotation are typed where the expansion
+       stands, as the syntax a template left untyped is. */
+    case %("x2c.ident" ?):
+      return Code.type(%(expr (<macro-expr>) (ident $value)));
+    case %("x2c.quoted" *): {
+      List resolved = active.expander.resolve_expression(value, active.site);
+      Type type = resolved.cadr();
+      return type.canonicalize();
+    }
     case %(param ? ?): return value.type_from_ast().canonicalize();
     case %((!or declare decl typedef) *):
       return value.type_from_ast().canonicalize();

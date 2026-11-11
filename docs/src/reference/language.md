@@ -1269,7 +1269,9 @@ expression's type, so `typeof(name) copy = name;` declares `copy` with the
 type of `name`. An operand that only C can type, such as a system header's
 macro, gives a type x2c does not resolve; the generated C spells it
 `__typeof__(operand)`, and C types it. `typeof_unqual` names the same type
-without its qualifiers.
+without its qualifiers. In a macro body, an operand that holds a hole is
+typed where the macro expands, so `typeof($value) copy = $value;` declares
+`copy` with the argument's type and `copy.method()` resolves.
 
 ### Alignment, atomic, and complex types
 
@@ -2545,7 +2547,9 @@ or 0.
 `Code.type` returns the canonical semantic `Type` for supported typed
 syntax. During expansion, syntax a template left untyped is resolved where the
 expansion stands, so a template's locals, casts, and method results report
-their declared types.
+their declared types. An `x2c_ident` name value and an untyped quotation are
+resolved the same way, so `Code.type(x2c_ident("puts"))` is the type of the
+function `puts`.
 
 `Code.binding_spelling` accepts a name hole's valid identifier `String` or
 compiler-issued identifier and binding syntax, and returns its source spelling
