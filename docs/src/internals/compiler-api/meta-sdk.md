@@ -655,7 +655,7 @@ Source: `src/meta-sdk/types.x`
 <a id="Type.return_type"></a>
 #### Type.return_type
 
-`Type Type.return_type(Type type)`
+`Type Type.return_type(Type t)`
 
 Implements `Type.return_type`, declared in `lib/meta.x`.
 
