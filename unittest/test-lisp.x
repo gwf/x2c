@@ -1945,6 +1945,9 @@ static void lisp_standard_environment_uses_library_operations(void) {
   EXPECT_INT_EQ(_raised_code(
     lisp, "(Array.find (List.array '(0 20)) nil)"), <bad-arg>);
   EXPECT_TRUE(_ev(lisp, "(Array.find (List.array '()) nil)") is void);
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list (range 3))"), _ev(lisp, "'(0 1 2 3)"));
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list (range 1 3))"), _ev(lisp, "'(1 2 3)"));
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list (range 3 1 -1))"), _ev(lisp, "'(3 2 1)"));
   EXPECT_VAR_EQ(
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
               "                     (lambda (x) (+ x 20))))"),

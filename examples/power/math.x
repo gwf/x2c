@@ -2,7 +2,7 @@
 
 int main(void) {
   auto {
-    printf("odd squares: %d\n", range(1, 10, 1)
+    printf("odd squares: %d\n", range(1, 10)
       .filter(%!(value) => value % 2 != 0)
       .map(%!(value) => value * value)
       .sum().int());
@@ -16,7 +16,7 @@ int main(void) {
     printf("polynomial at 3: %ld\n", coefficients.iter()
       .foldl(0, %!(acc, coefficient) => acc * 3 + coefficient).integer());
 
-    printf("8 factorial: %d\n", range(1, 8, 1).product().int());
+    printf("8 factorial: %d\n", range(1, 8).product().int());
   }
   return 0;
 }

@@ -264,7 +264,7 @@ typedef struct Repl {
 int main(int argc, char **argv) {                                                // Standard C argc/argv entry point.
   auto {                                                                     // Session-wide allocation region.
     try {                                                                        // Structured exception boundary.
-      Array args = range(0, argc - 1, 1)                                         // Lazy range iterator.
+      Array args = range(argc - 1)                                         // Lazy range iterator.
         .map(%!(int i) using &argv => String.new(argv[i]));                      // Capture &argv; convert each entry.
       Interp self = _interpreter();                                              // Session record returned by value.
       String source;                                                             // Immutable String held by a handle.
