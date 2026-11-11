@@ -1,11 +1,13 @@
 # x2cui lists and tables
 
-> Status: Gary accepted decisions 1 to 5 on 2026-11-11. Implemented on
-> the local branch `gwf/x2cui-method-vocabulary`, on top of a temporary
-> base that holds the prototype compiler change for
-> [method-form macros](method-form-macros.md). Not on `x2cui` or `dev`.
+> Status: Gary accepted decisions 1 to 5 on 2026-11-11, and approved the
+> To-Do, Mail, and Orders sources and images. Implemented on the local
+> branch `gwf/x2cui-method-simplify`, over `x2cui` merged with `dev` and
+> the compiler change for [method-form macros](method-form-macros.md),
+> including method forms in templates, `Entry` forwarding, `Decl` holes
+> in `foreach`, and computed macro names. Not on `x2cui` or `dev`.
 > Every "verified" statement below was compiled and run on macOS arm64
-> with stage 1 of that base. Statements marked "not verified" were not.
+> with stage 1 of that branch. Statements marked "not verified" were not.
 
 ## Result
 
@@ -64,10 +66,9 @@ including `continue`. Without `key:` the ID is the element's position.
 - The `in` form reuses the `Decl` hole; argument capture accepts `in`
   after a declaration, also after a method form's receiver. Verified.
 - `x` is visible in the target. Verified, also from the `key:` expression,
-  which is captured before `x` exists. Changed in how: a template cannot
-  pass a `Decl` hole to `foreach` (see [Limits](#limits)), so `ui.each`
-  declares `x` before a `foreach` over `Var` values and assigns it in each
-  pass through `cui_assign`.
+  which is captured before `x` exists. `ui.each` forwards its `Decl` hole
+  into `foreach ($element in $items)`, so the loop uses the collection's
+  own typed cursor.
 - A `key:` row after `in items` needs a `Decl`, an `Expr`, and an
   `Entry @rows` hole in one argument list. Verified.
 
@@ -148,7 +149,9 @@ keeps `NULL` and `CUI_*` constants working.
 
 `src/x2cui-generate.x` gives every generated component whose last C
 parameter is an option record an Expression macro `$Ui.NAME`, and each of
-CUI's own block macros a decorator `$Ui.NAME`. `tools/gen-arrays.py`
+CUI's own block macros a decorator `$Ui.NAME`. Each form is a template
+for its count of ordinary arguments, whose macro takes its name from a
+Name hole, `$Ui.$method`. `tools/gen-arrays.py`
 writes the table of the methods written in x2c that also take an option
 record, so the array components, the charts, and `ui.tree` have forms too.
 A script migrated the gallery, scenes, stress example, and tests to the
@@ -156,7 +159,8 @@ method forms: 809 calls of 157 component names. All 229 of their images
 are byte-identical to `origin/x2cui`'s, drawn back to back. Their blocks
 keep the `$cui.NAME` decorators.
 The to-do example's image is byte-identical to the one drawn with
-`$cui.row` forms. Verified.
+`$cui.row` forms, and the mail and orders images are byte-identical to
+the ones Gary approved. Verified.
 
 ## Decisions
 
@@ -180,32 +184,34 @@ The to-do example's image is byte-identical to the one drawn with
 
 ## Limits
 
-1. A template cannot pass a `Decl` hole to `foreach` or `$x2c.foreach`:
-   "macro hole 'element' has ambiguous kind; first: Decl also: Type".
-   Applying `$x2c.foreach` from a meta function fails with "parse:
-   expected syntax". `ui.each` declares and assigns instead, so it
-   iterates `Var` values rather than a typed collection's own cursor. A
-   compiler that accepts a forwarded `Decl` in `foreach` removes
-   `cui_assign`.
-2. A macro's name cannot be computed: `macro Expression $W.$m(...)` in a
-   template does not parse. Each method form is a fixed-arity template
-   whose `macrodef` row `name` `cui_named` replaces, so the generator
-   needs one template for each count of ordinary arguments: nine for
-   components, five for blocks.
-3. A method form's ordinary arguments have a fixed count, because a
-   sequence hole must be last. A component with more than eight ordinary
+1. A method form's ordinary arguments have a fixed count, because a
+   sequence hole must be last and a template cannot compute a parameter
+   list. The generator therefore keeps one template for each count: nine
+   for components and five for blocks. Computed macro names let each
+   template name its form `$Ui.$method` directly, but do not reduce the
+   number of templates. A component with more than eight ordinary
    arguments, or a block with more than four, has no form (the virtual
-   list and the data grid).
-4. `Entry @options` cannot be forwarded into a call, so every template
-   reaches its method through a public meta call, `cui_call`,
-   `cui_begin`, or `cui_table_begin`, which builds the call. The meta
-   helpers called from an importing file are public.
-5. A call that passes an option record value, rather than `name: value`
+   list). The data grid keeps `$cui.data_grid`.
+2. Short values need a meta function, so `Entry @options` rows are
+   lowered by `cui_arguments`, `cui_call`, `cui_begin`, and
+   `cui_table_begin`, not forwarded. Forwarding passes rows to a
+   `Map @rest` parameter or another `Entry` hole; CUI's methods take an
+   option record. These helpers run in the importing file's compiler, so
+   they are public.
+3. A component's form writes its method call in its own template,
+   `$ui.$method(@cui_arguments(...))`, because the self-call rule is
+   lexical: a call built by a meta function is not in the template, so it
+   would be the form again and recurse. A block's begin method and the
+   list constructs' methods have no forms, so `cui_begin` and `cui_call`
+   still build those calls.
+4. A call that passes an option record value, rather than `name: value`
    rows, must call the method as `Ui.NAME(ui, ..., record)`; the method
    form takes the call. The earlier `$cui.NAME(ui, ..., { ... })`
    decorators remain.
-6. Method forms work in statement and expression positions only, not at
+5. Method forms work in statement and expression positions only, not at
    file scope.
+6. A table row's `hovered` and `pressed` are always false; CUI reports
+   only its click.
 7. The mail and orders examples have no tests of their own beyond drawing
    an image; the package test covers clicks, hover, and the column
    lowering.

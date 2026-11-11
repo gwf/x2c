@@ -972,7 +972,8 @@ directory, not under `--build-dir`.
 ## Method forms and lists (2026-11-11)
 
 Recorded in [x2cui lists and tables](x2cui-lists-and-tables.md); on a
-local branch over the prototype compiler change for method-form macros,
+local branch over `x2cui` merged with `dev` and the compiler change for
+method-form macros,
 not on `x2cui`.
 
 - Every component that takes an option record, and each of CUI's block

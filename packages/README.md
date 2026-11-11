@@ -160,8 +160,12 @@ runs every standard application for that package.
   into a session and drives it.
 - [x2cui/examples/todo.x](x2cui/examples/todo.x): short. A to-do list in a
   window, with a text field, a filter, a confirmation dialog, and a saved
-  file. [gallery.x](x2cui/examples/gallery.x): broad. A port of CUI's own
-  gallery of 26 pages, browsed in a window or drawn off screen.
+  file. [mail.x](x2cui/examples/mail.x): a mail message list of
+  interactive rows with `ui.each` and `ui.item`.
+  [orders.x](x2cui/examples/orders.x): a sortable table of orders whose
+  columns are a Map literal. [gallery.x](x2cui/examples/gallery.x): broad.
+  A port of CUI's own gallery of 26 pages, browsed in a window or drawn
+  off screen.
 - [http-json-releases](../examples/packages/http-json-releases/http-json-releases.x):
   two packages in one program, importing libcurl and yyjson and linking both
   archives.

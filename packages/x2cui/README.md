@@ -74,7 +74,7 @@ Each CUI component keeps its name. The C calling conventions change:
   no Map: each becomes a field of the record in a C designated
   initializer, and a misspelled name is a C error that names the field.
   This is a component's method form, a macro of the method's name; see
-  [Short values](#short-values). Inside a macro of its own name,
+  [Short values](#short-values). Written in the macro's own template,
   `ui.NAME(...)` is the method, which takes the record itself as its last
   argument; `Ui.NAME(ui, ..., record)` calls the method anywhere.
 - **Labels and ids** are Strings: a literal, a variable, or an
