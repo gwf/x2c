@@ -146,6 +146,8 @@ typedef struct Compiler{
   Map prepared_rewrites;
   SlotWatch slot_watch;
   Token meta_statement;
+  List method_decorator;
+  List method_receiver;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int permanent_literals;
@@ -861,7 +863,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _271 = String_var(_270);
   _272 = List_var(NULL);
   _273 = Symbol_var(106239471489226);
-  _274 = int_var(2339);
+  _274 = int_var(2346);
   _275 = String_new("");
   _276 = String_var(_275);
   _277 = Atom_intern(String_new("macro-param"));
