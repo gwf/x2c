@@ -197,7 +197,7 @@ static int _fills_whole(Compiler c, Type type, List value) {
   /* A value the aggregate's declared converter accepts converts to the
      whole aggregate, as it does outside braces. */
   if (source && c.converter_call(
-        value, source.canonicalize(), type.canonicalize())) return 1;
+    value, source.canonicalize(), type.canonicalize())) return 1;
   return !resolved.is_array() && !resolved.is_aggregate();
 }
 
