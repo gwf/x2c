@@ -35,7 +35,7 @@ static void scene_line_chart(Ui ui) {
   List months = %("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep"
                   "Oct" "Nov" "Dec");
   $cui.card(ui, { .width = CUI_FILL, .max_width = 660 })
-    $cui.line_chart(ui, "revenue", series, months, {
+    ui.line_chart("revenue", series, $cui.count(series), months, {
       .area = true, .smooth = true, .height = 200, .format = "$%.0fk" });
 }
 
@@ -43,8 +43,8 @@ static void scene_bar_chart(Ui ui) {
   cui_series series[] = { cui_series.of("Desktop", desktop),
                           cui_series.of("Mobile", mobile) };
   $cui.card(ui, { .width = CUI_FILL, .max_width = 520 })
-    $cui.bar_chart(ui, "visits", series,
-                   %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), { .height = 200 });
+    ui.bar_chart("visits", series, $cui.count(series),
+                 %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), { .height = 200 });
 }
 
 static void scene_table(Ui ui) {

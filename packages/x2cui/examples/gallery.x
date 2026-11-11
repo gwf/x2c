@@ -23,8 +23,25 @@
 #include "gallery/feedback.x"
 #include "gallery/data.x"
 #include "gallery/charts.x"
+#include "gallery/actions.x"
+#include "gallery/smart_inputs.x"
+#include "gallery/pickers.x"
+#include "gallery/capture.x"
+#include "gallery/disclosure.x"
+#include "gallery/reader.x"
+#include "gallery/grid.x"
+#include "gallery/code.x"
+#include "gallery/social.x"
+#include "gallery/planning.x"
+#include "gallery/viz.x"
+#include "gallery/motion.x"
+#include "gallery/ai.x"
+#include "gallery/audio.x"
+#include "gallery/files.x"
+#include "gallery/devtools.x"
+#include "gallery/devtools2.x"
 
-// In the order of the PAGE_ constants.
+// The first nine are in the order of the PAGE_ constants.
 static Page pages[] = {
   { "Overview", CUI_ICON_LAYOUT_DASHBOARD, page_overview },
   { "Buttons", CUI_ICON_ZAP, page_buttons },
@@ -35,6 +52,24 @@ static Page pages[] = {
   { "Feedback", CUI_ICON_BELL, page_feedback },
   { "Data display", CUI_ICON_DATABASE, page_data },
   { "Charts", CUI_ICON_CHART_LINE, page_charts },
+  // The extended pages, from CUI's gallery_more.c.
+  { "Actions", CUI_ICON_COMMAND, page_actions },
+  { "Smart inputs", CUI_ICON_SQUARE_PEN, page_smart_inputs },
+  { "Pickers", CUI_ICON_CALENDAR, page_pickers },
+  { "Capture", CUI_ICON_UPLOAD, page_capture },
+  { "Disclosure", CUI_ICON_LAYERS, page_disclosure },
+  { "Reader", CUI_ICON_FILE_TEXT, page_reader },
+  { "Data grid", CUI_ICON_GRID_3X3, page_grid },
+  { "Code", CUI_ICON_CODE, page_code },
+  { "Social and media", CUI_ICON_MESSAGE_SQUARE, page_social },
+  { "Planning", CUI_ICON_LIST_CHECKS, page_planning },
+  { "More charts", CUI_ICON_CHART_PIE, page_viz },
+  { "Motion", CUI_ICON_ACTIVITY, page_motion },
+  { "AI", CUI_ICON_MESSAGE_SQUARE, page_ai },
+  { "Audio", CUI_ICON_AUDIO_LINES, page_audio },
+  { "Files", CUI_ICON_FOLDER, page_files },
+  { "Developer tools", CUI_ICON_SQUARE_TERMINAL, page_devtools },
+  { "More developer tools", CUI_ICON_BUG, page_devtools2 },
 };
 
 static int page_total(void) => sizeof pages / sizeof *pages;
@@ -183,7 +218,7 @@ static void dialogs(Ui ui, Gallery g) {
     { "Invite teammate", CUI_ICON_USER_PLUS, "Actions" },
     { "Open settings", CUI_ICON_SETTINGS, "Actions", "Ctrl ," },
   };
-  switch ($cui.command_palette(ui, g.palette_open, commands)) {
+  switch (ui.command_palette(g.palette_open, commands, $cui.count(commands))) {
     case 0: g.page = PAGE_OVERVIEW; break;
     case 1: g.page = PAGE_BUTTONS; break;
     case 2: g.page = PAGE_INPUTS; break;
@@ -249,7 +284,7 @@ static int shoot(Gallery g, Path directory) {
   directory.make_dirs();
   int empty = 0;
   for (int page = 0; page < page_total(); page++) {
-    Offscreen screen = auto Offscreen.open(1240, 2400);
+    Offscreen screen = auto Offscreen.open(1240, 4800);
     g.page = page;
     for (int frame = 0; frame < 6; frame++) {
       screen.begin();

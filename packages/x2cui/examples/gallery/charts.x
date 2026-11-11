@@ -32,7 +32,7 @@ void page_charts(Ui ui, Gallery g) {
   $cui.card(ui, {}) {
     cui_series s[] = { cui_series.of("Revenue", revenue),
                        cui_series.of("Costs", costs) };
-    $cui.line_chart(ui, "revenue", s, months, {
+    ui.line_chart("revenue", s, $cui.count(s), months, {
       .area = true, .smooth = true, .height = 240, .format = "$%.0fk" });
   }
   $cui.box(ui, { .dir = CUI_GRID, .columns = 2, .min_column_width = 260,
@@ -42,9 +42,9 @@ void page_charts(Ui ui, Gallery g) {
       $cui.card(ui, {}) {
         cui_series s[] = { cui_series.of("Desktop", desktop),
                            cui_series.of("Mobile", mobile) };
-        $cui.bar_chart(ui, "visits", s,
-                       %("Jan" "Feb" "Mar" "Apr" "May" "Jun"),
-                       { .height = 200 });
+        ui.bar_chart("visits", s, $cui.count(s),
+                     %("Jan" "Feb" "Mar" "Apr" "May" "Jun"),
+                     { .height = 200 });
       }
     }
     $cui.column(ui, { .gap = 12 }) {
@@ -62,9 +62,9 @@ void page_charts(Ui ui, Gallery g) {
       cui_series s[] = { cui_series.of("Passed", passed),
                          cui_series.of("Retried", retried),
                          cui_series.of("Failed", failed) };
-      $cui.bar_chart(ui, "runs", s,
-                     %("W1" "W2" "W3" "W4" "W5" "W6" "W7" "W8"),
-                     { .stacked = true, .height = 200 });
+      ui.bar_chart("runs", s, $cui.count(s),
+                   %("W1" "W2" "W3" "W4" "W5" "W6" "W7" "W8"),
+                   { .stacked = true, .height = 200 });
     }
     $cui.card(ui, { .dir = CUI_ROW, .gap = 24, .align = CUI_ALIGN_CENTER }) {
       ui.gauge("CPU", 0.42f, 130);

@@ -212,6 +212,16 @@ bool Ui.tree_begin(Ui ui, String label, bool &?open, cui_tree_opts opts) =>
   open ? cui_tree_begin(ui, label, &open, &opts)
        : cui_tree_begin(ui, label, NULL, &opts);
 
+/** Draws a table cell that holds a tree node, `depth` levels in. Returns
+    true when the node is clicked. A leaf has no open flag: pass NULL for
+    `open`.
+*/
+bool Ui.tree_cell(
+  Ui ui, String label, int depth, bool has_children, bool &?open,
+  String icon) =>
+  open ? cui_tree_cell(ui, label, depth, has_children, &open, icon)
+       : cui_tree_cell(ui, label, depth, has_children, NULL, icon);
+
 /** Draws a donut chart with one slice for each of `values`, named by the
     matching String of `labels`.
 */
@@ -507,7 +517,6 @@ $cui.method(cui_data_grid_end);
 $cui.method(cui_data_grid_cell);
 $cui.method(cui_data_grid_cell_edit);
 $cui.method(cui_data_grid_edit);
-$cui.method(cui_tree_cell);
 $cui.method(cui_tree_table_row);
 $cui.method(cui_tree_table_name);
 $cui.method(cui_tree_table_end);
@@ -678,9 +687,7 @@ inline const cui_draw_data *Ui.get_draw_data(Ui ui) => cui_get_draw_data(ui);
 
 /* gen-arrays: begin generated methods */
 
-/** Calls `cui_tour_ex`. Each array is a pointer and its count;
-    `$cui.tour` takes the array itself.
-*/
+/** Calls `cui_tour_ex`. */
 inline int Ui.tour(
   Ui ui, String id, const cui_tour_step *steps, int count, int &step,
   cui_tour_opts opts) =>
@@ -692,64 +699,48 @@ inline bool Ui.toggle_group(
   cui_toggle_group_ex(
     ui, id, x2cui_strings(labels), labels.len(), values, &opts);
 
-/** Calls `cui_reactions`. Each array is a pointer and its count;
-    `$cui.reactions` takes the array itself.
-*/
+/** Calls `cui_reactions`. */
 inline int Ui.reactions(Ui ui, String id, cui_reaction *items, int count) =>
   cui_reactions(ui, id, items, count);
 
-/** Calls `cui_speed_dial_ex`. Each array is a pointer and its count;
-    `$cui.speed_dial` takes the array itself.
-*/
+/** Calls `cui_speed_dial_ex`. */
 inline int Ui.speed_dial(
   Ui ui, String id, const cui_speed_action *actions, int count,
   cui_speed_dial_opts opts) =>
   cui_speed_dial_ex(ui, id, actions, count, &opts);
 
-/** Calls `cui_swipe_item_begin`. Each array is a pointer and its count;
-    `$cui.swipe_item_begin` takes the array itself.
-*/
+/** Calls `cui_swipe_item_begin`. */
 inline void Ui.swipe_item_begin(
   Ui ui, String id, const cui_swipe_action *left, int left_count,
   const cui_swipe_action *right, int right_count) =>
   cui_swipe_item_begin(ui, id, left, left_count, right, right_count);
 
-/** Calls `cui_filter_bar`. Each array is a pointer and its count;
-    `$cui.filter_bar` takes the array itself.
-*/
+/** Calls `cui_filter_bar`. */
 inline bool Ui.filter_bar(
   Ui ui, String id, const cui_filter_field *fields, int count,
-  uint32_t &selected, TextField search) =>
+  uint32_t *selected, TextField search) =>
   cui_filter_bar(
-    ui, id, fields, count, &selected, x2cui_buffer(search), search.capacity);
+    ui, id, fields, count, selected, x2cui_buffer(search), search.capacity);
 
-/** Calls `cui_tree_table_begin_ex`. Each array is a pointer and its count;
-    `$cui.tree_table_begin` takes the array itself.
-*/
+/** Calls `cui_tree_table_begin_ex`. */
 inline void Ui.tree_table_begin(
   Ui ui, String id, const cui_grid_column *columns, int column_count,
   cui_tree_node *nodes, int node_count, cui_tree_table_opts opts) =>
   cui_tree_table_begin_ex(
     ui, id, columns, column_count, nodes, node_count, &opts);
 
-/** Calls `cui_diff_view_rows`. Each array is a pointer and its count;
-    `$cui.diff_view_rows` takes the array itself.
-*/
+/** Calls `cui_diff_view_rows`. */
 inline int Ui.diff_view_rows(
   Ui ui, String id, cui_diff_row *rows, int first, int cap) =>
   cui_diff_view_rows(ui, id, rows, first, cap);
 
-/** Calls `cui_presence`. Each array is a pointer and its count;
-    `$cui.presence` takes the array itself.
-*/
+/** Calls `cui_presence`. */
 inline void Ui.presence(
   Ui ui, String id, const cui_presence_user *users, int count, int max_visible,
   float size) =>
   cui_presence(ui, id, users, count, max_visible, size);
 
-/** Calls `cui_ticker_ex`. Each array is a pointer and its count;
-    `$cui.ticker` takes the array itself.
-*/
+/** Calls `cui_ticker_ex`. */
 inline void Ui.ticker(
   Ui ui, String id, const cui_ticker_item *items, int count,
   cui_ticker_opts opts) =>
@@ -761,177 +752,133 @@ inline int Ui.heatmap(
   cui_heatmap_opts opts) =>
   cui_heatmap_ex(ui, id, values, rows, cols, &opts);
 
-/** Calls `cui_calendar_heatmap_ex`. Each array is a pointer and its count;
-    `$cui.calendar_heatmap` takes the array itself.
-*/
+/** Calls `cui_calendar_heatmap_ex`. */
 inline int Ui.calendar_heatmap(
   Ui ui, String id, cui_date start, const float *values, int days,
   cui_calendar_heatmap_opts opts) =>
   cui_calendar_heatmap_ex(ui, id, start, values, days, &opts);
 
-/** Calls `cui_treemap_ex`. Each array is a pointer and its count;
-    `$cui.treemap` takes the array itself.
-*/
+/** Calls `cui_treemap_ex`. */
 inline int Ui.treemap(
   Ui ui, String id, const cui_viz_item *items, int count,
   cui_treemap_opts opts) =>
   cui_treemap_ex(ui, id, items, count, &opts);
 
-/** Calls `cui_radar_chart_ex`. Each array is a pointer and its count;
-    `$cui.radar_chart` takes the array itself.
-*/
+/** Calls `cui_radar_chart_ex`. */
 inline int Ui.radar_chart(
   Ui ui, String id, const cui_series *series, int count, List axes,
   cui_radar_opts opts) =>
   cui_radar_chart_ex(
     ui, id, series, count, x2cui_strings(axes), axes.len(), &opts);
 
-/** Calls `cui_funnel_ex`. Each array is a pointer and its count;
-    `$cui.funnel` takes the array itself.
-*/
+/** Calls `cui_funnel_ex`. */
 inline int Ui.funnel(
   Ui ui, String id, const cui_viz_item *stages, int count,
   cui_funnel_opts opts) =>
   cui_funnel_ex(ui, id, stages, count, &opts);
 
-/** Calls `cui_sankey_ex`. Each array is a pointer and its count;
-    `$cui.sankey` takes the array itself.
-*/
+/** Calls `cui_sankey_ex`. */
 inline int Ui.sankey(
   Ui ui, String id, List nodes, const cui_sankey_link *links, int link_count,
   cui_sankey_opts opts) =>
   cui_sankey_ex(
     ui, id, x2cui_strings(nodes), nodes.len(), links, link_count, &opts);
 
-/** Calls `cui_waffle_ex`. Each array is a pointer and its count;
-    `$cui.waffle` takes the array itself.
-*/
+/** Calls `cui_waffle_ex`. */
 inline int Ui.waffle(
   Ui ui, String id, const cui_viz_item *items, int count,
   cui_waffle_opts opts) =>
   cui_waffle_ex(ui, id, items, count, &opts);
 
-/** Calls `cui_split_bar_ex`. Each array is a pointer and its count;
-    `$cui.split_bar` takes the array itself.
-*/
+/** Calls `cui_split_bar_ex`. */
 inline int Ui.split_bar(
   Ui ui, String id, const cui_viz_item *items, int count,
   cui_split_bar_opts opts) =>
   cui_split_bar_ex(ui, id, items, count, &opts);
 
-/** Calls `cui_bar_list_ex`. Each array is a pointer and its count;
-    `$cui.bar_list` takes the array itself.
-*/
+/** Calls `cui_bar_list_ex`. */
 inline int Ui.bar_list(
   Ui ui, String id, const cui_viz_item *items, int count,
   cui_bar_list_opts opts) =>
   cui_bar_list_ex(ui, id, items, count, &opts);
 
-/** Calls `cui_activity_rings_ex`. Each array is a pointer and its count;
-    `$cui.activity_rings` takes the array itself.
-*/
+/** Calls `cui_activity_rings_ex`. */
 inline int Ui.activity_rings(
   Ui ui, String id, const cui_viz_item *rings, int count,
   cui_rings_opts opts) =>
   cui_activity_rings_ex(ui, id, rings, count, &opts);
 
-/** Calls `cui_scatter_chart_ex`. Each array is a pointer and its count;
-    `$cui.scatter_chart` takes the array itself.
-*/
+/** Calls `cui_scatter_chart_ex`. */
 inline int Ui.scatter_chart(
   Ui ui, String id, const cui_scatter_series *series, int count,
   cui_scatter_opts opts) =>
   cui_scatter_chart_ex(ui, id, series, count, &opts);
 
-/** Calls `cui_candlestick_ex`. Each array is a pointer and its count;
-    `$cui.candlestick` takes the array itself.
-*/
+/** Calls `cui_candlestick_ex`. */
 inline int Ui.candlestick(
   Ui ui, String id, const cui_candle *candles, int count,
   cui_candlestick_opts opts) =>
   cui_candlestick_ex(ui, id, candles, count, &opts);
 
-/** Calls `cui_tab_bar_ex`. Each array is a pointer and its count;
-    `$cui.tab_bar` takes the array itself.
-*/
+/** Calls `cui_tab_bar_ex`. */
 inline bool Ui.tab_bar(
   Ui ui, String id, const cui_tab_bar_item *items, int count, int &selected,
   cui_tab_bar_opts opts) =>
   cui_tab_bar_ex(ui, id, items, count, &selected, &opts);
 
-/** Calls `cui_waveform_ex`. Each array is a pointer and its count;
-    `$cui.waveform` takes the array itself.
-*/
+/** Calls `cui_waveform_ex`. */
 inline bool Ui.waveform(
   Ui ui, String id, const float *peaks, int count, float &progress,
   cui_waveform_opts opts) =>
   cui_waveform_ex(ui, id, peaks, count, &progress, &opts);
 
-/** Calls `cui_agent_plan_ex`. Each array is a pointer and its count;
-    `$cui.agent_plan` takes the array itself.
-*/
+/** Calls `cui_agent_plan_ex`. */
 inline int Ui.agent_plan(
   Ui ui, String id, const cui_plan_step *steps, int count,
   cui_agent_plan_opts opts) =>
   cui_agent_plan_ex(ui, id, steps, count, &opts);
 
-/** Calls `cui_source_list`. Each array is a pointer and its count;
-    `$cui.source_list` takes the array itself.
-*/
+/** Calls `cui_source_list`. */
 inline int Ui.source_list(
   Ui ui, String id, const cui_source *sources, int count) =>
   cui_source_list(ui, id, sources, count);
 
-/** Calls `cui_prompt_suggestions_ex`. Each array is a pointer and its count;
-    `$cui.prompt_suggestions` takes the array itself.
-*/
+/** Calls `cui_prompt_suggestions_ex`. */
 inline int Ui.prompt_suggestions(
   Ui ui, String id, const cui_prompt_suggestion *items, int count,
   cui_prompt_suggestions_opts opts) =>
   cui_prompt_suggestions_ex(ui, id, items, count, &opts);
 
-/** Calls `cui_model_picker_ex`. Each array is a pointer and its count;
-    `$cui.model_picker` takes the array itself.
-*/
+/** Calls `cui_model_picker_ex`. */
 inline bool Ui.model_picker(
   Ui ui, String id, const cui_model *models, int count, int &selected,
   cui_model_picker_opts opts) =>
   cui_model_picker_ex(ui, id, models, count, &selected, &opts);
 
-/** Calls `cui_week_calendar_ex`. Each array is a pointer and its count;
-    `$cui.week_calendar` takes the array itself.
-*/
+/** Calls `cui_week_calendar_ex`. */
 inline int Ui.week_calendar(
   Ui ui, String id, cui_date week_start, cui_cal_event *events, int count,
   cui_week_opts opts) =>
   cui_week_calendar_ex(ui, id, week_start, events, count, &opts);
 
-/** Calls `cui_month_calendar_ex`. Each array is a pointer and its count;
-    `$cui.month_calendar` takes the array itself.
-*/
+/** Calls `cui_month_calendar_ex`. */
 inline cui_month_result Ui.month_calendar(
   Ui ui, String id, cui_date &month, const cui_month_event *events, int count,
   cui_month_opts opts) =>
   cui_month_calendar_ex(ui, id, &month, events, count, &opts);
 
-/** Calls `cui_gantt_ex`. Each array is a pointer and its count;
-    `$cui.gantt` takes the array itself.
-*/
+/** Calls `cui_gantt_ex`. */
 inline int Ui.gantt(
   Ui ui, String id, cui_gantt_task *tasks, int count, cui_date origin,
   int days, cui_gantt_opts opts) =>
   cui_gantt_ex(ui, id, tasks, count, origin, days, &opts);
 
-/** Calls `cui_toc`. Each array is a pointer and its count;
-    `$cui.toc` takes the array itself.
-*/
+/** Calls `cui_toc`. */
 inline int Ui.toc(
   Ui ui, String scroll_id, const cui_toc_item *items, int count) =>
   cui_toc(ui, scroll_id, items, count);
 
-/** Calls `cui_checklist_ex`. Each array is a pointer and its count;
-    `$cui.checklist` takes the array itself.
-*/
+/** Calls `cui_checklist_ex`. */
 inline int Ui.checklist(
   Ui ui, String id, cui_check_step *steps, int count,
   cui_checklist_opts opts) =>
@@ -943,147 +890,111 @@ inline bool Ui.multi_select(
   cui_multi_select_ex(
     ui, id, x2cui_strings(items), items.len(), selected, &opts);
 
-/** Calls `cui_histogram_slider_ex`. Each array is a pointer and its count;
-    `$cui.histogram_slider` takes the array itself.
-*/
+/** Calls `cui_histogram_slider_ex`. */
 inline bool Ui.histogram_slider(
   Ui ui, String label, const float *bins, int bin_count, float &lo, float &hi,
   float min, float max, cui_histogram_opts opts) =>
   cui_histogram_slider_ex(
     ui, label, bins, bin_count, &lo, &hi, min, max, &opts);
 
-/** Calls `cui_level_meter_ex`. Each array is a pointer and its count;
-    `$cui.level_meter` takes the array itself.
-*/
+/** Calls `cui_level_meter_ex`. */
 inline bool Ui.level_meter(
   Ui ui, String id, const float *levels, int channels,
   cui_level_meter_opts opts) =>
   cui_level_meter_ex(ui, id, levels, channels, &opts);
 
-/** Calls `cui_doc_tabs_ex`. Each array is a pointer and its count;
-    `$cui.doc_tabs` takes the array itself.
-*/
+/** Calls `cui_doc_tabs_ex`. */
 inline cui_doc_tabs_result Ui.doc_tabs(
   Ui ui, String id, const cui_doc_tab *tabs, int count, int &selected,
   cui_doc_tabs_opts opts) =>
   cui_doc_tabs_ex(ui, id, tabs, count, &selected, &opts);
 
-/** Calls `cui_prop_vec_ex`. Each array is a pointer and its count;
-    `$cui.prop_vec` takes the array itself.
-*/
+/** Calls `cui_prop_vec_ex`. */
 inline bool Ui.prop_vec(
   Ui ui, String label, float *value, int components, cui_prop_opts opts) =>
   cui_prop_vec_ex(ui, label, value, components, &opts);
 
-/** Calls `cui_hex_view_ex`. Each array is a pointer and its count;
-    `$cui.hex_view` takes the array itself.
-*/
+/** Calls `cui_hex_view_ex`. */
 inline cui_hex_result Ui.hex_view(
   Ui ui, String id, const uint8_t *data, size_t size, cui_hex_selection &sel,
   cui_hex_view_opts opts) =>
   cui_hex_view_ex(ui, id, data, size, &sel, &opts);
 
-/** Calls `cui_flame_graph_ex`. Each array is a pointer and its count;
-    `$cui.flame_graph` takes the array itself.
-*/
+/** Calls `cui_flame_graph_ex`. */
 inline cui_flame_result Ui.flame_graph(
   Ui ui, String id, const cui_flame_span *spans, int count,
   cui_flame_view &view, int &selected, cui_flame_opts opts) =>
   cui_flame_graph_ex(ui, id, spans, count, &view, &selected, &opts);
 
-/** Calls `cui_curve_editor_ex`. Each array is a pointer and its count;
-    `$cui.curve_editor` takes the array itself.
-*/
+/** Calls `cui_curve_editor_ex`. */
 inline cui_curve_result Ui.curve_editor(
   Ui ui, String id, cui_curve_key *keys, int &count, int capacity,
   cui_curve_opts opts) =>
   cui_curve_editor_ex(ui, id, keys, &count, capacity, &opts);
 
-/** Calls `cui_gradient_editor_ex`. Each array is a pointer and its count;
-    `$cui.gradient_editor` takes the array itself.
-*/
+/** Calls `cui_gradient_editor_ex`. */
 inline cui_gradient_result Ui.gradient_editor(
   Ui ui, String id, cui_gradient_stop *stops, int &count, int capacity,
   cui_gradient_opts opts) =>
   cui_gradient_editor_ex(ui, id, stops, &count, capacity, &opts);
 
-/** Calls `cui_timeline_editor_ex`. Each array is a pointer and its count;
-    `$cui.timeline_editor` takes the array itself.
-*/
+/** Calls `cui_timeline_editor_ex`. */
 inline cui_timeline_editor_result Ui.timeline_editor(
   Ui ui, String id, cui_timeline_track *tracks, int count, float &time,
   cui_timeline_editor_opts opts) =>
   cui_timeline_editor_ex(ui, id, tracks, count, &time, &opts);
 
-/** Calls `cui_kv_editor_ex`. Each array is a pointer and its count;
-    `$cui.kv_editor` takes the array itself.
-*/
+/** Calls `cui_kv_editor_ex`. */
 inline bool Ui.kv_editor(
   Ui ui, String id, cui_kv_pair *pairs, int &count, int capacity,
   cui_kv_editor_opts opts) =>
   cui_kv_editor_ex(ui, id, pairs, &count, capacity, &opts);
 
-/** Calls `cui_problems_ex`. Each array is a pointer and its count;
-    `$cui.problems` takes the array itself.
-*/
+/** Calls `cui_problems_ex`. */
 inline cui_problems_result Ui.problems(
   Ui ui, String id, const cui_diagnostic *diags, int count,
   cui_problems_opts opts) =>
   cui_problems_ex(ui, id, diags, count, &opts);
 
-/** Calls `cui_pipeline_ex`. Each array is a pointer and its count;
-    `$cui.pipeline` takes the array itself.
-*/
+/** Calls `cui_pipeline_ex`. */
 inline cui_pipeline_result Ui.pipeline(
   Ui ui, String id, List stages, const cui_pipeline_job *jobs, int job_count,
   cui_pipeline_opts opts) =>
   cui_pipeline_ex(
     ui, id, x2cui_strings(stages), stages.len(), jobs, job_count, &opts);
 
-/** Calls `cui_query_builder_ex`. Each array is a pointer and its count;
-    `$cui.query_builder` takes the array itself.
-*/
+/** Calls `cui_query_builder_ex`. */
 inline bool Ui.query_builder(
   Ui ui, String id, const cui_query_field *fields, int field_count,
   cui_query_node *nodes, int &count, int capacity, cui_query_opts opts) =>
   cui_query_builder_ex(
     ui, id, fields, field_count, nodes, &count, capacity, &opts);
 
-/** Calls `cui_keymap_ex`. Each array is a pointer and its count;
-    `$cui.keymap` takes the array itself.
-*/
+/** Calls `cui_keymap_ex`. */
 inline cui_keymap_result Ui.keymap(
   Ui ui, String id, const cui_keymap_binding *bindings, int count,
   cui_keymap_opts opts) =>
   cui_keymap_ex(ui, id, bindings, count, &opts);
 
-/** Calls `cui_commit_graph_ex`. Each array is a pointer and its count;
-    `$cui.commit_graph` takes the array itself.
-*/
+/** Calls `cui_commit_graph_ex`. */
 inline cui_commit_graph_result Ui.commit_graph(
   Ui ui, String id, const cui_commit *commits, int count,
   cui_commit_graph_opts opts) =>
   cui_commit_graph_ex(ui, id, commits, count, &opts);
 
-/** Calls `cui_graph_view_ex`. Each array is a pointer and its count;
-    `$cui.graph_view` takes the array itself.
-*/
+/** Calls `cui_graph_view_ex`. */
 inline cui_graph_result Ui.graph_view(
   Ui ui, String id, const cui_graph_node *nodes, int node_count,
   const cui_graph_edge *edges, int edge_count, cui_graph_opts opts) =>
   cui_graph_view_ex(ui, id, nodes, node_count, edges, edge_count, &opts);
 
-/** Calls `cui_waterfall_ex`. Each array is a pointer and its count;
-    `$cui.waterfall` takes the array itself.
-*/
+/** Calls `cui_waterfall_ex`. */
 inline cui_waterfall_result Ui.waterfall(
   Ui ui, String id, const cui_net_request *requests, int count,
   cui_waterfall_opts opts) =>
   cui_waterfall_ex(ui, id, requests, count, &opts);
 
-/** Calls `cui_trace_view_ex`. Each array is a pointer and its count;
-    `$cui.trace_view` takes the array itself.
-*/
+/** Calls `cui_trace_view_ex`. */
 inline cui_trace_result Ui.trace_view(
   Ui ui, String id, cui_trace_track *tracks, int track_count,
   const cui_trace_span *spans, int span_count, cui_trace_view &view,
@@ -1091,33 +1002,25 @@ inline cui_trace_result Ui.trace_view(
   cui_trace_view_ex(
     ui, id, tracks, track_count, spans, span_count, &view, &selected, &opts);
 
-/** Calls `cui_test_explorer_ex`. Each array is a pointer and its count;
-    `$cui.test_explorer` takes the array itself.
-*/
+/** Calls `cui_test_explorer_ex`. */
 inline cui_test_explorer_result Ui.test_explorer(
   Ui ui, String id, const cui_test_item *items, int count,
   cui_test_explorer_opts opts) =>
   cui_test_explorer_ex(ui, id, items, count, &opts);
 
-/** Calls `cui_stack_trace_ex`. Each array is a pointer and its count;
-    `$cui.stack_trace` takes the array itself.
-*/
+/** Calls `cui_stack_trace_ex`. */
 inline cui_stack_trace_result Ui.stack_trace(
   Ui ui, String id, const cui_stack_frame *frames, int count,
   cui_stack_trace_opts opts) =>
   cui_stack_trace_ex(ui, id, frames, count, &opts);
 
-/** Calls `cui_uptime_ex`. Each array is a pointer and its count;
-    `$cui.uptime` takes the array itself.
-*/
+/** Calls `cui_uptime_ex`. */
 inline cui_uptime_result Ui.uptime(
   Ui ui, String id, const cui_uptime_service *services, int count,
   cui_uptime_opts opts) =>
   cui_uptime_ex(ui, id, services, count, &opts);
 
-/** Calls `cui_time_histogram_ex`. Each array is a pointer and its count;
-    `$cui.time_histogram` takes the array itself.
-*/
+/** Calls `cui_time_histogram_ex`. */
 inline cui_time_histogram_result Ui.time_histogram(
   Ui ui, String id, double start, double bucket_seconds, int buckets,
   const cui_histogram_series *series, int series_count, double &sel_start,
@@ -1126,17 +1029,13 @@ inline cui_time_histogram_result Ui.time_histogram(
     ui, id, start, bucket_seconds, buckets, series, series_count, &sel_start,
     &sel_end, &opts);
 
-/** Calls `cui_coverage_ex`. Each array is a pointer and its count;
-    `$cui.coverage` takes the array itself.
-*/
+/** Calls `cui_coverage_ex`. */
 inline cui_coverage_result Ui.coverage(
   Ui ui, String id, const cui_coverage_file *files, int count,
   cui_coverage_opts opts) =>
   cui_coverage_ex(ui, id, files, count, &opts);
 
-/** Calls `cui_blame_ex`. Each array is a pointer and its count;
-    `$cui.blame` takes the array itself.
-*/
+/** Calls `cui_blame_ex`. */
 inline cui_blame_result Ui.blame(
   Ui ui, String id, List lines, const int *line_commit, int line_count,
   const cui_blame_commit *commits, int commit_count, cui_blame_opts opts) =>
@@ -1144,34 +1043,26 @@ inline cui_blame_result Ui.blame(
     ui, id, x2cui_strings(lines), line_commit, line_count, commits,
     commit_count, &opts);
 
-/** Calls `cui_feature_flags_ex`. Each array is a pointer and its count;
-    `$cui.feature_flags` takes the array itself.
-*/
+/** Calls `cui_feature_flags_ex`. */
 inline cui_feature_flags_result Ui.feature_flags(
   Ui ui, String id, cui_feature_flag *flags, int count, List envs,
   cui_feature_flags_opts opts) =>
   cui_feature_flags_ex(
     ui, id, flags, count, x2cui_strings(envs), envs.len(), &opts);
 
-/** Calls `cui_api_explorer_ex`. Each array is a pointer and its count;
-    `$cui.api_explorer` takes the array itself.
-*/
+/** Calls `cui_api_explorer_ex`. */
 inline cui_api_explorer_result Ui.api_explorer(
   Ui ui, String id, const cui_api_endpoint *endpoints, int count,
   cui_api_explorer_opts opts) =>
   cui_api_explorer_ex(ui, id, endpoints, count, &opts);
 
-/** Calls `cui_draw_polyline`. Each array is a pointer and its count;
-    `$cui.draw_polyline` takes the array itself.
-*/
+/** Calls `cui_draw_polyline`. */
 inline void Ui.draw_polyline(
   Ui ui, const cui_vec2 *points, int count, float thickness, cui_color color,
   bool closed) =>
   cui_draw_polyline(ui, points, count, thickness, color, closed);
 
-/** Calls `cui_draw_polygon`. Each array is a pointer and its count;
-    `$cui.draw_polygon` takes the array itself.
-*/
+/** Calls `cui_draw_polygon`. */
 inline void Ui.draw_polygon(
   Ui ui, const cui_vec2 *points, int count, cui_color color) =>
   cui_draw_polygon(ui, points, count, color);

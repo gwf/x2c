@@ -581,17 +581,38 @@ components on topic pages. Gary chose to have both:
   off screen and opens no window. The completeness test compares its
   scene names with CUI's header.
 
-State on 2026-11-10: the frame and the nine core pages are ported and
-drawn off screen; `gallery --shots DIR` draws each page on a tall surface.
-The whole gallery ran 13,500 frames under random input with freed memory
-scribbled, with no crash. Its resident memory is flat over 51,000 frames,
-as CUI's C gallery is. An earlier version grew up to 250 bytes a frame:
-the string-list table was a `Map`, which boxed an address on every lookup.
-It is now a small open-addressed table. The extended pages are not ported.
+State on 2026-11-10: the frame and all 26 pages are ported.
 
-The nine core pages need only six array forms. The seventeen extended
-pages use about 55 of the array components, so porting them completes
-most of Delivery 2's forms.
+- **Fidelity.** `gallery --shots` draws each page on a 1240 by 4800
+  surface. Each of the 26 images is byte-identical to the same page of
+  CUI's C gallery drawn the same way.
+- **Stability.** The gallery ran 26,000 frames under random mouse,
+  keyboard, and scroll input with freed memory scribbled, at wide and
+  narrow widths, with no crash.
+- **Memory.** Resident memory is flat over 20,000 or more frames a page,
+  as the C gallery's is. An earlier version grew up to 250 bytes a frame:
+  the string-list table was a `Map`, which boxed an address on every
+  lookup. It is now a small open-addressed table.
+- **Size.** 3,670 lines of x2c for 2,497 lines of C. The C lines run to
+  180 columns and the x2c lines stop at 79.
+- Nobody has operated the extended pages in a window.
+
+#### The array form after the port
+
+Gary accepted C arrays of CUI records on 2026-11-10. Porting the gallery
+then settled the call form:
+
+- `tools/gen-arrays.py` writes one `Ui` method for each of 62 array
+  components from the pinned header, with CUI's parameter names. A call
+  passes the array and `$cui.count(array)`.
+- A first version also generated 59 `$cui.` macros that took the array
+  whole. The seven workers who ported the pages used them 16 times and
+  used `$cui.count` with a method 57 times, because CUI's gallery ignores
+  most results and x2c does not let a value-returning macro stand alone as
+  a statement. The macros were removed. `$cui.table` and `$cui.data_grid`
+  remain, because they are blocks.
+- Three variadic functions and the functions that fill caller buffers
+  without a `cui_ctx` have no form and are called as C.
 
 ### Delivery 3: browser
 

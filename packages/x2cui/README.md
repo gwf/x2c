@@ -143,19 +143,52 @@ commands in the last frame. `write_png` raises `<io-fail>` when it cannot
 write. The package's tests drive components this way, with CUI's own
 `ui.input_mouse_move`, `ui.input_mouse_button`, and `ui.input_text`.
 
-## What has no x2c form yet
+## Arrays of records
 
-75 of CUI's 429 component functions take an array of records, numbers, or
-flags, or are variadic. They have no method yet and are called as C. They
-cover tables and data grids, charts, calendars, and several developer
-panels: 61 of CUI's 201 components. A later change gives them forms that
-take x2c collections.
+A component such as a table, a chart, or a calendar reads an array of
+CUI's own records. In x2c that array is a C array of those records,
+written with designated initializers, and `$cui.count` supplies its count:
+
+```x2c
+static cui_tab_bar_item tabs[] = {
+  { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" } };
+ui.tab_bar("tabs", tabs, $cui.count(tabs), selected, {});
+```
+
+The array may be static, a local, or a variable-length array filled from
+a collection. CUI writes into the array of a component that edits its
+records, such as a calendar whose events are dragged. `$cui.count` of a
+pointer does not compile; a program that holds a pointer passes its own
+count.
+
+Two block components take the array itself and supply the count:
+`$cui.table(ui, id, columns, opts) { ... }` and
+`$cui.data_grid(ui, id, columns, rows, first, last, opts) { ... }`. The
+data grid draws only the rows on screen, from `first` up to `last`.
+
+Chart numbers may also be a packed `ArrayFloat`:
+`cui_series.of(name, values)` builds a series over one, and
+`ui.donut_chart` and `ui.sparkline` take one. A chart's x axis labels are
+a `List` parameter.
+
+`tools/gen-arrays.py` writes the methods of these components from the
+pinned header, with CUI's parameter names.
 
 An option record keeps its C field types. A field that is a pointer to
 caller state takes an address, as in `{ .toggle = &bold }`, and a field
 that is an array takes a C array.
 
 A tree leaf has no open flag: `ui.tree_begin(name, NULL, { .leaf = true })`.
+
+A callback that CUI calls, such as a canvas paint function, is an ordinary
+function. Where its type names `cui_ctx *`, declare that parameter as
+`cui_ctx *` and assign it to a `Ui` to call methods.
+
+## What has no x2c form
+
+Variadic functions, such as `cui_textf`, `cui_table_cell_textf`, and
+`cui_terminal_printf`, and functions that fill caller buffers without a
+`cui_ctx`, such as `cui_terminal_init` and `cui_fs_list`, are called as C.
 
 ## No Lisp surface
 
@@ -172,10 +205,12 @@ list to a file after each change. `make run-interactive` opens it.
 
 `examples/gallery.x` is the broader application (`make example`). It is
 a port of CUI's own gallery, `examples/gallery_ui.c` and
-`examples/gallery_more.c` in CUI's source: the same pages, sections, and
-layout, with each page in a file under `examples/gallery/`. Read a page
-beside its C original to compare the two forms. `make run-gallery` opens
-it, and `gallery --shots DIR` draws every page off screen.
+`examples/gallery_more.c` in CUI's source: the same 26 pages, sections,
+and layout, with each page in a file under `examples/gallery/`. Read a
+page beside its C original to compare the two forms. `make run-gallery`
+opens it, and `gallery --shots DIR` draws every page off screen. Drawn
+that way, each page is the same image, byte for byte, as the same page of
+CUI's C gallery.
 
 `examples/scenes.x` is a check, not an application. It has one small
 scene for each component that has an x2c form, named for the component

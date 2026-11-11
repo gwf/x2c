@@ -30,6 +30,9 @@ meta static int _pointer(List type) => type.len() > 1 && type[0] == <*>;
 meta static int _const_pointer(List type) =>
   type.len() > 2 && type[0] == <*> && type[1] == <const>;
 
+meta static int _function(List type) =>
+  type.len() > 0 && type[0] == <func>;
+
 meta static int _spelled(List type, String shape) => type.repr() == shape;
 
 /* `cui_button_ex` is `button`, and `cui_draw_rect` is `draw_rect`. */
@@ -77,7 +80,9 @@ meta List cui_method(Code target, Code buffer, Code strings) {
       args.push($!( (int) $p.len() ));
       i++;
     }
-    else if (_pointer(type) && _spelled(Type.element(type), "(void)")) {
+    else if (_pointer(type) && (_spelled(Type.element(type), "(void)") ||
+                                _function(Type.element(type)))) {
+      // A void pointer and a callback pass as C.
       params.push($!Param{ $type $p });
       args.push($!( $p ));
     }
