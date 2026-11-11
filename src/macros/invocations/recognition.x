@@ -25,13 +25,26 @@ static const MacroPos macro_position_info[] = {
     a Macro target and then consumed is withdrawn with that transaction.
 */
 List Compiler.publish_macro_definition_node(Compiler c, List node) {
-  c.sym.put(c.macros, node.assoc(<name>), node);
+  Atom name = Compiler.macro_definition_name(node.assoc(<name>));
+  if (name !== node.assoc(<name>))
+    node = %(macrodef @(node.cdr().map(%!(List row) =>
+      row ~= %(name ?) ? %(name $name) : row)));
+  c.sym.put(c.macros, name, node);
   if (c.shallow && !c.macro_holes &&
       !node.assoc(<static>).equal(1) && !node.assoc(<local>).int())
     _record_compile_time_effect(
       c, %(compile-time macrodef $(c.freeze_declaration_syntax(node))),
       c.token);
   return node;
+}
+
+/** Returns a definition's name: `name` itself, or the name a template
+    computed, `(macro-name PART ...)` with its holes filled, joined as
+    `PART.PART`.
+*/
+Atom Compiler.macro_definition_name(Var name) {
+  match (name) case %(macro-name *parts): return Atom.intern(".".join(parts));
+  return name;
 }
 
 /** Installs included compile-time definitions in their source order.

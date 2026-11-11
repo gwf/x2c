@@ -106,7 +106,8 @@ module void _naming(Definition &d) {
     d.name = Atom.intern(c.token.text);
     c.next();
   }
-  else d.name = _name(c);
+  else d.name = _template_name(c);
+  if (d.name is <list>) return;
   String spelling = d.name.str();
   if (d.local && d.name in %<with defer while>)
     $fail.macros_name_reserved(c, d.start, spelling);
@@ -116,6 +117,25 @@ module void _naming(Definition &d) {
       !c.builtin_defs &&
       !Compiler.is_runtime_source(c.source_path(c.filename)))
     $fail.macros_macro_reserved(c, d.start, spelling);
+}
+
+/* A definition in a template may take a component of its name from a Name
+   hole, as `$W.$m`. Its name is then `(macro-name PART ...)`, which the
+   expansion fills and `macro_definition_name` joins as `W.add`. */
+static Var _template_name(Compiler c) {
+  String spelling;
+  _scan_name(c, spelling);
+  if (spelling || !c.macro_holes) return _name(c);
+  Array parts = [];
+  c.expect(<$>);
+  do {
+    List member = c.try_parse_macro_member();
+    if (!member && !c.token.text.is_identifier())
+      $fail.macros_macro_name(c, c.token);
+    parts.push(member ? member : c.token.text);
+    if (!member) c.next();
+  } while (c.test(<.>));
+  return %(macro-name @(parts.list_free()));
 }
 
 /* Reads the parameter holes, then a `using` clause. A decorator's first

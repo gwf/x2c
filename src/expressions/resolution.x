@@ -177,11 +177,11 @@ static List _content(Resolve &r, List content) {
 
 /* A method call that the template of the macro `owner` wrote is the
    method, not `owner`; the marker stays until the template expands. */
-static List _method_call(Resolve &r, Atom owner, List call) {
+static List _method_call(Resolve &r, Var owner, List call) {
   if (r.c.macro_holes) return r.input;
   r.input = call;
   r.type = call.cadr();
-  r.owner = owner;
+  r.owner = Compiler.macro_definition_name(owner);
   return _content(r, call.caddr());
 }
 
