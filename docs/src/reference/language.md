@@ -2553,7 +2553,12 @@ syntax. During expansion, syntax a template left untyped is resolved where the
 expansion stands, so a template's locals, casts, and method results report
 their declared types. An `x2c_ident` name value and an untyped quotation are
 resolved the same way, so `Code.type(x2c_ident("puts"))` is the type of the
-function `puts`.
+function `puts`. The `Type` omits the storage class and the qualifiers of the
+value itself. It keeps the qualifiers of what a pointer points at and of what
+a function returns: a `const char *` local reports `(* const char)`, and
+`Type.return_type` of a function that returns `const char *` reports the
+same. A declaration written with the reported `Type` therefore accepts the
+value it was read from.
 
 `Code.binding_spelling` accepts a name hole's valid identifier `String` or
 compiler-issued identifier and binding syntax, and returns its source spelling

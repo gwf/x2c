@@ -838,7 +838,7 @@ static Var _finish_type_spec(Compiler c, Var spec) {
              spec.car() == <macro-slot>;
   spec = c.evaluate_macro_slot(spec);
   if (slot && spec is <list>) {
-    Type type = spec.type().canonicalize();
+    Type type = spec.type().declared();
     return %(seq @type);
   }
   /* A type name a package or module file's quotation spells bare names

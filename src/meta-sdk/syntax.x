@@ -284,20 +284,18 @@ Type Code.type(Code value) {
       Type type = matched_type;
       if (type === %(<macro-expr>))
         type = active.expander.resolve_expression(value, active.site).cadr();
-      return type.canonicalize();
+      return _queried(type);
     }
     /* A name value and an untyped quotation are typed where the expansion
        stands, as the syntax a template left untyped is. */
     case %("x2c.ident" ?):
       return Code.type(%(expr (<macro-expr>) (ident $value)));
-    case %("x2c.quoted" *): {
-      List resolved = active.expander.resolve_expression(value, active.site);
-      Type type = resolved.cadr();
-      return type.canonicalize();
-    }
-    case %(param ? ?): return value.type_from_ast().canonicalize();
+    case %("x2c.quoted" *):
+      return _queried(
+        active.expander.resolve_expression(value, active.site).cadr());
+    case %(param ? ?): return _queried(value.type_from_ast());
     case %((!or declare decl typedef) *):
-      return value.type_from_ast().canonicalize();
+      return _queried(value.type_from_ast());
   }
   List binding = NULL;
   if (Ast.try_binding(value, NULL, NULL)) binding = value;
@@ -307,9 +305,15 @@ Type Code.type(Code value) {
         binding = captured;
       case %(bind (!set ?captured (*)) *): binding = captured;
     }
-  if (binding) return _binding_type(binding).canonicalize();
-  return List.type(value).canonicalize();
+  if (binding) return _queried(_binding_type(binding));
+  return _queried(List.type(value));
 }
+
+/* The type a query reports: the declared type without the storage classes
+   and qualifiers of the value itself. What a pointer points at and what a
+   function returns keep their qualifiers, which a declaration of the type
+   needs. */
+static Type _queried(Type type) => _x2c_type_unqualified(type.declared());
 
 // ancestry and placement
 
