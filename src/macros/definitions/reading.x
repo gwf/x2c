@@ -56,6 +56,8 @@ List Compiler.parse_macro_definition(Compiler c) {
   with (c.macro_holes = {}) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
+    // A method-form call to this macro in its own template is the method.
+    c.macro_holes[%(definition)] = d.name;
     if (enclosing != NULL) c.macro_holes[%(enclosing)] = enclosing;
     if (enclosing != NULL || d.anonymous) {
       d.namespace = c.fresh_name("holes");
@@ -104,7 +106,8 @@ module void _naming(Definition &d) {
     d.name = Atom.intern(c.token.text);
     c.next();
   }
-  else d.name = _name(c);
+  else d.name = _template_name(c);
+  if (d.name is <list>) return;
   String spelling = d.name.str();
   if (d.local && d.name in %<with defer while>)
     $fail.macros_name_reserved(c, d.start, spelling);
@@ -114,6 +117,25 @@ module void _naming(Definition &d) {
       !c.builtin_defs &&
       !Compiler.is_runtime_source(c.source_path(c.filename)))
     $fail.macros_macro_reserved(c, d.start, spelling);
+}
+
+/* A definition in a template may take a component of its name from a Name
+   hole, as `$W.$m`. Its name is then `(macro-name PART ...)`, which the
+   expansion fills and `macro_definition_name` joins as `W.add`. */
+static Var _template_name(Compiler c) {
+  String spelling;
+  _scan_name(c, spelling);
+  if (spelling || !c.macro_holes) return _name(c);
+  Array parts = [];
+  c.expect(<$>);
+  do {
+    List member = c.try_parse_macro_member();
+    if (!member && !c.token.text.is_identifier())
+      $fail.macros_macro_name(c, c.token);
+    parts.push(member ? member : c.token.text);
+    if (!member) c.next();
+  } while (c.test(<.>));
+  return %(macro-name @(parts.list_free()));
 }
 
 /* Reads the parameter holes, then a `using` clause. A decorator's first
@@ -137,8 +159,20 @@ static void _parameter(Definition &d, Array params, List hole) {
   Compiler c = d.c;
   if (d.kind == <decorator> && !d.target) _take_target(d, hole);
   else params.push(hole);
-  if (hole.assoc(<sequence>).int() && c.peek(0) == <,>)
+  if (hole.assoc(<sequence>).int() && c.peek(0) == <,> &&
+      (hole.assoc(<kind>) == <map-entry> || !_final_entry_rows(c)))
     $fail.macros_hole_final(c, c.token);
+}
+
+/* After a sequence hole's `,`, a final `Entry @rows` hole may follow; it
+   takes the `key: value` arguments, and the sequence takes the others. */
+static int _final_entry_rows(Compiler c) {
+  Token token = Token.skip_trivia(c.token + 1);
+  if (token.text != "Entry") return 0;
+  token = Token.skip_trivia(token + 1);
+  if (token.type != <@>) return 0;
+  token = Token.skip_trivia(Token.skip_trivia(token + 1) + 1);
+  return token.type == <)>;
 }
 
 /* A Unit target hole projects its captured source, and the definition

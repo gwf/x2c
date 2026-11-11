@@ -461,7 +461,6 @@ static List _statement(Compiler c, Symbol position) {
     case <switch>:      return _switch_statement(c);
     case <default>:     return _default_statement(c);
     case <;>:           return _empty_statement(c);
-    case <(>:           return c.parse_parenthesized_statement();
     case <"{">: case <"%{">: return _compound_statement(c);
   }
   return _expression_statement(c, position);
@@ -548,10 +547,20 @@ static List _macro_statement(Compiler c) {
   return %(stmnt $expression);
 }
 
+/* A statement beginning with `(` may instead be a cast or a destructuring
+   declaration. A method-form decorator at the statement's start raises
+   `<method-dec>` from the expression parse and applies from its arguments,
+   so no operator of the expression grammar reads its target. */
 static List _expression_statement(Compiler c, Symbol position) {
   Token start = c.token;
   List expr;
-  with (c.meta_statement = start) { expr = c.parse_expression(); }
+  try {
+    with (c.meta_statement = start) {
+      if (c.peek(0) == <(>) return c.parse_parenthesized_statement();
+      expr = c.parse_expression();
+    }
+  }
+  catch %(method-dec *): return c.parse_method_decorator(start, position);
   c.expect(<;>);
   if (!c.macro_holes && expr ~= %(expr ? (meta-call *)))
     return c.evaluate_meta_statement(expr, position, start);

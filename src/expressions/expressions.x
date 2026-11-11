@@ -47,6 +47,8 @@ module typedef struct Resolve {
   List input;
   Type type;
   Token origin;
+  // The macro whose own template wrote this method call; see `method-call`.
+  Atom owner;
 } Resolve;
 
 module {
