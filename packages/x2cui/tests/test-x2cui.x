@@ -207,6 +207,25 @@ static void a_string_list_lasts_until_the_frame_is_painted(void) {
   EXPECT_INT_EQ(month, 1);
 }
 
+/* A method that formats takes x2c values after its format. The terminal
+   buffer keeps the text it was given. */
+static void formatted_text_takes_x2c_values(void) {
+  char text[128];
+  cui_terminal_line lines[4];
+  cui_terminal_buffer terminal;
+  cui_terminal_init(&terminal, text, sizeof text, lines, 4);
+  String unit = "ms";
+  terminal.printf("%d of %d in %.1f %s", 2, 3, 4.25, unit);
+  String written = String.new_len(terminal.text, terminal.end);
+  EXPECT_STR_EQ(written, "2 of 3 in 4.2 ms");
+
+  Offscreen screen = auto Offscreen.open(240, 64);
+  screen.begin();
+  screen.ui().textf("%d of %d", 2, 3);
+  screen.end();
+  EXPECT_TRUE(screen.commands() > 0);
+}
+
 void x2cui_suite(void) {
   $test.run(offscreen_draws_and_writes_a_png);
   $test.run(write_png_raises_io_failure);
@@ -218,6 +237,7 @@ void x2cui_suite(void) {
   $test.run(a_text_result_is_a_string);
   $test.run(a_string_list_reaches_a_component);
   $test.run(a_string_list_lasts_until_the_frame_is_painted);
+  $test.run(formatted_text_takes_x2c_values);
 }
 
 int main(void) {

@@ -37,13 +37,13 @@ static void fill_build_log(void) {
     { CUI_LOG_WARN, "Physics step took 21.4 ms (budget 16.6 ms)" },
     { CUI_LOG_INFO, "Autosave written to saves/slot_2.sav (1.2 MB)" },
   };
-  // cui_log_init and the variadic cui_log_append have no
-  // methods; the buffer, line array, and text array are C storage.
+  // cui_log_init has no method;
+  // the buffer, line array, and text array are C storage.
   cui_log_init(&build_log, log_lines, 64, log_text, sizeof log_text);
   double t = 14 * 3600 + 2 * 60 + 7.12;
   for (int k = 0; k < (int) (sizeof lines / sizeof *lines); k++) {
     build_log.now = t;
-    cui_log_append(&build_log, lines[k].level, "%s", lines[k].text);
+    build_log.append(lines[k].level, "%s", lines[k].text);
     t += 0.083 + (k % 5) * 0.217;
   }
 }

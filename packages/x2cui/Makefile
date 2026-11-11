@@ -29,6 +29,7 @@ example: builds/gallery
 run: builds/todo builds/scenes
 	./builds/todo --shot builds/todo.png
 	./builds/scenes --shots builds/shots
+	./builds/scenes --check $(CUI_INCLUDE)/cui/cui.h
 
 run-interactive: builds/todo
 	./builds/todo

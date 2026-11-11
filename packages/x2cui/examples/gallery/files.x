@@ -50,29 +50,29 @@ static void run_command(String c) {
     int n = files_list(NULL, folder.text(), entries, 256, names,
                        sizeof names, false);
     for (int k = 0; k < n; k++)
-      cui_terminal_printf(&term, entries[k].dir ? "\x1b[1;34m%s/\x1b[0m\n"
+      term.printf(entries[k].dir ? "\x1b[1;34m%s/\x1b[0m\n"
                                                 : "%s\n", entries[k].name);
     if (n < 0)
       cui_terminal_write(&term, "\x1b[31mls: cannot read this folder"
                          "\x1b[0m\n", -1);
   } else if (c == "colors") {
     for (int k = 0; k < 16; k++)
-      cui_terminal_printf(&term, "\x1b[%dm\xe2\x96\x88\xe2\x96\x88\x1b[0m%s",
+      term.printf("\x1b[%dm\xe2\x96\x88\xe2\x96\x88\x1b[0m%s",
                           k < 8 ? 30 + k : 82 + k,
                           k == 7 || k == 15 ? "\n" : " ");
   } else if (c == "build") {
     String full = "\xe2\x96\x88", empty = "\xe2\x96\x91";
     for (int k = 0; k <= 20; k++) {
       String bar = %"$(full.repeat(k))$(empty.repeat(20 - k))";
-      cui_terminal_printf(&term, "\r\x1b[32m%s\x1b[0m %3d%%", bar, k * 5);
+      term.printf("\r\x1b[32m%s\x1b[0m %3d%%", bar, k * 5);
     }
     cui_terminal_write(&term, "\n\x1b[32mdone\x1b[0m\n", -1);
   } else if (c == "echo" || c.startswith("echo "))
-    cui_terminal_printf(&term, "%s\n", 
+    term.printf("%s\n",
                         c == "echo" ? "" : c.remove_prefix("echo "));
   else if (c == "clear") cui_terminal_clear(&term);
   else if (c[0])
-    cui_terminal_printf(&term, "\x1b[31m%s: command not found\x1b[0m\n", c);
+    term.printf("\x1b[31m%s: command not found\x1b[0m\n", c);
 }
 
 void page_files(Ui ui, Gallery g) {

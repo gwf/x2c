@@ -10,6 +10,8 @@
 
       scenes --list               print the scene names, one a line
       scenes --shots DIR [SCENE]  draw every scene, or one, to DIR/NAME.png
+      scenes --check HEADER       compare the scene names with the
+                                  components that CUI's cui.h defines
 */
 
 #include "path.x"
@@ -85,11 +87,43 @@ static int shoot_scenes(Path directory, String only) {
   return drawn && !empty ? 0 : 1;
 }
 
+/* Compares the scene names with the components of CUI's header, where
+   each `#define cui_NAME(` line defines the component NAME. */
+static int check_scenes(Path header) {
+  Map scenes = {}, components = {};
+  for (int f = 0; f < family_count(); f++)
+    for (int s = 0; s < families[f].count; s++)
+      scenes[families[f].scenes[s].name] = 1;
+  int unmatched = 0;
+  Var found;
+  foreach (String line in header.read_text().split_lines(0)) {
+    if (!line.startswith("#define cui_")) continue;
+    String rest = line.remove_prefix("#define cui_");
+    int paren = rest.find("(");
+    if (paren < 0) continue;
+    String name = rest[:paren];
+    components[name] = 1;
+    if (scenes.try_get(name, found)) continue;
+    printf("component %s has no scene\n", name);
+    unmatched++;
+  }
+  foreach (String name in scenes.keys()) {
+    if (components.try_get(name, found)) continue;
+    printf("scene %s names no component\n", name);
+    unmatched++;
+  }
+  printf("%d components, %d scenes, %d unmatched\n",
+         (int) components.len(), (int) scenes.len(), unmatched);
+  return unmatched ? 1 : 0;
+}
+
 int main(int argc, char **argv) {
   add_families();
   if (argc == 2 && !strcmp(argv[1], "--list")) return list_scenes();
   if (argc >= 3 && !strcmp(argv[1], "--shots"))
     return shoot_scenes(argv[2], argc > 3 ? argv[3] : NULL);
-  printf("usage: scenes --list | --shots DIR [SCENE]\n");
+  if (argc == 3 && !strcmp(argv[1], "--check"))
+    return check_scenes(argv[2]);
+  printf("usage: scenes --list | --shots DIR [SCENE] | --check HEADER\n");
   return 2;
 }

@@ -95,10 +95,18 @@ The methods are built at compile time from CUI's C signatures by
 `src/x2cui-generate.x`. To read a method's exact signature, find
 `x2cui__Ui_NAME` in `builds/x2cui.h` after `make build`.
 
-A value that changes on nearly every frame, such as a timer, is better
-drawn with the raw `cui_textf(ui, "%.1f s", seconds)`. CUI formats it in
-its own frame memory. An interpolated String would add one entry to the
-String pool for every distinct text.
+A CUI function that takes a `printf` format and C variadic arguments is a
+method that takes the format and x2c values, as `String.format` does:
+
+```x2c
+ui.textf("Ln %d, Col %d", result.line, result.column);
+ui.table_cell_textf("%.1f", score);
+terminal.printf("%s: command not found\n", command);
+log.append(CUI_LOG_WARN, "step took %.1f ms", elapsed);
+```
+
+`terminal` is a `cui_terminal_buffer` and `log` is a `cui_log_buffer`.
+Each formatted text is a String, as an interpolated label is.
 
 ## Windows and frames
 
@@ -186,9 +194,8 @@ function. Where its type names `cui_ctx *`, declare that parameter as
 
 ## What has no x2c form
 
-Variadic functions, such as `cui_textf`, `cui_table_cell_textf`, and
-`cui_terminal_printf`, and functions that fill caller buffers without a
-`cui_ctx`, such as `cui_terminal_init` and `cui_fs_list`, are called as C.
+Functions that fill caller buffers without a `cui_ctx`, such as
+`cui_terminal_init`, `cui_log_init`, and `cui_fs_list`, are called as C.
 
 ## No Lisp surface
 

@@ -85,7 +85,7 @@ static void scene_terminal(Ui ui) {
   cui_terminal_result result = ui.terminal(
     "term", term, { .height = 360, .prompt = "~/x2cui $ " });
   if (result.command && result.command[0])
-    cui_terminal_printf(&term, "%s: command not found\n", result.command);
+    term.printf("%s: command not found\n", result.command);
 }
 
 static void scene_file_picker(Ui ui) {
@@ -122,8 +122,8 @@ static void scene_code_editor(Ui ui) {
     "editor", source, { .lang = "c", .height = 300,
                         .placeholder = "Write some C" });
   $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER }) {
-    cui_textf(ui, "Ln %d, Col %d", result.line, result.column);
-    cui_textf(ui, "%d lines", result.line_count);
+    ui.textf("Ln %d, Col %d", result.line, result.column);
+    ui.textf("%d lines", result.line_count);
     ui.text("Spaces: 4", { .size = 12.5f, .color = CUI_COLOR_TEXT_MUTED });
   }
 }
@@ -158,7 +158,7 @@ static void scene_diff_view(Ui ui) {
     { .mode = mode ? CUI_DIFF_INLINE : CUI_DIFF_SPLIT, .current = &change,
       .language = "c", .old_title = "config.c (main)",
       .new_title = "config.c", .split_min_width = 520 });
-  cui_textf(ui, "Change %d of %d", result.current + 1, result.changes);
+  ui.textf("Change %d of %d", result.current + 1, result.changes);
 }
 
 // A small material graph; pin ids are unique across the editor.

@@ -15,9 +15,8 @@
     renderer into pixels, with no window. `TextField` holds text that a
     component edits in place.
 
-    Labels are Strings. A value that changes on nearly every frame is
-    better drawn with the raw `cui_textf(ui, "%.1f s", seconds)`, which
-    formats in CUI's own frame memory and creates no String.
+    Labels are Strings. A CUI function that takes a `printf` format is a
+    method that takes the format and x2c values: `ui.textf("%d items", n)`.
 
     This unit is the `x2cui` package entry: `import "x2cui"` reaches every
     nonstatic name as `x2cui__*` and every `$cui.` macro. The vendored
@@ -195,6 +194,26 @@ String TextField.take(TextField field) {
 cui_series cui_series.of(String name, ArrayFloat values) =>
   (cui_series){ .name = name, .values = (const float *) values.bytes,
                 .count = (int) values.len() };
+
+/** Draws text formatted from `format` and `values` by `String.format`.
+    CUI's `cui_textf` takes C variadic arguments; this takes x2c values.
+*/
+void Ui.textf(Ui ui, String format, List @values) =>
+  cui_textf(ui, "%s", format.format(@values));
+
+/// Draws a table cell's text formatted as `Ui.textf` formats it.
+void Ui.table_cell_textf(Ui ui, String format, List @values) =>
+  cui_table_cell_textf(ui, "%s", format.format(@values));
+
+/// Writes text formatted as `Ui.textf` formats it to a terminal's buffer.
+void cui_terminal_buffer.printf(cui_terminal_buffer &terminal, String format,
+                                List @values) =>
+  cui_terminal_printf(&terminal, "%s", format.format(@values));
+
+/// Appends a line formatted as `Ui.textf` formats it to a log's buffer.
+void cui_log_buffer.append(cui_log_buffer &log, cui_log_level level,
+                           String format, List @values) =>
+  cui_log_append(&log, level, "%s", format.format(@values));
 
 // The x axis labels of a chart are a List in x2c and two option fields in C.
 static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
