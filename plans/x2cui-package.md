@@ -39,7 +39,7 @@ int main(void) {
   Array tasks = [];
   TextField draft = TextField.new(96);
   App app = auto App.open({ .title = "To do", .width = 520, .height = 640 });
-  while (app.frame()) auto draw(app.ui(), tasks, draft);
+  while (app.frame()) draw(app.ui(), tasks, draft);
   return 0;
 }
 ```
@@ -319,8 +319,13 @@ no Error can unwind through a C frame. The browser probe shows that a
 blocking frame loop runs in the browser target when the program is linked
 with `-sJSPI` or `-sASYNCIFY`; see Delivery 3.
 
-Collections built while drawing are freed per frame by writing the frame
-call as an `auto` statement, as in the Result example.
+The frame call is not wrapped in an `auto` region. An earlier version of
+this plan and of the to-do example did that, and it was a defect: a task
+added by a click was allocated in the frame's region and freed when the
+frame ended, and the window crashed in `cui_checkbox_ex` on the next read
+of its title. Drawing is where a program changes its state, so a frame
+region frees live state. Drawing itself leaves nothing to free: the to-do
+example holds 8.4 MB resident after 500 frames and after 16,000.
 
 ### Headless rendering
 
@@ -474,8 +479,10 @@ Facts that differ from the specification above:
   `$cui.disabled_scope`. `$cui.id_index(ui, i)` is the one addition, over
   `cui_push_id_int`. Each evaluates its `ui` argument twice, as CUI's C
   macros do; a `typeof` local does not resolve package methods.
-- **The frame region is written `auto { draw(ui, state); }`.** A bare
-  `auto` call is not accepted as a loop body.
+- **There is no frame region.** See Application lifetime. Gary hit the
+  crash it caused on 2026-11-10. The cause was confirmed from the crash
+  report and reproduced off screen; the corrected example was then driven
+  through add, toggle, delete, filter, and clear with simulated input.
 - **`dependency.json` is the Linux X11 profile and is untested.**
   `package.mk` requires a file of that name; `dependency-darwin.json` is
   the tested macOS profile.

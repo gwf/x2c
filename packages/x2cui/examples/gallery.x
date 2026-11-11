@@ -101,7 +101,6 @@ int main(int argc, char **argv) {
   Scene *chosen = &families[0].scenes[0];
   App app = auto App.open({ .title = "x2cui gallery", .width = 1080,
                             .height = 720 });
-  // One region per frame frees what drawing allocated.
-  while (app.frame()) auto { draw_browser(app.ui(), chosen); }
+  while (app.frame()) draw_browser(app.ui(), chosen);
   return 0;
 }
