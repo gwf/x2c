@@ -123,7 +123,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _59 = String_new("x2c.array");
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -141,7 +141,7 @@ String String_join(String, List);
 
 int Buffer_write_datum_frame(Buffer out, Var value){
   if(! _init_guard_) _file_init_();
-  Buffer body = Buffer_new(0);
+  Buffer body = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = body;
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -368,7 +368,7 @@ static int _write_map(Buffer out, Map map){
 
 String Var_str(Var);
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 static int List_try_next(List, List *, Var *);
 
@@ -381,7 +381,7 @@ static int _tag_headed(List list){
   Var head = List_car(list);
   if(! Var_is_atom(head)) return 0;
   String text = Var_str(head);
-  if(! String_startswith(text, _17)) return 0;
+  if(! String_startswith(text, cons(String_var(_17), NULL))) return 0;
   {
     String tag;
     List _x2c_gensym_macro_object_2 = _47;
@@ -506,11 +506,11 @@ Var Var_convert(Var, Symbol);
 
 static Var _decode_number(String tag, String text){
   Symbol target = Symbol_new(tag);
-  if(String_startswith(tag, _48) || String_equal(tag, _49)){
+  if(String_startswith(tag, cons(String_var(_48), NULL)) || String_equal(tag, _49)){
     long double value = strtold(text, NULL);
     return Var_convert(Var_box_long_double(value), target);
   }
-  if(String_startswith(tag, _50)){
+  if(String_startswith(tag, cons(String_var(_50), NULL))){
     unsigned long long value = strtoull(text, NULL, 10);
     return Var_convert(Var_box_ulong_long(value), target);
   }

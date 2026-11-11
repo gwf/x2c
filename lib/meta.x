@@ -185,16 +185,17 @@ meta Code Code.call_in_order(Code member, List arguments, Type type);
     the rule that returned it. Each of `effects` applies first, in order; a
     `(cleanup TOKEN PLACED)` row replaces TOKEN in `code` with the lowered
     statements PLACED and marks the unit as needing exception support.
+    Supply effect rows as separate arguments, or omit them for no effects.
 */
-meta Code Code.lowered(Code code, List effects);
+meta Code Code.lowered(Code code, List @effects);
 
 /** Returns `code`, which is already bound and typed, marked so that a
     translator's result or placed code is lowered without being bound
     again. Each of `effects` applies first, in order; a
     `(new-name TOKEN ROLE)` row replaces TOKEN in `code` with a fresh
-    binding.
+    binding. Supply effect rows as separate arguments, or omit them.
 */
-meta Code Code.bound(Code code, List effects);
+meta Code Code.bound(Code code, List @effects);
 
 /** Returns `(SIGNATURE (TYPE READ)...)` for a `Func` adapter of a `Var`
     function that takes `parameters`, a lambda's parameters: its signature
@@ -438,9 +439,10 @@ meta void x2c_place(List where, Code code);
    the developer wrote, which no return value can do. */
 
 /** Reports `message` with `notes` at the macro invocation and fails the
-    expansion. This does not return.
+    expansion. Pass each String note as an argument, or omit the notes.
+    This does not return.
 */
-meta void x2c_diagnostic_fail(String message, List notes);
+meta void x2c_diagnostic_fail(String message, List @notes);
 
 /** Reports `message` with `notes` under `category`, such as `<parse>` or
     `<type>`, at `node`, syntax the macro received, and fails the
@@ -449,19 +451,19 @@ meta void x2c_diagnostic_fail(String message, List notes);
     invocation. This does not return.
 */
 meta void x2c_diagnostic_fail_at(
-  Var node, Symbol category, String message, List notes);
+  Var node, Symbol category, String message, List @notes);
 
 /** Reports `message` with `notes` under `category` at `node`, located as
     `x2c_diagnostic_fail_at` locates it, and returns so the expansion
     continues. The translation fails when it finishes.
 */
 meta void x2c_diagnostic_error_at(
-  Var node, Symbol category, String message, List notes);
+  Var node, Symbol category, String message, List @notes);
 
 /** Reports `message` with `notes` as a warning where it is raised, and
     returns so the expansion continues.
 */
-meta void x2c_diagnostic_warn(String message, List notes);
+meta void x2c_diagnostic_warn(String message, List @notes);
 
 // definition hashes
 

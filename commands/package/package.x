@@ -436,7 +436,7 @@ static String _marker_string(String path, String field) {
 */
 static List install_rows(String text) {
   Array rows = [];
-  foreach (String line, text.split_lines(0)) {
+  foreach (String line, text.split_lines()) {
     List fields = line.split(" ").filter(%!(String field) => field != NULL);
     if (!line.startswith("#") && fields.len() == 6) rows.push(fields);
   }
@@ -483,7 +483,7 @@ static String _platform(void) {
 static void _run(List arguments, const char *what) {
   Job job = NULL;
   String errors = NULL;
-  try job = arguments.job().options({stderr: <capture>}).start();
+  try job = arguments.job().options(stderr: <capture>).start();
   catch %((!or not-found io-fail) *detail): {
     long error = detail.assoc(<"errno">);
     errors = $report.install.start_failed(arguments.car(), error);
@@ -498,8 +498,7 @@ static void _run(List arguments, const char *what) {
 }
 
 static int _remote(String spec) =>
-  spec.startswith("http://") || spec.startswith("https://") ||
-  spec.startswith("file://");
+  spec.startswith("http://", "https://", "file://");
 
 static String _fetch(String url, String directory, String name) {
   String target = %"$directory/$name";
@@ -633,7 +632,7 @@ static List _locked_row(List rows, String name, String version) {
 }
 
 static void _write_lock(String path, List rows) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.write(
     $dedent(%"
     # x2c lockfile. Written by x2c build; keep it with the manifest.

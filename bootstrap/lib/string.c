@@ -40,7 +40,7 @@ _Static_assert(_Generic(& strcmp, int(*)(const char *, const char *) : 1, defaul
 _Static_assert(_Generic(& strchr, char *(*)(const char *, int) : 1, default: 0), "native alias String_c_find does not match strchr");
 #endif
 #define String_c_find strchr
-static String _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 static int _init_guard_ = 0;
 __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 #include "exception.h"
@@ -68,6 +68,8 @@ static String f8_building____join_rendered(List strings, String sep);
 static void f8_building____join_into(char * out, List strings, String sep, int sep_len);
 static String f8_building____pad(String str, int width, char fill, int side);
 static int f9_splitting____newline_width(String str);
+static Var _optional(List values, Var fallback, String operation);
+static char * f9_splitting____charset(List chars, String operation);
 static int f8_adapters____next(Iter iter, Var * out);
 #include <ctype.h>
 #include <limits.h>
@@ -222,7 +224,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   x2c_initialize_protocols();  if(_init_guard_) return;  _init_guard_ = 1;  _x2c_gensym_protocol_methods_0 =(VarMethods){
     .iter = _x2c_gensym_proto_split_iter_0
   }
-  ;  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);  _0 = String_new("\n");  _1 = String_new("\n");  _2 = String_new("\r\n");  _3 = String_new("\"\"");  _4 = String_new("\"%s\"");  _5 = String_new("\\");  _6 = String_new("excess values");  _7 = String_new("missing value");  _8 = String_new("width exceeds int range");  _9 = String_new("width");  _10 = String_new("precision");  _11 = String_new("incomplete conversion");  _12 = String_new("missing star value");  _13 = String_new(" exceeds int range");  _14 = String_new("unsupported length modifier");  _15 = String_new("positional formats are unsupported");  _16 = String_new("unsupported conversion");  _17 = String_new("unsupported integer length");  _18 = String_new("unsupported floating length");  _19 = String_new("wide strings and characters are unsupported");  _20 = String_new("unsupported flag for conversion");  _21 = String_new("unsupported precision for %c");  _22 = String_new("%c cannot produce an embedded NUL");  _23 = String_new("string conversion failed");  _24 = String_new("value conversion failed");
+  ;  if(! x2c_register_builtin_descriptor(40919656, _x2c_gensym_protocol_methods_0)) x2c_register_descriptor(String_new("split"), _x2c_gensym_protocol_methods_0);  _0 = String_new("String.replace");  _1 = String_new("String.strip");  _2 = String_new("String.lstrip");  _3 = String_new("String.rstrip");  _4 = String_new("\n");  _5 = String_new("\n");  _6 = String_new("\r\n");  _7 = String_new("\"\"");  _8 = String_new("\"%s\"");  _9 = String_new("\\");  _10 = String_new("excess values");  _11 = String_new("missing value");  _12 = String_new("width exceeds int range");  _13 = String_new("width");  _14 = String_new("precision");  _15 = String_new("incomplete conversion");  _16 = String_new("missing star value");  _17 = String_new(" exceeds int range");  _18 = String_new("unsupported length modifier");  _19 = String_new("positional formats are unsupported");  _20 = String_new("unsupported conversion");  _21 = String_new("unsupported integer length");  _22 = String_new("unsupported floating length");  _23 = String_new("wide strings and characters are unsupported");  _24 = String_new("unsupported flag for conversion");  _25 = String_new("unsupported precision for %c");  _26 = String_new("%c cannot produce an embedded NUL");  _27 = String_new("string conversion failed");  _28 = String_new("value conversion failed");  _29 = String_new("String.split");  _30 = String_new("String.split_lines");
 }
 
 int String_len(String str){
@@ -377,12 +379,30 @@ int String_find_within(String str, String sub, int start, int end){
   int m = String_len(sub);  x2c_normalize_slice(&(start), &(end), 1, String_len(str));  if(start + m > end) return - 1;  if(m == 0) return start;  const char * p = _find_bytes(str + start, end - start, sub, m);  return p ? p - str : - 1;
 }
 
-int String_startswith(String str, String prefix){
-  int str_len = String_len(str), prefix_len = String_len(prefix);  if(prefix_len == 0) return 1;  return String_truth(str) && prefix_len <= str_len && memcmp(str, prefix, prefix_len) == 0;
+int String_startswith(String str, List prefixes){
+  int length = String_len(str); {
+    String prefix;  List _x2c_gensym_macro_object_0 = prefixes;  List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;  Var _x2c_gensym_macro_cursor_output_0;  while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      prefix = Var_as_string(_x2c_gensym_macro_cursor_output_0); {
+        int count = String_len(prefix);  if(! count ||(String_truth(str) && count <= length && ! memcmp(str, prefix, count))) return 1;
+      }
+
+    }
+
+  }
+  return 0;
 }
 
-int String_endswith(String str, String suffix){
-  int str_len = String_len(str), suffix_len = String_len(suffix);  if(suffix_len == 0) return 1;  return String_truth(str) && suffix_len <= str_len && memcmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
+int String_endswith(String str, List suffixes){
+  int length = String_len(str); {
+    String suffix;  List _x2c_gensym_macro_object_1 = suffixes;  List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;  Var _x2c_gensym_macro_cursor_output_1;  while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      suffix = Var_as_string(_x2c_gensym_macro_cursor_output_1); {
+        int count = String_len(suffix);  if(! count ||(String_truth(str) && count <= length && ! memcmp(str + length - count, suffix, count))) return 1;
+      }
+
+    }
+
+  }
+  return 0;
 }
 
 static const char * _find_bytes(const char * haystack, int haystack_len, const char * needle, int needle_len){
@@ -397,13 +417,13 @@ static int _count_matches(String str, String sub, int limit){
 }
 
 String String_replace_n(String str, String old, String replacement, int max_replacements);
-String String_replace(String str, String old, String replacement){
-  return String_replace_n(str, old, replacement, - 1);
+String String_replace(String str, String old, String replacement, List limit){
+  if(! _init_guard_) _file_init_();  return String_replace_n(str, old, replacement, Var_int(_optional(limit, int_var(- 1), _0)));
 }
 
 String String_replace_n(String str, String old, String replacement, int max_replacements){
   if(! String_truth(str) || ! String_truth(old) || ! * old || max_replacements == 0) return _canonical(str);  if(String_equal(old, replacement)) return _canonical(str);  int str_len = String_len(str), old_len = String_len(old);  int replacement_len = String_len(replacement);  int count = _count_matches(str, old, max_replacements);  if(count == 0) return _canonical(str);  int length = f7_editing____replaced_length(str_len, count, old_len, replacement_len);  if(length < 0){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/string/editing.x",.function = "String_replace_n",.line = 38,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.replace_n")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/string/editing.x",.function = "String_replace_n",.line = 40,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_2, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.replace_n")), NULL))));  __builtin_unreachable();
   }
   String string = String_malloc(length + 1);  char * dst = string;  int copied = 0, replaced = 0;  while(copied <= str_len - old_len && replaced < count){
     const char * found = _find_bytes(str + copied, str_len - copied, old, old_len);  int prefix_len = found -(str + copied);  memcpy(dst, str + copied, prefix_len);  dst += prefix_len;  if(replacement_len){
@@ -425,7 +445,7 @@ String String_getslice(String s, int start, int stop, int step){
 String String_withindex(String str, int index, char value){
   if(! String_truth(str) || ! * str) return _canonical(str);  if(value == '\0'){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("String.withindex")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 121,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/string/editing.x",.function = "String_withindex",.line = 123,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(19800432), int_var(index));  __builtin_unreachable();
     }
 
   }
@@ -518,7 +538,7 @@ static int f8_building____join_length(List strings, int sep_len){
 }
 
 static String f8_building____join_rendered(List strings, String sep){
-  Buffer out = Buffer_new(0);  const Buffer _x2c_gensym_macro_acquired_0 = out; {
+  Buffer out = Buffer_new(NULL);  const Buffer _x2c_gensym_macro_acquired_0 = out; {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
     }
@@ -568,28 +588,28 @@ static String f8_building____pad(String str, int width, char fill, int side){
   int padding = width - length, left = side ? padding : 0;  if(side < 0) left = padding / 2;  int right = padding - left;  String string = String_malloc(width + 1);  memset(string, fill, left);  if(length) memcpy(string + left, str, length);  memset(string + left + length, fill, right);  return _finish(string, width);
 }
 
-String String_strip(String str, char * negChars){
-  if(! negChars) negChars = " \t\n\v\f\r";  int start = 0, end = String_len(str);  while(start < end && strchr(negChars, String_getindex(str, start))) start ++;  while(end > start && strchr(negChars, String_getindex(str, end - 1))) end --;  if(start == 0 && end == String_len(str)) return _canonical(str);  return String_new_len(str + start, end - start);
+String String_strip(String str, List chars){
+  if(! _init_guard_) _file_init_();  char * negChars = f9_splitting____charset(chars, _1);  if(! negChars) negChars = " \t\n\v\f\r";  int start = 0, end = String_len(str);  while(start < end && strchr(negChars, String_getindex(str, start))) start ++;  while(end > start && strchr(negChars, String_getindex(str, end - 1))) end --;  if(start == 0 && end == String_len(str)) return _canonical(str);  return String_new_len(str + start, end - start);
 }
 
-String String_lstrip(String str, char * negChars){
-  if(! negChars) negChars = " \t\n\v\f\r";  int beg = 0, length = String_len(str);  while(beg < length && strchr(negChars, String_getindex(str, beg))) beg ++;  if(beg == 0) return _canonical(str);  return String_new(str + beg);
+String String_lstrip(String str, List chars){
+  if(! _init_guard_) _file_init_();  char * negChars = f9_splitting____charset(chars, _2);  if(! negChars) negChars = " \t\n\v\f\r";  int beg = 0, length = String_len(str);  while(beg < length && strchr(negChars, String_getindex(str, beg))) beg ++;  if(beg == 0) return _canonical(str);  return String_new(str + beg);
 }
 
-String String_rstrip(String str, char * negChars){
-  if(! negChars) negChars = " \t\n\v\f\r";  int len = String_len(str);  while(len > 0 && strchr(negChars, String_getindex(str, len - 1))) len --;  if(len == String_len(str)) return _canonical(str);  return String_new_len(str, len);
+String String_rstrip(String str, List chars){
+  if(! _init_guard_) _file_init_();  char * negChars = f9_splitting____charset(chars, _3);  if(! negChars) negChars = " \t\n\v\f\r";  int len = String_len(str);  while(len > 0 && strchr(negChars, String_getindex(str, len - 1))) len --;  if(len == String_len(str)) return _canonical(str);  return String_new_len(str, len);
 }
 
 String String_dedent(String str){
-  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return NULL;  int length = String_len(str), skip = f9_splitting____newline_width(str), width = 0;  while(skip + width < length &&(String_getindex(str, skip + width) == ' ' || String_getindex(str, skip + width) == '\t')) width ++;  String prefix = String_new_len(str + skip, width);  String body = String_new(str + skip + width);  if(width) body = String_replace(body, String_join(NULL, cons(String_var(_0), cons(String_var(prefix), NULL))), _1);  int end = String_len(body), tail = end;  while(tail > 0 &&(String_getindex(body, tail - 1) == ' ' || String_getindex(body, tail - 1) == '\t')) tail --;  if(tail == end ||(tail > 0 && String_getindex(body, tail - 1) != '\n')) return body;  return String_new_len(body, tail);
+  if(! _init_guard_) _file_init_();  if(! String_truth(str)) return NULL;  int length = String_len(str), skip = f9_splitting____newline_width(str), width = 0;  while(skip + width < length &&(String_getindex(str, skip + width) == ' ' || String_getindex(str, skip + width) == '\t')) width ++;  String prefix = String_new_len(str + skip, width);  String body = String_new(str + skip + width);  if(width) body = String_replace(body, String_join(NULL, cons(String_var(_4), cons(String_var(prefix), NULL))), _5, NULL);  int end = String_len(body), tail = end;  while(tail > 0 &&(String_getindex(body, tail - 1) == ' ' || String_getindex(body, tail - 1) == '\t')) tail --;  if(tail == end ||(tail > 0 && String_getindex(body, tail - 1) != '\n')) return body;  return String_new_len(body, tail);
 }
 
 String String_remove_prefix(String str, String prefix){
-  if(! String_truth(prefix) || ! String_startswith(str, prefix)) return _canonical(str);  return String_new_len(str + String_len(prefix), String_len(str) - String_len(prefix));
+  if(! String_truth(prefix) || ! String_startswith(str, cons(String_var(prefix), NULL))) return _canonical(str);  return String_new_len(str + String_len(prefix), String_len(str) - String_len(prefix));
 }
 
 String String_remove_suffix(String str, String suffix){
-  if(! String_truth(suffix) || ! String_endswith(str, suffix)) return _canonical(str);  return String_new_len(str, String_len(str) - String_len(suffix));
+  if(! String_truth(suffix) || ! String_endswith(str, cons(String_var(suffix), NULL))) return _canonical(str);  return String_new_len(str, String_len(str) - String_len(suffix));
 }
 
 List String_partition(String str, String sep){
@@ -601,7 +621,18 @@ List String_rpartition(String str, String sep){
 }
 
 static int f9_splitting____newline_width(String str){
-  if(String_startswith(str, _2)) return 2;  return String_startswith(str, _1) ? 1 : 0;
+  if(String_startswith(str, cons(String_var(_6), NULL))) return 2;  return String_startswith(str, cons(String_var(_5), NULL)) ? 1 : 0;
+}
+
+static Var _optional(List values, Var fallback, String operation){
+  if(List_truth(values) && List_truth(List_cdr(values))){
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/splitting.x",.function = "_optional",.line = 158,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477439593778, 1, Symbol_var(34096809266140), String_var(operation));  __builtin_unreachable();
+  }
+  return List_truth(values) ? List_car(values) : fallback;
+}
+
+static char * f9_splitting____charset(List chars, String operation){
+  Var value = _optional(chars, Var_null(), operation);  if(Var_is_null(value) || Var_is_nil(value) ||(Var_is_integer(value) && ! Var_integer(value))) return NULL;  String charset = Var_string(value);  return String_truth(charset) ? charset : "";
 }
 
 String String_lower(String str){
@@ -669,9 +700,9 @@ String String_map(String str, Func fn){
     }
     ;  x2c_cleanup_push(& _x2c_gensym_defer_record_2); {
       char * out = string;  const char * src = str;  for(int i = 0;  i < n;  i ++){
-        char ch = Var_char(Var_convert_at(Func_apply_value(fn, char_var(src[i])), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_11; })));  if(! ch){
+        char ch = Var_char(Var_convert_at(Func_apply_value(fn, char_var(src[i])), 26993, ({ static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 109,.runtime = 1}; & _x2c_gensym_error_site_12; })));  if(! ch){
           Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("String.map")), NULL))); {
-            static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 110,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_12, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
+            static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/string/mapping.x",.function = "String_map",.line = 110,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_13, 143279181245224, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(19800432), int_var(i));  __builtin_unreachable();
           }
 
         }
@@ -789,7 +820,7 @@ int String_try_next(String str, int * cursor, int * out){
 }
 
 static int f8_adapters____next(Iter iter, Var * out){
-  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/string/adapters.x",.function = "f8_adapters____next",.line = 66,.runtime = 1}; & _x2c_gensym_error_site_13; })));
+  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/string/adapters.x",.function = "f8_adapters____next",.line = 66,.runtime = 1}; & _x2c_gensym_error_site_14; })));
   String str = Var_as_string(iter -> obj);
   if(index >= String_len(str)) return 0;
   * out = int_var(String_getindex(str, index));
@@ -875,8 +906,8 @@ String String_escape(String str);
 
 String String_repr(String str){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(str)) return _3;
-  return String_printf(_4, String_escape(str));
+  if(! String_truth(str)) return _7;
+  return String_printf(_8, String_escape(str));
 }
 
 String String_escape(String str){
@@ -885,8 +916,8 @@ String String_escape(String str){
   for(const char * at = str;  * at;  at ++){
     int width = f6_escape____escape_byte((unsigned char) * at, NULL);
     if(bytes > INT_MAX - width - 1){
-      static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/string/escape.x",.function = "String_escape",.line = 46,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_14, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.escape")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/string/escape.x",.function = "String_escape",.line = 46,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_15, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.escape")), NULL))));
       __builtin_unreachable();
     }
     bytes += width;
@@ -937,8 +968,8 @@ String String_parse(String str){
 
 String String_unescape(String str){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(str) || !(String_contains(str, _5))) return _canonical(str);
-  Buffer out = Buffer_new(0);
+  if(! String_truth(str) || !(String_contains(str, _9))) return _canonical(str);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_1 = out;
   {
     _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
@@ -957,8 +988,8 @@ String String_unescape(String str){
         int universal = String_getindex(str, i) == '\\' &&(String_getindex(str, i + 1) == 'u' || String_getindex(str, i + 1) == 'U');
         if(String_getindex(str, i) == '\\') width = scan_c_escape_value(str + i, &(value));
         if(width < 0){
-          static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 126,.runtime = 1};
-          x2c_error_raise_n(& _x2c_gensym_error_site_15, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
+          static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/string/escape.x",.function = "String_unescape",.line = 126,.runtime = 1};
+          x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
           __builtin_unreachable();
         }
         i += width;
@@ -985,13 +1016,13 @@ String x2c_string_unescape_bytes(String str){
   if(! _init_guard_) _file_init_();
   int n = String_len(str);
   if(n == 0) return NULL;
-  if(!(String_contains(str, _5))) return _canonical(str);
+  if(!(String_contains(str, _9))) return _canonical(str);
   String string = String_malloc(n + 1);
   if(f6_escape____unescape_into(string, str) < 0){
     String_free(string);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/string/escape.x",.function = "x2c_string_unescape_bytes",.line = 143,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
+      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/string/escape.x",.function = "x2c_string_unescape_bytes",.line = 143,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.unescape")), NULL))));
       __builtin_unreachable();
     }
 
@@ -1098,7 +1129,7 @@ static int f6_escape____unescape_into(char * out, const char * src){
 
 String String_format(String fmt, List values){
   if(! _init_guard_) _file_init_();
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_2 = out;
   {
     _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_7 ={
@@ -1119,7 +1150,7 @@ String String_format(String fmt, List values){
       while(f.cursor < f.length) if(f6_format____byte(&(f)) == '%') f6_format____conversion(&(f));
       else f.cursor ++;
       f6_format____write_literal(&(f));
-      if(List_truth(f.args)) f6_format____format_error(f.length, _6);
+      if(List_truth(f.args)) f6_format____format_error(f.length, _10);
       {
         String _x2c_gensym_return_value_7 = Buffer_str(out);
         {
@@ -1145,7 +1176,7 @@ static void f6_format____conversion(f6_format___Format * f){
   }
   else{
     f6_format___Spec spec = f6_format____spec(&((* f)));
-    f6_format____print(&((* f)), spec, f6_format____take(&((* f)), _7));
+    f6_format____print(&((* f)), spec, f6_format____take(&((* f)), _11));
   }
   (* f).literal =(* f).cursor;
 }
@@ -1185,12 +1216,12 @@ int abs(int);
 static void f6_format____width(f6_format___Format * f, f6_format___Spec * spec){
   if(f6_format____byte(&((* f))) == '*'){
     int width = f6_format____star(&((* f)));
-    if(width == INT_MIN) f6_format____fail(&((* f)), _8);
+    if(width == INT_MIN) f6_format____fail(&((* f)), _12);
     if(width < 0)(* spec).flags |= FORMAT_LEFT;
     (* spec).width = abs(width);
     (* f).cursor ++;
   }
-  else(* spec).width = f6_format____decimal(&((* f)), _9);
+  else(* spec).width = f6_format____decimal(&((* f)), _13);
 }
 
 static void f6_format____precision(f6_format___Format * f, f6_format___Spec * spec){
@@ -1201,22 +1232,22 @@ static void f6_format____precision(f6_format___Format * f, f6_format___Spec * sp
     (* spec).precision = f6_format____star(&((* f)));
     (* f).cursor ++;
   }
-  else(* spec).precision = f6_format____decimal(&((* f)), _10);
+  else(* spec).precision = f6_format____decimal(&((* f)), _14);
 }
 
 static void f6_format____need_byte(f6_format___Format * f){
-  if((* f).cursor ==(* f).length) f6_format____fail(&((* f)), _11);
+  if((* f).cursor ==(* f).length) f6_format____fail(&((* f)), _15);
 }
 
 static int f6_format____star(f6_format___Format * f){
-  return(int) Var_integer(f6_format____number(&((* f)), f6_format____take(&((* f)), _12), 3453797));
+  return(int) Var_integer(f6_format____number(&((* f)), f6_format____take(&((* f)), _16), 3453797));
 }
 
 static int f6_format____decimal(f6_format___Format * f, String label){
   int number = 0, start =(* f).cursor;
   while(f6_format____digit(&((* f)))){
     int digit = f6_format____byte(&((* f))) - '0';
-    if(number >(INT_MAX - digit) / 10) f6_format____format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_13), NULL))));
+    if(number >(INT_MAX - digit) / 10) f6_format____format_error(start, String_join(NULL, cons(String_var(label), cons(String_var(_17), NULL))));
     number = number * 10 + digit;
     (* f).cursor ++;
   }
@@ -1233,7 +1264,7 @@ static Symbol f6_format____modifier(f6_format___Format * f){
     case 'l' : return f6_format____doubled(&((* f)), 'l', 818062, 25983886);
     case 'L' :(* f).cursor ++;
     return 26071077642;
-    case 'j' : case 'z' : case 't' : f6_format____fail(&((* f)), _14);
+    case 'j' : case 'z' : case 't' : f6_format____fail(&((* f)), _18);
   }
   return 949130;
 }
@@ -1253,13 +1284,13 @@ static void f6_format____check(f6_format___Format * f, f6_format___Spec spec){
   char ch = spec.conversion;
   int integer = strchr("diouxX", ch) != NULL;
   int floating = strchr("fFeEgGaA", ch) != NULL, text = ch == 'c' || ch == 's';
-  if(ch == '$') f6_format____fail(&((* f)), _15);
-  if(! integer && ! floating && ! text) f6_format____fail(&((* f)), _16);
-  if(integer && spec.modifier == 26071077642) f6_format____fail(&((* f)), _17);
-  if(floating && spec.modifier != 949130 && spec.modifier != 818062 && spec.modifier != 26071077642) f6_format____fail(&((* f)), _18);
-  if(text && spec.modifier != 949130) f6_format____fail(&((* f)), _19);
-  if(text &&(spec.flags & ~ FORMAT_LEFT)) f6_format____fail(&((* f)), _20);
-  if(ch == 'c' && spec.precision >= 0) f6_format____fail(&((* f)), _21);
+  if(ch == '$') f6_format____fail(&((* f)), _19);
+  if(! integer && ! floating && ! text) f6_format____fail(&((* f)), _20);
+  if(integer && spec.modifier == 26071077642) f6_format____fail(&((* f)), _21);
+  if(floating && spec.modifier != 949130 && spec.modifier != 818062 && spec.modifier != 26071077642) f6_format____fail(&((* f)), _22);
+  if(text && spec.modifier != 949130) f6_format____fail(&((* f)), _23);
+  if(text &&(spec.flags & ~ FORMAT_LEFT)) f6_format____fail(&((* f)), _24);
+  if(ch == 'c' && spec.precision >= 0) f6_format____fail(&((* f)), _25);
 }
 
 static Var f6_format____take(f6_format___Format * f, String reason){
@@ -1309,7 +1340,7 @@ static Buffer f6_format____floating(f6_format___Format * f, const char * text, S
 
 static Buffer f6_format____character(f6_format___Format * f, const char * text, Var arg){
   int byte =(int) Var_integer(f6_format____number(&((* f)), arg, 3453797));
-  if(!(unsigned char) byte) f6_format____fail(&((* f)), _22);
+  if(!(unsigned char) byte) f6_format____fail(&((* f)), _26);
   return Buffer_printf((* f).out, text, byte);
 }
 
@@ -1350,7 +1381,7 @@ static Buffer f6_format____string(f6_format___Format * f, const char * text, Var
           code = x2c_error_catch_capture(_x2c_gensym_error_handler_0, 0);
           List volatile details;
           details = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_0, 1));
-          f6_format____nested(&((* f)), _23, code, details);
+          f6_format____nested(&((* f)), _27, code, details);
         }
 
       }
@@ -1396,7 +1427,7 @@ static Var f6_format____number(f6_format___Format * f, Var arg, Symbol target){
           code = x2c_error_catch_capture(_x2c_gensym_error_handler_1, 0);
           List volatile details;
           details = Var_list_payload(x2c_error_catch_capture(_x2c_gensym_error_handler_1, 1));
-          f6_format____nested(&((* f)), _24, code, details);
+          f6_format____nested(&((* f)), _28, code, details);
         }
 
       }
@@ -1421,8 +1452,8 @@ static void f6_format____fail(f6_format___Format * f, String reason){
 
 _Noreturn static void f6_format____format_error(int offset, String reason){
   {
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 332,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_17, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/string/format.x",.function = "f6_format____format_error",.line = 332,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_18, 435316840, 2, Symbol_var(1019648360), int_var(offset), Symbol_var(1218550748), String_var(reason));
     __builtin_unreachable();
   }
 
@@ -1433,8 +1464,8 @@ _Noreturn static void f6_format____nested(f6_format___Format * f, String reason,
   {
     Var _x2c_gensym_literal_part_5 = int_var((* f).offset);
     {
-      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 339,.runtime = 1};
-      x2c_error_raise_n(& _x2c_gensym_error_site_18, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_5, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
+      static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/string/format.x",.function = "f6_format____nested",.line = 339,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_19, 435316840, 3, Symbol_var(1019648360), _x2c_gensym_literal_part_5, Symbol_var(1218550748), String_var(reason), Symbol_var(6401226), List_var(cause));
       __builtin_unreachable();
     }
 
@@ -1501,8 +1532,9 @@ Split Var_split(Var value){
 
 List String_split_n(String str, String sep, int max_splits);
 
-List String_split(String str, String sep){
-  return String_split_n(str, sep, - 1);
+List String_split(String str, String sep, List limit){
+  if(! _init_guard_) _file_init_();
+  return String_split_n(str, sep, Var_int(_optional(limit, int_var(- 1), _29)));
 }
 
 List String_split_n(String str, String sep, int max_splits){
@@ -1520,7 +1552,9 @@ List String_split_n(String str, String sep, int max_splits){
   return Array_list_free(results);
 }
 
-List String_split_lines(String str, int keep_ends){
+List String_split_lines(String str, List options){
+  if(! _init_guard_) _file_init_();
+  int keep_ends = Var_int(_optional(options, int_var(0), _30));
   if(! String_truth(str)) return NULL;
   Array results = Array_new();
   int start = 0;
@@ -1628,7 +1662,7 @@ static int f7_cursors____splits_next(Split split, int * cursor, String * out){
 
 static int f7_cursors____iter_next(Iter iter, Var * out){
   Split split = Var_split(iter -> obj);
-  int cursor = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/string/cursors.x",.function = "f7_cursors____iter_next",.line = 266,.runtime = 1}; & _x2c_gensym_error_site_19; })));
+  int cursor = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/string/cursors.x",.function = "f7_cursors____iter_next",.line = 272,.runtime = 1}; & _x2c_gensym_error_site_20; })));
   String value;
   if(! Split_try_next(split, &(cursor), &(value))) return 0;
   iter -> state = int_var(cursor);

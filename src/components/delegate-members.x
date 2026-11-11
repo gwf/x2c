@@ -43,7 +43,7 @@ meta static void _delegate_fail_packages(
   x2c_diagnostic_fail_at(
     NULL, <type>,
     %"method '$method' is provided by multiple imported packages",
-    notes.list_free());
+    @(notes.list_free()));
 }
 
 /* Pushes `((FIELD...) BINDING)` for each path through the delegate fields
@@ -88,7 +88,7 @@ meta static void _delegate_fail_ambiguous(
   String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"method '$method' has multiple delegate paths",
-    notes.list_free());
+    @(notes.list_free()));
 }
 
 /* Reports a search that found no path and returned to an aggregate it
@@ -97,7 +97,7 @@ meta static void _delegate_fail_cycle(Type outer, String member, List fields) {
   String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"delegation cycle resolving $method",
-    %("delegate path: $(_delegate_path(outer, fields, NULL))"));
+    %"delegate path: $(_delegate_path(outer, fields, NULL))");
 }
 
 /* The fields of the one delegate path from an `outer` receiver that finds

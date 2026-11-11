@@ -5,7 +5,7 @@
 
 macro Stmt $user.error() { printf("returning\n"); }
 macro Stmt $user.warning(Expr $c) {
-  $c.report_warning(<driver>, "probe", NULL, NULL);
+  $c.report_warning(<driver>, "probe", NULL);
 }
 
 int direct_raise(void) {
@@ -41,14 +41,14 @@ int dynamic_cause(void) {
 }
 
 int direct_report(Compiler c) {
-  c.report_error(<driver>, "probe", NULL, NULL);
+  c.report_error(<driver>, "probe", NULL);
   return 0;
 }
 
 macro Stmt $report.parse.raise_payload(Expr $c) {
   $c.report_error(
     <parse>, "raise requires a %() payload literal",
-    $c.token, %("use raise %(code (key value)...);"));
+    $c.token, "use raise %(code (key value)...);");
 }
 
 int named_report(Compiler c) {
@@ -63,9 +63,9 @@ int returning_warning(Compiler c) {
 
 int direct_validate(Compiler c, List node) {
   if (node.car() != <item>)
-    c.report_error(<driver>, "probe", NULL, NULL);
+    c.report_error(<driver>, "probe", NULL);
   if (node.cdr().len() != 2 || node.cadr() is not <list>)
-    c.report_error(<driver>, "probe", NULL, NULL);
+    c.report_error(<driver>, "probe", NULL);
   return 1;
 }
 

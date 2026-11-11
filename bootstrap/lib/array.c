@@ -577,13 +577,13 @@ Buffer Array_write_str(Array _x2c_gensym_macro_array_34, Buffer _x2c_gensym_macr
 }
 
 String Array_str(Array _x2c_gensym_macro_array_35){
-  Buffer _x2c_gensym_macro_out_8 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_8 = Buffer_new(NULL);
   Array_write_str(_x2c_gensym_macro_array_35, _x2c_gensym_macro_out_8);
   return Buffer_str_free(_x2c_gensym_macro_out_8);
 }
 
 String Array_repr(Array _x2c_gensym_macro_array_36){
-  Buffer _x2c_gensym_macro_out_9 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_9 = Buffer_new(NULL);
   Array_write_repr(_x2c_gensym_macro_array_36, _x2c_gensym_macro_out_9);
   return Buffer_str_free(_x2c_gensym_macro_out_9);
 }
@@ -936,7 +936,7 @@ String Array_join(Array array, String separator){
   if(! _init_guard_) _file_init_();
   size_t n = array -> length;
   if(n == 0) return _0;
-  Buffer buf = Buffer_new(0);
+  Buffer buf = Buffer_new(NULL);
   for(size_t i = 0;  i < n;  i ++){
     Var elem =((Var *) array -> bytes)[i];
     Var_write_str(elem, buf);

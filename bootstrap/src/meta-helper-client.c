@@ -39,11 +39,11 @@ typedef struct MetaHelper{
 
 static MetaHelper primary, active;
 
-static List _17, _15, _5;
+static List _15, _5;
 
-static String _19, _18, _13, _12, _11, _10, _9, _8, _7, _6, _2, _1, _0;
+static String _17, _16, _13, _12, _11, _10, _9, _8, _7, _6, _2, _1, _0;
 
-static Var _16, _14, _4, _3;
+static Var _14, _4, _3;
 
 static int _init_guard_ = 0;
 
@@ -189,12 +189,10 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _11 = String_new("%s%g s");
   _12 = String_new("function: ");
   _13 = String_new("set X2C_META_TIMEOUT to a larger limit in seconds, or 0 for none");
-  _14 = String_var(_13);
+  _14 = Symbol_var(1157736);
   _15 = cons(_14, NULL);
-  _16 = Symbol_var(1157736);
-  _17 = cons(_16, NULL);
-  _18 = String_new("this meta call stopped the compile-time helper");
-  _19 = String_new("reason: ");
+  _16 = String_new("this meta call stopped the compile-time helper");
+  _17 = String_new("reason: ");
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -263,7 +261,7 @@ MetaHelper MetaHelper_new(String path, Map failures, Map units){
           {
             helper -> failures = Map_truth(failures) ? Map_copy(failures) : NULL;
             helper -> units = Map_truth(units) ? Map_copy(units) : NULL;
-            helper -> input = Buffer_new(0);
+            helper -> input = Buffer_new(NULL);
           }
 
         }
@@ -292,7 +290,7 @@ void Compiler_use_meta_helper(MetaHelper helper){
     Var _x2c_gensym_macro_cursor_output_0;
     Var _x2c_gensym_macro_cursor_output_1;
     while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
-      key = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-helper-client.x",.function = "Compiler_use_meta_helper",.line = 126}; & _x2c_gensym_error_site_0; })));
+      key = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_0, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/meta-helper-client.x",.function = "Compiler_use_meta_helper",.line = 127}; & _x2c_gensym_error_site_0; })));
       value = Var_as_string(_x2c_gensym_macro_cursor_output_1);
       String_try_own(value);
     }
@@ -307,7 +305,7 @@ void Compiler_use_meta_helper(MetaHelper helper){
     Var _x2c_gensym_macro_cursor_output_3;
     while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2), &(_x2c_gensym_macro_cursor_output_3))){
       key = Var_as_string(_x2c_gensym_macro_cursor_output_2);
-      value = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_3, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-helper-client.x",.function = "Compiler_use_meta_helper",.line = 127}; & _x2c_gensym_error_site_1; })));
+      value = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_3, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/meta-helper-client.x",.function = "Compiler_use_meta_helper",.line = 128}; & _x2c_gensym_error_site_1; })));
       String_try_own(key);
     }
 
@@ -576,7 +574,7 @@ static int _syntax_origin(Var node){
         {
           Var _x2c_gensym_match_value_10 = origin;
           {
-            int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-helper-client.x",.function = "_syntax_origin",.line = 193}; & _x2c_gensym_error_site_2; })));
+            int origin = Var_int(Var_convert_at(_x2c_gensym_match_value_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/meta-helper-client.x",.function = "_syntax_origin",.line = 194}; & _x2c_gensym_error_site_2; })));
             return origin;
           }
 
@@ -866,14 +864,14 @@ static void _refuse(Call * call, String why){
 
 static void _overdue(Call * c){
   _stop(SIGKILL);
-  Compiler_report_error((* c).compiler, 27335838, String_printf(_11, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_12), cons(String_var((* c).name), NULL)))), _15));
+  Compiler_report_error((* c).compiler, 27335838, String_printf(_11, "this meta call ran longer than ", (* c).limit), (* c).site, cons(String_var(String_join(NULL, cons(String_var(_12), cons(String_var((* c).name), NULL)))), cons(String_var(_13), NULL)));
 }
 
 static int _stop(int signal){
   int status = 0;
   if(_running()){
     if(signal) killpg(active -> pid, signal);
-    else _write_frame(_17, 0);
+    else _write_frame(_15, 0);
     close(active -> to);
     close(active -> from);
     if(active -> status < 0) waitpid(active -> pid, & active -> status, 0);
@@ -892,7 +890,7 @@ static int _running(void){
 }
 
 static int _write_frame(List message, double deadline){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
@@ -978,8 +976,8 @@ static int _reaped(void){
 }
 
 static void _stopped(Call * call, String reason){
-  Compiler_report_error((* call).compiler, 27335838, _18, (* call).site, ({
-    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(_12), cons(String_var((* call).name), NULL))));  Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(_19), cons(String_var(reason), NULL))));  cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL));
+  Compiler_report_error((* call).compiler, 27335838, _16, (* call).site, ({
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(_12), cons(String_var((* call).name), NULL))));  Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(_17), cons(String_var(reason), NULL))));  cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL));
   }
   ));
 }

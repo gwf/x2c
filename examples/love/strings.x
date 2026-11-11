@@ -4,7 +4,7 @@ int main(void) {
   String line = "  GET /docs/guide/values.html  ";
 
   // Slice, strip, split, and case-fold; the original is untouched.
-  String request = line.strip(NULL);
+  String request = line.strip();
   (String method, String path) = request.split(" ");
   assert(line.len() == 31 && method == "GET");
 

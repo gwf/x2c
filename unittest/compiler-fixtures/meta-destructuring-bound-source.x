@@ -3,7 +3,7 @@
 #include "meta.x"
 
 meta static List counted_pair(int seed, int *calls) {
-  if (seed < 0) x2c_diagnostic_fail("negative", %("counted_pair"));
+  if (seed < 0) x2c_diagnostic_fail("negative", "counted_pair");
   (*calls)++;
   return %($seed $(seed + 1));
 }

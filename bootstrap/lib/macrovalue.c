@@ -921,7 +921,7 @@ static Var f8_patterns____slot_binder(Var form){
 static Var f8_patterns____shown(Var value){
   if(! Var_is_binder(value)) return value;
   String name = Var_str(value);
-  if(String_len(name) != 18 || ! String_endswith(name, _109)) return value;
+  if(String_len(name) != 18 || ! String_endswith(name, cons(String_var(_109), NULL))) return value;
   return Symbol_var(String_getindex(name, 0) == '*' ? 54 : 58);
 }
 

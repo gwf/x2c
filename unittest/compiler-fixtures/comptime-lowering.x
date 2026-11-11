@@ -531,7 +531,7 @@ meta String ct_str_repeat(String s) => s.repeat(3);
 
 meta int ct_str_rfind(String s) => s.rfind("b");
 
-meta String ct_str_lines(String s) => "|".join(s.split_lines(0));
+meta String ct_str_lines(String s) => "|".join(s.split_lines());
 
 meta int ct_arr_contains(int n) {
   Array xs = [n, n + 1];

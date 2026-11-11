@@ -3,10 +3,10 @@
  (bind (binding 1 "double_value") 
   ((fnmod (params (param ("Var") (bind (binding 2 "value") ())))))) 
  (block 
-  (at 38 
+  (at 45 
    (return 
     (expr ("Var") 
-     (at 37 
+     (at 44 
       (call "x2c_var_mul_lane" 
        (args (expr ("Var") (ident (binding 2 "value"))) 
         (expr ("Var") 
@@ -17,13 +17,13 @@
  (bind (binding 4 "is_even") 
   ((fnmod (params (param ("Var") (bind (binding 5 "value") ())))))) 
  (block 
-  (at 41 
+  (at 48 
    (return 
     (expr (int) 
-     (at 40 
+     (at 47 
       (call (expr (macro-expr) (ident (binding-name "x2c_var_equal_lane"))) 
        (args (expr ("Var") 
-              (at 39 
+              (at 46 
                (call "x2c_var_mod_lane" 
                 (args (expr ("Var") (ident (binding 5 "value"))) 
                  (expr ("Var") 
@@ -40,10 +40,10 @@
     (params (param ("Var") (bind (binding 7 "left") ())) 
      (param ("Var") (bind (binding 8 "right") ())))))) 
  (block 
-  (at 43 
+  (at 50 
    (return 
     (expr ("Var") 
-     (at 42 
+     (at 49 
       (call "x2c_var_add_lane" 
        (args (expr ("Var") (ident (binding 7 "left"))) 
         (expr ("Var") (ident (binding 8 "right")))))))))))
@@ -55,7 +55,7 @@
          (expr (void) 
           (call (expr ((func ((void))) void) (ident (binding 10 "Scope_open"))) 
            (args (expr (void) ())))))) 
-  (at 44 
+  (at 51 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 11 "fluent") ()) 
@@ -70,7 +70,11 @@
                                     ("Iter")) (ident (binding 14 "Iter_map"))) 
                         (args (expr ("Iter") 
                                (call (expr ((func ((int) (int) (int) ("Iter"))) 
-                                            "Iter") (ident (binding 15 "range"))) 
+                                            "Iter") 
+                                      (parens 
+                                       (expr ((func ((int) (int) (int) ("Iter"))) 
+                                              "Iter") 
+                                        (ident (binding 15 "range"))))) 
                                 (args (expr (int) (literal (int) "1")) 
                                  (expr (int) (literal (int) "4")) 
                                  (expr (int) (literal (int) "1")) 
@@ -109,7 +113,7 @@
                               (call (expr ((func ((int))) "Var") 
                                      (ident (binding 3 "int_var"))) 
                                (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
-  (at 45 
+  (at 52 
    (declare ("Var") 
     (bindings 
      (op = (bind (binding 18 "paired") ()) 
@@ -120,7 +124,9 @@
                             ("Iter")) (ident (binding 20 "Iter_map2"))) 
                 (args (expr ("Iter") 
                        (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
-                              (ident (binding 15 "range"))) 
+                              (parens 
+                               (expr ((func ((int) (int) (int) ("Iter"))) 
+                                      "Iter") (ident (binding 15 "range"))))) 
                         (args (expr (int) (literal (int) "1")) 
                          (expr (int) (literal (int) "3")) 
                          (expr (int) (literal (int) "1")) 
@@ -136,7 +142,9 @@
                                        (args (expr (int) (literal (int) "0"))))))))))))))) 
                  (expr ("Iter") 
                   (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
-                         (ident (binding 15 "range"))) 
+                         (parens 
+                          (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
+                           (ident (binding 15 "range"))))) 
                    (args (expr (int) (literal (int) "10")) 
                     (expr (int) (literal (int) "12")) 
                     (expr (int) (literal (int) "1")) 
@@ -161,11 +169,11 @@
                               (call (expr ((func ((int))) "Var") 
                                      (ident (binding 3 "int_var"))) 
                                (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
-  (at 11 
+  (at 14 
    (declare (int) 
     (bindings 
      (op = (bind (binding 22 "nested") ()) (expr (int) (literal (int) "0")))))) 
-  (at 48 
+  (at 55 
    (block (declare (int) (bindings (bind (binding 23 "left") ()))) 
     (declare ("Iter") 
      (bindings 
@@ -175,7 +183,9 @@
                (ident (binding 14 "Iter_map"))) 
          (args (expr ("Iter") 
                 (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
-                       (ident (binding 15 "range"))) 
+                       (parens 
+                        (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
+                         (ident (binding 15 "range"))))) 
                  (args (expr (int) (literal (int) "1")) 
                   (expr (int) (literal (int) "2")) 
                   (expr (int) (literal (int) "1")) 
@@ -202,7 +212,7 @@
                         (args (expr (int) (literal (int) "0")))))))))))))))))) 
     (declare ("Var") 
      (bindings (bind (binding 25 "_x2c_gensym_macro_item_1") ()))) 
-    (at 47 
+    (at 54 
      (while 
       (expr (int) 
        (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -231,7 +241,9 @@
                    (ident (binding 29 "Iter_head"))) 
              (args (expr ("Iter") 
                     (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
-                           (ident (binding 15 "range"))) 
+                           (parens 
+                            (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
+                             (ident (binding 15 "range"))))) 
                      (args (expr (int) (literal (int) "10")) 
                       (expr (int) (literal (int) "11")) 
                       (expr (int) (literal (int) "1")) 
@@ -258,7 +270,7 @@
                             (args (expr (int) (literal (int) "0")))))))))))))))))) 
         (declare ("Var") 
          (bindings (bind (binding 30 "_x2c_gensym_macro_item_0") ()))) 
-        (at 46 
+        (at 53 
          (while 
           (expr (int) 
            (call (expr ((func (("Iter") (opt-ref "Var"))) int) 
@@ -286,10 +298,10 @@
               (expr (int) 
                (op + (expr (int) (ident (binding 23 "left"))) 
                 (expr (int) (ident (binding 27 "right"))))))))))))))))) 
-  (at 27 
+  (at 32 
    (declare (struct "Iter") 
     (bindings (bind (binding 31 "mixed_source_storage") ())))) 
-  (at 49 
+  (at 56 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 32 "mixed") ()) 
@@ -301,7 +313,9 @@
                       (ident (binding 14 "Iter_map"))) 
                 (args (expr ("Iter") 
                        (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
-                              (ident (binding 15 "range"))) 
+                              (parens 
+                               (expr ((func ((int) (int) (int) ("Iter"))) 
+                                      "Iter") (ident (binding 15 "range"))))) 
                         (args (expr (int) (literal (int) "1")) 
                          (expr (int) (literal (int) "3")) 
                          (expr (int) (literal (int) "1")) 
@@ -319,23 +333,25 @@
                               (call (expr ((func ((int))) "Var") 
                                      (ident (binding 3 "int_var"))) 
                                (args (expr (int) (literal (int) "0")))))))))))))))))))))) 
-  (at 29 
+  (at 35 
    (declare (struct "Iter") 
     (bindings (bind (binding 33 "source_storage") ()) 
      (bind (binding 34 "map_storage") ()) 
      (bind (binding 35 "filter_storage") ())))) 
-  (at 30 
+  (at 37 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 36 "source") ()) 
       (expr ("Iter") 
        (call (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
-              (ident (binding 15 "range"))) 
+              (parens 
+               (expr ((func ((int) (int) (int) ("Iter"))) "Iter") 
+                (ident (binding 15 "range"))))) 
         (args (expr (int) (literal (int) "1")) (expr (int) (literal (int) "4")) 
          (expr (int) (literal (int) "1")) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 33 "source_storage")))))))))))) 
-  (at 50 
+  (at 57 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 37 "mapped") ()) 
@@ -346,7 +362,7 @@
          (expr ("Func") (ident (binding 16 "_x2c_gensym_func_handle_1"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 34 "map_storage")))))))))))) 
-  (at 51 
+  (at 58 
    (declare ("Iter") 
     (bindings 
      (op = (bind (binding 38 "filtered") ()) 
@@ -357,7 +373,7 @@
          (expr ("Func") (ident (binding 17 "_x2c_gensym_func_handle_0"))) 
          (expr (* struct "Iter") 
           (op & (expr (struct "Iter") (ident (binding 35 "filter_storage")))))))))))) 
-  (at 33 
+  (at 40 
    (declare ("List") 
     (bindings 
      (op = (bind (binding 39 "explicit") ()) 
@@ -365,7 +381,7 @@
        (call (expr ((func (("Iter"))) ("List")) 
               (ident (binding 12 "Iter_list"))) 
         (args (expr ("Iter") (ident (binding 38 "filtered")))))))))) 
-  (at 34 
+  (at 41 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 40 "printf"))) 
@@ -383,12 +399,12 @@
        (expr (int) 
         (call (expr ((func (("List"))) (int)) (ident (binding 41 "List_len"))) 
          (args (expr ("List") (ident (binding 39 "explicit"))))))))))) 
-  (at 35 
+  (at 42 
    (stmnt 
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 43 "Scope_close"))) 
       (args (expr (void) ())))))) 
-  (at 52 (return (expr (int) (literal (int) "0"))))))
+  (at 59 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "Var") 
  (bind (binding 44 "_x2c_gensym_func_adapt_0") 

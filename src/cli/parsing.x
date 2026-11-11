@@ -332,8 +332,7 @@ CliRequest CliRequest.package_options(String path, String package) {
 */
 int CliRequest.dependency_option(String s) {
   return s && (
-    s.startswith("-MMD") || s.startswith("-MP") ||
-    s.startswith("-MF") || s.startswith("-MT") ||
+    s.startswith("-MMD", "-MP", "-MF", "-MT") ||
     ",-MMD" in s || ",-MP" in s || ",-MF" in s || ",-MT" in s
   );
 }

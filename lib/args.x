@@ -120,8 +120,8 @@ Map Args.parse(List args, List spec) {
 String Args.usage(String program, List spec) {
   Spec parsed = _read_spec(spec);
   defer _free(parsed);
-  auto Buffer synopsis = Buffer.new(0), options = Buffer.new(0);
-  auto Buffer operands = Buffer.new(0), out = Buffer.new(0);
+  auto Buffer synopsis = Buffer.new(), options = Buffer.new();
+  auto Buffer operands = Buffer.new(), out = Buffer.new();
   for (int i = 0; i < parsed.count; i++) {
     Option *option = &parsed.options[i];
     String label = _label((*option));

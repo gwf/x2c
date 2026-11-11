@@ -682,7 +682,7 @@ module List _bind_api_source(Compiler c, Var line, Var doc, Var syntax) {
 static String _filled_doc(Compiler c, String doc) {
   if (!doc || !c.macro_stack || doc.find("$") < 0) return doc;
   Map spellings = _hole_spellings(c);
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   for (char *text = doc; *text;) {
     int named = *text == '$' &&
       (scan_ascii_alpha((unsigned char) text[1]) || text[1] == '_');

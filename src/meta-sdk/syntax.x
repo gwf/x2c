@@ -14,7 +14,7 @@ static macro Stmt $fail.meta_sdk_binding_syntax(Expr $syntax) =>
 static macro Stmt $fail.meta_sdk_binding_known(Expr $value) =>
   MetaContext.reject(
     "Code.binding_spelling requires a known binding",
-    %("binding: $($value.repr())"));
+    %"binding: $($value.repr())");
 
 static macro Stmt $fail.meta_sdk_binding_identifier(Expr $syntax) =>
   _reject_value(
@@ -35,10 +35,10 @@ static macro Stmt $fail.meta_sdk_parameter_missing(
   Expr $function, Expr $wanted) =>
   MetaContext.reject(
     %"Code.parameter cannot find '$($wanted)'",
-    %("function: $(Code.name($function).repr())"));
+    %"function: $(Code.name($function).repr())");
 
 static alias fail_constant to MetaContext.reject(
-  "captured code is not a compile-time constant", NULL);
+  "captured code is not a compile-time constant");
 
 static macro Stmt $fail.meta_sdk_enclosing_role(Expr $value) =>
   _reject_value(
@@ -65,18 +65,18 @@ Var Code.value(Code code) {
 Code Code.call_in_order(Code member, List arguments, Type type) {
   _require_expansion("Code.call_in_order");
   List call = active.expander.call_in_order(member, arguments);
-  return Code.lowered(%(expr $type $call), NULL);
+  return Code.lowered(%(expr $type $call));
 }
 
 /** Implements `Code.lowered`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes.
 */
-Code Code.lowered(Code c, List effects) => %(code-value "lowered" $c $effects);
+Code Code.lowered(Code c, List @effects) => %(code-value "lowered" $c $effects);
 
 /** Implements `Code.bound`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes.
 */
-Code Code.bound(Code c, List effects) => %(code-value "bound" $c $effects);
+Code Code.bound(Code c, List @effects) => %(code-value "bound" $c $effects);
 
 /** Implements `Code.func_parameters`, declared in `lib/meta.x`. */
 List Code.func_parameters(Code parameters, Code fn, Code argv) {

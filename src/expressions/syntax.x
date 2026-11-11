@@ -106,7 +106,7 @@ List Compiler.parse_call_splice(Compiler c) {
 */
 List Compiler.parse_primary(Compiler c) {
   c.require_input();
-  _x2c_complete_here(c, <expr>, %());
+  _x2c_complete_here(c, <expr>);
   List slot = c.try_parse_macro_slot(<expression>);
   if (slot) return slot;
   switch (c.peek(0)) {
@@ -322,7 +322,7 @@ static List _parse_cast_operand(
 }
 
 static List _parse_unary_op(Compiler c) {
-  _x2c_complete_here(c, <expr>, %());
+  _x2c_complete_here(c, <expr>);
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (op == <sizeof>) return _parse_sizeof(c);

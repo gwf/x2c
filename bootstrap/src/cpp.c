@@ -32,11 +32,11 @@ typedef struct CppToken{
 }
 CppToken;
 
-static List _16, _15;
+static List _17, _16;
 
-static String _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _12, _11, _10, _9, _8, _7, _6, _5, _2, _1, _0;
+static String _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _53, _52, _51, _50, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _13, _12, _11, _10, _9, _8, _7, _6, _5, _2, _1, _0;
 
-static Var _33, _14, _13, _4, _3;
+static Var _15, _14, _4, _3;
 
 static int _init_guard_ = 0;
 
@@ -338,34 +338,34 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _3 = Symbol_var(1011493096);
   _4 = Symbol_var(458361162716);
   _5 = String_new("__VA_ARGS__");
-  _6 = String_new("<stdin>");
-  _7 = String_new("-D");
-  _8 = String_new("-U");
-  _9 = String_new("=");
-  _10 = String_new(" 1");
-  _11 = String_new("#define ");
-  _12 = String_new("<command line>");
-  _13 = String_var(_12);
-  _14 = int_var(0);
-  _15 = cons(_14, NULL);
-  _16 = cons(_13, _15);
-  _17 = String_new("__GNUC__");
-  _18 = String_new("defined");
-  _19 = String_new("1");
-  _20 = String_new("0");
-  _21 = String_new("?");
-  _22 = String_new(":");
-  _23 = String_new("&&");
-  _24 = String_new("||");
-  _25 = String_new("!");
-  _26 = String_new("-");
-  _27 = String_new("+");
-  _28 = String_new("~");
-  _29 = String_new(")");
-  _30 = String_new("unterminated use of macro \'");
-  _31 = String_new("\'");
-  _32 = String_new("expected \')\' before the end of the file");
-  _33 = String_var(_32);
+  _6 = String_new(" \t");
+  _7 = String_new("<stdin>");
+  _8 = String_new("-D");
+  _9 = String_new("-U");
+  _10 = String_new("=");
+  _11 = String_new(" 1");
+  _12 = String_new("#define ");
+  _13 = String_new("<command line>");
+  _14 = String_var(_13);
+  _15 = int_var(0);
+  _16 = cons(_15, NULL);
+  _17 = cons(_14, _16);
+  _18 = String_new("__GNUC__");
+  _19 = String_new("defined");
+  _20 = String_new("1");
+  _21 = String_new("0");
+  _22 = String_new("?");
+  _23 = String_new(":");
+  _24 = String_new("&&");
+  _25 = String_new("||");
+  _26 = String_new("!");
+  _27 = String_new("-");
+  _28 = String_new("+");
+  _29 = String_new("~");
+  _30 = String_new(")");
+  _31 = String_new("unterminated use of macro \'");
+  _32 = String_new("\'");
+  _33 = String_new("expected ')' before the end of the file");
   _34 = String_new("macro \'");
   _35 = String_new("\' takes ");
   _36 = String_new(" arguments");
@@ -665,7 +665,7 @@ static Token f6_macros____parameters(Token open, Array params, int * variadic){
 static String f6_macros____body(Token first){
   Array parts = Array_new();
   for(Token token = first;  token -> type != 11212;  token ++) Array_push(parts, String_var(token -> text));
-  return String_strip(String_join(_1, Array_list_free(parts)), " \t");
+  return String_strip(String_join(_1, Array_list_free(parts)), cons(String_var(_6), NULL));
 }
 
 static int f6_macros____unreadable(Token token){
@@ -681,7 +681,7 @@ static List f6_macros____site(Compiler c, Token token, String path){
   int line = token -> line;
   String file = Array_truth(c -> line_markers) ? Compiler_token_source(c, token, &(line)) : path;
   return({
-    Var _x2c_gensym_literal_part_2 = String_truth(file) ? String_var(Compiler_display_path(c, file)) : String_var(_6);  cons(_x2c_gensym_literal_part_2, cons(int_var(line), NULL));
+    Var _x2c_gensym_literal_part_2 = String_truth(file) ? String_var(Compiler_display_path(c, file)) : String_var(_7);  cons(_x2c_gensym_literal_part_2, cons(int_var(line), NULL));
   }
   );
 }
@@ -691,22 +691,22 @@ List Compiler_command_macros(List args){
   Cpp cpp = Cpp_new(Map_new());
   for(List at = args;  List_truth(at);  at = List_cdr(at)){
     String arg = Var_as_string(List_car(at)), option = String_getslice(arg, (-2147483647 - 1), 2, 1), value = String_getslice(arg, 2, (-2147483647 - 1), 1);
-    if(! String_equal(option, _7) && ! String_equal(option, _8)) continue;
+    if(! String_equal(option, _8) && ! String_equal(option, _9)) continue;
     if(! String_len(value) && List_truth(List_cdr(at))){
       at = List_cdr(at);
       value = Var_as_string(List_car(at));
     }
-    if(String_equal(option, _8)) _set(cpp, value, Symbol_var(44966220));
+    if(String_equal(option, _9)) _set(cpp, value, Symbol_var(44966220));
     else f6_macros____command_define(cpp, value);
   }
   return List_sort(Cpp_changes(cpp, Map_new()));
 }
 
 static void f6_macros____command_define(Cpp cpp, String value){
-  int equals = String_find(value, _9), undefined = 0;
-  String line = equals < 0 ? String_add(value, _10) : String_add(String_add(String_getslice(value, (-2147483647 - 1), x2c_slice_bound(equals), 1), _0), String_getslice(value, x2c_slice_bound(equals + 1), (-2147483647 - 1), 1));
-  Token name = Compiler_macro_directive(String_add(_11, line), &(undefined));
-  if(name) _define(cpp, name, _16);
+  int equals = String_find(value, _10), undefined = 0;
+  String line = equals < 0 ? String_add(value, _11) : String_add(String_add(String_getslice(value, (-2147483647 - 1), x2c_slice_bound(equals), 1), _0), String_getslice(value, x2c_slice_bound(equals + 1), (-2147483647 - 1), 1));
+  Token name = Compiler_macro_directive(String_add(_12, line), &(undefined));
+  if(name) _define(cpp, name, _17);
 }
 
 Symbol Compiler_preproc_conditional_kind(String);
@@ -816,7 +816,7 @@ int Compiler_never_defined(String);
 static int f10_conditions____defined(Cpp cpp, Token token){
   if(! Token_is_word(token)) return - 1;
   Var value = Map_getindex(cpp -> macros, String_var(token -> text));
-  if(Var_is_row(value, 9, 7, 4) ||(Var_is_void(value) && String_equal(token -> text, _17))) return 1;
+  if(Var_is_row(value, 9, 7, 4) ||(Var_is_void(value) && String_equal(token -> text, _18))) return 1;
   if(x2c_var_equal_lane(value, Symbol_var(44966220)) ||(Var_is_void(value) && Compiler_never_defined(token -> text))) return 0;
   return - 1;
 }
@@ -875,7 +875,7 @@ static Token f10_conditions____operand(Cpp cpp, Block items, Token token){
     .token = * token
   }
   ;
-  if(! String_equal(token -> text, _18)){
+  if(! String_equal(token -> text, _19)){
     Block_push(items, & item);
     return token;
   }
@@ -886,16 +886,16 @@ static Token f10_conditions____operand(Cpp cpp, Block items, Token token){
   }
   int holds = f10_conditions____defined(cpp, name);
   item.token.type = holds < 0 ? 46060699100 : 26417777576;
-  item.token.text = holds > 0 ? _19 : _20;
+  item.token.text = holds > 0 ? _20 : _21;
   Block_push(items, & item);
   return last -> type == 11212 ? last - 1 : last;
 }
 
 static f10_conditions___CppValue f10_conditions____ternary(f10_conditions___CppEval * e){
   f10_conditions___CppValue test = f10_conditions____binary(&((* e)), 1);
-  if(! f10_conditions____take(&((* e)), _21)) return test;
+  if(! f10_conditions____take(&((* e)), _22)) return test;
   f10_conditions___CppValue yes = f10_conditions____ternary(&((* e)));
-  if(! f10_conditions____take(&((* e)), _22))(* e).failed = 1;
+  if(! f10_conditions____take(&((* e)), _23))(* e).failed = 1;
   f10_conditions___CppValue no = f10_conditions____ternary(&((* e)));
   if(test.known) return test.value ? yes : no;
   if(yes.known && no.known && yes.value == no.value) return yes;
@@ -933,8 +933,8 @@ static int f10_conditions____level(String op){
 }
 
 static f10_conditions___CppValue f10_conditions____apply(String op, f10_conditions___CppValue left, f10_conditions___CppValue right){
-  if(String_equal(op, _23)) return f10_conditions____logical(left, right, 0);
-  if(String_equal(op, _24)) return f10_conditions____logical(left, right, 1);
+  if(String_equal(op, _24)) return f10_conditions____logical(left, right, 0);
+  if(String_equal(op, _25)) return f10_conditions____logical(left, right, 1);
   if(! left.known || ! right.known) return(f10_conditions___CppValue){
     0
   }
@@ -996,7 +996,7 @@ static f10_conditions___CppValue f10_conditions____unary(f10_conditions___CppEva
     ;
   }
   String op = f10_conditions____text(&((* e)));
-  if(! String_equal(op, _25) && ! String_equal(op, _26) && ! String_equal(op, _27) && ! String_equal(op, _28)) return f10_conditions____primary(&((* e)));
+  if(! String_equal(op, _26) && ! String_equal(op, _27) && ! String_equal(op, _28) && ! String_equal(op, _29)) return f10_conditions____primary(&((* e)));
   (* e).at ++;
   f10_conditions___CppValue operand = f10_conditions____unary(&((* e)));
   if(! operand.known) return operand;
@@ -1013,7 +1013,7 @@ static f10_conditions___CppValue f10_conditions____primary(f10_conditions___CppE
   switch(token -> type){
     case 81 :{
       f10_conditions___CppValue inner = f10_conditions____ternary(&((* e)));
-      if(! f10_conditions____take(&((* e)), _29))(* e).failed = 1;
+      if(! f10_conditions____take(&((* e)), _30))(* e).failed = 1;
       return inner;
     }
     case 26417777576 : return f10_conditions____number(&((* e)), token -> text);
@@ -1395,7 +1395,7 @@ static int f6_expand____arguments(f6_expand___Expander * x, Block stack, int inp
         depth += f6_expand____nesting(type);
         Block_push(arg, & item);
       }
-      if(!(* x).retreat) Compiler_report_error((* x).c, 27335838, String_join(NULL, cons(String_var(_30), cons(String_var(Var_str(List_cadr(definition))), cons(String_var(_31), NULL)))), (* x).site, cons(_33, cons(String_var(f6_expand____definition_note(definition)), NULL)));
+      if(!(* x).retreat) Compiler_report_error((* x).c, 27335838, String_join(NULL, cons(String_var(_31), cons(String_var(Var_str(List_cadr(definition))), cons(String_var(_32), NULL)))), (* x).site, cons(String_var(_33), cons(String_var(f6_expand____definition_note(definition)), NULL)));
       {
         int _x2c_gensym_return_value_6 = 0;
         {
@@ -1561,7 +1561,7 @@ static Token f6_expand____stringized(f6_expand___Substitution * s, Token param){
   for(size_t i = 0;  i < Block_len(arg);  i ++){
     String text = items[i].token.text;
     if(i && items[i].space) Array_push(parts, String_var(_0));
-    Array_push(parts, String_var(String_replace(String_replace(text, _41, _42), _40, _43)));
+    Array_push(parts, String_var(String_replace(String_replace(text, _41, _42, NULL), _40, _43, NULL)));
   }
   Array_push(parts, String_var(_40));
   CppToken item = f6_expand____made(27051791223990, String_join(_1, Array_list_free(parts)));
@@ -1795,7 +1795,7 @@ static void f6_expand____scan_body(Block tokens, String text){
       Block_push(tokens, token);
       continue;
     }
-    int pasting = String_startswith(token -> text, _47), skip = pasting ? 2 : 1;
+    int pasting = String_startswith(token -> text, cons(String_var(_47), NULL)), skip = pasting ? 2 : 1;
     CppToken mark = f6_expand____made(pasting ? 9031 : 71, pasting ? _47 : _48);
     Block_push(tokens, & mark.token);
     f6_expand____scan_body(tokens, String_getslice(token -> text, x2c_slice_bound(skip), (-2147483647 - 1), 1));
@@ -1884,8 +1884,8 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 }
 
 static int _x2c_gensym_string_switch_1(String s){
-  if(String_equal(s, _24)) return 1;
-  if(String_equal(s, _23)) return 2;
+  if(String_equal(s, _25)) return 1;
+  if(String_equal(s, _24)) return 2;
   if(String_equal(s, _56)) return 3;
   if(String_equal(s, _57)) return 4;
   if(String_equal(s, _58)) return 5;
@@ -1897,8 +1897,8 @@ static int _x2c_gensym_string_switch_1(String s){
   if(String_equal(s, _64)) return 11;
   if(String_equal(s, _65)) return 12;
   if(String_equal(s, _66)) return 13;
-  if(String_equal(s, _27)) return 14;
-  if(String_equal(s, _26)) return 15;
+  if(String_equal(s, _28)) return 14;
+  if(String_equal(s, _27)) return 15;
   if(String_equal(s, _67)) return 16;
   if(String_equal(s, _68)) return 17;
   if(String_equal(s, _69)) return 18;
@@ -1917,8 +1917,8 @@ static int _x2c_gensym_string_switch_2(String s){
   if(String_equal(s, _64)) return 9;
   if(String_equal(s, _65)) return 10;
   if(String_equal(s, _66)) return 11;
-  if(String_equal(s, _27)) return 12;
-  if(String_equal(s, _26)) return 13;
+  if(String_equal(s, _28)) return 12;
+  if(String_equal(s, _27)) return 13;
   if(String_equal(s, _67)) return 14;
   if(String_equal(s, _68)) return 15;
   if(String_equal(s, _69)) return 16;
@@ -1926,9 +1926,9 @@ static int _x2c_gensym_string_switch_2(String s){
 }
 
 static int _x2c_gensym_string_switch_3(String s){
-  if(String_equal(s, _25)) return 1;
-  if(String_equal(s, _26)) return 2;
-  if(String_equal(s, _28)) return 3;
+  if(String_equal(s, _26)) return 1;
+  if(String_equal(s, _27)) return 2;
+  if(String_equal(s, _29)) return 3;
   return 0;
 }
 

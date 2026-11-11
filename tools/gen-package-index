@@ -32,7 +32,7 @@ static Path source_archive(Path package, Path output):
   // COPYFILE_DISABLE keeps macOS tar from adding AppleDouble members.
   %(tar -czf $archive -C $(package.dirname()) --no-recursion
     @(members.list_free())).job()
-    .options({env: {COPYFILE_DISABLE: 1}}).run()
+    .options(env: {COPYFILE_DISABLE: 1}).run()
   return archive
 
 static void source_rows(

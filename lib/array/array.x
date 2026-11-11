@@ -394,7 +394,7 @@ meta native void Array.heapify(Array heap) {
 meta native String Array.join(Array array, String separator) {
   size_t n = array.length;
   if (n == 0) return "";
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   for (size_t i = 0; i < n; i++) {
     Var elem = ((Var *) array.bytes)[i];
     elem.write_str(buf);

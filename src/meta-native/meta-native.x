@@ -42,14 +42,14 @@ static macro Stmt $fail.meta_native_meta_decl(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     "meta requires a function or one initialized static value",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.meta_native_meta_storage(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>,
     "a meta value must have file-static storage",
-    $site, %("declaration: '$($name)'"));
+    $site, %"declaration: '$($name)'");
 
 static macro Stmt $report.meta_native_call_deferred(
   Expr $c, Expr $site, Name $report) =>
@@ -62,58 +62,58 @@ static macro Stmt $fail.meta_native_call_target(Expr $c, Expr $site) =>
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
-    $site, %("only a call to a meta function runs at compile time"));
+    $site, "only a call to a meta function runs at compile time");
 
 static macro Stmt $fail.meta_native_call_binding(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <macro>,
     "explicit meta call cannot be resolved",
-    $site, %("no binding for $($name)"));
+    $site, %"no binding for $($name)");
 
 static macro Stmt $fail.meta_native_meta_name(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>,
     "native meta function requires one direct name",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.meta_native_meta_signature(
   Expr $c, Expr $site, Expr $n) =>
   $c.report_error(
     <type>,
     "native meta function declaration does not match its target",
-    $site, %("name: $($n.name)" "signature: $($n.signature.repr())"));
+    $site, %"name: $($n.name)", %"signature: $($n.signature.repr())");
 
 static macro Stmt $fail.meta_native_meta_lifetime(
   Expr $c, Expr $site, Expr $name, Expr $signature) =>
   $c.report_error(
     <type>,
     "unproved native meta lifetime",
-    $site, %("name: $($name)" "signature: $($signature.repr())"
-    "it might return or keep its argument; ownership cannot be inferred"));
+    $site, %"name: $($name)", %"signature: $($signature.repr())",
+    "it might return or keep its argument; ownership cannot be inferred");
 
 static macro Stmt $fail.meta_native_package_platform(
   Expr $c, Expr $site, Expr $name, Expr $module) =>
   $c.report_error(
     <driver>,
     "native modules are not supported on this platform",
-    $site, %("package: $($name)" "module: $($module)"));
+    $site, %"package: $($name)", %"module: $($module)");
 
 static macro Stmt $fail.meta_native_package_compiler(
   Expr $c, Expr $site, Expr $name, Expr $module) =>
   $c.report_error(
     <driver>,
     %"package '$($name)' was built by another compiler; rebuild it",
-    $site, %("module: $($module)"));
+    $site, %"module: $($module)");
 
 static macro Stmt $fail.meta_native_outside_compilation(Expr $name) =>
-  MetaContext.reject(%"$($name) used outside compilation", NULL);
+  MetaContext.reject(%"$($name) used outside compilation");
 
 static macro Stmt $warn.meta_native_function_hidden(
   Expr $c, Expr $site, Expr $binding) =>
   $c.report_warning(
     <native>, "the compiler's own function hides a native module's",
-    $site, %("name: $($binding.name)"));
+    $site, %"name: $($binding.name)");
 
 static macro Stmt $fail.meta_native_module_invalid(Expr $path) =>
   Diagnostics.driver_error(%"not an x2c native module: $($path)");

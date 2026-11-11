@@ -267,7 +267,7 @@ module List _map_tail(Compiler c, Array items) {
     default:
       c.report_error(
         <xform>, "a Map rest argument must be a key: value entry or a splice",
-        NULL, NULL);
+        NULL);
   }
   if (rows || !parts.len()) parts.push(_map_literal(c, rows));
   if (parts.len() == 1) return parts[0];

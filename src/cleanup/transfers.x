@@ -232,17 +232,17 @@ static List _lower_landing(Walk &w, Var code, List rows) {
       case %(new-name ?token ?(String role)):
         parts[token] = _region_binding(c, role);
       case %(outer ?token ?node):
-        parts[token] = Code.lowered(%(seq $(_rewrite(w, node))), NULL);
+        parts[token] = Code.lowered(%(seq $(_rewrite(w, node))));
       case %(exits ?token ?statements):
         parts[token] = exits =
-          Code.lowered(_bind_parts(c, statements, parts), NULL);
+          Code.lowered(_bind_parts(c, statements, parts));
       case %(region ?token ?node): parts[token] = _region(w, exits, node);
     }
   return _bind_parts(c, code, parts);
 }
 
 static List _region(Walk &w, List cleanup, List body) =>
-  Code.lowered(_inside(w, cleanup, body, body), NULL);
+  Code.lowered(_inside(w, cleanup, body, body));
 
 /* defer regions
 
@@ -419,7 +419,7 @@ static List _region_path(Walk &w) {
    reports next. */
 static void _report_at(Walk &w, int origin, String message, List note) {
   with (w.c.origin = origin) {
-    w.c.report_error(<emit>, message, NULL, note);
+    w.c.report_error(<emit>, message, NULL, @note);
   }
 }
 
@@ -460,7 +460,7 @@ static List _defer_cleanup(Compiler c, List record) {
   List call = c.bind_syntax(
     $!{ x2c_cleanup_leave($address); },
     <block>, c.return_type);
-  return Code.lowered(%(seq $call), NULL);
+  return Code.lowered(%(seq $call));
 }
 
 /* Selects the record shape; captured records keep the environment beside

@@ -212,7 +212,7 @@ void Compiler.mark_completion(Compiler c, int position) {
 
 /* Raises `<replcomp>` at the completion marker with the visible symbols,
     grammar `role`, and available `keywords`. Does nothing elsewhere. */
-void _x2c_complete_here(Compiler c, Symbol role, List keywords) {
+void _x2c_complete_here(Compiler c, Symbol role, List @keywords) {
   if (!c.at_completion()) return;
   List rows = c.sym.visible_symbols();
   raise %(replcomp (kind $role) (rows $rows) (keywords $keywords));

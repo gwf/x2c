@@ -10,6 +10,7 @@
 #include "common.h"
 #include "compiler-meta.h"
 #include "derive.h"
+#include "iter.h"
 #include "lisp-bindings.h"
 #include "list-selectors.h"
 #include "native-scalar-types.h"

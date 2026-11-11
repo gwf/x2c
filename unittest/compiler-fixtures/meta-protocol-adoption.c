@@ -94,7 +94,7 @@ Var twice(Var value){
 int heads(int offset){
   if(! _init_guard_) _file_init_();
   struct Iter source, head;
-  return Var_int(Iter_sum(Iter_head(Iter_map(range(1, 9, 1, &(struct Iter){
+  return Var_int(Iter_sum(Iter_head(Iter_map((range)(1, 9, 1, &(struct Iter){
     int_var(0)
   }
   ), _x2c_gensym_func_handle_0, &(struct Iter){
@@ -103,7 +103,7 @@ int heads(int offset){
   ), 2, &(struct Iter){
     int_var(0)
   }
-  ))) * 10 + Iter_count(Iter_head(range(1, 9, 1, & source), 3 + offset, & head));
+  ))) * 10 + Iter_count(Iter_head((range)(1, 9, 1, & source), 3 + offset, & head));
 }
 
 int main(int argc, char * * argv){

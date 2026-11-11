@@ -96,7 +96,7 @@ static Iter dispatch_fixture_iter(Var value, Iter dest) {
 
 
 static void expect_stream_repr(Var value) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   value.write_repr(out);
   EXPECT_STR_EQ(out.str_free(), value.repr());
 }
@@ -266,7 +266,7 @@ static void var_void_equality_and_rendering(void) {
 
   EXPECT_STR_EQ(absent.str(), "void");
   EXPECT_STR_EQ(absent.repr(), "void");
-  Buffer display = Buffer.new(0), readable = Buffer.new(0);
+  Buffer display = Buffer.new(), readable = Buffer.new();
   absent.write_str(display);
   absent.write_repr(readable);
   EXPECT_STR_EQ(display.str_free(), "void");
@@ -1335,25 +1335,25 @@ static void var_dense_custom_dispatch(void) {
   EXPECT_PTR_EQ(a.pointer(), &first);
   EXPECT_STR_EQ(a.str(), "custom-str");
   EXPECT_STR_EQ(a.repr(), "custom-repr");
-  Buffer fallback = Buffer.new(0);
+  Buffer fallback = Buffer.new();
   a.write_repr(fallback);
   EXPECT_STR_EQ(fallback.str_free(), "custom-repr");
 
   methods.write_repr = dispatch_fixture_write_repr;
   x2c_register_descriptor("fixture", methods);
-  Buffer streamed = Buffer.new(0);
+  Buffer streamed = Buffer.new();
   a.write_repr(streamed);
   EXPECT_STR_EQ(streamed.str_free(), "custom-stream-repr");
 
   // A descriptor with only str renders through write_str by writing the
   // returned String.
-  Buffer str_fallback = Buffer.new(0);
+  Buffer str_fallback = Buffer.new();
   a.write_str(str_fallback);
   EXPECT_STR_EQ(str_fallback.str_free(), "custom-str");
 
   methods.write_str = dispatch_fixture_write_str;
   x2c_register_descriptor("fixture", methods);
-  Buffer str_streamed = Buffer.new(0);
+  Buffer str_streamed = Buffer.new();
   a.write_str(str_streamed);
   EXPECT_STR_EQ(str_streamed.str_free(), "custom-stream-str");
   // write_str takes precedence over str but leaves Var.str alone.
@@ -1509,7 +1509,7 @@ static void var_dense_dispatch_past_direct_rows(void) {
    write_str, so they also prove the String fallback on a real type
    rather than only on a synthetic descriptor. */
 static void var_write_str_matches_str(void) {
-  Buffer payload = Buffer.new(0);
+  Buffer payload = Buffer.new();
   payload.write("buffered");
   Block block = Block.new(sizeof(int));
   Var samples[] = {
@@ -1519,7 +1519,7 @@ static void var_write_str_matches_str(void) {
     7, 2.5, void, ((String) NULL)
   };
   for (int i = 0; i < (int) (sizeof samples / sizeof samples[0]); i++) {
-    Buffer out = Buffer.new(0);
+    Buffer out = Buffer.new();
     samples[i].write_str(out);
     String streamed = out.str_free();
     String direct = samples[i].str();
@@ -1533,12 +1533,12 @@ static void var_write_str_matches_str(void) {
    in str while a nested List keeps its own layout. */
 static void var_nested_write_str_parity(void) {
   Array array = %["text", (a b), {k: 1}, 3];
-  Buffer array_out = Buffer.new(0);
+  Buffer array_out = Buffer.new();
   array.write_str(array_out);
   EXPECT_STR_EQ(array_out.str_free(), array.str());
 
   Map map = %{key: [1, "two"]};
-  Buffer map_out = Buffer.new(0);
+  Buffer map_out = Buffer.new();
   map.write_str(map_out);
   EXPECT_STR_EQ(map_out.str_free(), map.str());
 
@@ -1553,10 +1553,10 @@ static void var_nested_write_str_parity(void) {
   EXPECT_STR_EQ(empties.str(), "[ { }, [  ], () ]");
   Map empty_nested = %{k: {}};
   EXPECT_STR_EQ(empty_nested.str(), "{ k: { } }");
-  Buffer null_map = Buffer.new(0);
+  Buffer null_map = Buffer.new();
   ((Map) NULL).write_str(null_map);
   EXPECT_STR_EQ(null_map.str_free(), ((Map) NULL).str());
-  Buffer null_array = Buffer.new(0);
+  Buffer null_array = Buffer.new();
   ((Array) NULL).write_str(null_array);
   EXPECT_STR_EQ(null_array.str_free(), ((Array) NULL).str());
 }
@@ -1570,11 +1570,11 @@ static void var_nested_list_keeps_display_padding(void) {
   Map padded_map = %{k: (a b)};
   EXPECT_STR_EQ(padded_map.str(), "{ k: ( a b ) }");
   EXPECT_STR_EQ(%(a (b c)).str(), "( a ( b c ))");
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   %(a b).var().write_str(out);
   EXPECT_STR_EQ(out.str_free(), "( a b )");
   // The caller's padding is restored, so a later write is not padded.
-  Buffer mixed = Buffer.new(0);
+  Buffer mixed = Buffer.new();
   %(a b).var().write_str(mixed);
   mixed.pad();
   EXPECT_STR_EQ(mixed.str_free(), "( a b )");
@@ -1594,18 +1594,18 @@ static void var_empty_container_display_forms(void) {
 
 /* Symbol and Atom stream without allocating the String their str returns. */
 static void var_symbol_atom_stream_without_allocating(void) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   Symbol.write_str(<spelling>, out);
   EXPECT_STR_EQ(out.str_free(), <spelling>.str());
   // A zero Symbol appends nothing, which str_free reports as no String at
   // all -- the same result Symbol.str returns for it.
-  Buffer zero = Buffer.new(0);
+  Buffer zero = Buffer.new();
   Symbol.write_str(0, zero);
   EXPECT_NULL(zero.str_free());
   EXPECT_NULL(Symbol.str(0));
 
   Var atom = %(exact-name).car();
-  Buffer atom_out = Buffer.new(0);
+  Buffer atom_out = Buffer.new();
   Atom.write_str(atom, atom_out);
   EXPECT_STR_EQ(atom_out.str_free(), Atom.str(atom));
 }
@@ -1669,7 +1669,7 @@ static void var_rendering_restores_after_error(void) {
   Array array = [value];
   Map map = {1: array};
   List list = $(map);
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   int caught = 0;
   try list.write_repr(out);
   catch %(render-err): caught = 1;

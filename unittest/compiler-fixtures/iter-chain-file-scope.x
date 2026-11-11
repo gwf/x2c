@@ -3,7 +3,7 @@
 /* A file-scope initializer completes the chain it consumes, as a function
    body does. */
 
-List squares = range(1, 4, 1);
+List squares = range(1, 4);
 static int evens = range(0, 6, 2).count();
 
 int main(void) {

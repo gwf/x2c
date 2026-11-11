@@ -186,7 +186,7 @@ static Buffer f34_module_block_static_typedef_second___Node_write_str(f34_module
 }
 
 static String f34_module_block_static_typedef_second___Node_str(f34_module_block_static_typedef_second___Node value){
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -223,7 +223,7 @@ static Buffer f34_module_block_static_typedef_second___Node_write_repr(f34_modul
 }
 
 static String f34_module_block_static_typedef_second___Node_repr(f34_module_block_static_typedef_second___Node value){
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0

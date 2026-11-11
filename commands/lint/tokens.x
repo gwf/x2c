@@ -59,7 +59,7 @@ static void _lines(Lint l):
     if width && strchr(text, '\t'): l.add("tab", line, "tab character")
     if width && isspace((unsigned char) text[width - 1]):
       l.add("trailing-whitespace", line, "trailing whitespace")
-    if !text.strip(NULL):
+    if !text.strip():
       if blank: l.add("blank-line-stack", line, "consecutive blank line")
       blank = 1
     else:
@@ -121,7 +121,7 @@ static int _prose(String text):
 
 /* A line comment that opens with a verb restating the code below it. */
 static int _narrates(String body):
-  String lower = body.strip(NULL).lower()
+  String lower = body.strip().lower()
   foreach String word in narration_words:
     if lower.startswith(word) &&
        !lint_word_char((unsigned char) lower[word.len()]):

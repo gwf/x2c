@@ -271,7 +271,7 @@ Buffer Url_write_repr(Url value, Buffer out){
   return Buffer_write(out, " }");
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -281,7 +281,7 @@ void x2c_cleanup_leave(X2CCleanup *);
 
 String Url_repr(Url value){
   if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -344,11 +344,11 @@ static int String_truth(String);
 
 Buffer Buffer_write_char(Buffer, char);
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 String Url_str(Url url){
   if(! _init_guard_) _file_init_();
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
@@ -363,9 +363,9 @@ String Url_str(Url url){
     x2c_cleanup_push(& _x2c_gensym_defer_record_1);
     {
       if(String_truth(url.scheme)) Buffer_write_char(Buffer_write(out, url.scheme), ':');
-      int authority = String_truth(url.host) || String_truth(url.userinfo) || url.port ||(String_truth(url.scheme) && String_startswith(url.path, _0));
+      int authority = String_truth(url.host) || String_truth(url.userinfo) || url.port ||(String_truth(url.scheme) && String_startswith(url.path, cons(String_var(_0), NULL)));
       if(authority) _write_authority(out, url);
-      if(authority && String_truth(url.path) && ! String_startswith(url.path, _0)) Buffer_write_char(out, '/');
+      if(authority && String_truth(url.path) && ! String_startswith(url.path, cons(String_var(_0), NULL))) Buffer_write_char(out, '/');
       if(String_truth(url.path)) Buffer_write(out, url.path);
       if(String_truth(url.query)) Buffer_write(Buffer_write_char(out, '?'), url.query);
       if(String_truth(url.fragment)) Buffer_write(Buffer_write_char(out, '#'), url.fragment);
@@ -386,7 +386,7 @@ String Url_str(Url url){
 
 Map Map_new(void);
 
-List String_split(String, String);
+List String_split(String, String, List);
 
 static int List_try_next(List, List *, Var *);
 
@@ -405,7 +405,7 @@ Map Url_parse_query(String query){
   Map fields = Map_new();
   {
     String pair;
-    List _x2c_gensym_macro_object_0 = String_split(query, _1);
+    List _x2c_gensym_macro_object_0 = String_split(query, _1, NULL);
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
@@ -470,7 +470,7 @@ String Url_format_query(Map fields){
 
       }
       Array_sort_by(names, _x2c_gensym_func_handle_0);
-      Buffer out = Buffer_new(0);
+      Buffer out = Buffer_new(NULL);
       const Buffer _x2c_gensym_macro_acquired_2 = out;
       {
         _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
@@ -618,10 +618,10 @@ static void _write_authority(Buffer out, Url url){
   if(url.port) Buffer_printf(out, ":%d", url.port);
 }
 
-String String_replace(String, String, String);
+String String_replace(String, String, String, List);
 
 static String _form_decode(String text){
-  return String_percent_decode(String_replace(text, _12, _13));
+  return String_percent_decode(String_replace(text, _12, _13, NULL));
 }
 
 String Var_str(Var);

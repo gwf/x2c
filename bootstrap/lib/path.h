@@ -60,7 +60,7 @@ void Path_write_text(Path path, String text);
 
 Path Path_temp_dir(void);
 
-Path Path_join(Path base, Path name);
+Path Path_join(Path base, List names);
 
 
 #endif /* __GUARD_0x1E3143B9__ */

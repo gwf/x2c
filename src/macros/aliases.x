@@ -26,34 +26,34 @@
 static macro Stmt $fail.macros_alias_expression(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "alias requires an expression",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.macros_alias_end(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected ';' or '{' after an alias expression",
-    $site, NULL);
+    $site);
 
 static macro Stmt $problem.macros_alias_included(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_problem(
     <parse>, %"declaration '$($name)' is already bound",
-    $site, %("this include aliases '$($name)'"));
+    $site, %"this include aliases '$($name)'");
 
 static macro Stmt $fail.macros_unalias_missing(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <parse>, %"no alias '$($name)' to remove in this scope",
-    $site, %("an alias of an enclosing scope ends with that scope"));
+    $site, "an alias of an enclosing scope ends with that scope");
 
 static macro Stmt $fail.macros_unalias_governed(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "unalias cannot be the body of a statement",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.macros_alias_governed(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "alias declaration cannot be the body of a statement",
-    $site, %("give the alias a braced body"));
+    $site, "give the alias a braced body");
 
 static const SymbolSet _operand_tails = %<. "->" ++ -- ; , ) ] } ?>;
 static const SymbolSet _prefix_operators = %<* & - +>;

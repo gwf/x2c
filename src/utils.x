@@ -150,7 +150,7 @@ int Compiler.run_command(String name, List arguments) {
   if (!path)
     $fail.utils_command_missing(name);
   Map options = {env: Compiler.command_environment(name), stdout: <inherit>};
-  try return $(path, @arguments).job().options(options).status();
+  try return $(path, @arguments).job().options(@options).status();
   catch %((!or not-found io-fail) *detail): Diagnostics.host_error(detail);
   return 2;
 }
@@ -252,9 +252,8 @@ String Env.find_program(String name) {
     are excluded even when they start with a shebang.
 */
 int Path.is_x2c_source(String path) {
-  if (path.endswith(".x") || path.endswith(".xp")) return 1;
-  if (path.endswith(".c") || path.endswith(".h") || path.endswith(".o") ||
-      path.endswith(".a")) return 0;
+  if (path.endswith(".x", ".xp")) return 1;
+  if (path.endswith(".c", ".h", ".o", ".a")) return 0;
   FILE *file = fopen(path, "r");
   if (!file) return 0;
   char head[2];

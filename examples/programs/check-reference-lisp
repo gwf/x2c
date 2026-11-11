@@ -203,8 +203,8 @@ static String _repr_bytes(String text) {
 /* Runs `command`, giving it `input` as standard input when set, and returns
    `(status stdout stderr)`, or NULL when it exceeds 15 seconds. */
 static List _run(List command, String input) {
-  Job job = command.job().options({stderr: <capture>});
-  if (input) job.options({input: input});
+  Job job = command.job().options(stderr: <capture>);
+  if (input) job.options(input: input);
   job.start();
   time_t deadline = time(NULL) + 15;
   while (!job.ready()) {
@@ -261,7 +261,7 @@ if (options["build"]) {
     (String source, String output) = build;
     Path program = root.join("examples/programs").join(source);
     %($x2c build --output $output $program).job()
-      .options({dir: root, stdout: <inherit>}).check();
+      .options(dir: root, stdout: <inherit>).check();
   }
 }
 Path init = root.join("etc/init.xlisp");

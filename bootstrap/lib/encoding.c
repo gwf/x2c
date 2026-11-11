@@ -230,7 +230,7 @@ Buffer Buffer_write_code_point(Buffer out, int point){
   return Buffer_write_len(out, bytes, length);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -239,7 +239,7 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String String_from_code_point(int point){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -423,7 +423,7 @@ Block String_hex_decode_bytes(String text){
 Buffer Buffer_printf(Buffer, const char *, ...);
 
 String String_percent_encode(String s){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_4 = out;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
@@ -466,7 +466,7 @@ String String_percent_decode(String text){
   if(! _init_guard_) _file_init_();
   if(! String_truth(text) || ! strchr(text, '%')) return String_new(text);
   String operation = _8;
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_5 = out;
   {
     _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
@@ -532,7 +532,7 @@ static int _next_point(Iter iter, Var * out){
 }
 
 static String _base64(Alphabet a, const unsigned char * bytes, size_t count){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_6 = out;
   {
     _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
@@ -649,7 +649,7 @@ static String _text(Block bytes, String operation, int bits){
 
 static String _hex(const unsigned char * bytes, size_t count){
   static const char digits[] = "0123456789abcdef";
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_7 = out;
   {
     _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={

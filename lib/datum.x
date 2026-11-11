@@ -23,7 +23,7 @@
    decimal and a newline before it, and returns 1, or writes nothing and
    returns 0 for a value the grammar cannot spell. */
 int Buffer.write_datum_frame(Buffer out, Var value) {
-  Buffer body = auto Buffer.new(0);
+  Buffer body = auto Buffer.new();
   if (!body.write_datum(value, 1)) return 0;
   out.write(%"$(body.len())\n$body");
   return 1;

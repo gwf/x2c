@@ -205,7 +205,7 @@ List Regexp.capture_names(Regexp regexp) {
 */
 String Regexp.escape(String literal) {
   if (!literal) return NULL;
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   foreach (char value, literal) {
     if (!(value & 0x80) && !isalnum((unsigned char) value) && value != '_')
       out.write_char('\\');

@@ -126,8 +126,8 @@ static void write_interfaces(Path stage) {
   $(
     stage.join("bin/x2c"), "translate", "--out-dir", ".x2c-interfaces",
     @(sources.list())).job()
-    .options({dir: stage, env: {"X2C_HOME": "."}, stdout: <capture>,
-              stderr: <capture>})
+    .options(dir: stage, env: {"X2C_HOME": "."}, stdout: <capture>,
+              stderr: <capture>)
     .check();
   foreach (Path source, sources) {
     String name = %"$(source.stem()).xi";
@@ -157,9 +157,9 @@ static void copy_examples(Path destination) {
 static void copy_shipped_commands(Path destination) {
   Path libexec = destination.join("libexec/x2c");
   libexec.make_dirs();
-  Buffer shipped = auto Buffer.new(0);
+  Buffer shipped = auto Buffer.new();
   foreach (String row,
-           root.join("commands/manifest.txt").read_text().split_lines(0)) {
+           root.join("commands/manifest.txt").read_text().split_lines()) {
     if (!row) continue;
     List fields = row.split("|");
     if (fields.cadr().str() != "shipped") continue;
@@ -172,7 +172,7 @@ static void copy_shipped_commands(Path destination) {
 }
 
 static String write_manifest(Path destination, String name, String kind) {
-  Buffer rows = auto Buffer.new(0);
+  Buffer rows = auto Buffer.new();
   foreach (Path path, destination.walk()) {
     if (!path.is_file()) continue;
     String relative = path.remove_prefix(%"$destination/");
@@ -191,7 +191,7 @@ static Map owned_files(Path prefix) {
   Map files = {};
   Path manifest = prefix.join(INSTALL_MANIFEST);
   if (!manifest.exists()) return files;
-  List lines = manifest.read_text().split_lines(0);
+  List lines = manifest.read_text().split_lines();
   if (!lines || !lines.car().str().startswith("x2c-native-v1 "))
     fail(%"unrecognized installation inventory: $manifest");
   foreach (String line, lines.cdr()) {

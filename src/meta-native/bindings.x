@@ -287,8 +287,8 @@ static void _meta_native_warn_duplicate(
   Compiler c, Token site, NativeBinding &n, List suppliers) {
   c.report_warning(
     <native>, "more than one native module defines this function",
-    site, %("name: $(n.name)" "supplied by: $(suppliers.car())"
-            "also defined by: $(", ".join(suppliers.cdr()))"));
+    site, @(%("name: $(n.name)" "supplied by: $(suppliers.car())"
+            "also defined by: $(", ".join(suppliers.cdr()))")));
 }
 
 /* The native type a signature names: each parameter, reference target,

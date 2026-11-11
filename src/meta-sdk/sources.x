@@ -6,10 +6,10 @@
 static macro Stmt $fail.meta_sdk_source_capture(Expr $value) =>
   MetaContext.reject(
     "Code.source_text requires complete captured syntax",
-    active.has_bindings ? NULL : %("value: $($value.repr())"));
+    @(active.has_bindings ? NULL : %("value: $($value.repr())")));
 
 static alias fail_embed_path_empty to MetaContext.reject(
-  "x2c_embed_text requires a non-empty path", NULL);
+  "x2c_embed_text requires a non-empty path");
 
 static macro Stmt $fail.meta_sdk_embed_literal(Expr $requested) =>
   _reject_value(
@@ -139,7 +139,7 @@ static File _open_embed_file(Compiler c, String path) {
 }
 
 static void _embed_reject(Compiler c, String message, String path) {
-  MetaContext.reject(message, $note.meta_sdk_path_notes(c, path));
+  MetaContext.reject(message, @($note.meta_sdk_path_notes(c, path)));
 }
 
 static int _literal_string(Var syntax, String &value) {

@@ -126,13 +126,13 @@ meta static List _lambda_kept_items(
   foreach (List item in items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
+      if (run.len()) out.push(Code.lowered(%(seq @(run.list()))));
       run.truncate(0);
-      out.push(item in declaring ? item : Code.lowered(item, NULL));
+      out.push(item in declaring ? item : Code.lowered(item));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
+  if (run.len()) out.push(Code.lowered(%(seq @(run.list()))));
   return out.list_free();
 }
 
@@ -165,10 +165,10 @@ meta static Code _lambda_declare_cells(List node, Map cells) {
         }
         celled |= !!cell;
         items.push(
-          cell ? cell : Code.lowered(%(declare $base (bindings $item)), NULL));
+          cell ? cell : Code.lowered(%(declare $base (bindings $item))));
       }
     case %(dstrdecl *): {
-      items.push(Code.lowered(node, NULL));
+      items.push(Code.lowered(node));
       foreach (List binding in _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
@@ -180,7 +180,7 @@ meta static Code _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       if (declaration ~= %(seq *initial))
         return %(block @initial
-                 $(Code.lowered(%(for () $test $next $body), NULL)));
+                 $(Code.lowered(%(for () $test $next $body))));
     }
   }
   return celled ? %(seq @(items.list_free())) : node;
@@ -308,7 +308,7 @@ meta static List _lambda_closure_params(
    bound already, so it is not bound again. */
 meta static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = Code.lowered(%(seq @(_lambda_items(body))), NULL);
+  List lowered = Code.lowered(%(seq @(_lambda_items(body))));
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }
@@ -322,7 +322,7 @@ meta Code lambda_lift(Code node) {
     List name = x2c_binding_fresh("lambda");
     x2c_place(
       %(unit-support), _lambda_function(name, _lambda_params(params), body));
-    return Code.bound(%(expr $type (ident $name)), NULL);
+    return Code.bound(%(expr $type (ident $name)));
   }
   return node;
 }
@@ -353,8 +353,7 @@ meta static Code _lambda_record(List context, List types) {
   }
   return Code.bound(
     %(typedef (static struct $context (fields @(fields.list_free())))
-       (bindings (bind $context ()))),
-    NULL);
+       (bindings (bind $context ()))));
 }
 
 /* The adapter `adapter` of the Func `closure` with arguments `argv`, as
@@ -409,8 +408,7 @@ meta static Code _lambda_adapter(
        (bind $adapter
          ((fnmod (params (param ("Func") (bind $closure ()))
                          (param (const "FuncArg") (bind $argv (*)))))))
-       (block @(items.list_free()))),
-    NULL);
+       (block @(items.list_free()))));
 }
 
 /* The bridge `bridge` through which a public inline function makes the
@@ -512,7 +510,7 @@ meta Code lambda_closure(Code node) {
       x2c_place(%(unit-support), function);
       x2c_place(%(unit-support), adapter_function);
       Code value = _lambda_value(adapter, context, adapted.car(), captures);
-      return Code.bound(value, NULL);
+      return Code.bound(value);
     }
   return node;
 }

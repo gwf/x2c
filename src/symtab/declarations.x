@@ -158,7 +158,7 @@ static List _declare(Sym s, List context, List key, List ast, List declared) {
   Type prior = type.is_function() ? s.get(ctxkey) : NULL;
   if (prior.is_function() && !s.same_rest_convention(type, prior))
     s.c.report_error(
-      <type>, "conflicting rest calling convention", NULL, NULL);
+      <type>, "conflicting rest calling convention", NULL);
   if ((int) s.scopes.len() == s.base_scopes && !context)
     _track_static(s, (List) ctxkey, ast);
   List binding = NULL;

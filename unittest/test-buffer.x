@@ -5,6 +5,26 @@
 #include <limits.h>
 #include <wchar.h>
 
+static void buffer_optional_padding(void) {
+  $test.scoped();
+  Buffer plain = Buffer.new();
+  plain.pad();
+  EXPECT_INT_EQ(plain.len(), 0);
+  plain.free();
+  List padding = %(3);
+  Buffer padded = Buffer.new(@padding);
+  padded.pad();
+  EXPECT_STR_EQ(padded.str_free(), "   ");
+  Buffer (*create)(List @) = Buffer.new;
+  Buffer indirect = create(2);
+  indirect.pad();
+  EXPECT_STR_EQ(indirect.str_free(), "  ");
+  int caught = 0;
+  try Buffer.new(1, 2);
+  catch %(bad-arity (operation "Buffer.new") *): caught++;
+  EXPECT_INT_EQ(caught, 1);
+}
+
 static void buffer_null_mutations_raise(void) {
   $test.scoped();
   Buffer buf = NULL;
@@ -53,7 +73,7 @@ static void buffer_bulk_writes_and_exact_string(void) {
 
 static void buffer_multiline_state(void) {
   $test.scoped();
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   buf.write("ab\n  cd");
   EXPECT_INT_EQ(buf.pos, 4);
   EXPECT_INT_EQ(buf._indent, 2);
@@ -68,7 +88,7 @@ static void buffer_multiline_state(void) {
 
 static void buffer_self_alias_growth_preserves_line_state(void) {
   $test.scoped();
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   buf.write("ab\n  cd");
   size_t capacity = buf.content.capacity();
   const char *tail = buf.content.bytes + 3;
@@ -82,7 +102,7 @@ static void buffer_self_alias_growth_preserves_line_state(void) {
 
 static void buffer_unwrite_crosses_lines(void) {
   $test.scoped();
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   buf.write("ab").newline().write("cd");
   EXPECT_INT_EQ(buf.pos, 2);
   buf.unwrite(4);
@@ -98,7 +118,7 @@ static void buffer_unwrite_crosses_lines(void) {
 
 static void buffer_eager_indents_and_clear_reuse(void) {
   $test.scoped();
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   buf.reserve(64);
   size_t capacity = buf.content.capacity();
   buf.pop();
@@ -119,7 +139,7 @@ static void buffer_eager_indents_and_clear_reuse(void) {
 
 static void buffer_status_get(void) {
   $test.scoped();
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   buf.write("abc");
   char out = 'z';
   EXPECT_TRUE(buf.try_get(0, out));
@@ -154,7 +174,7 @@ static void buffer_printf_short_and_long(void) {
 
 static void buffer_reports_contract_failures(void) {
   $test.scoped();
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   buf.write("kept");
   int caught = 0;
   try buf.write(NULL);
@@ -177,7 +197,7 @@ static void buffer_reports_contract_failures(void) {
 
 static void buffer_formatting_failure_transfers_and_keeps_text(void) {
   $test.scoped();
-  Buffer buf = Buffer.new(0);
+  Buffer buf = Buffer.new();
   buf.write("kept");
   // An unpaired surrogate has no multibyte encoding, so `%ls` cannot format.
   wchar_t invalid[2] = { (wchar_t) 0xD800, 0 };
@@ -195,12 +215,12 @@ static void buffer_formatting_failure_transfers_and_keeps_text(void) {
 static void buffer_str_free_consumes_the_receiver(void) {
   $test.scoped();
   ScopeStats before = Scope.stats();
-  Buffer text = Buffer.new(0);
+  Buffer text = Buffer.new();
   text.write("consumed");
   EXPECT_STR_EQ(text.str_free(), "consumed");
   // An empty Buffer converts to NULL and is released just the same, so the
   // live allocation count returns to where it started either way.
-  Buffer empty = Buffer.new(0);
+  Buffer empty = Buffer.new();
   EXPECT_NULL(empty.str_free());
   EXPECT_INT_EQ(Scope.stats().live_allocations, before.live_allocations);
 }
@@ -221,6 +241,7 @@ static void buffer_str_rejects_a_length_a_string_cannot_hold(void) {
 }
 
 void buffer_suite(void) {
+  $test.run(buffer_optional_padding);
   $test.run(buffer_null_mutations_raise);
   $test.run(buffer_formatting_failure_transfers_and_keeps_text);
   $test.run(buffer_str_free_consumes_the_receiver);

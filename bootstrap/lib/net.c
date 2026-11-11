@@ -242,7 +242,7 @@ Buffer Listener_write_str(Listener value, Buffer out){
   return Buffer_printf(out, "<Listener: 0x%012lX>", (long) value);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -252,7 +252,7 @@ void x2c_cleanup_leave(X2CCleanup *);
 
 String Listener_str(Listener value){
   if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -285,7 +285,7 @@ Buffer Listener_write_repr(Listener listener, Buffer out);
 
 String Listener_repr(Listener value){
   if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
@@ -352,7 +352,7 @@ Buffer Socket_write_str(Socket value, Buffer out){
 
 String Socket_str(Socket value){
   if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_2 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_2 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -439,7 +439,7 @@ Buffer Socket_write_repr(Socket value, Buffer out){
 
 String Socket_repr(Socket value){
   if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_3 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_3 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
       0

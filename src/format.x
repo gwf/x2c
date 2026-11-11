@@ -34,7 +34,7 @@ static typedef struct Pretty {
 char *Compiler.code_pretty_string(
   Compiler c, Array code, String output_file) {
   Pretty p = {
-    .c = c, .buff = Buffer.new(0), .output_file = output_file,
+    .c = c, .buff = Buffer.new(), .output_file = output_file,
     .output_line = 1
   };
   int count = code.len();
@@ -69,7 +69,7 @@ char *Compiler.code_pretty_string(
     them, for code that later passes carry as written.
 */
 String Compiler.code_text(Compiler c, Array tokens) {
-  Buffer text = Buffer.new(0);
+  Buffer text = Buffer.new();
   String prev = NULL;
   foreach (Var item in tokens) {
     String token = item.str();

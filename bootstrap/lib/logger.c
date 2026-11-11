@@ -1363,7 +1363,7 @@ static void _add_scratch(Logger logger, LogTextSink context){
         x2c_cleanup_push(& _x2c_gensym_defer_record_24);
         {
           {
-            Buffer added = Buffer_new(0);
+            Buffer added = Buffer_new(NULL);
             {
               _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
                 0
