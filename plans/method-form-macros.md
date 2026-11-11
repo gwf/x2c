@@ -130,12 +130,23 @@ Method forms work in templates too. A receiver that is a hole has its type
 only where the template expands, so the form is recognized when the
 template's syntax is bound there; a receiver whose type the template
 already knows, such as a typed local, is recognized when the template is
-parsed. The rule is enforced against the active expansions: while
-`$T.NAME` is on `c.macro_stack`, at any depth, `receiver.NAME(...)` is the
-method. Mutual use therefore terminates without a recursion limit: inside
-`$Pen.dot` expanding `$Pen.dash`, `pen.dot(...)` is the method. Verified:
-`pen.dot(1)` and `pen.dash(1)` give `2000 3000` in
-`macro-method-form-templates`. Decision 4 holds in templates as in source.
+parsed.
+
+The self-call rule is lexical: only a `receiver.NAME(...)` call written in
+`$T.NAME`'s own template is the method. It is decided where the template is
+defined, because the definition being parsed is known then. Its name is
+recorded in the template's hole map under `(definition)`. A call whose
+member matches it becomes `(expr () (method-call DEFINITION CALL))`, and a
+statement form whose member matches it is not deferred. Where the template
+expands, the marked call resolves as the method of `DEFINITION`. A target or
+argument passed into `$T.NAME`, and other macros' templates expanded within
+it, still get method forms, so `$ui.row (...) { $ui.row (...) $body }`
+nests. Verified in `macro-method-form-templates`. An earlier version of
+this change checked the whole `c.macro_stack` instead, and that rejected
+exactly this nesting. Two macros whose templates use each other's method
+forms recurse until the ordinary limit reports "macro expansion depth
+exceeds 64". Verified in `macro-method-form-mutual`. Decision 4 holds in
+templates as in source.
 
 ### Entry rows forwarded into a call
 
@@ -189,13 +200,16 @@ The x2cui package changes are not part of it.
 | `src/symtab/namespaces.x` | `Compiler.package_source_name` |
 | `src/protocol/registry.x` | `reverse_converter_spelling` calls `package_source_name` |
 
-The template and Entry changes add 138 lines and remove 27 in five files:
+The template and Entry changes add 180 lines and remove 28 in eight files:
 
 | File | Change |
 | --- | --- |
-| `src/macros/invocations/expressions.x` | `bind_method_macro`, `bind_method_decorator`, the deferred statement form, the stack check, and the capture rows of a template's call arguments |
-| `src/expressions/calls.x` | `_method` offers a call in an expansion to `bind_method_macro`; a forwarded Entry row becomes a `key: value` argument |
-| `src/expressions/syntax.x` | `Compiler.parse_call`; an Entry hole in a call's arguments parses in the Map-entry role |
+| `src/macros/invocations/expressions.x` | `bind_method_macro`, `bind_method_decorator`, `mark_method_call`, the deferred statement form, and the capture rows of a template's call arguments |
+| `src/expressions/calls.x` | `_method` offers a call in an expansion to `bind_method_macro`, with the macro whose own template wrote it; a forwarded Entry row becomes a `key: value` argument |
+| `src/expressions/resolution.x` | `(method-call DEFINITION CALL)` resolves `CALL` as a method of that macro |
+| `src/expressions/expressions.x` | `Resolve` carries that macro |
+| `src/expressions/syntax.x` | `Compiler.parse_call`; a template's call in its own macro's name is marked; an Entry hole in a call's arguments parses in the Map-entry role |
+| `src/macros/definitions/reading.x` | A template's hole map records its definition's name |
 | `src/parse/binding.x` | The `(method-decorator CALL TARGET)` statement |
 | `src/macros/templates.x` | `_template_arguments` becomes a module operation |
 
@@ -323,8 +337,8 @@ The prototype's compiler shortcuts are settled:
   Compatibility. `_expression_statement` sets it for every expression
   statement, including one that begins with `(`.
 - **The self-call check.** The prototype skipped a definition already on
-  `c.macro_stack`. Templates now recognize method forms, so the check is
-  restored and owns decision 3.
+  `c.macro_stack`. That check is replaced by the lexical mark described
+  under the self-call rule, which owns decision 3.
 - **Method forms in templates** and **Entry forwarding** are implemented.
 - **Fixtures and book** (limit 10) are written.
 
@@ -362,8 +376,8 @@ What remains:
   `macro-method-form-in-expression`, and, for package source names,
   `package-method-form` and `import-method-form` over the toy package
   `unittest/compiler-fixtures/packages/panels`. Templates and forwarding:
-  `macro-method-form-templates`, `macro-entry-forwarding`, and a hole
-  receiver in `import-method-form`.
+  `macro-method-form-templates`, `macro-method-form-mutual`,
+  `macro-entry-forwarding`, and a hole receiver in `import-method-form`.
 - The x2cui to-do `--shot` image stays byte-identical to the one drawn with
   `$cui.row`; it is, for every prototype commit.
 - `make stage-3`, `make verify-fixtures`, and `precommit`.
@@ -378,8 +392,10 @@ What remains:
   `_decorate`, expansion, `Token.after_group`, and the package-prefix owner
   are reused. New mechanism: two `Compiler` fields, the `<method-dec>`
   signal and its one catch, the start token passed along the postfix
-  tail, and the `(method-decorator CALL TARGET)` statement that defers a
-  template's statement form to binding. The forward scan, trial parse, and existence check of the first
+  tail, the `(method-decorator CALL TARGET)` statement that defers a
+  template's statement form to binding, and the `(method-call DEFINITION
+  CALL)` mark that carries the self-call decision from the definition to
+  its expansion. The forward scan, trial parse, and existence check of the first
   design are deleted, and so are the prototype's group scanner, its `__`
   split, its `postfix_start` field, and its self-call check.
 - **Idiomatic x2c.** Both forms are new invocation positions for existing
@@ -392,5 +408,7 @@ What remains:
   where its template expands reports too few or too many arguments as a
   `$T.NAME(...)` call does. A `$T.NAME` with no parameters has no place
   for the receiver, so `receiver.NAME()` reports "macro invocation has too
-  many arguments" instead of dropping the receiver unevaluated. The
-  fixtures listed above protect deliberate public behavior.
+  many arguments" instead of dropping the receiver unevaluated. Mutual
+  method-form recursion is reported by the existing expansion depth limit;
+  `macro-method-form-mutual` records that. The fixtures listed above
+  protect deliberate public behavior.

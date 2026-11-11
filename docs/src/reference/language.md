@@ -2186,10 +2186,14 @@ arguments of a form recognized this way are read as a call's arguments:
 expressions, `key: value` entries, and splices, with a sequence hole taking
 the rest.
 
-While `$T.NAME` expands, including inside the macros its expansion invokes,
-`RECEIVER.NAME(...)` is the method `T.NAME`. A macro can therefore wrap the
-method it shadows. Two macros that use each other's method forms stop
-there: inside `$T.a` expanding `$T.b`, `RECEIVER.a(...)` is the method.
+A `RECEIVER.NAME(...)` call written in `$T.NAME`'s own template is the
+method `T.NAME`, so a macro can wrap the method it shadows. The rule
+follows where the call is written, not what is expanding. A target or
+argument passed into `$T.NAME`, and the template of any other macro that
+its expansion invokes, still use `$T.NAME`: a template may nest
+`$ui.row (...) { $ui.row (...) $body }`. Two macros whose templates use
+each other's method forms therefore recurse until the macro expansion
+depth limit reports it.
 
 ```x2c
 ~#include <stdio.h>
