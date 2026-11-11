@@ -63,7 +63,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 char * Compiler_code_pretty_string(Compiler c, Array code, String output_file){
   if(! _init_guard_) _file_init_();
   Pretty p ={
-    .c = c, .buff = Buffer_new(0), .output_file = output_file, .output_line = 1
+    .c = c, .buff = Buffer_new(NULL), .output_file = output_file, .output_line = 1
   }
   ;
   int count = Array_len(code);
@@ -93,7 +93,7 @@ char * Compiler_code_pretty_string(Compiler c, Array code, String output_file){
 }
 
 String Compiler_code_text(Compiler c, Array tokens){
-  Buffer text = Buffer_new(0);
+  Buffer text = Buffer_new(NULL);
   String prev = NULL;
   {
     Var item;
@@ -126,7 +126,7 @@ static void _source_marker(Pretty * p, Var value){
   if(! String_truth(file)) file = _0;
   int line = Var_int(Var_convert_at(List_truth(location) ? List_assoc(location, Symbol_var(805770)) : int_var((* p).output_line + 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/format.x",.function = "_source_marker",.line = 94}; & _x2c_gensym_error_site_1; })));
   (* p).source_line = List_truth(location) ? line : 0;
-  String escaped = String_replace(String_escape(file), _1, _2);
+  String escaped = String_replace(String_escape(file), _1, _2, NULL);
   Buffer_write((* p).buff, String_join(NULL, cons(String_var(_3), cons(String_var(int_str(line)), cons(String_var(_4), cons(String_var(escaped), cons(String_var(_5), NULL)))))));
   _write_newline((* p).buff);
   if((* p).indent > 0) _write_indent((* p).buff, (* p).indent);

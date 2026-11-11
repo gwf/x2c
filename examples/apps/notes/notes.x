@@ -54,7 +54,7 @@ static int run(Map options) {
     "));
   Router routes = router(app, options["public"]);
   HttpServer server = HttpServer.new(routes,
-    {host: options["host"], port: port, workers: workers});
+    host: options["host"], port: port, workers: workers);
   defer server.close();
   signal(SIGINT, stop);
   signal(SIGTERM, stop);

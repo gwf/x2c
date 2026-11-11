@@ -25,10 +25,10 @@ Code Code.convert(Code value, Type target) =>
 Code Code.promoted(Code value) => _ask("Code_promoted", $(value));
 Code Code.call_in_order(Code member, List arguments, Type type) =>
   _ask("Code_call_in_order", $(member, arguments, type));
-Code Code.lowered(Code code, List effects) =>
-  _ask("Code_lowered", $(code, effects));
-Code Code.bound(Code code, List effects) =>
-  _ask("Code_bound", $(code, effects));
+Code Code.lowered(Code code, List @effects) =>
+  _ask("Code_lowered", $(code, @effects));
+Code Code.bound(Code code, List @effects) =>
+  _ask("Code_bound", $(code, @effects));
 List Code.func_parameters(Code parameters, Code fn, Code argv) =>
   _ask("Code_func_parameters", $(parameters, fn, argv));
 Code Code.register_rewrite(Code function, List pattern, List holes) =>
@@ -69,8 +69,8 @@ int x2c_invocation_column(void) => _ask("x2c_invocation_column", $());
 Code x2c_enclosing(Symbol what) => _ask("x2c_enclosing", $(what));
 void x2c_place(List where, Code code) { _ask("x2c_place", $(where, code)); }
 void x2c_diagnostic_error_at(
-  Var node, Symbol category, String message, List notes) {
-  _ask("x2c_diagnostic_error_at", $(node, category, message, notes));
+  Var node, Symbol category, String message, List @notes) {
+  _ask("x2c_diagnostic_error_at", $(node, category, message, @notes));
 }
 Map x2c_meta_definition_hashes(void) =>
   _ask("x2c_meta_definition_hashes", $());

@@ -433,12 +433,12 @@ static int _search_link(List arguments){
       argument = Var_as_string(_x2c_gensym_macro_cursor_output_1);
       {
         String part;
-        List _x2c_gensym_macro_object_0 = String_split(argument, _1);
+        List _x2c_gensym_macro_object_0 = String_split(argument, _1, NULL);
         List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
         Var _x2c_gensym_macro_cursor_output_0;
         while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
           part = Var_as_string(_x2c_gensym_macro_cursor_output_0);
-          if(String_startswith(part, _2)) return 1;
+          if(String_startswith(part, cons(String_var(_2), NULL))) return 1;
         }
 
       }
@@ -568,7 +568,7 @@ Path Path_absolute(Path);
 static int _support_unit(List inputs){
   if(List_len(inputs) != 1) return 0;
   String root = Compiler_cache_root();
-  return String_truth(root) && String_startswith(Path_absolute(Var_as_string(List_car(inputs))), String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_4), NULL))));
+  return String_truth(root) && String_startswith(Path_absolute(Var_as_string(List_car(inputs))), cons(String_var(String_join(NULL, cons(String_var(Path_absolute(root)), cons(String_var(_4), NULL)))), NULL));
 }
 
 static MetaHelper _use(Helper * h, List manifest){
@@ -728,7 +728,7 @@ String SourceView_resolve_include(SourceView, List, String, String, int);
 static int _include(Scan * s, String directive, String directory){
   int angle = 0;
   String target = Compiler_preproc_include_target(directive, &(angle));
-  if(! String_truth(target) || !(String_endswith(target, _8) || String_endswith(target, _9))) return 0;
+  if(! String_truth(target) || !(String_endswith(target, cons(String_var(_8), cons(String_var(_9), NULL))))) return 0;
   String file = SourceView_resolve_include((* s).request -> sources, (* s).request -> include_dirs, directory, target, angle);
   if(! String_truth(file)) return 0;
   String path = Path_absolute(file);
@@ -857,7 +857,7 @@ static int _compiler_owns(String path){
     Var _x2c_gensym_macro_cursor_output_8;
     while(List_try_next(_x2c_gensym_macro_object_13, &(_x2c_gensym_macro_cursor_13), &(_x2c_gensym_macro_cursor_output_8))){
       directory = Var_as_string(_x2c_gensym_macro_cursor_output_8);
-      if(String_startswith(path, String_join(NULL, cons(String_var(root), cons(String_var(_20), cons(String_var(directory), cons(String_var(_20), NULL))))))) return 1;
+      if(String_startswith(path, cons(String_var(String_join(NULL, cons(String_var(root), cons(String_var(_20), cons(String_var(directory), cons(String_var(_20), NULL)))))), NULL))) return 1;
     }
 
   }
@@ -949,7 +949,7 @@ static List _host_args(List cc_args){
     if(String_equal(arg, _27) || String_equal(arg, _28) || String_equal(arg, _29) || String_equal(arg, _30) || String_equal(arg, _31)){
       if(List_truth(List_cdr(rest))) rest = List_cdr(rest);
     }
-    else if(! String_startswith(arg, _32) && ! String_startswith(arg, _33) && ! String_startswith(arg, _34)) Array_push(kept, String_var(arg));
+    else if(! String_startswith(arg, cons(String_var(_32), NULL)) && ! String_startswith(arg, cons(String_var(_33), NULL)) && ! String_startswith(arg, cons(String_var(_34), NULL))) Array_push(kept, String_var(arg));
   }
   return Array_list(kept);
 }
@@ -1344,7 +1344,7 @@ static String _temporary(String path){
 }
 
 static String _tables(Array built, int count){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   Buffer_write(out, "#include \"x2c.h\"\n");
   {
     int index;
@@ -1403,7 +1403,7 @@ static List _write_manifest(Helper * h, String failure){
     Var _x2c_gensym_literal_part_48 = List_var(cons(_91, cons(List_var(Array_list((* h).groups)), NULL)));  Var _x2c_gensym_literal_part_49 = List_var(cons(_92, cons(List_var(Array_list((* h).failures)), NULL)));  Var _x2c_gensym_literal_part_50 = List_var(cons(_93, cons(String_truth(failure) ? String_var(failure) : String_var(_64), NULL)));  Var _x2c_gensym_literal_part_51 = List_var(cons(_94, cons(List_var(_digests((* h).deps)), NULL)));  Var _x2c_gensym_literal_part_52 = List_var(cons(_95, cons(int_var(!(* h).uncovered), NULL)));  cons(_x2c_gensym_literal_part_48, cons(_x2c_gensym_literal_part_49, cons(_x2c_gensym_literal_part_50, cons(_x2c_gensym_literal_part_51, cons(_x2c_gensym_literal_part_52, NULL)))));
   }
   );
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
@@ -1540,7 +1540,7 @@ static List _current(String directory){
 int SourceView_exists(SourceView, String);
 
 static String _digest(String path){
-  if(String_startswith(path, _97)) path = String_getslice(path, 4, (-2147483647 - 1), 1);
+  if(String_startswith(path, cons(String_var(_97), NULL))) path = String_getslice(path, 4, (-2147483647 - 1), 1);
   if(! SourceView_exists(NULL, path)) return _98;
   File input = fopen(path, "rb");
   {

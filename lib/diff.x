@@ -45,7 +45,7 @@ static typedef struct Hunk {
 meta native String Diff.unified(
   String old, String new, String old_name, String new_name) {
   Array edits = auto Diff.lines(old, new);
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   int count = edits.len(), at = 0, old_line = 0, new_line = 0;
   while (at < count) {
     if (_kind(edits, at) == <same>) {
@@ -73,8 +73,8 @@ meta native String Diff.unified(
     by one run of insertions.
 */
 meta native List Diff.lines(String old, String new) {
-  Array old_lines = auto old.split_lines(0);
-  Array new_lines = auto new.split_lines(0);
+  Array old_lines = auto old.split_lines();
+  Array new_lines = auto new.split_lines();
   Array edits = auto [];
   Script s = {old_lines, new_lines, edits};
   _trim(s);

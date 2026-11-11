@@ -14,7 +14,7 @@ Prefer:
 // The artifact may be absent, but a present directory is not a readable
 // source file and must fail before its declarations are cached.
 if (!_includable_file(path))
-  c.report_error(<input>, "unreadable include", token, %($path));
+  c.report_error(<input>, "unreadable include", token, path);
 ```
 
 Avoid:
@@ -23,7 +23,7 @@ Avoid:
 // Check if the path is a regular file.
 if (!_regular_file(path))
   // Report an error.
-  c.report_error(<input>, "unreadable include", token, %($path));
+  c.report_error(<input>, "unreadable include", token, path);
 ```
 
 ## PR-4 - Trust established facts
@@ -145,26 +145,24 @@ Example:
 ```x2c
 c.report_error(
   <protocol>, message, declaration_token,
-  %("participant:" $participant "member:" $member));
+  "participant:", participant, "member:", member);
 ```
 
 Example:
 
 ```x2c
 c.report_error(<protocol>, message, declaration_token,
-               %("participant:" $participant
-                 "member:" $member));
+               "participant:", participant,
+               "member:", member);
 ```
 
 Example:
 
 ```x2c
 c.report_error(
-  <protocol>, message,
-  %(
-    "participant:" $participant
-    "member:" $member
-  )
+  <protocol>, message, declaration_token,
+  "participant:", participant,
+  "member:", member
 );
 ```
 

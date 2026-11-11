@@ -120,7 +120,7 @@ Buffer SourceView_write_str(SourceView value, Buffer out){
 }
 
 String SourceView_str(SourceView value){
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -187,7 +187,7 @@ Buffer SourceView_write_repr(SourceView value, Buffer out){
 }
 
 String SourceView_repr(SourceView value){
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0

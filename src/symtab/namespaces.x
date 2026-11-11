@@ -109,6 +109,18 @@ String Compiler.package_spelling(Compiler c, String name) {
   return name.startswith(prefix) ? name : %"$prefix$name";
 }
 
+/** Returns the source name of a package-prefixed `spelling`, as `Ui` for
+    `x2cui__Ui`, or `spelling` when no package of this unit owns it. Only a
+    known package splits, because a foreign header may spell `__` in a name.
+*/
+String Compiler.package_source_name(Compiler c, String spelling) {
+  int split = spelling.find("__");
+  if (split <= 0) return spelling;
+  String package = spelling[:split];
+  return package == c.package || package in c.package_roots
+    ? spelling[split + 2:] : spelling;
+}
+
 /** Registers one local package alias.
 
     Shallow collection and full parsing both see an import, so repeating the

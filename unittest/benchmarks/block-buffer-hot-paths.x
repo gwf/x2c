@@ -30,7 +30,7 @@ int main(void) {
   }
   result("block-append-one", now_ns() - start, count);
 
-  Buffer write = Buffer.new(0);
+  Buffer write = Buffer.new();
   write.write_len(&value, 1);
   start = now_ns();
   for (int i = 0; i < count; i++) {
@@ -42,7 +42,7 @@ int main(void) {
   }
   result("buffer-write-one", now_ns() - start, count);
 
-  Buffer indent = Buffer.new(0);
+  Buffer indent = Buffer.new();
   indent.pos = 80;
   indent.push();
   indent.pos = 0;
@@ -57,7 +57,7 @@ int main(void) {
   }
   result("buffer-indent-80", now_ns() - start, count);
 
-  Buffer serialize = Buffer.new(0);
+  Buffer serialize = Buffer.new();
   int serial_count = count / 10;
   serialize.write("alpha: beta, gamma: delta");
   start = now_ns();

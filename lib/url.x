@@ -78,7 +78,7 @@ Url Url.parse(String text) {
     formats as `file:///tmp`.
 */
 String Url.str(Url url) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   if (url.scheme) out.write(url.scheme).write_char(':');
   int authority = url.host || url.userinfo || url.port ||
                   (url.scheme && url.path.startswith("/"));
@@ -119,7 +119,7 @@ String Url.format_query(Map fields) {
   Array names = auto [];
   foreach (Var name in fields.keys()) names.push(name);
   names.sort_by(%!(name) => name.str());
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   foreach (Var name in names) {
     if (out.len()) out.write_char('&');
     out.write(%"$(_form_encode(name))=$(_form_encode(fields[name]))");

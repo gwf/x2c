@@ -805,7 +805,7 @@ characters.
 
 ```x2c
 String line = "  name = x2c  ";
-String trimmed = line.strip(NULL);
+String trimmed = line.strip();
 List halves = trimmed.partition(" = ");
 printf("[%s] -> %s\n", trimmed, halves.repr());
 printf("upper=%s find=%d startswith=%d\n",
@@ -817,10 +817,20 @@ printf("upper=%s find=%d startswith=%d\n",
 upper=NAME = X2C find=5 startswith=1
 ```
 
-`strip`, `lstrip`, and `rstrip` take a C string of characters to remove, or
-`NULL` for the default whitespace set. `partition` returns a three-element
+`strip`, `lstrip`, and `rstrip` use whitespace when called with no arguments.
+Supply a String of characters to remove for a different set; explicit `NULL`
+also selects whitespace. An empty String selects no characters and leaves the
+input unchanged, including when the argument is a typed `String` with value
+`NULL`. This differs from the literal `NULL` argument.
+`partition` returns a three-element
 `List` of before/separator/after. `split` and `split_lines` return `List`s of
-`String`s. Use `words()`, `lines()`, or `splits(sep)` when the fields should
+`String`s. `split_lines()` removes line endings; `split_lines(1)` keeps them.
+`split(sep, limit)` and `replace(old, replacement, limit)` optionally limit
+the number of changes; an omitted or negative limit means all occurrences.
+`startswith` and `endswith` accept any number of alternatives and return true
+when one matches, or false when none were supplied. A List of alternatives
+can be spliced, as in `name.endswith(@suffixes)`.
+Use `words()`, `lines()`, or `splits(sep)` when the fields should
 stream directly through `foreach` instead. `String.join` is the inverse of
 eager `split`, with the separator as the receiver:
 
@@ -905,9 +915,11 @@ canonical `String`, use the copy-producing
 
 For anything longer, use `Buffer`. It grows, it tracks indentation, and a
 `String` destination calls `Buffer.str` for the finished canonical `String`.
+`Buffer.new()` defaults to zero padding; `Buffer.new(4)` makes `pad()` write
+four spaces.
 
 ```x2c
-Buffer out = Buffer.new(0);
+Buffer out = Buffer.new();
 foreach(int item in [1, 2, 3]) {
   out.write("item ");
   out.printf("%d", item);

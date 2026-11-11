@@ -366,7 +366,7 @@ leading indentation of the current line for `push`, `pop`, `indent`, and
 ```x2c
 String text;
 auto {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.write("case ").printf("%d", 7).write(":").newline_indent();
   text = out;
 }
@@ -477,7 +477,7 @@ static Entry adopt(Scope *keep) {
 
 static String label(void) {
   auto {
-    Buffer out = Buffer.new(0);
+    Buffer out = Buffer.new();
     out.write("ready");
     return out;
   }

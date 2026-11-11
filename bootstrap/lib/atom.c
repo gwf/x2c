@@ -159,7 +159,7 @@ static int _escape_byte(String spelling, int index){
 }
 
 static String _repr(Var value){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   Atom_write_repr(value, out);
   return Buffer_str_free(out);
 }

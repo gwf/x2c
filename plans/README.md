@@ -27,6 +27,16 @@ the package over the CUI user-interface library. Gary accepted its
 decisions on 2026-11-10. The package is implemented on macOS and in a
 browser; its Linux profile is written and has not been built.
 
+## Method-form macros
+
+[Method-form macros](method-form-macros.md) gives decorators and Expression
+macros method forms, as `ui.row (...) { }` and `ui.button(...)`. Gary
+accepted its decisions on 2026-11-11. The compiler semantics, decisions 1 to
+4, method forms inside templates, forwarding of `Entry` rows into calls,
+`Decl` holes in `foreach` headers, computed macro names in templates, and
+sequence holes before final `Entry` rows are implemented with fixtures and
+a book section; the x2cui option lowering, decision 5, is package work.
+
 ## Current work
 
 Checked against `a7a01924c` on 2026-11-02. These are the remaining items from

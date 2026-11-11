@@ -15,7 +15,7 @@
 /* Returns `text` with the sorted `(START END TEXT)` `edits` applied. An
    edit that overlaps an earlier one is dropped, for a later run. */
 static String _apply(String text, List edits):
-  Buffer out = auto Buffer.new(0)
+  Buffer out = auto Buffer.new()
   int cursor = 0
   foreach List edit in edits:
     Var (start, end, replacement) = edit
@@ -32,7 +32,7 @@ static String _generated(List translate, Path path, Path work):
   Path.remove_tree(work)
   Path.make_dirs(work)
   List command = translate.append($("--out-dir", work, path))
-  if command.job().options({stderr: <capture>}).status(): return NULL
+  if command.job().options(stderr: <capture>).status(): return NULL
   String stem = path.stem()
   return work.join(%"$stem.c").read_text() + work.join(%"$stem.h").read_text()
 

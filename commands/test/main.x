@@ -186,7 +186,7 @@ static String _shown(Path path) {
 
 static int _summary_counts(
   String output, int &passed, int &failed, int &skipped) {
-  foreach (String line in output.split_lines(0).reverse()) {
+  foreach (String line in output.split_lines().reverse()) {
     if (!line) continue;
     int end = 0;
     int fields = sscanf(line, "%d passed, %d failed, %d skipped%n",
@@ -218,7 +218,7 @@ static Job _start(Run run, Path file) {
   command.push(file);
   foreach (String arg in run.program_args) command.push(arg);
   Job job = command.list();
-  return job.options({stderr: <stdout>, env: {
+  return job.options(stderr: <stdout>, env: {
     "X2C_CACHE_DIR": %"$(run.root)/.x2c-build/tests"
-  }}).start();
+  }).start();
 }

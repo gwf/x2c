@@ -17,10 +17,10 @@ Include it with `#include "process.x"`.
 | [`Job.errors`](#Job.errors) | Returns the captured standard error of `job`, starting it and waiting as needed, or NULL when standard error was not captured or was empty. |
 | [`Job.kill`](#Job.kill) | Sends `signal` to every stage of `job` that is still running. |
 | [`Job.lines`](#Job.lines) | Returns the captured standard output of `job` as lines without their endings. |
-| [`Job.live`](#Job.live) | Makes `job` pass standard output through instead of capturing it, the same as `options({stdout: <inherit>})`, and returns it. |
-| [`Job.options`](#Job.options) | Sets `options` on `job` and returns it. |
+| [`Job.live`](#Job.live) | Makes `job` pass standard output through instead of capturing it, the same as `options(stdout: <inherit>)`, and returns it. |
+| [`Job.options`](#Job.options) | Sets keyword options on `job` and returns it. |
 | [`Job.output`](#Job.output) | Returns the captured standard output of `job`, starting it and waiting as needed. |
-| [`Job.pipe`](#Job.pipe) | Adds `command` after the last stage of `job`, reading that stage's output, and returns the job. |
+| [`Job.pipe`](#Job.pipe) | Adds each command after the last stage of `job`, reading that stage's output, and returns the job. |
 | [`Job.ready`](#Job.ready) | Reports whether every stage of `job` has exited, without blocking. |
 | [`Job.run`](#Job.run) | Passes standard output through, waits for `job`, and raises when its status is not zero: `live()` followed by `check()`. |
 | [`Job.start`](#Job.start) | Starts `job` without waiting and returns it. |
@@ -107,7 +107,7 @@ Source: `lib/process.x`
 `Job Job.live(Job job)`
 
 Makes `job` pass standard output through instead of capturing it, the
-same as `options({stdout: <inherit>})`, and returns it.
+same as `options(stdout: <inherit>)`, and returns it.
 
 **Raises:** `<bad-arg>` for NULL or a job that has started.
 
@@ -116,9 +116,11 @@ Source: `lib/process.x`
 <a id="Job.options"></a>
 #### Job.options
 
-`Job Job.options(Job job, Map options)`
+`Job Job.options(Job job, Map @options)`
 
-Sets `options` on `job` and returns it.
+Sets keyword options on `job` and returns it.
+Splice an existing Map with `@options`. With no options, the job's
+launch settings are unchanged.
 The keys are atoms: `dir` names the working directory, `env` is a `Map`
 of variables added to the inherited environment, and `input` is a
 `String` given to the first stage's standard input. `stdout` is
@@ -129,7 +131,7 @@ applies to every stage. A key set again replaces its earlier value.
 ```x2c
 ~#include "process.x"
 ~int main(void) {
-String root = %(pwd).job().options({dir: "/"}).output();
+String root = %(pwd).job().options(dir: "/").output();
 ~  return root == "/\n" ? 0 : 1;
 ~}
 ```
@@ -154,11 +156,12 @@ Source: `lib/process.x`
 <a id="Job.pipe"></a>
 #### Job.pipe
 
-`Job Job.pipe(Job job, List command)`
+`Job Job.pipe(Job job, List @commands)`
 
-Adds `command` after the last stage of `job`, reading that stage's
-output, and returns the job. A pipeline `command` adds each of its
-stages.
+Adds each command after the last stage of `job`, reading that stage's
+output, and returns the job. Each command is a List; a pipeline adds
+each of its stages. Pass several commands or splice a List of commands
+with `@commands`. With no commands, returns the unchanged job.
 
 **Raises:** `<bad-arg>` for NULL or a job that has started.
 

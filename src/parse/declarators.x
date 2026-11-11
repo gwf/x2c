@@ -29,7 +29,7 @@ List Compiler.parse_declarator_argument(Compiler c) {
 List Compiler.parse_parameter_list(Compiler c) {
   Array parameters = auto [];
   while (1) {
-    _x2c_complete_here(c, <type>, _x2c_type_keywords());
+    _x2c_complete_here(c, <type>, @(_x2c_type_keywords()));
     List parameter = c.try_parse_macro_slot(<param>);
     if (!parameter) parameter = c.parse_parameter();
     parameters.push(parameter);
@@ -54,7 +54,7 @@ List Compiler.parse_parameter(Compiler c) {
   List declarator = _declarator(c, type, NULL, method, first, after);
   if (rest && (declarator.caddr() || c.peek(0) == <,>))
     c.report_error(
-      <parse>, "rest parameter must be a final name", c.token, NULL);
+      <parse>, "rest parameter must be a final name", c.token);
   return _finish_parameter(c, type, declarator, method, first, after);
 }
 
@@ -219,7 +219,7 @@ static List _declarator_suffix(Compiler c) {
    the captured scope. */
 static List _function_parameters(Compiler c) {
   c.next();
-  _x2c_complete_here(c, <type>, _x2c_type_keywords());
+  _x2c_complete_here(c, <type>, @(_x2c_type_keywords()));
   if (c.peek(0) == <)>)
     $fail.parse_params_empty(c, c.token);
   SymScope saved = c.params, parsed;

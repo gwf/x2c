@@ -54,37 +54,37 @@ static macro Stmt $fail.frontend_input_read(
   $c.report_error(
     <driver>,
     %"cannot read input file '$($filename)': $($reason)",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.frontend_script_symbols(Expr $c, Expr $site) =>
   $c.report_error(
     <driver>,
     "script units use the default symbol collection",
-    $site, %("the host preprocessor reads the #! line as C, so --cpp-symbols,"
-    "--live-symbols, and the --dump-cpp modes cannot read a script"));
+    $site, "the host preprocessor reads the #! line as C, so --cpp-symbols,",
+    "--live-symbols, and the --dump-cpp modes cannot read a script");
 
 static macro Stmt $fail.frontend_indent_symbols(Expr $c, Expr $site) =>
   $c.report_error(
     <driver>,
     "indented units use the default symbol collection",
-    $site, %("the host preprocessor does not keep the indentation, so"
-    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read"
-    "an indented unit"));
+    $site, "the host preprocessor does not keep the indentation, so",
+    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read",
+    "an indented unit");
 
 static macro Stmt $fail.frontend_module_symbols(Expr $c, Expr $site) =>
   $c.report_error(
     <driver>,
     "module units use the default symbol collection",
-    $site, %("the host preprocessor reads a module block as C, so"
-    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a"
-    "module"));
+    $site, "the host preprocessor reads a module block as C, so",
+    "--cpp-symbols, --live-symbols, and the --dump-cpp modes cannot read a",
+    "module");
 
 static macro Stmt $fail.frontend_cpp_failed(
   Expr $c, Expr $site, Expr $status) =>
   $c.report_error(
     <driver>,
     "failed to run C preprocessor",
-    $site, %("stage: preprocess" "status: $($status)"));
+    $site, "stage: preprocess", %"status: $($status)");
 
 // symbol collection
 

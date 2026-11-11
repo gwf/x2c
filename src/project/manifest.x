@@ -32,7 +32,7 @@ int ProjectBuild.valid_name(String name) {
    a field whose array is open. A `#` outside a string starts a comment. */
 module void _parse_manifest(Project p) {
   Manifest m = {.project = p};
-  foreach (String text in p.text.split_lines(0)) {
+  foreach (String text in p.text.split_lines()) {
     m.line++;
     char *line = _content(text);
     if (!*line) continue;
@@ -287,7 +287,7 @@ static List _string_array(Project p, int line, String value) {
 static String _parse_string(Project p, int line, char **cursor) {
   char *at = _skip_space(*cursor ? *cursor : "");
   if (*at != '"') _error(p, line, "expected a quoted string");
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   for (at++; *at && *at != '"'; at++) {
     char ch = *at;
     if (ch == '\\') ch = _escape(p, line, *++at);

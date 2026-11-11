@@ -73,11 +73,11 @@ static struct ReplClient {
 static int _blank(unsigned char c) => c == ' ' || c == '\t' || c == '\r' || c == '\n';
 
 static String _word(String &text) {
-  text = text.lstrip(NULL);
+  text = text.lstrip();
   size_t end = 0;
   while (end < text.len() && !_blank(text[end])) end++;
   String word = text[:end];
-  text = text[end:].lstrip(NULL);
+  text = text[end:].lstrip();
   return word;
 }
 
@@ -268,7 +268,7 @@ static int _symbols(struct ReplClient &client, String argument) {
         Token token = tokens.next();
         if (token.type != <lit-char*>) return 0;
         path = token.text.parse();
-        argument = argument[token.pos + token.len:].lstrip(NULL);
+        argument = argument[token.pos + token.len:].lstrip();
       }
       else path = _word(argument);
       if (!path) return 0;
@@ -399,7 +399,7 @@ static int _control(
 }
 
 static int _line(struct ReplClient &client, String line) {
-  String text = line.strip(NULL);
+  String text = line.strip();
   if (text.startswith(":")) {
     if (client.interactive) client.input.remember(line);
     String operation = _word(text);
@@ -486,7 +486,7 @@ static ReplInputCompletion _argument_completion(
         size_t after = path.pos + path.len;
         if (paths.status() == <ok> && path.type == <lit-char*> &&
             after < argument.len() && _blank(argument[after])) {
-          argument = argument[after:].lstrip(NULL);
+          argument = argument[after:].lstrip();
           continue;
         }
         return _path_completion(text, cursor, cursor - argument.len());

@@ -473,7 +473,7 @@ ordinary local declaration:
 ```x2c
 ~int main(void) {
 Array items = auto [];
-Buffer text = auto Buffer.new(0);
+Buffer text = auto Buffer.new();
 items.push(42);
 text.write(items.repr());
 printf("%s\n", text.str());

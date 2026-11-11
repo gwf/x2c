@@ -147,8 +147,8 @@ Send binary output to a file with the `stdout` option instead.
 
 ### Pipelines
 
-A `List` of commands is a pipeline, and `pipe` adds a stage to a job. These
-two jobs are the same:
+A `List` of commands is a pipeline. `pipe` adds one or more command Lists
+to a job, or splices them with `@commands`. These two jobs are the same:
 
 ```x2c
 ~#include "process.x"
@@ -164,15 +164,16 @@ an early stage sets the status even when a later stage succeeds.
 
 ### Options
 
-`options` attaches settings before the job starts:
+`options` attaches keyword settings before the job starts. Splice an existing
+Map with `@options`; later entries override earlier ones:
 
 ```x2c
 ~#include "process.x"
 ~#include "path.x"
 ~int main(void) {
 Path root = "build";
-%(make all).job().options({dir: root, env: {CC: <clang>}}).run();
-String upper = %(tr a-z A-Z).job().options({input: "quiet"}).output();
+%(make all).job().options(dir: root, env: {CC: <clang>}).run();
+String upper = %(tr a-z A-Z).job().options(input: "quiet").output();
 ~  return upper == "QUIET" ? 0 : 1;
 ~}
 ```
@@ -188,7 +189,7 @@ String upper = %(tr a-z A-Z).job().options({input: "quiet"}).output();
 Without `input`, the first stage reads the script's standard input, and an
 empty `input` gives it an empty one. `stdout` applies to the last stage of a
 pipeline, and `stderr` to every stage. `live()` is the same as
-`options({stdout: <inherit>})`. An unknown key, such as a misspelled `dir`,
+`options(stdout: <inherit>)`. An unknown key, such as a misspelled `dir`,
 raises `<bad-arg>`. Changing options or adding a
 stage after the job has started also raises `<bad-arg>`.
 
@@ -265,6 +266,10 @@ foreach (Path unit in Path.glob("src/**/*.x"))
 on the text alone. `stem` and `extension` return a `String`; the others that
 return text return a `Path`. `absolute` resolves a path against the working
 directory.
+
+`root.join("out", "report.txt")` accepts several components in order.
+An absolute component replaces the path accumulated before it. `root.join()`
+returns `root`; `root.join(@components)` splices an existing List of paths.
 
 ### Asking about a path
 

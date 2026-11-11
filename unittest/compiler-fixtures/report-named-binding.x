@@ -6,7 +6,7 @@ char *strerror(int error);
 typedef struct Reporter { Token token; } *Reporter;
 static int reports, shadow_calls;
 void Reporter.report_error(Reporter reporter, Symbol code, String message,
-                          Token site, List notes) {
+                          Token site, List @notes) {
   (void) reporter; (void) code; (void) message; (void) site;
   if (notes.len() == 2 &&
       notes[1].string() == %"reason: $(String.new(strerror(ENOENT)))")
@@ -19,7 +19,7 @@ macro Stmt $report.emit_file_write(Expr $c, Expr $failure) {
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
       <emit>, "failed to write generated file",
-      $c.token, %("file: $($failure.assoc(<path>))" "reason: $reason"));
+      $c.token, %"file: $($failure.assoc(<path>))", %"reason: $reason");
   }
 }
 

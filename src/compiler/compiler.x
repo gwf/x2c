@@ -272,6 +272,13 @@ typedef struct Compiler {
   /* Where the expression statement being parsed starts. A meta call there
      that the statement's `;` ends is evaluated as the statement. */
   Token meta_statement;
+  /* A method-form decorator found at the start of an expression statement,
+     held while `<method-dec>` unwinds the expression parse; see
+     `try_parse_method_macro`. */
+  List method_decorator;
+  /* The receiver of the method-form macro being invoked, until its argument
+     capture takes it as the first argument. */
+  List method_receiver;
   /* A collection pass whose protocol registries are installed from collected
      symbols on first use; `_install_imports` owns the installation. */
   int import_protocols;

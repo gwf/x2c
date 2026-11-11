@@ -50,7 +50,7 @@ static const List catalog_labels = %(
    a capital follows a lower-case letter or digit. */
 static Array _words(String text):
   Array words = []
-  Buffer word = auto Buffer.new(0)
+  Buffer word = auto Buffer.new()
   for (char *ch = text ? text : ""; ; ch++):
     int c = (unsigned char) *ch
     int split = isupper(c) && word.len() &&
@@ -79,7 +79,7 @@ static int _shared(Map a, Map b):
 
 /* `text` with each run of space collapsed to one space and trimmed. */
 static String _normal(String text):
-  Buffer out = auto Buffer.new(0)
+  Buffer out = auto Buffer.new()
   int gap = 0
   for (char *ch = text ? text : ""; *ch; ch++):
     if isspace((unsigned char) *ch):
@@ -99,13 +99,13 @@ static String _prose(String raw, Symbol kind):
     String.new_len(body, strlen(body) - 2)
   Array lines = []
   foreach String each in text.split("\n"):
-    String trimmed = each.lstrip(NULL)
+    String trimmed = each.lstrip()
     char *at = trimmed ? trimmed : ""
     if kind == <line> && !strncmp(at, "//", 2): at += 2
     else if kind != <line> && *at == '*': at++
     if isspace((unsigned char) *at): at++
-    lines.push(String.new(at).rstrip(NULL))
-  return lines.join("\n").strip(NULL)
+    lines.push(String.new(at).rstrip())
+  return lines.join("\n").strip()
 
 /* Collects the comments of `l` into `all` and returns their number. */
 static int _collect(Lint l, Comment *all):
@@ -219,7 +219,7 @@ static void _comment(
   foreach String word in words:
     if word in reason_words: reason = 1
   String code = next <= lines.len() ? lines[next - 1] : NULL
-  code = code.strip(NULL)
+  code = code.strip()
   String name = _declared(l, next, declarations)
   if lint_mentions(lower, history_phrases):
     l.add("comment-history", c.start, "history or unfinished work")
@@ -300,7 +300,7 @@ void Lint.comment_rules(Lint l, Compiler c, List ast, List rows):
     int next = all[at].end + 1
     for (; next <= lines.len(); next++):
       String text = lines[next - 1]
-      if text.strip(NULL): break
+      if text.strip(): break
     _comment(l, all[at], lines, next, declarations)
     if at + 1 < n && all[at].kind == <doc> && all[at + 1].kind == <doc> &&
        l.prev(all[at + 1].first) == all[at].last:

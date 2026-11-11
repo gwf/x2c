@@ -1893,18 +1893,18 @@ Buffer MapIntInt_write_str(MapIntInt _x2c_gensym_macro_map_53, Buffer _x2c_gensy
   return MapIntInt_write_entries(_x2c_gensym_macro_map_53, _x2c_gensym_macro_out_11, 40228);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 String Buffer_str_free(Buffer);
 
 String MapIntInt_str(MapIntInt _x2c_gensym_macro_map_54){
-  Buffer _x2c_gensym_macro_out_12 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_12 = Buffer_new(NULL);
   MapIntInt_write_str(_x2c_gensym_macro_map_54, _x2c_gensym_macro_out_12);
   return Buffer_str_free(_x2c_gensym_macro_out_12);
 }
 
 String MapIntInt_repr(MapIntInt _x2c_gensym_macro_map_55){
-  Buffer _x2c_gensym_macro_out_13 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_13 = Buffer_new(NULL);
   MapIntInt_write_repr(_x2c_gensym_macro_map_55, _x2c_gensym_macro_out_13);
   return Buffer_str_free(_x2c_gensym_macro_out_13);
 }
@@ -2829,13 +2829,13 @@ Buffer MapLongDouble_write_str(MapLongDouble _x2c_gensym_macro_map_109, Buffer _
 }
 
 String MapLongDouble_str(MapLongDouble _x2c_gensym_macro_map_110){
-  Buffer _x2c_gensym_macro_out_29 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_29 = Buffer_new(NULL);
   MapLongDouble_write_str(_x2c_gensym_macro_map_110, _x2c_gensym_macro_out_29);
   return Buffer_str_free(_x2c_gensym_macro_out_29);
 }
 
 String MapLongDouble_repr(MapLongDouble _x2c_gensym_macro_map_111){
-  Buffer _x2c_gensym_macro_out_30 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_30 = Buffer_new(NULL);
   MapLongDouble_write_repr(_x2c_gensym_macro_map_111, _x2c_gensym_macro_out_30);
   return Buffer_str_free(_x2c_gensym_macro_out_30);
 }
@@ -3738,13 +3738,13 @@ Buffer MapStringString_write_str(MapStringString _x2c_gensym_macro_map_165, Buff
 }
 
 String MapStringString_str(MapStringString _x2c_gensym_macro_map_166){
-  Buffer _x2c_gensym_macro_out_46 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_46 = Buffer_new(NULL);
   MapStringString_write_str(_x2c_gensym_macro_map_166, _x2c_gensym_macro_out_46);
   return Buffer_str_free(_x2c_gensym_macro_out_46);
 }
 
 String MapStringString_repr(MapStringString _x2c_gensym_macro_map_167){
-  Buffer _x2c_gensym_macro_out_47 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_47 = Buffer_new(NULL);
   MapStringString_write_repr(_x2c_gensym_macro_map_167, _x2c_gensym_macro_out_47);
   return Buffer_str_free(_x2c_gensym_macro_out_47);
 }
@@ -4645,13 +4645,13 @@ Buffer MapStringInt_write_str(MapStringInt _x2c_gensym_macro_map_221, Buffer _x2
 }
 
 String MapStringInt_str(MapStringInt _x2c_gensym_macro_map_222){
-  Buffer _x2c_gensym_macro_out_63 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_63 = Buffer_new(NULL);
   MapStringInt_write_str(_x2c_gensym_macro_map_222, _x2c_gensym_macro_out_63);
   return Buffer_str_free(_x2c_gensym_macro_out_63);
 }
 
 String MapStringInt_repr(MapStringInt _x2c_gensym_macro_map_223){
-  Buffer _x2c_gensym_macro_out_64 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_64 = Buffer_new(NULL);
   MapStringInt_write_repr(_x2c_gensym_macro_map_223, _x2c_gensym_macro_out_64);
   return Buffer_str_free(_x2c_gensym_macro_out_64);
 }

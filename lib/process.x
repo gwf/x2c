@@ -151,21 +151,25 @@ static typedef struct Failure { Symbol step, int error; } Failure;
 */
 meta native Job List.job(List command) => Job.new(command);
 
-/** Adds `command` after the last stage of `job`, reading that stage's
-    output, and returns the job. A pipeline `command` adds each of its
-    stages.
+/** Adds each command after the last stage of `job`, reading that stage's
+    output, and returns the job. Each command is a List; a pipeline adds
+    each of its stages. Pass several commands or splice a List of commands
+    with `@commands`. With no commands, returns the unchanged job.
     Raises: `<bad-arg>` for NULL or a job that has started.
 */
-Job Job.pipe(Job job, List command) {
+Job Job.pipe(Job job, List @commands) {
   if (!job) raise %(bad-arg (operation "Job.pipe"));
   _unstarted(job, "Job.pipe");
-  job.stages = job.stages.append(_stages(command));
+  foreach (List command in commands)
+    job.stages = job.stages.append(_stages(command));
   return job;
 }
 
 // options
 
-/** Sets `options` on `job` and returns it.
+/** Sets keyword options on `job` and returns it.
+    Splice an existing Map with `@options`. With no options, the job's
+    launch settings are unchanged.
     The keys are atoms: `dir` names the working directory, `env` is a `Map`
     of variables added to the inherited environment, and `input` is a
     `String` given to the first stage's standard input. `stdout` is
@@ -176,14 +180,14 @@ Job Job.pipe(Job job, List command) {
     ```x2c
     ~#include "process.x"
     ~int main(void) {
-    String root = %(pwd).job().options({dir: "/"}).output();
+    String root = %(pwd).job().options(dir: "/").output();
     ~  return root == "/\n" ? 0 : 1;
     ~}
     ```
 
     Raises: `<bad-arg>` for NULL, an unknown key, or a job that has started.
 */
-Job Job.options(Job job, Map options) {
+Job Job.options(Job job, Map @options) {
   if (!job) raise %(bad-arg (operation "Job.options"));
   _unstarted(job, "Job.options");
   foreach (Var (key, value) in options) {
@@ -204,7 +208,7 @@ void Job.run(Job job) {
 }
 
 /** Makes `job` pass standard output through instead of capturing it, the
-    same as `options({stdout: <inherit>})`, and returns it.
+    same as `options(stdout: <inherit>)`, and returns it.
     Raises: `<bad-arg>` for NULL or a job that has started.
 */
 Job Job.live(Job job) {
@@ -217,7 +221,7 @@ Job Job.live(Job job) {
     endings.
     Raises: the causes of `Job.output`.
 */
-List Job.lines(Job job) => job.output().split_lines(0);
+List Job.lines(Job job) => job.output().split_lines();
 
 /** Returns the captured standard output of `job`, starting it and waiting
     as needed. A live job, or one whose output was empty, returns NULL.

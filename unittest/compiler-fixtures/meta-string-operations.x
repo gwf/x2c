@@ -126,23 +126,23 @@ meta int text_find_within(int unused) {
 }
 meta int text_replace_n(int unused) {
   (void) unused;
-  return "aaaa".replace_n("a", "b", 2).equal("bbaa")
-    && "aa".replace_n("a", "b", 0).equal("aa");
+  return "aaaa".replace("a", "b", 2).equal("bbaa")
+    && "aa".replace("a", "b", 0).equal("aa");
 }
 meta int text_split_n(int unused) {
   (void) unused;
-  return "a:b:c".split_n(":", 1).equal(%("a" "b:c"))
-    && "a:b".split_n(":", 0).equal(%("a:b"));
+  return "a:b:c".split(":", 1).equal(%("a" "b:c"))
+    && "a:b".split(":", 0).equal(%("a:b"));
 }
 meta int text_lstrip(int unused) {
   (void) unused;
-  return "  a  ".lstrip((char *) 0).equal("a  ")
+  return "  a  ".lstrip().equal("a  ")
     && "xxax".lstrip("x").equal("ax")
     && " ".lstrip(" ").len() == 0;
 }
 meta int text_rstrip(int unused) {
   (void) unused;
-  return "  a  ".rstrip((char *) 0).equal("  a")
+  return "  a  ".rstrip().equal("  a")
     && "xaxx".rstrip("x").equal("xa")
     && " ".rstrip(" ").len() == 0;
 }

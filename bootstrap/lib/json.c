@@ -423,7 +423,7 @@ Buffer Buffer_write_len(Buffer, const char *, size_t);
 
 String Buffer_str(Buffer);
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 int scan_utf8_length(const unsigned char *);
 
@@ -466,7 +466,7 @@ static String _string(Reader * r){
 
         }
         if(byte == '\\'){
-          if(decoded == NULL) decoded = Buffer_new(0);
+          if(decoded == NULL) decoded = Buffer_new(NULL);
           Buffer_write_len(decoded, (* r).text + run, (* r).at - run);
           _escape(&((* r)), decoded);
           run =(* r).at;
@@ -663,7 +663,7 @@ _Noreturn static void _fail(Reader * r, String why){
 }
 
 static String _json(Var value, int pretty){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={

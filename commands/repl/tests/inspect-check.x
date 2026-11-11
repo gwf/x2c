@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
   _definition(c, "Probe create_probe(int x);");
   _check("create_probe" in session.members("Probe"),
          "related C constructor was not described");
-  Buffer displayed = auto Buffer.new(0);
+  Buffer displayed = auto Buffer.new();
   int remaining = 3;
   repl_inspect_value(displayed, [1, [2, 3], 4], 3, &remaining);
   String limited = displayed;

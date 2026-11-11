@@ -65,7 +65,7 @@ static void net_timeout_reports_errno(void) {
 static void net_listener_repr_preserves_fields_and_stop(void) {
   $test.scoped();
   Listener listener = auto Listener.bind("127.0.0.1", 0);
-  Buffer expected = auto Buffer.new(0);
+  Buffer expected = auto Buffer.new();
   expected.printf("Listener { fd: %d, host: \"127.0.0.1\", port: %d, stopped: 0 }",
                   listener.fd, listener.port());
   EXPECT_STR_EQ(listener.repr(), expected.str());

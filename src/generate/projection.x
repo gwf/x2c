@@ -13,7 +13,7 @@ static macro Stmt $fail.generate_inline_private(
     $c.report_error(
       <emit>,
       %"public inline function '$($function)' uses unit-private '$($name)'",
-      NULL, NULL);
+      NULL);
   }
 }
 

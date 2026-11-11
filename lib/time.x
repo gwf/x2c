@@ -116,7 +116,7 @@ int Duration.compare(Duration a, Duration b) =>
 */
 String Duration.str(Duration d) {
   if (!d.nanoseconds) return "0s";
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   unsigned long long size = d.nanoseconds;
   if (d.nanoseconds < 0) {
     out.write_char('-');
@@ -277,7 +277,7 @@ int DateTime.weekday(DateTime d) {
     as in `2026-10-28T10:05:09-04:00`.
 */
 String DateTime.str(DateTime d) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.printf(
     "%04d-%02d-%02dT%02d:%02d:%02d", d.year, d.month, d.day,
     d.hour, d.minute, d.second);

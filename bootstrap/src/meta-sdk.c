@@ -45,11 +45,11 @@ MetaContext;
 #include <sys/stat.h>
 static MetaContext active;
 
-static List _235, _234, _233, _229, _228, _226, _225, _223, _222, _220, _219, _217, _216, _214, _213, _211, _209, _173, _172, _171, _169, _164, _160, _158, _156, _154, _152, _150, _148, _147, _146, _144, _131, _127, _124, _115, _113, _112, _111, _109, _108, _107, _105, _74, _73, _72, _70, _69, _62, _51, _50, _44, _43, _42, _41, _40, _25, _24, _21, _20;
+static List _233, _232, _231, _227, _226, _224, _223, _221, _220, _218, _217, _215, _214, _212, _211, _209, _173, _172, _171, _169, _164, _160, _158, _156, _154, _152, _150, _148, _147, _146, _144, _131, _127, _124, _115, _113, _112, _111, _109, _108, _107, _105, _74, _73, _72, _70, _69, _62, _51, _50, _44, _43, _42, _41, _40, _25, _24, _21, _20;
 
-static String _231, _207, _206, _205, _204, _203, _202, _201, _200, _199, _198, _197, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _184, _182, _181, _180, _176, _175, _174, _167, _166, _165, _162, _161, _140, _138, _137, _136, _135, _134, _133, _132, _129, _125, _122, _121, _120, _119, _118, _117, _116, _102, _101, _100, _98, _97, _96, _95, _94, _93, _88, _87, _86, _85, _84, _83, _82, _80, _78, _76, _75, _64, _63, _60, _59, _58, _57, _48, _47, _46, _45, _38, _36, _34, _32, _30, _29, _28, _27, _26, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _229, _207, _206, _205, _204, _203, _202, _201, _200, _199, _198, _197, _196, _195, _194, _193, _192, _191, _190, _189, _188, _187, _186, _185, _184, _182, _181, _180, _176, _175, _174, _167, _166, _165, _162, _161, _140, _138, _137, _136, _135, _134, _133, _132, _129, _125, _122, _121, _120, _119, _118, _117, _116, _102, _101, _100, _98, _97, _96, _95, _94, _93, _88, _87, _86, _85, _84, _83, _82, _80, _78, _76, _75, _64, _63, _60, _59, _58, _57, _48, _47, _46, _45, _38, _36, _34, _32, _30, _29, _28, _27, _26, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _232, _230, _227, _224, _221, _218, _215, _212, _210, _208, _183, _179, _178, _177, _170, _168, _163, _159, _157, _155, _153, _151, _149, _145, _143, _142, _141, _139, _130, _128, _126, _123, _114, _110, _106, _104, _103, _99, _92, _91, _90, _89, _81, _79, _77, _71, _68, _67, _66, _65, _61, _56, _55, _54, _53, _52, _49, _39, _37, _35, _33, _31, _23, _22, _19, _18;
+static Var _230, _228, _225, _222, _219, _216, _213, _210, _208, _183, _179, _178, _177, _170, _168, _163, _159, _157, _155, _153, _151, _149, _145, _143, _142, _141, _139, _130, _128, _126, _123, _114, _110, _106, _104, _103, _99, _92, _91, _90, _89, _81, _79, _77, _71, _68, _67, _66, _65, _61, _56, _55, _54, _53, _52, _49, _39, _37, _35, _33, _31, _23, _22, _19, _18;
 
 static int _init_guard_ = 0;
 
@@ -124,32 +124,32 @@ static Func _x2c_gensym_func_handle_0;
 
 
 
-_x2c_gensym_initializer_choice_45505D6E_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _216)))
+_x2c_gensym_initializer_choice_45505D6E_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _214)))
 static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1);
 
 static Func _x2c_gensym_func_handle_1;
 
-_x2c_gensym_initializer_choice_45505D6E_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _225)))
+_x2c_gensym_initializer_choice_45505D6E_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _223)))
 static Var _x2c_gensym_func_adapt_2(Func _x2c_gensym_func_binding_2, const FuncArg * _x2c_gensym_func_argv_2);
 
 static Func _x2c_gensym_func_handle_2;
 
-_x2c_gensym_initializer_choice_45505D6E_2((_x2c_gensym_func_handle_2 = x2c_func_shared(_x2c_gensym_func_adapt_2, _216)))
+_x2c_gensym_initializer_choice_45505D6E_2((_x2c_gensym_func_handle_2 = x2c_func_shared(_x2c_gensym_func_adapt_2, _214)))
 static Var _x2c_gensym_func_adapt_3(Func _x2c_gensym_func_binding_3, const FuncArg * _x2c_gensym_func_argv_3);
 
 static Func _x2c_gensym_func_handle_3;
 
-_x2c_gensym_initializer_choice_45505D6E_3((_x2c_gensym_func_handle_3 = x2c_func_shared(_x2c_gensym_func_adapt_3, _234)))
+_x2c_gensym_initializer_choice_45505D6E_3((_x2c_gensym_func_handle_3 = x2c_func_shared(_x2c_gensym_func_adapt_3, _232)))
 static Var _x2c_gensym_func_adapt_4(Func _x2c_gensym_func_binding_4, const FuncArg * _x2c_gensym_func_argv_4);
 
 static Func _x2c_gensym_func_handle_4;
 
-_x2c_gensym_initializer_choice_45505D6E_4((_x2c_gensym_func_handle_4 = x2c_func_shared(_x2c_gensym_func_adapt_4, _234)))
+_x2c_gensym_initializer_choice_45505D6E_4((_x2c_gensym_func_handle_4 = x2c_func_shared(_x2c_gensym_func_adapt_4, _232)))
 static Var _x2c_gensym_func_adapt_5(Func _x2c_gensym_func_binding_5, const FuncArg * _x2c_gensym_func_argv_5);
 
 static Func _x2c_gensym_func_handle_5;
 
-_x2c_gensym_initializer_choice_45505D6E_5((_x2c_gensym_func_handle_5 = x2c_func_shared(_x2c_gensym_func_adapt_5, _235)))
+_x2c_gensym_initializer_choice_45505D6E_5((_x2c_gensym_func_handle_5 = x2c_func_shared(_x2c_gensym_func_adapt_5, _233)))
 typedef struct _x2c_gensym_defer_env_0{
   const void * _x2c_gensym_defer_capture_0;
 }
@@ -369,34 +369,32 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _205 = String_new("_x2c_");
   _206 = String_new("native module sources declare no meta function");
   _207 = String_new("declare each exported function with a bodyless meta prototype");
-  _208 = String_var(_207);
+  _208 = List_var(_40);
   _209 = cons(_208, NULL);
-  _210 = List_var(_40);
+  _210 = List_var(_209);
   _211 = cons(_210, NULL);
-  _212 = List_var(_211);
-  _213 = cons(_212, NULL);
-  _214 = cons(_18, _213);
-  _215 = List_var(_214);
-  _216 = cons(_215, _40);
-  _217 = cons(_31, NULL);
-  _218 = List_var(_217);
-  _219 = cons(_210, _211);
-  _220 = cons(_218, _219);
-  _221 = List_var(_220);
-  _222 = cons(_221, NULL);
-  _223 = cons(_18, _222);
-  _224 = List_var(_223);
-  _225 = cons(_224, _40);
-  _226 = cons(_106, NULL);
-  _227 = List_var(_226);
-  _228 = cons(_227, NULL);
-  _229 = cons(_18, _228);
-  _230 = List_var(_229);
-  _231 = String_new("Map");
-  _232 = String_var(_231);
-  _233 = cons(_232, NULL);
-  _234 = cons(_230, _233);
-  _235 = cons(_215, _169);
+  _212 = cons(_18, _211);
+  _213 = List_var(_212);
+  _214 = cons(_213, _40);
+  _215 = cons(_31, NULL);
+  _216 = List_var(_215);
+  _217 = cons(_208, _209);
+  _218 = cons(_216, _217);
+  _219 = List_var(_218);
+  _220 = cons(_219, NULL);
+  _221 = cons(_18, _220);
+  _222 = List_var(_221);
+  _223 = cons(_222, _40);
+  _224 = cons(_106, NULL);
+  _225 = List_var(_224);
+  _226 = cons(_225, NULL);
+  _227 = cons(_18, _226);
+  _228 = List_var(_227);
+  _229 = String_new("Map");
+  _230 = String_var(_229);
+  _231 = cons(_230, NULL);
+  _232 = cons(_228, _231);
+  _233 = cons(_213, _169);
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
   _x2c_gensym_static_initialize_2();
@@ -2183,8 +2181,8 @@ static List f10_primitives____native_rows(Symbol inventory, List leading, List t
           row = Var_list_payload(_x2c_gensym_macro_cursor_output_19);
           {
             String name = Var_as_string(List_car(row));
-            int own = String_startswith(name, _202) || String_startswith(name, _203) || String_startswith(name, _204);
-            if(! String_startswith(name, _205) && own ==(inventory == 239277269348)) Array_push(rows, List_var(row));
+            int own = String_startswith(name, cons(String_var(_202), cons(String_var(_203), cons(String_var(_204), NULL))));
+            if(! String_startswith(name, cons(String_var(_205), NULL)) && own ==(inventory == 239277269348)) Array_push(rows, List_var(row));
           }
 
         }
@@ -2218,7 +2216,7 @@ static List f10_primitives____native_rows(Symbol inventory, List leading, List t
 
 static List f10_primitives____declared_targets(List paths){
   List rows = Compiler_native_meta_targets(paths, 1);
-  if(! List_truth(rows)) MetaContext_reject(_206, _209);
+  if(! List_truth(rows)) MetaContext_reject(_206, cons(String_var(_207), NULL));
   return rows;
 }
 

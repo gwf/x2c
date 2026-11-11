@@ -251,17 +251,22 @@ int Buffer.truth(Buffer b) => b != NULL && b.content.length != 0;
 
 // lifecycle
 
-/** Allocates an empty `Buffer` whose `pad` method writes `padding` spaces.
-    Raises: `<alloc-fail>` or `<size-limit>` while allocating its fixed-width
-    backing `Block`s.
+/** Allocates an empty `Buffer` with optional padding, defaulting to zero.
+    `pad` writes that many spaces. Pass zero or one padding value.
+    Raises: `<bad-arity>` for more than one value, or `<alloc-fail>` or
+    `<size-limit>` while allocating its fixed-width backing `Block`s.
 */
-meta native Buffer Buffer.new(size_t padding) {
+meta native Buffer Buffer.new(List @padding) {
+  if (padding && padding.cdr())
+    raise %(bad-arity (operation "Buffer.new") (maximum 1)
+            (actual $(padding.len())));
+  size_t spaces = padding ? padding.car().ulong() : 0;
   Buffer buf = xmalloc(sizeof(struct Buffer));
   buf.content = Block.new(sizeof(char));
   /* Allocating the indent Block here puts it in the Buffer's owning scope.
      The first push may run under another scope. */
   buf.indents = Block.new(sizeof(size_t));
-  buf.padding = padding;
+  buf.padding = spaces;
   buf.pos = buf._indent = 0;
   return buf;
 }

@@ -4,7 +4,7 @@
 meta static String trim_chars(String text) => text.strip(" .");
 
 meta static String trim_space(String text) {
-  return text.strip((char *) 0);
+  return text.strip();
 }
 
 meta static int mapped_values(int offset) {

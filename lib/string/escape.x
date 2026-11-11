@@ -117,7 +117,7 @@ meta native String String.parse(String str) {
 */
 meta native String String.unescape(String str) {
   if (!str || !("\\" in str)) return _canonical(str);
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   for (int i = 0, length = str.len(); i < length;) {
     int value = (unsigned char) str[i], width = 1;
     int universal = str[i] == '\\' &&

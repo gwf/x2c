@@ -17,7 +17,7 @@ meta static List sequence_hits(List expanded, int expected) {
   match (expanded)
     case %(expr ? (call ? (args ? *items))): parts = items;
   if (!parts && expected)
-    x2c_diagnostic_fail("sequence fixture setup failed", %());
+    x2c_diagnostic_fail("sequence fixture setup failed");
   int direct = 0, pending = 0, body = 0;
   List pattern = Macro_pattern(pack, %(*items));
   direct = expanded.match(pattern) != NULL;
@@ -25,7 +25,7 @@ meta static List sequence_hits(List expanded, int expected) {
   match (invocation) case pack(*items): pending = items.len() == expected;
   match (expanded) case pack(*items): body = items.len() == expected;
   if (!direct || !pending || !body)
-    x2c_diagnostic_fail("macro sequence case failed", %());
+    x2c_diagnostic_fail("macro sequence case failed");
   return $!int{ 1 };
 }
 
@@ -34,7 +34,7 @@ meta static List mixed_hits(List expanded) {
   List args = NULL;
   match (expanded) case %(expr ? (call ? (args *items))): args = items;
   if (!args || args.len() != 3)
-    x2c_diagnostic_fail("mixed fixture setup failed", %());
+    x2c_diagnostic_fail("mixed fixture setup failed");
   int pending = 0, body = 0;
   List invocation = mixed(args.car(), args.cdr());
   match (invocation) case mixed(?first, *rest):
@@ -42,7 +42,7 @@ meta static List mixed_hits(List expanded) {
   match (expanded) case mixed(?first, *rest):
     body = List.compare(first, args.car()) == 0 && rest.len() == 2;
   if (!pending || !body)
-    x2c_diagnostic_fail("mixed macro sequence case failed", %());
+    x2c_diagnostic_fail("mixed macro sequence case failed");
   return $!int{ 1 };
 }
 
@@ -51,7 +51,7 @@ meta static List reordered_hits(List expanded, List same) {
   List args = NULL;
   match (expanded) case %(expr ? (call ? (args *items))): args = items;
   if (!args || args.len() != 2)
-    x2c_diagnostic_fail("reordered fixture setup failed", %());
+    x2c_diagnostic_fail("reordered fixture setup failed");
   int pending = 0, body = 0, repeated = 0, unequal = 0;
   List invocation = reverse(args.cadr(), args.car());
   match (invocation) case reverse(?first, ?second):
@@ -63,7 +63,7 @@ meta static List reordered_hits(List expanded, List same) {
   match (same) case reverse(?equal, ?equal): repeated = 1;
   match (expanded) case reverse(?equal, ?equal): unequal = 1;
   if (!pending || !body || !repeated || unequal)
-    x2c_diagnostic_fail("reordered macro case failed", %());
+    x2c_diagnostic_fail("reordered macro case failed");
   return $!int{ 1 };
 }
 
@@ -74,7 +74,7 @@ meta static List fixed_hits(List expanded) {
   match (invocation) case fixed(): pending = 1;
   match (expanded) case fixed(): body = 1;
   if (!pending || !body)
-    x2c_diagnostic_fail("binder-free macro case failed", %());
+    x2c_diagnostic_fail("binder-free macro case failed");
   return $!int{ 1 };
 }
 

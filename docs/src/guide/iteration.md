@@ -231,7 +231,16 @@ You read an iterator two ways:
 An `Iter` is single-pass. There is no rewind, and the aggregates below
 consume their input, so build a fresh iterator for a second traversal.
 
-`range` is the simplest source:
+`range(end)` starts at zero and uses step one. `range(start, end)` uses
+step one; a third argument supplies the step. Every form keeps the inclusive
+endpoint. Immediate traversals use caller-owned temporary storage:
+
+```x2c
+foreach (int value in range(3)) printf("%d ", value);
+```
+
+The loop prints `0 1 2 3 `. Supply a fourth argument when the iterator must
+use explicit caller-owned storage:
 
 ```x2c
 struct Iter storage;
@@ -294,7 +303,7 @@ static int divisible_by_four(Var value) {
 
 int main(void) {
   auto {
-    Array values = range(1, 8, 1)
+    Array values = range(1, 8)
       .map(double_value)
       .filter(divisible_by_four);
     foreach(int value in values)
@@ -378,7 +387,8 @@ iterators from `scan` and `map2`, and fixed `find`, `any`, and `all` results.
 The corresponding String identity and List accumulator-preservation defaults
 also end; Lisp nil callbacks use the same native contract.
 
-- `range(start, end, step)`: each `int` in the range.
+- `range(end)`, `range(start, end)`, or `range(start, end, step)`:
+  each `int` in the inclusive range.
 - `iter.filter(pred)`: elements accepted by `Var` truthiness.
 - `iter.map(fn)`: `fn(element)`.
 - `iter.head(count)`: at most `count` leading elements.
@@ -424,13 +434,13 @@ Constructing an iterator does not consume it. Collectors and aggregates do:
 ~static int over_two(Var value) { return value > 2; }
 ~
 ~int main(void) {
-List numbers = range(1, 4, 1);
-Array boxed = range(1, 4, 1);
+List numbers = range(1, 4);
+Array boxed = range(1, 4);
 printf("%s and %s\n", numbers.str(), boxed.str());
 
-printf("sum = %d\n", range(1, 10, 1).sum().int());
+printf("sum = %d\n", range(1, 10).sum().int());
 printf("first over two = %s\n",
-       range(1, 10, 1).find(over_two));
+       range(1, 10).find(over_two));
 ~  return 0;
 ~}
 ```
@@ -460,7 +470,7 @@ a `zip` or `map2`, before the loop starts pulling.
 ~static int is_even(Var value) { return value % 2 == 0; }
 ~
 ~int main(void) {
-foreach(int value in range(1, 10, 1).filter(is_even))
+foreach(int value in range(1, 10).filter(is_even))
   printf("%d\n", value);
 ~  return 0;
 ~}

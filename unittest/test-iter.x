@@ -177,41 +177,41 @@ static void iter_func_callbacks(void) {
   Func captured_all = %!(Var value) => value > floor;
   Func captured_find = %!(Var value) => value > high;
 
-  EXPECT_TRUE(range(1, 3, 1).map(unary_pointer).list() == %(2 4 6));
-  EXPECT_TRUE(range(1, 3, 1).map(captured_unary).list() == %(2 3 4));
-  EXPECT_TRUE(range(1, 3, 1).filter(predicate_pointer).list() == %(2 3));
-  EXPECT_TRUE(range(1, 3, 1).filter(captured_predicate).list() == %(2 3));
-  EXPECT_TRUE(range(1, 3, 1).filter(_iter_truthy_string).list() == %(2 3));
+  EXPECT_TRUE(range(1, 3).map(unary_pointer).list() == %(2 4 6));
+  EXPECT_TRUE(range(1, 3).map(captured_unary).list() == %(2 3 4));
+  EXPECT_TRUE(range(1, 3).filter(predicate_pointer).list() == %(2 3));
+  EXPECT_TRUE(range(1, 3).filter(captured_predicate).list() == %(2 3));
+  EXPECT_TRUE(range(1, 3).filter(_iter_truthy_string).list() == %(2 3));
 
   EXPECT_TRUE(
-    range(1, 3, 1).zip_with(range(10, 12, 1), pair_sum).list() ==
+    range(1, 3).zip_with(range(10, 12), pair_sum).list() ==
       %(11 13 15));
   EXPECT_TRUE(
-    range(1, 3, 1).zip_with(range(10, 12, 1), binary_pointer).list() ==
+    range(1, 3).zip_with(range(10, 12), binary_pointer).list() ==
       %(11 13 15));
   EXPECT_TRUE(
-    range(1, 3, 1).zip_with(range(10, 12, 1), captured_binary).list() ==
+    range(1, 3).zip_with(range(10, 12), captured_binary).list() ==
       %(12 14 16));
   EXPECT_TRUE(
-    range(1, 3, 1).map2(range(10, 12, 1), binary_pointer).list() ==
+    range(1, 3).map2(range(10, 12), binary_pointer).list() ==
       %(11 13 15));
   EXPECT_TRUE(
-    range(1, 3, 1).map2(range(10, 12, 1), captured_binary).list() ==
+    range(1, 3).map2(range(10, 12), captured_binary).list() ==
       %(12 14 16));
 
-  EXPECT_TRUE(range(1, 3, 1).scan(0, binary_pointer).list() == %(1 3 6));
-  EXPECT_TRUE(range(1, 3, 1).scan(0, captured_binary).list() == %(2 5 9));
-  EXPECT_INT_EQ(range(1, 3, 1).foldl(void, binary_pointer).int(), 6);
-  EXPECT_INT_EQ(range(1, 3, 1).foldl(void, captured_binary).int(), 8);
-  EXPECT_INT_EQ(range(1, 3, 1).foldl(0, binary_pointer).int(), 6);
-  EXPECT_INT_EQ(range(1, 3, 1).foldl(0, captured_binary).int(), 9);
+  EXPECT_TRUE(range(1, 3).scan(0, binary_pointer).list() == %(1 3 6));
+  EXPECT_TRUE(range(1, 3).scan(0, captured_binary).list() == %(2 5 9));
+  EXPECT_INT_EQ(range(1, 3).foldl(void, binary_pointer).int(), 6);
+  EXPECT_INT_EQ(range(1, 3).foldl(void, captured_binary).int(), 8);
+  EXPECT_INT_EQ(range(1, 3).foldl(0, binary_pointer).int(), 6);
+  EXPECT_INT_EQ(range(1, 3).foldl(0, captured_binary).int(), 9);
 
-  EXPECT_TRUE(range(1, 3, 1).any(predicate_pointer));
-  EXPECT_TRUE(range(1, 3, 1).any(captured_predicate));
-  EXPECT_FALSE(range(1, 3, 1).all(predicate_pointer));
-  EXPECT_TRUE(range(1, 3, 1).all(captured_all));
-  EXPECT_INT_EQ(range(1, 3, 1).find(predicate_pointer).int(), 2);
-  EXPECT_INT_EQ(range(1, 3, 1).find(captured_find).int(), 3);
+  EXPECT_TRUE(range(1, 3).any(predicate_pointer));
+  EXPECT_TRUE(range(1, 3).any(captured_predicate));
+  EXPECT_FALSE(range(1, 3).all(predicate_pointer));
+  EXPECT_TRUE(range(1, 3).all(captured_all));
+  EXPECT_INT_EQ(range(1, 3).find(predicate_pointer).int(), 2);
+  EXPECT_INT_EQ(range(1, 3).find(captured_find).int(), 3);
 }
 
 static void iter_func_failures_and_empty_sources(void) {
@@ -219,47 +219,47 @@ static void iter_func_failures_and_empty_sources(void) {
   Func wrong_arity = _iter_no_arguments;
   int arity_caught = 0;
 
-  try range(1, 2, 1).map(wrong_arity).next();
+  try range(1, 2).map(wrong_arity).next();
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).filter(wrong_arity).next();
+  try range(1, 2).filter(wrong_arity).next();
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).zip_with(range(3, 4, 1), wrong_arity).next();
+  try range(1, 2).zip_with(range(3, 4), wrong_arity).next();
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).map2(range(3, 4, 1), wrong_arity).next();
+  try range(1, 2).map2(range(3, 4), wrong_arity).next();
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).scan(0, wrong_arity).next();
+  try range(1, 2).scan(0, wrong_arity).next();
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).foldl(0, wrong_arity);
+  try range(1, 2).foldl(0, wrong_arity);
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).any(wrong_arity);
+  try range(1, 2).any(wrong_arity);
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).all(wrong_arity);
+  try range(1, 2).all(wrong_arity);
   catch %(bad-arity *): arity_caught++;
-  try range(1, 2, 1).find(wrong_arity);
+  try range(1, 2).find(wrong_arity);
   catch %(bad-arity *): arity_caught++;
   EXPECT_INT_EQ(arity_caught, 9);
 
-  EXPECT_TRUE(range(1, 0, 1).map(wrong_arity).next() is void);
-  EXPECT_TRUE(range(1, 0, 1).filter(wrong_arity).next() is void);
+  EXPECT_TRUE(range(1, 0).map(wrong_arity).next() is void);
+  EXPECT_TRUE(range(1, 0).filter(wrong_arity).next() is void);
   EXPECT_TRUE(
-    range(1, 0, 1).zip_with(range(1, 2, 1), wrong_arity).next() is void);
+    range(1, 0).zip_with(range(1, 2), wrong_arity).next() is void);
   EXPECT_TRUE(
-    range(1, 0, 1).map2(range(1, 2, 1), wrong_arity).next() is void);
-  EXPECT_TRUE(range(1, 0, 1).scan(0, wrong_arity).next() is void);
-  EXPECT_TRUE(range(1, 0, 1).foldl(void, wrong_arity) is void);
-  EXPECT_INT_EQ(range(1, 0, 1).foldl(7, wrong_arity).int(), 7);
-  EXPECT_FALSE(range(1, 0, 1).any(wrong_arity));
-  EXPECT_TRUE(range(1, 0, 1).all(wrong_arity));
-  EXPECT_TRUE(range(1, 0, 1).find(wrong_arity) is void);
+    range(1, 0).map2(range(1, 2), wrong_arity).next() is void);
+  EXPECT_TRUE(range(1, 0).scan(0, wrong_arity).next() is void);
+  EXPECT_TRUE(range(1, 0).foldl(void, wrong_arity) is void);
+  EXPECT_INT_EQ(range(1, 0).foldl(7, wrong_arity).int(), 7);
+  EXPECT_FALSE(range(1, 0).any(wrong_arity));
+  EXPECT_TRUE(range(1, 0).all(wrong_arity));
+  EXPECT_TRUE(range(1, 0).find(wrong_arity) is void);
 
   Func reference_unary = _iter_reference_argument;
   Func reference_binary = _iter_reference_pair;
   Func numeric_unary = _iter_long_value;
   Func numeric_binary = _iter_long_pair;
   int reference_caught = 0, conversion_caught = 0;
-  try range(1, 2, 1).map(reference_unary).next();
+  try range(1, 2).map(reference_unary).next();
   catch %(bad-types *): reference_caught++;
-  try range(1, 2, 1).foldl(void, reference_binary);
+  try range(1, 2).foldl(void, reference_binary);
   catch %(bad-types *): reference_caught++;
   try %("text").iter().map(numeric_unary).next();
   catch %(no-convert *): conversion_caught++;
@@ -269,9 +269,9 @@ static void iter_func_failures_and_empty_sources(void) {
   EXPECT_INT_EQ(conversion_caught, 2);
 
   int transferred = 0, void_caught = 0;
-  try range(76, 76, 1).map(_iter_raise).next();
+  try range(76, 76).map(_iter_raise).next();
   catch %(invariant (value ?value)): transferred = value.int() == 76;
-  try range(1, 1, 1).map(_iter_void_result).next();
+  try range(1, 1).map(_iter_void_result).next();
   catch %(void-op *): void_caught = 1;
   EXPECT_TRUE(transferred);
   EXPECT_TRUE(void_caught);
@@ -309,7 +309,7 @@ static void iter_func_lifetimes_and_allocations(void) {
 static void iter_immediate_fluent_chains(void) {
   $test.scoped();
   map_call_count = 0;
-  List values = range(0, 3, 1)
+  List values = range(3)
     .map(double_value).filter(greater_than_one);
   EXPECT_INT_EQ(values.len(), 3);
   EXPECT_INT_EQ(values[0].int(), 2);
@@ -317,8 +317,8 @@ static void iter_immediate_fluent_chains(void) {
   EXPECT_INT_EQ(values[2].int(), 6);
   EXPECT_INT_EQ(map_call_count, 4);
 
-  Var total = range(1, 3, 1)
-    .map2(range(10, 12, 1), pair_sum).sum();
+  Var total = range(1, 3)
+    .map2(range(10, 12), pair_sum).sum();
   EXPECT_INT_EQ(total.int(), 39);
 }
 
@@ -811,6 +811,29 @@ static void iter_var_iter_into(void) {
 
 }
 
+static void iter_range_defaults(void) {
+  $test.scoped();
+  int total = 0, end = 3, start = 1;
+  ScopeStats before = Scope.stats();
+  foreach (int value in range(end++)) total += value;
+  foreach (int value in range(start++, 3)) total += value;
+  int mapped = range(3).map(double_value).count();
+  ScopeStats after = Scope.stats();
+  EXPECT_INT_EQ(total, 12);
+  EXPECT_INT_EQ(end, 4);
+  EXPECT_INT_EQ(start, 2);
+  EXPECT_INT_EQ(mapped, 4);
+  EXPECT_INT_EQ(after.allocation_calls, before.allocation_calls);
+  EXPECT_TRUE(range(0).list() == %(0));
+  EXPECT_INT_EQ(range(-1).count(), 0);
+  EXPECT_TRUE(range(1, 5, 2).list() == %(1 3 5));
+
+  struct Iter storage;
+  Iter (*native_range)(int, int, int, Iter) = range;
+  EXPECT_PTR_EQ(native_range(1, 2, 1, &storage), &storage);
+  EXPECT_TRUE(Iter.list(&storage) == %(1 2));
+}
+
 static void iter_descending_range(void) {
   struct Iter storage;
   Iter values = range(5, 1, -2, &storage);
@@ -897,6 +920,7 @@ void iter_suite(void) {
   $test.run(iter_fold_predicates_and_zip_with);
   $test.run(iter_required_callbacks_consume_only_their_inputs);
   $test.run(iter_var_iter_into);
+  $test.run(iter_range_defaults);
   $test.run(iter_descending_range);
   $test.run(iter_range_boundaries);
 }

@@ -48,7 +48,7 @@ static int _eval_file(Lisp lisp, const char *path, int print) {
 }
 
 static int _repl(Lisp lisp) {
-  Buffer source = auto Buffer.new(0);
+  Buffer source = auto Buffer.new();
   unsigned cursor = 0;
   int failed = 0, incomplete = 0, interactive = isatty(Stdin.fileno());
   while (1) {

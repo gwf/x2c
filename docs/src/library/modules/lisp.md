@@ -14,7 +14,7 @@ The Lisp runtime: reader, session, and evaluator.
 | [`lisp_match_replace`](#lisp_match_replace) | Returns the instantiated `template` when `input` matches `pat`. |
 | [`lisp_string_lstrip`](#lisp_string_lstrip) | Trims leading bytes, accepting the same charset values as `strip`. |
 | [`lisp_string_rstrip`](#lisp_string_rstrip) | Trims trailing bytes, accepting the same charset values as `strip`. |
-| [`lisp_string_strip`](#lisp_string_strip) | Trims the bytes in `chars`, using whitespace for an empty String. |
+| [`lisp_string_strip`](#lisp_string_strip) | Trims the bytes in `chars`, using whitespace when omitted or nil. |
 | [`lisp_truth`](#lisp_truth) | Returns Lisp true for every value except nil and `void`. |
 | [`Lisp.adopt`](#Lisp.adopt) | Makes `lisp` read `parent`'s definitions for names it does not bind. |
 | [`Lisp.apply`](#Lisp.apply) | Applies `callable` to already evaluated `values`. |
@@ -62,7 +62,7 @@ Source: `lib/lisp/primitives.x`
 
 #### lisp_string_lstrip
 
-`String lisp_string_lstrip(String string, Var chars)`
+`String lisp_string_lstrip(String string, List @chars)`
 
 Trims leading bytes, accepting the same charset values as `strip`.
 
@@ -70,7 +70,7 @@ Source: `lib/lisp/primitives.x`
 
 #### lisp_string_rstrip
 
-`String lisp_string_rstrip(String string, Var chars)`
+`String lisp_string_rstrip(String string, List @chars)`
 
 Trims trailing bytes, accepting the same charset values as `strip`.
 
@@ -78,9 +78,9 @@ Source: `lib/lisp/primitives.x`
 
 #### lisp_string_strip
 
-`String lisp_string_strip(String string, Var chars)`
+`String lisp_string_strip(String string, List @chars)`
 
-Trims the bytes in `chars`, using whitespace for an empty String.
+Trims the bytes in `chars`, using whitespace when omitted or nil.
 
 Source: `lib/lisp/primitives.x`
 

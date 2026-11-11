@@ -7,9 +7,9 @@
 #include "grammar.h"
 static List _88, _86, _84, _82, _77, _73, _67, _65, _56, _54, _53, _52, _49, _48, _47, _44, _43, _42, _38, _33, _30, _27, _24, _12, _7;
 
-static String _92, _91, _90, _75, _58, _50, _45, _40, _31, _28, _25, _22, _5, _4, _1, _0;
+static String _93, _92, _91, _90, _75, _58, _50, _45, _40, _31, _28, _25, _22, _5, _4, _1, _0;
 
-static Var _94, _93, _89, _87, _85, _83, _81, _80, _79, _78, _76, _74, _72, _71, _70, _69, _68, _66, _64, _63, _62, _61, _60, _59, _57, _55, _51, _46, _41, _39, _37, _36, _35, _34, _32, _29, _26, _23, _21, _20, _19, _18, _17, _16, _15, _14, _13, _11, _10, _9, _8, _6, _3, _2;
+static Var _95, _94, _89, _87, _85, _83, _81, _80, _79, _78, _76, _74, _72, _71, _70, _69, _68, _66, _64, _63, _62, _61, _60, _59, _57, _55, _51, _46, _41, _39, _37, _36, _35, _34, _32, _29, _26, _23, _21, _20, _19, _18, _17, _16, _15, _14, _13, _11, _10, _9, _8, _6, _3, _2;
 
 static int _init_guard_ = 0;
 
@@ -165,11 +165,12 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _87 = List_var(_86);
   _88 = cons(_87, NULL);
   _89 = Symbol_var(199882);
-  _90 = String_new("#");
-  _91 = String_new("endif");
-  _92 = String_new("if");
-  _93 = Symbol_var(60);
-  _94 = Symbol_var(588);
+  _90 = String_new(" \t");
+  _91 = String_new("#");
+  _92 = String_new("endif");
+  _93 = String_new("if");
+  _94 = Symbol_var(60);
+  _95 = Symbol_var(588);
 }
 
 static Symbol _match_head(Var value){
@@ -701,14 +702,14 @@ static List _match_labels(Var value, Array heads, int * labelling){
 }
 
 static int _match_nesting(String text){
-  String directive = String_strip(String_remove_prefix(String_strip(text, " \t"), _90), " \t");
-  if(String_startswith(directive, _91)) return - 1;
-  return String_startswith(directive, _92);
+  String directive = String_strip(String_remove_prefix(String_strip(text, cons(String_var(_90), NULL)), _91), cons(String_var(_90), NULL));
+  if(String_startswith(directive, cons(String_var(_92), NULL))) return - 1;
+  return String_startswith(directive, cons(String_var(_93), NULL));
 }
 
 static List _match_listed(List arm, List none){
   return({
-    Var _x2c_gensym_literal_part_10 = List_var(cons(_62, cons(_93, cons(List_var(none), NULL))));  cons(_94, cons(_x2c_gensym_literal_part_10, cons(List_var(arm), NULL)));
+    Var _x2c_gensym_literal_part_10 = List_var(cons(_62, cons(_94, cons(List_var(none), NULL))));  cons(_95, cons(_x2c_gensym_literal_part_10, cons(List_var(arm), NULL)));
   }
   );
 }

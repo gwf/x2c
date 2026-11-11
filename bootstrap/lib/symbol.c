@@ -54,7 +54,7 @@ int Symbol_compare(Symbol a, Symbol b){
 Buffer Symbol_write_repr(Symbol symbol, Buffer out);
 
 String Symbol_repr(Symbol symbol){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   Symbol_write_repr(symbol, out);
   return Buffer_str_free(out);
 }

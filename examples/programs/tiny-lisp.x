@@ -22,7 +22,7 @@ int c=' ';
 
 int main(void){Map e={};for(W();c!=EOF;W())puts(E(R(),e).str());return 0;}
 
-Var R(void){W();if(c==EOF||c==')')return F();if(c=='\''){N();return cons("quote",cons(R(),NULL));}if(c=='('){N();Array a=auto [];for(W();c!=')';W())a.push(R());N();return a.list();}Buffer b=auto Buffer.new(0);do{b.write_char(c);N();}while(c!=EOF&&!strchr(" \t\r\n()';",c));return b.str();}
+Var R(void){W();if(c==EOF||c==')')return F();if(c=='\''){N();return cons("quote",cons(R(),NULL));}if(c=='('){N();Array a=auto [];for(W();c!=')';W())a.push(R());N();return a.list();}Buffer b=auto Buffer.new();do{b.write_char(c);N();}while(c!=EOF&&!strchr(" \t\r\n()';",c));return b.str();}
 
 void W(void){for(;;)if(c!=EOF&&strchr(" \t\r\n",c))N();else if(c==';'){while(c!=EOF&&c!='\n')N();}else return;}
 

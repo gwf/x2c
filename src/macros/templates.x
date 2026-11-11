@@ -287,7 +287,7 @@ static List _sdk_template_call(Var stored, List values) {
 
 /* The capture rows of a template call's values, which `_hole_row`
    converts for their holes. */
-static List _template_arguments(
+module List _template_arguments(
   Compiler c, List definition, List values, Token invocation,
   int retain_syntax) {
   Array rows = [];

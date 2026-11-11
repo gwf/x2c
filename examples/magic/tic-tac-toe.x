@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
         Stdout.flush();
         String input = Stdin.readline();
         if (!input) { puts("\nGoodbye."); return 0; }
-        input = input.strip(NULL);
+        input = input.strip();
         square = input.len() == 1 ? input[0] - '0' : 0;
         if (!_empty(square)) puts("Choose an empty square from 1 to 9.");
       }

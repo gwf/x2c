@@ -41,7 +41,7 @@ typedef struct ToolRun{
 #include "utils.h"
 static List _128, _126, _125, _123, _121, _117, _68, _65, _58, _57, _33, _30, _29, _28, _27, _26;
 
-static String _136, _135, _134, _133, _132, _131, _130, _129, _119, _115, _113, _111, _109, _107, _105, _103, _101, _99, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _70, _69, _66, _63, _62, _61, _60, _59, _55, _53, _51, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _31, _24, _22, _20, _18, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _137, _136, _135, _134, _133, _132, _131, _130, _129, _119, _115, _113, _111, _109, _107, _105, _103, _101, _99, _97, _95, _93, _91, _89, _87, _85, _83, _81, _79, _77, _75, _73, _71, _70, _69, _66, _63, _62, _61, _60, _59, _55, _53, _51, _49, _48, _47, _46, _45, _44, _43, _42, _41, _40, _39, _38, _37, _36, _35, _34, _31, _24, _22, _20, _18, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static Var _127, _124, _122, _120, _118, _116, _114, _112, _110, _108, _106, _104, _102, _100, _98, _96, _94, _92, _90, _88, _86, _84, _82, _80, _78, _76, _74, _72, _67, _64, _56, _54, _52, _50, _32, _25, _23, _21, _19, _17;
 
@@ -245,12 +245,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _128 = cons(_127, _121);
   _129 = String_new("End of search list");
   _130 = String_new("search starts here");
-  _131 = String_new(" (");
-  _132 = String_new("/include");
-  _133 = String_new("lib");
-  _134 = String_new("libraries: ");
-  _135 = String_new("=");
-  _136 = String_new(":");
+  _131 = String_new(" ");
+  _132 = String_new(" (");
+  _133 = String_new("/include");
+  _134 = String_new("lib");
+  _135 = String_new("libraries: ");
+  _136 = String_new("=");
+  _137 = String_new(":");
   _x2c_gensym_static_initialize_0();
 }
 
@@ -525,12 +526,12 @@ static String _recorded_tool(String name){
   }
   {
     String line;
-    List _x2c_gensym_macro_object_0 = String_split_lines(record, 0);
+    List _x2c_gensym_macro_object_0 = String_split_lines(record, NULL);
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_0);
-      if(String_startswith(line, String_join(NULL, cons(String_var(name), cons(String_var(_41), NULL))))) return String_remove_prefix(line, String_join(NULL, cons(String_var(name), cons(String_var(_41), NULL))));
+      if(String_startswith(line, cons(String_var(String_join(NULL, cons(String_var(name), cons(String_var(_41), NULL)))), NULL))) return String_remove_prefix(line, String_join(NULL, cons(String_var(name), cons(String_var(_41), NULL))));
     }
 
   }
@@ -727,13 +728,13 @@ static void _add_include_directories(Array directories, String listing){
   int listed = 0;
   {
     String line;
-    List _x2c_gensym_macro_object_4 = String_split_lines(listing, 0);
+    List _x2c_gensym_macro_object_4 = String_split_lines(listing, NULL);
     List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
     Var _x2c_gensym_macro_cursor_output_4;
     while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_4);
       {
-        if(String_startswith(line, _129)) return;
+        if(String_startswith(line, cons(String_var(_129), NULL))) return;
         if(String_contains(line, _130)) listed = 1;
         else if(listed) _add_include_directory(directories, line);
       }
@@ -745,27 +746,27 @@ static void _add_include_directories(Array directories, String listing){
 }
 
 static void _add_include_directory(Array directories, String line){
-  String directory = String_strip(line, " ");
-  int note = String_find(directory, _131);
+  String directory = String_strip(line, cons(String_var(_131), NULL));
+  int note = String_find(directory, _132);
   if(note >= 0) directory = String_getslice(directory, (-2147483647 - 1), x2c_slice_bound(note), 1);
   Array_push(directories, String_var(directory));
-  if(String_endswith(directory, _132)) Array_push(directories, String_var(Path_join(Path_dirname(directory), _133)));
+  if(String_endswith(directory, cons(String_var(_133), NULL))) Array_push(directories, String_var(Path_join(Path_dirname(directory), cons(String_var(_134), NULL))));
 }
 
 static void _add_library_directories(Array directories, String output){
   {
     String line;
-    List _x2c_gensym_macro_object_6 = String_split_lines(output, 0);
+    List _x2c_gensym_macro_object_6 = String_split_lines(output, NULL);
     List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
     Var _x2c_gensym_macro_cursor_output_6;
     while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_6))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_6);
       {
-        if(! String_startswith(line, _134)) continue;
-        String list = String_remove_prefix(String_remove_prefix(line, _134), _135);
+        if(! String_startswith(line, cons(String_var(_135), NULL))) continue;
+        String list = String_remove_prefix(String_remove_prefix(line, _135), _136);
         {
           String directory;
-          List _x2c_gensym_macro_object_5 = String_split(list, _136);
+          List _x2c_gensym_macro_object_5 = String_split(list, _137, NULL);
           List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
           Var _x2c_gensym_macro_cursor_output_5;
           while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){

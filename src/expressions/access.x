@@ -106,7 +106,7 @@ static List _method_member(
     c.report_error(
       <type>,
       hidden + " conformance; adopt the protocol for this type to use it",
-      NULL, NULL);
+      NULL);
   }
   if (signature && rejected) signature = NULL;
   List binding = NULL;

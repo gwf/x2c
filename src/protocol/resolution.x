@@ -108,7 +108,7 @@ static macro Stmt $report.protocol_base_missing(
   $c.diagnostics.report(
     <protocol>,
     %"adoption base $(_type_spelling($base)) names no visible protocol",
-    $site, NULL);
+    $site);
 
 static macro Stmt $report.protocol_signature_conflict(
   Expr $c, Expr $location, Expr $member, Expr $owner, Expr $declaration_site,
@@ -127,7 +127,7 @@ static macro Stmt $report.protocol_signature_conflict(
       %"'$($binding)' has a signature incompatible " +
         %"with $($owner) member '$($member)'",
       $location,
-      $(protocol_note, conflict_note, expected_note));
+      protocol_note, conflict_note, expected_note);
   }
 }
 
@@ -241,7 +241,7 @@ static void _resolve_record(
   if (!conformance) {
     if (!location) return;
     String detail = _missing_detail(c, base, participant, native, failure);
-    c.diagnostics.report(<protocol>, detail, location, NULL);
+    c.diagnostics.report(<protocol>, detail, location);
     return;
   }
   if (location) {

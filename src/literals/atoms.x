@@ -3,26 +3,25 @@
 static macro Stmt $fail.literals_atom_expected(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, %"expected atomic expression, found '$($c.token.text)'",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.literals_number_range(
   Expr $c, Expr $site, Expr $text) =>
   $c.report_error(
     <type>, "numeric literal is outside the supported scalar range",
-    $site, $("literal:", $text));
+    $site, "literal:", $text);
 
 static macro Stmt $fail.literals_binder_name(
   Expr $c, Expr $site, Expr $atom) =>
   $c.report_error(
     <parse>, "invalid match binder name",
-    $site, $("binder-name:", $atom.str()));
+    $site, "binder-name:", $atom.str());
 
 static macro Stmt $fail.literals_symbol_truncated(
   Expr $c, Expr $origin, Expr $spelling, Expr $lossy) =>
   $c.report_error(
     <parse>, "Symbol literal does not round-trip",
-    $origin, %("source spelling: $($spelling)"
-      "encoded spelling: $($lossy)"));
+    $origin, %"source spelling: $($spelling)", %"encoded spelling: $($lossy)");
 
 // atoms and Symbols
 
@@ -85,7 +84,7 @@ static void _warn_macro_name(Compiler c, String spelling) {
     <literal>,
     %"'$spelling' is a Symbol here; unquote a typed value such as "
       + %"$unquoted to insert the macro's value",
-    c.token, NULL);
+    c.token);
 }
 
 /* A `<...>` literal is an exact Symbol, which a pattern may use as a

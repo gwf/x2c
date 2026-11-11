@@ -4,13 +4,13 @@
 */
 
 static alias fail_invocation_missing to MetaContext.reject(
-  "x2c invocation location used outside macro expansion", NULL);
+  "x2c invocation location used outside macro expansion");
 
 static macro Stmt $fail.meta_sdk_notes_string(Expr $operation, Expr $note) =>
   _reject_value(%"$($operation) notes must be Strings", $note);
 
 static macro Stmt $fail.meta_sdk_expansion_required(Expr $operation) =>
-  MetaContext.reject(%"$($operation) used outside macro expansion", NULL);
+  MetaContext.reject(%"$($operation) used outside macro expansion");
 
 static macro Expression $note.meta_sdk_value_notes(Expr $value) =>
   %("value: $($value.repr())");
@@ -52,14 +52,14 @@ List MetaContext.invocation_location(void) {
 }
 
 /** Implements `x2c_diagnostic_fail`, declared in `lib/meta.x`. */
-void x2c_diagnostic_fail(String message, List notes) {
+void x2c_diagnostic_fail(String message, List @notes) {
   _check_notes("x2c_diagnostic_fail", notes);
-  MetaContext.reject(message, notes);
+  MetaContext.reject(message, @notes);
 }
 
 /** Implements `x2c_diagnostic_fail_at`, declared in `lib/meta.x`. */
 void x2c_diagnostic_fail_at(
-  Var node, Symbol category, String message, List notes) {
+  Var node, Symbol category, String message, List @notes) {
   _check_notes("x2c_diagnostic_fail_at", notes);
   active.expander.report_meta_error(
     node, category, message, active.site, notes, 1);
@@ -67,7 +67,7 @@ void x2c_diagnostic_fail_at(
 
 /** Implements `x2c_diagnostic_error_at`, declared in `lib/meta.x`. */
 void x2c_diagnostic_error_at(
-  Var node, Symbol category, String message, List notes) {
+  Var node, Symbol category, String message, List @notes) {
   _check_notes("x2c_diagnostic_error_at", notes);
   active.expander.report_meta_error(
     node, category, message, active.site, notes, 0);
@@ -76,10 +76,10 @@ void x2c_diagnostic_error_at(
 /** Reports a warning where it is raised and returns, so a macro can keep
    expanding. Failure stays separate because it never returns.
 */
-void x2c_diagnostic_warn(String message, List notes) {
+void x2c_diagnostic_warn(String message, List @notes) {
   _check_notes("x2c_diagnostic_warn", notes);
   active.expander.report_warning(
-    <macro>, message, active.expander.token, notes);
+    <macro>, message, active.expander.token, @notes);
 }
 
 // rejection
@@ -88,9 +88,9 @@ void x2c_diagnostic_warn(String message, List notes) {
     returns, so the rejected operation's caller cannot continue with a
     missing answer. With no active invocation it is a bad state.
 */
-void MetaContext.reject(String message, List notes) {
+void MetaContext.reject(String message, List @notes) {
   Compiler c = active.evaluator;
-  if (c) c.report_error(<macro>, message, active.site, notes);
+  if (c) c.report_error(<macro>, message, active.site, @notes);
   raise %(bad-state (operation "x2c SDK rejection") (reason $message));
 }
 
@@ -110,5 +110,5 @@ module void _require_expansion(String operation) {
 }
 
 module void _reject_value(String message, Var value) {
-  MetaContext.reject(message, $note.meta_sdk_value_notes(value));
+  MetaContext.reject(message, @($note.meta_sdk_value_notes(value)));
 }

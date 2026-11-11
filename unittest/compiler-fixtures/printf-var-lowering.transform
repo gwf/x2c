@@ -202,15 +202,14 @@
                 (call "Var_convert_at" 
                  (args (expr ("Var") (ident (binding 4 "key"))) 
                   (expr ("Symbol") "3847013") (error-site)))))))))))) 
-  (at 13 
+  (at 34 
    (declare ("Buffer") 
     (bindings 
      (op = (bind (binding 27 "buffer") ()) 
       (expr ("Buffer") 
-       (call (expr ((func (("size_t"))) "Buffer") 
-              (ident (binding 28 "Buffer_new"))) 
-        (args (expr (int) (literal (int) "0"))))))))) 
-  (at 34 
+       (call (expr ((func (("List"))) "Buffer") 
+              (ident (binding 28 "Buffer_new"))) (args (expr ("List") (nil))))))))) 
+  (at 35 
    (stmnt 
     (expr ("Buffer") 
      (call (expr ((func (("Buffer") (* const char) (...))) ("Buffer")) 
@@ -239,7 +238,7 @@
         (call (expr ((func (("Buffer"))) ("String")) 
                (ident (binding 30 "Buffer_str"))) 
          (args (expr ("Buffer") (ident (binding 27 "buffer"))))))))))) 
-  (at 35 
+  (at 36 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 17 "printf"))) 
@@ -253,7 +252,7 @@
        (expr ("String") 
         (call "Var_str" 
          (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))) 
-  (at 36 
+  (at 37 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 17 "printf"))) 
@@ -267,7 +266,7 @@
        (expr ("String") 
         (call "Var_str" 
          (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))) 
-  (at 37 
+  (at 38 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 17 "printf"))) 
@@ -281,7 +280,7 @@
        (expr ("String") 
         (call "Var_str" 
          (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))) 
-  (at 38 
+  (at 39 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 17 "printf"))) 
@@ -295,7 +294,7 @@
        (expr ("String") 
         (call "Var_str" 
          (args (expr ("DynamicAlias") (ident (binding 7 "answer"))))))))))) 
-  (at 39 
+  (at 40 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 17 "printf"))) 
@@ -328,4 +327,4 @@
      (call (expr ((func (("Buffer"))) (void)) 
             (ident (binding 31 "Buffer_free"))) 
       (args (expr ("Buffer") (ident (binding 27 "buffer")))))))) 
-  (at 40 (return (expr (int) (literal (int) "0"))))))
+  (at 41 (return (expr (int) (literal (int) "0"))))))

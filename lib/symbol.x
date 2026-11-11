@@ -84,7 +84,7 @@ meta native int Symbol.compare(Symbol a, Symbol b) {
     Raises: `<alloc-fail>` while constructing the result.
 */
 String Symbol.repr(Symbol symbol) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   symbol.write_repr(out);
   return out.str_free();
 }

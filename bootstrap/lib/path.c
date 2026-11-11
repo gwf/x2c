@@ -214,9 +214,9 @@ int String_getindex(String, int);
 
 void x2c_cleanup_push(X2CCleanup *);
 
-int String_endswith(String, String);
+int String_endswith(String, List);
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 int String_contains(String, String);
 
@@ -252,7 +252,7 @@ List Path_glob(Path pattern){
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
       Glob g ={
-        pattern, matches, ! ! String_truth(base), String_endswith(text, _0), String_startswith(pattern, _3) || String_contains(pattern, _4)
+        pattern, matches, ! ! String_truth(base), String_endswith(text, cons(String_var(_0), NULL)), String_startswith(pattern, cons(String_var(_3), NULL)) || String_contains(pattern, _4)
       }
       ;
       if(Path_is_dir(root)) _glob(&(g), root, _glob_depth(String_getslice(text, x2c_slice_bound(cut), (-2147483647 - 1), 1)));
@@ -331,13 +331,13 @@ Path Path_absolute(Path path);
 void Path_copy_tree(Path source, Path target){
   if(! _init_guard_) _file_init_();
   struct stat info;
-  if(! lstat(source, & info) && S_ISDIR(info.st_mode) && String_startswith(String_join(NULL, cons(String_var(Path_absolute(target)), cons(String_var(_7), NULL))), String_join(NULL, cons(String_var(Path_absolute(source)), cons(String_var(_7), NULL))))) File_path_error(String_var(_8), target, EINVAL);
+  if(! lstat(source, & info) && S_ISDIR(info.st_mode) && String_startswith(String_join(NULL, cons(String_var(Path_absolute(target)), cons(String_var(_7), NULL))), cons(String_var(String_join(NULL, cons(String_var(Path_absolute(source)), cons(String_var(_7), NULL)))), NULL))) File_path_error(String_var(_8), target, EINVAL);
   _copy_tree(source, target);
 }
 
-Path Path_join(Path base, Path name);
+Path Path_join(Path base, List names);
 
-List String_split(String, String);
+List String_split(String, String, List);
 
 static int List_try_next(List, List *, Var *);
 
@@ -349,14 +349,14 @@ Path Path_absolute(Path path){
   if(! _init_guard_) _file_init_();
   char buffer[PATH_MAX];
   if(realpath(path, buffer)) return String_new(buffer);
-  if(! String_startswith(path, _0)){
+  if(! String_startswith(path, cons(String_var(_0), NULL))){
     if(! getcwd(buffer, sizeof(buffer))) File_path_error(String_var(_9), path, errno);
-    path = Path_join(String_new(buffer), path);
+    path = Path_join(String_new(buffer), cons(String_var(path), NULL));
   }
   Path result = _0;
   {
     String part;
-    List _x2c_gensym_macro_object_0 = String_split(path, _0);
+    List _x2c_gensym_macro_object_0 = String_split(path, _0, NULL);
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
@@ -367,7 +367,7 @@ Path Path_absolute(Path path){
           result = Path_dirname(result);
           continue;
         }
-        result = Path_join(result, part);
+        result = Path_join(result, cons(String_var(part), NULL));
         if(realpath(result, buffer)) result = String_new(buffer);
       }
 
@@ -516,17 +516,31 @@ Path Path_temp_dir(void){
   if(! _init_guard_) _file_init_();
   const char * parent = getenv("TMPDIR");
   Path root = parent && * parent ? String_new(parent) : _17;
-  String pattern = Path_join(root, _18);
+  String pattern = Path_join(root, cons(String_var(_18), NULL));
   char * created = xmemdup(pattern, String_len(pattern) + 1);
   if(! mkdtemp(created)) File_path_error(String_var(_19), root, errno);
   return String_new(created);
 }
 
-Path Path_join(Path base, Path name){
+Path Path_join(Path base, List names){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(name)) return base;
-  if(! String_truth(base) || String_startswith(name, _0)) return name;
-  return String_endswith(base, _0) ? String_join(NULL, cons(String_var(base), cons(String_var(name), NULL))) : String_join(NULL, cons(String_var(base), cons(String_var(_7), cons(String_var(name), NULL))));
+  {
+    Path name;
+    List _x2c_gensym_macro_object_1 = names;
+    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
+    Var _x2c_gensym_macro_cursor_output_1;
+    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_1);
+      {
+        if(! String_truth(name)) continue;
+        if(! String_truth(base) || String_startswith(name, cons(String_var(_0), NULL))) base = name;
+        else base = String_endswith(base, cons(String_var(_0), NULL)) ? String_join(NULL, cons(String_var(base), cons(String_var(name), NULL))) : String_join(NULL, cons(String_var(base), cons(String_var(_7), cons(String_var(name), NULL))));
+      }
+
+    }
+
+  }
+  return base;
 }
 
 static String _trimmed(String path){
@@ -575,12 +589,12 @@ static void _push_children(Array pending, Path directory){
   List children = List_reverse(Path_list_dir(directory));
   {
     String name;
-    List _x2c_gensym_macro_object_1 = children;
-    List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
-    Var _x2c_gensym_macro_cursor_output_1;
-    while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_1);
-      Array_push(pending, String_var(Path_join(directory, name)));
+    List _x2c_gensym_macro_object_2 = children;
+    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+      Array_push(pending, String_var(Path_join(directory, cons(String_var(name), NULL))));
     }
 
   }
@@ -591,11 +605,11 @@ static int _glob_depth(String components){
   int depth = 0;
   {
     String part;
-    List _x2c_gensym_macro_object_2 = String_split(components, _0);
-    List _x2c_gensym_macro_cursor_2 = _x2c_gensym_macro_object_2;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
-      part = Var_as_string(_x2c_gensym_macro_cursor_output_2);
+    List _x2c_gensym_macro_object_3 = String_split(components, _0, NULL);
+    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
+      part = Var_as_string(_x2c_gensym_macro_cursor_output_3);
       {
         if(! String_truth(part)) continue;
         if(String_equal(part, _20)) return - 1;
@@ -611,18 +625,18 @@ static int _glob_depth(String components){
 static void _glob(Glob * g, Path directory, int depth){
   {
     String name;
-    List _x2c_gensym_macro_object_3 = Path_list_dir(directory);
-    List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
-    Var _x2c_gensym_macro_cursor_output_3;
-    while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
-      name = Var_as_string(_x2c_gensym_macro_cursor_output_3);
+    List _x2c_gensym_macro_object_4 = Path_list_dir(directory);
+    List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
+    Var _x2c_gensym_macro_cursor_output_4;
+    while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
+      name = Var_as_string(_x2c_gensym_macro_cursor_output_4);
       {
-        Path child = Path_join(directory, name);
+        Path child = Path_join(directory, cons(String_var(name), NULL));
         String candidate = child;
         if(!(* g).rooted) candidate = String_getslice(candidate, 2, (-2147483647 - 1), 1);
         if((* g).directories) candidate = String_join(NULL, cons(String_var(candidate), cons(String_var(_7), NULL)));
         if(Path_glob_match((* g).pattern, candidate) &&(!(* g).directories || Path_is_dir(child))) Array_push((* g).matches, String_var(candidate));
-        if(depth != 1 &&((* g).hidden || ! String_startswith(name, _3)) && _descends(child)) _glob(&((* g)), child, depth - 1);
+        if(depth != 1 &&((* g).hidden || ! String_startswith(name, cons(String_var(_3), NULL))) && _descends(child)) _glob(&((* g)), child, depth - 1);
       }
 
     }
@@ -745,7 +759,7 @@ static void _remove_entries(Path path, String * failed, int * failure){
       {
         String child_failed = NULL;
         int child_failure = 0;
-        _remove_tree(Path_join(path, String_new(entry -> d_name)), &(child_failed), &(child_failure));
+        _remove_tree(Path_join(path, cons(String_var(String_new(entry -> d_name)), NULL)), &(child_failed), &(child_failure));
         if(String_truth(child_failed) && ! String_truth((* failed))){
           (* failed) = Var_as_string(Context_export(context, String_var(child_failed)));
           (* failure) = child_failure;
@@ -786,12 +800,12 @@ static void _copy_tree(Path source, Path target){
     Path_make_dirs(target);
     {
       String name;
-      List _x2c_gensym_macro_object_4 = Path_list_dir(source);
-      List _x2c_gensym_macro_cursor_4 = _x2c_gensym_macro_object_4;
-      Var _x2c_gensym_macro_cursor_output_4;
-      while(List_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4))){
-        name = Var_as_string(_x2c_gensym_macro_cursor_output_4);
-        _copy_tree(Path_join(source, name), Path_join(target, name));
+      List _x2c_gensym_macro_object_5 = Path_list_dir(source);
+      List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
+      Var _x2c_gensym_macro_cursor_output_5;
+      while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_5))){
+        name = Var_as_string(_x2c_gensym_macro_cursor_output_5);
+        _copy_tree(Path_join(source, cons(String_var(name), NULL)), Path_join(target, cons(String_var(name), NULL)));
       }
 
     }

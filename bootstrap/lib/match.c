@@ -973,11 +973,11 @@ Buffer MachineProgram_write_str(MachineProgram value, Buffer out){
   return Buffer_printf(out, "<MachineProgram: 0x%012lX>", (long) value);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 String MachineProgram_str(MachineProgram value){
   if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -1056,7 +1056,7 @@ Buffer MachineProgram_write_repr(MachineProgram value, Buffer out){
 
 String MachineProgram_repr(MachineProgram value){
   if(! _init_guard_) _file_init_();
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0

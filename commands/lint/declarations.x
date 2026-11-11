@@ -125,26 +125,26 @@ static String _join(String left, String right):
    opens a call, an expression body, an assignment, or a control body joins
    its successor only when that completes the statement. */
 static int _rejoined(Lines lines, Array text, int start, int stop):
-  String first = text[start], whole = first.strip(NULL)
-  int indent = first.len() - first.lstrip(NULL).len()
+  String first = text[start], whole = first.strip()
+  int indent = first.len() - first.lstrip().len()
   for (int at = start + 1; at < stop; at++):
     String line = text[at]
-    whole = _join(whole, line.strip(NULL))
+    whole = _join(whole, line.strip())
   if indent + whole.len() <= 79: return 1
-  String previous = first.rstrip(NULL)
+  String previous = first.rstrip()
   int result = 1, depth = 0, control = lines.control[start]
   int opener = lines.opener[start], closer = lines.closer[start]
   for (int at = start + 1; at < stop; at++):
     String line = text[at]
     depth += lines.delta[at - 1]
     int head = control && !depth && closer
-    String joined = _join(previous, line.strip(NULL))
+    String joined = _join(previous, line.strip())
     if joined.len() <= 79 && !(head && result > 1) &&
        (at == stop - 1 || !(head || opener)):
       previous = joined
       if !lines.code[at]: continue
     else:
-      previous = line.rstrip(NULL)
+      previous = line.rstrip()
       result++
     opener = lines.opener[at]
     closer = lines.closer[at]
@@ -236,7 +236,7 @@ static void _subject(Lint l, int start, int body, int end):
   int line_start = l.tokens[from].pos - (l.tokens[from].col - 1)
   int stop = l.tokens[end - 1].pos + l.tokens[end - 1].len
   String before = String.new_len(l.text + line_start, stop - line_start)
-  Buffer after = auto Buffer.new(0)
+  Buffer after = auto Buffer.new()
   after.write_len(l.text + line_start, l.tokens[from].pos - line_start)
   for (int at = from; at < end; at++):
     Token t = l.at(at)
@@ -333,8 +333,7 @@ static void _saved_bindings(Lint l, Compiler c, List node, int line):
         match item:
           case %(bind (binding ? ?name) ?):
             String word = name
-            if word.startswith("old_") || word.startswith("saved_") ||
-               word.startswith("previous_"):
+            if word.startswith("old_", "saved_", "previous_"):
               l.add("saved-local", line,
                     %"review $word as a scoped override")
       return

@@ -94,7 +94,7 @@ HttpRequest HttpRequest.read(File input, int body_limit) {
     if (colon <= 0) Http.fail(400, "malformed header");
     String name = String.new_len(line, colon).lower();
     if (!_header_name(name)) Http.fail(400, "invalid header name");
-    String value = String.new(line + colon + 1).strip(NULL);
+    String value = String.new(line + colon + 1).strip();
     if (req.headers.contains(name)) {
       if (name == "content-length") Http.fail(400, "duplicate content length");
       value = String.format("%s, %s", req.headers[name].str(), value);
@@ -134,7 +134,7 @@ Var HttpRequest.json(HttpRequest req) => Json.parse(req.body);
 /** Creates an empty 200 response. */
 HttpResponse HttpResponse.new(void) {
   HttpResponse res = Scope.calloc(1, sizeof(struct HttpResponse));
-  res.code = 200; res.headers = {}; res.body = Buffer.new(0);
+  res.code = 200; res.headers = {}; res.body = Buffer.new();
   return res;
 }
 
@@ -185,7 +185,7 @@ void HttpResponse.write(HttpResponse res, File output, int keep_alive) =>
 
 static void _write(
   HttpResponse res, File output, int keep_alive, int head_only) {
-  Buffer head = auto Buffer.new(0);
+  Buffer head = auto Buffer.new();
   head.printf("HTTP/1.1 %d %s\r\n", res.code, _reason(res.code));
   res.headers["content-length"] = String.printf("%ld", (long) res.body.len());
   res.headers["connection"] = keep_alive ? "keep-alive" : "close";
@@ -270,13 +270,14 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
 }
 
 /** Binds immediately; port 0 selects an available port.
-    Options use Symbol keys.
+    Keyword options use Symbol keys. Splice an existing Map with
+    `@options`; omitted options use the server defaults.
     Raises: `<bad-arg>` for fewer than one worker, an idle timeout below one
     millisecond, a negative body limit, a NULL `logger`, or an invalid port,
     `<not-found>` when the host does not resolve, or `<io-fail>` on a host
     failure while binding, as `Listener.bind` does.
 */
-HttpServer HttpServer.new(Router router, Map options) {
+HttpServer HttpServer.new(Router router, Map @options) {
   HttpServer s = Scope.calloc(1, sizeof(struct HttpServer));
   int ready = 0;
   defer if (!ready && s.owns_logger) s.logger.free();
