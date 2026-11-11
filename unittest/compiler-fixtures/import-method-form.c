@@ -17,6 +17,10 @@ int main(void){
     printf("section %d\n", (panel).depth);
     printf("%d\n", panels__Panel_label(panel, 3) * 10);
   }
+  {
+    printf("section %d\n", (panel).depth);
+    printf("%d\n", panels__Panel_label(panel, 4) * 10);
+  }
   return 0;
 }
 

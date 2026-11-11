@@ -268,6 +268,12 @@ static List _method(CallSite &k, List receiver, List field) {
   k.receiver = receiver;
   k.field = field;
   List resolution = _lookup(k);
+  /* A template's receiver may get its type only where the template
+     expands, and a method-form macro of that type then takes the call. */
+  if (k.c.macro_stack && !k.c.macro_holes) {
+    List macro = k.c.bind_method_macro(k.receiver, k.method, k.supplied);
+    if (macro) return macro;
+  }
   if (!resolution && _deferred_receiver(k.receiver)) {
     List callee = %(expr (<macro-expr>) (op . $(k.receiver) $(k.field)));
     return _finish(k, k.result_type, callee, NULL, NULL);
@@ -526,18 +532,23 @@ static List _resolve_call_arguments(
     if (value is <list> && !value.is_nil() &&
         value.car() == <seq>)
       foreach (List item in value.list().cdr())
-        arguments.push(c.resolve_expression(item, origin));
+        arguments.push(c.resolve_expression(_entry_argument(item), origin));
     else if (slot)
       arguments.push(
         c.resolve_expression(
           c.lift_meta_expression(value, origin), origin)
       );
     else if (value is <list>)
-      arguments.push(c.resolve_expression(value, origin));
+      arguments.push(c.resolve_expression(_entry_argument(value), origin));
     else arguments.push(value);
   }
   return arguments.list_free();
 }
+
+/* An `Entry` row spliced into a call is a `key: value` argument, spelled
+   as `parse_call_entry` spells one. */
+static List _entry_argument(List item) =>
+  item.car() == <map-entry> ? %(expr ("Map") $item) : item;
 
 /* Returns the printf-family entry a callee names, or `NULL`. A resolved
    user function that happens to use a libc spelling is not one. */

@@ -62,6 +62,10 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
 */
 List Compiler.parse_macro_expression_target(Compiler c) => _parse_cast(c);
 
+/** Parses the argument list at the cursor as a call of `callee`. */
+List Compiler.parse_call(Compiler c, List callee) =>
+  _parse_postfix_apply(c, callee);
+
 /** Parses an assignment expression and any following comma expressions.
     A comma expression retains source order and takes the type of its final
     value. `c.token` stops at the first token outside the expression.
@@ -440,7 +444,8 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   Array arguments = [], notes = [];
   if (c.peek(0) == <)>) arguments.push(%(expr (void) ()));
   while (c.peek(0) != <)>) {
-    List argument = c.try_parse_macro_slot(<argument>);
+    List argument = _entry_rows_slot(c);
+    if (!argument) argument = c.try_parse_macro_slot(<argument>);
     if (!argument) argument = c.parse_call_splice();
     if (!argument) argument = c.parse_call_entry();
     arguments.push(argument ? argument : c.parse_assignment());
@@ -463,6 +468,14 @@ static List _parse_postfix_apply(Compiler c, List expr) {
     match (expr) case %(expr () (op . ? (?name))):
       _note_explicit_converter(c, result, name.str(), origin);
   return result;
+}
+
+/* In a template, an `Entry` hole spliced into a call forwards its rows as
+   the call's `key: value` arguments. */
+static List _entry_rows_slot(Compiler c) {
+  List hole = c.peek_macro_hole();
+  return hole && hole.assoc(<kind>) == <map-entry>
+    ? c.try_parse_macro_slot(<map-entry>) : NULL;
 }
 
 /* A delegate rewrite selects its method after the initial member lookup.

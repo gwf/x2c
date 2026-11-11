@@ -33,56 +33,141 @@ List Compiler.try_parse_macro_expression(Compiler c) {
     `dot` is its `.`. Returns NULL, consuming nothing, when no such macro
     applies; the call is then an ordinary method call.
 
-    Raises: `<method-dec>` when `$T.name` is a decorator, `start` begins
-    an expression statement, and a target follows the arguments. The
-    statement continues with `parse_method_decorator`.
+    Raises: `<method-dec>` when `start` begins an expression statement, a
+    target follows the arguments, and `$T.name` is a decorator or, in a
+    template, may be one where the template expands. The statement
+    continues with `parse_method_decorator`.
 */
 List Compiler.try_parse_method_macro(
   Compiler c, List receiver, Token start, Token dot) {
-  List definition = _method_macro(c, receiver, Token.skip_trivia(dot + 1));
-  if (!definition) return NULL;
-  int decorator = definition.assoc(<kind>) == <decorator>;
-  if (decorator && (start != c.meta_statement || !_target_follows(c)))
-    return NULL;
-  c.method_receiver = _capture_source(c, receiver, start, dot);
-  if (decorator) {
+  List definition =
+    _method_macro(c, receiver, Token.skip_trivia(dot + 1).text);
+  int decorator = definition && definition.assoc(<kind>) == <decorator>;
+  if (definition && !decorator) {
+    c.method_receiver = _capture_source(c, receiver, start, dot);
+    return c.resolve_expression(
+      _expression_invocation(c, definition, start), start);
+  }
+  if ((decorator || c.macro_holes) && start == c.meta_statement &&
+      _target_follows(c)) {
+    c.method_receiver = _capture_source(c, receiver, start, dot);
     c.method_decorator = definition;
     raise %(method-dec);
   }
-  return c.resolve_expression(
-    _expression_invocation(c, definition, start), start);
+  return NULL;
 }
 
 /** Parses the method-form decorator application whose arguments begin at
     the cursor, after `try_parse_method_macro` raised `<method-dec>` for
-    the expression statement that begins at `start`.
+    the expression statement that begins at `start`. In a template whose
+    receiver has no type yet, the result is `(method-decorator CALL
+    TARGET)`, which `bind_method_decorator` applies where it expands.
 */
 List Compiler.parse_method_decorator(
   Compiler c, Token start, Symbol position) {
-  List definition = c.method_decorator;
+  List definition = c.method_decorator, receiver = c.method_receiver;
   c.method_decorator = NULL;
-  return _decorate(c, definition, start, position, 0);
+  if (definition) return _decorate(c, definition, start, position, 0);
+  c.method_receiver = NULL;
+  String name = _previous_source_token(c, c.token).text;
+  List call = c.parse_call(%(expr () (op . $receiver ($name))));
+  return %(method-decorator $call $(c.parse_governed(position)));
+}
+
+/** Expands a template's method-form call `receiver.name(supplied)` as the
+    Expression macro `$T.name` once the receiver has its type where the
+    template expands. Returns NULL when no such macro applies.
+*/
+List Compiler.bind_method_macro(
+  Compiler c, List receiver, String name, List supplied) {
+  List definition = _method_macro(c, receiver, name);
+  if (!definition || definition.assoc(<kind>) != <expression>) return NULL;
+  List input = _method_arguments(c, definition, receiver, supplied);
+  return c.bind_syntax(
+    %(macro-invoke $definition $input m-invoke), <expression>,
+    c.return_type);
+}
+
+/** Applies a template's `(method-decorator CALL TARGET)` as the decorator
+    `$T.name` of the call's receiver, at `position`.
+*/
+List Compiler.bind_method_decorator(
+  Compiler c, List call, List target, Symbol position) {
+  match (call)
+    case $called(%(expr ? (op . ?receiver (?(String name)))), *supplied): {
+      receiver = c.resolve_expression(receiver, c.token);
+      List definition = _method_macro(c, receiver, name);
+      if (!definition || definition.assoc(<kind>) != <decorator>)
+        $fail.macros_macro_unbound(c, c.token, _method_spelling(receiver, name));
+      List input = %(target
+        $(_method_arguments(c, definition, receiver, supplied))
+        $(_capture_row_project(c, definition.assoc(<targetp>), $(target), 0)));
+      return c.bind_syntax(
+        %(macro-invoke $definition $input m-invoke), position, c.return_type);
+    }
+  __builtin_unreachable();
 }
 
 /* The Expression macro or decorator `$T.name` for the receiver's named type
    `T`, which a package type finds by its source name, as `$Ui.row` for
-   `x2cui__Ui`. A template's receiver has no type yet, so there
-   `receiver.name(...)` is the method, and a macro can wrap the method it
-   shadows. */
-static List _method_macro(Compiler c, List receiver, Token name) {
-  if (c.macro_holes) return NULL;
+   `x2cui__Ui`. While `$T.name` expands, including inside the macros it
+   expands, `receiver.name(...)` is the method, so a macro can wrap the
+   method it shadows. */
+static List _method_macro(Compiler c, List receiver, String name) {
   Type type = receiver.cadr();
   Var owner = type ? type.car() : NULL;
   if (owner is not <string>) return NULL;
-  String member = name.text, source = c.package_source_name(owner);
+  String source = c.package_source_name(owner);
   Var stored;
-  if (!_try_macro(c, c.macros, Atom.intern(%"$owner.$member"), stored) &&
+  if (!_try_macro(c, c.macros, Atom.intern(%"$owner.$name"), stored) &&
       (source == owner ||
-       !_try_macro(c, c.macros, Atom.intern(%"$source.$member"), stored)))
+       !_try_macro(c, c.macros, Atom.intern(%"$source.$name"), stored)))
     return NULL;
   List definition = stored;
+  foreach (List active in c.macro_stack)
+    if (active.car() == definition) return NULL;
   Symbol kind = definition.assoc(<kind>);
   return kind == <expression> || kind == <decorator> ? definition : NULL;
+}
+
+// The decorator name a method form spells, as `Ui.row`.
+static String _method_spelling(List receiver, String name) {
+  Var owner = receiver.cadr() ? receiver.cadr().car() : NULL;
+  return owner is <string> ? %"$owner.$name" : name;
+}
+
+/* The capture rows of a method form whose arguments a template parsed as
+   a call's: the receiver, then each argument in order, a sequence hole
+   taking the rest. A forwarded `key: value` row fills an Entry hole. */
+static List _method_arguments(
+  Compiler c, List definition, List receiver, List supplied) {
+  List rest = cons(receiver, _call_values(supplied));
+  Array values = [];
+  foreach (List hole in definition.assoc(<parameters>).list()) {
+    if (hole.assoc(<sequence>).int()) {
+      values.push(rest);
+      rest = NULL;
+      continue;
+    }
+    if (!rest) $fail.macros_macro_missing_args(c, c.token);
+    values.push(rest.car());
+    rest = rest.cdr();
+  }
+  if (rest) $fail.macros_macro_extra_args(c, c.token);
+  return _template_arguments(c, definition, values.list_free(), c.token, 0);
+}
+
+/* A call's arguments as values: no arguments for `()`, the items of a
+   spliced sequence, and a `key: value` argument as its row. */
+static List _call_values(List supplied) {
+  Array values = [];
+  foreach (Var argument in supplied) match (argument) {
+    case %(expr (void) ()): {}
+    case %(seq *items): foreach (Var item in items) values.push(item);
+    case %(expr ? (!set ?row (map-entry ? ?))): values.push(row);
+    default: values.push(argument);
+  }
+  return values.list_free();
 }
 
 /* Whether a decorator's target follows the arguments that begin at the
