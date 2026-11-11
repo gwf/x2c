@@ -27,6 +27,74 @@ List Compiler.try_parse_macro_expression(Compiler c) {
     _expression_invocation(c, definition, invocation), invocation);
 }
 
+/** Expands `receiver.name(...)` as the Expression macro `$T.name` of the
+    receiver's named type `T`, with the receiver as its first explicit
+    argument. The receiver's postfix expression begins at `start`, and
+    `dot` is its `.`. Returns NULL, consuming nothing, when no such macro
+    applies; the call is then an ordinary method call.
+
+    Raises: `<method-dec>` when `$T.name` is a decorator, `start` begins
+    an expression statement, and a target follows the arguments. The
+    statement continues with `parse_method_decorator`.
+*/
+List Compiler.try_parse_method_macro(
+  Compiler c, List receiver, Token start, Token dot) {
+  List definition = _method_macro(c, receiver, Token.skip_trivia(dot + 1));
+  if (!definition) return NULL;
+  int decorator = definition.assoc(<kind>) == <decorator>;
+  if (decorator && (start != c.meta_statement || !_target_follows(c)))
+    return NULL;
+  c.method_receiver = _capture_source(c, receiver, start, dot);
+  if (decorator) {
+    c.method_decorator = definition;
+    raise %(method-dec);
+  }
+  return c.resolve_expression(
+    _expression_invocation(c, definition, start), start);
+}
+
+/** Parses the method-form decorator application whose arguments begin at
+    the cursor, after `try_parse_method_macro` raised `<method-dec>` for
+    the expression statement that begins at `start`.
+*/
+List Compiler.parse_method_decorator(
+  Compiler c, Token start, Symbol position) {
+  List definition = c.method_decorator;
+  c.method_decorator = NULL;
+  return _decorate(c, definition, start, position, 0);
+}
+
+/* The Expression macro or decorator `$T.name` for the receiver's named type
+   `T`, which a package type finds by its source name, as `$Ui.row` for
+   `x2cui__Ui`. A template's receiver has no type yet, so there
+   `receiver.name(...)` is the method, and a macro can wrap the method it
+   shadows. */
+static List _method_macro(Compiler c, List receiver, Token name) {
+  if (c.macro_holes) return NULL;
+  Type type = receiver.cadr();
+  Var owner = type ? type.car() : NULL;
+  if (owner is not <string>) return NULL;
+  String member = name.text, source = c.package_source_name(owner);
+  Var stored;
+  if (!_try_macro(c, c.macros, Atom.intern(%"$owner.$member"), stored) &&
+      (source == owner ||
+       !_try_macro(c, c.macros, Atom.intern(%"$source.$member"), stored)))
+    return NULL;
+  List definition = stored;
+  Symbol kind = definition.assoc(<kind>);
+  return kind == <expression> || kind == <decorator> ? definition : NULL;
+}
+
+/* Whether a decorator's target follows the arguments that begin at the
+   cursor: a brace, `$`, or a word other than the operators `is` and `in`.
+   No other word can follow the closing parenthesis of a call inside an
+   expression. */
+static int _target_follows(Compiler c) {
+  Token next = c.token.after_group();
+  return next.type == <"{"> || next.type == <$> ||
+    (next.text.is_identifier() && next.text != "is" && next.text != "in");
+}
+
 /* Returns the Macro value of a `$name` without arguments; otherwise restores
    the cursor to `$`. */
 static List _named_macro_value(Compiler c, Token invocation) {

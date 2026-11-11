@@ -103,19 +103,13 @@ List Compiler.publish_protocol_node(
     A `Base.participant` reverse converter is declared under the participant's
     source spelling, and package mode rewrites that joined name as a whole, so
     the package prefix sits at the front of the derived binding instead of
-    inside it. The split is keyed on a known package because a foreign
-    header may spell `__` in a type name.
+    inside it.
 */
 String Compiler.reverse_converter_spelling(
   Compiler c, String base_name, String infix, String participant) {
-  int split = participant.find("__");
-  String package = split > 0 &&
-    (c.package == participant[:split] ||
-     participant[:split] in c.package_roots)
-      ? participant[:split] : NULL;
-  String bare = package ? participant[split + 2:] : participant;
-  String binding = %"$(base_name)_$infix$(bare.lower())";
-  return package ? %"$(package)__$binding" : binding;
+  String bare = c.package_source_name(participant);
+  String prefix = participant[:participant.len() - bare.len()];
+  return %"$prefix$(base_name)_$infix$(bare.lower())";
 }
 
 // registry lifecycle

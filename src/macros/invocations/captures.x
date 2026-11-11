@@ -9,13 +9,23 @@ static keyword loop $private.loop;
 
 module List _invocation_arguments(
   Compiler c, List definition, Token invocation) {
-  if (_bare(invocation, definition)) return %(args);
+  List receiver = c.method_receiver;
+  c.method_receiver = NULL;
+  if (!receiver && _bare(invocation, definition)) return %(args);
   Array arguments = [];
   // The first Param hole opens one scope for the rest of the arguments.
   int parameter_scope = 0;
   defer { if (parameter_scope) c.sym.pop_scope(); }
   c.expect(<(>);
   List descriptors = definition.assoc(<parameters>);
+  /* A method-form macro's receiver is its first explicit argument, as in
+     `$T.name(receiver, ...)`. */
+  if (receiver) {
+    if (!descriptors) $fail.macros_macro_extra_args(c, c.token);
+    arguments.push(
+      _capture_row_project(c, descriptors.car(), $(receiver), 0));
+    descriptors = descriptors.cdr();
+  }
   for (List nodes = descriptors; nodes; nodes = nodes.cdr()) {
     List hole = nodes.car();
     Symbol kind = hole.assoc(<kind>);
