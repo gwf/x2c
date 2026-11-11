@@ -448,15 +448,10 @@ typedef struct RowOptions { bool selected; } RowOptions;
 /** What `ui.each` has seen of the items drawn in it so far. */
 typedef struct ItemTrail { bool listing, selected; int items; } ItemTrail;
 
-/** Runs the block once for each element of `$items`, with the variable
-    `$element` declares holding it, as `foreach` holds it. Each pass pushes
-    the id `key:` names, or the element's position, so a row keeps its
-    state when the list is filtered or reordered. The id is popped on
-    every exit.
-
-    A template cannot pass a declaration to `foreach`, so the variable is
-    declared before the loop and assigned in each pass; see
-    `cui_assign`.
+/** Runs the block once for each element of `$items`, with `$element`
+    declared as `foreach` declares it. Each pass pushes the id `key:`
+    names, or the element's position, so a row keeps its state when the
+    list is filtered or reordered. The id is popped on every exit.
 */
 macro Decorator $Ui.each(
   Stmt $body, Expr $ui, Decl $element, Expr $items, Entry @options) {
@@ -466,9 +461,7 @@ macro Decorator $Ui.each(
     ItemTrail trail = ui.each_begin();
     defer ui.each_end(trail);
     int position = 0;
-    $element;
-    foreach (Var value in $items) {
-      $cui_assign($element, value);
+    foreach ($element in $items) {
       $cui_push_key(ui, position, $options);
       defer {
         cui_pop_id(ui);

@@ -6,10 +6,11 @@
 /*  x2cui-options.x -- `name: value` arguments as CUI option records
 
     A method form such as `ui.button("Add", variant: primary)` calls its
-    method through `cui_call`. Each `name: value` argument becomes the
-    field `name` of the option record the method takes last, so a call
-    builds no Map: the generated C holds only a designated initializer. A
-    misspelled name is a C error that names the field.
+    method with the arguments `cui_arguments` returns. Each `name: value`
+    argument becomes the field `name` of the option record the method
+    takes last, so a call builds no Map: the generated C holds only a
+    designated initializer. A misspelled name is a C error that names the
+    field.
 
     Every value, and every ordinary argument, is lowered by the C type of
     its field or parameter:
@@ -36,20 +37,28 @@
     form, so they are public.
 */
 
-/** Returns the call of the `Ui` method `method` on `ui` with `args`, and
-    with `options` as the record of the option parameter that follows them.
+/** Returns the arguments of the `Ui` method `method` on `ui`: `args`,
+    and `options` as the record of the option parameter that follows them.
 */
-meta List cui_call(List ui, String method, List options, List @args) =>
-  _call(ui, _signature(ui, method), method, options, args);
+meta List cui_arguments(List ui, String method, List options, List @args) {
+  List types = Type.parameters(_signature(ui, method));
+  int count = args.len();
+  Array passed = [];
+  for (int i = 0; i < count; i++)
+    passed.push(cui_value(types[i + 1], args[i]));
+  if (types.len() > count + 1)
+    passed.push(cui_record(types[count + 1], options));
+  return passed.list_free();
+}
 
-/** Returns `cui_call`'s call of a block's begin method as a test that is
-    true while the block is open: the call itself when it reports that,
-    and otherwise the call followed by 1.
+/** Returns the call of the `Ui` method `method` on `ui` with the
+    arguments `cui_arguments` returns. A method with a method form is
+    called from that form's template instead, where the call is the method.
 */
-meta List cui_begin(List ui, String method, List options, List @args) {
-  Type sig = _signature(ui, method);
-  List call = _call(ui, sig, method, options, args);
-  return Type.return_type(sig) ~= %(void) ? $!( ($call, 1) ) : call;
+meta List cui_call(List ui, String method, List options, List @args) {
+  List m = x2c_ident(method);
+  List passed = cui_arguments(ui, method, options, @args);
+  return $!( $ui.$m(@passed) );
 }
 
 /** Returns `value`, the value of a field or argument of type `type`, with
@@ -76,19 +85,6 @@ meta List cui_record(Type record, List options) {
   List fields = Type.fields(record);
   List rows = options.map(%!(List row) => _field(fields, row));
   return $!( ($record){ @rows } );
-}
-
-/** Returns `name = value` for the variable the declaration `element`
-    declares, as one pass of `ui.each` assigns its element.
-*/
-meta List cui_assign(List element, List value) {
-  match (element) {
-    case %(declare ? (bindings (bind ?name ()))): {
-      List variable = %(expr () (ident $name));
-      return $!( $variable = $value );
-    }
-  }
-  return element;
 }
 
 /** Returns the call that pushes the id of one pass of `ui.each`: the
@@ -121,23 +117,10 @@ meta List cui_table_begin(List ui, List id, List columns, List options) {
 
 // calls
 
+// The receiver comes first among the method's parameter types.
 meta static Type _signature(List ui, String method) {
   List member = Type.resolve_member(Code.type(ui), method, 1);
   return member[2];
-}
-
-// The receiver comes first among the method's parameter types.
-meta static List _call(
-  List ui, Type sig, String method, List options, List args) {
-  List types = Type.parameters(sig);
-  int count = args.len();
-  Array passed = [];
-  for (int i = 0; i < count; i++)
-    passed.push(cui_value(types[i + 1], args[i]));
-  if (types.len() > count + 1)
-    passed.push(cui_record(types[count + 1], options));
-  List m = x2c_ident(method), lowered = passed.list_free();
-  return $!( $ui.$m(@lowered) );
 }
 
 // option records

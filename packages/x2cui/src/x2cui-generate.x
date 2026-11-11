@@ -22,9 +22,11 @@
     A `const char *` result is a String.
 
     Every other parameter passes unchanged. The table of rows is in
-    x2cui.x. A component that takes an option record, and each of CUI's
-    block components, also gets a method form; see "Method forms" below. A function that takes an array of records or numbers has no
+    x2cui.x. A function that takes an array of records or numbers has no
     row here, because its pointer is not one of these conventions.
+
+    A component that takes an option record, and each of CUI's block
+    components, also gets a method form; see "Method forms" below.
 */
 
 meta static int _pointer(List type) => type.len() > 1 && type[0] == <*>;
@@ -140,88 +142,94 @@ macro Unit $cui.method(Name $target) { @cui_method($target) }
 
     The form of a component is an Expression macro `$Ui.NAME`; the form of
     a block component, whose C functions are `cui_NAME_begin` and
-    `cui_NAME_end`, is a decorator `$Ui.NAME`. Inside its own expansion,
+    `cui_NAME_end`, is a decorator `$Ui.NAME`. Written in its own template,
     `ui.NAME(...)` is the method the form wraps. Each form is one of the
-    templates below, one for each count of ordinary arguments, renamed by
-    `$cui.named`. Its expansion calls `cui_call` or `cui_begin`, which read
-    the method's parameter types and lower each value by its type; see
-    x2cui-options.x.
+    templates below, one for each count of ordinary arguments, which takes
+    its name from the method. A component's form calls its method with
+    the arguments `cui_arguments` returns, and a block's form calls its
+    begin method through `cui_begin`; both read the method's parameter
+    types and lower each value by its type; see x2cui-options.x.
 */
 
-/** Returns `definition` renamed `Ui.method`. */
-meta List cui_named(List definition, Var method) {
-  Atom name = Atom.intern(%"Ui.$(Code.binding_spelling(method))");
-  return %(macrodef @(definition.cdr().map(%!(List row) =>
-      row ~= %(name ?) ? %(name $name) : row)));
-}
+/* CUI's own block macros, `cui_NAME(ui, ...) { ... }`, which run their
+   block between `cui_NAME_begin` and `cui_NAME_end`. Each has a block
+   form. Those that CUI writes with `CUI__SCOPE_IF` run the block only
+   while the begin call reports the block open. A table has its own form,
+   with a template of columns, a data grid keeps `$cui.data_grid`, and a
+   virtual list keeps `$cui.virtual_list`. */
+meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
+  "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
+  "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
+  "menu_bar" "toolbar" "status_bar");
+meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
+  "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
+  "user_menu" "menu_bar_menu" "inspector" "tree");
 
-/** Defines the macro `$definition` as `$Ui.method`. */
-macro Decorator $cui.named(Macro $definition, Name $method) =>
-  $cui_named($definition, $method);
+/** Returns the begin call of a block, `ui.NAME_begin(...)` with the
+    arguments `cui_arguments` returns, as a test that is true while the
+    block is open.
+*/
+meta List cui_begin(List ui, String block, List options, List @args) {
+  List call = cui_call(ui, %"$(block)_begin", options, @args);
+  return block in _openings ? call : $!( ($call, 1) );
+}
 
 /* The component templates. */
 
 macro Unit $cui.widget0(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(Expr $ui, Entry @options) =>
-    $cui_call($ui, $method, $options);
+  macro Expression $Ui.$method(Expr $ui, Entry @options) =>
+    $ui.$method(@cui_arguments($ui, $method, $options));
 }
 
 macro Unit $cui.widget1(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(Expr $ui, Expr $a, Entry @options) =>
-    $cui_call($ui, $method, $options, $a);
+  macro Expression $Ui.$method(Expr $ui, Expr $a, Entry @options) =>
+    $ui.$method(@cui_arguments($ui, $method, $options, $a));
 }
 
 macro Unit $cui.widget2(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(Expr $ui, Expr $a, Expr $b, Entry @options) =>
-    $cui_call($ui, $method, $options, $a, $b);
+  macro Expression $Ui.$method(Expr $ui, Expr $a, Expr $b, Entry @options) =>
+    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b));
 }
 
 macro Unit $cui.widget3(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(
+  macro Expression $Ui.$method(
     Expr $ui, Expr $a, Expr $b, Expr $c, Entry @options) =>
-    $cui_call($ui, $method, $options, $a, $b, $c);
+    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c));
 }
 
 macro Unit $cui.widget4(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(
+  macro Expression $Ui.$method(
     Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Entry @options) =>
-    $cui_call($ui, $method, $options, $a, $b, $c, $d);
+    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c, $d));
 }
 
 macro Unit $cui.widget5(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(
+  macro Expression $Ui.$method(
     Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Entry @options) =>
-    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e);
+    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c, $d, $e));
 }
 
 macro Unit $cui.widget6(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(
+  macro Expression $Ui.$method(
     Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f,
     Entry @options) =>
-    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e, $f);
+    $ui.$method(@cui_arguments($ui, $method, $options, $a, $b, $c, $d, $e, $f));
 }
 
 macro Unit $cui.widget7(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(
+  macro Expression $Ui.$method(
     Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g,
     Entry @options) =>
-    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e, $f, $g);
+    $ui.$method(
+      @cui_arguments($ui, $method, $options, $a, $b, $c, $d, $e, $f, $g));
 }
 
 macro Unit $cui.widget8(Name $method) {
-  $cui.named($method)
-  macro Expression $cui.widget(
+  macro Expression $Ui.$method(
     Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g,
     Expr $h, Entry @options) =>
-    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e, $f, $g, $h);
+    $ui.$method(@cui_arguments(
+      $ui, $method, $options, $a, $b, $c, $d, $e, $f, $g, $h));
 }
 
 /* The block templates. The receiver is evaluated once; the end call is
@@ -229,8 +237,7 @@ macro Unit $cui.widget8(Name $method) {
    begin call reports whether it is open runs only while it is open. */
 
 macro Unit $cui.block0(Name $block, Name $end) {
-  $cui.named($block)
-  macro Decorator $cui.block(Stmt $body, Expr $ui, Entry @options) {
+  macro Decorator $Ui.$block(Stmt $body, Expr $ui, Entry @options) {
     {
       typeof($ui) ui = $ui;
       if ($cui_begin(ui, $block, $options)) {
@@ -242,8 +249,7 @@ macro Unit $cui.block0(Name $block, Name $end) {
 }
 
 macro Unit $cui.block1(Name $block, Name $end) {
-  $cui.named($block)
-  macro Decorator $cui.block(Stmt $body, Expr $ui, Expr $a, Entry @options) {
+  macro Decorator $Ui.$block(Stmt $body, Expr $ui, Expr $a, Entry @options) {
     {
       typeof($ui) ui = $ui;
       if ($cui_begin(ui, $block, $options, $a)) {
@@ -255,8 +261,7 @@ macro Unit $cui.block1(Name $block, Name $end) {
 }
 
 macro Unit $cui.block2(Name $block, Name $end) {
-  $cui.named($block)
-  macro Decorator $cui.block(
+  macro Decorator $Ui.$block(
     Stmt $body, Expr $ui, Expr $a, Expr $b, Entry @options) {
     {
       typeof($ui) ui = $ui;
@@ -269,8 +274,7 @@ macro Unit $cui.block2(Name $block, Name $end) {
 }
 
 macro Unit $cui.block3(Name $block, Name $end) {
-  $cui.named($block)
-  macro Decorator $cui.block(
+  macro Decorator $Ui.$block(
     Stmt $body, Expr $ui, Expr $a, Expr $b, Expr $c, Entry @options) {
     {
       typeof($ui) ui = $ui;
@@ -283,8 +287,7 @@ macro Unit $cui.block3(Name $block, Name $end) {
 }
 
 macro Unit $cui.block4(Name $block, Name $end) {
-  $cui.named($block)
-  macro Decorator $cui.block(
+  macro Decorator $Ui.$block(
     Stmt $body, Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d,
     Entry @options) {
     {
@@ -321,28 +324,6 @@ meta static Macro _block_form(int count) {
     case 4: return $cui.block4;
   }
   return NULL;
-}
-
-/* CUI's own block macros, `cui_NAME(ui, ...) { ... }`, which run their
-   block between `cui_NAME_begin` and `cui_NAME_end`. Each has a block
-   form. Those that CUI writes with `CUI__SCOPE_IF` run the block only
-   while the begin call reports the block open. A table has its own form,
-   with a template of columns, a data grid keeps `$cui.data_grid`, and a
-   virtual list keeps `$cui.virtual_list`. */
-meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
-  "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
-  "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
-  "menu_bar" "toolbar" "status_bar");
-meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
-  "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
-  "user_menu" "menu_bar_menu" "inspector" "tree");
-
-/** Returns the begin call of a block, `ui.NAME_begin(...)` made by
-    `cui_call`, as a test that is true while the block is open.
-*/
-meta List cui_begin(List ui, String block, List options, List @args) {
-  List call = cui_call(ui, %"$(block)_begin", options, @args);
-  return block in _openings ? call : $!( ($call, 1) );
 }
 
 /* A row and a column end as a box does. */
