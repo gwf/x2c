@@ -10,7 +10,8 @@
 - License: MIT, reproduced verbatim in `LICENSES/cui-1.3.1-MIT.txt`.
   `licenses.sha256` pins every file under `LICENSES/`.
 
-The native source receives no patch.
+The macOS and Linux profiles compile the source without a patch. The
+browser profile applies one; see [Browser](#browser).
 
 ## Build profile
 
@@ -53,6 +54,34 @@ redistributed. Verified on macOS arm64.
 
 This profile has not been built or run. The package is not in `PACKAGES`
 in `packages/Makefile` until it has been.
+
+## Browser
+
+`dependency-wasm.json`, prepared with `CC=emcc AR=emar`. Emscripten
+compiles `cui.c` with `-m64 -Os -fsigned-char -sSUPPORT_LONGJMP=emscripten
+-sUSE_SDL=2 -DCUI_PLATFORM_SDL2`. The first four flags are those of x2c's
+browser runtime. `CUI_PLATFORM_SDL2` selects CUI's SDL2 window layer, and
+`-sUSE_SDL=2` supplies Emscripten's SDL2 port, which Emscripten downloads
+and builds on first use. SDL2 is under the zlib license, reproduced in
+`LICENSES/sdl2-zlib.txt`. The SDL2 version is the one the installed
+Emscripten ships; this package does not pin it.
+
+One patch, `patches/web-opengl-es.patch`, is applied to
+`src/platform/cui_app_sdl2.c`. CUI's SDL2 layer asks for a desktop OpenGL
+3.3 core context, which a browser does not offer. Under `__EMSCRIPTEN__`
+the patch asks for OpenGL ES 3.0, which is WebGL 2. CUI's OpenGL renderer
+already writes ES 3.0 shaders when it sees an ES context. Without the
+patch CUI falls back to its software renderer, which on a high-density
+display draws into one quarter of the canvas.
+
+A program links with `-sJSPI`, so that waiting for input returns control
+to the browser, and with `-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2
+-sGL_ENABLE_GET_PROC_ADDRESS=1`. It needs a browser with 64-bit
+WebAssembly memory, JavaScript Promise Integration, and WebGL 2.
+
+Verified on 2026-11-10 with Emscripten 6.0.13 and SDL 2.32.10: under
+Node 26 for off-screen drawing, and in the Chromium of the Claude desktop
+app's browser pane for the window. Not run in Safari or Firefox.
 
 ## Bundled third-party content
 

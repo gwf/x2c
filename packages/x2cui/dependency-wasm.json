@@ -1,0 +1,89 @@
+{
+  "schema": 1,
+  "name": "cui",
+  "version": "1.3.1",
+  "profile": "static-app-sdl2-wasm64",
+  "sources": [
+    {
+      "name": "cui",
+      "url": "https://github.com/yappologistic/CUI/archive/refs/tags/v1.3.1.tar.gz",
+      "sha256": "d925329943d377b748995efed5603b47ff469eb956c297244b562a73b74641d5",
+      "root": "CUI-1.3.1"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "patches/web-opengl-es.patch",
+      "sha256": "95ff8af9bf064fd90e859957ce6339330788036c75e5ab17431b55bb7eb01cdc"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/web-opengl-es.patch"
+      ]
+    },
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "python3",
+        "tools/amalgamate.py",
+        "{work}/amalgamation"
+      ]
+    },
+    {
+      "cwd": "{work}",
+      "argv": [
+        "{cc}",
+        "-m64",
+        "-Os",
+        "-fsigned-char",
+        "-sSUPPORT_LONGJMP=emscripten",
+        "-sUSE_SDL=2",
+        "-DCUI_PLATFORM_SDL2",
+        "-c",
+        "amalgamation/cui.c",
+        "-o",
+        "{work}/cui.o"
+      ]
+    },
+    {
+      "cwd": "{work}",
+      "argv": [
+        "{ar}",
+        "rcs",
+        "{prefix}/lib/libcui.a",
+        "cui.o"
+      ]
+    }
+  ],
+  "copies": [
+    {
+      "from": "{source_cui}/include/cui/cui.h",
+      "to": "{prefix}/include/cui/cui.h"
+    },
+    {
+      "from": "{source_cui}/include/cui/cui_app.h",
+      "to": "{prefix}/include/cui/cui_app.h"
+    },
+    {
+      "from": "{source_cui}/include/cui/cui_icons.h",
+      "to": "{prefix}/include/cui/cui_icons.h"
+    },
+    {
+      "from": "{source_cui}/include/cui/cui_render.h",
+      "to": "{prefix}/include/cui/cui_render.h"
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/cui/cui.h",
+    "{prefix}/include/cui/cui_app.h",
+    "{prefix}/include/cui/cui_icons.h",
+    "{prefix}/include/cui/cui_render.h",
+    "{prefix}/lib/libcui.a"
+  ]
+}

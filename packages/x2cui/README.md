@@ -48,7 +48,8 @@ make -C packages/x2cui build
 ./hello
 ```
 
-Platforms: source only. macOS is built and tested. The Linux profile is
+Platforms: source only. macOS is built and tested, and the gallery runs
+in a browser; see [In a browser](#in-a-browser). The Linux profile is
 written and has not been built; see `PROFILE.md`.
 
 The driver adds the package's `builds` and `src` directories and links
@@ -226,6 +227,37 @@ draws every scene off screen to `DIR/NAME.png`, and `scenes --list` prints
 the names. `scenes --check HEADER` compares the names with the
 `#define cui_NAME(` lines of CUI's `cui.h` and fails when a component has
 no scene. A menu that opens only on a click is drawn closed.
+
+## In a browser
+
+The gallery also runs in a browser, from the same x2c source:
+
+```sh
+make wasm-runtime                 # at the repository root, once
+make -C packages/x2cui web-serve  # then open http://127.0.0.1:4399/
+```
+
+`make web` writes `builds/web/gallery.js`, `gallery.wasm`, and
+`index.html`. It needs Emscripten. The program is 64-bit WebAssembly and
+draws with WebGL 2 through CUI's SDL2 window layer. The browser must
+support 64-bit WebAssembly memory and JavaScript Promise Integration;
+`web/index.html` says so where one is missing. `gallery.wasm` is 2.6 MB,
+1.0 MB compressed with gzip.
+
+`make web-check` draws every gallery page off screen under Node. Of the
+26 images, 22 match the native build's to within one step of one colour
+channel in fewer than 1,200 bytes of 23.8 million. The four others
+differ where the platform differs: two table rows with equal sort keys
+change places, the keymap shows Ctrl for Cmd, and the file pages list
+another directory.
+
+`web-check` and `web` are not part of `make check`, which needs no
+Emscripten. `PROFILE.md` records the browser build.
+
+A program of your own builds the same way as the gallery does in the
+`Makefile`: `x2c build -c --cc tools/wasm-cc` compiles its units, and
+`tools/wasm-cc` links them with the package's browser archive, x2c's
+browser runtime, and CUI's browser archive.
 
 ## Native API
 

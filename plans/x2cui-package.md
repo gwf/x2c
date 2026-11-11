@@ -676,6 +676,51 @@ Work:
    for browsers without Memory64 or JSPI.
 5. **Verification in a real browser**, including keyboard and text input.
 
+#### Delivery 3 state
+
+State on 2026-11-10: the gallery runs in a browser from the same source.
+
+- **No change to x2c was needed.** Item 1 above was wrong about the
+  route. `x2c build -c --cc <wrapper>` already compiles a program that
+  imports a package to objects for another compiler, with the package's
+  include directories. The package's `Makefile` compiles the gallery and
+  the package that way through `tools/wasm-cc`, and links with Emscripten.
+  `tools/wasm-build` is unchanged and still handles one file without
+  packages.
+- **Profile.** `dependency-wasm.json` builds CUI with its SDL2 window
+  layer through the shared dependency cache, with `CC=emcc AR=emar`.
+- **WebGL.** `patches/web-opengl-es.patch` makes CUI's SDL2 layer ask for
+  OpenGL ES 3.0 under Emscripten. With it the gallery draws through
+  WebGL 2 at the display's full density. Without it CUI fell back to the
+  software renderer and drew into a quarter of the canvas.
+- **Host page.** `web/index.html` gives the canvas the whole window and
+  the keyboard focus, and names the missing feature in a browser without
+  64-bit memory or JavaScript Promise Integration.
+- **Verified in the Claude desktop app's browser pane (Chromium):** the
+  gallery opens; a click changes the page; keys type into a field and
+  Backspace deletes; the wheel scrolls the page under the pointer; the
+  dark theme applies; resizing the window resizes the canvas.
+- **Verified under Node:** `make web-check` draws all 26 pages. 22 match
+  the native images to within one step of one colour channel. Four
+  differ where the platform differs: the order of two table rows with
+  equal sort keys, Ctrl for Cmd in two places, and the listed directory.
+- **Size.** `gallery.wasm` is 2,576,741 bytes, 1,034,111 with `gzip -9`.
+
+Not done or not verified:
+
+- Safari and Firefox were not run.
+- Pasting, an input method editor, and touch input were not tested.
+- The to-do example has no browser build; it saves to a file, which a
+  browser page does not keep.
+- The software fallback draws at quarter size on a high-density display.
+  It is reached only when WebGL 2 is unavailable.
+- The browser checks are outside `make check`, which needs no Emscripten.
+
+Compiler observation: `-Xcc` arguments also reach the meta compiler that
+`--meta-cc` names. `-Xcc -m64 -Xcc -sUSE_SDL=2` with `--cc emcc
+--meta-cc cc` fails in the meta build with clang's "unknown argument".
+The wrapper `tools/wasm-cc` carries the flags instead.
+
 ## Decisions accepted
 
 Gary accepted these on 2026-11-10:

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CUI Gallery in x2c</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #fff; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; outline: none; }
+  #notice { position: fixed; inset: 0; display: none; padding: 24px;
+            font: 16px/1.5 system-ui, sans-serif; background: #fff; }
+</style>
+</head>
+<body>
+<canvas id="canvas" tabindex="0"></canvas>
+<div id="notice"></div>
+<script type="module">
+  const canvas = document.getElementById("canvas");
+  const notice = document.getElementById("notice");
+  function stop(text) {
+    notice.textContent = text;
+    notice.style.display = "block";
+  }
+  // The program is 64-bit WebAssembly, and its frame loop waits for
+  // input through JavaScript Promise Integration.
+  function memory64() {
+    try {
+      new WebAssembly.Memory({ initial: 1n, maximum: 1n, address: "i64" });
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+  if (typeof WebAssembly !== "object") {
+    stop("This browser does not run WebAssembly.");
+  } else if (!memory64()) {
+    stop("This browser does not support 64-bit WebAssembly memory.");
+  } else if (typeof WebAssembly.Suspending !== "function") {
+    stop("This browser does not support JavaScript Promise Integration.");
+  } else {
+    const { default: start } = await import("./gallery.js");
+    canvas.focus();
+    canvas.addEventListener("pointerdown", () => canvas.focus());
+    try {
+      await start({ canvas, print: (line) => console.log(line),
+                    printErr: (line) => console.error(line) });
+    } catch (error) {
+      stop("The gallery stopped: " + error);
+      throw error;
+    }
+  }
+</script>
+</body>
+</html>

@@ -16,7 +16,7 @@ PACKAGE_LINK := $(CUI_PREFIX)/lib/libcui.a -Wl,-framework,Cocoa \
 # Each example with files of its own keeps them in a directory beside it.
 PACKAGE_X_FLAGS += --x-include-dir examples
 
-.PHONY: run run-interactive run-gallery
+.PHONY: run run-interactive run-gallery web web-check web-serve
 
 check: test run
 
@@ -52,3 +52,63 @@ builds/gallery: examples/gallery.x $(GALLERY_UNITS) \
 		$(PACKAGE_CONSUMER_DEPS) | builds
 	$(X2C) build --output $@ --build-dir builds/gallery-build \
 	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $< $(GALLERY_UNITS)
+
+# The browser build. Emscripten compiles CUI with its SDL2 window layer,
+# the package, and the gallery to 64-bit WebAssembly, and links them with
+# x2c's browser runtime (`make wasm-runtime` at the repository root).
+WASM_RUNTIME := $(ROOT)/builds/wasm/libx2c.a
+WASM_MANIFEST := dependency-wasm.json
+WASM_DEPS := CC=emcc AR=emar $(DEPS_TOOL)
+WASM_CC := $(CURDIR)/tools/wasm-cc
+WASM_CUI = $(shell $(WASM_DEPS) path $(WASM_MANIFEST) prefix)
+WASM_LINK := -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 \
+	-sINITIAL_MEMORY=64MB -sMAXIMUM_MEMORY=1GB -sSTACK_SIZE=8MB
+
+web: builds/web/gallery.js builds/web/index.html
+
+# Draws every page of the gallery off screen under Node.
+web-check: builds/web/gallery-node.cjs
+	node $< --shots builds/web/pages
+
+web-serve: web
+	python3 -m http.server 4399 --bind 127.0.0.1 --directory builds/web
+
+builds/web/index.html: web/index.html | builds/web
+	cp $< $@
+
+builds/web:
+	mkdir -p $@
+
+$(WASM_RUNTIME):
+	@echo "missing $@: run 'make wasm-runtime' at the repository root"
+	@exit 1
+
+# The link inputs: the gallery's objects, the package's archive, x2c's
+# browser runtime, and CUI's browser archive.
+builds/web/objects.rsp: examples/gallery.x $(GALLERY_UNITS) \
+		$(PACKAGE_CONSUMER_DEPS) $(WASM_MANIFEST) tools/wasm-cc \
+		| builds/web
+	$(WASM_DEPS) prepare $(WASM_MANIFEST)
+	$(X2C) build --kind static-library --cc $(WASM_CC) --ar emar -Os \
+	  --output builds/web/libx2cui.a --build-dir builds/web/package \
+	  --c-include-dir src --c-include-dir $(WASM_CUI)/include \
+	  $(filter %.c,$(PACKAGE_GENERATED))
+	$(X2C) build -c --cc $(WASM_CC) --meta-cc cc -Os \
+	  --build-dir builds/web/gallery --x-include-dir src \
+	  --package-dir .. -I $(WASM_CUI)/include --x-include-dir examples \
+	  --c-include-dir src --c-include-dir $(WASM_CUI)/include \
+	  examples/gallery.x $(GALLERY_UNITS)
+	{ find builds/web/gallery/obj -name '*.o'; \
+	  echo builds/web/libx2cui.a; \
+	  echo -Wl,--whole-archive; echo $(WASM_RUNTIME); \
+	  echo -Wl,--no-whole-archive; \
+	  echo $(WASM_CUI)/lib/libcui.a; } > $@
+
+builds/web/gallery.js: builds/web/objects.rsp $(WASM_RUNTIME)
+	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) -sMODULARIZE=1 -sEXPORT_ES6=1 \
+	  -sENVIRONMENT=web -sJSPI -sMIN_WEBGL_VERSION=2 \
+	  -sMAX_WEBGL_VERSION=2 -sGL_ENABLE_GET_PROC_ADDRESS=1
+
+builds/web/gallery-node.cjs: builds/web/objects.rsp $(WASM_RUNTIME)
+	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) -sENVIRONMENT=node \
+	  -sNODERAWFS=1

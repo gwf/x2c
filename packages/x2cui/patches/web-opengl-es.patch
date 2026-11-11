@@ -1,0 +1,20 @@
+--- a/src/platform/cui_app_sdl2.c
++++ b/src/platform/cui_app_sdl2.c
+@@ -43,10 +43,17 @@
+     const char *env = getenv("CUI_RENDERER");
+     if (app->desc.renderer != CUI_RENDERER_SOFTWARE && !(env && strcmp(env, "software") == 0)) {
+         flags |= SDL_WINDOW_OPENGL;
++#ifdef __EMSCRIPTEN__
++        /* a browser offers WebGL 2, which is OpenGL ES 3.0 */
++        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
++        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
++        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
++#else
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
++#endif
+         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+     }
+     s->win = SDL_CreateWindow(app->title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, app->desc.width, app->desc.height, flags);
