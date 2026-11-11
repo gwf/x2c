@@ -154,11 +154,16 @@ meta native Iter range(int start, int end, int step, Iter iter) {
 }
 
 /* Add only the omitted bounds; ordinary call lowering still supplies
-   caller-owned iterator storage for a traversal. */
+   caller-owned iterator storage for a traversal. Captured Expr arguments
+   are already syntax. Templates and their runtime helpers would pull boxed
+   Atoms into the always-linked iterator object at load time. */
 meta List _range_arguments(List arguments) {
-  if (arguments.len() == 1) arguments = $(0, @arguments, 1);
-  else if (arguments.len() == 2) arguments = $(@arguments, 1);
-  return $!Iter{ (range)(@arguments) };
+  List zero = %(expr (int) (literal (int) "0"));
+  List one = %(expr (int) (literal (int) "1"));
+  if (arguments.len() == 1) arguments = $(zero, @arguments, one);
+  else if (arguments.len() == 2) arguments = $(@arguments, one);
+  return %(expr ("Iter")
+    (call (expr () (parens (expr () (ident "range")))) (args @arguments)));
 }
 
 /** Calls the typed range operation with defaults for omitted arguments.

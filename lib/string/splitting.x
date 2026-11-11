@@ -26,7 +26,7 @@ String String.strip(String str, List @chars) {
 
 /** Removes leading bytes found in the C string `chars`.
     Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
-    canonical; null input returns NULL and an unchanged input is returned as-is.
+    canonical; null input returns NULL. An unchanged input is returned as-is.
     Raises: `<bad-arity>` for more than one charset, or `<alloc-fail>`
     while constructing a changed result.
 */
@@ -41,7 +41,7 @@ String String.lstrip(String str, List @chars) {
 
 /** Removes trailing bytes found in the C string `chars`.
     Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
-    canonical; null input returns NULL and an unchanged input is returned as-is.
+    canonical; null input returns NULL. An unchanged input is returned as-is.
     Raises: `<bad-arity>` for more than one charset, or `<alloc-fail>`
     while constructing a changed result.
 */

@@ -1691,7 +1691,7 @@ static void f9_rendering____nil(Buffer out){
 }
 
 static int f9_rendering____fits(f9_rendering___Render * r, List elem){
-  Buffer line = Buffer_new(cons(Var_box_ulong((* r).out -> padding), NULL));
+  Buffer line = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_21 = line;
   {
     _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={
@@ -1705,6 +1705,7 @@ static int f9_rendering____fits(f9_rendering___Render * r, List elem){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_24);
     {
+      line -> padding =(* r).out -> padding;
       f9_rendering___Render flat ={
         line, (* r).mode
       }

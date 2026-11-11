@@ -552,6 +552,17 @@ static void list_array_conversion_boundaries(void) {
   roundtrip.free();
 }
 
+static void list_rendering_releases_temporary_storage(void) {
+  $test.scoped();
+  List values = %((1 2 3) (4 5 6));
+  String expected = values.repr(), rendered = NULL;
+  ScopeStats before = Scope.stats();
+  for (int i = 0; i < 1000; i++) rendered = values.repr();
+  ScopeStats after = Scope.stats();
+  EXPECT_STR_EQ(rendered, expected);
+  EXPECT_INT_EQ(after.live_allocations, before.live_allocations);
+}
+
 static void list_array_list_free_consumes_the_receiver(void) {
   ScopeStats before = Scope.stats();
   Array values = [1, 2, 3];
@@ -729,6 +740,7 @@ void list_suite(void) {
   $test.run(list_assoc_hash_equal);
   $test.run(list_search_matches_numbers_by_value);
   $test.run(list_array_conversion_boundaries);
+  $test.run(list_rendering_releases_temporary_storage);
   $test.run(list_array_list_free_consumes_the_receiver);
   $test.run(list_sort_orders_values);
   $test.run(list_sort_callbacks_preserve_source);

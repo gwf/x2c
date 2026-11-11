@@ -94,7 +94,8 @@ meta native List String.split_n(String str, String sep, int max_splits) {
     returns `nil`. The canonical fields and `List` remain live until their
     actual `String` and `List` pools are released.
     Raises: `<bad-arity>` for more than one option, conversion failures,
-    or `<alloc-fail>` or `<size-limit>` while constructing fields or the result.
+    or `<alloc-fail>` or `<size-limit>` while constructing fields or
+    the result.
 */
 meta native List String.split_lines(String str, List @options) {
   int keep_ends = _optional(options, 0, "String.split_lines").int();

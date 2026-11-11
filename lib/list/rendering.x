@@ -107,7 +107,8 @@ static void _nil(Buffer out) {
 /* Writes a List flat when it fits in the rest of the line. Returns zero,
    having written nothing, when it does not fit. */
 static int _fits(Render &r, List elem) {
-  Buffer line = auto Buffer.new(r.out.padding);
+  Buffer line = auto Buffer.new();
+  line.padding = r.out.padding;
   Render flat = {line, r.mode};
   _flat_items(flat, elem);
   if (r.out.pos + line.content.length > _WIDTH) return 0;
