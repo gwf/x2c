@@ -134,7 +134,8 @@ meta static List _call(
   Array passed = [];
   for (int i = 0; i < count; i++)
     passed.push(cui_value(types[i + 1], args[i]));
-  if (types.len() > count + 1) passed.push(cui_record(types[count + 1], options));
+  if (types.len() > count + 1)
+    passed.push(cui_record(types[count + 1], options));
   List m = x2c_ident(method), lowered = passed.list_free();
   return $!( $ui.$m(@lowered) );
 }
@@ -173,7 +174,8 @@ meta static List _columns(List options) {
   return %();
 }
 
-meta static List _column(List entry) => _column_of(entry[1], entry[2], "LEFT", 1);
+meta static List _column(List entry) =>
+  _column_of(entry[1], entry[2], "LEFT", 1);
 
 /* `right(w)`, `center(w)`, and `unsorted(w)` wrap a width; they nest. */
 meta static List _column_of(

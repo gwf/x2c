@@ -6,9 +6,9 @@
     implementation and its names for records, enums, and constants, and
     replaces the C calling conventions:
 
-      ui.button("Add", { .variant = CUI_BUTTON_PRIMARY })
-      ui.checkbox(task.title, task.done, {})
-      $cui.row(ui, { .gap = 8 }) { ... }
+      ui.button("Add", variant: primary)
+      ui.checkbox(task.title, task.done)
+      ui.row (gap: 8) { ... }
 
     `Ui` is CUI's `cui_ctx *` and `App` is its `cui_app *`, so every raw
     CUI call takes them as they are. `Offscreen` draws with the software
@@ -338,7 +338,8 @@ typedef struct ItemPaint { bool hovered, selected, rule; } ItemPaint;
 static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
   ItemPaint *paint = user;
   if (paint.selected)
-    cui_draw_rect(ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_ACTIVE));
+    cui_draw_rect(ui, r, CUI_CORNERS(10),
+                  cui_token_color(ui, CUI_TOKEN_ACTIVE));
   else if (paint.hovered)
     cui_draw_rect(ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_HOVER));
   else if (paint.rule)

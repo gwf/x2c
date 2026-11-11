@@ -83,11 +83,16 @@ static void message_list(Ui ui, Mail &a) {
     ui.scroll (id: "list", gap: 0, fade_edges: true) {
       ui.each (Message m in shown, key: m.id) {
         ui.item (row, selected: a.selected == m) {
-          if (row.clicked) { a.selected = m; m.unread = false; a.reading = true; }
+          if (row.clicked) {
+            a.selected = m;
+            m.unread = false;
+            a.reading = true;
+          }
           ui.row (width: fill, pad_y: 12, pad_right: 12, align: start) {
             // Every row keeps the dot's gutter, so names line up.
             ui.box (width: 26, pad_top: 6, align: center)
-              if (m.unread) ui.box (width: 7, height: 7, radius: 4, bg: accent) {}
+              if (m.unread)
+                ui.box (width: 7, height: 7, radius: 4, bg: accent) {}
             ui.column (gap: 3, width: fill) {
               ui.row (gap: 8, width: fill) {
                 ui.text(m.from, font: m.unread ? medium : body,

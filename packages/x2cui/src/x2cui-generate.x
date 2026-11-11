@@ -22,7 +22,8 @@
     A `const char *` result is a String.
 
     Every other parameter passes unchanged. The table of rows is in
-    x2cui.x. A function that takes an array of records or numbers has no
+    x2cui.x. A component that takes an option record, and each of CUI's
+    block components, also gets a method form; see "Method forms" below. A function that takes an array of records or numbers has no
     row here, because its pointer is not one of these conventions.
 */
 
@@ -218,8 +219,8 @@ macro Unit $cui.widget7(Name $method) {
 macro Unit $cui.widget8(Name $method) {
   $cui.named($method)
   macro Expression $cui.widget(
-    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g, Expr $h,
-    Entry @options) =>
+    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g,
+    Expr $h, Entry @options) =>
     $cui_call($ui, $method, $options, $a, $b, $c, $d, $e, $f, $g, $h);
 }
 

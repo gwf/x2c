@@ -18,11 +18,11 @@ int main(void) {
   int clicks = 0;
   while (app.frame()) {
     Ui ui = app.ui();
-    $cui.column(ui, { .pad = 24, .gap = 12 }) {
+    ui.column (pad: 24, gap: 12) {
       ui.heading("Hello, CUI", 2);
-      ui.switch("Notifications", notify, {});
-      if (ui.button("Click me", { .variant = CUI_BUTTON_PRIMARY })) clicks++;
-      ui.text(%"Clicked $clicks times.", {});
+      ui.switch("Notifications", notify);
+      if (ui.button("Click me", variant: primary)) clicks++;
+      ui.text(%"Clicked $clicks times.");
     }
   }
   return 0;
@@ -62,14 +62,21 @@ Each CUI component keeps its name. The C calling conventions change:
 
 | C | x2c |
 | --- | --- |
-| `cui_button(ui, "Add", .variant = CUI_BUTTON_PRIMARY)` | `ui.button("Add", { .variant = CUI_BUTTON_PRIMARY })` |
-| `cui_checkbox(ui, "Done", &task->done)` | `ui.checkbox("Done", task.done, {})` |
-| `cui_input(ui, "name", buf, sizeof buf, .width = CUI_FILL)` | `ui.input("name", field, { .width = CUI_FILL })` |
-| `cui_segmented(ui, "view", items, 3, &index)` | `ui.segmented("view", %("All" "Open" "Done"), index, {})` |
-| `cui_row(ui, .gap = 8) { ... }` | `$cui.row(ui, { .gap = 8 }) { ... }` |
+| `cui_button(ui, "Add", .variant = CUI_BUTTON_PRIMARY)` | `ui.button("Add", variant: primary)` |
+| `cui_checkbox(ui, "Done", &task->done)` | `ui.checkbox("Done", task.done)` |
+| `cui_input(ui, "name", buf, sizeof buf, .width = CUI_FILL)` | `ui.input("name", field, width: fill)` |
+| `cui_segmented(ui, "view", items, 3, &index)` | `ui.segmented("view", %("All" "Open" "Done"), index)` |
+| `cui_icon_button(ui, CUI_ICON_X, .size = CUI_SIZE_SM)` | `ui.icon_button(x, size: sm)` |
+| `cui_row(ui, .gap = 8) { ... }` | `ui.row (gap: 8) { ... }` |
 
-- **Options** are the last argument and are always written: `{}` means all
-  defaults. Field names are those of CUI's option record.
+- **Options** follow the other arguments as `name: value`, with the names
+  of the fields of CUI's option record, and may be left out. A call builds
+  no Map: each becomes a field of the record in a C designated
+  initializer, and a misspelled name is a C error that names the field.
+  This is a component's method form, a macro of the method's name; see
+  [Short values](#short-values). Inside a macro of its own name,
+  `ui.NAME(...)` is the method, which takes the record itself as its last
+  argument; `Ui.NAME(ui, ..., record)` calls the method anywhere.
 - **Labels and ids** are Strings: a literal, a variable, or an
   interpolation such as `%"Row $i"`.
 - **State** that a component changes is passed by reference, with no `&`:
@@ -80,21 +87,86 @@ Each CUI component keeps its name. The C calling conventions change:
   `field.empty()` tests it.
 - **A list of strings** is a `List`.
 - **A text result** is a String, or NULL where CUI returns none.
-- **A block component** is a statement decorator. Its end call is deferred,
-  so it also runs when the block leaves through `return`, `break`, or
-  `continue`. CUI's own C macros skip the end call there. A component that
-  reports whether it is open, such as `$cui.dialog` or `$cui.menu`, runs
-  its block only while open. Decorators stack:
+- **A block component** is a statement decorator written as a method,
+  `ui.row (gap: 8) { ... }`, with a space before its arguments by
+  convention. Its end call is deferred, so it also runs when the block
+  leaves through `return`, `break`, or `continue`. CUI's own C macros skip
+  the end call there. A component that reports whether it is open, such as
+  `ui.dialog` or `ui.menu`, runs its block only while open. Decorators
+  stack:
 
   ```x2c
-  $cui.id_index(ui, i) $cui.row(ui, { .gap = 8 }) {
-    ui.checkbox(task.title, task.done, {});
+  $cui.id_index(ui, i) ui.row (gap: 8, align: center) {
+    ui.checkbox(task.title, task.done);
   }
   ```
 
-The methods are built at compile time from CUI's C signatures by
-`src/x2cui-generate.x`. To read a method's exact signature, find
-`x2cui__Ui_NAME` in `builds/x2cui.h` after `make build`.
+  Each block component also keeps its earlier spelling with a record,
+  `$cui.row(ui, { .gap = 8 }) { ... }`.
+
+The methods and their method forms are built at compile time from CUI's
+C signatures by `src/x2cui-generate.x`. To read a method's exact
+signature, find `x2cui__Ui_NAME` in `builds/x2cui.h` after `make build`.
+
+### Short values
+
+A value, or an ordinary argument, that is a lower-case name with no
+declaration of its own is a short name for a CUI constant. The C type of
+its field or parameter decides the constant:
+
+| Type | Short name | Constant |
+| --- | --- | --- |
+| an enum, such as `cui_align` or `cui_button_variant` | `center`, `primary` | the member with the enum's prefix: `CUI_ALIGN_CENTER`, `CUI_BUTTON_PRIMARY` |
+| `cui_size` | `fill`, `fit` | `CUI_FILL`, `CUI_FIT` |
+| another `cui_T`, such as `cui_color` or `cui_font` | `accent`, `medium` | `CUI_COLOR_ACCENT`, `CUI_FONT_MEDIUM` |
+| text | `plus` | the icon `CUI_ICON_PLUS` |
+
+A number for a `cui_size` is pixels: `width: 26` is `CUI_PX(26)`, and
+`grow(1.5)` is `CUI_GROW(1.5)`. In `font: m.unread ? medium : body`, each
+arm is lowered. A declared name keeps its own value, and so does a C
+macro such as `CUI_FILL` or `NULL`.
+
+### Lists and tables
+
+`ui.each (T x in items, key: expression)` runs its block once for each
+element, with `x` declared as `foreach` declares it. Each pass pushes an
+id made from `key:`, or from the element's position when there is none,
+so a row keeps its state when the list is filtered or reordered.
+`ui.item (row, selected: ...) { ... }` is an interactive row: it draws a
+quiet fill when selected or hovered, and inside `ui.each` a hairline
+along its top edge unless it is the first item or it or the item before
+it is selected. `row` is a `RowState` with `hovered`, `pressed`, and
+`clicked` for this frame:
+
+```x2c
+ui.each (Message m in shown, key: m.id)
+ui.item (row, selected: a.selected == m) {
+  if (row.clicked) a.selected = m;
+  ui.text(m.subject, font: medium);
+}
+```
+
+`ui.table` takes its columns as a Map literal of titles and widths, which
+it lowers at compile time to a static `cui_table_column` array. A width is
+pixels, `fill`, `fit`, or `grow(w)`; `right(w)` and `center(w)` align the
+column, and `unsorted(w)` keeps it from sorting. `ui.table_row (row,
+selected: ...)` begins a row, and `ui.cell () { ... }` and
+`ui.cell_text(text)` are its cells:
+
+```x2c
+ui.table ("orders", sort: &s.sort, selectable: true,
+          columns: {"Order": 90, "Customer": fill, "Amount": right(110)})
+ui.each (Order o in shown, key: o.id)
+ui.table_row (row, selected: s.selected == o) {
+  if (row.clicked) s.selected = o;
+  ui.cell_text(o.id);
+  ui.cell () ui.avatar(o.customer, size: 28);
+  ui.cell_text(o.price);
+}
+```
+
+CUI reports only a table row's click, so a table row's `hovered` and
+`pressed` stay false.
 
 A CUI function that takes a `printf` format and C variadic arguments is a
 method that takes the format and x2c values, as `String.format` does:
@@ -163,7 +235,7 @@ written with designated initializers, and `$cui.count` supplies its count:
 ```x2c
 static cui_tab_bar_item tabs[] = {
   { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" } };
-ui.tab_bar("tabs", tabs, $cui.count(tabs), selected, {});
+ui.tab_bar("tabs", tabs, $cui.count(tabs), selected);
 ```
 
 The array may be static, a local, or a variable-length array filled from
@@ -185,11 +257,12 @@ a `List` parameter.
 `tools/gen-arrays.py` writes the methods of these components from the
 pinned header, with CUI's parameter names.
 
-An option record keeps its C field types. A field that is a pointer to
-caller state takes an address, as in `{ .toggle = &bold }`, and a field
-that is an array takes a C array.
+An option keeps its C field type. A field that is a pointer to caller
+state takes an address, as in `toggle: &bold`, and a field that is an
+array takes a C array.
 
-A tree leaf has no open flag: `ui.tree_begin(name, NULL, { .leaf = true })`.
+A tree leaf has no open flag: `ui.tree_begin(name, NULL, { .leaf = true })`,
+the method, which a leaf calls directly.
 
 A callback that CUI calls, such as a canvas paint function, is an ordinary
 function. Where its type names `cui_ctx *`, declare that parameter as
@@ -212,6 +285,12 @@ keeps tasks in an `Array`, adds one from a text field, filters the list,
 removes a task, confirms before clearing the finished ones, and saves the
 list to a file after each change. `make run-interactive` opens it.
 `todo --shot IMAGE.png` draws three sample tasks off screen.
+
+`examples/mail.x` is a mail message list: `ui.each` over the messages of
+one folder that match a search, one `ui.item` row each, with a context
+menu. `examples/orders.x` is a table of recent orders with a Map of
+columns, sorted by the header clicked. `mail --shot IMAGE.png` and
+`orders --shot IMAGE.png` draw them off screen.
 
 `examples/gallery.x` is the broader application (`make example`). It is
 a port of CUI's own gallery, `examples/gallery_ui.c` and
