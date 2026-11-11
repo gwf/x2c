@@ -94,7 +94,7 @@ builds/web/objects.rsp: examples/gallery.x $(GALLERY_UNITS) \
 	$(X2C) build --kind static-library --cc $(WASM_CC) --ar emar -Os \
 	  --output builds/web/libx2cui.a --build-dir builds/web/package \
 	  --c-include-dir src --c-include-dir $(WASM_CUI)/include \
-	  $(filter %.c,$(PACKAGE_GENERATED))
+	  $(filter %.c,$(PACKAGE_GENERATED)) $(PACKAGE_NATIVE)
 	$(X2C) build -c --cc $(WASM_CC) --meta-cc cc -Os \
 	  --build-dir builds/web/gallery --x-include-dir src \
 	  --package-dir .. -I $(WASM_CUI)/include --x-include-dir examples \

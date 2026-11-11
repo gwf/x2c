@@ -10,4 +10,7 @@
 #error "the x2c CUI client requires CUI 1.3"
 #endif
 
+/* Defined in x2cui-window.c; `App.frame` calls it. */
+void x2cui_title_bar(void *window, bool dark);
+
 #endif

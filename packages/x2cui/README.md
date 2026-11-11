@@ -113,7 +113,9 @@ Each formatted text is a String, as an interpolated label is.
 
 `App.open` opens a window and raises `<init-fail>` when it cannot.
 `app.frame()` presents the last frame, waits for input or animation, and
-begins the next; it returns false once the window has closed. `app.ui()`
+begins the next; it returns false once the window has closed. On macOS it
+also gives the window's title bar the light or dark appearance of the
+current theme, so the title bar follows `ui.set_theme`. `app.ui()`
 is the window's borrowed `Ui`. `App` adopts `Cleanup`, so
 `App app = auto App.open(...)` closes the window when the scope ends.
 

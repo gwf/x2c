@@ -513,8 +513,8 @@ Facts that differ from the specification above:
   CUI's frame memory.
 - **Container macros keep CUI's names**, for example `$cui.id_scope` and
   `$cui.disabled_scope`. `$cui.id_index(ui, i)` is the one addition, over
-  `cui_push_id_int`. Each evaluates its `ui` argument twice, as CUI's C
-  macros do; a `typeof` local does not resolve package methods.
+  `cui_push_id_int`. Each evaluates its `ui` argument once, through a
+  `typeof` local, since gwf/x2c#657.
 - **There is no frame region.** See Application lifetime. Gary hit the
   crash it caused on 2026-11-10. The cause was confirmed from the crash
   report and reproduced off screen; the corrected example was then driven
@@ -921,3 +921,26 @@ check. The completeness test protects a deliberate public claim: every
 pinned component has an x2c form. The compiler work in Delivery 0 adds one
 fixture case for P1, which protects against wrong output: a header
 declaration that was dropped or misread without a diagnostic.
+
+## After the compiler repairs (2026-11-11)
+
+gwf/x2c#655 to #659 are on `dev`, and `x2cui` contains them.
+
+- The generator names `TextField`, `x2cui_buffer`, and `x2cui_strings`
+  directly. It takes a function's name and reads its type.
+- The component table in `src/x2cui.x` is one `expand` over 356 names.
+  `Ui.get_strings` and `Ui.get_draw_data` are rows; a `const` result is
+  visible to the generator. `tools/gen-arrays.py` reads the table.
+- Each decorator evaluates its `ui` argument once.
+- No example needed a string macro beside a literal, so none changed.
+- The generated header differs from the earlier one only in the receiver
+  spelling of those two methods. `make check` passes, and the gallery's 26
+  pages remain byte-identical to CUI's C gallery.
+
+`App.frame` gives a macOS window the appearance of the current theme
+before each frame. CUI sets that appearance only when it creates the
+window, so the title bar stayed light or dark after `ui.set_theme`.
+`src/x2cui-window.c` holds the call, written against the Objective-C
+runtime in C; it does nothing on other platforms. A hidden-window probe
+read `NSAppearanceNameAqua`, then `NSAppearanceNameDarkAqua`, then
+`NSAppearanceNameAqua` as the theme changed. Not viewed on screen.

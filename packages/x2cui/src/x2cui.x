@@ -73,9 +73,14 @@ App App.open(cui_app_desc desc) {
 }
 
 /** Presents the last frame, waits for input or animation, and begins the
-    next frame. Returns false once the window has closed.
+    next frame. Returns false once the window has closed. The window's
+    title bar takes the light or dark appearance of the current theme.
 */
-inline bool App.frame(App app) => cui_app_frame(app);
+bool App.frame(App app) {
+  x2cui_title_bar(cui_app_native_window(app),
+                  cui_get_theme_mode(cui_app_ui(app)) == CUI_THEME_DARK);
+  return cui_app_frame(app);
+}
 
 /** Returns the window's borrowed `Ui`, valid until the window closes. */
 inline Ui App.ui(App app) => cui_app_ui(app);
