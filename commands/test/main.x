@@ -186,7 +186,7 @@ static String _shown(Path path) {
 
 static int _summary_counts(
   String output, int &passed, int &failed, int &skipped) {
-  foreach (String line in output.split_lines(0).reverse()) {
+  foreach (String line in output.split_lines().reverse()) {
     if (!line) continue;
     int end = 0;
     int fields = sscanf(line, "%d passed, %d failed, %d skipped%n",

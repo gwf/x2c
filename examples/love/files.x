@@ -15,7 +15,7 @@ long total = 0;
 
 // Skip blank lines; each remaining row has three valid longs.
 foreach (String line in input) {
-  if (!line.strip(NULL)) continue;
+  if (!line.strip()) continue;
   String (a, b, c) = line.words().iter().list();
   long x = atol(a), y = atol(b), z = atol(c);
   total += x + y + z;

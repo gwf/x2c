@@ -11,7 +11,7 @@ int main(void) {
       Stdout.puts(line);
     }
     else {
-      String text = line.strip(NULL);
+      String text = line.strip();
       if (text) sequence.write(text);
     }
   }

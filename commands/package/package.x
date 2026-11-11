@@ -436,7 +436,7 @@ static String _marker_string(String path, String field) {
 */
 static List install_rows(String text) {
   Array rows = [];
-  foreach (String line, text.split_lines(0)) {
+  foreach (String line, text.split_lines()) {
     List fields = line.split(" ").filter(%!(String field) => field != NULL);
     if (!line.startswith("#") && fields.len() == 6) rows.push(fields);
   }
@@ -498,8 +498,7 @@ static void _run(List arguments, const char *what) {
 }
 
 static int _remote(String spec) =>
-  spec.startswith("http://") || spec.startswith("https://") ||
-  spec.startswith("file://");
+  spec.startswith("http://", "https://", "file://");
 
 static String _fetch(String url, String directory, String name) {
   String target = %"$directory/$name";

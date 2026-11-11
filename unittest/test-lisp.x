@@ -994,6 +994,14 @@ static void lisp_default_session_is_ready(void) {
   if (!EXPECT_NOT_NULL(lisp)) return;
   EXPECT_INT_EQ(Var.integer(lisp.eval(%(+ 20 22))), 42);
   EXPECT_STR_EQ(Var.string(lisp.eval(%(lower "READY"))), "ready");
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.strip \" x \")")), "x");
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.strip \" x \" nil)")), "x");
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.strip \" x \" \"\")")), " x ");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp,
+    "(String.startswith \"abc\" \"z\" \"ab\")")), 1);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(String.endswith \"abc\")")), 0);
+  EXPECT_STR_EQ(Var.string(_ev(lisp,
+    "(String.replace \"aaa\" \"a\" \"b\" 2)")), "bba");
   lisp.destroy();
 }
 

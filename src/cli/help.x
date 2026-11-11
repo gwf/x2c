@@ -241,7 +241,7 @@ module int _external_listed(String name) {
     manifest = %"$(x2c_get_root())/commands/manifest.txt";
   else if (libexec) manifest = %"$libexec/commands.txt";
   if (!manifest || !Path.is_file(manifest)) return 0;
-  foreach (String line in Path.read_text(manifest).split_lines(0))
+  foreach (String line in Path.read_text(manifest).split_lines())
     if (line.startswith(%"$name|")) return 1;
   return 0;
 }

@@ -105,7 +105,7 @@ static void _metrics(Lint l):
        !t.text.startswith("//") || "lint:" in t.text: continue
     if t.line > 1 && l.first[t.line - 1] >= 0 ||
        l.first[t.line + 1] >= 0: continue
-    String label = t.text[2:].strip(NULL)
+    String label = t.text[2:].strip()
     int plain = label.len() > 0
     for (char *ch = label; plain && *ch; ch++):
       if !islower((unsigned char) *ch) && *ch != ' ': plain = 0

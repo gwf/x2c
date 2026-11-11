@@ -159,7 +159,7 @@ static void copy_shipped_commands(Path destination) {
   libexec.make_dirs();
   Buffer shipped = auto Buffer.new();
   foreach (String row,
-           root.join("commands/manifest.txt").read_text().split_lines(0)) {
+           root.join("commands/manifest.txt").read_text().split_lines()) {
     if (!row) continue;
     List fields = row.split("|");
     if (fields.cadr().str() != "shipped") continue;
@@ -191,7 +191,7 @@ static Map owned_files(Path prefix) {
   Map files = {};
   Path manifest = prefix.join(INSTALL_MANIFEST);
   if (!manifest.exists()) return files;
-  List lines = manifest.read_text().split_lines(0);
+  List lines = manifest.read_text().split_lines();
   if (!lines || !lines.car().str().startswith("x2c-native-v1 "))
     fail(%"unrecognized installation inventory: $manifest");
   foreach (String line, lines.cdr()) {

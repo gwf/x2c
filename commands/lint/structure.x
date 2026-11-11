@@ -339,7 +339,7 @@ static String _body_text(Lint l, List function):
       if out.len() && out[-1] != ' ': out.write_char(' ')
       continue
     out.write_len(l.text + t.pos, t.len)
-  return out.str().strip(NULL)
+  return out.str().strip()
 
 /** Runs the rules that compare the `count` files in `lints`: a top-level
     type that no other file mentions, and a function body of five or more

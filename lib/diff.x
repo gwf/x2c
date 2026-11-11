@@ -73,8 +73,8 @@ meta native String Diff.unified(
     by one run of insertions.
 */
 meta native List Diff.lines(String old, String new) {
-  Array old_lines = auto old.split_lines(0);
-  Array new_lines = auto new.split_lines(0);
+  Array old_lines = auto old.split_lines();
+  Array new_lines = auto new.split_lines();
   Array edits = auto [];
   Script s = {old_lines, new_lines, edits};
   _trim(s);

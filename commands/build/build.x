@@ -215,7 +215,7 @@ static void _add_inputs(Build b) {
     if (!request.dry_run) CliRequest.require_input(input);
     if (Path.is_x2c_source(input)) b.xlat_n++;
     else if (input.endswith(".c")) b.c_sources.push(input);
-    else if (input.endswith(".o") || input.endswith(".a"))
+    else if (input.endswith(".o", ".a"))
       b.native_inputs.push(input);
     else $fail.build_input_unsupported(input);
     if (request.kind == <static-lib> && input.endswith(".a"))
@@ -604,7 +604,7 @@ static void _place_includes(Build b, Map headers, String unit) {
   List searched = $(Path.dirname(unit), @(b.request.include_dirs));
   foreach (String suffix, %(".h" ".c")) {
     String text = Path.read_text(_unit_file(directory, unit, suffix));
-    foreach (String line, text.split_lines(0)) {
+    foreach (String line, text.split_lines()) {
       String target = _unit_include(line);
       if (target) _place_header(headers, searched, directory, target);
     }
@@ -1268,7 +1268,7 @@ int CliRequest.script_current(CliRequest request, String directory) {
   String record = %"$directory/.x2c-state/script", text = NULL;
   if (access(%"$directory/run", X_OK) || !SourceView.read(NULL, record, text))
     return 0;
-  List lines = text.split_lines(0);
+  List lines = text.split_lines();
   String cc = Toolchain.new(request).cc;
   int ok = 1;
   uint64_t hash = _script_fingerprint(request, cc, lines.cdr(), ok);
@@ -1385,7 +1385,7 @@ static List _depfile_inputs(String depfile) {
 static int _state_matches(String path, uint64_t hash) {
   String text = NULL;
   if (!SourceView.read(NULL, path, text)) return 0;
-  List lines = text.split_lines(0);
+  List lines = text.split_lines();
   if (!lines) return 0;
   String first = lines.car();
   return first == _state_line(hash);

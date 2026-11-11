@@ -110,7 +110,7 @@ module void _naming(Definition &d) {
     $fail.macros_name_reserved(c, d.start, spelling);
   /* The runtime and the compiler prelude may define the reserved `x2c.*`
      and `lisp.*` macros. */
-  if ((spelling.startswith("x2c.") || spelling.startswith("lisp.")) &&
+  if (spelling.startswith("x2c.", "lisp.") &&
       !c.builtin_defs &&
       !Compiler.is_runtime_source(c.source_path(c.filename)))
     $fail.macros_macro_reserved(c, d.start, spelling);

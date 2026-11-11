@@ -280,7 +280,7 @@ static int _package(Scan &s, Tokenizer tokens) {
 static int _include(Scan &s, String directive, String directory) {
   int angle = 0;
   String target = Compiler.preproc_include_target(directive, angle);
-  if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return 0;
+  if (!target || !(target.endswith(".x", ".xp"))) return 0;
   String file = s.request.sources.resolve_include(
     s.request.include_dirs, directory, target, angle);
   if (!file) return 0;
@@ -609,7 +609,7 @@ static String _compile_support(
   if (tool_capture(
     %($driver "translate" "--out-dir" $directory $source),
     printed, errors))
-    return %"cannot translate $source: $(errors.strip(NULL))";
+    return %"cannot translate $source: $(errors.strip())";
   Toolchain t = h.toolchain;
   String include = h.include, output = _temporary(object);
   String failure = Compiler.meta_cc_run(

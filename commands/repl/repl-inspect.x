@@ -14,7 +14,7 @@ List ReplSession.resolve(ReplSession session, String expression);
 
 static String _declaration(Compiler c, Type type, List binding) =>
   String.new(c.code_pretty_string(
-    c.emit($(type.declaration_ast(binding)), NULL), NULL)).strip(NULL);
+    c.emit($(type.declaration_ast(binding)), NULL), NULL)).strip();
 
 static String _type_text(Compiler c, Type type) {
   type = type.declared();
@@ -73,10 +73,10 @@ static String _named_declaration(
   match (syntax) {
     case %(function ?spec ?bound ?):
       return String.new(c.code_pretty_string(
-        c.emit(%((declare $spec (bindings $bound))), NULL), NULL)).strip(NULL);
+        c.emit(%((declare $spec (bindings $bound))), NULL), NULL)).strip();
     case %((!or declare typedef) *):
       return String.new(c.code_pretty_string(c.emit($(syntax), NULL), NULL))
-        .strip(NULL);
+        .strip();
   }
   return _declaration(c, type, $(name));
 }
@@ -172,7 +172,7 @@ static Type _query_type(ReplSession session, String text) {
   foreach (Symbol tag in %<struct union enum>) {
     String prefix = tag.str() + " ";
     if (text.startswith(prefix)) {
-      Type type = $(tag, text.remove_prefix(prefix).strip(NULL));
+      Type type = $(tag, text.remove_prefix(prefix).strip());
       if (c.sym.field_order(type) ||
           c.sym.get(%(@type "enumerators"))) return type;
     }

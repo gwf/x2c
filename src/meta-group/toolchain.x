@@ -61,7 +61,7 @@ static String _runtime_headers(String include_dir) {
 static String _cc_error(String errors) {
   Array lines = [];
   foreach (String line in (errors ? errors : "").split("\n")) {
-    String text = line.strip(NULL);
+    String text = line.strip();
     if (!text) continue;
     if (": error: " in text && !text.startswith("clang:") &&
         !text.startswith("cc:") && !text.startswith("gcc:"))

@@ -180,7 +180,7 @@ static long _head(Socket client, int &code) {
   long length = 0;
   for (;;) {
     String line = client.input.readline();
-    if (!line || !line.strip(NULL)) break;
+    if (!line || !line.strip()) break;
     if (line.startswith("content-length:")) length = atol(line + 15);
   }
   return length;

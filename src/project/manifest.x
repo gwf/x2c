@@ -32,7 +32,7 @@ int ProjectBuild.valid_name(String name) {
    a field whose array is open. A `#` outside a string starts a comment. */
 module void _parse_manifest(Project p) {
   Manifest m = {.project = p};
-  foreach (String text in p.text.split_lines(0)) {
+  foreach (String text in p.text.split_lines()) {
     m.line++;
     char *line = _content(text);
     if (!*line) continue;

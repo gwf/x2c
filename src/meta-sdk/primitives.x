@@ -93,8 +93,7 @@ static List _native_rows(Symbol inventory, List leading, List trailing) {
   foreach (List row in
            Compiler.native_meta_targets(NULL, inventory == <runtime>)) {
     String name = row.car();
-    int own = name.startswith("x2c_") || name.startswith("Code_") ||
-              name.startswith("Type_");
+    int own = name.startswith("x2c_", "Code_", "Type_");
     if (!name.startswith("_x2c_") && own == (inventory == <compiler>))
       rows.push(row);
   }

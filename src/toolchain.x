@@ -341,7 +341,7 @@ static String _recorded_tool(String name) {
   if (!home) return NULL;
   try record = Path.read_text(%"$home/lib/x2c/toolchain");
   catch %(not-found *): {}
-  foreach (String line in record.split_lines(0))
+  foreach (String line in record.split_lines())
     if (line.startswith(%"$name=")) return line.remove_prefix(%"$name=");
   return NULL;
 }
@@ -487,7 +487,7 @@ static List _includes(String option, List directories) =>
    stops at `End of search list`. */
 static void _add_include_directories(Array directories, String listing) {
   int listed = 0;
-  foreach (String line in listing.split_lines(0)) {
+  foreach (String line in listing.split_lines()) {
     if (line.startswith("End of search list")) return;
     if ("search starts here" in line) listed = 1;
     else if (listed) _add_include_directory(directories, line);
@@ -505,7 +505,7 @@ static void _add_include_directory(Array directories, String line) {
 }
 
 static void _add_library_directories(Array directories, String output) {
-  foreach (String line in output.split_lines(0)) {
+  foreach (String line in output.split_lines()) {
     if (!line.startswith("libraries: ")) continue;
     String list = line.remove_prefix("libraries: ").remove_prefix("=");
     foreach (String directory in list.split(":"))

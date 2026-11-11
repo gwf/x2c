@@ -60,7 +60,7 @@ static String _read(void) {
     }
     else {
       if (line.startswith(">")) break;
-      sequence.write(line.strip(NULL));
+      sequence.write(line.strip());
     }
   }
   return sequence.str().upper();

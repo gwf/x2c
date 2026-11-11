@@ -94,7 +94,7 @@ HttpRequest HttpRequest.read(File input, int body_limit) {
     if (colon <= 0) Http.fail(400, "malformed header");
     String name = String.new_len(line, colon).lower();
     if (!_header_name(name)) Http.fail(400, "invalid header name");
-    String value = String.new(line + colon + 1).strip(NULL);
+    String value = String.new(line + colon + 1).strip();
     if (req.headers.contains(name)) {
       if (name == "content-length") Http.fail(400, "duplicate content length");
       value = String.format("%s, %s", req.headers[name].str(), value);

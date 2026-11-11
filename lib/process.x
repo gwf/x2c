@@ -221,7 +221,7 @@ Job Job.live(Job job) {
     endings.
     Raises: the causes of `Job.output`.
 */
-List Job.lines(Job job) => job.output().split_lines(0);
+List Job.lines(Job job) => job.output().split_lines();
 
 /** Returns the captured standard output of `job`, starting it and waiting
     as needed. A live job, or one whose output was empty, returns NULL.
