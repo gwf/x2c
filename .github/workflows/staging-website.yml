@@ -15,6 +15,11 @@ jobs:
   website:
     runs-on: ubuntu-24.04
     environment: staging-publication
+    env:
+      SITE_SOURCE_REF: ${{ inputs.source_sha }}
+      SITE_RELEASE_CHANNEL: staging
+      SITE_URL: https://staging.x2c-lang.dev
+      SITE_BASE: /
     steps:
       - uses: actions/checkout@v5
         with:
@@ -59,11 +64,6 @@ jobs:
           sudo apt-get install -y cloc
           npm ci --prefix source/site
       - name: Build website without rebuilding release binaries
-        env:
-          SITE_SOURCE_REF: ${{ inputs.source_sha }}
-          SITE_RELEASE_CHANNEL: staging
-          SITE_URL: https://staging.x2c-lang.dev
-          SITE_BASE: /
         run: npm --prefix source/site run build
       - name: Retain staged release and check site
         env:
