@@ -370,6 +370,12 @@ without requiring public services:
   `release-checks.x` reads produced artifacts through asynchronous files.
 - raylib's standard examples render PNG files in memory. Use
   `run-interactive` for the windowed showcase; package checks do not run it.
+- `packages/x2cui/examples/todo.x` is a to-do list in a window, drawn with
+  CUI's components: `ui.button("Add", { .variant = CUI_BUTTON_PRIMARY })`
+  and `$cui.row(ui, { .gap = 8 }) { ... }`. `gallery.x` shows one scene for
+  each component. Its standard run draws off screen; use `run-interactive`
+  or `run-gallery` for a window. The package builds from a checkout on
+  macOS and is not yet in `make packages`.
 - `packages/torch/examples/fit-line.x` fits a line by gradient descent
   through libtorch autograd: `x.matmul(w) + b`, `backward`, and an in-place update
   under `Torch.no_grad`, with every operator temporary reclaimed by the
