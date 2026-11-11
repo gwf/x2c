@@ -52,61 +52,55 @@ static void draw(Ui ui, Todo &todo) {
   foreach (Task task in todo.tasks) done += task.done;
   int open = (int) todo.tasks.len() - done;
 
-  $cui.column(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                    .align = CUI_ALIGN_CENTER, .bg = CUI_COLOR_BACKGROUND })
-  $cui.column(ui, { .width = CUI_FILL, .max_width = 560, .height = CUI_FILL,
-                    .pad = 24, .gap = 16 }) {
-    $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_END }) {
+  ui.column (width: fill, height: fill, align: center,
+             bg: background)
+  ui.column (width: fill, max_width: 560, height: fill,
+             pad: 24, gap: 16) {
+    ui.row (gap: 12, align: end) {
       ui.heading("To do", 2);
       ui.spacer();
-      ui.text(%"$open open, $done done", {});
+      ui.text(%"$open open, $done done");
     }
 
     // Enter in the field or the button adds the task.
-    $cui.row(ui, { .gap = 8 }) {
+    ui.row (gap: 8) {
       int typed = ui.input("new-task", todo.draft,
-                           { .placeholder = "Add a task", .width = CUI_FILL });
-      bool add = ui.button("Add", { .variant = CUI_BUTTON_PRIMARY,
-                                    .icon = CUI_ICON_PLUS,
-                                    .disabled = todo.draft.empty() });
+                           placeholder: "Add a task", width: fill);
+      bool add = ui.button("Add", variant: primary, icon: plus,
+                           disabled: todo.draft.empty());
       if ((add || typed & CUI_SUBMITTED) && !todo.draft.empty()) {
         todo.tasks.push(Task.new(todo.draft.take(), false));
         changed = true;
       }
     }
 
-    $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
-      ui.segmented("filter", %("All" "Open" "Done"), todo.filter, {});
+    ui.row (gap: 8, align: center) {
+      ui.segmented("filter", %("All" "Open" "Done"), todo.filter);
       ui.spacer();
-      if (ui.button("Clear done", { .variant = CUI_BUTTON_GHOST,
-                                    .disabled = done == 0 }))
+      if (ui.button("Clear done", variant: ghost, disabled: done == 0))
         todo.confirm_clear = true;
     }
 
-    $cui.scroll(ui, { .id = "tasks", .width = CUI_FILL, .height = CUI_FILL,
-                      .gap = 2 }) {
+    ui.scroll (id: "tasks", width: fill, height: fill, gap: 2) {
       for (int i = 0; i < (int) todo.tasks.len(); i++) {
         Task task = todo.tasks[i];
         if (!shown(task, todo.filter)) continue;
         visible++;
         // The index keeps two tasks with one title apart.
         $cui.id_index(ui, i)
-        $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER,
-                       .width = CUI_FILL }) {
-          changed |= ui.checkbox(task.title, task.done, {});
+        ui.row (gap: 8, align: center, width: fill) {
+          changed |= ui.checkbox(task.title, task.done);
           ui.spacer();
-          if (ui.icon_button(CUI_ICON_X, { .tooltip = "Delete",
-                                           .variant = CUI_BUTTON_GHOST,
-                                           .size = CUI_SIZE_SM }))
+          if (ui.icon_button(x, tooltip: "Delete", variant: ghost, size: sm))
             removed = i;
         }
       }
       if (!visible) {
         bool empty = !todo.tasks.len();
-        ui.empty_state(empty ? "No tasks yet" : "Nothing here", {
-          .icon = CUI_ICON_LIST_CHECKS,
-          .description = empty ? "Type one above and press Enter."
-                               : "No task matches this filter." });
+        ui.empty_state(empty ? "No tasks yet" : "Nothing here",
+                       icon: list_checks,
+                       description: empty ? "Type one above and press Enter."
+                                          : "No task matches this filter.");
       }
     }
   }
@@ -117,16 +111,16 @@ static void draw(Ui ui, Todo &todo) {
     changed = true;
   }
 
-  $cui.dialog(ui, "Clear finished tasks?", todo.confirm_clear, {
-      .description = "They are removed from the list and from the file.",
-      .width = 380 })
-  $cui.dialog_footer(ui) {
-    if (ui.button("Cancel", {})) todo.confirm_clear = false;
-    if (ui.button("Clear", { .variant = CUI_BUTTON_DANGER })) {
+  ui.dialog ("Clear finished tasks?", todo.confirm_clear,
+             description: "They are removed from the list and from the file.",
+             width: 380)
+  ui.dialog_footer () {
+    if (ui.button("Cancel")) todo.confirm_clear = false;
+    if (ui.button("Clear", variant: danger)) {
       todo.tasks = todo.tasks.list().filter(%!(Task task) => !task.done);
       todo.confirm_clear = false;
       changed = true;
-      ui.toast("Finished tasks cleared", {});
+      ui.toast("Finished tasks cleared");
     }
   }
 

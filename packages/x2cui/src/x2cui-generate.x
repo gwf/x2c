@@ -2,6 +2,7 @@
 
 #include "x2c.x"
 #include "meta.x"
+#include "x2cui-options.x"
 
 /*  x2cui-generate.x -- Ui methods built from CUI's C signatures
 
@@ -41,7 +42,16 @@ meta static String _method_name(String function) {
   return name.endswith("_ex") ? name[:name.len() - 3] : name;
 }
 
-/** Returns the `Ui` method that forwards to the C function `target`. */
+/* CUI names its option records `*_opts`, and its layout record `cui_box`. */
+meta static int _option_record(Type type) {
+  Var name = type.car();
+  return name is <string> &&
+         (((String) name).endswith("_opts") || name == "cui_box");
+}
+
+/** Returns the `Ui` method that forwards to the C function `target`, and
+    its method form when it has one.
+*/
 meta List cui_method(String function) {
   List target = x2c_ident(function);
   Type signature = Code.type(target);
@@ -103,13 +113,220 @@ meta List cui_method(String function) {
     }
   }
   List declared = params.list_free(), passed = args.list_free();
-  List method = x2c_ident(_method_name(function));
+  String name = _method_name(function);
+  List method = x2c_ident(name);
   List unit = _spelled(result, "(void)")
     ? $!Unit{ inline void Ui.$method(@declared) { $target(@passed); } }
     : $!Unit{ inline $result Ui.$method(@declared) =>
                 $target(@passed); };
-  return $(unit);
+  Type last = types[count - 1];
+  int options = count > 1 && _const_pointer(last) &&
+                _option_record(Type.element(last));
+  List form = _method_form(name, declared.len() - 1 - options, options);
+  return form ? %($unit $form) : $(unit);
 }
 
 /** Defines the `Ui` method for the CUI function `$target`. */
 macro Unit $cui.method(Name $target) { @cui_method($target) }
+
+/*  Method forms
+
+    A component whose last parameter is CUI's option record has a method
+    form that takes the options as `name: value` arguments:
+
+      ui.button("Add", variant: primary, icon: plus)
+      ui.row (gap: 8, align: center) { ... }
+
+    The form of a component is an Expression macro `$Ui.NAME`; the form of
+    a block component, whose C functions are `cui_NAME_begin` and
+    `cui_NAME_end`, is a decorator `$Ui.NAME`. Inside its own expansion,
+    `ui.NAME(...)` is the method the form wraps. Each form is one of the
+    templates below, one for each count of ordinary arguments, renamed by
+    `$cui.named`. Its expansion calls `cui_call` or `cui_begin`, which read
+    the method's parameter types and lower each value by its type; see
+    x2cui-options.x.
+*/
+
+/** Returns `definition` renamed `Ui.method`. */
+meta List cui_named(List definition, Var method) {
+  Atom name = Atom.intern(%"Ui.$(Code.binding_spelling(method))");
+  return %(macrodef @(definition.cdr().map(%!(List row) =>
+      row ~= %(name ?) ? %(name $name) : row)));
+}
+
+/** Defines the macro `$definition` as `$Ui.method`. */
+macro Decorator $cui.named(Macro $definition, Name $method) =>
+  $cui_named($definition, $method);
+
+/* The component templates. */
+
+macro Unit $cui.widget0(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(Expr $ui, Entry @options) =>
+    $cui_call($ui, $method, $options);
+}
+
+macro Unit $cui.widget1(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(Expr $ui, Expr $a, Entry @options) =>
+    $cui_call($ui, $method, $options, $a);
+}
+
+macro Unit $cui.widget2(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(Expr $ui, Expr $a, Expr $b, Entry @options) =>
+    $cui_call($ui, $method, $options, $a, $b);
+}
+
+macro Unit $cui.widget3(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(
+    Expr $ui, Expr $a, Expr $b, Expr $c, Entry @options) =>
+    $cui_call($ui, $method, $options, $a, $b, $c);
+}
+
+macro Unit $cui.widget4(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(
+    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Entry @options) =>
+    $cui_call($ui, $method, $options, $a, $b, $c, $d);
+}
+
+macro Unit $cui.widget5(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(
+    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Entry @options) =>
+    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e);
+}
+
+/* The block templates. The receiver is evaluated once; the end call is
+   deferred, so it also runs when the block leaves early; a block whose
+   begin call reports whether it is open runs only while it is open. */
+
+macro Unit $cui.block0(Name $block, Name $end) {
+  $cui.named($block)
+  macro Decorator $cui.block(Stmt $body, Expr $ui, Entry @options) {
+    {
+      typeof($ui) ui = $ui;
+      if ($cui_begin(ui, $block, $options)) {
+        defer ui.$end();
+        $body
+      }
+    }
+  }
+}
+
+macro Unit $cui.block1(Name $block, Name $end) {
+  $cui.named($block)
+  macro Decorator $cui.block(Stmt $body, Expr $ui, Expr $a, Entry @options) {
+    {
+      typeof($ui) ui = $ui;
+      if ($cui_begin(ui, $block, $options, $a)) {
+        defer ui.$end();
+        $body
+      }
+    }
+  }
+}
+
+macro Unit $cui.block2(Name $block, Name $end) {
+  $cui.named($block)
+  macro Decorator $cui.block(
+    Stmt $body, Expr $ui, Expr $a, Expr $b, Entry @options) {
+    {
+      typeof($ui) ui = $ui;
+      if ($cui_begin(ui, $block, $options, $a, $b)) {
+        defer ui.$end();
+        $body
+      }
+    }
+  }
+}
+
+macro Unit $cui.block3(Name $block, Name $end) {
+  $cui.named($block)
+  macro Decorator $cui.block(
+    Stmt $body, Expr $ui, Expr $a, Expr $b, Expr $c, Entry @options) {
+    {
+      typeof($ui) ui = $ui;
+      if ($cui_begin(ui, $block, $options, $a, $b, $c)) {
+        defer ui.$end();
+        $body
+      }
+    }
+  }
+}
+
+macro Unit $cui.block4(Name $block, Name $end) {
+  $cui.named($block)
+  macro Decorator $cui.block(
+    Stmt $body, Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d,
+    Entry @options) {
+    {
+      typeof($ui) ui = $ui;
+      if ($cui_begin(ui, $block, $options, $a, $b, $c, $d)) {
+        defer ui.$end();
+        $body
+      }
+    }
+  }
+}
+
+meta static Macro _widget_form(int count) {
+  switch (count) {
+    case 0: return $cui.widget0;
+    case 1: return $cui.widget1;
+    case 2: return $cui.widget2;
+    case 3: return $cui.widget3;
+    case 4: return $cui.widget4;
+    case 5: return $cui.widget5;
+  }
+  return NULL;
+}
+
+meta static Macro _block_form(int count) {
+  switch (count) {
+    case 0: return $cui.block0;
+    case 1: return $cui.block1;
+    case 2: return $cui.block2;
+    case 3: return $cui.block3;
+    case 4: return $cui.block4;
+  }
+  return NULL;
+}
+
+/* CUI's own block macros, `cui_NAME(ui, ...) { ... }`, which run their
+   block between `cui_NAME_begin` and `cui_NAME_end`. Each has a block
+   form. Those that CUI writes with `CUI__SCOPE_IF` run the block only
+   while the begin call reports the block open. A table has its own form,
+   with a template of columns, a data grid keeps `$cui.data_grid`, and a
+   virtual list keeps `$cui.virtual_list`. */
+meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
+  "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
+  "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
+  "menu_bar" "toolbar" "status_bar");
+meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
+  "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
+  "user_menu" "menu_bar_menu" "inspector");
+
+/** Returns the begin call of a block, `ui.NAME_begin(...)` made by
+    `cui_call`, as a test that is true while the block is open.
+*/
+meta List cui_begin(List ui, String block, List options, List @args) {
+  List call = cui_call(ui, %"$(block)_begin", options, @args);
+  return block in _openings ? call : $!( ($call, 1) );
+}
+
+/* A row and a column end as a box does. */
+meta static String _end_method(String block) =>
+  block == "row" || block == "column" ? "box_end" : %"$(block)_end";
+
+/* The method form of `method`, which takes `count` ordinary arguments and,
+   when `options` is set, an option record; NULL when it has none. */
+meta static List _method_form(String method, int count, int options) {
+  String block = method.endswith("_begin") ? method[:method.len() - 6] : NULL;
+  if (block && (block in _scopes || block in _openings))
+    return Macro_apply(_block_form(count), %($block $(_end_method(block))));
+  Macro form = options && !block ? _widget_form(count) : NULL;
+  return form ? Macro_apply(form, %($method)) : NULL;
+}
