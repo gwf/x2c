@@ -812,7 +812,7 @@ ordinary local declaration:
 ```x2c
 int main(void) {
 Array items = auto [];
-Buffer text = auto Buffer.new(0);
+Buffer text = auto Buffer.new();
 items.push(42);
 text.write(items.repr());
 printf("%s\n", text.str());
@@ -2009,6 +2009,11 @@ A final `List @name` parameter receives an ordinary `List`. Write separate
 arguments at the call site; the compiler packs the arguments after the fixed
 parameters into that List. With no trailing arguments, the List is empty.
 There can be one rest parameter, with zero or more fixed parameters before it.
+
+In a named macro body, use `@(expression)` for a runtime splice argument.
+A registered `@hole` still splices captured syntax, and `@meta_function()`
+still inserts the meta function's result. In a quotation, expression holes
+keep their construction-time meaning.
 
 ```x2c
 static int count_items(String label, List @items) => items.len();
@@ -3875,10 +3880,10 @@ x2c_invocation_line()
 x2c_invocation_column()
 x2c_enclosing(what)
 x2c_place(where, code)
-x2c_diagnostic_fail(message, notes)
-x2c_diagnostic_fail_at(node, category, message, notes)
-x2c_diagnostic_error_at(node, category, message, notes)
-x2c_diagnostic_warn(message, notes)
+x2c_diagnostic_fail(message, @notes)
+x2c_diagnostic_fail_at(node, category, message, @notes)
+x2c_diagnostic_error_at(node, category, message, @notes)
+x2c_diagnostic_warn(message, @notes)
 ```
 
 A macro body calls one with `$`, as in `$Code.type($value)` or
@@ -3918,8 +3923,10 @@ where it was written. Constructed syntax, derived subtrees, name values, and
 calls outside expansion are rejected.
 
 `x2c_diagnostic_fail` reports a macro diagnostic at its source location with
-`String` notes and does not return. `x2c_diagnostic_fail_at` reports at
-syntax the macro received, and `x2c_diagnostic_error_at` reports there and
+`String` notes and does not return. Pass notes as separate arguments; omit
+them for no notes, or splice an existing List with `@notes`.
+`x2c_diagnostic_fail_at` reports at syntax the macro received, and
+`x2c_diagnostic_error_at` reports there and
 returns, failing the translation when it finishes.
 
 `x2c_ident` returns the tagged name value described above and accepts a
@@ -4415,8 +4422,8 @@ therefore produces a mutable pointer variable; a pointer to const data keeps
 its pointee qualification.
 
 An `auto` immediately after `=` instead manages the acquired value. For
-example, `Buffer buffer = auto Buffer.new(0);` has the same meaning as
-`Buffer buffer = $auto(Buffer.new(0));`. The keyword covers the complete
+example, `Buffer buffer = auto Buffer.new();` has the same meaning as
+`Buffer buffer = $auto(Buffer.new());`. The keyword covers the complete
 initializer; it is not accepted inside an operator or call argument.
 Declaration `auto` cannot be combined with initializer `auto` or `$auto`
 in the same declaration group, including through forwarding macros.

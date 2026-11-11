@@ -23,7 +23,7 @@ Include it with `#include "path.x"`.
 | [`Path.is_dir`](#Path.is_dir) | Reports whether `p` names a directory, following links. |
 | [`Path.is_executable`](#Path.is_executable) | Reports whether this process may execute `path`, as the shell's `-x`. |
 | [`Path.is_file`](#Path.is_file) | Reports whether `p` names a regular file, following links. |
-| [`Path.join`](#Path.join) | Returns `name` joined to `base` with one separating slash. |
+| [`Path.join`](#Path.join) | Joins each supplied path to `base` with one separating slash. |
 | [`Path.list_dir`](#Path.list_dir) | Returns the names in the directory `path`, sorted, without `.` and `..`. |
 | [`Path.make_dirs`](#Path.make_dirs) | Creates the directory `p` and any missing parents. |
 | [`Path.modified_time`](#Path.modified_time) | Returns the modification time of `path` in seconds since the epoch, with the fraction the filesystem records. |
@@ -176,10 +176,11 @@ Source: `lib/path.x`
 <a id="Path.join"></a>
 #### Path.join
 
-`meta native Self Path.join(Self base, Path name)`
+`meta native Self Path.join(Self base, List @names)`
 
-Returns `name` joined to `base` with one separating slash.
-An absolute `name`, or an empty `base`, is returned unchanged.
+Joins each supplied path to `base` with one separating slash.
+An absolute component replaces the accumulated path. With no components,
+returns `base`; null components leave the accumulated path unchanged.
 
 Source: `lib/path.x`
 

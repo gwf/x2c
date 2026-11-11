@@ -1140,11 +1140,11 @@ single-pass pull iterators.
 
 Public functions:
 
-`Iter.new`, `Iter.next`, `Iter.iter`, `range`, `Iter.map`, `Iter.filter`,
-`Iter.scan`, `Iter.accumulate`, `Iter.zip`, `Iter.map2`, `Iter.zip_with`,
-`Iter.enumerate`, `Iter.chain`, `Iter.head`, `Iter.repeat`, `Iter.unique`,
-`Iter.unzip`, `Iter.init`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`,
-`Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`,
+`Iter.new`, `Iter.next`, `Iter.iter`, `range`, `_range_arguments`, `Iter.map`,
+`Iter.filter`, `Iter.scan`, `Iter.accumulate`, `Iter.zip`, `Iter.map2`,
+`Iter.zip_with`, `Iter.enumerate`, `Iter.chain`, `Iter.head`, `Iter.repeat`,
+`Iter.unique`, `Iter.unzip`, `Iter.init`, `Iter.foldl`, `Iter.any`, `Iter.all`,
+`Iter.find`, `Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`,
 `Iter.try_next`
 
 ### [lib/json.x](../lib/json.x)

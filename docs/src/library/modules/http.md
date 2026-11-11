@@ -166,10 +166,11 @@ Source: `lib/http.x`
 <a id="HttpServer.new"></a>
 #### HttpServer.new
 
-`HttpServer HttpServer.new(Router router, Map options)`
+`HttpServer HttpServer.new(Router router, Map @options)`
 
 Binds immediately; port 0 selects an available port.
-Options use Symbol keys.
+Keyword options use Symbol keys. Splice an existing Map with
+`@options`; omitted options use the server defaults.
 
 **Raises:** `<bad-arg>` for fewer than one worker, an idle timeout below one
 millisecond, a negative body limit, a NULL `logger`, or an invalid port,

@@ -13,7 +13,7 @@ Growable text buffer with indentation support.
 | [`Buffer.getindex`](#Buffer.getindex) | Returns `buf.get(index)`, so `buf[index]` reads a byte. |
 | [`Buffer.len`](#Buffer.len) | Returns the number of bytes currently stored in `buf`. |
 | [`Buffer.move_to`](#Buffer.move_to) | Moves `buf` and both owned `Block`s into `scope`, keeping their identities. |
-| [`Buffer.new`](#Buffer.new) | Allocates an empty `Buffer` whose `pad` method writes `padding` spaces. |
+| [`Buffer.new`](#Buffer.new) | Allocates an empty `Buffer` with optional padding, defaulting to zero. |
 | [`Buffer.pop`](#Buffer.pop) | Pops one indentation depth from `buf`'s stack when present. |
 | [`Buffer.printf`](#Buffer.printf) | Appends formatted text to `buf`. |
 | [`Buffer.push`](#Buffer.push) | Pushes the current column as a later indentation depth. |
@@ -67,12 +67,13 @@ Source: `lib/buffer.x`
 <a id="Buffer.new"></a>
 #### Buffer.new
 
-`meta native Buffer Buffer.new(size_t padding)`
+`meta native Buffer Buffer.new(List @padding)`
 
-Allocates an empty `Buffer` whose `pad` method writes `padding` spaces.
+Allocates an empty `Buffer` with optional padding, defaulting to zero.
+`pad` writes that many spaces. Pass zero or one padding value.
 
-**Raises:** `<alloc-fail>` or `<size-limit>` while allocating its fixed-width
-backing `Block`s.
+**Raises:** `<bad-arity>` for more than one value, or `<alloc-fail>` or
+`<size-limit>` while allocating its fixed-width backing `Block`s.
 
 Source: `lib/buffer.x`
 
