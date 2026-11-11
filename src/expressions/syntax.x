@@ -152,9 +152,12 @@ List Compiler.parse_call_entry(Compiler c) {
 List Compiler.parse_variable(Compiler c) {
   Token origin = c.token;
   Var definition;
-  // A macro defined to a string literal is that literal after preprocessing.
-  if (c.object_macros.try_get(origin.text, definition) &&
-      definition == <string>) {
+  /* A macro defined to a string literal is that literal after preprocessing,
+     and so is a name this unit cannot resolve that stands before a literal,
+     as a header's string macro does. */
+  if (c.object_macros.try_get(origin.text, definition)
+        ? definition == <string>
+        : c.peek(1) == <lit-char*> && !c.sym.get($(origin.text))) {
     c.next();
     return _join_c_string_literals(
       c, %(expr (* char) (literal (* char) $(origin.text))));
