@@ -7,7 +7,9 @@
 > Gary also directed "Make method forms work inside templates too. Fix
 > Entry @options too." and then "Fix the foreach and computed macro name
 > limits too." and "Fix the computed parameter list limit too."; all five
-> are implemented on the same branch. Decision
+> are implemented on the same branch (PR 661). His later "Fix file-scope
+> method forms too." is implemented on `gwf/method-form-file-scope`, based
+> on `934888ffc`, for a follow-up PR. Decision
 > 5 and the x2cui macros are package work on the x2cui branch.
 > The prototype that preceded the implementation is on the local branch
 > `gwf/scratch-x2cui-method-ui` on top of `x2cui` at `b393dd58c`.
@@ -337,6 +339,46 @@ argument. It needed 122 more lines in `recognition.x`, a check that some
 that failed to parse. Its scan also miscounted nesting at `%(` and `$(`
 until that was fixed. The postfix design deletes all of that.
 
+### File-scope method forms
+
+Before this change, the Expression form already worked in file-scope and
+static initializers, because those parse as expressions. The decorator form
+failed: `app.route ("/x") void handler(void) { ... }` reached the
+declaration parser and reported "expected ')'".
+
+A file-scope item is now a method-form decorator application when four
+things hold. It begins with a name that resolves to a variable, not a
+type, and the next token is `.`, `->`, or `[`. Its postfix chain of `.name`,
+`->name`, `[...]`, and `(...)` steps ends in `.name(...)`. A target follows:
+`{`, `$`, or a word other than `is` and `in`. And some visible macro's name
+ends in `.name`. `Compiler.method_decorator_target` makes this token test.
+Every other item reaches the declaration parser exactly as before, so its
+diagnostics do not change; `app.route ("/x") void f(void) {}` with no
+`$T.route` macro still reports "expected ')'" at the same token.
+
+Recognition reuses the file-scope application path. `_target_at` in
+`targets.x`, which `try_parse_macro_target_at(<unit>)` and
+`parse_function_target` share, tries `parse_unit_method_decorator` at file
+scope. That parses the receiver with the ordinary expression parse and
+applies the decorator through `parse_method_decorator` and `_decorate`, as a
+statement does. Because `parse_function_target` goes through the same
+path, method forms stack with each other and with `$` applications.
+Collection skips the application in `_skip_collected_form`, as it skips a
+`$` one, and collects the target, so nothing is published twice.
+
+A recognized item whose receiver type has no decorator `$T.name` falls back
+to the declaration parser. The expression parse may already have reported
+an error for such an item, for example "type App has no method route".
+That happens only when some other type has a macro `$U.route`.
+
+Two cases are not supported. A receiver that begins with `(` is not
+recognized at file scope. And in a template that expands at file scope, a
+receiver, whether a hole or a free name, has no type where the template is
+parsed, so the decorator form is read as a declaration; deferring it would
+need each decorator's target parser before the decorator is known. The
+explicit spelling `$T.name(receiver, ...)` works in both cases. Verified in
+`macro-method-form-file-scope` and `import-method-form-file-scope`.
+
 ## Compatibility
 
 - Code without a `$T.NAME` macro is unaffected. Every existing compiler
@@ -410,8 +452,11 @@ What remains:
   `$private`-style fresh name is not accepted as a name component.
 - Only an `Entry` sequence may follow another sequence hole.
 
-- Method forms work in statement and expression positions only, not at file
-  scope (prototype limit 7), and only with `.`.
+- Method forms are recognized only with `.`. At file scope (prototype
+  limit 7, now fixed; see "File-scope method forms"), a receiver must begin
+  with a variable, so `(expression).name (...)` is not recognized there, and
+  a template that expands at file scope cannot use the decorator form; it
+  writes `$T.name(receiver, ...)`.
 - In a template, a statement form whose receiver has no type yet takes a
   statement target, so such a form cannot apply an `Expr`-target decorator.
 - In a template, a form recognized where the template expands reads its
@@ -446,7 +491,8 @@ What remains:
   `macro-entry-forwarding`, and a hole receiver in `import-method-form`.
   Decl holes and computed names: `macro-decl-foreach` and
   `macro-computed-name`. Arguments before Entry rows:
-  `macro-sequence-entry-rows`.
+  `macro-sequence-entry-rows`. File scope: `macro-method-form-file-scope`
+  and `import-method-form-file-scope`.
 - The x2cui to-do `--shot` image stays byte-identical to the one drawn with
   `$cui.row`; it is, for every prototype commit.
 - `make stage-3`, `make verify-fixtures`, and `precommit`.

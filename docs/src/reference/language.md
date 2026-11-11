@@ -2300,8 +2300,44 @@ A package's type `Ui` is `x2cui__Ui` in generated C, but its macros keep the
 source spelling `$Ui.row`. A method form looks for `$T.NAME` under the
 receiver type's generated name and then under its source name, so the
 package's macros apply in the package and in every importing file. Method
-forms are recognized in statements and expressions, not at file scope, and
-only with `.`.
+forms are recognized only with `.`.
+
+At file scope, a method-form decorator stands where a `$T.NAME(receiver,
+...)` application does, before the same targets. A file-scope item is one
+when it begins with a variable, not a type; its postfix chain ends in
+`.NAME(ARGUMENTS)`; a target follows; and some macro is named `$T.NAME`.
+Any other item is read as a declaration, as before:
+
+```x2c
+~#include "x2c.x"
+~#include "meta.x"
+typedef struct App { int routes; } App;
+App app;
+
+macro Decorator $App.route(Function $function, Expr $app, Expr $path) {
+  printf("route %s\n", $path);
+  @Code.body($function)
+}
+
+app.route ("/home")
+void home(void) { puts("home"); }
+
+int main(void) {
+  home();
+  return 0;
+}
+```
+
+```text
+route /home
+home
+```
+
+A file-scope receiver begins with a name, so `(expression).NAME (...)` is
+not recognized there. In a template that expands at file scope, the
+receiver of a decorator form has no type where the template is defined,
+so the template writes `$T.NAME(receiver, ...)` instead. The Expression form
+works in file-scope initializers and in templates that expand there.
 
 ### Macro values
 
