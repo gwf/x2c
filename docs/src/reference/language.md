@@ -1237,7 +1237,11 @@ typedef struct Record { String names[2]; Var last; } Record;
 Record record = {.names[1] = "second", "last"};
 ```
 
-Each supplied value converts to its destination element or field type. After
+Each supplied value converts to its destination element or field type. A
+value that the converter of an aggregate destination accepts converts to
+that whole aggregate instead of initializing its first member: with
+`Size int.size(int)` and a field `Size width`, `{ .width = 5 }` stores
+`int_size(5)`. After
 `.names[1] = "second"` above, the next value initializes `last`, including its
 ordinary conversion to `Var`. With `.names = "first", "second", "last"`,
 brace elision fills both array elements before continuing to `last`. Explicit
@@ -1269,7 +1273,9 @@ expression's type, so `typeof(name) copy = name;` declares `copy` with the
 type of `name`. An operand that only C can type, such as a system header's
 macro, gives a type x2c does not resolve; the generated C spells it
 `__typeof__(operand)`, and C types it. `typeof_unqual` names the same type
-without its qualifiers.
+without its qualifiers. In a macro body, an operand that holds a hole is
+typed where the macro expands, so `typeof($value) copy = $value;` declares
+`copy` with the argument's type and `copy.method()` resolves.
 
 ### Alignment, atomic, and complex types
 
@@ -2545,7 +2551,14 @@ or 0.
 `Code.type` returns the canonical semantic `Type` for supported typed
 syntax. During expansion, syntax a template left untyped is resolved where the
 expansion stands, so a template's locals, casts, and method results report
-their declared types.
+their declared types. An `x2c_ident` name value and an untyped quotation are
+resolved the same way, so `Code.type(x2c_ident("puts"))` is the type of the
+function `puts`. The `Type` omits the storage class and the qualifiers of the
+value itself. It keeps the qualifiers of what a pointer points at and of what
+a function returns: a `const char *` local reports `(* const char)`, and
+`Type.return_type` of a function that returns `const char *` reports the
+same. A declaration written with the reported `Type` therefore accepts the
+value it was read from.
 
 `Code.binding_spelling` accepts a name hole's valid identifier `String` or
 compiler-issued identifier and binding syntax, and returns its source spelling

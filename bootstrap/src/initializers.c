@@ -1107,6 +1107,7 @@ Type source = Var_type(List_cadr(value)), resolved = f10_subobjects____resolve_s
 if(List_equal(Type_list(f10_subobjects____resolve_shape(c, source)), Type_list(resolved))) return 1;
 if(Sym_is_var_type(c -> sym, type)) return 1;
 if(f10_subobjects____fills_char_array(c, type, value)) return 1;
+if(List_truth(Type_list(source)) && List_truth(Compiler_converter_call(c, value, Type_canonicalize(source), Type_canonicalize(type)))) return 1;
 return ! Type_is_array(resolved) && ! Type_is_aggregate(resolved);
 }
 
