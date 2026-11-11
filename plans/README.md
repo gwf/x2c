@@ -29,6 +29,7 @@ accepted its decisions on 2026-11-11. The compiler semantics, decisions 1 to
 `Decl` holes in `foreach` headers, computed macro names in templates, and
 sequence holes before final `Entry` rows are implemented with fixtures and
 a book section; the x2cui option lowering, decision 5, is package work.
+File-scope method forms are implemented for a follow-up PR.
 
 ## Current work
 
