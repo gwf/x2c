@@ -125,7 +125,7 @@ Var Compiler.folded_constant(Compiler c, Var node) {
 Var Compiler.literal_text_value(String spelling) {
   int len = spelling.len();
   if (len >= 2 && spelling[0] == '"') {
-    Buffer text = auto Buffer.new(0);
+    Buffer text = auto Buffer.new();
     int ended = 0;
     for (int i = 0; i < len;) {
       if (spelling[i] != '"') return void;
@@ -139,7 +139,7 @@ Var Compiler.literal_text_value(String spelling) {
   }
   if (len >= 3 && spelling[0] == '\'') {
     if (scan_c_character(spelling) != len) return void;
-    Buffer text = auto Buffer.new(0);
+    Buffer text = auto Buffer.new();
     int ended = 0;
     _literal_piece(text, spelling + 1, len - 2, ended);
     String body = text;

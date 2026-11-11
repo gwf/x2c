@@ -242,7 +242,7 @@ static Var _request(int in, Buffer input) {
 
 /* Writes one reply frame, or returns 0 for a message with no datum. */
 static int _reply(List message) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   if (!out.write_datum_frame(message)) return 0;
   String frame = %"$out";
   fwrite((char *) frame, 1, frame.len(), helper_out);
@@ -403,7 +403,7 @@ int main(void) {
   pthread_t watcher;
   pthread_create(&watcher, NULL, _watch, (void *) (long) getppid());
   helper_modules = {};
-  helper_input = Buffer.new(0);
+  helper_input = Buffer.new();
   helper_tables = {};
   for (int i = 0; i < x2c_meta_helper_count(); i++) {
     Map table = x2c_meta_helper_table(i);

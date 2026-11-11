@@ -108,7 +108,7 @@ MetaHelper MetaHelper.new(String path, Map failures, Map units) {
   auto (&helper.scope) {
     helper.failures = failures ? failures.copy() : NULL;
     helper.units = units ? units.copy() : NULL;
-    helper.input = Buffer.new(0);
+    helper.input = Buffer.new();
   }
   return helper;
 }
@@ -437,7 +437,7 @@ static int _running(void) =>
    `deadline` passes. A helper that has exited must not end the compiler
    with SIGPIPE; a helper not reading must not block its deadline. */
 static int _write_frame(List message, double deadline) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   if (!out.write_datum_frame(message)) return 0;
   String frame = %"$out";
   void (*previous)(int) = signal(SIGPIPE, SIG_IGN);

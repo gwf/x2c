@@ -781,7 +781,7 @@ static void _render(EditState &l, int flags) {
   int old_rows = l.oldrows;
   int fd = l.input.ofd, j;
 
-  Buffer folded = auto l.fold_count ? Buffer.new(0) : NULL;
+  Buffer folded = auto l.fold_count ? Buffer.new() : NULL;
   if (l.fold_count) {
     _render_buffer(l, folded, render_pos);
     render = folded.content.bytes;
@@ -794,7 +794,7 @@ static void _render(EditState &l, int flags) {
 
   /* First step: clear all the lines used before. To do so start by
    * going to the last row. */
-  Buffer ab = auto Buffer.new(0);
+  Buffer ab = auto Buffer.new();
 
   if (flags & REFRESH_CLEAN) {
     if (old_rows-rpos > 0) ab.printf("\x1b[%dB", old_rows-rpos);

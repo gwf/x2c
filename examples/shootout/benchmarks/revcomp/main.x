@@ -3,7 +3,7 @@
  */
 
 int main(void) {
-  Buffer sequence = auto Buffer.new(0);
+  Buffer sequence = auto Buffer.new();
   foreach (String line in Stdin) {
     if (line.startswith(">")) {
       _write(sequence);
@@ -20,7 +20,7 @@ int main(void) {
 }
 
 static void _write(Buffer sequence) {
-  Buffer line = auto Buffer.new(0);
+  Buffer line = auto Buffer.new();
   for (ptrdiff_t end = sequence.len(); end > 0;) {
     line.clear();
     int count = end > 60 ? 60 : end;

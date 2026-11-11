@@ -699,7 +699,7 @@ static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out) {
 /* `_write_primitive_repr` owns the numeric repr spellings. The `String`
    form renders through a `Buffer`, so the two forms cannot drift apart. */
 static String _primitive_repr(Var v, Symbol tag) =>
-  _write_primitive_repr(v, tag, Buffer.new(0)).str_free();
+  _write_primitive_repr(v, tag, Buffer.new()).str_free();
 
 /* Each numeric tag prints its own value with its own C spelling, so the text
    names both the number and the width it was boxed at. The narrow integer

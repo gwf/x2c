@@ -135,7 +135,7 @@ String ReplSession.symbol_text(
   Map descriptions = auto _symbol_descriptions(session, all);
   Array names = auto [];
   foreach (String name in descriptions.keys()) names.push(name);
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   foreach (String name in names.sort()) {
     Map row = descriptions[name];
     if (!all && row["dependency"] is not void && row["dependency"].truth())
@@ -308,7 +308,7 @@ static void _method_rows(Compiler c, Type type, Buffer out, Map shown) {
 String ReplSession.members(ReplSession session, String text) {
   Type type = _query_type(session, text);
   if (!type) return NULL;
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.printf("%s\n", _type_text(session.compiler, type));
   _field_rows(session.compiler, type, out);
   Map shown = auto {};
@@ -320,7 +320,7 @@ String ReplSession.members(ReplSession session, String text) {
 /** Describes a declaration or expression type without executing input. */
 String ReplSession.info(ReplSession session, String text) {
   Map description = _description(session, text);
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   if (description) {
     String declaration = description["declaration"], path = description["path"];
     String display = description["display"], name = description["name"];
@@ -361,7 +361,7 @@ String ReplSession.source(ReplSession session, String name) {
   Map row = _description(session, name);
   if (!row) return NULL;
   String body = row["body"], path = row["path"];
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.printf("%s", path ? path : "<unknown>");
   if (row["line"] is not void) out.printf(":%d", row["line"].int());
   out.newline();

@@ -27,5 +27,5 @@ return 0;
 // The checked-in data sits beside the examples wherever they live.
 String example_data(String name) {
   Path source = String.new(__FILE__);
-  return source.dirname().join("../data").join(name);
+  return source.dirname().join("../data", name);
 }

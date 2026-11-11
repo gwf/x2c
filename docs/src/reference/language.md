@@ -3070,8 +3070,8 @@ therefore produces a mutable pointer variable; a pointer to const data keeps
 its pointee qualification.
 
 An `auto` immediately after `=` instead manages the acquired value. For
-example, `Buffer buffer = auto Buffer.new(0);` has the same meaning as
-`Buffer buffer = $auto(Buffer.new(0));`. The keyword covers the complete
+example, `Buffer buffer = auto Buffer.new();` has the same meaning as
+`Buffer buffer = $auto(Buffer.new());`. The keyword covers the complete
 initializer; it is not accepted inside an operator or call argument.
 Declaration `auto` cannot be combined with initializer `auto` or `$auto`
 in the same declaration group, including through forwarding macros.

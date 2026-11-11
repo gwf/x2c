@@ -85,7 +85,7 @@ String Compiler.interface_text(Compiler c) {
   String canonical = _canonical_path(c.filename);
   Var cached = _process_cache()[canonical];
   if (cached is void) return NULL;
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   List record = %(
     interface 8 $(Compiler.identity()) @(_stored_record(canonical, cached)));
   /* An interface is plain data, which a loader never evaluates. */
@@ -236,7 +236,7 @@ static List _linked_prelude_sources(void) => Compiler.prelude_sources().cdr();
 
 /* `record` as an interface spells it, or NULL when it cannot be spelled. */
 static String _record_text(List record) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   if (out.write_datum(record, 0)) return out;
   return NULL;
 }

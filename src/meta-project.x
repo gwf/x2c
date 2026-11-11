@@ -626,7 +626,7 @@ static String _temporary(String path) =>
 
 /* The unit that gives the helper each built table by index. */
 static String _tables(Array built, int count) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   out.write("#include \"x2c.h\"\n");
   foreach (int index in built)
     out.printf("Map x2c_module_targets_%d(void);\n", index);
@@ -677,7 +677,7 @@ static List _write_manifest(Helper &h, String failure) {
     (groups $(h.groups.list())) (failures $(h.failures.list()))
     (failure $(failure ? failure : "")) (deps $(_digests(h.deps)))
     (covered $(!h.uncovered)));
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.write_datum(manifest, 0);
   Path.write_text(%"$(h.directory)/manifest", out);
   return manifest;

@@ -157,7 +157,7 @@ static void copy_examples(Path destination) {
 static void copy_shipped_commands(Path destination) {
   Path libexec = destination.join("libexec/x2c");
   libexec.make_dirs();
-  Buffer shipped = auto Buffer.new(0);
+  Buffer shipped = auto Buffer.new();
   foreach (String row,
            root.join("commands/manifest.txt").read_text().split_lines(0)) {
     if (!row) continue;
@@ -172,7 +172,7 @@ static void copy_shipped_commands(Path destination) {
 }
 
 static String write_manifest(Path destination, String name, String kind) {
-  Buffer rows = auto Buffer.new(0);
+  Buffer rows = auto Buffer.new();
   foreach (Path path, destination.walk()) {
     if (!path.is_file()) continue;
     String relative = path.remove_prefix(%"$destination/");

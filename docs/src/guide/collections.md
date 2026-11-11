@@ -907,7 +907,7 @@ For anything longer, use `Buffer`. It grows, it tracks indentation, and a
 `String` destination calls `Buffer.str` for the finished canonical `String`.
 
 ```x2c
-Buffer out = Buffer.new(0);
+Buffer out = Buffer.new();
 foreach(int item in [1, 2, 3]) {
   out.write("item ");
   out.printf("%d", item);

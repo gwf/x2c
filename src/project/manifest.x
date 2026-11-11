@@ -287,7 +287,7 @@ static List _string_array(Project p, int line, String value) {
 static String _parse_string(Project p, int line, char **cursor) {
   char *at = _skip_space(*cursor ? *cursor : "");
   if (*at != '"') _error(p, line, "expected a quoted string");
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   for (at++; *at && *at != '"'; at++) {
     char ch = *at;
     if (ch == '\\') ch = _escape(p, line, *++at);

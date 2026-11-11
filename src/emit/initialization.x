@@ -263,7 +263,7 @@ module List _source_initializer(Emitter &e, List function) {
    Generated bodies have no source-map directives; the original argument keeps
    its ordinary mapping at the invocation and its original storage scope. */
 module List _initializer_macro(Emitter &e, List input, List body) {
-  Buffer parameters = Buffer.new(0);
+  Buffer parameters = Buffer.new();
   foreach (List argument in input.cdr()) {
     if (parameters.len()) parameters.write_char(',');
     parameters.write(argument.car().str());

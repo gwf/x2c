@@ -526,7 +526,7 @@ static String _note_line(List l) {
 static void _write_json(
   Compiler c, Symbol code, Symbol severity, String message, List location,
   String note) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.write(%"{\"code\":$(Var.json(code))");
   out.write(%",\"message\":$(Var.json(message))");
   out.write(%",\"severity\":$(Var.json(severity))");

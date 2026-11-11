@@ -329,7 +329,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
 
 /* Native C declarations retain their authored aggregate attributes. */
 static String _program_c_header(Compiler c, List ast) {
-  Buffer text = auto Buffer.new(0);
+  Buffer text = auto Buffer.new();
   text.write($dedent(%"
     #pragma once
     #include \"x2c.h\"
@@ -768,7 +768,7 @@ static String _program_header(ProgramBuild &b) {
   ReplProgram program = b.program;
   String source = %"$(program.directory)/declarations.c";
   String expanded = %"$(program.directory)/declarations.i";
-  Buffer text = auto Buffer.new(0);
+  Buffer text = auto Buffer.new();
   text.write($dedent(%"
     #include \"x2c.h\"
     #include \"meta.h\"

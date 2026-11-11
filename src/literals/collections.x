@@ -155,7 +155,7 @@ static List _set_expression(Array symbols) {
 /* Three-digit escapes preserve each byte inside one quoted C string. */
 static String _octal_literal(Block bytes) {
   unsigned char *data = bytes.bytes;
-  Buffer output = Buffer.new(0);
+  Buffer output = Buffer.new();
   output.write("\"");
   for (size_t at = 0; at < bytes.len(); at++)
     output.printf("\\%03o", (unsigned) data[at]);

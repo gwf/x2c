@@ -684,7 +684,7 @@ static void var_truth_and_generic_predicates(void) {
   Bytes full_bytes = Bytes.new(sizeof(char));
   char byte = 'x';
   full_bytes = full_bytes.append(&byte, 1);
-  Buffer empty_buffer = Buffer.new(0), full_buffer = Buffer.new(0);
+  Buffer empty_buffer = Buffer.new(), full_buffer = Buffer.new();
   full_buffer.write("x");
   EXPECT_FALSE(Var.new(<block>, empty_block).truth());
   EXPECT_TRUE(Var.new(<block>, full_block).truth());

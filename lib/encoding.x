@@ -115,7 +115,7 @@ Buffer Buffer.write_code_point(Buffer out, int point) {
     Raises: the causes of `Buffer.write_code_point`.
 */
 String String.from_code_point(int point) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   return out.write_code_point(point);
 }
 
@@ -225,7 +225,7 @@ Block String.hex_decode_bytes(String text) =>
     value.
 */
 String String.percent_encode(String s) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   for (const unsigned char *at = (const unsigned char *) s; at && *at;
        at++) {
     if (_unreserved(*at)) out.write_char(*at);
@@ -243,7 +243,7 @@ String String.percent_encode(String s) {
 String String.percent_decode(String text) {
   if (!text || !strchr(text, '%')) return String.new(text);
   String operation = "String.percent_decode";
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   for (int i = 0; text[i] > 0; i++) {
     if (text[i] != '%') {
       out.write_char(text[i]);
@@ -283,7 +283,7 @@ static int _next_point(Iter iter, Var *out) {
 // encoding triples
 
 static String _base64(Alphabet a, const unsigned char *bytes, size_t count) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   for (size_t i = 0; i < count; i += 3) {
     size_t take = count - i < 3 ? count - i : 3;
     unsigned long group = (unsigned long) bytes[i] << 16;
@@ -355,7 +355,7 @@ static String _text(Block bytes, String operation, int bits) {
 
 static String _hex(const unsigned char *bytes, size_t count) {
   static const char digits[] = "0123456789abcdef";
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   for (size_t i = 0; i < count; i++) {
     out.write_char(digits[bytes[i] >> 4]);
     out.write_char(digits[bytes[i] & 15]);

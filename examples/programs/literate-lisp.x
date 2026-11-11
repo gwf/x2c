@@ -473,7 +473,7 @@ static Var _bool(int x)      => x ? <true>.var() : %().var();                   
 static Var _reserved(void) => Var.null();                                        // Expression body; void Var value.
 
 static int _repl(Interp &self) {
-  Buffer source = auto Buffer.new(0);                                            // Release Buffer on block exit.
+  Buffer source = auto Buffer.new();                                            // Release Buffer on block exit.
   Repl repl = { .source = source, .interactive = isatty(Stdin.fileno()) };       // Named fields; POSIX terminal check.
   defer repl.storage.destroy();                                                  // Destroy remaining tokens on exit.
   int failed = 0;                                                                // Written by catch, so kept apart.

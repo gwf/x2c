@@ -132,7 +132,7 @@ foreach (Var (host, arguments), distribution.getdefault("platform_args", none))
   if (host.str() == platform)
     foreach (String argument, arguments)
       native_args = native_args.append($(argument));
-Buffer response = Buffer.new(0);
+Buffer response = Buffer.new();
 foreach (String argument, native_args)
   response.printf("%s\n", quoted(argument));
 stage.join("builds").join(%"$name.native.rsp").write_text(response.str());

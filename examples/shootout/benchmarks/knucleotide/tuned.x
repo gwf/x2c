@@ -29,7 +29,7 @@ int main(void) {
 static Var _run(Var input) {
   Batch batch = input;
   MapSubInt counts = _count(batch.sequence, batch.width);
-  Buffer output = auto Buffer.new(0);
+  Buffer output = auto Buffer.new();
   if (batch.width <= 2) {
     Map frequencies = counts.strings();
     Array keys = [];
@@ -52,7 +52,7 @@ static Var _run(Var input) {
 }
 
 static String _read(void) {
-  Buffer sequence = auto Buffer.new(0);
+  Buffer sequence = auto Buffer.new();
   int found = 0;
   foreach (String line in Stdin) {
     if (!found) {

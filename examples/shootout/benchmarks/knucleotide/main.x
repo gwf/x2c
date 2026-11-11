@@ -27,7 +27,7 @@ int main(void) {
 static Var _run(Var input) {
   Batch batch = input;
   Map counts = _count(batch.sequence, batch.width);
-  Buffer output = auto Buffer.new(0);
+  Buffer output = auto Buffer.new();
   if (batch.width <= 2) {
     Array keys = [];
     foreach ((String key, Var count) in counts) keys.push(key);
@@ -46,7 +46,7 @@ static Var _run(Var input) {
 }
 
 static String _read(void) {
-  Buffer sequence = auto Buffer.new(0);
+  Buffer sequence = auto Buffer.new();
   int found = 0;
   foreach (String line in Stdin) {
     if (!found) {

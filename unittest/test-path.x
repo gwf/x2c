@@ -33,6 +33,13 @@ static void path_parts_examine_text(void) {
   EXPECT_STR_EQ(Path.join("a/", "b"), "a/b");
   EXPECT_STR_EQ(Path.join("a", "/b"), "/b");
   EXPECT_STR_EQ(Path.join(NULL, "b"), "b");
+  EXPECT_STR_EQ(Path.join("a"), "a");
+  EXPECT_STR_EQ(Path.join("a", "b", "c"), "a/b/c");
+  EXPECT_STR_EQ(Path.join("a", "b", "/c", "d"), "/c/d");
+  List components = $("b", NULL, "c");
+  EXPECT_STR_EQ(Path.join("a", @components), "a/b/c");
+  Path root = "a";
+  EXPECT_STR_EQ(root.join(@components), "a/b/c");
 }
 
 static long _text_length(String text) => text.len();

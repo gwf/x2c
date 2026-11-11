@@ -151,7 +151,7 @@ each one as an `int`, `String.code_point_count` counts them, and
 String word = "na\xc3\xafve";
 printf("%d bytes, %d code points\n", word.len(), word.code_point_count());
 foreach (int point in word.code_points()) printf(" U+%04X", point);
-Buffer out = auto Buffer.new(0);
+Buffer out = auto Buffer.new();
 out.write_code_point(0x263A);
 printf("\n%s %d\n", out.str().hex_encode(), "\xc0\x80".is_utf8());
 ~  return 0;

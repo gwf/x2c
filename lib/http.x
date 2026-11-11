@@ -134,7 +134,7 @@ Var HttpRequest.json(HttpRequest req) => Json.parse(req.body);
 /** Creates an empty 200 response. */
 HttpResponse HttpResponse.new(void) {
   HttpResponse res = Scope.calloc(1, sizeof(struct HttpResponse));
-  res.code = 200; res.headers = {}; res.body = Buffer.new(0);
+  res.code = 200; res.headers = {}; res.body = Buffer.new();
   return res;
 }
 
@@ -185,7 +185,7 @@ void HttpResponse.write(HttpResponse res, File output, int keep_alive) =>
 
 static void _write(
   HttpResponse res, File output, int keep_alive, int head_only) {
-  Buffer head = auto Buffer.new(0);
+  Buffer head = auto Buffer.new();
   head.printf("HTTP/1.1 %d %s\r\n", res.code, _reason(res.code));
   res.headers["content-length"] = String.printf("%ld", (long) res.body.len());
   res.headers["connection"] = keep_alive ? "keep-alive" : "close";

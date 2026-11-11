@@ -705,7 +705,7 @@ static void string_byte_escaping(void) {
   char mixed_raw[] = {'A', '"', '\'', '\\', '\n', '\t',
                       (char) 0x80, '\0'};
   String mixed = String.new_len(mixed_raw, 7);
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   mixed.write_repr(out);
   EXPECT_TRUE(out.str_free() == "\"%s\"".printf(mixed.escape()));
 }

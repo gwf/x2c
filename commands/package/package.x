@@ -633,7 +633,7 @@ static List _locked_row(List rows, String name, String version) {
 }
 
 static void _write_lock(String path, List rows) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.write(
     $dedent(%"
     # x2c lockfile. Written by x2c build; keep it with the manifest.

@@ -211,7 +211,7 @@ static void a_long_cluster_comes_back_whole(void) {
   /*  U+1D400 is the one column; U+E0100 through U+E010A are variation
       selectors, printable and zero-width, and four bytes each. */
   char selector[] = "\xf3\xa0\x84\x80";
-  Buffer drawn = Buffer.new(0).write("\xf0\x9d\x90\x80");
+  Buffer drawn = Buffer.new().write("\xf0\x9d\x90\x80");
   for (int mark = 0; mark < 11; mark++) {
     selector[3] = (char) (0x80 + mark);
     drawn.write_len(selector, 4);

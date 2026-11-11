@@ -9,7 +9,7 @@
 
 /** Writes an owned analysis value using the existing tagged datum grammar. */
 String snapshot_text(Var value) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   if (!out.write_datum(value, 1))
     raise %(bad-types (operation "graph snapshot") (value $value));
   return out;

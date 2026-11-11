@@ -793,7 +793,7 @@ static List _field_write(List field) {
 static List _string_method(String owner, String member) {
   String writer = %"write_$(member)";
   List body = $!{
-    auto Buffer out = Buffer.new(0);
+    auto Buffer out = Buffer.new();
     value.$writer(out);
     return out.str();
   };

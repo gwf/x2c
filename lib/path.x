@@ -329,13 +329,17 @@ Path Path.temp_dir(void) {
   return String.new(created);
 }
 
-/** Returns `name` joined to `base` with one separating slash.
-    An absolute `name`, or an empty `base`, is returned unchanged.
+/** Joins each supplied path to `base` with one separating slash.
+    An absolute component replaces the accumulated path. With no components,
+    returns `base`; null components leave the accumulated path unchanged.
 */
-meta native Self Path.join(Self base, Path name) {
-  if (!name) return base;
-  if (!base || name.startswith("/")) return name;
-  return base.endswith("/") ? %"$base$name" : %"$base/$name";
+meta native Self Path.join(Self base, List @names) {
+  foreach (Path name in names) {
+    if (!name) continue;
+    if (!base || name.startswith("/")) base = name;
+    else base = base.endswith("/") ? %"$base$name" : %"$base/$name";
+  }
+  return base;
 }
 
 static String _trimmed(String path) {

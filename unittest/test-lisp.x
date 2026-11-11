@@ -1056,7 +1056,7 @@ static void lisp_numeric_comparison_reads_the_value(void) {
 
 
 static String _nested_reader_source(String open, String close, int count) {
-  Buffer source = auto Buffer.new(0);
+  Buffer source = auto Buffer.new();
   source.write("  ");
   for (int i = 0; i < count; i++) source.write(open);
   source.write("x");
@@ -1118,7 +1118,7 @@ static String _read_outcome(Lisp lisp, String source, int tokenized) {
   catch %(incomplete *): status = <incomplete>;
   catch %(malformed *): status = <malformed>;
   catch %(size-limit *): status = <size-limit>;
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.printf("%s %u ", (char *) status.str(), cursor);
   if (value is not void) out.write_datum(value, 1);
   return out;
@@ -1142,7 +1142,7 @@ static void lisp_read_fast_path_matches_token_reader(void) {
                   _read_outcome(lisp, source, 0));
   for (int depth = LISP_READ_DEPTH_MAX - 1;
        depth <= LISP_READ_DEPTH_MAX; depth++) {
-    Buffer source = auto Buffer.new(0);
+    Buffer source = auto Buffer.new();
     for (int i = 0; i < depth; i++) source.write("(");
     source.write("x");
     for (int i = 0; i < depth; i++) source.write(")");
@@ -1216,7 +1216,7 @@ static void lisp_strings_take_x2c_escapes(void) {
    reader comment. */
 static void lisp_datum_atom_round_trips(void) {
   foreach (String spelling, %("/" "/=" "//b" "/*b" "//" "/*")) {
-    Buffer out = auto Buffer.new(0);
+    Buffer out = auto Buffer.new();
     EXPECT_TRUE(out.write_datum(Atom.intern(spelling), 1));
     unsigned cursor = 0;
     Var back = void;
@@ -1232,7 +1232,7 @@ static void lisp_datum_symbol_round_trips(void) {
   foreach (String spelling, %("<<" "<x" "a b" "<<=" "a\"b" "a\\b" "line\n"))
     for (int tagged = 0; tagged < 2; tagged++) {
       Symbol symbol = Symbol.new(spelling);
-      Buffer out = auto Buffer.new(0);
+      Buffer out = auto Buffer.new();
       EXPECT_TRUE(out.write_datum(symbol, tagged));
       unsigned cursor = 0;
       Var back = void;
@@ -1243,7 +1243,7 @@ static void lisp_datum_symbol_round_trips(void) {
       EXPECT_INT_EQ(Lisp.read(NULL, out, cursor, back), <value>);
       EXPECT_VAR_EQ(back, Symbol.var(symbol));
     }
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   EXPECT_FALSE(out.write_datum((Symbol) 0, 0));
 }
 

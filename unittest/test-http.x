@@ -72,7 +72,7 @@ static void http_parser_rejections(void) {
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: -1\r\n\r\n", 100), 400);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: 2\r\n\r\nx", 100), 400);
   EXPECT_INT_EQ(_rejected("GET / HTTP/1.1\r\nHost: x\r\n", 100), 400);
-  Buffer longline = auto Buffer.new(0);
+  Buffer longline = auto Buffer.new();
   longline.write("GET /").write_repeat('x', 8192).write(" HTTP/1.1\r\nHost: x\r\n\r\n");
   EXPECT_INT_EQ(_rejected(longline, 100), 400);
   longline.clear().write("GET / HTTP/1.1\r\nHost: x\r\nBig: ").write_repeat('x', 65536).write("\r\n\r\n");

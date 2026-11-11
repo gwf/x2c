@@ -25,7 +25,7 @@ static typedef struct Render {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 String List.str(List lst) {
-  Buffer buf = auto Buffer.new(0);
+  Buffer buf = auto Buffer.new();
   lst.write_str(buf);
   return buf;
 }
@@ -52,7 +52,7 @@ Buffer List.write_str(List lst, Buffer out) {
     Raises: `<alloc-fail>` or `<size-limit>` while constructing the result.
 */
 String List.repr(List lst) {
-  Buffer buf = auto Buffer.new(0);
+  Buffer buf = auto Buffer.new();
   lst.write_repr(buf);
   return buf;
 }
