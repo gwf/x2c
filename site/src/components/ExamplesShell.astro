@@ -1,0 +1,64 @@
+---
+import { exampleEntries, exampleSections } from "../lib/example-catalog";
+import "../styles/examples-reading.css";
+import { mdbookSidebarAssets } from "../../mdbook-sidebar.mjs";
+const sidebar = mdbookSidebarAssets();
+const { current = "love" } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const href = (entry) => entry.article
+  ? `${base}examples/${entry.article.frontmatter.slug}/`
+  : entry.section === "programs" ? `${base}examples/${entry.id.split("/").pop()}/`
+  : `${base}examples/${entry.section}/#${entry.id.replaceAll("/", "-")}`;
+---
+<style is:inline set:html={sidebar.css} />
+<div class="examples-shell" data-examples-shell>
+  <input type="checkbox" id="mdbook-sidebar-toggle-anchor" hidden />
+  <nav id="mdbook-sidebar" class="sidebar examples-index" aria-label="Example index">
+    <div class="sidebar-scrollbox">
+      <ol class="chapter">
+        {exampleSections.map(section => <li class:list={["chapter-item", {expanded: current === section || (section === "programs" && !["love", "power", "magic"].includes(current))}]}>
+          <span class="chapter-link-wrapper"><a href={`${base}examples/${section}/`} class:list={{active: current === section}}>{section}</a><button class="chapter-fold-toggle" aria-label={`Toggle ${section}`} aria-expanded={current === section || (section === "programs" && !["love", "power", "magic"].includes(current))}><div aria-hidden="true">&#10097;</div></button></span>
+          <ol class="section">{exampleEntries.filter(entry => entry.section === section).map(entry =>
+            <li><a href={href(entry)} data-index-link class:list={{active: current === (entry.article?.frontmatter.slug ?? entry.id.split("/").pop())}}>{entry.label}</a></li>)}</ol>
+        </li>)}
+      </ol>
+    </div>
+    <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle"><div class="sidebar-resize-indicator"></div></div>
+  </nav>
+  <div class="examples-reading"><slot /></div>
+</div>
+<script is:inline>
+  document.documentElement.classList.add("js");
+  const checkbox = document.getElementById("mdbook-sidebar-toggle-anchor");
+  let visible = window.innerWidth >= 1080;
+  try { visible = visible && localStorage.getItem("mdbook-sidebar") !== "hidden"; } catch {}
+  checkbox.checked = visible;
+  document.documentElement.classList.toggle("sidebar-visible", visible);
+  document.getElementById("mdbook-sidebar-toggle").setAttribute("aria-expanded", String(visible));
+</script>
+<script is:inline set:html={sidebar.script} />
+<script>
+  const index = document.querySelector<HTMLElement>("#mdbook-sidebar")!;
+  const scrollbox = index.querySelector<HTMLElement>(".sidebar-scrollbox")!;
+  const button = document.querySelector<HTMLElement>("#mdbook-sidebar-toggle")!;
+  const checkbox = document.querySelector<HTMLInputElement>("#mdbook-sidebar-toggle-anchor")!;
+  checkbox.addEventListener("change", () => { index.style.display = checkbox.checked ? "" : "none"; });
+  button.addEventListener("keydown", event => {
+    if (event.key === "Enter" || event.key === " ") { event.preventDefault(); button.click(); }
+  });
+  scrollbox.scrollTop = Number(sessionStorage.getItem("examples-index-scroll") || 0);
+  index.addEventListener("click", event => {
+    sessionStorage.setItem("examples-index-scroll", String(scrollbox.scrollTop));
+    const fold = (event.target as HTMLElement).closest(".chapter-fold-toggle");
+    if (fold) fold.setAttribute("aria-expanded", String(fold.parentElement!.parentElement!.classList.contains("expanded")));
+    if (innerWidth < 1080 && (event.target as HTMLElement).closest("a") && checkbox.checked) button.click();
+  });
+  addEventListener("keydown", event => { if (event.key === "Escape" && checkbox.checked) { button.click(); button.focus(); } });
+  const mark = () => {
+    for (const link of index.querySelectorAll<HTMLAnchorElement>("[data-index-link]")) {
+      const url = new URL(link.href);
+      if (url.pathname === location.pathname && url.hash) link.classList.toggle("active", url.hash === location.hash);
+    }
+  };
+  addEventListener("hashchange", mark); mark();
+</script>

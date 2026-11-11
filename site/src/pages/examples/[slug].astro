@@ -3,6 +3,7 @@ import { basename } from "node:path";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
+import ExamplesShell from "../../components/ExamplesShell.astro";
 import ExampleWalkthrough from "../../components/ExampleWalkthrough.astro";
 import ExampleHeading from "../../components/ExampleHeading.astro";
 import CoreSetup from "../../components/CoreSetup.astro";
@@ -46,7 +47,8 @@ const previous = articles[(current + articles.length - 1) % articles.length];
   socialImage={`examples/${page.slug}.png`}
   socialImageAlt={`${page.title} ${page.description}`}
 >
-  <Fragment slot="header"><SiteHeader /></Fragment>
+  <Fragment slot="header"><SiteHeader examples /></Fragment>
+  <ExamplesShell current={page.slug}>
   <article class="example-page" data-example={page.slug}
     data-section={section} data-surface="detail">
     <ExampleHeading page={page} sourceUrl={sourceUrl} />
@@ -88,5 +90,6 @@ const previous = articles[(current + articles.length - 1) % articles.length];
       </a>
     </nav>
   </article>
+  </ExamplesShell>
   <SiteFooter />
 </BaseLayout>

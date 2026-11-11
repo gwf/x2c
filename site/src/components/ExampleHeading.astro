@@ -5,10 +5,6 @@ const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 const canonicalUrl = new URL(local(`examples/${page.slug}/`), Astro.site).href;
 ---
 <header class="example-heading">
-  <nav class="example-eyebrow example-breadcrumb" aria-label="Breadcrumb">
-    <a href={local("#top")}>x2c</a>{" / "}
-    <span aria-current="page">{page.navTitle}</span>
-  </nav>
   <h1>{page.title}</h1>
   <p class="example-premise">{page.description}</p>
   <nav class="example-actions" aria-label="Example actions">

@@ -45,7 +45,7 @@ const visibleCode = (slide: string, source: string) => {
   const block = (slideSources[`../content/slides/${slide}`] as string ?? "")
     .match(/```x2c\n([\s\S]*?)\n```/)?.[1];
   return block?.split("\n").filter((line) => !line.trimStart().startsWith("~"))
-    .join("\n").trim() ?? source;
+    .join("\n").replace(/^\n+|\n+$/g, "") ?? source;
 };
 
 const sourceFor = (id: string) =>

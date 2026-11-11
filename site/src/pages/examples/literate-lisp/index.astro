@@ -6,6 +6,7 @@ import { x2cDarkTheme } from "../../../../shiki-x2c-theme.mjs";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import SiteHeader from "../../../components/SiteHeader.astro";
 import SiteFooter from "../../../components/SiteFooter.astro";
+import ExamplesShell from "../../../components/ExamplesShell.astro";
 import ExampleHeading from "../../../components/ExampleHeading.astro";
 import CoreSetup from "../../../components/CoreSetup.astro";
 import "../../../styles/example-pages.css";
@@ -31,7 +32,8 @@ const html = await codeToHtml(source, {
 });
 ---
 <BaseLayout title={`${page.title.replace(/\.$/, "")} \u2014 x2c`} description={page.description}>
-  <Fragment slot="header"><SiteHeader /></Fragment>
+  <Fragment slot="header"><SiteHeader examples /></Fragment>
+  <ExamplesShell current="literate-lisp">
   <article class="example-page literate-page" data-example="literate-lisp"
     data-section="magic" data-surface="detail">
     <ExampleHeading page={page} sourceUrl="#source"
@@ -104,10 +106,11 @@ const html = await codeToHtml(source, {
       </a>
     </nav>
   </article>
+  </ExamplesShell>
   <SiteFooter />
 </BaseLayout>
 <style>
-  .literate-page { --source-font: clamp(11px, 1.05vw, 12px); }
+  .literate-page { --source-font: clamp(10px, 1.05vw, 12px); max-width: 1080px; }
   a { text-underline-offset: 3px; }
   .reading-intro { max-width: 82ch; }
   .example-reading { margin-top: clamp(38px, 5vw, 64px); }
@@ -117,13 +120,13 @@ const html = await codeToHtml(source, {
   .sections { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 24px; padding: 8px 0 24px; font: 14px/1.5 "Archivo", sans-serif; }
   #source { width: 100%; container-type: inline-size; scroll-margin-top: 85px; font: var(--source-font)/1.65 "JetBrains Mono", monospace; }
   .source-caption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; padding: 12px 24px; background: #dedbd5; font-size: 11px; }
-  .source-stage { position: relative; font: var(--source-font)/1.8 "JetBrains Mono", monospace; }
+  .source-stage { position: relative; font: clamp(10px, 1.2cqw, 12px)/1.8 "JetBrains Mono", monospace; }
   .section-jump { position: absolute; right: 0; width: max(5ch, calc((100cqw - 124ch) / 2)); text-align: center; padding: 0; font: inherit; color: #777; background: #000; text-decoration: none; user-select: none; white-space: nowrap; }
   .section-jump:hover, .section-jump:focus-visible { color: #ddd; }
   .section-jump:focus-visible { outline: 1px solid #aaa; outline-offset: 2px; }
   .source-scroll { overflow-x: auto; background: var(--code); }
   .source-scroll:focus-visible { outline: 2px solid var(--red-text); }
-  .source-scroll :global(pre) { margin: 0; padding: 24px max(7ch, calc((100cqw - 120ch) / 2)); width: 100%; min-width: 134ch; box-sizing: border-box; font: var(--source-font)/1.8 "JetBrains Mono", monospace; }
+  .source-scroll :global(pre) { margin: 0; padding: 24px max(7ch, calc((100cqw - 120ch) / 2)); width: 100%; min-width: 134ch; box-sizing: border-box; font: clamp(10px, 1.2cqw, 12px)/1.8 "JetBrains Mono", monospace; }
   .source-scroll :global(pre) {
     --gutter: max(7ch, calc((100cqw - 120ch) / 2));
     --gutter-edge: calc(var(--gutter) - 2ch);

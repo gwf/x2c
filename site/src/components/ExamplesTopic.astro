@@ -1,0 +1,38 @@
+---
+import { Code } from "astro:components";
+import { exampleEntries } from "../lib/example-catalog";
+import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
+const { topic = "love" } = Astro.props;
+const entries = exampleEntries.filter(entry => entry.section === topic && topic !== "programs" && !entry.article);
+const titles = { love: "Everyday values and operations.", power: "Compose larger programs.", magic: "Extend the language.", programs: "Explore a complete program." };
+const descriptions = { love: "Values, text, and collections. Read down the page or choose an example from the index.", power: "Types, protocols, control flow, and concurrency, working together.", magic: "Operators, macros, and compile-time code that shape the language.", programs: "Longer examples bring the pieces together." };
+const json = value => JSON.stringify(value).replaceAll("<", "\u003c");
+const notes = await Promise.all(entries.map(async entry => {
+  if (!entry.slide) return entry.description ?? "";
+  const html = await entry.slide.compiledContent();
+  const at = html.indexOf("</pre>");
+  return at < 0 ? html : html.slice(at + 6);
+}));
+---
+<header class="examples-topic-heading"><p class="about-eyebrow">examples / {topic}</p><h1>{titles[topic]}</h1><p>{descriptions[topic]}</p></header>
+{topic === "programs" && <div class="examples-program-list">{exampleEntries.filter(entry => entry.section === "programs").map(entry => <p><a href={`${import.meta.env.BASE_URL}examples/${entry.article?.frontmatter.slug ?? entry.id.split("/").pop()}/`}>{entry.label}</a> - {entry.article?.frontmatter.description ?? entry.description}</p>)}</div>}
+{entries.map((entry, i) => <article class="reading-example" id={entry.id.replaceAll("/", "-")} data-playground data-programs={`${import.meta.env.BASE_URL}playground/programs/`}>
+  <header><p class="about-eyebrow">{entry.label}</p><h2>{entry.slide?.frontmatter.title ?? entry.label}</h2></header>
+  <div class="reading-example-prose" data-about-body set:html={notes[i]} />
+  <div class="reading-source-bar"><span>{entry.path}</span><a href={`#${entry.id.replaceAll("/", "-")}`} aria-label={`Link to ${entry.label}`}>link</a></div>
+  <div class="reading-source"><Code code={entry.source} lang={{...grammar, name:"x2c"}} theme={x2cDarkTheme} /></div>
+  <textarea hidden readonly aria-label="Published source">{entry.source}</textarea><pre data-highlight hidden></pre>
+  <div class="reading-run"><button type="button" data-run hidden>Run</button><button type="button" data-stop hidden>Stop</button><button type="button" data-reset hidden>Reset</button><span data-status role="status"></span></div>
+  <section class="reading-output" data-output-comparison aria-label="Program results">
+    <div><h3 data-output-title>Actual output</h3><pre data-output role="log" aria-label="Actual output"></pre></div>
+    <div><h3>Expected output</h3><pre data-expected-output aria-label="Expected output">{entry.output ?? "No console output."}</pre></div>
+  </section>
+  <p class="reading-local">Run locally: <code>{entry.recipe ?? `x2c run ${entry.path}`}</code></p>
+  <script type="application/json" data-theme set:html={json(x2cDarkTheme)} />
+  <script type="application/json" data-examples set:html={json([entry].map(({id,path,source,visible,runnable,program,output})=>({id,path,source,visible,runnable,program,output})))} />
+</article>)}
+<script>
+  import { setupPlayground } from "../lib/playground";
+  document.querySelectorAll<HTMLElement>(".reading-example[data-playground]").forEach(root => setupPlayground(root));
+</script>

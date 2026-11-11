@@ -23,7 +23,7 @@ const hiddenLines = {
       .split("\n")
       .filter((line) => !line.trimStart().startsWith("~"))
       .join("\n")
-      .trim();
+      .replace(/^\n+|\n+$/g, "");
   }
 };
 

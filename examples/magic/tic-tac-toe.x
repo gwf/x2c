@@ -29,6 +29,27 @@ static Var _wins(int square, String player) {
   return %();
 }
 
+
+static void _show_board(void) {
+  for (int row = 0; row < 3; row++) {
+    int i = row * 3;
+    printf(" %c | %c | %c\n", board[i], board[i + 1], board[i + 2]);
+    if (row < 2) puts("---+---+---");
+  }
+}
+
+static int _won(char player) {
+  for (int i = 0; i < 8; i++)
+    if (board[lines[i][0]] == player && board[lines[i][1]] == player &&
+        board[lines[i][2]] == player) return 1;
+  return 0;
+}
+
+static int _empty(int square) {
+  return square >= 1 && square <= 9 && board[square - 1] != 'X' &&
+    board[square - 1] != 'O';
+}
+
 int main(int argc, char **argv) {
   if (argc != 2) {
     Stderr.puts("usage: tic-tac-toe STRATEGY.xlisp\n");
@@ -76,24 +97,4 @@ int main(int argc, char **argv) {
   }
   puts("Draw.");
   return 0;
-}
-
-static void _show_board(void) {
-  for (int row = 0; row < 3; row++) {
-    int i = row * 3;
-    printf(" %c | %c | %c\n", board[i], board[i + 1], board[i + 2]);
-    if (row < 2) puts("---+---+---");
-  }
-}
-
-static int _won(char player) {
-  for (int i = 0; i < 8; i++)
-    if (board[lines[i][0]] == player && board[lines[i][1]] == player &&
-        board[lines[i][2]] == player) return 1;
-  return 0;
-}
-
-static int _empty(int square) {
-  return square >= 1 && square <= 9 && board[square - 1] != 'X' &&
-    board[square - 1] != 'O';
 }
