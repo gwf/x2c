@@ -220,10 +220,12 @@ that way, each page is the same image, byte for byte, as the same page of
 CUI's C gallery.
 
 `examples/scenes.x` is a check, not an application. It has one small
-scene for each component that has an x2c form, named for the component
-and grouped into families under `examples/scenes/`. `scenes --shots DIR`
+scene for each of CUI's 201 components, named for the component and
+grouped into families under `examples/scenes/`. `scenes --shots DIR`
 draws every scene off screen to `DIR/NAME.png`, and `scenes --list` prints
-the names. A menu that opens only on a click is drawn closed.
+the names. `scenes --check HEADER` compares the names with the
+`#define cui_NAME(` lines of CUI's `cui.h` and fails when a component has
+no scene. A menu that opens only on a click is drawn closed.
 
 ## Native API
 
@@ -251,5 +253,6 @@ make run
 make check
 ```
 
-`make run` draws the to-do application and every scene off screen.
+`make run` draws the to-do application and every scene off screen, then
+checks that every component of the pinned header has a scene.
 No check opens a window, because a window needs a display.

@@ -489,7 +489,8 @@ Not done:
 - Linux. `dependency.json` is unbuilt, so the package is not in
   `PACKAGES`.
 - Parameter names. Generated methods name their parameters `p1`, `p2`.
-- `tests/test-gallery.x`, which arrives with Delivery 2 as specified.
+- The completeness check, which arrived with Delivery 2 as
+  `scenes --check`; see "Every component has a scene" below.
 - Menus that open only on a click are drawn closed in `--shots`.
 
 Facts that differ from the specification above:
@@ -601,6 +602,28 @@ State on 2026-11-10: the frame and all 26 pages are ported.
 - **Size.** 3,670 lines of x2c for 2,497 lines of C. The C lines run to
   180 columns and the x2c lines stop at 79.
 - Nobody has operated the extended pages in a window.
+
+#### Every component has a scene
+
+State on 2026-11-10: `examples/scenes.x` has 201 scenes, one for each of
+the 201 component macros in the pinned `cui.h`.
+
+- **The check.** `scenes --check HEADER` reads the `#define cui_NAME(`
+  lines of the header and fails when a component has no scene or a scene
+  names no component. `make run`, and so `make check`, runs it against
+  the pinned header. It replaces the `tests/test-gallery.x` that this plan
+  specified: the scene table is in the `scenes` program, so the program
+  checks itself and the package keeps no second list.
+- **The families.** `viz.x` (19 scenes), `devtools.x` (18), and
+  `choices.x` (20) hold the 57 scenes added for the array components.
+  All 201 scenes draw, none empty, also with freed memory scribbled.
+- **Names.** `ui.prop_vec2`, `ui.prop_vec3`, and `ui.prop_vec4` were
+  added so each of those components keeps its CUI name.
+- `cui_flame_sort` and `cui_trace_sort` take an array and no `cui_ctx`
+  and are called as C.
+- The week calendar reads the system clock, so its image changes with
+  the date. The file browser and file picker images change with the
+  directory they list.
 
 #### The array form after the port
 

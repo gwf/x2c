@@ -215,6 +215,18 @@ void cui_log_buffer.append(cui_log_buffer &log, cui_log_level level,
                            String format, List @values) =>
   cui_log_append(&log, level, "%s", format.format(@values));
 
+/// Edits the two numbers at `value` in an inspector row.
+bool Ui.prop_vec2(Ui ui, String label, float *value, cui_prop_opts opts) =>
+  cui_prop_vec_ex(ui, label, value, 2, &opts);
+
+/// Edits the three numbers at `value` in an inspector row.
+bool Ui.prop_vec3(Ui ui, String label, float *value, cui_prop_opts opts) =>
+  cui_prop_vec_ex(ui, label, value, 3, &opts);
+
+/// Edits the four numbers at `value` in an inspector row.
+bool Ui.prop_vec4(Ui ui, String label, float *value, cui_prop_opts opts) =>
+  cui_prop_vec_ex(ui, label, value, 4, &opts);
+
 // The x axis labels of a chart are a List in x2c and two option fields in C.
 static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
   if (labels) {
