@@ -1,6 +1,6 @@
 #pragma once
 
-/*  layout.x -- gallery scenes for boxes, rows, columns, cards, scrolling,
+/*  layout.x -- scenes for boxes, rows, columns, cards, scrolling,
     splits, id and disabled scopes, text, and buttons
 */
 

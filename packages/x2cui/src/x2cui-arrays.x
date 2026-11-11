@@ -44,6 +44,21 @@ macro Stmt $cui.bar_chart(
   $ui.bar_chart($id, $series, $cui.count($series), $labels, $opts);
 }
 
+/** Shows a command palette over the `cui_command` array `$commands` while
+    `$open` is true. Returns the index of the chosen command, or -1.
+*/
+macro Expression $cui.command_palette(
+  Expr $ui, Expr $open, Expr $commands) =>
+  $ui.command_palette($open, $commands, $cui.count($commands));
+
+/** Draws one selectable card for each `cui_choice` of the array
+    `$choices` and keeps the chosen index in `$index`. Returns true when
+    the choice changes.
+*/
+macro Expression $cui.radio_cards(
+  Expr $ui, Expr $id, Expr $choices, Expr $index, Expr $opts) =>
+  $ui.radio_cards($id, $choices, $cui.count($choices), $index, $opts);
+
 /** Runs the block inside a table with the `cui_table_column` array
     `$columns`. The block begins each row with `ui.table_row`.
 */

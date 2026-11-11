@@ -1,6 +1,6 @@
 #pragma once
 
-/*  tools.x -- gallery scenes for path bars, file browsers and pickers, a
+/*  tools.x -- scenes for path bars, file browsers and pickers, a
     terminal, markdown, a code editor, a diff view, a node editor, docking,
     and an emoji picker
 */

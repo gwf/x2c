@@ -1,6 +1,6 @@
 #pragma once
 
-/*  data.x -- gallery scenes for charts, tables, and the data grid
+/*  data.x -- scenes for charts, tables, and the data grid
 
     These components read arrays of CUI's records. The arrays are C arrays
     written with designated initializers, and each `$cui.` macro takes the

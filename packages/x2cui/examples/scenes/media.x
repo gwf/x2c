@@ -1,6 +1,6 @@
 #pragma once
 
-/*  media.x -- gallery scenes for media, messages, disclosure, feedback,
+/*  media.x -- scenes for media, messages, disclosure, feedback,
     pickers, audio controls, and capture
 */
 

@@ -1,6 +1,6 @@
 #pragma once
 
-/*  chrome.x -- gallery scenes for compound buttons, special inputs, the
+/*  chrome.x -- scenes for compound buttons, special inputs, the
     menu bar, toolbar, and status bar, the property inspector, the log
     console, and developer tools
 */

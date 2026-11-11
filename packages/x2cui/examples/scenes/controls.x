@@ -1,6 +1,6 @@
 #pragma once
 
-/*  controls.x -- gallery scenes for selection controls, text and number
+/*  controls.x -- scenes for selection controls, text and number
     inputs, pickers, navigation, menus, popovers, images, dialogs, sheets,
     notifications, and status displays
 */

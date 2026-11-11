@@ -205,6 +205,35 @@ static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
   return opts;
 }
 
+/** Draws a donut chart with one slice for each of `values`, named by the
+    matching String of `labels`.
+*/
+void Ui.donut_chart(
+  Ui ui, String id, ArrayFloat values, List labels, cui_chart_opts opts) {
+  cui_donut_chart_ex(ui, id, (const float *) values.bytes,
+                     x2cui_strings(labels), (int) values.len(), &opts);
+}
+
+/** Draws `values` as a small line with no axes. */
+void Ui.sparkline(
+  Ui ui, ArrayFloat values, cui_size width, float height, cui_color color) {
+  cui_sparkline(ui, (const float *) values.bytes, (int) values.len(), width,
+                height, color);
+}
+
+/** Draws `length` one-character boxes that edit `code`, a field of at
+    least `length + 1` bytes. Returns true when the code changes.
+*/
+bool Ui.otp_input(Ui ui, String id, TextField code, int length) =>
+  cui_otp_input(ui, id, code.buffer, length);
+
+/** Begins a list whose items the user drags into a new order. `order`
+    holds the item indices in display order, and CUI rewrites it.
+*/
+void Ui.reorder_begin(Ui ui, String id, ArrayInt order) {
+  cui_reorder_begin(ui, id, (int *) order.bytes, (int) order.len());
+}
+
 /** Draws a line chart of `count` series, with `labels` along the x axis,
     or NULL for none. `$cui.line_chart` supplies the count of an array.
 */
@@ -413,6 +442,8 @@ $cui.method(cui_image_destroy);
 $cui.method(cui_image_ex);
 $cui.method(cui_image_viewer_ex);
 $cui.method(cui_cropper_ex);
+$cui.method(cui_command_palette);
+$cui.method(cui_radio_cards_ex);
 $cui.method(cui_tag_input_ex);
 $cui.method(cui_button_group_begin);
 $cui.method(cui_button_group_end);

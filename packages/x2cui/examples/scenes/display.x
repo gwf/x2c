@@ -1,6 +1,6 @@
 #pragma once
 
-/*  display.x -- gallery scenes for data display, lists, agent interfaces,
+/*  display.x -- scenes for data display, lists, agent interfaces,
     text effects, and motion
 */
 
