@@ -49,7 +49,7 @@ meta List cui_method(Code target, Code buffer, Code strings) {
      The compiler reports a `const char *` result without its `const`, and
      no CUI function returns writable text. */
   if (_spelled(result, "(* char)")) result = $!Type{ String };
-  Array params = [], args = [], setup = [];
+  Array params = [], args = [];
   List ui = x2c_ident("ui");
   params.push($!Param{ cui_ctx *$ui });
   args.push($!( $ui ));
@@ -71,11 +71,8 @@ meta List cui_method(Code target, Code buffer, Code strings) {
     }
     else if (_spelled(type, "(* const * const char)") && next &&
              _spelled(next, "(int)")) {
-      List names = x2c_ident(%"names$i");
       params.push($!Param{ List $p });
-      setup.push($!{ const char *$names[$p.len() + 1]; });
-      setup.push($!{ $strings($p, $names); });
-      args.push($!( $names ));
+      args.push($!( $strings($p) ));
       args.push($!( (int) $p.len() ));
       i++;
     }
@@ -99,17 +96,11 @@ meta List cui_method(Code target, Code buffer, Code strings) {
     }
   }
   List declared = params.list_free(), passed = args.list_free();
-  List prepared = setup.list_free();
   List method = x2c_ident(_method_name(Code.binding_spelling(target)));
   List unit = _spelled(result, "(void)")
-    ? $!Unit{ inline void Ui.$method(@declared) {
-                @prepared
-                $target(@passed);
-              } }
-    : $!Unit{ inline $result Ui.$method(@declared) {
-                @prepared
-                return $target(@passed);
-              } };
+    ? $!Unit{ inline void Ui.$method(@declared) { $target(@passed); } }
+    : $!Unit{ inline $result Ui.$method(@declared) =>
+                $target(@passed); };
   return $(unit);
 }
 

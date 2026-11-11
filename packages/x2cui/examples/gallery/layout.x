@@ -56,7 +56,8 @@ static void scene_scroll(Ui ui) {
 
 static void scene_split(Ui ui) {
   static float ratio = 0.35f;
-  $cui.split(ui, "panes", ratio, { .width = CUI_FILL, .height = CUI_PX(240) }) {
+  $cui.split(ui, "panes", ratio, { .width = CUI_FILL,
+                                   .height = CUI_PX(240) }) {
     tile(ui, "Navigation");
     ui.split_next();
     tile(ui, "Content. Drag the divider.");
@@ -90,7 +91,8 @@ static void scene_text(Ui ui) {
   ui.label("A label has medium weight.");
   ui.text("Body text wraps to the width it is given and follows the theme.",
           { .width = CUI_PX(320) });
-  ui.text("Muted, smaller text.", { .color = CUI_COLOR_TEXT_MUTED, .size = 12 });
+  ui.text("Muted, smaller text.", { .color = CUI_COLOR_TEXT_MUTED,
+                                    .size = 12 });
 }
 
 static void scene_button(Ui ui) {

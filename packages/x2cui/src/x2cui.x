@@ -190,12 +190,23 @@ String TextField.take(TextField field) {
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
 
-/** Copies the Strings of `items` into `names`, which holds `items.len()`
-    pointers, for a component that takes `const char *const *`.
+/* One native array for each List of Strings a component has been given.
+   A List is canonical, so equal Lists are one List and one entry. */
+static Map string_arrays = {};
+
+/** Returns the Strings of `items` as the array a component reads. CUI may
+    read the array until the frame ends, so the array is kept and is built
+    once for each distinct List.
 */
-void x2cui_strings(List items, const char **names) {
+const char *const *x2cui_strings(List items) {
+  Var known;
+  if (string_arrays.try_get((long) items, known))
+    return (const char *const *) known.integer();
+  const char **names = malloc((items.len() + 1) * sizeof *names);
   int index = 0;
   foreach (String item in items) names[index++] = item;
+  string_arrays[(long) items] = (long) names;
+  return names;
 }
 
 $cui.method(cui_heading);
@@ -375,7 +386,6 @@ $cui.method(cui_reorder_item_begin);
 $cui.method(cui_reorder_item_end);
 $cui.method(cui_progress_ring);
 $cui.method(cui_split_button_ex);
-$cui.method(cui_toggle_group_ex);
 $cui.method(cui_confirm_button_ex);
 $cui.method(cui_status_button_ex);
 $cui.method(cui_theme_switcher);
@@ -462,7 +472,6 @@ $cui.method(cui_expandable_card_end);
 $cui.method(cui_toc_anchor);
 $cui.method(cui_banner_ex);
 $cui.method(cui_countdown_ex);
-$cui.method(cui_multi_select_ex);
 $cui.method(cui_range_calendar);
 $cui.method(cui_date_range_picker_ex);
 $cui.method(cui_time_picker_ex);
