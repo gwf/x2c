@@ -1,5 +1,5 @@
 ---
-title: Put libraries to work
+title: Put packages to work
 ---
 
 Draw a chart, build a terminal app, query data, or train a model. Below is

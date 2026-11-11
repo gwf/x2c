@@ -1,5 +1,6 @@
 ---
 slug: self-host
+home: false
 section: magic
 tab: self-host
 ---

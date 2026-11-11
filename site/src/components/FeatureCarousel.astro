@@ -49,7 +49,11 @@ const count = String(slides.length).padStart(2, "0");
         return (
           <div class="carousel-slide" id={`example-${slug}`}
             role="tabpanel" aria-labelledby={`example-tab-${slug}`}
+            data-aliases={(slide.frontmatter.aliases ?? []).map((alias: string) => `example-${alias}`).join(" ")}
             data-example={slug} data-section={name} data-surface="home">
+            {(slide.frontmatter.aliases ?? []).map((alias: string) => (
+              <span id={`example-${alias}`} hidden />
+            ))}
             <ExamplePanel slide={slide} codeLabel={codeLabel}
               expanded={article && {
                 href: sitePath(`/examples/${article.frontmatter.slug}/`),

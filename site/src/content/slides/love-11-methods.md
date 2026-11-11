@@ -1,5 +1,6 @@
 ---
 slug: methods
+home: false
 section: love
 tab: methods
 ---

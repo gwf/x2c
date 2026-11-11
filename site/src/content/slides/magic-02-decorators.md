@@ -1,7 +1,10 @@
 ---
 slug: decorators
 section: magic
+home: true
+order: 2
 tab: decorators
+title: Transform a function at its definition.
 ---
 
 ```x2c
@@ -23,7 +26,4 @@ $trace()
 int answer(void) => 42;
 ```
 
-`$trace` receives a parsed `Function` and wraps its body while
-preserving its signature. `Code.name` supplies the trace label;
-`defer` prints the exit trace even when the body returns. Callers still
-use an ordinary function.
+A decorator adds tracing around a function body. The function keeps its ordinary calling interface while the transformation supplies the repeated entry and exit work.

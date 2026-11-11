@@ -35,10 +35,10 @@ const language = { ...grammar, name: "x2c" };
     <Fragment set:html={examples.at(-1)!.closing} />
   </div>
   <aside class="hero-ideas" aria-labelledby="hero-ideas-title">
-    <h2 id="hero-ideas-title">Love, power, and magic.</h2>
+    <h2 id="hero-ideas-title">x2c's values expressed in code</h2>
     <ul class="idea-list">
       {examples.map(example => (
-        <li data-value={example.label.toLowerCase()}>
+        <li data-value={example.label}>
           <p>
             <strong class="idea-title">{example.heading}</strong>{" "}
             <em class="idea-tagline">{example.tagline}</em>

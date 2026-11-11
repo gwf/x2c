@@ -1,7 +1,10 @@
 ---
 slug: match
 section: power
-tab: match
+home: true
+order: 3
+tab: matching
+title: Recognize a shape. Rebuild it.
 ---
 
 ```x2c
@@ -41,8 +44,6 @@ List simplify(List node) {
 }
 ```
 
-`match` rewrites structured code without walking List positions.
-`?name` binds one value; `*body` captures a `List` of statements.
-Templates insert transformed values with `$` and splice sequences with
-`@`. This small control-flow simplifier uses the same pattern-and-rebuild
-technique as x2c's compiler.
+`match` selects nested List structures and binds their parts. Templates rebuild the result: `$` inserts a value and `@` splices a sequence.
+
+This small simplifier combines pattern matching and reconstruction without manually indexing every node.

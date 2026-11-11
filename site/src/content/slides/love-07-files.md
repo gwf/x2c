@@ -1,7 +1,10 @@
 ---
 slug: files
 section: love
+home: true
+order: 7
 tab: files
+title: Read the file. Use its contents.
 ---
 
 ```x2c
@@ -38,7 +41,4 @@ printf("total: %ld\n", total);
 ~}
 ```
 
-`File.string_close` reads the whole text and closes the file; `foreach`
-streams it line by line. `String.words` splits each row, destructuring
-names its fields, and `atol` converts the three valid decimal longs.
-Declaration `auto` keeps stream cleanup beside the open.
+Read a whole file as text or process its lines one at a time. File methods handle the buffers; ordinary String and collection operations handle the contents.

@@ -71,10 +71,10 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </section>
   </div>
 
-  <section id="love" class="landing-section">
+  <section id="love" class="landing-section idea-section">
     <div class="section-shell">
-      <div class="section-feature-grid">
-        <header class="section-heading">
+      <div class="idea-gallery">
+        <header class="section-heading idea-heading">
           <h2>{love.title}</h2>
           <div class="section-overview"><LoveCopy /></div>
         </header>
@@ -96,10 +96,10 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="power" class="landing-section">
+  <section id="power" class="landing-section idea-section">
     <div class="section-shell">
-      <div class="section-feature-grid">
-        <header class="section-heading">
+      <div class="idea-gallery">
+        <header class="section-heading idea-heading">
           <h2>{power.title}</h2>
           <div class="section-overview"><PowerCopy /></div>
         </header>
@@ -123,10 +123,10 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <section id="magic" class="landing-section">
+  <section id="magic" class="landing-section idea-section">
     <div class="section-shell">
-      <div class="section-feature-grid">
-        <header class="section-heading">
+      <div class="idea-gallery">
+        <header class="section-heading idea-heading">
           <h2>{magic.title}</h2>
           <div class="section-overview"><MagicCopy /></div>
         </header>
@@ -275,7 +275,8 @@ const [titleHtml, kickerHtml] = await Promise.all([
           <div class="docs-card stat-card">
             <small>compiler</small>
             <strong>{sourceLines("src")}</strong>
-            <p>code / comment lines in the compiler source.</p>
+            <p>code / comment lines in the compiler, including all nested modules
+              and language components. Command programs are counted separately.</p>
           </div>
           <div class="docs-card stat-card">
             <small>library</small>
@@ -283,14 +284,18 @@ const [titleHtml, kickerHtml] = await Promise.all([
             <p>code / comment lines in the library source.</p>
           </div>
           <div class="docs-card stat-card">
-            <small>X Lisp</small>
-            <strong>{sourceLines("xlisp")}</strong>
-            <p>code / comment lines in hand-written X Lisp source.</p>
+            <small>compiler commands</small>
+            <strong>{sourceLines("commands")}</strong>
+            <p>{number(statistics.inventory.commands)} command programs,
+              including build/run, lint, graph analysis, and the language server.
+              Code / comment lines; excludes command tests.</p>
           </div>
           <div class="docs-card stat-card">
-            <small>compiler support</small>
-            <strong>{sourceLines("etc")}</strong>
-            <p>code / comment lines in compiler support modules.</p>
+            <small>language components</small>
+            <strong>{sourceLines("components")}</strong>
+            <p>{number(statistics.inventory.components)} components implementing
+              language features with macros and rewrite rules. Code / comment
+              lines, already included in the compiler total.</p>
           </div>
           <div class="docs-card stat-card">
             <small>tests</small>
@@ -309,9 +314,9 @@ const [titleHtml, kickerHtml] = await Promise.all([
           </div>
           <div class="docs-card stat-card">
             <small>packages</small>
-            <strong><a href="#packages">Build something.</a></strong>
+            <strong><a href="#packages">{number(inSection("packages").length)}</a></strong>
             <p>
-              Explore C libraries through working x2c examples.
+              packages demonstrated with working examples in the gallery.
             </p>
           </div>
         </div>

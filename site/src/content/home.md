@@ -4,19 +4,20 @@ kicker: "x2c is a language for people who love to code."
 ---
 
 Every programming language is built around a few values that determine what is
-easy or awkward to express. Python values readability. C values a small and fast
+easy or awkward to express. Python values readability and comes with batteries included. C values a small and fast
 mapping to the machine. Lisp values code and data being the same. Languages are
 opinionated because their goals conflict, and each one picks its priorities.
 
 x2c is a quirky little language that would rather not pick. Static or dynamic,
-mutable or immutable, compile-time or run-time, managed or unmanaged: every side
-stays available. x2c is picky about one thing only, which is that all of it
-stays one language. The same types, the same values, and the same code work on
-every side, from single bits up to whole systems. You can change your mind or
+mutable or immutable, compile-time or run-time, managed or unmanaged: every option
+stays available. x2c is picky about one thing only, which is that it all
+stays one small language. The same code works in every mode, from single bits
+up to whole systems. You can change your mind or
 your paradigm without changing languages.
 
 All of which makes x2c sound like a language with no values. It has three:
 *love*, *power*, and *magic*, and we know how that sounds.
+Nonetheless, see the panel for the values translated into code.
 
 Under the hood, x2c is a strict superset of C that compiles to C, so everything
 stays close to native representations and works with the entire C ecosystem. If

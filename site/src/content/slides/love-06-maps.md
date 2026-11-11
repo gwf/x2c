@@ -1,5 +1,6 @@
 ---
 slug: maps
+home: false
 section: love
 tab: maps
 ---

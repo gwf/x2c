@@ -1440,3 +1440,114 @@ a.docs-card:hover {
   .landing-footer > p { grid-column: 1 / -1; grid-row: 2; }
   .footer-top { grid-column: 2; grid-row: 1; }
 }
+
+/* Idea sections: a full-width heading row, then a full-width carousel. */
+.idea-section .section-shell {
+  display: block;
+}
+
+.idea-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
+  align-items: start;
+  column-gap: clamp(20px, calc(4.5vw - 16px), 64px);
+  margin-bottom: clamp(28px, 3.5vw, 44px);
+}
+
+.idea-heading .section-overview {
+  margin: 0;
+}
+
+.section-lede {
+  margin: 0 0 var(--section-paragraph-gap, 1.1rem) !important;
+  color: var(--paper);
+  font:
+    italic 400 clamp(19px, 1.9vw, 23px) / 1.3 "Instrument Serif",
+    Georgia,
+    serif;
+  text-wrap: balance;
+}
+
+.landing-section:nth-of-type(even) .section-lede {
+  color: var(--dark);
+}
+
+.idea-section .section-exit {
+  margin: clamp(18px, 2vw, 26px) 0 0;
+}
+
+/* Each slide is one idea: the point on the left, the code on the right. */
+.idea-section .carousel-slide {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.35fr);
+  background: var(--carousel-dark);
+}
+
+.idea-section .carousel-slide .feature-copy {
+  grid-column: 1;
+  grid-row: 1;
+  padding: clamp(20px, 2.6vw, 34px) clamp(18px, 2.4vw, 30px);
+  border-top: 0;
+  border-right: 1px solid var(--hairline-on-dark);
+}
+
+.idea-section .carousel-slide .feature-code {
+  grid-column: 2;
+  grid-row: 1;
+  padding: clamp(14px, 2vw, 26px);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.idea-section .feature-copy h3 {
+  margin: 0 0 16px;
+  font-size: clamp(26px, 2.4vw, 32px);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.idea-section .feature-copy p {
+  font-size: 15px;
+  line-height: 1.62;
+}
+
+.idea-section .feature-copy em {
+  color: var(--paper);
+  font-style: italic;
+}
+
+.idea-section .feature-copy a {
+  color: var(--coral);
+}
+
+.idea-section .carousel-slide .feature-copy .caption-links {
+  margin-top: 16px;
+}
+
+
+@media (max-width: 980px) {
+  .idea-heading {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 18px;
+  }
+}
+
+@media (max-width: 760px) {
+  .idea-section .carousel-slide {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  .idea-section .carousel-slide .feature-copy {
+    grid-column: 1;
+    grid-row: 1;
+    border-right: 0;
+    border-bottom: 1px solid var(--hairline-on-dark);
+  }
+
+  .idea-section .carousel-slide .feature-code {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}

@@ -1,7 +1,10 @@
 ---
 slug: exceptions
 section: power
-tab: exceptions
+home: true
+order: 6
+tab: errors
+title: Cleanup and recovery belong together.
 ---
 
 ```x2c
@@ -53,7 +56,4 @@ String read_text(String path) {
 ~}
 ```
 
-`File.string` rejects embedded NUL bytes, and `auto` closes the file
-before the caller, `preview`, handles that failure. Named `catch`
-clauses distinguish invalid text from a missing file; `catch:` handles
-everything else. The loader owns cleanup; its caller chooses how to recover.
+A failed read can leave a block without leaving its file open. Cleanup stays beside the resource; the caller handles the failure where it can decide what to do next.

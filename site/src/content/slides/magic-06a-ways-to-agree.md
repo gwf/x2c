@@ -1,5 +1,6 @@
 ---
 slug: ways-to-agree
+home: false
 section: magic
 tab: same list
 ---

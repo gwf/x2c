@@ -1,7 +1,11 @@
 ---
 slug: compile-time-lisp
+aliases: [ways-to-agree, self-host]
 section: magic
-tab: codegen
+home: true
+order: 0
+tab: compile time
+title: Compute while the program compiles.
 ---
 
 ```x2c
@@ -32,7 +36,4 @@ meta static List responses(void) =>
   %((200 "OK") (404 "Not Found") (503 "Unavailable"));
 ```
 
-A `meta` function runs inside the compiler. `$column(...)` computes during
-translation; here a quotation splices one table column into a C array
-initializer. The generated program contains the codes and string literals,
-and changing the table updates both arrays.
+A meta function runs x2c during compilation. Build related tables from one description, then use the generated values in the finished program.

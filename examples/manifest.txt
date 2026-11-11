@@ -80,3 +80,11 @@ apps/notes/bench/load|probe|none||-|Optional loopback benchmark client.
 apps/notes/bench/notes-database|probe|none||-|Shared database support for optional Notes benchmarks.
 apps/notes/bench/threaded-notes|probe|none||-|Optional Notes comparison with one database thread.
 apps/notes/notes|optional|none||-|SQLite-backed notes server; make -C examples/apps/notes check.
+
+love/two-kinds|showcase|run||expected/love-two-kinds.stdout|Gallery: canonical values versus objects with identity.
+love/collections|showcase|run||expected/love-collections.stdout|Gallery: Lists, Arrays, and Maps through one bracket syntax.
+love/loops|showcase|run||expected/love-loops.stdout|Gallery: foreach, destructuring, pattern conditions, lambdas, keyword arguments.
+power/classes|showcase|run||expected/power-classes.stdout|Gallery: a value class and a pointer class with its own init.
+power/protocols|showcase|run||expected/power-protocols.stdout|Gallery: set union and intersection as + and * through a protocol.
+power/channels|showcase|run||expected/power-channels.stdout|Gallery: two threads share a bounded channel under Thread.run.
+magic/fields|showcase|run||expected/magic-fields.stdout|Gallery: a meta function generates code from a struct's fields.

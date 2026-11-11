@@ -140,5 +140,50 @@
   {
     "slide": "packages-00-torch.md",
     "source": "packages/torch/examples/mlp.x"
+  },
+  {
+    "slide": "love-refresh-two-kinds.md",
+    "example": "love/two-kinds",
+    "optional": false
+  },
+  {
+    "slide": "love-refresh-collections.md",
+    "example": "love/collections",
+    "optional": false
+  },
+  {
+    "slide": "love-refresh-loops.md",
+    "example": "love/loops",
+    "optional": false
+  },
+  {
+    "slide": "power-refresh-classes.md",
+    "example": "power/classes",
+    "optional": false
+  },
+  {
+    "slide": "power-refresh-protocols.md",
+    "example": "power/protocols",
+    "optional": false
+  },
+  {
+    "slide": "power-refresh-iterators.md",
+    "example": "power/iterators",
+    "optional": false
+  },
+  {
+    "slide": "power-refresh-derive.md",
+    "example": "power/derive",
+    "optional": false
+  },
+  {
+    "slide": "power-refresh-channels.md",
+    "example": "power/channels",
+    "optional": false
+  },
+  {
+    "slide": "magic-refresh-fields.md",
+    "example": "magic/fields",
+    "optional": false
   }
 ]

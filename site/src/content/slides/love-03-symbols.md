@@ -1,7 +1,10 @@
 ---
 slug: symbols
 section: love
-tab: symbols
+home: true
+order: 5
+tab: names
+title: Give a value a name.
 ---
 
 ```x2c
@@ -31,8 +34,4 @@ foreach (Symbol stage in stages)
 ~}
 ```
 
-`Symbol` gives names constant-time equality without allocating or
-occupying C's identifier namespace. `SymbolSet` adds declaration order,
-indexing, and membership with no runtime setup. `SymbolSet.index` locates
-a stage; `Symbol.str` recovers its text. Compact names have a fixed
-capacity; `Atom` handles arbitrary external names.
+Symbols provide named values for states, keys, and choices. An ordered vocabulary also gives related names an order, so a program can describe its domain without relying on unexplained numbers.

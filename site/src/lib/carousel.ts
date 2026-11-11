@@ -66,10 +66,12 @@ for (const carousel of document.querySelectorAll<HTMLElement>(
   };
 
   slides.forEach((slide, position) => {
-    destinations.set(slide.id, () => {
+    const select = () => {
       show(position, "link", false, false);
       carousel.scrollIntoView({ block: "start", behavior: "instant" });
-    });
+    };
+    for (const id of [slide.id, ...(slide.dataset.aliases?.split(" ").filter(Boolean) ?? [])])
+      destinations.set(id, select);
   });
 
   tabs.forEach((tab, position) => {
@@ -104,7 +106,8 @@ for (const carousel of document.querySelectorAll<HTMLElement>(
   viewport.addEventListener("pointercancel", () => { pointerStart = null; });
 
   const initial = slides.findIndex((slide) =>
-    slide.id === fragmentId(location.hash));
+    [slide.id, ...(slide.dataset.aliases?.split(" ") ?? [])]
+      .includes(fragmentId(location.hash)));
   show(initial < 0 ? 0 : initial, initial < 0 ? undefined : "link", false, false);
   carousel.setAttribute("data-carousel-ready", "");
   count.setAttribute("aria-live", "polite");

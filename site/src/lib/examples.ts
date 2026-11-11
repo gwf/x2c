@@ -9,7 +9,8 @@ const files = import.meta.glob<ExampleMarkdown>("../content/slides/*.md", {
 // Filename order controls presentation; frontmatter slugs keep links stable.
 export const slides = Object.keys(files).sort().map((path) => files[path]);
 export const inSection = (name: string) =>
-  slides.filter((slide) => slide.frontmatter.section === name);
+  slides.filter((slide) => slide.frontmatter.section === name && slide.frontmatter.home !== false)
+    .sort((a, b) => (a.frontmatter.order ?? 0) - (b.frontmatter.order ?? 0));
 
 export const articles = Object.values(
   import.meta.glob<ExampleMarkdown>("../content/examples/*.md", { eager: true }),

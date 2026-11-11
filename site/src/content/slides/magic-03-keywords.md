@@ -1,7 +1,10 @@
 ---
 slug: keywords
 section: magic
+home: true
+order: 3
 tab: keywords
+title: Give a convention its own syntax.
 ---
 
 ```x2c
@@ -28,7 +31,4 @@ catch %(oops):
 ~}
 ```
 
-`$control.with_lock` evaluates the lock expression once and wraps a
-`Block` with `Mutex.lock` and deferred `Mutex.unlock`. `keyword` gives
-that decorator the spelling `with_lock`. The lock is released when the
-block exits, including when an exception leaves it.
+Turn locking and cleanup into a statement. The decorator introduces the held lock and its deferred release, so the body can concentrate on the operation being protected.
