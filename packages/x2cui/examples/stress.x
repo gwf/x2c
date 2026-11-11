@@ -19,7 +19,6 @@
 import "x2cui" with App, Offscreen, Ui;
 
 #include "time.x"
-#include "typed-array.x"
 
 #include <math.h>
 
@@ -29,7 +28,7 @@ typedef struct Stress {
   int load;            // SHAPES or COMPONENTS
   float items;         // how many items the load animates
   float clock;         // seconds of animation so far
-  ArrayFloat times;    // the last HISTORY times between frames, in ms
+  float times[HISTORY];  // the last times between frames, in ms
   double frame_sum;    // seconds between frames since the figures changed
   double draw_sum;     // seconds spent in `draw` since the figures changed
   int frames;          // frames since the figures changed
@@ -39,10 +38,9 @@ typedef struct Stress {
 static float item_limit(int load) => load == SHAPES ? 50000 : 3000;
 
 static Stress stress_new(int load, float items) {
-  Stress stress = { .load = load, .items = items, .times = [],
+  Stress stress = { .load = load, .items = items,
                     .rate = "-", .frame_time = "-", .draw_time = "-",
                     .vertices = "-", .triangles = "-" };
-  for (int i = 0; i < HISTORY; i++) stress.times.push(0);
   return stress;
 }
 
@@ -157,6 +155,44 @@ static void figure(Ui ui, String label, String value) {
   }
 }
 
+typedef struct History {
+  float times[HISTORY];
+  cui_color line, guide;
+} History;
+
+/* The chart's scale is 0 to 33.3 ms, two frames of a 60 Hz display, so a
+   steady rate is a flat line and a slow frame is a spike. A frame slower
+   than that raises the scale. The guide marks 16.7 ms. */
+static void paint_history(cui_ctx *context, cui_rect area, void *user) {
+  Ui ui = context;
+  History *history = user;
+  float limit = 1000 / 30.0f;
+  for (int i = 0; i < HISTORY; i++)
+    if (history.times[i] > limit) limit = history.times[i];
+  float guide = area.y + area.h * (1 - 1000 / 60.0f / limit);
+  ui.draw_line((cui_vec2){ area.x, guide },
+               (cui_vec2){ area.x + area.w, guide }, 1, history.guide);
+  cui_vec2 points[HISTORY];
+  for (int i = 0; i < HISTORY; i++)
+    points[i] = (cui_vec2){
+      area.x + area.w * i / (HISTORY - 1),
+      area.y + area.h * (1 - history.times[i] / limit) };
+  ui.draw_polyline(points, HISTORY, 1.5f, history.line, false);
+}
+
+static void draw_history(Ui ui, Stress &stress) {
+  History history = { .line = ui.color_of(CUI_COLOR_ACCENT),
+                      .guide = ui.color_of(CUI_COLOR_BORDER) };
+  memcpy(history.times, stress.times, sizeof history.times);
+  $cui.column(ui, { .width = CUI_FILL, .min_width = 240, .gap = 2 }) {
+    ui.text("Between frames, last 240, with a guide at 16.7 ms",
+            { .size = 12, .color = CUI_COLOR_TEXT_MUTED, .nowrap = true });
+    // The canvas copies the history, because it paints when the frame ends.
+    ui.canvas("history", CUI_FILL, CUI_PX(40), paint_history, &history,
+              sizeof history);
+  }
+}
+
 static void draw(Ui ui, Stress &stress) {
   stress.clock += ui.delta_time();
   $cui.column(ui, { .width = CUI_FILL, .height = CUI_FILL, .pad = 16,
@@ -167,7 +203,7 @@ static void draw(Ui ui, Stress &stress) {
       figure(ui, "Describing a frame", stress.draw_time);
       figure(ui, "Vertices", stress.vertices);
       figure(ui, "Triangles", stress.triangles);
-      ui.sparkline(stress.times, CUI_PX(240), 40, CUI_COLOR_ACCENT);
+      draw_history(ui, stress);
     }
     $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER }) {
       if (ui.segmented("load", %("Shapes" "Components"), stress.load, {}))
