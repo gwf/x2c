@@ -2,7 +2,8 @@
 
 > Status: plan and specification with all open decisions accepted by Gary
 > on 2026-11-10. Delivery 0 is submitted as gwf/x2c#653. Delivery 1 is
-> not started.
+> in progress on the local branch `gwf/x2cui-package`; see
+> [Delivery 1 progress](#delivery-1-progress).
 > Baseline: x2c `988bc47e7` (0.16.0), CUI `v1.3.1`.
 > Every "verified" statement below was compiled and run on macOS arm64
 > during planning. Statements marked "not verified" were not.
@@ -439,6 +440,55 @@ P3 are not repaired.
 Estimated size: about 450 lines of package source apart from the table,
 about 470 table rows, about 2,500 lines of gallery, about 600 lines of
 tests. These are estimates.
+
+#### Delivery 1 progress
+
+State on 2026-11-10, macOS arm64, local branch `gwf/x2cui-package`, which
+is based on the Delivery 0 branch until gwf/x2c#653 is published.
+
+Done and verified:
+
+- `make -C packages/x2cui prepare build` builds pinned CUI v1.3.1 from its
+  amalgamation and builds the package with no warnings.
+- `App`, `Offscreen`, and `TextField`.
+- The generator and a table of 354 rows, plus two hand-written methods.
+- 37 container macros.
+- `examples/todo.x`, 163 lines against 148 in CUI's C version, with the
+  same features. `todo --shot` renders the expected image off screen. The
+  window process starts and stays up; its contents were not inspected.
+
+Not done: Gary's acceptance of the to-do example, the gallery, tests,
+README, PROFILE, the book section, the `PACKAGES` entry, and Linux.
+
+Facts that differ from the specification above:
+
+- **The pinned tag has 201 component macros and 429 `cui_ctx` functions.**
+  The census above read CUI's working tree, 14 commits after the tag.
+- **73 functions wait for Delivery 2.** They take arrays of records or
+  numbers, or are variadic. The 356 others have methods.
+- **The text method is `field.text()`.** `str` is a conversion name that
+  x2c reserves, so the buffer member is `buffer` and the method is `text`.
+- **A text result is a String.** Six functions return `const char *` into
+  CUI's frame memory.
+- **Container macros keep CUI's names**, for example `$cui.id_scope` and
+  `$cui.disabled_scope`. `$cui.id_index(ui, i)` is the one addition, over
+  `cui_push_id_int`. Each evaluates its `ui` argument twice, as CUI's C
+  macros do; a `typeof` local does not resolve package methods.
+- **The frame region is written `auto { draw(ui, state); }`.** A bare
+  `auto` call is not accepted as a loop body.
+- **`dependency.json` is the Linux X11 profile and is untested.**
+  `package.mk` requires a file of that name; `dependency-darwin.json` is
+  the tested macOS profile.
+
+Compiler observations from this work, none repaired and none blocking:
+
+- A type name quoted in a meta function, `$!Param{ TextField $p }`, loses
+  its package prefix in the emitted C. The generator takes the type from a
+  package function's parameter instead.
+- `Type.return_type` reports a `const T *` result without its `const`. Two
+  methods with such results are written by hand.
+- `"button_ex"[:-3]` yields `"button_"`. Whether that is the intended
+  slice rule is not checked.
 
 ### Delivery 2: record and array widgets
 
