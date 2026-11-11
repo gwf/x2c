@@ -937,10 +937,12 @@ gwf/x2c#655 to #659 are on `dev`, and `x2cui` contains them.
   spelling of those two methods. `make check` passes, and the gallery's 26
   pages remain byte-identical to CUI's C gallery.
 
-`App.frame` gives a macOS window the appearance of the current theme
-before each frame. CUI sets that appearance only when it creates the
-window, so the title bar stayed light or dark after `ui.set_theme`.
-`src/x2cui-window.c` holds the call, written against the Objective-C
-runtime in C; it does nothing on other platforms. A hidden-window probe
-read `NSAppearanceNameAqua`, then `NSAppearanceNameDarkAqua`, then
-`NSAppearanceNameAqua` as the theme changed. Not viewed on screen.
+`App.frame` gives a macOS window's title bar the theme's background
+color before each frame, with the matching light or dark appearance for
+its title and buttons. CUI sets the appearance only when it creates the
+window, and the system's own dark title bar is a gray that matches no CUI
+color. `src/x2cui-window.c` holds the calls, written against the
+Objective-C runtime in C; it does nothing on other platforms. Captures of
+a real window gave equal title bar and content pixels: (18, 18, 18) in
+the dark theme and (255, 255, 255) in the light theme. During the theme's
+fade the title bar is one frame behind the content.

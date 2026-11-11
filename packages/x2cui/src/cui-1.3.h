@@ -11,6 +11,6 @@
 #endif
 
 /* Defined in x2cui-window.c; `App.frame` calls it. */
-void x2cui_title_bar(void *window, bool dark);
+void x2cui_title_bar(void *window, bool dark, unsigned rgb);
 
 #endif
