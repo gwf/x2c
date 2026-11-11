@@ -1,12 +1,13 @@
 # x2cui: a first-class x2c package over CUI
 
-> Status: plan and specification with all open decisions accepted by Gary
-> on 2026-11-10. Delivery 0 is submitted as gwf/x2c#653. Delivery 1 is
-> in progress on the local branch `gwf/x2cui-package`; see
-> [Delivery 1 progress](#delivery-1-progress).
-> Baseline: x2c `988bc47e7` (0.16.0), CUI `v1.3.1`.
-> Every "verified" statement below was compiled and run on macOS arm64
-> during planning. Statements marked "not verified" were not.
+> Status: in progress on the long-lived branch `x2cui`, 2026-11-10.
+> Gary accepted the plan's decisions and the to-do example. Delivery 0 is
+> published on `dev` (gwf/x2c#653). Delivery 1 is on `x2cui`; see
+> [Delivery 1 progress](#delivery-1-progress). Nothing in this plan is on
+> `dev` except Delivery 0.
+> Baseline: x2c `239408687`, CUI `v1.3.1`.
+> Every "verified" statement below was compiled and run on macOS arm64.
+> Statements marked "not verified" were not.
 
 ## Result
 
@@ -412,9 +413,21 @@ package claims completion.
 
 ## Deliveries
 
-Each delivery is one or more PRs to `dev` through the shared integrator,
-with the package `check` target as focused evidence. `packages-check` stays
-optional.
+Gary set the branch policy on 2026-11-10:
+
+- All CUI-specific work lives on the branch `x2cui` and stays off `dev`
+  until the whole package is proven. That covers `packages/x2cui`, this
+  plan, and the package's entries in `packages/README.md` and the book.
+- The x2cui session owns `x2cui` and merges into it at will. It does not
+  go through the shared integrator. gwf/x2c#654, the first submission of
+  Delivery 1 to `dev`, was withdrawn and closed.
+- A change to x2c itself (compiler, runtime, tools, or shared package
+  machinery) is never made on `x2cui`. It goes to `dev` as its own PR
+  through the integrator, as Delivery 0 did. `x2cui` then takes it by
+  merging `dev`.
+- When the package is proven, `x2cui` is proposed to `dev` as a whole.
+
+The package `check` target is the focused evidence for each delivery.
 
 ### Delivery 0: compiler fix P1
 
@@ -448,8 +461,8 @@ tests. These are estimates.
 
 #### Delivery 1 progress
 
-State on 2026-11-10, macOS arm64, branch `gwf/x2cui-package`, based on
-`dev` after gwf/x2c#653.
+State on 2026-11-10, macOS arm64, branch `x2cui` at `dev` `239408687`
+plus the package commits.
 
 Done and verified:
 
