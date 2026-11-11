@@ -1,7 +1,7 @@
 # Landing-page gallery refresh
 
 > Status: Implemented locally and verified, 2026-11-10.
-> Publication to dev authorized; final validation in progress. Prior checkpoint: `4423d85f`.
+> Publication to dev authorized. Prior checkpoint: `4423d85f`.
 > Reference: local site-update exploration at `522d8552d`.
 
 ## Layout
@@ -144,3 +144,16 @@ and ran energy-gradient against its checked-in output successfully.
 Site build and built-link checks passed. Browser checks exercised all 26 tabs
 at 375px without horizontal page overflow; desktop galleries span 1098px at
 a 1280px viewport. Existing carousel and package layout remain shared owners.
+
+## Delivery scope
+
+Gary explicitly directed that this website work is not gated by compiler
+checks and later authorized direct publication to dev. Website tests, build,
+built-link checks, gallery execution, and metrics tests are the scoped proof.
+An additional agent-pr-check attempt failed on a stale ast-leaf-contract
+transform fixture and generated documentation, and on missing runtime headers
+during probes. The latter attempt overlapped a local wasm-runtime build that
+refreshes include symlinks; do not treat those header failures as an established
+compiler defect. Full log: debug/website-publication-gate.log. Its bootstrap
+regeneration is preserved in debug/website-gate-bootstrap.patch and excluded
+from this website publication. No compiler source or expectations were changed.

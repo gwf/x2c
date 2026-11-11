@@ -62,6 +62,6 @@ test("precompiled programs run the examples without a compile service",
     assert.equal(maps.program, true);
     assert.match(maps.source, /int main\(void\)/);
     assert.doesNotMatch(maps.visible, /int main\(void\)/);
-    assert.match(home, /playground\/\?example=love%2Fmaps/);
+    assert.match(home, /playground\/\?example=love%2Fcollections/);
     assert.match(home, /href="[^"]*examples\/">examples</);
   });
