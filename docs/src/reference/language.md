@@ -2205,8 +2205,7 @@ macro Expression $Meter.read_twice(Expr $meter, Expr $raw) =>
 
 int main(void) {
   Meter meter = { 10 };
-  printf("%d %d
-", meter.read(4), meter.read_twice(4));
+  printf("%d %d\n", meter.read(4), meter.read_twice(4));
   return 0;
 }
 ```
