@@ -994,6 +994,14 @@ static void lisp_default_session_is_ready(void) {
   if (!EXPECT_NOT_NULL(lisp)) return;
   EXPECT_INT_EQ(Var.integer(lisp.eval(%(+ 20 22))), 42);
   EXPECT_STR_EQ(Var.string(lisp.eval(%(lower "READY"))), "ready");
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.strip \" x \")")), "x");
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.strip \" x \" nil)")), "x");
+  EXPECT_STR_EQ(Var.string(_ev(lisp, "(String.strip \" x \" \"\")")), " x ");
+  EXPECT_INT_EQ(Var.integer(_ev(lisp,
+    "(String.startswith \"abc\" \"z\" \"ab\")")), 1);
+  EXPECT_INT_EQ(Var.integer(_ev(lisp, "(String.endswith \"abc\")")), 0);
+  EXPECT_STR_EQ(Var.string(_ev(lisp,
+    "(String.replace \"aaa\" \"a\" \"b\" 2)")), "bba");
   lisp.destroy();
 }
 
@@ -1056,7 +1064,7 @@ static void lisp_numeric_comparison_reads_the_value(void) {
 
 
 static String _nested_reader_source(String open, String close, int count) {
-  Buffer source = auto Buffer.new(0);
+  Buffer source = auto Buffer.new();
   source.write("  ");
   for (int i = 0; i < count; i++) source.write(open);
   source.write("x");
@@ -1118,7 +1126,7 @@ static String _read_outcome(Lisp lisp, String source, int tokenized) {
   catch %(incomplete *): status = <incomplete>;
   catch %(malformed *): status = <malformed>;
   catch %(size-limit *): status = <size-limit>;
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.printf("%s %u ", (char *) status.str(), cursor);
   if (value is not void) out.write_datum(value, 1);
   return out;
@@ -1142,7 +1150,7 @@ static void lisp_read_fast_path_matches_token_reader(void) {
                   _read_outcome(lisp, source, 0));
   for (int depth = LISP_READ_DEPTH_MAX - 1;
        depth <= LISP_READ_DEPTH_MAX; depth++) {
-    Buffer source = auto Buffer.new(0);
+    Buffer source = auto Buffer.new();
     for (int i = 0; i < depth; i++) source.write("(");
     source.write("x");
     for (int i = 0; i < depth; i++) source.write(")");
@@ -1216,7 +1224,7 @@ static void lisp_strings_take_x2c_escapes(void) {
    reader comment. */
 static void lisp_datum_atom_round_trips(void) {
   foreach (String spelling, %("/" "/=" "//b" "/*b" "//" "/*")) {
-    Buffer out = auto Buffer.new(0);
+    Buffer out = auto Buffer.new();
     EXPECT_TRUE(out.write_datum(Atom.intern(spelling), 1));
     unsigned cursor = 0;
     Var back = void;
@@ -1232,7 +1240,7 @@ static void lisp_datum_symbol_round_trips(void) {
   foreach (String spelling, %("<<" "<x" "a b" "<<=" "a\"b" "a\\b" "line\n"))
     for (int tagged = 0; tagged < 2; tagged++) {
       Symbol symbol = Symbol.new(spelling);
-      Buffer out = auto Buffer.new(0);
+      Buffer out = auto Buffer.new();
       EXPECT_TRUE(out.write_datum(symbol, tagged));
       unsigned cursor = 0;
       Var back = void;
@@ -1243,7 +1251,7 @@ static void lisp_datum_symbol_round_trips(void) {
       EXPECT_INT_EQ(Lisp.read(NULL, out, cursor, back), <value>);
       EXPECT_VAR_EQ(back, Symbol.var(symbol));
     }
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   EXPECT_FALSE(out.write_datum((Symbol) 0, 0));
 }
 
@@ -1937,6 +1945,9 @@ static void lisp_standard_environment_uses_library_operations(void) {
   EXPECT_INT_EQ(_raised_code(
     lisp, "(Array.find (List.array '(0 20)) nil)"), <bad-arg>);
   EXPECT_TRUE(_ev(lisp, "(Array.find (List.array '()) nil)") is void);
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list (range 3))"), _ev(lisp, "'(0 1 2 3)"));
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list (range 1 3))"), _ev(lisp, "'(1 2 3)"));
+  EXPECT_VAR_EQ(_ev(lisp, "(Iter.list (range 3 1 -1))"), _ev(lisp, "'(3 2 1)"));
   EXPECT_VAR_EQ(
     _ev(lisp, "(Iter.list (Iter.map (range 1 3 1)"
               "                     (lambda (x) (+ x 20))))"),

@@ -4,7 +4,7 @@
     components through CUI's own input functions, so none needs a window.
 */
 
-import "x2cui" with App, Offscreen, TextField, Ui;
+import "x2cui" with App, Offscreen, RowState, TextField, Ui;
 
 #include "path.x"
 #include "test-support.x"
@@ -25,13 +25,13 @@ typedef struct Form {
 
 static void draw_form(Ui ui, Form &form) {
   $cui.column(ui, { .pad = 16, .gap = 12, .width = CUI_FILL }) {
-    form.clicks += ui.button("Save", { .variant = CUI_BUTTON_PRIMARY });
+    form.clicks += ui.button("Save", variant: CUI_BUTTON_PRIMARY);
     form.button = ui.last_rect();
-    ui.checkbox("I agree", form.agree, {});
+    ui.checkbox("I agree", form.agree);
     form.box = ui.last_rect();
-    form.typed |= ui.input("name", form.name, { .width = CUI_FILL });
+    form.typed |= ui.input("name", form.name, width: CUI_FILL);
     form.field = ui.last_rect();
-    ui.segmented("tab", %("One" "Two" "Three"), form.tab, {});
+    ui.segmented("tab", %("One" "Two" "Three"), form.tab);
   }
 }
 
@@ -196,11 +196,11 @@ static void a_string_list_lasts_until_the_frame_is_painted(void) {
     // The first array is built inside a region, which must not free it.
     if (pass == 0) auto {
       screen.ui().wheel_picker(
-        "month", %("January" "February" "March"), month, {});
+        "month", %("January" "February" "March"), month);
     }
     else
       screen.ui().wheel_picker(
-        "month", %("January" "February" "March"), month, {});
+        "month", %("January" "February" "March"), month);
     screen.end();
   }
   EXPECT_TRUE(screen.commands() > 0);
@@ -226,6 +226,240 @@ static void formatted_text_takes_x2c_values(void) {
   EXPECT_TRUE(screen.commands() > 0);
 }
 
+// method forms
+
+// Draws three frames of `draw` and writes the last to `path`.
+static void shoot(String path, void (*draw)(Ui ui)) {
+  Offscreen screen = auto Offscreen.open(360, 240);
+  for (int pass = 0; pass < 3; pass++) {
+    screen.begin();
+    draw(screen.ui());
+    screen.end();
+  }
+  screen.write_png(path);
+}
+
+// Whether `draw` and `expected` draw the same pixels.
+static bool same_pixels(void (*draw)(Ui ui), void (*expected)(Ui ui)) {
+  Path directory = Path.temp_dir();
+  defer directory.remove_tree();
+  Path one = directory.join("one.png"), two = directory.join("two.png");
+  shoot(one, draw);
+  shoot(two, expected);
+  FILE *a = fopen(one, "rb"), *b = fopen(two, "rb");
+  defer { fclose(a); fclose(b); }
+  int x, y;
+  do {
+    x = fgetc(a);
+    y = fgetc(b);
+  } while (x == y && x != EOF);
+  return x == y;
+}
+
+/* Short names, numbers, `grow`, `?:`, a declared name, and NULL, each
+   lowered by the type of its field or parameter. */
+static void short_forms(Ui ui) {
+  int variant = CUI_BUTTON_DANGER;
+  bool wide = true;
+  ui.column (width: fill, pad: 12, gap: 8, bg: surface_muted) {
+    ui.row (gap: 8, align: center) {
+      ui.button("Add", variant: primary, icon: plus);
+      ui.icon_button(x, variant: ghost, size: sm);
+      ui.box (width: grow(2)) ui.text("wide", font: wide ? medium : body,
+                                     color: accent);
+      ui.box (width: 30, height: 10, bg: border) {}
+    }
+    ui.button("Declared", variant: variant, tooltip: NULL);
+    ui.text("plain");
+  }
+}
+
+static void c_forms(Ui ui) {
+  $cui.column(ui, { .width = CUI_FILL, .pad = 12, .gap = 8,
+                    .bg = CUI_COLOR_SURFACE_MUTED }) {
+    $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
+      cui_button_ex(ui, "Add", &(cui_button_opts){
+        .variant = CUI_BUTTON_PRIMARY, .icon = CUI_ICON_PLUS });
+      cui_icon_button_ex(ui, CUI_ICON_X, &(cui_button_opts){
+        .variant = CUI_BUTTON_GHOST, .size = CUI_SIZE_SM });
+      $cui.box(ui, { .width = CUI_GROW(2) })
+        cui_text_ex(ui, "wide", &(cui_text_opts){
+          .font = CUI_FONT_MEDIUM, .color = CUI_COLOR_ACCENT });
+      $cui.box(ui, { .width = CUI_PX(30), .height = CUI_PX(10),
+                     .bg = CUI_COLOR_BORDER }) {}
+    }
+    cui_button_ex(ui, "Declared", &(cui_button_opts){
+      .variant = CUI_BUTTON_DANGER });
+    cui_text_ex(ui, "plain", &(cui_text_opts){ 0 });
+  }
+}
+
+static void method_forms_draw_what_the_c_calls_draw(void) {
+  EXPECT_TRUE(same_pixels(short_forms, c_forms));
+  // The comparison tells different screens apart.
+  EXPECT_FALSE(same_pixels(short_forms, a_map_of_columns));
+}
+
+static void a_map_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 1 };
+  ui.table ("people", sort: &sort,
+            columns: {"Name": fill, "Role": unsorted(80),
+                      "Score": right(grow(0.5)), "Seen": center(70)})
+  ui.each (String name in %("Ada" "Grace")) ui.table_row (row) {
+    ui.cell_text(name);
+    ui.cell () ui.badge("Admin", tone: info);
+    ui.cell_text("12");
+    ui.cell_text("Mon");
+  }
+}
+
+static void an_array_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 1 };
+  cui_table_column columns[] = {
+    { "Name", CUI_FILL, CUI_TEXT_LEFT, true },
+    { "Role", CUI_PX(80), CUI_TEXT_LEFT, false },
+    { "Score", CUI_GROW(0.5), CUI_TEXT_RIGHT, true },
+    { "Seen", CUI_PX(70), CUI_TEXT_CENTER, true },
+  };
+  $cui.table(ui, "people", columns, { .sort = &sort }) {
+    foreach (String name in %("Ada" "Grace")) {
+      cui_push_id_int(ui, name == "Ada" ? 0 : 1);
+      cui_table_row(ui, false);
+      cui_table_cell_text(ui, name);
+      cui_table_cell(ui);
+      cui_badge_ex(ui, "Admin", &(cui_badge_opts){ .tone = CUI_TONE_INFO });
+      cui_table_cell_text(ui, "12");
+      cui_table_cell_text(ui, "Mon");
+      cui_pop_id(ui);
+    }
+  }
+}
+
+static void a_table_takes_its_columns_from_a_map(void) {
+  EXPECT_TRUE(same_pixels(a_map_of_columns, an_array_of_columns));
+}
+
+// lists
+
+typedef struct Picks {
+  int clicked, passes;
+  bool hovered;
+  cui_rect second;       // the second row's label
+} Picks;
+
+static void draw_list(Ui ui, Picks &p) {
+  ui.column (width: fill, pad: 8) {
+    ui.each (String name in %("one" "two" "skipped" "three"), key: name) {
+      p.passes++;
+      if (name == "skipped") continue;
+      ui.item (row, selected: name == "three") {
+        if (row.clicked) p.clicked = name == "two" ? 2 : 1;
+        if (name == "two") p.hovered = row.hovered;
+        ui.label(name);
+        if (name == "two") p.second = ui.last_rect();
+      }
+    }
+  }
+}
+
+static void list_frame(Offscreen screen, Picks &p) {
+  screen.begin();
+  draw_list(screen.ui(), p);
+  screen.end();
+}
+
+static void an_item_reports_what_the_pointer_did(void) {
+  Picks p = {};
+  Offscreen screen = auto Offscreen.open(240, 240);
+  list_frame(screen, p);
+  list_frame(screen, p);
+  EXPECT_INT_EQ(p.passes, 8);
+  EXPECT_INT_EQ(p.clicked, 0);
+  Ui ui = screen.ui();
+  ui.input_mouse_move(p.second.x + p.second.w / 2, p.second.y + 4);
+  list_frame(screen, p);
+  list_frame(screen, p);
+  EXPECT_TRUE(p.hovered);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  list_frame(screen, p);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  list_frame(screen, p);
+  EXPECT_INT_EQ(p.clicked, 2);
+}
+
+/* A form takes any count of ordinary arguments: the virtual list's six,
+   with `fill` lowered for its `cui_size` height. */
+static void a_virtual_list_draws_the_rows_in_view(void) {
+  Offscreen screen = auto Offscreen.open(200, 120);
+  int first = 0, last = 0;
+  for (int pass = 0; pass < 3; pass++) {
+    screen.begin();
+    Ui ui = screen.ui();
+    ui.virtual_list ("rows", 1000, 24, fill, first, last)
+      for (int i = first; i < last; i++) ui.text(%"row $i");
+    screen.end();
+  }
+  EXPECT_INT_EQ(first, 0);
+  EXPECT_TRUE(last > 0 && last < 1000);
+}
+
+// What the pointer did to each of three table rows in the last frame.
+typedef struct TableRows {
+  RowState rows[3];
+  bool disabled;
+} TableRows;
+
+static void draw_table(Ui ui, TableRows &t) {
+  $cui.disabled_scope(ui, t.disabled)
+  ui.table ("rows", selectable: true, columns: {"Name": fill})
+  ui.each (String name in %("one" "two" "three"))
+  ui.table_row (row) {
+    int i = name == "one" ? 0 : name == "two" ? 1 : 2;
+    t.rows[i] = row;
+    ui.cell_text(name);
+  }
+}
+
+static void table_frame(Offscreen screen, TableRows &t) {
+  screen.begin();
+  draw_table(screen.ui(), t);
+  screen.end();
+}
+
+static void a_table_row_reports_what_the_pointer_did(void) {
+  TableRows t = {};
+  Offscreen screen = auto Offscreen.open(240, 240);
+  table_frame(screen, t);
+  table_frame(screen, t);
+  EXPECT_FALSE(t.rows[1].hovered);
+  // A table row has no rectangle of its own to aim at, so the pointer
+  // moves down the table until the second row reports it.
+  Ui ui = screen.ui();
+  for (int y = 0; y < 240 && !t.rows[1].hovered; y += 4) {
+    ui.input_mouse_move(120, y);
+    table_frame(screen, t);
+    table_frame(screen, t);
+  }
+  EXPECT_TRUE(t.rows[1].hovered);
+  EXPECT_FALSE(t.rows[0].hovered);
+  EXPECT_FALSE(t.rows[2].hovered);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  table_frame(screen, t);
+  EXPECT_TRUE(t.rows[1].pressed);
+  EXPECT_FALSE(t.rows[0].pressed);
+  EXPECT_FALSE(t.rows[1].clicked);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  table_frame(screen, t);
+  EXPECT_TRUE(t.rows[1].clicked);
+  EXPECT_FALSE(t.rows[2].clicked);
+
+  // A disabled table's rows report nothing, as their highlight shows.
+  t.disabled = true;
+  table_frame(screen, t);
+  table_frame(screen, t);
+  EXPECT_FALSE(t.rows[1].hovered);
+}
+
 void x2cui_suite(void) {
   $test.run(offscreen_draws_and_writes_a_png);
   $test.run(write_png_raises_io_failure);
@@ -238,6 +472,11 @@ void x2cui_suite(void) {
   $test.run(a_string_list_reaches_a_component);
   $test.run(a_string_list_lasts_until_the_frame_is_painted);
   $test.run(formatted_text_takes_x2c_values);
+  $test.run(method_forms_draw_what_the_c_calls_draw);
+  $test.run(a_table_takes_its_columns_from_a_map);
+  $test.run(an_item_reports_what_the_pointer_did);
+  $test.run(a_virtual_list_draws_the_rows_in_view);
+  $test.run(a_table_row_reports_what_the_pointer_did);
 }
 
 int main(void) {

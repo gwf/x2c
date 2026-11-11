@@ -11,7 +11,22 @@
       "root": "CUI-1.3.1"
     }
   ],
+  "inputs": [
+    {
+      "path": "patches/table-row-state.patch",
+      "sha256": "66b33b791c7516e57f2a40126a627cadeb859a13d4aebd17d9feaec7bcc05262"
+    }
+  ],
   "steps": [
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/table-row-state.patch"
+      ]
+    },
     {
       "cwd": "{source_cui}",
       "argv": [

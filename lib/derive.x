@@ -53,12 +53,12 @@ meta List _derive_fields(Type type, Symbol kind) {
     if (category == <pointer>)
       x2c_diagnostic_fail(
         %"derive: field '$(field.car())' of $(type.car()) has pointer type "
-          + field.cadr().repr(), %());
+          + field.cadr().repr());
     if ((kind == <args> && (category == <value> || category == <struct>)) ||
         (kind == <row> && category == <struct>))
       x2c_diagnostic_fail(
         %"derive: field '$(field.car())' of $(type.car()) "
-          + %"is not supported by <$(kind)>", %());
+          + %"is not supported by <$(kind)>");
     result.push($( @field, category ));
   }
   return result.list_free();

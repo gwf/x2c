@@ -465,7 +465,7 @@ int main(void){
   }
   struct Iter zip_left_storage, zip_right_storage, zip_storage;
   Iter zip_left = List_iter(_21, & zip_left_storage);
-  Iter zip_right = range(1, 2, 1, & zip_right_storage);
+  Iter zip_right =(range)(1, 2, 1, & zip_right_storage);
   Iter zipped = Iter_zip(zip_left, zip_right, & zip_storage);
   int zipped_total = 0;
   {

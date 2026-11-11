@@ -3,45 +3,45 @@
 static macro Stmt $fail.callable_shared(Expr $c, Expr $source) =>
   _adapter_error(
     $c, "function conversion needs x2c_func_shared from lib/func/func.x",
-    %("Func"), $source, NULL);
+    %("Func"), $source);
 
 static macro Stmt $fail.callable_context(Expr $c, Expr $source) =>
   _adapter_error(
     $c,
     "function pointer conversion needs Func.new_context from lib/func/func.x",
-    %("Func"), $source, NULL);
+    %("Func"), $source);
 
 static macro Stmt $fail.callable_native_context(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding needs Func.context from lib/func/func.x",
-    $target, $source, NULL);
+    $target, $source);
 
 static macro Stmt $fail.callable_direct(Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding target must be a direct function",
     $target, $source,
-    %("supported: a free function or Type.method designator"));
+    "supported: a free function or Type.method designator");
 
 static macro Stmt $fail.callable_variadic(
   Expr $c, Expr $target, Expr $source, Expr $func_type) {
   String message = $c.sym.resolve_key($target) == $func_type
     ? "function conversion to Func cannot be variadic"
     : "native binding target cannot be variadic";
-  _adapter_error($c, message, $target, $source, NULL);
+  _adapter_error($c, message, $target, $source);
 }
 
 static macro Stmt $fail.callable_readers(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding needs Func argument readers from lib/func/func.x",
-    $target, $source, NULL);
+    $target, $source);
 
 static macro Stmt $fail.callable_parameter(
   Expr $c, Expr $target, Expr $source) =>
   _adapter_error(
     $c, "native binding parameter type has no Var representation",
-    $target, $source, NULL);
+    $target, $source);
 
 static macro Expression $note.callable_target(Expr $target) =>
   $target ? %"target signature: $($target.repr())"
@@ -429,8 +429,8 @@ module int _typed_params_variadic(List params) {
 }
 
 module void _adapter_error(
-  Compiler c, String message, Type target, Type source, List details) {
+  Compiler c, String message, Type target, Type source, List @details) {
   String target_note = $note.callable_target(target);
   String source_note = $note.callable_source(source);
-  c.report_error(<type>, message, NULL, $(target_note, source_note, @details));
+  c.report_error(<type>, message, NULL, target_note, source_note, @details);
 }

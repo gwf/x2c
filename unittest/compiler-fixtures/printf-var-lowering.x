@@ -22,7 +22,7 @@ int main(void) {
   String string =
     %"string:%hhd/%hu/%Lf/%s".printf(key, key, val, answer);
   Stdout.printf("file:%c/%u\n", letter, key);
-  Buffer buffer = Buffer.new(0);
+  Buffer buffer = Buffer.new();
   buffer.printf("buffer:%ld/%g", key, val);
 
   printf("%s\n%s\n%s\n%s\n", first, second, string, buffer.str());

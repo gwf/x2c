@@ -24,11 +24,11 @@ void page_actions(Ui ui, Gallery g) {
     List items = %("Save as draft" "Save and publish" "Schedule\xe2\x80\xa6");
     static const char *icons[] = { CUI_ICON_FILE_TEXT, CUI_ICON_SEND,
                                    CUI_ICON_CLOCK };
-    int r = ui.split_button("Save", items, { .item_icons = icons,
-                                             .icon = CUI_ICON_SAVE });
+    int r = ui.split_button("Save", items, item_icons: icons,
+                                           icon: CUI_ICON_SAVE);
     if (r >= 0) split_choice = r;
-    ui.split_button("Export", items, { .variant = CUI_BUTTON_OUTLINE,
-                                       .icon = CUI_ICON_DOWNLOAD });
+    ui.split_button("Export", items, variant: CUI_BUTTON_OUTLINE,
+                                     icon: CUI_ICON_DOWNLOAD);
     if (split_choice >= 0) {
       String choice = split_choice == 0 ? "Saved" : items[split_choice - 1];
       ui.muted(choice);
@@ -42,21 +42,21 @@ void page_actions(Ui ui, Gallery g) {
     static const char *icons[] = { CUI_ICON_BOLD, CUI_ICON_ITALIC,
                                    CUI_ICON_UNDERLINE, CUI_ICON_CODE };
     ui.toggle_group("format", %("Bold" "Italic" "Underline" "Code"), fmt,
-                    { .icons = icons, .icon_only = true });
+                    icons: icons, icon_only: true);
     static const char *aicons[] = { CUI_ICON_ALIGN_LEFT, CUI_ICON_LIST,
                                     CUI_ICON_MENU };
     ui.toggle_group("align", %("Left" "Center" "Right"), align,
-                    { .icons = aicons, .exclusive = true });
+                    icons: aicons, exclusive: true);
   }
 
   section(ui, "Morphing buttons",
           "Confirm before destroying, and show the result of work in "
           "place.");
   $cui.row(ui, { .gap = 12, .wrap = true }) {
-    if (ui.confirm_button("Delete project", { .icon = CUI_ICON_TRASH_2 }))
+    if (ui.confirm_button("Delete project", icon: CUI_ICON_TRASH_2))
       deleted++;
-    if (ui.status_button("Save changes", save_status, {
-          .icon = CUI_ICON_SAVE, .success_label = "Saved" })) {
+    if (ui.status_button("Save changes", save_status,
+          icon: CUI_ICON_SAVE, success_label: "Saved")) {
       save_status = CUI_STATUS_BUSY;
       status_at = ui.time();
     }
@@ -88,12 +88,12 @@ void page_actions(Ui ui, Gallery g) {
   $cui.user_menu(ui, "Maya Okafor", {
       .detail = "maya@fieldwork.studio", .status = "online",
       .placement = CUI_PLACE_BOTTOM_START }) {
-    ui.menu_item("Profile", { .icon = CUI_ICON_USER, .shortcut = "Ctrl P" });
-    ui.menu_item("Billing", { .icon = CUI_ICON_CREDIT_CARD });
-    ui.menu_item("Settings", { .icon = CUI_ICON_SETTINGS,
-                               .shortcut = "Ctrl ," });
+    ui.menu_item("Profile", icon: CUI_ICON_USER, shortcut: "Ctrl P");
+    ui.menu_item("Billing", icon: CUI_ICON_CREDIT_CARD);
+    ui.menu_item("Settings", icon: CUI_ICON_SETTINGS,
+                             shortcut: "Ctrl ,");
     ui.menu_separator();
-    ui.menu_item("Log out", { .icon = CUI_ICON_LOG_OUT });
+    ui.menu_item("Log out", icon: CUI_ICON_LOG_OUT);
   }
 
   section(ui, "Swipe actions",
@@ -112,13 +112,13 @@ void page_actions(Ui ui, Gallery g) {
       ui.swipe_item_begin("row", left, $cui.count(left), right,
                           $cui.count(right));
       ui.icon(CUI_ICON_CIRCLE, 16, CUI_COLOR_TEXT_MUTED);
-      ui.text(title, { .width = CUI_FILL, .nowrap = true });
-      ui.text("Today", { .size = 12, .color = CUI_COLOR_TEXT_MUTED });
+      ui.text(title, width: CUI_FILL, nowrap: true);
+      ui.text("Today", size: 12, color: CUI_COLOR_TEXT_MUTED);
       int a = ui.swipe_item_end();
       if (a >= 0)
         ui.toast(a == 0 ? "Marked as done" : a == 100 ? "Archived"
                                                       : "Deleted",
-                 { .tone = a == 101 ? CUI_TONE_DANGER : CUI_TONE_SUCCESS });
+                 tone: a == 101 ? CUI_TONE_DANGER : CUI_TONE_SUCCESS);
     }
   }
 
@@ -130,7 +130,7 @@ void page_actions(Ui ui, Gallery g) {
       { CUI_ICON_FILE_TEXT, "New note" }, { CUI_ICON_IMAGE, "Upload image" },
       { CUI_ICON_MIC, "Record memo" } };
     int c = ui.speed_dial("dial", acts, $cui.count(acts),
-                          { .tooltip = "Create" });
+                          tooltip: "Create");
     if (c >= 0) dial_choice = c;
     if (dial_choice >= 0) ui.muted(acts[dial_choice].label);
   }

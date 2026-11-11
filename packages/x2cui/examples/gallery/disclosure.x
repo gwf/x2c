@@ -20,42 +20,42 @@ void page_disclosure(Ui ui, Gallery g) {
   };
   static int deleted;
   if (ui.banner("CUI 1.1 is out: data grid, kanban and forty new "
-                "components.", banner, {
-        .action = "Read the notes", .dismissible = true }))
-    ui.toast("Opening release notes", {});
-  if (!banner && ui.button("Show the banner again", { .size = CUI_SIZE_SM }))
+                "components.", banner,
+        action: "Read the notes", dismissible: true))
+    ui.toast("Opening release notes");
+  if (!banner && ui.button("Show the banner again", size: CUI_SIZE_SM))
     banner = true;
 
   section(ui, "Hover card", "Rest the pointer on a name.");
   $cui.row(ui, { .gap = 6, .wrap = true }) {
-    ui.text("Assigned to", {});
+    ui.text("Assigned to");
     ui.link("@jonas");
     $cui.hover_card(ui, "grace-card", { .width = 300 })
     $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_START }) {
-      ui.avatar("Jonas Berg", { .size = 44, .status = "online" });
+      ui.avatar("Jonas Berg", size: 44, status: "online");
       $cui.column(ui, { .gap = 4, .width = CUI_FILL }) {
-        ui.text("Jonas Berg", { .font = CUI_FONT_MEDIUM });
-        ui.text("Engineer on the rendering team. Joined March 2024.", {
-          .size = 13, .color = CUI_COLOR_TEXT_SECONDARY });
+        ui.text("Jonas Berg", font: CUI_FONT_MEDIUM);
+        ui.text("Engineer on the rendering team. Joined March 2024.",
+          size: 13, color: CUI_COLOR_TEXT_SECONDARY);
         $cui.row(ui, { .gap = 6, .pad_top = 4, .wrap = true }) {
           ui.icon(CUI_ICON_CALENDAR, 12, CUI_COLOR_TEXT_MUTED);
-          ui.text("Usually replies within an hour", {
-            .size = 12, .color = CUI_COLOR_TEXT_MUTED });
+          ui.text("Usually replies within an hour",
+            size: 12, color: CUI_COLOR_TEXT_MUTED);
         }
       }
     }
-    ui.text("and due Friday.", {});
+    ui.text("and due Friday.");
   }
 
   section(ui, "Confirm popover", "Ask right where the action is.");
   $cui.row(ui, { .gap = 12, .wrap = true }) {
-    if (ui.button("Delete branch", { .icon = CUI_ICON_TRASH_2 }))
+    if (ui.button("Delete branch", icon: CUI_ICON_TRASH_2))
       ui.popover_open("confirm-delete");
-    if (ui.confirm_popover("confirm-delete", {
-          .title = "Delete feature/grid?",
-          .description = "The branch and its 12 commits are removed from "
+    if (ui.confirm_popover("confirm-delete",
+          title: "Delete feature/grid?",
+          description: "The branch and its 12 commits are removed from "
                          "the remote.",
-          .confirm_label = "Delete branch", .danger = true }))
+          confirm_label: "Delete branch", danger: true))
       deleted++;
     if (deleted) ui.muted("Branch deleted");
   }
@@ -71,7 +71,7 @@ void page_disclosure(Ui ui, Gallery g) {
     "dependencies, and it renders through OpenGL or a built-in software "
     "rasterizer, so it also runs in virtual machines and over remote "
     "desktop.",
-    { .lines = 2 });
+    lines: 2);
 
   section(ui, "Expandable cards", "A header that opens a body with a spring.");
   $cui.column(ui, { .gap = 10 }) {
@@ -84,26 +84,26 @@ void page_disclosure(Ui ui, Gallery g) {
       $cui.row(ui, { .gap = 40, .wrap = true }) {
         $cui.column(ui, { .gap = 2 }) {
           ui.muted("This month");
-          ui.text("$84.00", { .font = CUI_FONT_DISPLAY, .size = 22,
-                              .tabular = true });
+          ui.text("$84.00", font: CUI_FONT_DISPLAY, size: 22,
+                            tabular: true);
         }
         $cui.column(ui, { .gap = 2 }) {
           ui.muted("Seats");
-          ui.text("7 of 10", { .font = CUI_FONT_DISPLAY, .size = 22,
-                               .tabular = true });
+          ui.text("7 of 10", font: CUI_FONT_DISPLAY, size: 22,
+                             tabular: true);
         }
       }
       $cui.row(ui, { .gap = 8, .wrap = true }) {
-        ui.button("Change plan", { .size = CUI_SIZE_SM });
-        ui.button("Invoices", { .size = CUI_SIZE_SM,
-                                .variant = CUI_BUTTON_GHOST });
+        ui.button("Change plan", size: CUI_SIZE_SM);
+        ui.button("Invoices", size: CUI_SIZE_SM,
+                              variant: CUI_BUTTON_GHOST);
       }
     }
     $cui.expandable_card(ui, "Security", card2, {
         .description = "Two-factor authentication is on",
         .icon = CUI_ICON_SHIELD })
-      ui.text("Recovery codes were generated 3 months ago.", {
-        .color = CUI_COLOR_TEXT_SECONDARY });
+      ui.text("Recovery codes were generated 3 months ago.",
+        color: CUI_COLOR_TEXT_SECONDARY);
   }
 
   section(ui, "Countdown", "Digits roll as the time passes.");
@@ -112,24 +112,24 @@ void page_disclosure(Ui ui, Gallery g) {
     if (target == 0)
       target = ui.time() + 2 * 86400 + 5 * 3600 + 42 * 60 + 18;
     $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_CENTER }) {
-      ui.countdown("launch", target - ui.time(), {});
-      ui.countdown("sale", target - ui.time() - 86400 * 2, {
-        .compact = true, .hide_days = true });
+      ui.countdown("launch", target - ui.time());
+      ui.countdown("sale", target - ui.time() - 86400 * 2,
+        compact: true, hide_days: true);
     }
   }
 
   section(ui, "Onboarding checklist", "Progress, with the next step open.");
   $cui.box(ui, { .width = CUI_PX(460) }) {
-    int a = ui.checklist("onboarding", steps, $cui.count(steps), {
-      .title = "Set up your workspace" });
+    int a = ui.checklist("onboarding", steps, $cui.count(steps),
+      title: "Set up your workspace");
     if (a >= 0) {
       steps[a].done = true;
-      ui.toast(steps[a].title, { .tone = CUI_TONE_SUCCESS });
+      ui.toast(steps[a].title, tone: CUI_TONE_SUCCESS);
     }
   }
 
   section(ui, "Undo toast", "A draining line shows how long Undo stays.");
-  if (ui.button("Archive 3 conversations", { .icon = CUI_ICON_ARCHIVE }))
-    ui.toast("3 conversations archived", { .action = "Undo",
-                                           .show_timer = true });
+  if (ui.button("Archive 3 conversations", icon: CUI_ICON_ARCHIVE))
+    ui.toast("3 conversations archived", action: "Undo",
+                                         show_timer: true);
 }

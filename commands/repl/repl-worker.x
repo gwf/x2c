@@ -71,7 +71,7 @@ static int _worker_write(int fd, String bytes) {
 }
 
 static int _worker_send(int fd, Var value) {
-  Buffer frame = auto Buffer.new(0);
+  Buffer frame = auto Buffer.new();
   return frame.write_datum_frame(value) && _worker_write(fd, frame);
 }
 
@@ -229,7 +229,7 @@ static Map _worker_result(ReplSession session, ReplResult result) {
 }
 
 static String _worker_stats(ReplSession session, int verbose) {
-  Buffer text = auto Buffer.new(0);
+  Buffer text = auto Buffer.new();
   ScopeStats scope = Scope.stats();
   PoolStats pool = Pool.stats(Pool.current());
   text.printf("session: definitions=%u\n", session.names.len());
@@ -282,7 +282,7 @@ static Map _worker_dispatch(ReplSession session, Map message) {
   else if (operation == <members>) output = session.members(text);
   else if (operation == <stats>) output = _worker_stats(session, message[<verbose>]);
   else if (operation == <files>) {
-    Buffer listing = auto Buffer.new(0);
+    Buffer listing = auto Buffer.new();
     CliRequest request = session.frontend.request;
     if (session.program)
       foreach (String path, session.program.roots) listing.printf("root: %s\n", path);
@@ -308,7 +308,7 @@ static Map _worker_dispatch(ReplSession session, Map message) {
 static String _worker_snapshot(ReplProgram program, String retained) {
   if (retained || !program) return retained;
   retained = %"$(program.directory)/program.snapshot";
-  Buffer data = auto Buffer.new(0);
+  Buffer data = auto Buffer.new();
   if (!data.write_datum(repl_program_snapshot(program), 1)) {
     fputs("native program snapshot contains a non-data value\n", stderr);
     exit(1);
@@ -364,7 +364,7 @@ static void _worker_serve(
     fputs("native program snapshot contains a non-data value\n", stderr);
     exit(1);
   }
-  Buffer pending = Buffer.new(0);
+  Buffer pending = Buffer.new();
   Var value = void;
   while (_worker_read(from, pending, value)) {
     Map message = value;
@@ -458,7 +458,7 @@ ReplWorker repl_worker_start(ReplWorkerStart start) {
   worker.to = requests[1];
   worker.from = replies[0];
   worker.terminal = master;
-  worker.pending = Buffer.new(0);
+  worker.pending = Buffer.new();
   Map ready = _worker_receive(worker, 0);
   if (!ready || ready[<status>] != <ready>) {
     if (ready) worker.failure = ready[<message>];

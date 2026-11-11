@@ -84,7 +84,7 @@ Map Compiler.builtin_targets(void) {
 
 static List _scope_expand(List body, List destinations) {
   if (destinations.len() > 1)
-    x2c_diagnostic_fail("$scope accepts zero or one destination", %());
+    x2c_diagnostic_fail("$scope accepts zero or one destination");
   List enter = destinations ? $!( Scope_push(@destinations) )
                             : $!( Scope_open() );
   List leave = destinations ? $!( Scope_pop() ) : $!( Scope_close() );
@@ -99,7 +99,7 @@ static List _scope_expand(List body, List destinations) {
    application declares its own private `address` and `previous`. */
 static List _with_expand(List body, List assignments) {
   if (!assignments)
-    x2c_diagnostic_fail("with requires at least one assignment", %());
+    x2c_diagnostic_fail("with requires at least one assignment");
   foreach (List assignment in assignments.reverse())
     body = _with_assignment(assignment, body);
   return body;
@@ -112,7 +112,7 @@ static List _with_assignment(List assignment, List body) {
   if (!place)
     x2c_diagnostic_fail(
       "with requires 'destination = expression' entries",
-      %("parenthesize a comma expression inside an entry"));
+      "parenthesize a comma expression inside an entry");
   Type type = ((Code) place).type();
   return $!{ {
     $type *address = &$place;
@@ -132,7 +132,7 @@ static List _auto_expand(List value) {
   if (!local || !x2c_enclosing(<function>))
     _auto_fail(
       <parse>,
-      "managed initializer requires a complete block-local initializer", %());
+      "managed initializer requires a complete block-local initializer");
   _auto_reject_managed(value);
   if (local ~= %(declare ? (bindings (bind ?binding ?)))) {
     Compiler c = Compiler.expanding();
@@ -154,7 +154,7 @@ static void _auto_reject_managed(List value) {
       if (%(managed $binding) in c.semantic_binding_facts())
         _auto_fail(
           <parse>, "managed initializer cannot manage an already managed local",
-          %("local: $(Ast.binding_spelling(binding))"));
+          %"local: $(Ast.binding_spelling(binding))");
     }
   }
 }
@@ -164,7 +164,7 @@ static List _auto_release(Code local, List binding, List acquired) {
   Type base = local.cadr();
   if (base.is_static() || base.is_extern() || base.is_threaded())
     _auto_fail(
-      <parse>, "managed initializer requires automatic local storage", %());
+      <parse>, "managed initializer requires automatic local storage");
   Type type = local.type();
   if (!type.protocol_member("cleanup")) return %(seq);
   return $!{
@@ -174,9 +174,9 @@ static List _auto_release(Code local, List binding, List acquired) {
 }
 
 // Reports at the block item that holds the managed declaration.
-static void _auto_fail(Symbol category, String message, List notes) {
+static void _auto_fail(Symbol category, String message, List @notes) {
   x2c_diagnostic_fail_at(
-    x2c_enclosing(<statement>), category, message, notes);
+    x2c_enclosing(<statement>), category, message, @notes);
 }
 
 static List _foreach_expand(
@@ -189,15 +189,14 @@ static List _foreach_expand(
   List converter = direct ? %() : _converter(type);
   if (targets.len() != 1 && targets.len() != 2)
     x2c_diagnostic_fail(
-      "foreach requires one binding or a two-name destructuring declaration",
-      %());
+      "foreach requires one binding or a two-name destructuring declaration");
   List spec = direct ? %() : _typed_cursor_spec(type, targets);
   if (!direct && !spec) spec = _cursor_spec(type, type, targets.len());
   if (!direct && !converter && !spec) {
     Var printable = type;
     x2c_diagnostic_fail(
       "type " + printable.repr() + " is not iterable",
-      %("declare a matching try_next cursor or an Iter protocol adoption"));
+      "declare a matching try_next cursor or an Iter protocol adoption");
   }
   Foreach f = {
     .declaration = declaration, .collection = collection, .body = body,
@@ -381,7 +380,7 @@ static List _class_expand(List capture) {
     x2c_diagnostic_fail(
       %"class $owner cannot take an enum value " +
       "representation: Var has no fixed tag for an enum",
-      %("give the enum a typedef and name that typedef instead"));
+      "give the enum a typedef and name that typedef instead");
   return %($capture (declaration-recipe class.defaults
     ($owner $type $(MetaContext.invocation_location()))));
 }
@@ -447,7 +446,7 @@ static List _class_constructor(Shape &s) {
   }
   if (s.heap && !s.aggregate && !((Type) s.pointee).is_value())
     x2c_diagnostic_fail(
-      %"class $owner requires an explicit constructor", %());
+      %"class $owner requires an explicit constructor");
   List constructor = _new(
     owner, s.representation, s.heap, s.named,
     s.positional && !initialize, extras);
@@ -527,7 +526,7 @@ static List _comparison(Shape &s) {
       !_method($(owner), "hash"))
     x2c_diagnostic_fail(
       %"value class $owner requires compatible equal " +
-      "and hash methods", %());
+      "and hash methods");
   return %();
 }
 
@@ -649,7 +648,7 @@ static List _class_initializer(String owner, Var heap_value) {
   }
   String suffix = heap ? ")" : " &)";
   x2c_diagnostic_fail(
-    %"class $owner requires void $owner.init($owner$suffix", %());
+    %"class $owner requires void $owner.init($owner$suffix");
   return %();
 }
 
@@ -793,7 +792,7 @@ static List _field_write(List field) {
 static List _string_method(String owner, String member) {
   String writer = %"write_$(member)";
   List body = $!{
-    auto Buffer out = Buffer.new(0);
+    auto Buffer out = Buffer.new();
     value.$writer(out);
     return out.str();
   };
@@ -827,7 +826,7 @@ static List _method(Type type, String name) {
       foreach (String package in packages) notes.push(%"package: '$package'");
       x2c_diagnostic_fail(
         %"method '$(type.base_type().car()).$name' is provided by " +
-        "multiple imported packages", notes.list_free());
+        "multiple imported packages", @(notes.list_free()));
     }
   }
   return %();
@@ -888,12 +887,12 @@ static List _binding_record(Var group, Var name, List function) {
   if (group_name in c.binding_sealed)
     x2c_diagnostic_fail(
       "native Lisp binding appears after its group was installed",
-      %("group: $group_name"));
+      %"group: $group_name");
   foreach (List row in c.binding_rows)
     if (row.car() == group_name && row[1] == lisp_name)
       x2c_diagnostic_fail(
         "duplicate native Lisp binding name",
-        %("group: $group_name" "name: $lisp_name"));
+        %"group: $group_name", %"name: $lisp_name");
   c.binding_rows =
     %(($group_name $lisp_name $function_name $type) @(c.binding_rows));
   return NULL;
@@ -904,7 +903,7 @@ static String _binding_name(Var node) {
   if (value is <string>) return value;
   x2c_diagnostic_fail(
     "native Lisp binding name requires a String literal",
-    %("value: $(node.repr())"));
+    %"value: $(node.repr())");
   return NULL;
 }
 
@@ -914,7 +913,7 @@ static List _binding_install(List lisp, Var group) {
   List rows = _binding_rows_for(group_name, c.binding_rows).reverse();
   if (!rows)
     x2c_diagnostic_fail(
-      "unknown native Lisp binding group", %("group: $group_name"));
+      "unknown native Lisp binding group", %"group: $group_name");
   if (!(group_name in c.binding_sealed))
     c.binding_sealed = cons(group_name, c.binding_sealed);
   Array statements = [];

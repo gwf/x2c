@@ -96,9 +96,9 @@ static void string_shortcuts_copy_detached_storage(void) {
   defer detached.release();
   String canonical = String.new(text);
   EXPECT_TRUE(text !== canonical);
-  EXPECT_TRUE(text.strip(NULL) === canonical);
-  EXPECT_TRUE(text.lstrip(NULL) === canonical);
-  EXPECT_TRUE(text.rstrip(NULL) === canonical);
+  EXPECT_TRUE(text.strip() === canonical);
+  EXPECT_TRUE(text.lstrip() === canonical);
+  EXPECT_TRUE(text.rstrip() === canonical);
   EXPECT_TRUE(text.remove_prefix("missing") === canonical);
   EXPECT_TRUE(text.remove_suffix("missing") === canonical);
   EXPECT_TRUE(text.pad_left(1, ' ') === canonical);
@@ -107,7 +107,7 @@ static void string_shortcuts_copy_detached_storage(void) {
   EXPECT_TRUE(text.add(NULL) === canonical);
   EXPECT_TRUE(String.add(NULL, text) === canonical);
   EXPECT_TRUE(text.replace("missing", "new") === canonical);
-  EXPECT_TRUE(text.replace_n(NULL, NULL, 0) === canonical);
+  EXPECT_TRUE(text.replace(NULL, NULL, 0) === canonical);
   EXPECT_TRUE(text.replace(text, text) === canonical);
   EXPECT_TRUE(text.withindex(-999, 'X') === canonical);
   EXPECT_TRUE(text.withindex(0, 'd') === canonical);
@@ -274,7 +274,7 @@ static void string_noop_construction_preserves_owner(void) {
   EXPECT_TRUE(text.repeat(1) === text);
   EXPECT_TRUE(text.withindex(0, 'u') === text);
   EXPECT_TRUE(long_text.getslice(0, long_text.len(), 1) === long_text);
-  EXPECT_TRUE(text.replace_n("change", "change", -1) === text);
+  EXPECT_TRUE(text.replace("change", "change", -1) === text);
 
   PoolStats after = pool.stats();
   EXPECT_INT_EQ((int) after.allocation_calls,
@@ -285,7 +285,7 @@ static void string_noop_construction_preserves_owner(void) {
   EXPECT_TRUE(transient.repeat(1) === text);
   EXPECT_TRUE(transient.withindex(0, 'u') === text);
   EXPECT_TRUE(transient.getslice(0, transient.len(), 1) === text);
-  EXPECT_TRUE(transient.replace_n("change", "change", -1) === text);
+  EXPECT_TRUE(transient.replace("change", "change", -1) === text);
   transient.free();
   Pool.close();
 }
@@ -538,9 +538,9 @@ static void string_search_and_replace(void) {
   EXPECT_INT_EQ("abcabc".find_within("c", -3, -1), 5);
   EXPECT_TRUE("abcabc".find_all("c", -100, -1) == %(2 5));
   EXPECT_TRUE(text.replace("ab", NULL) == "xxxx");
-  EXPECT_TRUE(text.replace_n("ab", "Q", 2) == "QxxQxxab");
-  EXPECT_TRUE(text.replace_n("ab", "Q", 0) === text);
-  EXPECT_TRUE(text.replace_n(NULL, "Q", -1) === text);
+  EXPECT_TRUE(text.replace("ab", "Q", 2) == "QxxQxxab");
+  EXPECT_TRUE(text.replace("ab", "Q", 0) === text);
+  EXPECT_TRUE(text.replace(NULL, "Q", -1) === text);
   EXPECT_TRUE(text.replace("missing", "Q") === text);
 }
 
@@ -619,18 +619,18 @@ static void string_transformations(void) {
   EXPECT_TRUE("HeLLo".lower() == "hello");
   EXPECT_TRUE("HeLLo".upper() == "HELLO");
   EXPECT_TRUE("hELLO".capitalize() == "Hello");
-  EXPECT_TRUE("  x  ".strip(NULL) == "x");
-  EXPECT_TRUE("x".strip(NULL) === %"x");
-  EXPECT_TRUE("  x  ".lstrip(NULL) == "x  ");
-  EXPECT_TRUE("  x  ".rstrip(NULL) == "  x");
+  EXPECT_TRUE("  x  ".strip() == "x");
+  EXPECT_TRUE("x".strip() === %"x");
+  EXPECT_TRUE("  x  ".lstrip() == "x  ");
+  EXPECT_TRUE("  x  ".rstrip() == "  x");
   EXPECT_TRUE("xytextyx".lstrip("xy") == "textyx");
   EXPECT_TRUE("xytextyx".rstrip("xy") == "xytext");
-  EXPECT_TRUE(lower.lstrip(NULL) === lower);
-  EXPECT_TRUE(lower.rstrip(NULL) === lower);
-  EXPECT_NULL(" \t".lstrip(NULL));
-  EXPECT_NULL(" \t".rstrip(NULL));
-  EXPECT_NULL("".lstrip(NULL));
-  EXPECT_NULL("".rstrip(NULL));
+  EXPECT_TRUE(lower.lstrip() === lower);
+  EXPECT_TRUE(lower.rstrip() === lower);
+  EXPECT_NULL(" \t".lstrip());
+  EXPECT_NULL(" \t".rstrip());
+  EXPECT_NULL("".lstrip());
+  EXPECT_NULL("".rstrip());
   EXPECT_TRUE(String.new_fill('x', 3) == "xxx");
   EXPECT_NULL(String.new_fill('x', 0));
   EXPECT_TRUE("a1b2".filter(_string_test_alpha) == "ab");
@@ -705,7 +705,7 @@ static void string_byte_escaping(void) {
   char mixed_raw[] = {'A', '"', '\'', '\\', '\n', '\t',
                       (char) 0x80, '\0'};
   String mixed = String.new_len(mixed_raw, 7);
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   mixed.write_repr(out);
   EXPECT_TRUE(out.str_free() == "\"%s\"".printf(mixed.escape()));
 }
@@ -867,7 +867,56 @@ static void string_checked_format_failures(void) {
   expect_format_failure("%*d", %("wide" 1), 0, 1);
 }
 
+static void string_rest_arguments(void) {
+  String text = "  x  ";
+  EXPECT_TRUE(text.strip() == "x");
+  EXPECT_TRUE(text.strip(NULL) == "x");
+  EXPECT_TRUE(text.lstrip(NULL) == "x  ");
+  EXPECT_TRUE(text.rstrip(NULL) == "  x");
+  EXPECT_TRUE(text.strip("") == text);
+  String empty_charset = NULL;
+  EXPECT_TRUE(text.strip(empty_charset) == text);
+  EXPECT_TRUE(text.lstrip(empty_charset) == text);
+  EXPECT_TRUE(text.rstrip(empty_charset) == text);
+  List charset = %(" x"), empty = NULL;
+  EXPECT_NULL(text.strip(@charset));
+  EXPECT_TRUE(text.strip(@empty) == "x");
+  EXPECT_TRUE("abc".startswith("z", "ab"));
+  EXPECT_TRUE("abc".endswith("z", "bc"));
+  EXPECT_FALSE("abc".startswith());
+  EXPECT_FALSE("abc".endswith(@empty));
+  EXPECT_TRUE("abc".startswith(NULL));
+  EXPECT_TRUE("abc".endswith(""));
+  Var number = 12, word = <tail>;
+  EXPECT_TRUE("123".startswith(number));
+  EXPECT_TRUE("detail".endswith(word));
+  List prefixes = %("z" "ab");
+  EXPECT_TRUE("abc".startswith(@prefixes));
+  int (*predicate)(String, List @) = String.startswith;
+  EXPECT_TRUE(predicate("abc", @prefixes));
+  Func starts = String.startswith;
+  EXPECT_INT_EQ(starts("abc", @prefixes).int(), 1);
+  EXPECT_TRUE("a:b:c".split(":", 1) == %("a" "b:c"));
+  EXPECT_TRUE("aaa".replace("a", "b", 2) == "bba");
+  EXPECT_TRUE("a\nb\n".split_lines() == %("a" "b"));
+  EXPECT_TRUE("a\n".split_lines(1) == %("a\n"));
+  int evaluated = 0;
+  EXPECT_TRUE("abc".startswith((evaluated++, "a"), (evaluated++, "b")));
+  EXPECT_INT_EQ(evaluated, 2);
+  int caught = 0;
+  try text.strip(" ", "x");
+  catch %(bad-arity *): caught++;
+  try text.split_lines(0, 1);
+  catch %(bad-arity *): caught++;
+  try text.split(" ", 1, 2);
+  catch %(bad-arity *): caught++;
+  try text.replace(" ", "", 1, 2);
+  catch %(bad-arity *): caught++;
+  EXPECT_INT_EQ(caught, 4);
+}
+
 void string_suite(void) {
+  $test.run(string_rest_arguments);
   $test.run(string_canonical_identity);
   $test.run(string_shortcuts_copy_detached_storage);
   $test.run(string_empty_is_native_zero);

@@ -35,8 +35,8 @@ static void scene_line_chart(Ui ui) {
   List months = %("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep"
                   "Oct" "Nov" "Dec");
   $cui.card(ui, { .width = CUI_FILL, .max_width = 660 })
-    ui.line_chart("revenue", series, $cui.count(series), months, {
-      .area = true, .smooth = true, .height = 200, .format = "$%.0fk" });
+    ui.line_chart("revenue", series, $cui.count(series), months,
+      area: true, smooth: true, height: 200, format: "$%.0fk");
 }
 
 static void scene_bar_chart(Ui ui) {
@@ -44,7 +44,7 @@ static void scene_bar_chart(Ui ui) {
                           cui_series.of("Mobile", mobile) };
   $cui.card(ui, { .width = CUI_FILL, .max_width = 520 })
     ui.bar_chart("visits", series, $cui.count(series),
-                 %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), { .height = 200 });
+                 %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), height: 200);
 }
 
 static void scene_table(Ui ui) {
@@ -63,10 +63,10 @@ static void scene_table(Ui ui) {
       if (ui.table_row(index == chosen)) chosen = index;
       index++;
       ui.table_cell();
-      ui.avatar(name, { .size = 24 });
-      ui.text(name, { .font = CUI_FONT_MEDIUM, .nowrap = true });
+      ui.avatar(name, size: 24);
+      ui.text(name, font: CUI_FONT_MEDIUM, nowrap: true);
       ui.table_cell();
-      ui.badge(team, {});
+      ui.badge(team);
       ui.table_cell_text(%"$commits");
       ui.table_cell_text(String.format("%.1f", score));
     }
@@ -88,10 +88,10 @@ static void scene_data_grid(Ui ui) {
       (String name, String team, int commits, double score) = people[row];
       ui.data_grid_row(row);
       ui.data_grid_cell();
-      ui.avatar(name, { .size = 24 });
-      ui.text(name, { .size = 13.5f });
+      ui.avatar(name, size: 24);
+      ui.text(name, size: 13.5f);
       ui.data_grid_cell();
-      ui.badge(team, {});
+      ui.badge(team);
       ui.data_grid_cell_text(%"$commits");
       ui.data_grid_cell_text(String.format("%.1f", score));
     }

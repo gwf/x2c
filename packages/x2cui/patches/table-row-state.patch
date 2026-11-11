@@ -1,0 +1,49 @@
+--- a/include/cui/cui.h
++++ b/include/cui/cui.h
+@@ -860,6 +860,10 @@
+ CUI_API bool cui_table_begin_ex(cui_ctx *ui, const char *id, const cui_table_column *columns, int column_count, const cui_table_opts *opts);
+ /* Begin a row. Returns true when the row is clicked. */
+ CUI_API bool cui_table_row(cui_ctx *ui, bool selected);
++/* Whether the pointer is over the row cui_table_row began last, and whether
++ * that row is pressed: the state its hover highlight shows. */
++CUI_API bool cui_table_row_hovered(cui_ctx *ui);
++CUI_API bool cui_table_row_pressed(cui_ctx *ui);
+ /* Next cell; put any components inside, or use cui_table_cell_text. */
+ CUI_API void cui_table_cell(cui_ctx *ui);
+ CUI_API void cui_table_cell_text(cui_ctx *ui, const char *text);
+--- a/src/cui_data.c
++++ b/src/cui_data.c
+@@ -302,6 +302,7 @@
+     bool in_row;
+     bool compact, striped, selectable;
+     bool scroll;
++    bool row_hovered, row_pressed;   /* the pointer on the row begun last */
+     struct cui_table_build *prev;
+ };
+ 
+@@ -423,6 +424,8 @@
+     int ri = t->row_index++;
+     cui_id rid = cui__hash(&ri, sizeof ri, t->id ^ 0x20Bu);
+     cui_interact r = cui__interact(ui, rid, t->selectable ? CUI_IF_FOCUSABLE : 0);
++    t->row_hovered = r.hovered;
++    t->row_pressed = r.pressed;
+     float hv_v = cui__hover_fade(ui, rid, r.hovered, CUI__T_HIGHLIGHT), *hv = &hv_v;
+     int row = cui__node_new(ui, rid);
+     cui_node *n = &ui->nodes[row];
+@@ -445,6 +448,16 @@
+     return r.clicked;
+ }
+ 
++bool cui_table_row_hovered(cui_ctx *ui) {
++    struct cui_table_build *t = ui->building.table;
++    return t && t->in_row && t->row_hovered;
++}
++
++bool cui_table_row_pressed(cui_ctx *ui) {
++    struct cui_table_build *t = ui->building.table;
++    return t && t->in_row && t->row_pressed;
++}
++
+ void cui_table_cell(cui_ctx *ui) {
+     struct cui_table_build *t = ui->building.table;
+     if (!t || !t->in_row) return;

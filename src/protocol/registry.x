@@ -16,7 +16,7 @@ static typedef struct AdoptionDraft {
 static macro Stmt $fail.protocol_protocol_invalid(Expr $c, Expr $site) =>
   $c.report_error(
     <macro>, "constructed protocol syntax is invalid",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.protocol_decl_conflict(
   Expr $c, Expr $site, Expr $base, Expr $first_location,
@@ -26,7 +26,7 @@ static macro Stmt $fail.protocol_decl_conflict(
     String second = %"second: $($second_location)";
     $c.report_error(
       <protocol>, %"conflicting protocol declarations for $($base.repr())",
-      $site, $(first, second));
+      $site, first, second);
   }
 }
 
@@ -35,7 +35,7 @@ static macro Stmt $fail.protocol_type_undeclared(
   $c.report_error(
     <protocol>,
     %"adoption participant '$($spelling)' does not name a declared type",
-    $origin, NULL);
+    $origin);
 
 static macro Stmt $fail.protocol_adoption_conflict(
   Expr $c, Expr $site, Expr $adoption, Expr $first_location) {
@@ -46,7 +46,7 @@ static macro Stmt $fail.protocol_adoption_conflict(
       _adoption_spelling($adoption.base, $adoption.participant);
     $c.report_error(
       <protocol>, %"conflicting adoption declarations for $spelling",
-      $site, $(first, second));
+      $site, first, second);
   }
 }
 
@@ -60,7 +60,7 @@ static macro Stmt $report.protocol_adoption_conflict(
       _adoption_spelling($adoption.base, $adoption.participant);
     $c.diagnostics.report(
       <protocol>, %"conflicting adoption declarations for $spelling",
-      $site, $(first, second));
+      $site, first, second);
   }
 }
 
@@ -103,19 +103,13 @@ List Compiler.publish_protocol_node(
     A `Base.participant` reverse converter is declared under the participant's
     source spelling, and package mode rewrites that joined name as a whole, so
     the package prefix sits at the front of the derived binding instead of
-    inside it. The split is keyed on a known package because a foreign
-    header may spell `__` in a type name.
+    inside it.
 */
 String Compiler.reverse_converter_spelling(
   Compiler c, String base_name, String infix, String participant) {
-  int split = participant.find("__");
-  String package = split > 0 &&
-    (c.package == participant[:split] ||
-     participant[:split] in c.package_roots)
-      ? participant[:split] : NULL;
-  String bare = package ? participant[split + 2:] : participant;
-  String binding = %"$(base_name)_$infix$(bare.lower())";
-  return package ? %"$(package)__$binding" : binding;
+  String bare = c.package_source_name(participant);
+  String prefix = participant[:participant.len() - bare.len()];
+  return %"$prefix$(base_name)_$infix$(bare.lower())";
 }
 
 // registry lifecycle
@@ -297,9 +291,9 @@ static String _representation_error(Type representation) {
    the adoption's location. */
 static void _report_modifier(AdoptionDraft &a, String message) {
   if (a.modifier_token)
-    a.c.report_error(<protocol>, message, a.modifier_token, NULL);
+    a.c.report_error(<protocol>, message, a.modifier_token);
   else
-    a.c.diagnostics.report(<protocol>, message, a.location, NULL);
+    a.c.diagnostics.report(<protocol>, message, a.location);
 }
 
 module Symbol _tag_value(List expression) {

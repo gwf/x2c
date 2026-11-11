@@ -791,7 +791,7 @@ static Buffer _write_primitive_str(Var v, Symbol tag, Buffer out){
 }
 
 static String _primitive_repr(Var v, Symbol tag){
-  return Buffer_str_free(_write_primitive_repr(v, tag, Buffer_new(0)));
+  return Buffer_str_free(_write_primitive_repr(v, tag, Buffer_new(NULL)));
 }
 
 static Buffer _write_primitive_repr(Var v, Symbol tag, Buffer out){

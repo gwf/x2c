@@ -108,7 +108,7 @@ static void atom_write_repr_escapes_leading_angle(void) {
   String bare[] = { "<", "<=", "<=x" };
   for (int i = 0; i < sizeof escaped / sizeof escaped[0]; i++) {
     Atom expected = Atom.intern(escaped[i]);
-    Buffer out = Buffer.new(0);
+    Buffer out = Buffer.new();
     Atom.write_repr(expected, out);
     String written = out.str_free();
     EXPECT_TRUE(written.startswith("\\x3C"));
@@ -119,7 +119,7 @@ static void atom_write_repr_escapes_leading_angle(void) {
   }
   for (int i = 0; i < sizeof bare / sizeof bare[0]; i++) {
     Atom expected = Atom.intern(bare[i]);
-    Buffer out = Buffer.new(0);
+    Buffer out = Buffer.new();
     Atom.write_repr(expected, out);
     String written = out.str_free();
     EXPECT_STR_EQ(written, bare[i]);

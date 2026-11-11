@@ -13,7 +13,7 @@ meta static List rebuild(List code) {
       return captured(body, captures, params);
     case plain(?body, *params): return plain(body, params);
   }
-  x2c_diagnostic_fail("expected a lambda", NULL);
+  x2c_diagnostic_fail("expected a lambda");
 }
 macro Expression $again(Expr $code) => $rebuild($code);
 

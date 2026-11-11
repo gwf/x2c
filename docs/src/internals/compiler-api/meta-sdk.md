@@ -98,7 +98,7 @@ Source: `src/meta-sdk/syntax.x`
 
 #### x2c_diagnostic_error_at
 
-`void x2c_diagnostic_error_at(Var node, Symbol category, String message, List notes)`
+`void x2c_diagnostic_error_at(Var node, Symbol category, String message, List @notes)`
 
 Implements `x2c_diagnostic_error_at`, declared in `lib/meta.x`.
 
@@ -106,7 +106,7 @@ Source: `src/meta-sdk/context.x`
 
 #### x2c_diagnostic_fail
 
-`void x2c_diagnostic_fail(String message, List notes)`
+`void x2c_diagnostic_fail(String message, List @notes)`
 
 Implements `x2c_diagnostic_fail`, declared in `lib/meta.x`.
 
@@ -114,7 +114,7 @@ Source: `src/meta-sdk/context.x`
 
 #### x2c_diagnostic_fail_at
 
-`void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List notes)`
+`void x2c_diagnostic_fail_at(Var node, Symbol category, String message, List @notes)`
 
 Implements `x2c_diagnostic_fail_at`, declared in `lib/meta.x`.
 
@@ -122,7 +122,7 @@ Source: `src/meta-sdk/context.x`
 
 #### x2c_diagnostic_warn
 
-`void x2c_diagnostic_warn(String message, List notes)`
+`void x2c_diagnostic_warn(String message, List @notes)`
 
 Reports a warning where it is raised and returns, so a macro can keep
 expanding. Failure stays separate because it never returns.
@@ -225,7 +225,7 @@ Source: `src/meta-sdk/syntax.x`
 <a id="Code.bound"></a>
 #### Code.bound
 
-`Code Code.bound(Code c, List effects)`
+`Code Code.bound(Code c, List @effects)`
 
 Implements `Code.bound`, declared in `lib/meta.x`, with the carrier
 `Compiler.take_code_value` consumes.
@@ -300,7 +300,7 @@ Source: `src/meta-sdk/syntax.x`
 <a id="Code.lowered"></a>
 #### Code.lowered
 
-`Code Code.lowered(Code c, List effects)`
+`Code Code.lowered(Code c, List @effects)`
 
 Implements `Code.lowered`, declared in `lib/meta.x`, with the carrier
 `Compiler.take_code_value` consumes.
@@ -479,7 +479,7 @@ Source: `src/meta-sdk/primitives.x`
 <a id="MetaContext.reject"></a>
 #### MetaContext.reject
 
-`void MetaContext.reject(String message, List notes)`
+`void MetaContext.reject(String message, List @notes)`
 
 Reports `message` and `notes` at the active invocation and never
 returns, so the rejected operation's caller cannot continue with a

@@ -5,7 +5,7 @@
 #include "test-macros.x"
 
 static String script(List edits) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   foreach (List edit, edits) {
     Symbol kind = edit.car();
     String line = edit.cadr();
@@ -33,7 +33,7 @@ static void diff_lines_finds_a_shortest_script(void) {
 
 static void diff_lines_replaces_unrelated_texts_past_the_limit(void) {
   $test.scoped();
-  Buffer old = Buffer.new(0), new = Buffer.new(0);
+  Buffer old = Buffer.new(), new = Buffer.new();
   for (int i = 0; i < 3000; i++) {
     old.printf("old %d\n", i);
     new.printf("new %d\n", i);
@@ -70,7 +70,7 @@ static void diff_unified_prints_hunks_with_context(void) {
   EXPECT_NULL(Diff.unified("a\nb\n", "a\nb\n", "x", "y"));
   EXPECT_STR_EQ(Diff.unified("a\nb\nc\n", "a\nB\nc\n", "old", "new"),
                 "--- old\n+++ new\n@@ -1,3 +1,3 @@\n a\n-b\n+B\n c\n");
-  Buffer old = Buffer.new(0), new = Buffer.new(0);
+  Buffer old = Buffer.new(), new = Buffer.new();
   for (int i = 1; i <= 20; i++) {
     old.printf("%d\n", i);
     new.printf("%s\n", i == 5 ? "five" : i == 15 ? "fifteen" : %"$i");

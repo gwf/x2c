@@ -264,6 +264,8 @@ static List _bind_form(Compiler c, List input, Symbol context, int pending) {
     case %((!or goto label) ?) if (statement): return input;
     case $expression_statement(?expr) if (statement):
       return _bind_expression_statement(c, expr, context);
+    case %(method-decorator ?call ?target) if (statement):
+      return c.bind_method_decorator(call, target, context);
     case $deferred(?body) if (statement):
       return %(defer $(_bind_statement(c, body)));
     case $do_loop(?body, ?test) if (statement): return _bind_do(c, body, test);

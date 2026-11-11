@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "buffer.h"
-static String _6, _5, _4, _3, _2, _1, _0;
+static String _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -57,12 +57,13 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   if(_init_guard_) return;
   _init_guard_ = 1;
   _0 = String_new("/");
-  _1 = String_new(".d");
-  _2 = String_new("cannot write dependency file: ");
-  _3 = String_new("search:");
-  _4 = String_new("cwd:");
-  _5 = String_new(".c");
-  _6 = String_new(".h");
+  _1 = String_new("/");
+  _2 = String_new(".d");
+  _3 = String_new("cannot write dependency file: ");
+  _4 = String_new("search:");
+  _5 = String_new("cwd:");
+  _6 = String_new(".c");
+  _7 = String_new(".h");
 }
 
 String Path_stem(Path);
@@ -76,7 +77,7 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
   if(! _init_guard_) _file_init_();
   if(request -> no_deps || CliRequest_inspects(request)) return 1;
   String path = String_truth(request -> dep_file) ? request -> dep_file :({
-    Var _x2c_gensym_literal_part_0 = String_var(String_rstrip(output_dir, "/"));  Var _x2c_gensym_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_0), cons(_x2c_gensym_literal_part_1, cons(String_var(_1), NULL)))));
+    Var _x2c_gensym_literal_part_0 = String_var(String_rstrip(output_dir, cons(String_var(_0), NULL)));  Var _x2c_gensym_literal_part_1 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_0, cons(String_var(_1), cons(_x2c_gensym_literal_part_1, cons(String_var(_2), NULL)))));
   }
   );
   long volatile error = 0;
@@ -133,7 +134,7 @@ int Compiler_write_depfile(Compiler compiler, CliRequest request, String input, 
     _x2c_gensym_error_handler_0 = NULL;
     x2c_exception_leave(& _x2c_gensym_exception_frame_0);
   }
-  Diagnostics_driver_report(String_join(NULL, cons(String_var(_2), cons(String_var(path), NULL))), strerror(error));
+  Diagnostics_driver_report(String_join(NULL, cons(String_var(_3), cons(String_var(path), NULL))), strerror(error));
   return 0;
 }
 
@@ -149,7 +150,7 @@ List translation_depfile_parse(String text){
   }
   if(! ch || * ch != ':') return NULL;
   Array paths = Array_new();
-  Buffer word = Buffer_new(0);
+  Buffer word = Buffer_new(NULL);
   for(ch ++;  * ch && * ch != '\n';  ch ++){
     if(* ch == '\\' && ch[1]){
       ch ++;
@@ -205,7 +206,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
               path = Var_as_string(_x2c_gensym_macro_cursor_output_0);
               content_hash = _x2c_gensym_macro_cursor_output_1;
               {
-                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_as_string(content_hash), _3)) Array_push(searches, String_var(String_startswith(path, _4) ? String_getslice(path, 4, (-2147483647 - 1), 1) : path));
+                if(Var_is_row(content_hash, 11, 7, 1) && String_startswith(Var_as_string(content_hash), cons(String_var(_4), NULL))) Array_push(searches, String_var(String_startswith(path, cons(String_var(_5), NULL)) ? String_getslice(path, 4, (-2147483647 - 1), 1) : path));
                 else Array_push(paths, String_var(path));
               }
 
@@ -214,7 +215,7 @@ static String _contents(CliRequest request, Compiler compiler, String input, Str
           }
           if(! Array_len(paths)) Array_push(paths, String_var(input));
           Array_sort(paths);
-          Buffer out = Buffer_new(0);
+          Buffer out = Buffer_new(NULL);
           const Buffer _x2c_gensym_macro_acquired_0 = out;
           {
             _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -298,12 +299,12 @@ static void _write_targets(Buffer out, CliRequest request, String input, String 
     return;
   }
   String base =({
-    Var _x2c_gensym_literal_part_2 = String_var(String_rstrip(output_dir, "/"));  Var _x2c_gensym_literal_part_3 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_0), cons(_x2c_gensym_literal_part_3, NULL))));
+    Var _x2c_gensym_literal_part_2 = String_var(String_rstrip(output_dir, cons(String_var(_0), NULL)));  Var _x2c_gensym_literal_part_3 = String_var(Path_stem(input));  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(String_var(_1), cons(_x2c_gensym_literal_part_3, NULL))));
   }
   );
-  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_5), NULL))));
-  Buffer_write_char(out, ' ');
   _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_6), NULL))));
+  Buffer_write_char(out, ' ');
+  _write_word(out, String_join(NULL, cons(String_var(base), cons(String_var(_7), NULL))));
 }
 
 static void _write_phony(Buffer out, Array paths, String primary){

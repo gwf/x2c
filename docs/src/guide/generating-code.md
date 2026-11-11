@@ -667,7 +667,7 @@ argument is wrong in a way the macro can see:
 meta static List one_word(Source node) {
   String text = Code.source_text(node);
   if (text.contains(" "))
-    x2c_diagnostic_fail("this argument must be one word", %());
+    x2c_diagnostic_fail("this argument must be one word");
   return $!String{ $text };
 }
 

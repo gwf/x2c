@@ -37,7 +37,7 @@ static String _sq_string(Var value, String field) {
 
 /* Validate the external query once, before selection can short-circuit.
    Evaluation below relies on these shapes and the existing predicate names. */
-static void _sq_keys(Map object, List allowed) {
+static void _sq_keys(Map object, List @allowed) {
   foreach (String key, object.keys())
     if (!(key in allowed)) _sq_error(%"unknown query field: $key");
 }
@@ -80,7 +80,7 @@ static void _sq_validate_filter(Map filter, int node) {
       _sq_validate_filter(_sq_object(value, key), node);
     else if (!node && key == "reachable_from") {
       Map reach = _sq_object(value, key);
-      _sq_keys(reach, %("select" "relations" "direction" "depth"));
+      _sq_keys(reach, "select", "relations", "direction", "depth");
       _sq_validate_filter(_sq_object(reach["select"], "select"), 0);
       _sq_validate_walk(reach);
     }
@@ -116,7 +116,7 @@ static String _sq_validate_query(Map request) {
       break;
     default: _sq_error(%"unknown operation: $op");
   }
-  _sq_keys(request, %("op" "offset" "limit").append(fields));
+  _sq_keys(request, "op", "offset", "limit", @fields);
   if (request.contains("offset")) _sq_integer(request["offset"], 0, "offset");
   if (request.contains("limit")) _sq_integer(request["limit"], 1, "limit");
   if (request.contains("select") ||

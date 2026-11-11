@@ -12,7 +12,9 @@
    `<order>`, and `captures` the outer names a local macro's body reads. */
 module typedef struct Definition {
   Compiler c, Token start;
-  Atom name, Symbol kind;
+  // An Atom, or a template's `(macro-name PART ...)`; see `_template_name`.
+  Var name;
+  Symbol kind;
   List target, parameters, template, fresh, captures, pattern, rebuild, type;
   List origin, String file, namespace, Map locals, Array using;
   int anonymous, local, nested, quotation, leaf, storage;

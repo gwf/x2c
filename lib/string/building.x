@@ -174,7 +174,7 @@ static int _join_length(List strings, int sep_len) {
 /* Renders each element once, so an element contributes exactly the text it
    rendered, however long that turns out to be. */
 static String _join_rendered(List strings, String sep) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   for (List cell = strings; cell; cell = cell.cdr()) {
     Var item = cell.car();
     if (!item.is_null()) item.write_str(out);

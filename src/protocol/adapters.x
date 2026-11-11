@@ -283,7 +283,7 @@ static void _report_requirement(
   List row = _visible_adoption(a.c, base, participant);
   a.c.diagnostics.report(
     <protocol>, _requirement_detail(base, participant, failure),
-    _adoption_location(row), NULL);
+    _adoption_location(row));
 }
 
 module void _report_collision(
@@ -311,7 +311,7 @@ module void _report_collision(
 
   List notes = _collision_notes(kind, first, second);
   List row = _visible_adoption(c, first_base, participant);
-  c.diagnostics.report(<protocol>, message, _adoption_location(row), notes);
+  c.diagnostics.report(<protocol>, message, _adoption_location(row), @notes);
 }
 
 static List _collision_notes(Symbol kind, List first, List second) {

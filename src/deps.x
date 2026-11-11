@@ -66,7 +66,7 @@ List translation_depfile_parse(String text) {
     ch++;
   }
   if (!ch || *ch != ':') return NULL;
-  Array paths = [], Buffer word = Buffer.new(0);
+  Array paths = [], Buffer word = Buffer.new();
   // The word before the newline is pushed once, after the loop.
   for (ch++; *ch && *ch != '\n'; ch++) {
     if (*ch == '\\' && ch[1]) {
@@ -97,7 +97,7 @@ static String _contents(
   }
   if (!paths.len()) paths.push(input);
   paths.sort();
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   _write_targets(out, request, input, output_dir);
   out.write_char(':');
   foreach (String path in paths) {

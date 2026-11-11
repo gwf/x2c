@@ -62,7 +62,7 @@ String Buffer_repr(Buffer buf);
 
 int Buffer_truth(Buffer b);
 
-Buffer Buffer_new(size_t padding);
+Buffer Buffer_new(List padding);
 
 Buffer Buffer_reserve(Buffer buf, size_t minimum);
 

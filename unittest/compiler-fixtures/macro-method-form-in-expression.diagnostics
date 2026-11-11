@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/macro-method-form-in-expression.x:13:14: type: type Ui has no method row
+    k = ui.row (1) { }
+               ^
+

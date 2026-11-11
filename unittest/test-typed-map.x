@@ -473,7 +473,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
 
   MapIntInt ints = {1: 2}, later_ints = {1: 3};
   Map int_map = ints;
-  Buffer int_str = Buffer.new(0), int_repr = Buffer.new(0);
+  Buffer int_str = Buffer.new(), int_repr = Buffer.new();
   ints.write_str(int_str); ints.write_repr(int_repr);
   Test_expect_same_text(
     ints, later_ints, int_map, ints, ints.repr(),
@@ -485,7 +485,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   MapLongDouble doubles = {10L: 2.5};
   MapLongDouble later_doubles = {10L: 3.5};
   Map double_map = doubles;
-  Buffer double_str = Buffer.new(0), double_repr = Buffer.new(0);
+  Buffer double_str = Buffer.new(), double_repr = Buffer.new();
   doubles.write_str(double_str); doubles.write_repr(double_repr);
   Test_expect_same_text(
     doubles, later_doubles, double_map, doubles, doubles.repr(),
@@ -495,7 +495,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   MapStringString strings = {"alpha": "one"};
   MapStringString later_strings = {"alpha": "two"};
   Map string_map = strings;
-  Buffer string_str = Buffer.new(0), string_repr = Buffer.new(0);
+  Buffer string_str = Buffer.new(), string_repr = Buffer.new();
   strings.write_str(string_str); strings.write_repr(string_repr);
   Test_expect_same_text(
     strings, later_strings, string_map, strings, strings.repr(),
@@ -505,7 +505,7 @@ static void typed_map_common_capabilities_cover_every_family(void) {
   MapStringInt string_ints = {"alpha": 1};
   MapStringInt later_string_ints = {"alpha": 2};
   Map string_int_map = string_ints;
-  Buffer string_int_str = Buffer.new(0), string_int_repr = Buffer.new(0);
+  Buffer string_int_str = Buffer.new(), string_int_repr = Buffer.new();
   string_ints.write_str(string_int_str);
   string_ints.write_repr(string_int_repr);
   Test_expect_same_text(

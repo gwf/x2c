@@ -91,7 +91,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   Scope_open();
-  List fluent = Iter_list(Iter_filter(Iter_map(range(1, 4, 1, &(struct Iter){
+  List fluent = Iter_list(Iter_filter(Iter_map((range)(1, 4, 1, &(struct Iter){
     int_var(0)
   }
   ), _x2c_gensym_func_handle_1, &(struct Iter){
@@ -101,10 +101,10 @@ int main(void){
     int_var(0)
   }
   ));
-  Var paired = Iter_sum(Iter_map2(range(1, 3, 1, &(struct Iter){
+  Var paired = Iter_sum(Iter_map2((range)(1, 3, 1, &(struct Iter){
     int_var(0)
   }
-  ), range(10, 12, 1, &(struct Iter){
+  ), (range)(10, 12, 1, &(struct Iter){
     int_var(0)
   }
   ), _x2c_gensym_func_handle_2, &(struct Iter){
@@ -114,7 +114,7 @@ int main(void){
   int nested = 0;
   {
     int left;
-    Iter _x2c_gensym_macro_iterator_1 = Iter_map(range(1, 2, 1, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_1 = Iter_map((range)(1, 2, 1, &(struct Iter){
       int_var(0)
     }
     ), _x2c_gensym_func_handle_1, &(struct Iter){
@@ -126,7 +126,7 @@ int main(void){
       left = Var_int(Var_convert_at(_x2c_gensym_macro_item_1, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "unittest/compiler-fixtures/iter-chain-completion.x",.function = "main",.line = 22}; & _x2c_gensym_error_site_0; })));
       {
         int right;
-        Iter _x2c_gensym_macro_iterator_0 = Iter_head(range(10, 11, 1, &(struct Iter){
+        Iter _x2c_gensym_macro_iterator_0 = Iter_head((range)(10, 11, 1, &(struct Iter){
           int_var(0)
         }
         ), 1, &(struct Iter){
@@ -145,12 +145,12 @@ int main(void){
 
   }
   struct Iter mixed_source_storage;
-  List mixed = Iter_list(Iter_map(range(1, 3, 1, & mixed_source_storage), _x2c_gensym_func_handle_1, &(struct Iter){
+  List mixed = Iter_list(Iter_map((range)(1, 3, 1, & mixed_source_storage), _x2c_gensym_func_handle_1, &(struct Iter){
     int_var(0)
   }
   ));
   struct Iter source_storage, map_storage, filter_storage;
-  Iter source = range(1, 4, 1, & source_storage);
+  Iter source =(range)(1, 4, 1, & source_storage);
   Iter mapped = Iter_map(source, _x2c_gensym_func_handle_1, & map_storage);
   Iter filtered = Iter_filter(mapped, _x2c_gensym_func_handle_0, & filter_storage);
   List explicit = Iter_list(filtered);

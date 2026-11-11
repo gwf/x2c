@@ -133,13 +133,13 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
                      .bg = CUI_COLOR_FOREGROUND, .dir = CUI_STACK,
                      .align = CUI_ALIGN_CENTER,
                      .justify = CUI_JUSTIFY_CENTER })
-        ui.text("C", { .font = CUI_FONT_DISPLAY, .size = 16,
-                       .color = CUI_COLOR_BACKGROUND, .line_height = 1.0f });
-      ui.text("CUI", { .font = CUI_FONT_MEDIUM, .size = 15, .nowrap = true });
+        ui.text("C", font: CUI_FONT_DISPLAY, size: 16,
+                     color: CUI_COLOR_BACKGROUND, line_height: 1.0f);
+      ui.text("CUI", font: CUI_FONT_MEDIUM, size: 15, nowrap: true);
       ui.spacer();
       // x2c reads a C macro constant as a value only when its type is given.
       int major = CUI_VERSION_MAJOR, minor = CUI_VERSION_MINOR;
-      ui.badge(%"v$major.$minor", { .size = CUI_SIZE_SM });
+      ui.badge(%"v$major.$minor", size: CUI_SIZE_SM);
     }
     $cui.scroll(ui, { .id = "nav", .height = CUI_FILL, .gap = 2 }) {
       ui.nav_section("Components");
@@ -148,17 +148,17 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
           ui.gap(10);
           ui.nav_section("Extended");
         }
-        if (ui.nav_item(pages[page].name, {
-              .icon = pages[page].icon, .selected = g.page == page,
-              .group = "pages" }))
+        if (ui.nav_item(pages[page].name,
+              icon: pages[page].icon, selected: g.page == page,
+              group: "pages"))
           go_to(ui, g, page);
       }
     }
     $cui.column(ui, { .gap = 12, .pad = 8 }) {
       static const char *mode_icons[] = { CUI_ICON_SUN, CUI_ICON_MOON };
       int mode = g.dark;
-      if (ui.segmented("theme", %("Light" "Dark"), mode, {
-            .full_width = true, .icons = mode_icons, .size = CUI_SIZE_SM }))
+      if (ui.segmented("theme", %("Light" "Dark"), mode,
+            full_width: true, icons: mode_icons, size: CUI_SIZE_SM))
         set_theme(ui, g, mode == 1);
       accent_row(ui, g);
     }
@@ -168,15 +168,15 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
 static void dialogs(Ui ui, Gallery g) {
   $cui.dialog(ui, "Edit profile", g.dialog_open, {
       .description = "Changes are visible to your team." }) {
-    ui.input("dlg-name", g.name, { .label = "Name" });
-    ui.input("dlg-email", g.email, { .label = "Email",
-                                     .icon = CUI_ICON_MAIL });
-    ui.switch("Public profile", g.wifi, {});
+    ui.input("dlg-name", g.name, label: "Name");
+    ui.input("dlg-email", g.email, label: "Email",
+                                   icon: CUI_ICON_MAIL);
+    ui.switch("Public profile", g.wifi);
     $cui.dialog_footer(ui) {
-      if (ui.button("Cancel", {})) g.dialog_open = false;
-      if (ui.button("Save changes", { .variant = CUI_BUTTON_PRIMARY })) {
+      if (ui.button("Cancel")) g.dialog_open = false;
+      if (ui.button("Save changes", variant: CUI_BUTTON_PRIMARY)) {
         g.dialog_open = false;
-        ui.toast("Profile updated", { .tone = CUI_TONE_SUCCESS });
+        ui.toast("Profile updated", tone: CUI_TONE_SUCCESS);
       }
     }
   }
@@ -185,27 +185,27 @@ static void dialogs(Ui ui, Gallery g) {
                      "everyone. You cannot undo this.",
       .width = 400 })
   $cui.dialog_footer(ui) {
-    if (ui.button("Cancel##confirm", {})) g.confirm_open = false;
-    if (ui.button("Delete project", { .variant = CUI_BUTTON_DANGER })) {
+    if (ui.button("Cancel##confirm")) g.confirm_open = false;
+    if (ui.button("Delete project", variant: CUI_BUTTON_DANGER)) {
       g.confirm_open = false;
-      ui.toast("Project deleted", { .tone = CUI_TONE_DANGER,
-                                    .action = "Undo" });
+      ui.toast("Project deleted", tone: CUI_TONE_DANGER,
+                                  action: "Undo");
     }
   }
   $cui.sheet(ui, "Notifications", g.sheet_open, {
       .description = "Choose what we tell you about." }) {
-    ui.switch("Comments", g.newsletter, {
-      .description = "When someone replies to you." });
-    ui.switch("Mentions", g.wifi, {
-      .description = "When someone mentions you." });
-    ui.switch("Weekly digest", g.bluetooth, {
-      .description = "A summary every Monday." });
+    ui.switch("Comments", g.newsletter,
+      description: "When someone replies to you.");
+    ui.switch("Mentions", g.wifi,
+      description: "When someone mentions you.");
+    ui.switch("Weekly digest", g.bluetooth,
+      description: "A summary every Monday.");
     ui.separator();
     ui.label("Recent");
-    ui.list_item("Jonas commented on Release 1.0", {
-      .avatar = "Jonas Berg", .subtitle = "2 minutes ago" });
-    ui.list_item("Priya invited you to Engines", {
-      .avatar = "Priya Nair", .subtitle = "1 hour ago" });
+    ui.list_item("Jonas commented on Release 1.0",
+      avatar: "Jonas Berg", subtitle: "2 minutes ago");
+    ui.list_item("Priya invited you to Engines",
+      avatar: "Priya Nair", subtitle: "1 hour ago");
   }
   static const cui_command commands[] = {
     { "Go to Overview", CUI_ICON_LAYOUT_DASHBOARD, "Navigation" },
@@ -265,9 +265,9 @@ static void draw(Ui ui, Gallery g) {
                       .pad_x = narrow ? 16 : 40, .pad_top = narrow ? 12 : 36,
                       .pad_bottom = 64, .gap = 20 }) {
       if (narrow) $cui.row(ui, { .gap = 8, .width = CUI_FILL }) {
-        if (ui.icon_button(CUI_ICON_MENU, { .tooltip = "Components" }))
+        if (ui.icon_button(CUI_ICON_MENU, tooltip: "Components"))
           g.drawer = true;
-        ui.text("CUI", { .font = CUI_FONT_MEDIUM, .size = 15 });
+        ui.text("CUI", font: CUI_FONT_MEDIUM, size: 15);
       }
       draw_page(ui, g);
     }

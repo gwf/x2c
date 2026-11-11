@@ -44,12 +44,12 @@ static void split_eager_and_join(void) {
 }
 
 static void split_limits_and_lines(void) {
-  List limited = "a,b,c".split_n(",", 1);
+  List limited = "a,b,c".split(",", 1);
   EXPECT_INT_EQ(limited.len(), 2);
   expect_split_item(limited, 0, "a");
   expect_split_item(limited, 1, "b,c");
 
-  List unsplit = "a,b".split_n(",", 0);
+  List unsplit = "a,b".split(",", 0);
   EXPECT_INT_EQ(unsplit.len(), 1);
   expect_split_item(unsplit, 0, "a,b");
 
@@ -58,7 +58,7 @@ static void split_limits_and_lines(void) {
   EXPECT_TRUE("a,b".split(NULL) == %("a,b"));
   EXPECT_INT_EQ(String.split_lines(NULL, 0).len(), 0);
 
-  List lines = "a\r\nb\rc\n\n".split_lines(0);
+  List lines = "a\r\nb\rc\n\n".split_lines();
   EXPECT_INT_EQ(lines.len(), 4);
   expect_split_item(lines, 0, "a");
   expect_split_item(lines, 1, "b");
@@ -91,7 +91,7 @@ static void split_cursor_semantics(void) {
   EXPECT_TRUE("a::b:".splits(":").iter(NULL) == NULL);
   EXPECT_TRUE("a::b:".split(":") ==
               collect_split_cursor("a::b:".splits(":")));
-  EXPECT_TRUE("a\r\nb\rc\n\n".split_lines(0) ==
+  EXPECT_TRUE("a\r\nb\rc\n\n".split_lines() ==
               collect_split_cursor("a\r\nb\rc\n\n".lines()));
 }
 

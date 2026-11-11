@@ -2,7 +2,8 @@
 
 // replacement
 
-/** Returns `str` with every occurrence of `old` replaced by `replacement`.
+/** Returns `str` with occurrences of `old` replaced by `replacement`.
+    An optional limit bounds the replacements; omitted or negative means all.
     Scanning runs left to right and matches do not overlap: each one
     resumes after the text it consumed, so replacing `aa` in `aaaa` performs
     two replacements, not three. Replaced text is never rescanned, so a
@@ -12,11 +13,12 @@
     When there is nothing to replace, `str` itself is returned, so the
     result may be the same pointer as the input. An empty or null `old`
     returns `str`.
-    Raises: the same causes as `String.replace_n`.
+    Raises: `<bad-arity>` for more than one limit, conversion failures,
+    or the same causes as `String.replace_n`.
 */
 meta native String String.replace(
-  String str, String old, String replacement) =>
-  str.replace_n(old, replacement, -1);
+  String str, String old, String replacement, List @limit) =>
+  str.replace_n(old, replacement, _optional(limit, -1, "String.replace").int());
 
 /** Replaces at most `max_replacements` non-overlapping occurrences of `old`.
     Scanning proceeds left to right and does not rescan replacement text. A

@@ -434,8 +434,7 @@ static List _typed_hole(
 static List _checked_type(Compiler c, List type, Token origin) {
   if (!c.meta_body) return type;
   List error = _runtime_call(c, "type_name_error", $(type), origin);
-  List fail = _runtime_call(
-    c, "x2c_diagnostic_fail", %($error (expr ("List") (nil))), origin);
+  List fail = _runtime_call(c, "x2c_diagnostic_fail", $(error), origin);
   return c.resolve_expression(
     %(expr () (op ? $error
       (expr ("Type") (commas $fail $type)) $type)),

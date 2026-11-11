@@ -9,13 +9,23 @@ static keyword loop $private.loop;
 
 module List _invocation_arguments(
   Compiler c, List definition, Token invocation) {
-  if (_bare(invocation, definition)) return %(args);
+  List receiver = c.method_receiver;
+  c.method_receiver = NULL;
+  if (!receiver && _bare(invocation, definition)) return %(args);
   Array arguments = [];
   // The first Param hole opens one scope for the rest of the arguments.
   int parameter_scope = 0;
   defer { if (parameter_scope) c.sym.pop_scope(); }
   c.expect(<(>);
   List descriptors = definition.assoc(<parameters>);
+  /* A method-form macro's receiver is its first explicit argument, as in
+     `$T.name(receiver, ...)`. */
+  if (receiver) {
+    if (!descriptors) $fail.macros_macro_extra_args(c, c.token);
+    arguments.push(
+      _capture_row_project(c, descriptors.car(), $(receiver), 0));
+    descriptors = descriptors.cdr();
+  }
   for (List nodes = descriptors; nodes; nodes = nodes.cdr()) {
     List hole = nodes.car();
     Symbol kind = hole.assoc(<kind>);
@@ -23,8 +33,13 @@ module List _invocation_arguments(
       c.sym.push_new_scope();
       parameter_scope = 1;
     }
-    arguments.push(_argument_row(c, hole, kind));
-    if (nodes.cdr() && c.peek(0) != <)>) _argument_separator(c, kind);
+    /* Only a final Entry sequence follows a sequence; it takes the
+       arguments from the first `key: value` row. */
+    int before_entries = hole.assoc(<sequence>).int() && nodes.cdr();
+    arguments.push(_argument_row(c, hole, kind, before_entries));
+    if (nodes.cdr() && c.peek(0) != <)> &&
+        !(before_entries && c.at_map_entry()))
+      _argument_separator(c, kind);
   }
   if (c.test(<,>))
     $fail.macros_macro_extra_args(c, c.token);
@@ -34,22 +49,30 @@ module List _invocation_arguments(
 
 /* The arguments one hole captures: one, or a comma-separated sequence. A
    MatchRow hole also takes the directives around its rows. */
-static List _argument_row(Compiler c, List hole, Symbol kind) {
+static List _argument_row(
+  Compiler c, List hole, Symbol kind, int before_entries) {
   int sequence = hole.assoc(<sequence>);
   Array captured = [];
   if (c.peek(0) == <)> && !sequence)
     $fail.macros_macro_missing_args(c, c.token);
-  if (c.peek(0) != <)>) loop {
+  if (c.peek(0) != <)> && !(before_entries && c.at_map_entry())) loop {
     _row_directives(c, kind, captured);
     Token first = c.token;
     Var argument = _parse_argument(c, kind);
     if (kind != <name>)
       argument = _capture_source(c, argument, first, c.token);
     captured.push(argument);
-    if (!sequence || !c.test(<,>)) break;
+    if (!sequence || c.peek(0) != <,> ||
+        (before_entries && _entry_follows_comma(c)))
+      break;
+    c.next();
   }
   _row_directives(c, kind, captured);
   return _capture_row_project(c, hole, captured.list_free(), 0);
+}
+
+static int _entry_follows_comma(Compiler c) {
+  with (c.token = Token.skip_trivia(c.token + 1)) { return c.at_map_entry(); }
 }
 
 static void _row_directives(Compiler c, Symbol kind, Array captured) {

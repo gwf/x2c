@@ -157,7 +157,7 @@ List Regex.capture_names(Regex regex) {
     underscore escaped, so that it matches itself inside a pattern.
 */
 String Regex.escape(String literal) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   int n = literal.len();
   for (int i = 0; i < n; i++) {
     int byte = (unsigned char) literal[i];
@@ -871,7 +871,7 @@ static RegexCapture _whole(RegexMatch found) => found.car();
 static String _rebuild(
   Regex r, String subject, int all, Func fn, String replacement,
   int callback) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   int cursor = 0;
   for (RegexMatch found = _search(r, subject, 0); found;
        found = all ? _next(r, subject, found) : NULL) {

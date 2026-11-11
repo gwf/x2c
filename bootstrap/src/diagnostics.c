@@ -382,7 +382,7 @@ void Compiler_report_warning(Compiler c, Symbol code, String message, Token toke
 
 int Diagnostics_anonymous_macro_name(String name){
   if(! _init_guard_) _file_init_();
-  return String_startswith(name, _1);
+  return String_startswith(name, cons(String_var(_1), NULL));
 }
 
 String Diagnostics_macro_spelling(List definition, Token invocation){
@@ -577,10 +577,10 @@ Path Path_absolute(Path);
 
 String Compiler_display_path(Compiler compiler, String path){
   if(! _init_guard_) _file_init_();
-  if(! String_truth(path) || String_startswith(path, _39)) return path;
+  if(! String_truth(path) || String_startswith(path, cons(String_var(_39), NULL))) return path;
   if(compiler -> source_facts) return Path_absolute(path);
   String root = compiler -> root_dir;
-  if(String_truth(root) && String_startswith(path, root) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, x2c_slice_bound(String_len(root) + 1), (-2147483647 - 1), 1);
+  if(String_truth(root) && String_startswith(path, cons(String_var(root), NULL)) && String_len(path) > String_len(root) && String_getindex(path, String_len(root)) == '/') return String_getslice(path, x2c_slice_bound(String_len(root) + 1), (-2147483647 - 1), 1);
   return path;
 }
 
@@ -779,7 +779,7 @@ static String _note_line(List l){
 }
 
 static void _write_json(Compiler c, Symbol code, Symbol severity, String message, List location, String note){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -846,14 +846,14 @@ Buffer_write(out, ",\"length\":null,\"position\":null");
 
 int Path_exists(Path);
 
-Path Path_join(Path, Path);
+Path Path_join(Path, List);
 
 static String _shown_path(Compiler compiler, String path){
-  if(! String_truth(path) || String_startswith(path, _39)) return path;
-  if(! String_startswith(path, _52) && ! Path_exists(path)) path = Path_join(compiler -> root_dir, path);
+  if(! String_truth(path) || String_startswith(path, cons(String_var(_39), NULL))) return path;
+  if(! String_startswith(path, cons(String_var(_52), NULL)) && ! Path_exists(path)) path = Path_join(compiler -> root_dir, cons(String_var(path), NULL));
   path = Path_absolute(path);
   String directory = String_join(NULL, cons(String_var(Path_absolute(_53)), cons(String_var(_54), NULL)));
-  return String_startswith(path, directory) ? String_remove_prefix(path, directory) : path;
+  return String_startswith(path, cons(String_var(directory), NULL)) ? String_remove_prefix(path, directory) : path;
 }
 
 static void _write_heading(Compiler c, Symbol code, Symbol severity, String message, List location){
@@ -877,7 +877,7 @@ static void _write_heading(Compiler c, Symbol code, Symbol severity, String mess
         }
         );
         fprintf(stderr, "%s: %s: %s\n", place, kind, message);
-        _show_source_context(c, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 578}; & _x2c_gensym_error_site_19; }))), Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 578}; & _x2c_gensym_error_site_20; }))), Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 578}; & _x2c_gensym_error_site_21; }))), Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 578}; & _x2c_gensym_error_site_22; }))));
+        _show_source_context(c, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 577}; & _x2c_gensym_error_site_19; }))), Var_int(Var_convert_at(column, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 577}; & _x2c_gensym_error_site_20; }))), Var_int(Var_convert_at(length, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 577}; & _x2c_gensym_error_site_21; }))), Var_int(Var_convert_at(position, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_22 = {.file = "../../src/diagnostics.x",.function = "_write_heading",.line = 577}; & _x2c_gensym_error_site_22; }))));
         return;
       }
 
@@ -904,7 +904,7 @@ static void _show_source_context(Compiler compiler, int line, int column, int le
       Var _x2c_gensym_match_value_6 = text_line;
       Var _x2c_gensym_match_value_7 = before;
       {
-        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../src/diagnostics.x",.function = "_show_source_context",.line = 594}; & _x2c_gensym_error_site_23; })));
+        int text_line = Var_int(Var_convert_at(_x2c_gensym_match_value_6, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_23 = {.file = "../../src/diagnostics.x",.function = "_show_source_context",.line = 593}; & _x2c_gensym_error_site_23; })));
         String before = Var_as_string(_x2c_gensym_match_value_7);
         if(line == text_line) if(String_len(before)){
           String shown =({
@@ -953,7 +953,7 @@ static int _text_line(Compiler c, int position){
     int _x2c_gensym_macro_cursor_8 = 0;
     Var _x2c_gensym_macro_cursor_output_10;
     while(Array_try_next(_x2c_gensym_macro_object_8, &(_x2c_gensym_macro_cursor_8), &(_x2c_gensym_macro_cursor_output_10))){
-      start = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../src/diagnostics.x",.function = "_text_line",.line = 621}; & _x2c_gensym_error_site_24; })));
+      start = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_10, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_24 = {.file = "../../src/diagnostics.x",.function = "_text_line",.line = 620}; & _x2c_gensym_error_site_24; })));
       {
         if(start > position) break;
         line ++;

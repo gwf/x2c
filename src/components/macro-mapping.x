@@ -12,14 +12,14 @@
    any other input, is read as a constant. */
 meta List _x2c_expand_rows(List generator, List input) {
   if (generator.assoc(<kind>) == <decorator>)
-    x2c_diagnostic_fail("expand requires a code-producing macro", %());
+    x2c_diagnostic_fail("expand requires a code-producing macro");
   Compiler c = Compiler.expanding();
   Var value = input ~= %(expr ? (meta-call *))
     ? c.evaluate_meta_value(input, c.token, 1)
     : c.resolve_expression(input, c.token);
   if (value ~= %(expr *)) value = Code.value(value);
   if (value is not <list>)
-    x2c_diagnostic_fail("expand requires a compile-time List", %());
+    x2c_diagnostic_fail("expand requires a compile-time List");
   List rows = value, parameters = generator.assoc(<parameters>);
   int sequence = parameters &&
     parameters.last().list().assoc(<sequence>).int();
@@ -34,7 +34,7 @@ meta List _x2c_expand_rows(List generator, List input) {
       String expected = sequence ? %"at least $required" : required.str();
       String noun = !sequence && required == 1 ? "argument" : "arguments";
       x2c_diagnostic_fail(
-        %"expand row $index expects $expected $noun; got $supplied", %());
+        %"expand row $index expects $expected $noun; got $supplied");
     }
     List application =
       c.evaluate_macro_slot(Macro_apply(generator, arguments));

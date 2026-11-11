@@ -357,7 +357,7 @@ static String _string(Reader &r) {
       return decoded;
     }
     if (byte == '\\') {
-      if (decoded == NULL) decoded = Buffer.new(0);
+      if (decoded == NULL) decoded = Buffer.new();
       decoded.write_len(r.text + run, r.at - run);
       _escape(r, decoded);
       run = r.at;
@@ -504,7 +504,7 @@ static void _fail(Reader &r, String why) {
 }
 
 static String _json(Var value, int pretty) {
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   _x2c_json_write(out, value, pretty);
   return out;
 }

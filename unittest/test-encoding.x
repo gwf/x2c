@@ -75,7 +75,7 @@ static void encoding_utf8_rejects_ill_formed_bytes(void) {
 
 static void encoding_utf8_encodes_code_points(void) {
   $test.scoped();
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.write_code_point('A').write_code_point(0x7FF).write_code_point(0xFFFF);
   out.write_code_point(0x10FFFF);
   EXPECT_STR_EQ(out.str(), "A\xdf\xbf\xef\xbf\xbf\xf4\x8f\xbf\xbf");

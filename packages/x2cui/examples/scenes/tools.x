@@ -67,34 +67,34 @@ static void scene_path_bar(Ui ui) {
   static int depth = 5;
   List segments = %("x2c" "packages" "x2cui" "examples" "gallery");
   cui_path_bar_result result = ui.path_bar(
-    "path", segments[:depth], { .icon = CUI_ICON_FOLDER });
+    "path", segments[:depth], icon: CUI_ICON_FOLDER);
   if (result.clicked >= 0) depth = result.clicked + 1;
   ui.text("Click a segment to go up, or the empty part to type a path.",
-          { .color = CUI_COLOR_TEXT_MUTED });
+          color: CUI_COLOR_TEXT_MUTED);
 }
 
 static void scene_file_browser(Ui ui) {
   cui_file_browser_result result = ui.file_browser(
-    "files", folder, { .height = CUI_PX(360) });
+    "files", folder, height: CUI_PX(360));
   ui.text(result.selected ? %"Selected $(result.selected)"
                           : %"In $(folder.text())",
-          { .color = CUI_COLOR_TEXT_MUTED, .size = 12 });
+          color: CUI_COLOR_TEXT_MUTED, size: 12);
 }
 
 static void scene_terminal(Ui ui) {
   cui_terminal_result result = ui.terminal(
-    "term", term, { .height = 360, .prompt = "~/x2cui $ " });
+    "term", term, height: 360, prompt: "~/x2cui $ ");
   if (result.command && result.command[0])
     term.printf("%s: command not found\n", result.command);
 }
 
 static void scene_file_picker(Ui ui) {
   static bool open = true;
-  if (ui.button("Open...", { .icon = CUI_ICON_FOLDER_OPEN })) open = true;
-  ui.text(chosen.empty() ? "No file chosen." : %"Chose $(chosen.text())", {});
+  if (ui.button("Open...", icon: CUI_ICON_FOLDER_OPEN)) open = true;
+  ui.text(chosen.empty() ? "No file chosen." : %"Chose $(chosen.text())");
   ui.file_picker("open", open, chosen,
-                 { .title = "Open a source file", .start = examples_dir,
-                   .filter = "*.x", .filter_label = "x2c sources" });
+                 title: "Open a source file", start: examples_dir,
+                 filter: "*.x", filter_label: "x2c sources");
 }
 
 static void scene_markdown(Ui ui) {
@@ -114,17 +114,17 @@ static void scene_markdown(Ui ui) {
     "|:-------|-------:|\n"
     "| Layout | 11 |\n"
     "| Tools | 17 |\n";
-  ui.markdown("notes", notes, { .width = CUI_PX(560) });
+  ui.markdown("notes", notes, width: CUI_PX(560));
 }
 
 static void scene_code_editor(Ui ui) {
   cui_code_editor_result result = ui.code_editor(
-    "editor", source, { .lang = "c", .height = 300,
-                        .placeholder = "Write some C" });
+    "editor", source, lang: "c", height: 300,
+                      placeholder: "Write some C");
   $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER }) {
     ui.textf("Ln %d, Col %d", result.line, result.column);
     ui.textf("%d lines", result.line_count);
-    ui.text("Spaces: 4", { .size = 12.5f, .color = CUI_COLOR_TEXT_MUTED });
+    ui.text("Spaces: 4", size: 12.5f, color: CUI_COLOR_TEXT_MUTED);
   }
 }
 
@@ -151,13 +151,13 @@ static void scene_diff_view(Ui ui) {
     "    fclose(f);\n"
     "    return loaded;\n"
     "}\n";
-  ui.segmented("mode", %("Split" "Inline"), mode, { .size = CUI_SIZE_SM });
+  ui.segmented("mode", %("Split" "Inline"), mode, size: CUI_SIZE_SM);
   // The options take the selected change as an `int *`.
   cui_diff_result result = ui.diff_view(
     "diff", before, after,
-    { .mode = mode ? CUI_DIFF_INLINE : CUI_DIFF_SPLIT, .current = &change,
-      .language = "c", .old_title = "config.c (main)",
-      .new_title = "config.c", .split_min_width = 520 });
+    mode: mode ? CUI_DIFF_INLINE : CUI_DIFF_SPLIT, current: &change,
+    language: "c", old_title: "config.c (main)",
+    new_title: "config.c", split_min_width: 520);
   ui.textf("Change %d of %d", result.current + 1, result.changes);
 }
 
@@ -174,29 +174,29 @@ static void scene_node_editor(Ui ui) {
   if (!ui.node_editor_begin("material", view, { .height = CUI_FILL }))
     return;
   ui.node_begin(0, x[0], y[0], "UV", { .width = 110 });
-  ui.node_output(PIN_UV, "UV", { .type = TYPE_VECTOR });
+  ui.node_output(PIN_UV, "UV", type: TYPE_VECTOR);
   ui.node_end();
   ui.node_begin(1, x[1], y[1], "Brick texture", { .width = 160 });
-  ui.node_input(PIN_TEX_VEC, "Vector", { .type = TYPE_VECTOR });
-  ui.node_output(PIN_TEX_COLOR, "Color", { .type = TYPE_COLOR });
+  ui.node_input(PIN_TEX_VEC, "Vector", type: TYPE_VECTOR);
+  ui.node_output(PIN_TEX_COLOR, "Color", type: TYPE_COLOR);
   ui.node_end();
   ui.node_begin(2, x[2], y[2], "Mix", { .width = 160 });
-  ui.node_input(PIN_MIX_A, "Color A", { .type = TYPE_COLOR });
-  ui.node_input(PIN_MIX_B, "Color B", { .type = TYPE_COLOR });
+  ui.node_input(PIN_MIX_A, "Color A", type: TYPE_COLOR);
+  ui.node_input(PIN_MIX_B, "Color B", type: TYPE_COLOR);
   // An input without a link shows a control for its value.
-  if (!ui.node_input(PIN_MIX_FAC, "Factor", { .type = TYPE_FLOAT }))
-    $cui.node_content(ui) ui.slider("##factor", factor, 0, 1, {});
-  ui.node_output(PIN_MIX_OUT, "Color", { .type = TYPE_COLOR });
+  if (!ui.node_input(PIN_MIX_FAC, "Factor", type: TYPE_FLOAT))
+    $cui.node_content(ui) ui.slider("##factor", factor, 0, 1);
+  ui.node_output(PIN_MIX_OUT, "Color", type: TYPE_COLOR);
   ui.node_end();
   ui.node_begin(3, x[3], y[3], "Material output", { .width = 150 });
-  ui.node_input(PIN_OUT_BASE, "Base color", { .type = TYPE_COLOR });
-  ui.node_input(PIN_OUT_ROUGH, "Roughness", { .type = TYPE_FLOAT });
+  ui.node_input(PIN_OUT_BASE, "Base color", type: TYPE_COLOR);
+  ui.node_input(PIN_OUT_ROUGH, "Roughness", type: TYPE_FLOAT);
   ui.node_end();
   ui.node_begin(4, x[4], y[4], "Roughness", { .width = 160 });
   $cui.node_content(ui)
     ui.slider("Value", roughness, 0, 1,
-              { .show_value = true, .format = "%.2f" });
-  ui.node_output(PIN_ROUGH, "Value", { .type = TYPE_FLOAT });
+              show_value: true, format: "%.2f");
+  ui.node_output(PIN_ROUGH, "Value", type: TYPE_FLOAT);
   ui.node_end();
   ui.node_link(1, PIN_UV, PIN_TEX_VEC);
   ui.node_link(2, PIN_TEX_COLOR, PIN_MIX_A);
@@ -213,18 +213,18 @@ static void scene_dockspace(Ui ui) {
     $cui.dock_panel(ui, "Files", files, { .icon = CUI_ICON_FOLDER })
       $cui.column(ui, { .pad = 8, .gap = 6 }) {
         ui.label("examples");
-        ui.text("gallery.x", {});
-        ui.text("todo.x", {});
-        ui.text("gallery/tools.x", {});
+        ui.text("gallery.x");
+        ui.text("todo.x");
+        ui.text("gallery/tools.x");
       }
     $cui.dock_panel(ui, "main.x", editor, { .icon = CUI_ICON_CODE,
                                              .dirty = true })
-      ui.code_editor("dock-editor", source, { .lang = "c", .height = -1 });
+      ui.code_editor("dock-editor", source, lang: "c", height: -1);
     $cui.dock_panel(ui, "Outline", outline, { .icon = CUI_ICON_LIST })
-      ui.text("tile_cache_find", {});
+      ui.text("tile_cache_find");
     $cui.dock_panel(ui, "Terminal", shell, { .icon = CUI_ICON_TERMINAL })
-      ui.terminal("dock-term", term, { .height = -1, .size = 12,
-                                       .no_input = true });
+      ui.terminal("dock-term", term, height: -1, size: 12,
+                                     no_input: true);
   }
 }
 
@@ -235,14 +235,14 @@ static void scene_emoji_picker(Ui ui) {
        recent emoji as a `char *recent, size_t recent_cap` pair. CUI draws
        12 new emoji a frame, so a short grid fills in the gallery's three
        frames. */
-    String picked = ui.emoji_picker("emoji", { .tone = &tone,
-                                               .height = 106 });
+    String picked = ui.emoji_picker("emoji", tone: &tone,
+                                             height: 106);
     if (picked) status.set(%"$(status.text())$picked");
     $cui.column(ui, { .gap = 10, .width = CUI_FILL }) {
       ui.label("Status");
-      ui.input("note", status, { .width = CUI_FILL });
+      ui.input("note", status, width: CUI_FILL);
       ui.text("Pick an emoji to add it to the status.",
-              { .color = CUI_COLOR_TEXT_MUTED, .size = 12 });
+              color: CUI_COLOR_TEXT_MUTED, size: 12);
     }
   }
 }

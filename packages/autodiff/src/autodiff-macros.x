@@ -264,7 +264,7 @@ macro Unit $ad.form.function(Type $spec, Name $name, Param $params, Stmt @items)
 
 
 meta void ad_fail(String message, Var form) {
-  x2c_diagnostic_fail("ad: " + message, $(form.repr()));
+  x2c_diagnostic_fail("ad: " + message, form.repr());
 }
 
 meta int ad_mutates(Var form) {

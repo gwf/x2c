@@ -10,8 +10,13 @@
 - License: MIT, reproduced verbatim in `LICENSES/cui-1.3.1-MIT.txt`.
   `licenses.sha256` pins every file under `LICENSES/`.
 
-The macOS and Linux profiles compile the source without a patch. The
-browser profile applies one; see [Browser](#browser).
+Every profile applies `patches/table-row-state.patch`. It adds two
+functions to CUI, `cui_table_row_hovered` and `cui_table_row_pressed`,
+which return the hover and press `cui_table_row` already computes for the
+row's highlight; CUI returns only the click. The patch adds a field to
+CUI's private table record and changes nothing CUI draws. Because it adds
+the two declarations to `cui.h`, `headers.sha256` pins the patched header.
+The browser profile applies a second patch; see [Browser](#browser).
 
 ## Build profile
 
@@ -66,7 +71,7 @@ and builds on first use. SDL2 is under the zlib license, reproduced in
 `LICENSES/sdl2-zlib.txt`. The SDL2 version is the one the installed
 Emscripten ships; this package does not pin it.
 
-One patch, `patches/web-opengl-es.patch`, is applied to
+A second patch, `patches/web-opengl-es.patch`, is applied to
 `src/platform/cui_app_sdl2.c`. CUI's SDL2 layer asks for a desktop OpenGL
 3.3 core context, which a browser does not offer. Under `__EMSCRIPTEN__`
 the patch asks for OpenGL ES 3.0, which is WebGL 2. CUI's OpenGL renderer

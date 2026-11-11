@@ -18,7 +18,7 @@ Canonical byte strings and core text operations.
 | [`String.contains_digit`](#String.contains_digit) | Reports whether `str` contains a decimal digit. |
 | [`String.count`](#String.count) | Returns the non-overlapping count of `sub` in `str`. |
 | [`String.dedent`](#String.dedent) | Removes the indentation the text was written with. |
-| [`String.endswith`](#String.endswith) | Reports whether `str` ends with `suffix`. |
+| [`String.endswith`](#String.endswith) | Reports whether `str` ends with any supplied suffix. |
 | [`String.filter`](#String.filter) | Returns the bytes of `str` accepted by ordinary `Var` truthiness of `fn`. |
 | [`String.find`](#String.find) | Returns the index of the first occurrence of `sub` in `str`, or -1. |
 | [`String.find_all`](#String.find_all) | Returns each non-overlapping starting index at which `sub` occurs. |
@@ -43,7 +43,7 @@ Canonical byte strings and core text operations.
 | [`String.len`](#String.len) | Returns the byte length of `str`, excluding the terminating NUL. |
 | [`String.lines`](#String.lines) | Returns a lazy cursor over lines in `str`, with endings removed. |
 | [`String.lower`](#String.lower) | Returns `str` with every upper-case byte lowered. |
-| [`String.lstrip`](#String.lstrip) | Removes leading bytes found in the C string `negChars`. |
+| [`String.lstrip`](#String.lstrip) | Removes leading bytes found in the C string `chars`. |
 | [`String.map`](#String.map) | Returns `str` with `fn` applied to every byte. |
 | [`String.new`](#String.new) | Returns the canonical `String` holding the bytes of the C string `str`. |
 | [`String.pad_center`](#String.pad_center) | Pads both sides of `str` to the requested width. |
@@ -54,18 +54,18 @@ Canonical byte strings and core text operations.
 | [`String.remove_prefix`](#String.remove_prefix) | Removes `prefix` when `str` starts with it and returns a canonical `String`. |
 | [`String.remove_suffix`](#String.remove_suffix) | Removes `suffix` when `str` ends with it and returns a canonical `String`. |
 | [`String.repeat`](#String.repeat) | Returns a canonical `String` containing `count` copies of `str`. |
-| [`String.replace`](#String.replace) | Returns `str` with every occurrence of `old` replaced by `replacement`. |
+| [`String.replace`](#String.replace) | Returns `str` with occurrences of `old` replaced by `replacement`. |
 | [`String.replace_n`](#String.replace_n) | Replaces at most `max_replacements` non-overlapping occurrences of `old`. |
 | [`String.rfind`](#String.rfind) | Returns the index of the last occurrence of `sub` in `str`, or -1. |
 | [`String.rpartition`](#String.rpartition) | Splits `str` around its final occurrence of `sep`. |
-| [`String.rstrip`](#String.rstrip) | Removes trailing bytes found in the C string `negChars`. |
-| [`String.split`](#String.split) | Splits `str` on every occurrence of `sep` into a `List` of `String`s. |
+| [`String.rstrip`](#String.rstrip) | Removes trailing bytes found in the C string `chars`. |
+| [`String.split`](#String.split) | Splits `str` on `sep`, with an optional maximum number of splits. |
 | [`String.split_lines`](#String.split_lines) | Splits `str` into a `List` of lines. |
 | [`String.split_n`](#String.split_n) | Splits `str` at no more than `max_splits` separators. |
 | [`String.splits`](#String.splits) | Returns a lazy cursor over fields separated by `sep`. |
 | [`String.squeeze`](#String.squeeze) | Collapses adjacent runs of each byte listed in `chars`. |
-| [`String.startswith`](#String.startswith) | Reports whether `str` starts with `prefix`. |
-| [`String.strip`](#String.strip) | Returns `str` with leading and trailing bytes in `negChars` removed. |
+| [`String.startswith`](#String.startswith) | Reports whether `str` starts with any supplied prefix. |
+| [`String.strip`](#String.strip) | Returns `str` with leading and trailing bytes in `chars` removed. |
 | [`String.try_next`](#String.try_next) | Writes the next byte, advances `cursor`, and returns one. |
 | [`String.unescape`](#String.unescape) | Decodes C backslash escapes in `str` into a canonical `String`. |
 | [`String.upper`](#String.upper) | Returns `str` with every lower-case byte raised. |
@@ -227,12 +227,12 @@ Source: `lib/string/splitting.x`
 <a id="String.endswith"></a>
 #### String.endswith
 
-`meta native int String.endswith(String str, String suffix)`
+`meta native int String.endswith(String str, List @suffixes)`
 
-Reports whether `str` ends with `suffix`.
-An empty `suffix` is a suffix of every `String`. The comparison is
-bytewise, so this is a safe test for a file extension but not for a
-case-insensitive one; lower both sides first.
+Reports whether `str` ends with any supplied suffix.
+No suffixes returns false. An empty suffix matches every String.
+Matching is bytewise and case-sensitive. Arguments and splices are
+evaluated once in order before matching.
 
 Source: `lib/string/search.x`
 
@@ -541,7 +541,7 @@ Source: `lib/string/storage.x`
 
 Returns a lazy cursor over lines in `str`, with endings removed.
 LF, CR, and CRLF end a line, with CRLF counted as one ending. The yielded
-fields agree with `str.split_lines(0)`, including empty interior lines and
+fields agree with `str.split_lines()`, including empty interior lines and
 the rule that a trailing ending does not add a final empty line.
 
 Each yielded field is a canonical `String`. Distinct fields remain resident
@@ -573,13 +573,14 @@ Source: `lib/string/mapping.x`
 <a id="String.lstrip"></a>
 #### String.lstrip
 
-`String String.lstrip(String str, char *negChars)`
+`String String.lstrip(String str, List @chars)`
 
-Removes leading bytes found in the C string `negChars`.
-Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input
-returns NULL and an unchanged input is returned as-is.
+Removes leading bytes found in the C string `chars`.
+Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+canonical; null input returns NULL. An unchanged input is returned as-is.
 
-**Raises:** `<alloc-fail>` while constructing a changed result.
+**Raises:** `<bad-arity>` for more than one charset, or `<alloc-fail>`
+while constructing a changed result.
 
 Source: `lib/string/splitting.x`
 
@@ -736,9 +737,10 @@ Source: `lib/string/building.x`
 <a id="String.replace"></a>
 #### String.replace
 
-`meta native String String.replace(String str, String old, String replacement)`
+`meta native String String.replace(String str, String old, String replacement, List @limit)`
 
-Returns `str` with every occurrence of `old` replaced by `replacement`.
+Returns `str` with occurrences of `old` replaced by `replacement`.
+An optional limit bounds the replacements; omitted or negative means all.
 Scanning runs left to right and matches do not overlap: each one
 resumes after the text it consumed, so replacing `aa` in `aaaa` performs
 two replacements, not three. Replaced text is never rescanned, so a
@@ -749,7 +751,8 @@ When there is nothing to replace, `str` itself is returned, so the
 result may be the same pointer as the input. An empty or null `old`
 returns `str`.
 
-**Raises:** the same causes as `String.replace_n`.
+**Raises:** `<bad-arity>` for more than one limit, conversion failures,
+or the same causes as `String.replace_n`.
 
 Source: `lib/string/editing.x`
 
@@ -801,22 +804,24 @@ Source: `lib/string/splitting.x`
 <a id="String.rstrip"></a>
 #### String.rstrip
 
-`String String.rstrip(String str, char *negChars)`
+`String String.rstrip(String str, List @chars)`
 
-Removes trailing bytes found in the C string `negChars`.
-Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input
-returns NULL and an unchanged input is returned as-is.
+Removes trailing bytes found in the C string `chars`.
+Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+canonical; null input returns NULL. An unchanged input is returned as-is.
 
-**Raises:** `<alloc-fail>` while constructing a changed result.
+**Raises:** `<bad-arity>` for more than one charset, or `<alloc-fail>`
+while constructing a changed result.
 
 Source: `lib/string/splitting.x`
 
 <a id="String.split"></a>
 #### String.split
 
-`meta native List String.split(String str, String sep)`
+`meta native List String.split(String str, String sep, List @limit)`
 
-Splits `str` on every occurrence of `sep` into a `List` of `String`s.
+Splits `str` on `sep`, with an optional maximum number of splits.
+Omitting the limit or passing a negative value splits every occurrence.
 Separators are not coalesced, so adjacent ones produce empty fields and
 the result holds one more element than the number of separators found.
 An empty field is the empty `String`, the null pointer. An empty or null
@@ -829,25 +834,28 @@ printf("%s\n", "a:b:c".split(":").repr());
 printf("%s\n", "a::b".split(":").repr());
 ```
 
-**Raises:** the same causes as `String.split_n`.
+**Raises:** `<bad-arity>` for more than one limit, conversion failures,
+or the same causes as `String.split_n`.
 
 Source: `lib/string/cursors.x`
 
 <a id="String.split_lines"></a>
 #### String.split_lines
 
-`meta native List String.split_lines(String str, int keep_ends)`
+`meta native List String.split_lines(String str, List @options)`
 
 Splits `str` into a `List` of lines.
-LF, CR, and CRLF all end a line, and CRLF counts as one ending. A
-nonzero `keep_ends` leaves each line's ending attached to it. A trailing
+LF, CR, and CRLF all end a line, and CRLF counts as one ending. The
+optional `keep_ends` defaults to zero. A nonzero value keeps each ending.
+A trailing
 line ending does not produce a final empty line, so text that ends in a
 newline yields as many lines as it has endings. A null or empty `str`
 returns `nil`. The canonical fields and `List` remain live until their
 actual `String` and `List` pools are released.
 
-**Raises:** `<alloc-fail>` or `<size-limit>` while constructing fields or the
-result.
+**Raises:** `<bad-arity>` for more than one option, conversion failures,
+or `<alloc-fail>` or `<size-limit>` while constructing fields or
+the result.
 
 Source: `lib/string/cursors.x`
 
@@ -902,28 +910,29 @@ Source: `lib/string/mapping.x`
 <a id="String.startswith"></a>
 #### String.startswith
 
-`meta native int String.startswith(String str, String prefix)`
+`meta native int String.startswith(String str, List @prefixes)`
 
-Reports whether `str` starts with `prefix`.
-An empty `prefix` is a prefix of every `String`. `String.remove_prefix`
-performs the same test and returns the remainder, so there is rarely a
-reason to run both.
+Reports whether `str` starts with any supplied prefix.
+No prefixes returns false. An empty prefix matches every String.
+Arguments and splices are evaluated once in order before matching.
 
 Source: `lib/string/search.x`
 
 <a id="String.strip"></a>
 #### String.strip
 
-`String String.strip(String str, char *negChars)`
+`String String.strip(String str, List @chars)`
 
-Returns `str` with leading and trailing bytes in `negChars` removed.
-`negChars` is a NUL-terminated C string listing the bytes to remove, not
+Returns `str` with leading and trailing bytes in `chars` removed.
+`chars` is a NUL-terminated C string listing the bytes to remove, not
 a substring and not a pattern; order and repetition in it are irrelevant.
-Passing NULL uses the default whitespace set " \t\n\v\f\r". Trimming
+Omitting `chars` or passing NULL uses the whitespace set " \t\n\v\f\r".
+An empty String selects no bytes, including a typed String NULL. Trimming
 stops at each end on the first byte not in the set, and `str` itself is
 returned when nothing is trimmed.
 
-**Raises:** `<alloc-fail>` while constructing the result. A `String` made
+**Raises:** `<bad-arity>` for more than one charset, or `<alloc-fail>`
+while constructing the result. A `String` made
 entirely of removable bytes trims to NULL, the empty `String`, without
 raising.
 

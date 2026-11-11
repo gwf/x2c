@@ -55,7 +55,7 @@ String exec = "ln -s \"$1\" \"$2.$$\" && exec \"$3\" translate "
 Path dangling = build.join("missing/probe.c");
 Path sibling = partial.join("probe.c.tmp");
 Job failed = %(sh -c $exec sh $dangling $sibling $x2c $partial $probe).job()
-  .options({stderr: <capture>});
+  .options(stderr: <capture>);
 if (!failed.status()) _fail("failed output write reported success");
 if (!failed.errors().contains("failed to write generated file"))
   _fail("failed output write did not report its cause");
@@ -74,7 +74,7 @@ if (_has_temporary("partial"))
 Path blocked = build.join("blocked");
 blocked.join("probe.xi").make_dirs();
 Job renamed = %($x2c translate --out-dir $blocked $probe).job()
-  .options({stderr: <capture>});
+  .options(stderr: <capture>);
 if (!renamed.status()) _fail("blocked interface write reported success");
 if (!renamed.errors().contains("failed to write generated file"))
   _fail("blocked interface write did not report its cause");

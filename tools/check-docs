@@ -367,7 +367,7 @@ static void _check_ledger_placement(void):
 
 static Job _generator(String script) =>
   %($(root.join("builds/0/x2c")) script $script --check).job()
-    .options({dir: root, stderr: <capture>}).start()
+    .options(dir: root, stderr: <capture>).start()
 
 static void _check_generator(Job job, String what):
   if !job.status(): return

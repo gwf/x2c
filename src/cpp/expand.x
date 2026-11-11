@@ -11,24 +11,24 @@ static macro Stmt $fail.cpp_use_unterminated(
   Expr $c, Expr $site, Expr $name, Expr $note) =>
   $c.report_error(
     <macro>, %"unterminated use of macro '$($name)'", $site,
-    %("expected ')' before the end of the file" $($note)));
+    "expected ')' before the end of the file", $note);
 
 static macro Stmt $fail.cpp_use_arity(
   Expr $c, Expr $site, Expr $name, Expr $expected, Expr $given,
   Expr $note) =>
   $c.report_error(
     <macro>, %"macro '$($name)' takes $($expected) arguments", $site,
-    %("given: $($given)" $($note)));
+    %"given: $($given)", $note);
 
 static macro Stmt $fail.cpp_paste_invalid(
   Expr $c, Expr $site, Expr $left, Expr $right, Expr $note) =>
   $c.report_error(
     <macro>, %"pasting '$($left)' and '$($right)' does not give one token",
-    $site, %($($note)));
+    $site, $note);
 
 static macro Stmt $fail.cpp_paste_edge(Expr $c, Expr $site, Expr $note) =>
   $c.report_error(
-    <macro>, "'##' needs a token on each side", $site, %($($note)));
+    <macro>, "'##' needs a token on each side", $site, $note);
 
 /* One pass over a scanned stream. `in` is the scanned stream and `out` the
    stream the parser reads, NULL until the first expansion. `site` is the

@@ -22,8 +22,8 @@ static int kv_n = 4;
 
 static void devtools_kv(Ui ui) {
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 680 }) {
-    ui.text("Headers", { .font = CUI_FONT_MEDIUM });
-    ui.kv_editor("headers", kv_pairs, kv_n, $cui.count(kv_pairs), {});
+    ui.text("Headers", font: CUI_FONT_MEDIUM);
+    ui.kv_editor("headers", kv_pairs, kv_n, $cui.count(kv_pairs));
   }
 }
 
@@ -50,7 +50,7 @@ static const cui_diagnostic pbm_diags[] = {
 static void devtools_problems(Ui ui) {
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 760 })
     ui.problems("problems", pbm_diags, $cui.count(pbm_diags),
-                { .height = 300 });
+                height: 300);
 }
 
 static int pl_sel = 3;
@@ -70,7 +70,7 @@ static void devtools_pipeline(Ui ui) {
   };
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 920 })
     ui.pipeline("run", %("Build" "Test" "Package" "Deploy"), jobs,
-                $cui.count(jobs), { .selected = &pl_sel });
+                $cui.count(jobs), selected: &pl_sel);
 }
 
 static const char *const qb_status[] = { "Open", "In progress", "Closed" };
@@ -89,19 +89,19 @@ static int qb_n = 5;
 static void devtools_query(Ui ui) {
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 720 }) {
     ui.query_builder("filter", qb_fields, $cui.count(qb_fields), qb_nodes,
-                     qb_n, $cui.count(qb_nodes), {});
+                     qb_n, $cui.count(qb_nodes));
     // CUI writes the query as a sentence into a buffer; it has no method.
     char text[256];
     cui_query_text(qb_fields, $cui.count(qb_fields), qb_nodes, qb_n, text,
                    sizeof text);
-    ui.text(text, { .size = 12, .color = CUI_COLOR_TEXT_MUTED });
+    ui.text(text, size: 12, color: CUI_COLOR_TEXT_MUTED);
   }
 }
 
 static void devtools_schedule(Ui ui) {
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 560 })
-    ui.schedule_picker("backup", sc_cron, { .now = 1794211200, .utc = true,
-                                            .next_count = 3 });
+    ui.schedule_picker("backup", sc_cron, now: 1794211200, utc: true,
+                                          next_count: 3);
 }
 
 static int km_mods = CUI_MOD_PRIMARY;
@@ -136,9 +136,9 @@ static void devtools_keymap(Ui ui) {
   static const char *cats_en[] = { "File", "Navigate", "Edit",
                                    "Run and debug" };
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 900 })
-    ui.keymap("keys", binds, $cui.count(binds), {
-      .categories = cats_en, .category_count = $cui.count(cats_en),
-      .mods = &km_mods });
+    ui.keymap("keys", binds, $cui.count(binds),
+      categories: cats_en, category_count: $cui.count(cats_en),
+      mods: &km_mods);
 }
 
 static const cui_commit cg_commits[] = {
@@ -168,7 +168,7 @@ static int cg_sel = 1;
 static void devtools_commits(Ui ui) {
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 920 })
     ui.commit_graph("history", cg_commits, $cui.count(cg_commits),
-                    { .selected = &cg_sel, .height = 320 });
+                    selected: &cg_sel, height: 320);
 }
 
 static const cui_graph_node gv_nodes[] = {
@@ -191,8 +191,8 @@ static int gv_sel = 1;
 static void devtools_graph(Ui ui) {
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 1000 })
     ui.graph_view("deps", gv_nodes, $cui.count(gv_nodes), gv_edges,
-                  $cui.count(gv_edges), { .selected = &gv_sel,
-                                          .height = 340 });
+                  $cui.count(gv_edges), selected: &gv_sel,
+                                        height: 340);
 }
 
 static const cui_net_request wf_reqs[] = {
@@ -221,9 +221,9 @@ static int wf_sel = 2;
 
 static void devtools_waterfall(Ui ui) {
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 1000 })
-    ui.waterfall("net", wf_reqs, $cui.count(wf_reqs), {
-      .selected = &wf_sel, .height = 340, .dom_loaded = 0.395,
-      .loaded = 0.68 });
+    ui.waterfall("net", wf_reqs, $cui.count(wf_reqs),
+      selected: &wf_sel, height: 340, dom_loaded: 0.395,
+      loaded: 0.68);
 }
 
 static cui_trace_track tr_tracks[] = {
@@ -279,9 +279,9 @@ static void devtools_trace(Ui ui) {
         tr_sel = i;
   $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 1000 })
     ui.trace_view("trace", tr_tracks, $cui.count(tr_tracks), tr_spans, tr_n,
-                  tr_view, tr_sel, {
-                    .markers = tr_marks,
-                    .marker_count = $cui.count(tr_marks), .height = 320 });
+                  tr_view, tr_sel,
+                    markers: tr_marks,
+                    marker_count: $cui.count(tr_marks), height: 320);
 }
 
 void page_devtools(Ui ui, Gallery g) {

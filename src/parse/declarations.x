@@ -46,6 +46,9 @@ List Compiler.parse_simple_declaration(Compiler c) => _declaration_group(c, 0);
     delimiter remains current; flat destructuring may omit its initializer.
 */
 List Compiler.parse_declaration_argument(Compiler c) {
+  // In a template, a Decl hole forwards its captured declaration.
+  List slot = c.try_parse_macro_slot(<decl>);
+  if (slot) return slot;
   if (c.test(<(>)) {
     Array declarations = [];
     do declarations.push(c.parse_declaration_argument()); while (c.test(<,>));

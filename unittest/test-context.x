@@ -223,7 +223,7 @@ static void context_exports_owned_storage(void) {
   block.push(&number);
   Bytes bytes = Bytes.new(sizeof(char));
   bytes = bytes.append("abc", 3);
-  Buffer buffer = Buffer.new(0);
+  Buffer buffer = Buffer.new();
   buffer.write("buffer text");
   Array values = [];
   values.push(block);

@@ -44,6 +44,7 @@ struct UnzipShared{
 #include "array/array.h"
 #include "block.h"
 #include "func/func.h"
+#include "meta.h"
 #include <limits.h>
 #include <stdlib.h>
 #define UNZIP_COMPACT_THRESHOLD 256
@@ -54,6 +55,8 @@ Var Iter_next(Iter iter);
 Iter Iter_iter(Iter x, Iter dest);
 
 Iter range(int start, int end, int step, Iter iter);
+
+List _range_arguments(List arguments);
 
 Iter Iter_map(Iter iter, Func func, Iter dest);
 

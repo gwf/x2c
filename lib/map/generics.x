@@ -397,14 +397,14 @@ macro Unit $map.typed.observation(Type $map) {
 
   /** Returns the typed-Map display String. */
   String $map.str($map map) {
-    Buffer out = Buffer.new(0);
+    Buffer out = Buffer.new();
     map.write_str(out);
     return out.str_free();
   }
 
   /** Returns the readable typed-Map representation. */
   String $map.repr($map map) {
-    Buffer out = Buffer.new(0);
+    Buffer out = Buffer.new();
     map.write_repr(out);
     return out.str_free();
   }

@@ -1,0 +1,20 @@
+toolbar
+  [a]
+10
+panel
+  [b]
+10
+outer
+  inner
+    outer
+      inner
+        deep
+a
+  b
+    leaf
+s1
+  s2
+    a
+      b
+        leaf
+3000 300

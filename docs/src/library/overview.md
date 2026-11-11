@@ -54,7 +54,7 @@ For code points, see [Encode text and parse URLs](#encode-text-and-parse-urls).
 Use [Buffer](modules/buffer.md) for incremental text:
 
 ```x2c
-Buffer output = auto Buffer.new(0);
+Buffer output = auto Buffer.new();
 output.write("count=");
 output.printf("%d", 4);
 String text = output;

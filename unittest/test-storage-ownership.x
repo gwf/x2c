@@ -311,7 +311,7 @@ static void _storage_export_order(int child_first) {
     Block block = Block.new(sizeof(int));
     int number = 37;
     block.push(&number);
-    Buffer buffer = Buffer.new(0);
+    Buffer buffer = Buffer.new();
     buffer.write("ordered buffer");
     ContextProbe probe = xmalloc(sizeof(struct ContextProbe));
     *probe = (struct ContextProbe) {.value = text};

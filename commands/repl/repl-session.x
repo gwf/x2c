@@ -169,8 +169,8 @@ ReplCompletion ReplSession.complete(
     c.mark_completion(marked.len() - marker.len());
     _x2c_complete_here(
       c, <submit>,
-      _x2c_block_keywords().filter(%!(word) =>
-        !(word in %("case" "break" "continue" "goto" "default"))));
+      @(_x2c_block_keywords().filter(%!(word) =>
+        !(word in %("case" "break" "continue" "goto" "default")))));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {

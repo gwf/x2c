@@ -106,16 +106,16 @@ void page_grid(Ui ui, Gallery g) {
       person *p = &people[order_ix[r]];
       ui.data_grid_row(r);
       ui.data_grid_cell();
-      ui.avatar(p.name.text(), { .size = 24 });
+      ui.avatar(p.name.text(), size: 24);
       ui.data_grid_edit(p.name);
       ui.data_grid_cell_text(p.email);
       ui.data_grid_cell();
-      ui.badge(p.team, {});
+      ui.badge(p.team);
       ui.data_grid_cell_text(%"$(p.commits)");
       ui.data_grid_cell();
-      ui.progress(p.score / 100, { .width = CUI_PX(70), .height = 5 });
-      ui.text(String.format("%.1f", (double) p.score), {
-        .tabular = true, .size = 13, .color = CUI_COLOR_TEXT_SECONDARY });
+      ui.progress(p.score / 100, width: CUI_PX(70), height: 5);
+      ui.text(String.format("%.1f", (double) p.score),
+        tabular: true, size: 13, color: CUI_COLOR_TEXT_SECONDARY);
     }
   }
   ui.muted(n_sel ? "Rows selected. Press Esc to clear."

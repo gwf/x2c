@@ -104,7 +104,7 @@ static String _program_slice(Compiler c, List span) {
 }
 
 static String _program_declaration(Compiler c, Type type, String name) =>
-  _program_text(c, type.declaration_ast($(name))).strip(NULL);
+  _program_text(c, type.declaration_ast($(name))).strip();
 
 static int _program_private(Compiler c, String name, Type type) =>
   type.is_static() || $(name) in c.sym.file_statics() ||
@@ -212,7 +212,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       List function = functions[name];
       String declaration = function
         ? _program_text(c, %(declare $(function.cadr())
-                                  (bindings $(function.caddr())))).strip(NULL)
+                                  (bindings $(function.caddr())))).strip()
         : _program_declaration(c, type, name);
       _program_symbol(b, c, path, name, type, row, declaration,
                       _program_slice(c, span), source_line);
@@ -244,7 +244,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
         int line = 1;
         (void) _program_origin(c, span, line);
         String declaration = type.is_function() || type.is_typedef()
-          ? _program_text(c, node).strip(NULL)
+          ? _program_text(c, node).strip()
           : _program_declaration(c, type, name);
         _program_symbol(b, c, path, name, type, node, declaration,
                         type.is_function() ? NULL : _program_slice(c, span), line);
@@ -329,7 +329,7 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
 
 /* Native C declarations retain their authored aggregate attributes. */
 static String _program_c_header(Compiler c, List ast) {
-  Buffer text = auto Buffer.new(0);
+  Buffer text = auto Buffer.new();
   text.write($dedent(%"
     #pragma once
     #include \"x2c.h\"
@@ -562,9 +562,7 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
     String package = Compiler.package_directory(frontend.request.package_roots(), file);
     if (Path.is_x2c_source(file) &&
         !(package && Compiler.is_package_source(package, file)) &&
-        !(home && (file.startswith(%"$home/lib/") ||
-                   file.startswith(%"$home/src/") ||
-                   file.startswith(%"$home/etc/"))) && !(file in b.seen))
+        !(home && file.startswith(%"$home/lib/", %"$home/src/", %"$home/etc/")) && !(file in b.seen))
       b.roots.push(unit.context.export(file));
   }
   List macros = native ? c.command_macros
@@ -768,7 +766,7 @@ static String _program_header(ProgramBuild &b) {
   ReplProgram program = b.program;
   String source = %"$(program.directory)/declarations.c";
   String expanded = %"$(program.directory)/declarations.i";
-  Buffer text = auto Buffer.new(0);
+  Buffer text = auto Buffer.new();
   text.write($dedent(%"
     #include \"x2c.h\"
     #include \"meta.h\"
@@ -840,7 +838,7 @@ static void _program_native_dependencies(ReplProgram program, CliRequest request
    linker forwarding options. Static archives are baked into the artifact. */
 static void _program_link_dependencies(ReplProgram program, String text) {
   foreach (String line, text.split("\n")) {
-    String file = line.strip(NULL);
+    String file = line.strip();
     if (!(file.endswith(".dylib") || ".so" in Path.basename(file) ||
           ".framework/" in file) || !Path.is_file(file)) continue;
     file = Path.resolved_absolute(file);
@@ -932,10 +930,9 @@ ReplProgram repl_program_build_selected(
   foreach (String root, roots.append(derived)) {
     String path = Path.resolved_absolute(root);
     if (!Path.is_file(path)) { failure = %"cannot read input file: $root"; return NULL; }
-    if (path.endswith(".o") || path.endswith(".a") || path.endswith(".so") ||
-        path.endswith(".dylib")) {
+    if (path.endswith(".o", ".a", ".so", ".dylib")) {
       native.push(path);
-      if (path.endswith(".so") || path.endswith(".dylib"))
+      if (path.endswith(".so", ".dylib"))
         program.dependencies[path] = Path.content_identity(path);
     }
     else build.roots.push(path);

@@ -12,6 +12,7 @@ Expression syntax and its resolution.
 
 | Function | Summary |
 | --- | --- |
+| [`Compiler.at_map_entry`](#Compiler.at_map_entry) | Reports whether a `key: value` call argument begins at the cursor. |
 | [`Compiler.check_explicit_converter`](#Compiler.check_explicit_converter) | Reports `parsed` when it is the explicit converter call resolved last and `target` converts its receiver on its own: either side is Var, the types share one C type, or the receiver declares a converter to the target. |
 | [`Compiler.complete_iter_chain`](#Compiler.complete_iter_chain) | Completes an eligible resolved `Iter` call chain for immediate consumption. |
 | [`Compiler.convert_expression`](#Compiler.convert_expression) | Adds operations to convert a resolved expression AST to `target`. |
@@ -21,6 +22,7 @@ Expression syntax and its resolution.
 | [`Compiler.is_operator_temporary`](#Compiler.is_operator_temporary) | Reports whether an operator result needs discard when consumed. |
 | [`Compiler.needs_resolution`](#Compiler.needs_resolution) | True when syntax still needs ordinary binding or macro substitution. |
 | [`Compiler.parse_assignment`](#Compiler.parse_assignment) | Parses one right-associative assignment expression. |
+| [`Compiler.parse_call`](#Compiler.parse_call) | Parses the argument list at the cursor as a call of `callee`. |
 | [`Compiler.parse_call_entry`](#Compiler.parse_call_entry) | Parses a `key: value` argument for a Map rest parameter as `(expr ("Map") (map-entry KEY VALUE))`, or returns NULL without consuming an ordinary argument. |
 | [`Compiler.parse_call_splice`](#Compiler.parse_call_splice) | Parses an explicit List splice argument, or returns NULL without consuming an ordinary argument. |
 | [`Compiler.parse_conditional`](#Compiler.parse_conditional) | Parses a binary expression and its optional conditional tail. |
@@ -40,6 +42,15 @@ Expression syntax and its resolution.
 | [`Compiler.var_tag_expression`](#Compiler.var_tag_expression) | Builds an exact tag expression, deferring macro type slots until binding. |
 
 ### `Compiler`
+
+<a id="Compiler.at_map_entry"></a>
+#### Compiler.at_map_entry
+
+`int Compiler.at_map_entry(Compiler c)`
+
+Reports whether a `key: value` call argument begins at the cursor.
+
+Source: `src/expressions/syntax.x`
 
 <a id="Compiler.check_explicit_converter"></a>
 #### Compiler.check_explicit_converter
@@ -148,6 +159,15 @@ Source: `src/expressions/resolution.x`
 Parses one right-associative assignment expression.
 A parenthesized identifier list on the left becomes a destructuring
 assignment only for `=`. `c.token` stops after the expression.
+
+Source: `src/expressions/syntax.x`
+
+<a id="Compiler.parse_call"></a>
+#### Compiler.parse_call
+
+`List Compiler.parse_call(Compiler c, List callee)`
+
+Parses the argument list at the cursor as a call of `callee`.
 
 Source: `src/expressions/syntax.x`
 

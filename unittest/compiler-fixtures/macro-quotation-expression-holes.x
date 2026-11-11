@@ -54,7 +54,7 @@ meta static List ordered(List a, List b) {
   Array log = [];
   List built = $!( $(counted(log, a)) - $(counted(log, b)) );
   if (log.len() != 2 || log[0] !== a || log[1] !== b)
-    x2c_diagnostic_fail("holes evaluated out of order", %());
+    x2c_diagnostic_fail("holes evaluated out of order");
   return built;
 }
 macro Expression $difference(Expr $a, Expr $b) => $ordered($a, $b);

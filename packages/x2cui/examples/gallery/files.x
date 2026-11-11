@@ -84,25 +84,25 @@ void page_files(Ui ui, Gallery g) {
   static bool open_dlg, save_dlg;
   section(ui, "File browser", "Double-click to open; type to jump; "
                               "Backspace goes up.");
-  cui_file_browser_result r = ui.file_browser("files", folder, {
-    .list = files_list, .height = CUI_PX(380) });
+  cui_file_browser_result r = ui.file_browser("files", folder,
+    list: files_list, height: CUI_PX(380));
   if (r.picked) chosen.set(r.picked);
   $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER, .wrap = true }) {
-    if (ui.button("Open\xe2\x80\xa6", { .icon = CUI_ICON_FOLDER_OPEN }))
+    if (ui.button("Open\xe2\x80\xa6", icon: CUI_ICON_FOLDER_OPEN))
       open_dlg = true;
-    if (ui.button("Save as\xe2\x80\xa6", { .icon = CUI_ICON_DOWNLOAD }))
+    if (ui.button("Save as\xe2\x80\xa6", icon: CUI_ICON_DOWNLOAD))
       save_dlg = true;
     if (!chosen.empty()) ui.muted(chosen.text());
   }
-  ui.file_picker("open", open_dlg, chosen, { .list = files_list });
-  ui.file_picker("save", save_dlg, chosen, {
-    .list = files_list, .save = true, .name = "untitled.txt" });
+  ui.file_picker("open", open_dlg, chosen, list: files_list);
+  ui.file_picker("save", save_dlg, chosen,
+    list: files_list, save: true, name: "untitled.txt");
 
   // A small shell over the same folder.
   section(ui, "Terminal", "Colors, \\r progress, history on Up and Down, "
                           "Ctrl+C, Ctrl+L, drag to select.");
-  cui_terminal_result tr = ui.terminal("shell", term, {
-    .height = 300, .prompt = "> " });
+  cui_terminal_result tr = ui.terminal("shell", term,
+    height: 300, prompt: "> ");
   if (tr.command) run_command(tr.command);
-  if (tr.interrupt) ui.toast("Interrupted", {});
+  if (tr.interrupt) ui.toast("Interrupted");
 }

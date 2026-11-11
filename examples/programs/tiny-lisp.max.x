@@ -66,7 +66,7 @@ static Var _read(void) {
   /* Atom spellings are arbitrary-length Strings, including numeric text.
      Interning preserves each complete spelling and shares repeated names.
      str() interns the contents before auto frees the temporary Buffer. */
-  Buffer spelling = auto Buffer.new(0);
+  Buffer spelling = auto Buffer.new();
   do {
     spelling.write_char(lookahead);
     _next();

@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     if (open(":memory:", &db) || !db ||
         exec(db, "CREATE TABLE sample(value); INSERT INTO sample VALUES(42)",
              NULL, NULL, NULL) || close(db)) return 1;
-    Buffer encoded = auto Buffer.new(0);
+    Buffer encoded = auto Buffer.new();
     if (!encoded.write_datum(repl_program_snapshot(program), 1)) return 1;
     printf("SQLite snapshot: %zu bytes\n", encoded.len());
     puts("native SQLite wrapper header create/call/close passed");
@@ -154,7 +154,7 @@ int main(int argc, char **argv) {
     return 1;
   String header = Path.read_text(program.header);
   if ("#include" in header) return 1;
-  Buffer encoded = auto Buffer.new(0);
+  Buffer encoded = auto Buffer.new();
   if (!encoded.write_datum(repl_program_snapshot(program), 1)) return 1;
   printf("library snapshot: %zu bytes\n", encoded.len());
   unsigned cursor = 0;

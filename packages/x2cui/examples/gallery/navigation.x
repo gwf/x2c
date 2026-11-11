@@ -8,7 +8,7 @@ void page_navigation(Ui ui, Gallery g) {
   section(ui, "Tabs", "The indicator slides to the active tab.");
   $cui.card(ui, { .gap = 16 }) {
     List tabs = %("Overview" "Analytics" "Reports" "Settings");
-    ui.tabs("tabs", tabs, g.tab, {});
+    ui.tabs("tabs", tabs, g.tab);
     $cui.column(ui, { .gap = 6, .pad_y = 4 }) {
       String current = tabs[g.tab];
       ui.label(current);
@@ -18,7 +18,7 @@ void page_navigation(Ui ui, Gallery g) {
     static const char *tab_icons[] = { CUI_ICON_USER, CUI_ICON_LOCK,
                                        CUI_ICON_CREDIT_CARD };
     ui.tabs("tabs2", %("Account" "Password" "Billing"), g.tab2,
-            { .variant = CUI_TABS_PILL, .icons = tab_icons });
+            variant: CUI_TABS_PILL, icons: tab_icons);
   }
   section(ui, "Breadcrumb and pagination", NULL);
   $cui.card(ui, { .gap = 18 }) {
@@ -26,7 +26,7 @@ void page_navigation(Ui ui, Gallery g) {
     int c = ui.breadcrumb(crumbs);
     if (c >= 0) {
       String crumb = crumbs[c];
-      ui.toast(crumb, {});
+      ui.toast(crumb);
     }
     ui.pagination("pages", g.page_index, 12);
   }
@@ -34,12 +34,12 @@ void page_navigation(Ui ui, Gallery g) {
   $cui.card(ui, { .gap = 18 }) {
     ui.stepper(%("Account" "Workspace" "Invite team" "Done"), g.step);
     $cui.row(ui, { .gap = 8, .wrap = true }) {
-      if (ui.button("Back", { .disabled = g.step == 0 })) g.step--;
-      if (ui.button(g.step >= 3 ? "Finish" : "Next", {
-            .variant = CUI_BUTTON_PRIMARY,
-            .icon_right = CUI_ICON_ARROW_RIGHT })) {
+      if (ui.button("Back", disabled: g.step == 0)) g.step--;
+      if (ui.button(g.step >= 3 ? "Finish" : "Next",
+            variant: CUI_BUTTON_PRIMARY,
+            icon_right: CUI_ICON_ARROW_RIGHT)) {
         if (g.step < 3) g.step++;
-        else ui.toast("All set", { .tone = CUI_TONE_SUCCESS });
+        else ui.toast("All set", tone: CUI_TONE_SUCCESS);
       }
     }
   }

@@ -2,6 +2,7 @@
 
 #include "x2c.x"
 #include "meta.x"
+#include "x2cui-options.x"
 
 /*  x2cui-generate.x -- Ui methods built from CUI's C signatures
 
@@ -23,6 +24,9 @@
     Every other parameter passes unchanged. The table of rows is in
     x2cui.x. A function that takes an array of records or numbers has no
     row here, because its pointer is not one of these conventions.
+
+    A component that takes an option record, and each of CUI's block
+    components, also gets a method form; see "Method forms" below.
 */
 
 meta static int _pointer(List type) => type.len() > 1 && type[0] == <*>;
@@ -41,7 +45,16 @@ meta static String _method_name(String function) {
   return name.endswith("_ex") ? name[:name.len() - 3] : name;
 }
 
-/** Returns the `Ui` method that forwards to the C function `target`. */
+/* CUI names its option records `*_opts`, and its layout record `cui_box`. */
+meta static int _option_record(Type type) {
+  Var name = type.car();
+  return name is <string> &&
+         (((String) name).endswith("_opts") || name == "cui_box");
+}
+
+/** Returns the `Ui` method that forwards to the C function `target`, and
+    its method form when it has one.
+*/
 meta List cui_method(String function) {
   List target = x2c_ident(function);
   Type signature = Code.type(target);
@@ -103,13 +116,109 @@ meta List cui_method(String function) {
     }
   }
   List declared = params.list_free(), passed = args.list_free();
-  List method = x2c_ident(_method_name(function));
+  String name = _method_name(function);
+  List method = x2c_ident(name);
   List unit = _spelled(result, "(void)")
     ? $!Unit{ inline void Ui.$method(@declared) { $target(@passed); } }
     : $!Unit{ inline $result Ui.$method(@declared) =>
                 $target(@passed); };
-  return $(unit);
+  Type last = types[count - 1];
+  int options = count > 1 && _const_pointer(last) &&
+                _option_record(Type.element(last));
+  List form = _method_form(name, options);
+  return form ? %($unit $form) : $(unit);
 }
 
 /** Defines the `Ui` method for the CUI function `$target`. */
 macro Unit $cui.method(Name $target) { @cui_method($target) }
+
+/*  Method forms
+
+    A component whose last parameter is CUI's option record has a method
+    form that takes the options as `name: value` arguments:
+
+      ui.button("Add", variant: primary, icon: plus)
+      ui.row (gap: 8, align: center) { ... }
+
+    The form of a component is an Expression macro `$Ui.NAME`; the form of
+    a block component, whose C functions are `cui_NAME_begin` and
+    `cui_NAME_end`, is a decorator `$Ui.NAME`. Written in its own template,
+    `ui.NAME(...)` is the method the form wraps. Each form is one of the two
+    templates below, which takes its name from the method; its ordinary
+    arguments are those before the first `name: value`. A component's
+    form calls its method with the arguments `cui_arguments` returns, and
+    a block's form calls its begin method through `cui_begin`; both read
+    the method's parameter types and lower each value by its type; see
+    x2cui-options.x.
+*/
+
+/* CUI's own block macros, `cui_NAME(ui, ...) { ... }`, which run their
+   block between `cui_NAME_begin` and `cui_NAME_end`. Each has a block
+   form. Those that CUI writes with `CUI__SCOPE_IF` run the block only
+   while the begin call reports the block open. A table has its own form,
+   with a template of columns. */
+meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
+  "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
+  "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
+  "menu_bar" "toolbar" "status_bar" "virtual_list");
+meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
+  "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
+  "user_menu" "menu_bar_menu" "inspector" "tree");
+
+/** Returns the begin call of a block, `ui.NAME_begin(...)` with the
+    arguments `cui_arguments` returns, as a test that is true while the
+    block is open.
+*/
+meta List cui_begin(List ui, String block, List options, List @args) {
+  List call = cui_call(ui, %"$(block)_begin", options, @args);
+  return block in _openings ? call : $!( ($call, 1) );
+}
+
+/* The template of a component's form. */
+macro Unit $cui.widget(Name $method) {
+  macro Expression $Ui.$method(Expr $ui, Expr @args, Entry @options) =>
+    $ui.$method(@cui_arguments($ui, $method, $options, @args));
+}
+
+/* The template of a block's form. The receiver is evaluated once; the end
+   call is deferred, so it also runs when the block leaves early; a block
+   whose begin call reports whether it is open runs only while it is
+   open. */
+macro Unit $cui.block(Name $block, Name $end) {
+  macro Decorator $Ui.$block(
+    Stmt $body, Expr $ui, Expr @args, Entry @options) {
+    {
+      typeof($ui) ui = $ui;
+      if ($cui_begin(ui, $block, $options, @args)) {
+        defer ui.$end();
+        $body
+      }
+    }
+  }
+}
+
+/* A row and a column end as a box does. */
+meta static String _end_method(String block) =>
+  block == "row" || block == "column" ? "box_end" : %"$(block)_end";
+
+/* The method form of `method`, which takes an option record last when
+   `options` is set; NULL when it has none. */
+meta static List _method_form(String method, int options) {
+  String block = method.endswith("_begin") ? method[:method.len() - 6] : NULL;
+  if (block && (block in _scopes || block in _openings))
+    return Macro_apply($cui.block, %($block $(_end_method(block))));
+  return options && !block ? Macro_apply($cui.widget, %($method)) : NULL;
+}
+
+/** Returns the method form of `method`, a `Ui` method written in x2c
+    rather than generated, when it takes an option record last.
+*/
+meta List cui_form(String method) {
+  Type ui = $!Type{ Ui };
+  List types = Type.parameters(Type.resolve_member(ui, method, 1)[2]);
+  List form = _method_form(method, _option_record(types[types.len() - 1]));
+  return form ? $(form) : %();
+}
+
+/** Defines the method form of the `Ui` method `$method`. */
+macro Unit $cui.form(Name $method) { @cui_form($method) }

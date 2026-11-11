@@ -16,7 +16,7 @@ static macro Stmt $fail.generate_file_write(
     String reason = String.new(strerror((int) $failure.assoc(<"errno">)));
     $c.report_error(
       <emit>, "failed to write generated file",
-      $site, %("file: $($failure.assoc(<path>))" "reason: $reason"));
+      $site, %"file: $($failure.assoc(<path>))", %"reason: $reason");
   }
 }
 

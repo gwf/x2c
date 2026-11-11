@@ -293,8 +293,7 @@ Returns the conventional reverse converter spelling.
 A `Base.participant` reverse converter is declared under the participant's
 source spelling, and package mode rewrites that joined name as a whole, so
 the package prefix sits at the front of the derived binding instead of
-inside it. The split is keyed on a known package because a foreign
-header may spell `__` in a type name.
+inside it.
 
 Source: `src/protocol/registry.x`
 

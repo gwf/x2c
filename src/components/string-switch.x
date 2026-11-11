@@ -22,7 +22,7 @@
 macro Stmt $report.string_switch_case(Expr $site) =>
   x2c_diagnostic_error_at(
     $site, <xform>, "a case in a String switch takes a string literal",
-    %("compare computed values with an if chain or match"));
+    "compare computed values with an if chain or match");
 
 /* Whether `type` is the type of a C string literal. `lib/type.x` spells it
    `Type.is_char_pointer_like`, which a component cannot include; see
@@ -120,7 +120,7 @@ meta Code string_switch_lowering(Code node) {
     List numbered = _string_cases(body, indices, labels, NULL);
     Code helper = _string_switch_helper(type, labels.list_free());
     return Code.lowered(
-      %(switch $($!int{ $helper($selector) }) $numbered), NULL);
+      %(switch $($!int{ $helper($selector) }) $numbered));
   }
   return node;
 }

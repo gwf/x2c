@@ -14,7 +14,7 @@ List ReplSession.resolve(ReplSession session, String expression);
 
 static String _declaration(Compiler c, Type type, List binding) =>
   String.new(c.code_pretty_string(
-    c.emit($(type.declaration_ast(binding)), NULL), NULL)).strip(NULL);
+    c.emit($(type.declaration_ast(binding)), NULL), NULL)).strip();
 
 static String _type_text(Compiler c, Type type) {
   type = type.declared();
@@ -73,10 +73,10 @@ static String _named_declaration(
   match (syntax) {
     case %(function ?spec ?bound ?):
       return String.new(c.code_pretty_string(
-        c.emit(%((declare $spec (bindings $bound))), NULL), NULL)).strip(NULL);
+        c.emit(%((declare $spec (bindings $bound))), NULL), NULL)).strip();
     case %((!or declare typedef) *):
       return String.new(c.code_pretty_string(c.emit($(syntax), NULL), NULL))
-        .strip(NULL);
+        .strip();
   }
   return _declaration(c, type, $(name));
 }
@@ -135,7 +135,7 @@ String ReplSession.symbol_text(
   Map descriptions = auto _symbol_descriptions(session, all);
   Array names = auto [];
   foreach (String name in descriptions.keys()) names.push(name);
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   foreach (String name in names.sort()) {
     Map row = descriptions[name];
     if (!all && row["dependency"] is not void && row["dependency"].truth())
@@ -172,7 +172,7 @@ static Type _query_type(ReplSession session, String text) {
   foreach (Symbol tag in %<struct union enum>) {
     String prefix = tag.str() + " ";
     if (text.startswith(prefix)) {
-      Type type = $(tag, text.remove_prefix(prefix).strip(NULL));
+      Type type = $(tag, text.remove_prefix(prefix).strip());
       if (c.sym.field_order(type) ||
           c.sym.get(%(@type "enumerators"))) return type;
     }
@@ -308,7 +308,7 @@ static void _method_rows(Compiler c, Type type, Buffer out, Map shown) {
 String ReplSession.members(ReplSession session, String text) {
   Type type = _query_type(session, text);
   if (!type) return NULL;
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.printf("%s\n", _type_text(session.compiler, type));
   _field_rows(session.compiler, type, out);
   Map shown = auto {};
@@ -320,7 +320,7 @@ String ReplSession.members(ReplSession session, String text) {
 /** Describes a declaration or expression type without executing input. */
 String ReplSession.info(ReplSession session, String text) {
   Map description = _description(session, text);
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   if (description) {
     String declaration = description["declaration"], path = description["path"];
     String display = description["display"], name = description["name"];
@@ -361,7 +361,7 @@ String ReplSession.source(ReplSession session, String name) {
   Map row = _description(session, name);
   if (!row) return NULL;
   String body = row["body"], path = row["path"];
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.printf("%s", path ? path : "<unknown>");
   if (row["line"] is not void) out.printf(":%d", row["line"].int());
   out.newline();
