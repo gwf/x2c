@@ -9,12 +9,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import FeatureCarousel from "../components/FeatureCarousel.astro";
-import FeatureTable from "../components/FeatureTable.astro";
 import HeroTitle from "../components/HeroTitle.astro";
 import CopyButton from "../components/CopyButton.astro";
-import { articles, inSection, slides } from "../lib/examples";
+import { inSection } from "../lib/examples";
 import { inlineMarkdown } from "../lib/inline-markdown";
-import { Content as HomeCopy, frontmatter as home } from "../content/home.md";
+import HomeIntroduction from "../components/HomeIntroduction.astro";
+import { frontmatter as home } from "../content/home.md";
 import { Content as LoveCopy, frontmatter as love } from "../content/love.md";
 import {
   Content as PackagesCopy,
@@ -66,22 +66,8 @@ const [titleHtml, kickerHtml] = await Promise.all([
       <header class="hero-heading">
         <HeroTitle html={titleHtml} />
         <p set:html={kickerHtml} />
-        <nav class="hero-examples" aria-label="Featured examples">
-          <span>Try an example:</span>
-          {articles.map(({ frontmatter: example }) => (
-            <a href={local(`examples/${example.slug}/`)}
-              data-example={example.slug} data-surface="hero"
-              data-section={slides.find(slide =>
-                slide.frontmatter.slug === example.slide)!.frontmatter.section}
-              data-example-action="explore">
-              {example.navTitle}</a>
-          ))}
-        </nav>
       </header>
-      <FeatureTable intro={home.featureIntro} features={home.features} />
-      <div class="hero-prose">
-        <HomeCopy />
-      </div>
+      <HomeIntroduction />
     </section>
   </div>
 
