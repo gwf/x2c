@@ -841,18 +841,18 @@
     (declare (static "MatchCaptureSite") 
      (bindings 
       (bind (binding 109 "_x2c_gensym_macro_arms_0") 
-       ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+       ((dim (expr (int) (literal (int) "1"))))))) 
     (declare ("Var") 
      (bindings 
       (bind (binding 110 "_x2c_gensym_macro_patterns_0") 
-       ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+       ((dim (expr (int) (literal (int) "1"))))))) 
     (declare (static "ErrorCatchSite") 
      (bindings 
       (op = (bind (binding 111 "_x2c_gensym_macro_site_0") ()) 
        (expr () 
         (composite 
          (commas 
-          (expr ((dim (expr (macro-expr) ("1"))) static "MatchCaptureSite") 
+          (expr ((dim ("1")) static "MatchCaptureSite") 
            (ident (binding 109 "_x2c_gensym_macro_arms_0"))) 
           (expr (int) (literal (int) "-1")) (expr (int) (literal (int) "1")) 
           (expr (int) "ERROR_CATCH_PENDING") 
@@ -868,7 +868,7 @@
        (expr ("Var") 
         (op = (expr ("Var") 
                (index 
-                (expr ((dim (expr (macro-expr) ("1"))) "Var") 
+                (expr ((dim ("1")) "Var") 
                  (ident (binding 110 "_x2c_gensym_macro_patterns_0"))) 
                 (expr (int) (literal (int) "0")))) 
          (expr ("Var") 
@@ -894,7 +894,7 @@
           (expr (* static "ErrorCatchSite") 
            (op & (expr (static "ErrorCatchSite") 
                   (ident (binding 111 "_x2c_gensym_macro_site_0"))))) 
-          (expr ((dim (expr (macro-expr) ("1"))) "Var") 
+          (expr ((dim ("1")) "Var") 
            (ident (binding 110 "_x2c_gensym_macro_patterns_0"))))))))) 
     (stmnt 
      (expr (void) 
