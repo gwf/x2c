@@ -1653,7 +1653,29 @@ before the adoption.
 
 `@name` is a sequence hole. It captures zero or more arguments of one
 element kind, must be the final argument, and `@name` in the body is the
-splice point:
+splice point. One exception: a final `Entry @rows` hole may follow it. The
+sequence then takes the arguments before the first `key: value` row, and
+the `Entry` hole takes the rows:
+
+```x2c
+~#include "x2c.x"
+int scaled(int a, int b, Map @options) =>
+  (a + b) * options.getdefault(<scale>, 1).integer();
+
+macro Expression $scaled(Expr @args, Entry @options) =>
+  scaled(@args, @options);
+
+int main(void) {
+  printf("%d %d\n", $scaled(1, 2), $scaled(1, 2, scale: 10));
+  return 0;
+}
+```
+
+```text
+3 30
+```
+
+A sequence hole alone is the final argument:
 
 ```x2c
 static int sum(int a, int b) {
@@ -2430,6 +2452,8 @@ the original binding syntax.
 
 A template can call a `meta` function in a slot and pass it a sequence hole
 written with `$name`; the function receives the captured items as one `List`.
+Written `@name` for a `List @rest` parameter, the items are separate
+arguments, as `$count(@args)` passes each captured argument.
 Applying a macro value with one `List` of syntax as the last argument passes
 that List as the whole trailing sequence, so `outer(head, items)` and
 `outer(head, a, b)` build the same code. A `List` of numbers or Strings, such

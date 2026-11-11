@@ -6,7 +6,8 @@
 > `069ad6363`, with compiler fixtures and a book section. On 2026-11-11
 > Gary also directed "Make method forms work inside templates too. Fix
 > Entry @options too." and then "Fix the foreach and computed macro name
-> limits too."; all four are implemented on the same branch. Decision
+> limits too." and "Fix the computed parameter list limit too."; all five
+> are implemented on the same branch. Decision
 > 5 and the x2cui macros are package work on the x2cui branch.
 > The prototype that preceded the implementation is on the local branch
 > `gwf/scratch-x2cui-method-ui` on top of `x2cui` at `b393dd58c`.
@@ -185,10 +186,37 @@ Expression macros and a decorator.
 With this, x2cui's `$cui.named` decorator and `cui_named` meta function can
 be removed: each template can be named `$Ui.$method` directly. The
 per-arity templates (`$cui.widget0` to `$cui.widget8`, `$cui.block0` and
-the rest) do not exist only because of the name limit. Each one has a
-different parameter list, `Expr $a, Expr $b, ...` before `Entry @options`,
-and a template cannot compute a definition's parameter list. That is a
-separate limit and is not built here.
+the rest) did not exist only because of the name limit. Each one had a
+different parameter list, `Expr $a, Expr $b, ...` before `Entry @options`.
+
+### Any number of arguments before Entry rows
+
+Gary then directed "Fix the computed parameter list limit too." Computed
+parameter lists were not built. The arity templates existed because a
+sequence hole had to be the final parameter, so `Expr @args, Entry
+@options` was rejected with "sequence macro hole must be the final
+argument". That rule now has one exception: a final `Entry @rows` hole may
+follow a sequence hole. The sequence takes the arguments before the first
+`key: value` row, and the Entry hole takes the rows. Capture stops the
+sequence at the first row (`_argument_row` in `captures.x`, with the new
+`Compiler.at_map_entry`), and a template's method form splits its call
+values the same way (`_method_arguments`).
+
+x2cui forwards those arguments to `cui_call`, a `meta` function with a
+`List @args` rest parameter. A sequence hole passed to a meta call was one
+`List` (`$args`); written `@args`, it now splices its items into the rest
+parameter. With both changes, `$cui.widget0` to `$cui.widget8` can become
+one template, `macro Expression $Ui.$method(Expr $ui, Expr @args, Entry
+@options) => $cui_call($ui, $method, $options, @args);`, and the block
+templates one decorator template. Verified in `macro-sequence-entry-rows`
+with generated Expression macros and decorators of several arities, in
+source, in the explicit spelling, and in a template.
+
+This is smaller than computed parameter lists: it adds 51 lines and
+removes 12, needs no new hole kind, and keeps parameter names ordinary.
+A computed parameter list would need a spelling for computed hole names
+and for "all of them" in the body; the sequence hole already is that
+spelling.
 
 ### Package types
 
@@ -377,9 +405,10 @@ The prototype's compiler shortcuts are settled:
 
 What remains:
 
-- A template cannot compute a nested definition's parameter list, so a
-  generator needs one template for each arity. A `$private`-style fresh
-  name is not accepted as a name component.
+- A template cannot compute a nested definition's parameter list. A
+  sequence hole before the final Entry rows covers the arity case. A
+  `$private`-style fresh name is not accepted as a name component.
+- Only an `Entry` sequence may follow another sequence hole.
 
 - Method forms work in statement and expression positions only, not at file
   scope (prototype limit 7), and only with `.`.
@@ -416,7 +445,8 @@ What remains:
   `macro-method-form-templates`, `macro-method-form-mutual`,
   `macro-entry-forwarding`, and a hole receiver in `import-method-form`.
   Decl holes and computed names: `macro-decl-foreach` and
-  `macro-computed-name`.
+  `macro-computed-name`. Arguments before Entry rows:
+  `macro-sequence-entry-rows`.
 - The x2cui to-do `--shot` image stays byte-identical to the one drawn with
   `$cui.row`; it is, for every prototype commit.
 - `make stage-3`, `make verify-fixtures`, and `precommit`.
