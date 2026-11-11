@@ -638,6 +638,7 @@ Public functions:
 `Compiler.skip_macro_invocation`, `Compiler.macro_targets_unit`,
 `Compiler.try_parse_macro_target_at`, `Compiler.try_parse_macro_expression`,
 `Compiler.try_parse_method_macro`, `Compiler.parse_method_decorator`,
+`Compiler.method_decorator_target`, `Compiler.parse_unit_method_decorator`,
 `Compiler.mark_method_call`, `Compiler.bind_method_macro`,
 `Compiler.bind_method_decorator`, `Compiler.evaluate_macro_rows`,
 `Compiler.evaluate_macro_slot`, `Compiler.evaluate_meta_value`,
