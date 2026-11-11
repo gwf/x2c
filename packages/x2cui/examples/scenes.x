@@ -21,6 +21,8 @@
 #include "scenes/display.x"
 #include "scenes/media.x"
 #include "scenes/data.x"
+#include "scenes/viz.x"
+#include "scenes/devtools.x"
 #include "scenes/tools.x"
 #include "scenes/chrome.x"
 
@@ -39,6 +41,8 @@ static void add_families(void) {
   add_family(display_family());
   add_family(media_family());
   add_family(data_family());
+  add_family(viz_family());
+  add_family(devtools_family());
   add_family(tools_family());
   add_family(chrome_family());
 }
