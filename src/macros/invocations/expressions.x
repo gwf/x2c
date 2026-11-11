@@ -35,20 +35,22 @@ List Compiler.try_parse_macro_expression(Compiler c) {
 
     Raises: `<method-dec>` when `start` begins an expression statement, a
     target follows the arguments, and `$T.name` is a decorator or, in a
-    template, may be one where the template expands. The statement
-    continues with `parse_method_decorator`.
+    template other than `$T.name`'s own, may be one where the template
+    expands. The statement continues with `parse_method_decorator`.
 */
 List Compiler.try_parse_method_macro(
   Compiler c, List receiver, Token start, Token dot) {
-  List definition =
-    _method_macro(c, receiver, Token.skip_trivia(dot + 1).text);
+  String name = Token.skip_trivia(dot + 1).text;
+  Atom own = _own_definition(c);
+  List definition = _method_macro(c, receiver, name, own);
   int decorator = definition && definition.assoc(<kind>) == <decorator>;
   if (definition && !decorator) {
     c.method_receiver = _capture_source(c, receiver, start, dot);
     return c.resolve_expression(
       _expression_invocation(c, definition, start), start);
   }
-  if ((decorator || c.macro_holes) && start == c.meta_statement &&
+  int deferred = c.macro_holes && !_names_member(own, name);
+  if ((decorator || deferred) && start == c.meta_statement &&
       _target_follows(c)) {
     c.method_receiver = _capture_source(c, receiver, start, dot);
     c.method_decorator = definition;
@@ -74,13 +76,24 @@ List Compiler.parse_method_decorator(
   return %(method-decorator $call $(c.parse_governed(position)));
 }
 
+/** Marks a template's call `receiver.name(...)` written in the template of
+    a macro `$T.name` as `(expr () (method-call DEFINITION CALL))`, so that
+    where the template expands the call is `$T.name`'s method, not the
+    macro. Returns `call` unchanged otherwise.
+*/
+List Compiler.mark_method_call(Compiler c, List call, String name) {
+  Atom own = _own_definition(c);
+  return _names_member(own, name) ? %(expr () (method-call $own $call)) : call;
+}
+
 /** Expands a template's method-form call `receiver.name(supplied)` as the
     Expression macro `$T.name` once the receiver has its type where the
-    template expands. Returns NULL when no such macro applies.
+    template expands. Returns NULL when no such macro applies, or when the
+    call was written in the template of the macro `own` that it names.
 */
 List Compiler.bind_method_macro(
-  Compiler c, List receiver, String name, List supplied) {
-  List definition = _method_macro(c, receiver, name);
+  Compiler c, List receiver, String name, List supplied, Atom own) {
+  List definition = _method_macro(c, receiver, name, own);
   if (!definition || definition.assoc(<kind>) != <expression>) return NULL;
   List input = _method_arguments(c, definition, receiver, supplied);
   return c.bind_syntax(
@@ -96,7 +109,7 @@ List Compiler.bind_method_decorator(
   match (call)
     case $called(%(expr ? (op . ?receiver (?(String name)))), *supplied): {
       receiver = c.resolve_expression(receiver, c.token);
-      List definition = _method_macro(c, receiver, name);
+      List definition = _method_macro(c, receiver, name, NULL);
       if (!definition || definition.assoc(<kind>) != <decorator>)
         $fail.macros_macro_unbound(c, c.token, _method_spelling(receiver, name));
       List input = %(target
@@ -110,10 +123,10 @@ List Compiler.bind_method_decorator(
 
 /* The Expression macro or decorator `$T.name` for the receiver's named type
    `T`, which a package type finds by its source name, as `$Ui.row` for
-   `x2cui__Ui`. While `$T.name` expands, including inside the macros it
-   expands, `receiver.name(...)` is the method, so a macro can wrap the
-   method it shadows. */
-static List _method_macro(Compiler c, List receiver, String name) {
+   `x2cui__Ui`. In the template of `own`, `$T.name`'s own call is the
+   method, so a macro can wrap the method it shadows. */
+static List _method_macro(
+  Compiler c, List receiver, String name, Atom own) {
   Type type = receiver.cadr();
   Var owner = type ? type.car() : NULL;
   if (owner is not <string>) return NULL;
@@ -124,11 +137,18 @@ static List _method_macro(Compiler c, List receiver, String name) {
        !_try_macro(c, c.macros, Atom.intern(%"$source.$name"), stored)))
     return NULL;
   List definition = stored;
-  foreach (List active in c.macro_stack)
-    if (active.car() == definition) return NULL;
+  if (definition.assoc(<name>) == own) return NULL;
   Symbol kind = definition.assoc(<kind>);
   return kind == <expression> || kind == <decorator> ? definition : NULL;
 }
+
+// The macro whose template is being parsed, or NULL.
+static Atom _own_definition(Compiler c) =>
+  c.macro_holes ? c.macro_holes.getdefault(%(definition), NULL) : NULL;
+
+// Whether the macro `own`, as `Ui.row`, has the member name `name`.
+static int _names_member(Atom own, String name) =>
+  own && own.str().endswith("." + name);
 
 // The decorator name a method form spells, as `Ui.row`.
 static String _method_spelling(List receiver, String name) {

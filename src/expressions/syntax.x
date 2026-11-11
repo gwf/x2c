@@ -467,6 +467,9 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   if (method && supplied === %((expr (void) ())))
     match (expr) case %(expr () (op . ? (?name))):
       _note_explicit_converter(c, result, name.str(), origin);
+  if (method && c.macro_holes)
+    match (expr) case %(expr () (op . ? (?(String name)))):
+      return c.mark_method_call(result, name);
   return result;
 }
 

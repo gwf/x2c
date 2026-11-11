@@ -9,6 +9,7 @@ static typedef struct CallSite {
   List receiver, field, supplied;
   Token origin;
   String method;
+  Atom owner;
 } CallSite;
 
 /* dynamic Func calls
@@ -255,7 +256,7 @@ module List _native(Resolve &r, String callee, List supplied) {
 module List _call(Resolve &r, List function, List supplied) {
   CallSite site = {
     .c = r.c, .result_type = r.type, .supplied = supplied,
-    .origin = r.origin};
+    .origin = r.origin, .owner = r.owner};
   match (function)
     case %(expr ? (op . ?receiver (!set ?field (?name)))):
       return _method(site, receiver, field);
@@ -271,7 +272,8 @@ static List _method(CallSite &k, List receiver, List field) {
   /* A template's receiver may get its type only where the template
      expands, and a method-form macro of that type then takes the call. */
   if (k.c.macro_stack && !k.c.macro_holes) {
-    List macro = k.c.bind_method_macro(k.receiver, k.method, k.supplied);
+    List macro =
+      k.c.bind_method_macro(k.receiver, k.method, k.supplied, k.owner);
     if (macro) return macro;
   }
   if (!resolution && _deferred_receiver(k.receiver)) {

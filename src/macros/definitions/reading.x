@@ -56,6 +56,8 @@ List Compiler.parse_macro_definition(Compiler c) {
   with (c.macro_holes = {}) {
     d.locals = {};
     c.macro_holes[%(locals)] = d.locals;
+    // A method-form call to this macro in its own template is the method.
+    c.macro_holes[%(definition)] = d.name;
     if (enclosing != NULL) c.macro_holes[%(enclosing)] = enclosing;
     if (enclosing != NULL || d.anonymous) {
       d.namespace = c.fresh_name("holes");

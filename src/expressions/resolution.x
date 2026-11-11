@@ -118,6 +118,8 @@ static List _content(Resolve &r, List content) {
     case %(call ?(String callee) (args *args)):
       return _native(r, callee, args);
   }
+  match (content) case %(method-call ?owner ?(List call)):
+    return _method_call(r, owner, call);
   match (r.input) case $called(?callee, *args): return _call(r, callee, args);
   match (content) {
     case %(ident ?value):
@@ -171,6 +173,16 @@ static List _content(Resolve &r, List content) {
   if (content && content.car() == <array>) return _array_value(r);
   if (content && content.car() == <map>) return _map_value(r);
   return r.input;
+}
+
+/* A method call that the template of the macro `owner` wrote is the
+   method, not `owner`; the marker stays until the template expands. */
+static List _method_call(Resolve &r, Atom owner, List call) {
+  if (r.c.macro_holes) return r.input;
+  r.input = call;
+  r.type = call.cadr();
+  r.owner = owner;
+  return _content(r, call.caddr());
 }
 
 static List _macro_slot(Resolve &r, List content) {

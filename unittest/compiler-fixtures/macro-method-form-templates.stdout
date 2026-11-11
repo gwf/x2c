@@ -4,6 +4,17 @@ toolbar
 panel
   [b]
 10
-card
-  in card
-2000 3000
+outer
+  inner
+    outer
+      inner
+        deep
+a
+  b
+    leaf
+s1
+  s2
+    a
+      b
+        leaf
+3000 300
