@@ -61,8 +61,13 @@ jobs:
       - uses: ./trusted/.github/actions/install-mdbook
       - name: Install website dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cloc clang
+          command -v clang
+          curl -fsSL --retry 3 \
+            https://github.com/AlDanial/cloc/releases/download/v2.06/cloc-2.06.pl \
+            -o "$RUNNER_TEMP/cloc"
+          echo "ed9fbdd081a2ceb933ea490b3c1cfacc87d3898ae2650d0d6756439695a836c8  $RUNNER_TEMP/cloc" | sha256sum --check
+          chmod +x "$RUNNER_TEMP/cloc"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
           npm ci --prefix source/site
       - uses: ./trusted/.github/actions/select-clang
       - uses: emscripten-core/setup-emsdk@v15
