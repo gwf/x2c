@@ -165,8 +165,9 @@ ui.table_row (row, selected: s.selected == o) {
 }
 ```
 
-CUI reports only a table row's click, so a table row's `hovered` and
-`pressed` stay false.
+A table row's `hovered` and `pressed` come from `cui_table_row_hovered` and
+`cui_table_row_pressed`, two functions this package's build adds to CUI;
+see `PROFILE.md`.
 
 A CUI function that takes a `printf` format and C variadic arguments is a
 method that takes the format and x2c values, as `String.format` does:

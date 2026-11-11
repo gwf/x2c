@@ -4,7 +4,7 @@
     components through CUI's own input functions, so none needs a window.
 */
 
-import "x2cui" with App, Offscreen, TextField, Ui;
+import "x2cui" with App, Offscreen, RowState, TextField, Ui;
 
 #include "path.x"
 #include "test-support.x"
@@ -403,6 +403,63 @@ static void a_virtual_list_draws_the_rows_in_view(void) {
   EXPECT_TRUE(last > 0 && last < 1000);
 }
 
+// What the pointer did to each of three table rows in the last frame.
+typedef struct TableRows {
+  RowState rows[3];
+  bool disabled;
+} TableRows;
+
+static void draw_table(Ui ui, TableRows &t) {
+  $cui.disabled_scope(ui, t.disabled)
+  ui.table ("rows", selectable: true, columns: {"Name": fill})
+  ui.each (String name in %("one" "two" "three"))
+  ui.table_row (row) {
+    int i = name == "one" ? 0 : name == "two" ? 1 : 2;
+    t.rows[i] = row;
+    ui.cell_text(name);
+  }
+}
+
+static void table_frame(Offscreen screen, TableRows &t) {
+  screen.begin();
+  draw_table(screen.ui(), t);
+  screen.end();
+}
+
+static void a_table_row_reports_what_the_pointer_did(void) {
+  TableRows t = {};
+  Offscreen screen = auto Offscreen.open(240, 240);
+  table_frame(screen, t);
+  table_frame(screen, t);
+  EXPECT_FALSE(t.rows[1].hovered);
+  // A table row has no rectangle of its own to aim at, so the pointer
+  // moves down the table until the second row reports it.
+  Ui ui = screen.ui();
+  for (int y = 0; y < 240 && !t.rows[1].hovered; y += 4) {
+    ui.input_mouse_move(120, y);
+    table_frame(screen, t);
+    table_frame(screen, t);
+  }
+  EXPECT_TRUE(t.rows[1].hovered);
+  EXPECT_FALSE(t.rows[0].hovered);
+  EXPECT_FALSE(t.rows[2].hovered);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  table_frame(screen, t);
+  EXPECT_TRUE(t.rows[1].pressed);
+  EXPECT_FALSE(t.rows[0].pressed);
+  EXPECT_FALSE(t.rows[1].clicked);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  table_frame(screen, t);
+  EXPECT_TRUE(t.rows[1].clicked);
+  EXPECT_FALSE(t.rows[2].clicked);
+
+  // A disabled table's rows report nothing, as their highlight shows.
+  t.disabled = true;
+  table_frame(screen, t);
+  table_frame(screen, t);
+  EXPECT_FALSE(t.rows[1].hovered);
+}
+
 void x2cui_suite(void) {
   $test.run(offscreen_draws_and_writes_a_png);
   $test.run(write_png_raises_io_failure);
@@ -419,6 +476,7 @@ void x2cui_suite(void) {
   $test.run(a_table_takes_its_columns_from_a_map);
   $test.run(an_item_reports_what_the_pointer_did);
   $test.run(a_virtual_list_draws_the_rows_in_view);
+  $test.run(a_table_row_reports_what_the_pointer_did);
 }
 
 int main(void) {

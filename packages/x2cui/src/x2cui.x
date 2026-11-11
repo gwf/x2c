@@ -367,11 +367,14 @@ RowState Ui.item_begin(Ui ui, RowOptions opts) {
   return (RowState){ result.hovered, result.pressed, result.clicked };
 }
 
-/** Begins a row of a table and returns whether it was clicked. CUI does
-    not report a table row's hover or press, so those stay false.
+/** Begins a row of a table and returns what the pointer did to it: the
+    hover and press its highlight shows, and its click.
 */
-RowState Ui.table_row_begin(Ui ui, RowOptions opts) =>
-  (RowState){ .clicked = cui_table_row(ui, opts.selected) };
+RowState Ui.table_row_begin(Ui ui, RowOptions opts) {
+  bool clicked = cui_table_row(ui, opts.selected);
+  return (RowState){ cui_table_row_hovered(ui), cui_table_row_pressed(ui),
+                     clicked };
+}
 
 /// Draws the next cell of a table row with one text.
 void Ui.cell_text(Ui ui, String text) => cui_table_cell_text(ui, text);
@@ -468,7 +471,8 @@ expand %(
   cui_avatar_group cui_empty_state_ex cui_metric_ex cui_meter
   cui_accordion_begin cui_accordion_end cui_tree_end cui_tree_clicked
   cui_list_item_ex cui_virtual_list_begin cui_virtual_list_end
-  cui_table_begin_ex cui_table_row cui_table_cell cui_table_cell_text
+  cui_table_begin_ex cui_table_row cui_table_row_hovered cui_table_row_pressed
+  cui_table_cell cui_table_cell_text
   cui_table_end cui_gauge cui_image_create cui_image_load cui_image_destroy
   cui_image_ex cui_image_viewer_ex cui_cropper_ex cui_command_palette
   cui_radio_cards_ex cui_tag_input_ex cui_button_group_begin

@@ -110,9 +110,17 @@ the generated C.
 `ui.cell ()` begins the next cell and runs its target there;
 `ui.cell_text(text)` is a method. Implemented.
 
-- `cui_table_row` reports only a click. A table row's `row.hovered` and
-  `row.pressed` are always false; CUI's public API has no way to read
-  them. Changed from decision 2.
+- `cui_table_row` returns only a click, and CUI's public API has no way to
+  read the row's hover or press: the row's id and rectangle are internal.
+  `patches/table-row-state.patch` adds `cui_table_row_hovered` and
+  `cui_table_row_pressed`, which return the interaction `cui_table_row`
+  already computes for its highlight, so they respect what the highlight
+  respects. A test moves the pointer onto the second row, presses, and
+  releases, checks the other rows stay false, and checks that a disabled
+  table reports nothing. Verified. Popups above the table and its scroll
+  area act through CUI's own hit test, which decides the highlight; they
+  are not tested separately. The patch changes nothing CUI draws; all 229
+  images stay byte-identical. Verified.
 
 ### Short values inside expressions
 
@@ -169,8 +177,8 @@ the ones Gary approved. Verified.
 1. Adopt `ui.each` as the keyed loop, with the element's position as the
    default key. Done.
 2. Adopt `ui.item` and `ui.table_row` binding a row-state name, with
-   `hovered`, `pressed`, and `clicked`. Done; a table row reports only
-   `clicked`.
+   `hovered`, `pressed`, and `clicked`. Done, through a CUI patch for a
+   table row.
 3. Adopt a Map literal of titles and widths as the column template, with
    `right(...)`, `center(...)`, and `unsorted(...)` as width wrappers.
    Done.
@@ -206,8 +214,8 @@ the ones Gary approved. Verified.
    decorators remain.
 5. Method forms work in statement and expression positions only, not at
    file scope.
-6. A table row's `hovered` and `pressed` are always false; CUI reports
-   only its click.
+6. A table row's hover and press come from a patch to CUI; see
+   `PROFILE.md`. A new CUI version needs the patch remade.
 7. The mail and orders examples have no tests of their own beyond drawing
    an image; the package test covers clicks, hover, and the column
    lowering.
