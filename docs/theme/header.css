@@ -111,10 +111,6 @@
   gap: var(--landing-nav-gap);
 }
 
-.landing-page-nav a {
-  color: var(--red, var(--x2c-red));
-}
-
 .landing-nav>div+div {
   margin-left: var(--landing-divider-space);
   padding-left: var(--landing-divider-space);
@@ -122,7 +118,7 @@
 }
 
 .landing-nav>.landing-site-nav {
-  margin-left: var(--landing-nav-gap);
+  margin-left: 0;
   padding-left: 0;
   border-left: 0;
 }
@@ -169,10 +165,6 @@ a:is([href^="https://" i], [href^="http://" i], [href^="//"]):not(
   .landing-nav {
     --landing-nav-gap: 10px;
     font-size: 10.5px !important;
-  }
-
-  .landing-page-nav {
-    flex-basis: 100%;
   }
 
   .landing-nav>.landing-site-nav {

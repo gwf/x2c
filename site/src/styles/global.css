@@ -373,6 +373,7 @@ main:focus {
 
 .hero-title-line {
   display: block;
+  position: relative;
   width: max-content;
   letter-spacing: -0.02em;
 }
@@ -380,6 +381,32 @@ main:focus {
 /* Fit each headline to the container using Instrument Serif's proportions. */
 .hero-title-line:first-child {
   font-size: 13.849cqw;
+}
+
+/*
+ * Lift: under a mouse pointer, a copy of each letter is placed over it by
+ * the title's script, and the nearest copy rises a few pixels.
+ * The line's own text turns transparent while the copies are shown. A copy
+ * shares the line's font and line height, so at left: <letter> it covers
+ * the letter exactly.
+ */
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .hero-heading h1 {
+    isolation: isolate;
+  }
+
+  .hero-title-line .lift-copy {
+    position: absolute;
+    top: 0;
+    color: var(--dark);
+    pointer-events: none;
+    transform: translateY(calc(var(--lift, 0) * -1px));
+    transition: transform 240ms cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  .hero-heading h1.is-live .hero-title-line {
+    color: transparent;
+  }
 }
 
 .hero-heading p {
@@ -406,14 +433,19 @@ main:focus {
 }
 
 .hero-prose {
-  display: flow-root;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, calc(53% + 2.6rem));
+  gap: clamp(24px, 3vw, 44px);
+  align-items: start;
+}
+
+.hero-copy {
+  min-width: 0;
 }
 
 .hero-ideas {
-  grid-column: 2;
-  grid-row: 2;
   min-width: 0;
-  margin: 0 0 30px;
+  margin: 0;
   border: 1px solid var(--line);
   border-top: 4px solid var(--red);
   background: rgba(255, 255, 255, 0.5);
@@ -434,16 +466,14 @@ main:focus {
   margin: 0;
   padding: 0;
   list-style: none;
-  counter-reset: idea;
 }
 
 .idea-list>li {
   display: grid;
-  grid-template-columns: 2.2rem minmax(0, 1fr);
+  grid-template-columns: 4.8rem minmax(0, 1fr);
   column-gap: 8px;
   padding: 12px clamp(10px, 1.5vw, 18px) 13px;
   border-bottom: 1px solid var(--line);
-  counter-increment: idea;
 }
 
 .idea-list>li:last-child {
@@ -451,8 +481,8 @@ main:focus {
 }
 
 .idea-list>li::before {
-  content: counter(idea);
-  grid-row: 1 / span 2;
+  content: attr(data-value);
+  grid-row: 1 / span 3;
   color: var(--red-text);
   font:
     400 26px/1 "Instrument Serif",
@@ -472,8 +502,23 @@ main:focus {
   line-height: 1.5;
 }
 
-.idea-list p code {
+.idea-list code:not(pre code) {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
   font-size: 0.9em;
+}
+
+.idea-list .idea-tagline {
+  color: var(--dark);
+  opacity: 0.5;
+  font-style: italic;
+}
+
+.idea-detail {
+  grid-column: 2;
+  margin-top: 10px;
 }
 
 .idea-code {
@@ -491,17 +536,19 @@ main:focus {
   white-space: pre-wrap;
 }
 
-.hero-prose .hero-ideas {
-  float: right;
-  width: 53%;
-  margin: 0 0 28px clamp(24px, 3vw, 44px);
-}
-
 @media (max-width: 800px) {
-  .hero-prose .hero-ideas {
-    float: none;
-    width: auto;
-    margin: 0 0 28px;
+  .hero-prose {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  .idea-list>li::before {
+    grid-row: 1;
+  }
+
+  .idea-code,
+  .idea-detail {
+    grid-column: 1 / -1;
   }
 }
 

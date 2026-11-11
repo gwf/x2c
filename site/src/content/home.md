@@ -44,7 +44,7 @@ foreach (String word in words)
 Power is C made composable. Complex things are possible. Iterators, `match`,
 scopes, exceptions, and threads all work with the built-in types and with each
 other, and the protocols behind those types are open to your own. No framework
-is needed to hold it together. The pieces are small but compound in power.
+is needed to hold it together. The pieces are small, and they compound.
 
 <!-- ignore: Illustrative pipeline; count_file and add_counts are application functions. -->
 ```x2c,ignore

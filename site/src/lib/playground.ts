@@ -4,13 +4,18 @@ import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
 
 interface Example {
   id: string; source: string; visible: string; program: boolean;
+  path?: string; runnable?: boolean; output?: string;
 }
 
 export function setupPlayground() {
   const root = document.querySelector<HTMLElement>("[data-playground]");
   if (!root) return;
   const source = root.querySelector<HTMLTextAreaElement>("textarea")!;
-  const select = root.querySelector<HTMLSelectElement>("select")!;
+  const select = root.querySelector<HTMLSelectElement>("select");
+  const links = [...root.querySelectorAll<HTMLAnchorElement>("[data-example-list] a[data-example]")];
+  const notes = [...root.querySelectorAll<HTMLElement>("[data-about]")];
+  const sourceName = root.querySelector<HTMLElement>("[data-source-name]");
+  const outputTitle = root.querySelector<HTMLElement>("[data-output-title]");
   const run = root.querySelector<HTMLButtonElement>("[data-run]")!;
   const stop = root.querySelector<HTMLButtonElement>("[data-stop]")!;
   const reset = root.querySelector<HTMLButtonElement>("[data-reset]")!;
@@ -26,7 +31,7 @@ export function setupPlayground() {
   // A compile service needs the whole program; otherwise show the slide's code.
   const original = (entry: Example) => service ? entry.source : entry.visible;
   const edited = () => source.value !== original(example);
-  select.value = example.id;
+  if (select) select.value = example.id;
   source.value = original(example);
   const dark = JSON.parse(root.querySelector("[data-theme]")!.textContent!);
   let highlighter: Awaited<ReturnType<typeof createHighlighterCore>>;
@@ -57,7 +62,15 @@ export function setupPlayground() {
   ]));
   // Without a service, only an unedited precompiled example can run.
   const ready = (message = "Ready.") => {
-    if (!service && !programs) return;
+    const available = example.runnable !== false && Boolean(service || example.program);
+    run.hidden = !available;
+    if (!available) {
+      reset.hidden = true;
+      status.textContent = example.runnable === false
+        ? "This example needs the native toolchain. Use its local recipe."
+        : "Running programs is unavailable in this build. You can still read and edit the examples.";
+      return;
+    }
     const blocked = !service && edited();
     run.disabled = !memory64 || blocked;
     reset.hidden = !blocked;
@@ -79,6 +92,17 @@ export function setupPlayground() {
     source.value = original(example);
     source.scrollTop = source.scrollLeft = 0;
     paint();
+    if (sourceName) sourceName.textContent = example.path ?? example.id;
+    for (const link of links) {
+      if (link.dataset.example === example.id) link.setAttribute("aria-current", "true");
+      else link.removeAttribute("aria-current");
+    }
+    for (const note of notes) note.hidden = note.dataset.about !== example.id;
+    if (outputTitle) {
+      outputTitle.textContent = example.output ? "Expected output" : "Output";
+      output.textContent = example.output ?? "";
+      root.querySelector("[data-about-body]")!.scrollTop = 0;
+    }
     if (!request && !worker) ready();
   };
   source.addEventListener("input", () => {
@@ -89,17 +113,23 @@ export function setupPlayground() {
     highlight.scrollTop = source.scrollTop;
     highlight.scrollLeft = source.scrollLeft;
   });
-  select.addEventListener("change", () => {
-    example = examples.find((entry) => entry.id === select.value)!;
+  const choose = (id: string) => {
+    finish("Stopped.");
+    example = examples.find(entry => entry.id === id)!;
     load();
     const url = new URL(location.href);
-    url.searchParams.set("example", select.value);
+    url.searchParams.set("example", id);
     history.replaceState(null, "", url);
+  };
+  select?.addEventListener("change", () => choose(select.value));
+  for (const link of links) link.addEventListener("click", event => {
+    event.preventDefault();
+    choose(link.dataset.example!);
   });
   reset.addEventListener("click", load);
   stop.addEventListener("click", () => finish("Stopped."));
   addEventListener("pagehide", () => finish("Stopped."));
-  ready();
+  load();
 
   const write = (kind: string, text: string) => {
     outputSize += text.length + 1;
@@ -143,6 +173,7 @@ export function setupPlayground() {
     run.disabled = true;
     stop.hidden = false;
     output.replaceChildren();
+    if (outputTitle) outputTitle.textContent = "Output";
     outputSize = 0;
     const precompiled = Boolean(programs && example.program && !edited());
     status.textContent = precompiled ? "Loading..." : "Compiling...";
