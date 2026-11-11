@@ -130,7 +130,7 @@ static List f6_values____func_return_body(Compiler c, List value);
 
 typedef struct f9_callbacks___Callback{
   Compiler c;
-  Type target, source, result, source_result;
+  Type target, source, result;
   List params, source_params, source_binding;
 }
 f9_callbacks___Callback;
@@ -2191,7 +2191,7 @@ static void f9_callbacks____split(f9_callbacks___Callback * c){
   if(! List_truth((* c).source_binding) || ! List_truth(Type_list(source)) || Type_is_pointer(source) || ! Type_is_function(source)) f9_callbacks____fail(&((* c)), _953, _46);
   if(! Type_function_parts((* c).target, &((* c).params), NULL)) f9_callbacks____fail(&((* c)), _954, NULL);
   (* c).result = Type_apply((* c).target);
-  if(! Type_function_parts(source, &((* c).source_params), &((* c).source_result))) f9_callbacks____fail(&((* c)), _955, NULL);
+  if(! Type_function_parts(source, &((* c).source_params), NULL)) f9_callbacks____fail(&((* c)), _955, NULL);
   if(_typed_params_variadic((* c).params) || _typed_params_variadic((* c).source_params)) f9_callbacks____fail(&((* c)), _956, NULL);
 }
 
@@ -2201,8 +2201,8 @@ static void f9_callbacks____check_signature(f9_callbacks___Callback * cb){
     String _x2c_gensym_macro_detail_0 = String_printf(_957, target_count, source_count);
     f9_callbacks____fail(&((* cb)), _958, cons(String_var(_x2c_gensym_macro_detail_0), NULL));
   }
-  Type result = Type_canonicalize((* cb).result);
-  Type source_result = Type_canonicalize((* cb).source_result);
+  Type result = _x2c_type_unqualified(Type_declared((* cb).result));
+  Type source_result = _x2c_type_unqualified(Type_declared(Type_apply((* cb).source)));
   if(result == _304 || source_result == _304) f9_callbacks____fail(&((* cb)), _959, NULL);
   if(! List_equal(Type_list(result), Type_list(source_result))) f9_callbacks____fail(&((* cb)), _960, NULL);
 }
@@ -2273,7 +2273,7 @@ static List f9_callbacks____function(f9_callbacks___Callback * cb, List binding)
     Type _x2c_gensym_hole_3 =(* cb).source;  List _x2c_gensym_hole_4 =(* cb).source_binding;  Macro_typed(Type_list(_x2c_gensym_hole_3), List_var(_x2c_gensym_hole_4));
   }
   );
-  List call = _func_call(c, Type_canonicalize(Type_apply((* cb).source)), source, arguments);
+  List call = _func_call(c, Type_apply((* cb).source), source, arguments);
   List body =(* cb).result == _304 ? cons(List_var(cons(_170, cons(List_var(call), NULL))), NULL) : cons(List_var(({
     Var _x2c_gensym_literal_part_79 = List_var((* cb).result);  Var _x2c_gensym_literal_part_80 = List_var(Compiler_convert_expression(c, call, (* cb).result));  cons(_351, cons(_x2c_gensym_literal_part_79, cons(_x2c_gensym_literal_part_80, NULL)));
   }
