@@ -5,7 +5,8 @@
 > implemented on branch `gwf/method-form-compiler`, based on `dev` at
 > `069ad6363`, with compiler fixtures and a book section. On 2026-11-11
 > Gary also directed "Make method forms work inside templates too. Fix
-> Entry @options too."; both are implemented on the same branch. Decision
+> Entry @options too." and then "Fix the foreach and computed macro name
+> limits too."; all four are implemented on the same branch. Decision
 > 5 and the x2cui macros are package work on the x2cui branch.
 > The prototype that preceded the implementation is on the local branch
 > `gwf/scratch-x2cui-method-ui` on top of `x2cui` at `b393dd58c`.
@@ -156,6 +157,38 @@ function or method, or another macro's `Entry` hole; no rows forward no
 entries. Verified in `macro-entry-forwarding`. Before this change the
 template was rejected where it was defined, with "macro hole 'options' has
 ambiguous kind", for an ordinary function call as well as a method form.
+
+### Decl holes in a foreach header
+
+A `Decl` hole can stand where a template reads a declaration argument, as
+in `foreach ($element in $items) $body`. `parse_declaration_argument`, the
+owner of that position, now first accepts a `Decl` hole in the `decl` role,
+which that hole kind already accepts. Before, the declaration parser read
+the hole as the declaration's type and reported "macro hole 'element' has
+ambiguous kind; first: Decl also: Type". The declared variable is typed and
+visible in the body, including through a method form such as
+`ui.each(int n in [1, 2, 3])`. Verified in `macro-decl-foreach`.
+
+### Computed macro names
+
+A `macro` definition inside a template may take a component of its name
+from an enclosing `Name` hole: `$W.$m`, or `$$m` for a one-component name.
+Neither spelling parsed before; there was no existing computed-name
+spelling to stay consistent with. The definition's name is then
+`(macro-name PART ...)`. The enclosing expansion fills it, and
+`publish_macro_definition_node` joins it as `W.add` through
+`Compiler.macro_definition_name`. The self-call mark compares a computed
+name's last part with the call's member, so `$w.$m(...)` in the generated
+template is the method. Verified in `macro-computed-name`, which generates
+Expression macros and a decorator.
+
+With this, x2cui's `$cui.named` decorator and `cui_named` meta function can
+be removed: each template can be named `$Ui.$method` directly. The
+per-arity templates (`$cui.widget0` to `$cui.widget8`, `$cui.block0` and
+the rest) do not exist only because of the name limit. Each one has a
+different parameter list, `Expr $a, Expr $b, ...` before `Entry @options`,
+and a template cannot compute a definition's parameter list. That is a
+separate limit and is not built here.
 
 ### Package types
 
@@ -344,6 +377,10 @@ The prototype's compiler shortcuts are settled:
 
 What remains:
 
+- A template cannot compute a nested definition's parameter list, so a
+  generator needs one template for each arity. A `$private`-style fresh
+  name is not accepted as a name component.
+
 - Method forms work in statement and expression positions only, not at file
   scope (prototype limit 7), and only with `.`.
 - In a template, a statement form whose receiver has no type yet takes a
@@ -378,6 +415,8 @@ What remains:
   `unittest/compiler-fixtures/packages/panels`. Templates and forwarding:
   `macro-method-form-templates`, `macro-method-form-mutual`,
   `macro-entry-forwarding`, and a hole receiver in `import-method-form`.
+  Decl holes and computed names: `macro-decl-foreach` and
+  `macro-computed-name`.
 - The x2cui to-do `--shot` image stays byte-identical to the one drawn with
   `$cui.row`; it is, for every prototype commit.
 - `make stage-3`, `make verify-fixtures`, and `precommit`.

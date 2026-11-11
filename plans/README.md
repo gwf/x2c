@@ -25,7 +25,8 @@ website work belongs to a separate session.
 [Method-form macros](method-form-macros.md) gives decorators and Expression
 macros method forms, as `ui.row (...) { }` and `ui.button(...)`. Gary
 accepted its decisions on 2026-11-11. The compiler semantics, decisions 1 to
-4, method forms inside templates, and forwarding of `Entry` rows into calls
+4, method forms inside templates, forwarding of `Entry` rows into calls,
+`Decl` holes in `foreach` headers, and computed macro names in templates
 are implemented with fixtures and a book section; the x2cui option
 lowering, decision 5, is package work.
 

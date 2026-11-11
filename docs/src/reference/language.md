@@ -1571,6 +1571,28 @@ identifier targets, but it may not contain multiple comma-separated
 declarators. Parentheses group independently typed declarations, such as
 `(String word, int count)`. A grouped capture is a canonical `seq` of ordinary
 declarations; each declaration follows the same binding and placement rules.
+A template may place a `Decl` hole wherever a declaration argument is read,
+as in a `foreach` header; the captured declaration is then declared there:
+
+```x2c
+~#include "x2c.x"
+macro Decorator $each(Stmt $body, Decl $element, Expr $items) {
+  foreach ($element in $items) $body
+}
+
+int main(void) {
+  $each(String s in %("a" "b")) puts(s);
+  return 0;
+}
+```
+
+```text
+a
+b
+```
+
+The caller may write `in` after a `Decl` argument in place of a comma, as in
+`foreach`.
 
 A `DeclaratorRow` argument has no leading type or trailing semicolon. A
 declaration template supplies the shared type, and a trailing
@@ -2091,6 +2113,37 @@ int main(void) {
 A nested macro can use an enclosing template's holes. Its own holes shadow
 same-spelled enclosing holes. Substitution embeds those values in the returned
 template; it does not make an arbitrary local-data closure.
+
+A component of a nested definition's name may be an enclosing `Name` hole,
+as in `$W.$m` or `$$m`. The name is joined where the enclosing template
+expands, so one generator defines a family of macros:
+
+```x2c
+~#include <stdio.h>
+typedef struct W { int n; } W;
+
+int W.add(W w, int k) => w.n + k;
+int W.sub(W w, int k) => w.n - k;
+
+macro Unit $scaled(Name $m) {
+  macro Expression $W.$m(Expr $w, Expr $k) => $w.$m($k * 10);
+}
+$scaled(add);
+$scaled(sub);
+
+int main(void) {
+  W w = { 1 };
+  printf("%d %d\n", w.add(2), w.sub(2));
+  return 0;
+}
+```
+
+```text
+21 -19
+```
+
+Inside each generated template, `$w.$m(...)` names the macro being defined,
+so it is the method.
 
 A `Macro` target and an explicit `Macro` hole accept an anonymous or named
 macro definition, a bare macro value such as `$generator`, or a parenthesized
