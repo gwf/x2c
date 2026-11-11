@@ -112,7 +112,8 @@ List Compiler.bind_method_decorator(
       receiver = c.resolve_expression(receiver, c.token);
       List definition = _method_macro(c, receiver, name, NULL);
       if (!definition || definition.assoc(<kind>) != <decorator>)
-        $fail.macros_macro_unbound(c, c.token, _method_spelling(receiver, name));
+        $fail.macros_macro_unbound(
+          c, c.token, _method_spelling(receiver, name));
       List input = %(target
         $(_method_arguments(c, definition, receiver, supplied))
         $(_capture_row_project(c, definition.assoc(<targetp>), $(target), 0)));

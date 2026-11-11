@@ -27,8 +27,8 @@ static const MacroPos macro_position_info[] = {
 List Compiler.publish_macro_definition_node(Compiler c, List node) {
   Atom name = Compiler.macro_definition_name(node.assoc(<name>));
   if (name !== node.assoc(<name>))
-    node = %(macrodef @(node.cdr().map(%!(List row) =>
-      row ~= %(name ?) ? %(name $name) : row)));
+    node = %(macrodef @(node.cdr().map(
+      %!(List row) => row ~= %(name ?) ? %(name $name) : row)));
   c.sym.put(c.macros, name, node);
   if (c.shallow && !c.macro_holes &&
       !node.assoc(<static>).equal(1) && !node.assoc(<local>).int())
