@@ -152,8 +152,9 @@ static Var _own_definition(Compiler c) =>
    `member`, a spelling or a Name hole's member projection. */
 static int _names_member(Var own, Var member) {
   match (own) case %(macro-name * ?last): return last.equal(member);
-  return own is <atom> && member is <string> &&
-    ((Atom) own).str().endswith("." + member);
+  if (!own.is_atom() || member is not <string>) return 0;
+  Atom name = own;
+  return name.str().endswith("." + member);
 }
 
 // The decorator name a method form spells, as `Ui.row`.
