@@ -157,7 +157,6 @@ int main(int argc, char **argv) {
   load(todo);
   App app = auto App.open({ .title = "To do", .width = 520, .height = 640,
                             .min_width = 360, .min_height = 420 });
-  // One region per frame frees what drawing allocated.
-  while (app.frame()) auto { draw(app.ui(), todo); }
+  while (app.frame()) draw(app.ui(), todo);
   return 0;
 }

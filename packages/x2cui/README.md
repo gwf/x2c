@@ -108,16 +108,17 @@ begins the next; it returns false once the window has closed. `app.ui()`
 is the window's borrowed `Ui`. `App` adopts `Cleanup`, so
 `App app = auto App.open(...)` closes the window when the scope ends.
 
-Draw each frame inside a region, so collections built while drawing are
-freed:
+Draw each frame with an ordinary call:
 
 ```x2c
-while (app.frame()) auto { draw(app.ui(), state); }
+while (app.frame()) draw(app.ui(), state);
 ```
 
-Create lasting objects, such as a `TextField` or an `Array` of tasks,
-before the loop. One created inside the region is freed when its frame
-ends.
+Do not wrap the frame in an `auto` region. Drawing is where a program
+changes its state: a click adds a task or replaces a list. A region would
+free those objects when the frame ends. Drawing itself leaves nothing
+behind to free: the to-do example holds 8.4 MB of resident memory after
+500 frames and after 16,000.
 
 A `Ui` belongs to one thread. Several windows each on their own thread are
 allowed by CUI; this package does not test that.
