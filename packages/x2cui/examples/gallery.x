@@ -13,6 +13,11 @@
 #include "path.x"
 #include "gallery/scene.x"
 #include "gallery/layout.x"
+#include "gallery/controls.x"
+#include "gallery/display.x"
+#include "gallery/media.x"
+#include "gallery/tools.x"
+#include "gallery/chrome.x"
 
 #define FAMILY_LIMIT 16
 
@@ -25,6 +30,11 @@ static void add_family(Family family) { families[family_total++] = family; }
 
 static void add_families(void) {
   add_family(layout_family());
+  add_family(controls_family());
+  add_family(display_family());
+  add_family(media_family());
+  add_family(tools_family());
+  add_family(chrome_family());
 }
 
 // The page every scene is drawn on.

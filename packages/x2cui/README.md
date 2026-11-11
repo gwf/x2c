@@ -145,11 +145,18 @@ write. The package's tests drive components this way, with CUI's own
 
 ## What has no x2c form yet
 
-73 of CUI's 429 component functions take an array of records or numbers,
-or are variadic. They have no method yet and are called as C. They cover
-tables and data grids, charts, calendars, and several developer panels:
-59 of CUI's 201 components. A later change gives them forms that take x2c
-collections.
+75 of CUI's 429 component functions take an array of records, numbers, or
+flags, or are variadic. They have no method yet and are called as C. They
+cover tables and data grids, charts, calendars, and several developer
+panels: 61 of CUI's 201 components. A later change gives them forms that
+take x2c collections.
+
+An option record keeps its C field types. A field that is a pointer to
+caller state takes an address, as in `{ .toggle = &bold }`, and a field
+that is an array takes a C array.
+
+`ui.tree_begin` takes its open flag by reference, so a leaf, for which CUI
+accepts NULL, passes a flag it ignores.
 
 ## No Lisp surface
 
@@ -165,8 +172,9 @@ list to a file after each change. `make run-interactive` opens it.
 `todo --shot IMAGE.png` draws three sample tasks off screen.
 
 `examples/gallery.x` is the broader application (`make example`). It has
-one scene for each component that has an x2c form, named for the component
-and grouped into families under `examples/gallery/`. `make run-gallery`
+140 scenes, one for each component that has an x2c form, named for the
+component and grouped into six families under `examples/gallery/`. A menu
+that opens only on a click is drawn closed off screen. `make run-gallery`
 opens it as a browser of scenes. `gallery --shots DIR` draws every scene
 off screen to `DIR/NAME.png`, and `gallery --list` prints the scene names.
 

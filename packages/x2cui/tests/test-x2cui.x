@@ -186,6 +186,27 @@ static void a_string_list_reaches_a_component(void) {
   EXPECT_TRUE(screen.commands() > 0);
 }
 
+/* CUI reads a wheel picker's items when it paints, after the call that
+   passed them has returned. */
+static void a_string_list_lasts_until_the_frame_is_painted(void) {
+  Offscreen screen = auto Offscreen.open(240, 240);
+  int month = 1;
+  for (int pass = 0; pass < 4; pass++) {
+    screen.begin();
+    // The first array is built inside a region, which must not free it.
+    if (pass == 0) auto {
+      screen.ui().wheel_picker(
+        "month", %("January" "February" "March"), month, {});
+    }
+    else
+      screen.ui().wheel_picker(
+        "month", %("January" "February" "March"), month, {});
+    screen.end();
+  }
+  EXPECT_TRUE(screen.commands() > 0);
+  EXPECT_INT_EQ(month, 1);
+}
+
 void x2cui_suite(void) {
   $test.run(offscreen_draws_and_writes_a_png);
   $test.run(write_png_raises_io_failure);
@@ -196,6 +217,7 @@ void x2cui_suite(void) {
   $test.run(a_block_left_early_still_ends);
   $test.run(a_text_result_is_a_string);
   $test.run(a_string_list_reaches_a_component);
+  $test.run(a_string_list_lasts_until_the_frame_is_painted);
 }
 
 int main(void) {

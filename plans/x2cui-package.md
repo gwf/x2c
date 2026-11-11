@@ -448,29 +448,46 @@ tests. These are estimates.
 
 #### Delivery 1 progress
 
-State on 2026-11-10, macOS arm64, local branch `gwf/x2cui-package`, which
-is based on the Delivery 0 branch until gwf/x2c#653 is published.
+State on 2026-11-10, macOS arm64, branch `gwf/x2cui-package`, based on
+`dev` after gwf/x2c#653.
 
 Done and verified:
 
-- `make -C packages/x2cui prepare build` builds pinned CUI v1.3.1 from its
-  amalgamation and builds the package with no warnings.
+- `make -C packages/x2cui check` passes: 11 tests, the to-do example drawn
+  off screen, and 140 gallery scenes drawn off screen with none empty.
 - `App`, `Offscreen`, and `TextField`.
-- The generator and a table of 354 rows, plus two hand-written methods.
+- The generator and a table of 352 rows, plus two hand-written methods.
 - 37 container macros.
-- `examples/todo.x`, 163 lines against 148 in CUI's C version, with the
-  same features. `todo --shot` renders the expected image off screen. The
-  window process starts and stays up; its contents were not inspected.
+- `examples/todo.x`. Its `draw` function was driven off screen through
+  add, toggle, delete, filter, and clear with simulated input.
+- `examples/gallery.x` with six scene families and 140 scenes. Each scene
+  ran 400 frames under random mouse and keyboard input with freed memory
+  scribbled, with no crash. The todo and gallery windows start and stay
+  up; their contents were not inspected in a window.
+- README, PROFILE, the package index, and the book's package guide.
 
-Not done: Gary's acceptance of the to-do example, the gallery, tests,
-README, PROFILE, the book section, the `PACKAGES` entry, and Linux.
+Not done:
+
+- Linux. `dependency.json` is unbuilt, so the package is not in
+  `PACKAGES`.
+- Parameter names. Generated methods name their parameters `p1`, `p2`.
+- `tests/test-gallery.x`, which arrives with Delivery 2 as specified.
+- Menus that open only on a click are drawn closed in `--shots`.
 
 Facts that differ from the specification above:
 
 - **The pinned tag has 201 component macros and 429 `cui_ctx` functions.**
   The census above read CUI's working tree, 14 commits after the tag.
-- **73 functions wait for Delivery 2.** They take arrays of records or
-  numbers, or are variadic. The 356 others have methods.
+- **75 functions wait for Delivery 2.** They take arrays of records,
+  numbers, or flags, or are variadic. The 354 others have methods. They
+  leave 61 of the 201 components for Delivery 2.
+- **A List of Strings is kept as a native array for the process.** CUI
+  reads a wheel picker's items when it paints, after the call returns, so
+  an array on the method's stack crashed. `x2cui_strings` keeps one array
+  for each distinct List; Lists are canonical, so the set is bounded by
+  the distinct lists a program uses.
+- **Option records keep their C field types.** A pointer field takes an
+  address and an array field takes a C array.
 - **The text method is `field.text()`.** `str` is a conversion name that
   x2c reserves, so the buffer member is `buffer` and the method is `text`.
 - **A text result is a String.** Six functions return `const char *` into
