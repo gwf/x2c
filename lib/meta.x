@@ -87,7 +87,8 @@ typedef List Source;
    code only refers to. */
 
 /** Returns the canonical semantic type of captured code in the current
-    expansion. Unbound expressions are resolved in that expansion.
+    expansion. Unbound expressions, name values, and untyped quotations are
+    resolved in that expansion.
 */
 meta Type Code.type(Code value);
 
