@@ -1486,13 +1486,13 @@ int _tag_floating(List row){
   return _tag_kind(row) == 439096724366;
 }
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 String Var_str(Var);
 
 int _tag_unsigned(List row){
   if(! _init_guard_) _file_init_();
-  return String_startswith(Var_str(List_getindex(row, 0)), _86);
+  return String_startswith(Var_str(List_getindex(row, 0)), cons(String_var(_86), NULL));
 }
 
 Var _tag_bits(List row);

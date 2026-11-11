@@ -1543,7 +1543,7 @@ static Var f15_transformations____sublis_node(List alist, Var node){
 Buffer List_write_str(List lst, Buffer out);
 
 String List_str(List lst){
-  Buffer buf = Buffer_new(0);
+  Buffer buf = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_19 = buf;
   {
     _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
@@ -1616,7 +1616,7 @@ Buffer List_write_str(List lst, Buffer out){
 Buffer List_write_repr(List lst, Buffer out);
 
 String List_repr(List lst){
-  Buffer buf = Buffer_new(0);
+  Buffer buf = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_20 = buf;
   {
     _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
@@ -1691,7 +1691,7 @@ static void f9_rendering____nil(Buffer out){
 }
 
 static int f9_rendering____fits(f9_rendering___Render * r, List elem){
-  Buffer line = Buffer_new((* r).out -> padding);
+  Buffer line = Buffer_new(cons(Var_box_ulong((* r).out -> padding), NULL));
   const Buffer _x2c_gensym_macro_acquired_21 = line;
   {
     _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={

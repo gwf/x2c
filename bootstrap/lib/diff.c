@@ -129,7 +129,7 @@ List Diff_lines(String old, String new);
 
 void x2c_cleanup_push(X2CCleanup *);
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 size_t Buffer_len(Buffer);
 
@@ -155,7 +155,7 @@ String Diff_unified(String old, String new, String old_name, String new_name){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_0);
     {
-      Buffer out = Buffer_new(0);
+      Buffer out = Buffer_new(NULL);
       const Buffer _x2c_gensym_macro_acquired_1 = out;
       {
         _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
@@ -202,7 +202,7 @@ String Diff_unified(String old, String new, String old_name, String new_name){
 
 }
 
-List String_split_lines(String, int);
+List String_split_lines(String, List);
 
 Array Array_new(void);
 
@@ -214,7 +214,7 @@ List Array_list(Array);
 
 List Diff_lines(String old, String new){
   if(! _init_guard_) _file_init_();
-  Array old_lines = List_array(String_split_lines(old, 0));
+  Array old_lines = List_array(String_split_lines(old, NULL));
   const Array _x2c_gensym_macro_acquired_2 = old_lines;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={
@@ -228,7 +228,7 @@ List Diff_lines(String old, String new){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_2);
     {
-      Array new_lines = List_array(String_split_lines(new, 0));
+      Array new_lines = List_array(String_split_lines(new, NULL));
       const Array _x2c_gensym_macro_acquired_3 = new_lines;
       {
         _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={

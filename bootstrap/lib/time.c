@@ -362,7 +362,7 @@ Buffer Duration_write_repr(Duration value, Buffer out){
   return Buffer_write(out, " }");
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -371,7 +371,7 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String Duration_repr(Duration value){
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -441,7 +441,7 @@ Buffer Time_write_repr(Time value, Buffer out){
 }
 
 String Time_repr(Time value){
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_1 _x2c_gensym_macro_environment_1 ={
       0
@@ -548,7 +548,7 @@ Buffer DateTime_write_repr(DateTime value, Buffer out){
 }
 
 String DateTime_repr(DateTime value){
-  Buffer _x2c_gensym_macro_out_2 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_2 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -634,7 +634,7 @@ Buffer Buffer_printf(Buffer, const char *, ...);
 String Duration_str(Duration d){
   if(! _init_guard_) _file_init_();
   if(! d.nanoseconds) return _7;
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
@@ -786,7 +786,7 @@ int DateTime_weekday(DateTime d){
 int abs(int);
 
 String DateTime_str(DateTime d){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_1 = out;
   {
     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_4 ={

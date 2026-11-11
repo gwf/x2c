@@ -40,6 +40,7 @@ struct UnzipShared{
 #include "array/array.h"
 #include "block.h"
 #include "func/func.h"
+#include "meta.h"
 #include <limits.h>
 #include <stdlib.h>
 #define UNZIP_COMPACT_THRESHOLD 256
@@ -48,6 +49,16 @@ typedef UnzipColumn * UnzipColumnRef;
 typedef UnzipShared * UnzipSharedRef;
 
 #include "var-adapters.h"
+static List _29, _28, _27, _25, _24, _22, _21, _20, _18, _17, _15, _14, _7, _3;
+
+static String _12, _1;
+
+static Var _31, _30, _26, _23, _19, _16, _13, _11, _10, _9, _8, _6, _5, _4, _2, _0;
+
+static int _init_guard_ = 0;
+
+__attribute__((constructor, noinline, cold)) static void _file_init_(void);
+
 static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_gensym_macro_pointer_0);
 
 static inline UnzipColumnRef Var_unzipcolumnref(Var _x2c_gensym_macro_value_1);
@@ -106,6 +117,44 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair);
 
 static void _unzip_compact(UnzipShared * shared, int column);
 
+__attribute__((constructor, noinline, cold)) static void _file_init_(void){
+  x2c_initialize_protocols();
+  if(_init_guard_) return;
+  _init_guard_ = 1;
+  _0 = Symbol_var(377892);
+  _1 = String_new("Iter");
+  _2 = String_var(_1);
+  _3 = cons(_2, NULL);
+  _4 = List_var(_3);
+  _5 = Symbol_var(199448);
+  _6 = Symbol_var(917238582723620);
+  _7 = cons(_6, NULL);
+  _8 = List_var(_7);
+  _9 = Symbol_var(1077029798);
+  _10 = Symbol_var(19147688);
+  _11 = Atom_intern(String_new("binding-name"));
+  _12 = String_new("range");
+  _13 = String_var(_12);
+  _14 = cons(_13, NULL);
+  _15 = cons(_11, _14);
+  _16 = List_var(_15);
+  _17 = cons(_16, NULL);
+  _18 = cons(_10, _17);
+  _19 = List_var(_18);
+  _20 = cons(_19, NULL);
+  _21 = cons(_8, _20);
+  _22 = cons(_0, _21);
+  _23 = List_var(_22);
+  _24 = cons(_23, NULL);
+  _25 = cons(_9, _24);
+  _26 = List_var(_25);
+  _27 = cons(_26, NULL);
+  _28 = cons(_8, _27);
+  _29 = cons(_0, _28);
+  _30 = List_var(_29);
+  _31 = Symbol_var(102886);
+}
+
 static inline Var UnzipColumnRef_var(UnzipColumnRef _x2c_gensym_macro_pointer_0){
   Var _x2c_gensym_macro_value_0;
   _x2c_gensym_macro_value_0.p64 = _x2c_gensym_macro_pointer_0;
@@ -154,7 +203,7 @@ Iter range(int start, int end, int step, Iter iter){
   if(! step){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("range")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/iter.x",.function = "range",.line = 145,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/iter.x",.function = "range",.line = 146,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -163,6 +212,15 @@ Iter range(int start, int end, int step, Iter iter){
   if(step == 1) return Iter_init(iter, _range_raw_int(end), _range_up_next, _range_raw_int(start));
   if(step == - 1) return Iter_init(iter, _range_raw_int(end), _range_down_next, _range_raw_int(start));
   return Iter_init(iter, _range_raw_pair(end, step), _range_general_next, int_var(start));
+}
+
+List Macro_inserted_items(List);
+
+List _range_arguments(List arguments){
+  if(! _init_guard_) _file_init_();
+  if(List_len(arguments) == 1) arguments = cons(int_var(0), List_append(arguments, cons(int_var(1), NULL)));
+  else if(List_len(arguments) == 2) arguments = List_append(arguments, cons(int_var(1), NULL));
+  return cons(_0, cons(_4, cons(List_var(cons(_5, cons(_30, cons(List_var(cons(_31, Macro_inserted_items(arguments))), NULL)))), NULL)));
 }
 
 Iter Iter_map(Iter iter, Func func, Iter dest){
@@ -386,7 +444,7 @@ int Iter_try_next(Iter iter, Var * out){
     return 0;
   }
   if(Var_is_void((* out))){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 641,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/iter.x",.function = "Iter_try_next",.line = 660,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 48270474208, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Iter.try_next")), NULL))));
     __builtin_unreachable();
   }
@@ -416,7 +474,7 @@ static int _range_down_next(Iter iter, Var * out){
 static int _range_general_next(Iter iter, Var * out){
   int stop = _range_raw_high(iter -> obj);
   int step = _range_raw_value(iter -> obj);
-  int current = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/iter.x",.function = "_range_general_next",.line = 670,.runtime = 1}; & _x2c_gensym_error_site_2; })));
+  int current = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/iter.x",.function = "_range_general_next",.line = 689,.runtime = 1}; & _x2c_gensym_error_site_2; })));
   if((step > 0 && current > stop) ||(step < 0 && current < stop)) return 0;
   * out = int_var(current);
   long long next =(long long) current + step;
@@ -523,7 +581,7 @@ static int _enumerate_next(Iter iter, Var * out){
   Iter source = Var_iter_payload(iter -> obj);
   Var value;
   if(! Iter_try_next(source, &(value))) return 0;
-  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/iter.x",.function = "_enumerate_next",.line = 766,.runtime = 1}; & _x2c_gensym_error_site_3; })));
+  int index = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/iter.x",.function = "_enumerate_next",.line = 785,.runtime = 1}; & _x2c_gensym_error_site_3; })));
   iter -> state = int_var(index + 1);
   * out = List_var(cons(int_var(index), cons(value, NULL)));
   return 1;
@@ -540,7 +598,7 @@ static int _chain_next(Iter iter, Var * out){
 
 static int _head_next(Iter iter, Var * out){
   Iter source = Var_iter_payload(iter -> obj);
-  int remaining = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/iter.x",.function = "_head_next",.line = 785,.runtime = 1}; & _x2c_gensym_error_site_4; })));
+  int remaining = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/iter.x",.function = "_head_next",.line = 804,.runtime = 1}; & _x2c_gensym_error_site_4; })));
   if(remaining <= 0) return 0;
   if(! Iter_try_next(source, &(* out))) return 0;
   iter -> state = int_var(remaining - 1);
@@ -548,7 +606,7 @@ static int _head_next(Iter iter, Var * out){
 }
 
 static int _repeat_next(Iter iter, Var * out){
-  int remaining = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/iter.x",.function = "_repeat_next",.line = 793,.runtime = 1}; & _x2c_gensym_error_site_5; })));
+  int remaining = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/iter.x",.function = "_repeat_next",.line = 812,.runtime = 1}; & _x2c_gensym_error_site_5; })));
   if(remaining <= 0) return 0;
   iter -> state = int_var(remaining - 1);
   * out = iter -> obj;
@@ -587,7 +645,7 @@ static void _unzip_shared_init(UnzipShared * u, Iter source){
 
 static int _unzip_next(Iter iter, Var * out){
   UnzipSharedRef shared = Var_unzipsharedref(iter -> obj);
-  int stage = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/iter.x",.function = "_unzip_next",.line = 834,.runtime = 1}; & _x2c_gensym_error_site_6; })));
+  int stage = Var_int(Var_convert_at(iter -> state, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/iter.x",.function = "_unzip_next",.line = 853,.runtime = 1}; & _x2c_gensym_error_site_6; })));
   if(stage >= 2) return 0;
   Iter child = & shared -> column_iters[stage];
   iter -> state = int_var(stage + 1);
@@ -622,7 +680,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 866,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 885,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_7, 4477479911782, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1510312), _x2c_gensym_literal_part_2, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }
@@ -633,7 +691,7 @@ static void _unzip_buffer_push(UnzipShared * shared, Var pair){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Iter.unzip")), NULL)));
     Var _x2c_gensym_literal_part_4 = String_var(String_join(NULL, cons(String_var(String_new("two-element List")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 870,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/iter.x",.function = "_unzip_buffer_push",.line = 889,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1510312), _x2c_gensym_literal_part_4, Symbol_var(46228810), pair);
       __builtin_unreachable();
     }

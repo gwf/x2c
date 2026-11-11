@@ -345,7 +345,7 @@ Buffer Regex_write_str(Regex value, Buffer out){
   return Buffer_printf(out, "<Regex: 0x%012lX>", (long) value);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -354,7 +354,7 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String Regex_str(Regex value){
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -448,7 +448,7 @@ Buffer Regex_write_repr(Regex value, Buffer out){
 }
 
 String Regex_repr(Regex value){
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -525,7 +525,7 @@ static int _x2c_ascii_word(int);
 Buffer Buffer_write_char(Buffer, char);
 
 String Regex_escape(String literal){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = out;
   {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
@@ -1446,7 +1446,7 @@ static FuncArg FuncArg_value(Var);
 Var Func_apply(Func, unsigned, const FuncArg *);
 
 static String _rebuild(Regex r, String subject, int all, Func fn, String replacement, int callback){
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_5 = out;
   {
     _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_9 ={

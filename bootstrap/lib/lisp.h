@@ -119,11 +119,11 @@ Var lisp_substring(String string, int start, int stop);
 
 Var lisp_string_downcase(String string);
 
-String lisp_string_strip(String string, Var chars);
+String lisp_string_strip(String string, List chars);
 
-String lisp_string_lstrip(String string, Var chars);
+String lisp_string_lstrip(String string, List chars);
 
-String lisp_string_rstrip(String string, Var chars);
+String lisp_string_rstrip(String string, List chars);
 
 Var lisp_match_replace(List input, Var pat, Var template);
 

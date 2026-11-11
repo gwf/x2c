@@ -784,7 +784,7 @@ static String f9_toolchain____cc_error(String errors){
   Array lines = Array_new();
   {
     String line;
-    List _x2c_gensym_macro_object_0 = String_split((String_truth(errors) ? errors : ""), _5);
+    List _x2c_gensym_macro_object_0 = String_split((String_truth(errors) ? errors : ""), _5, NULL);
     List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
@@ -792,7 +792,7 @@ static String f9_toolchain____cc_error(String errors){
       {
         String text = String_strip(line, NULL);
         if(! String_truth(text)) continue;
-        if(String_contains(text, _6) && ! String_startswith(text, _7) && ! String_startswith(text, _8) && ! String_startswith(text, _9)) return text;
+        if(String_contains(text, _6) && ! String_startswith(text, cons(String_var(_7), NULL)) && ! String_startswith(text, cons(String_var(_8), NULL)) && ! String_startswith(text, cons(String_var(_9), NULL))) return text;
         Array_push(lines, String_var(text));
       }
 
@@ -801,9 +801,9 @@ static String f9_toolchain____cc_error(String errors){
   }
   if(! Array_len(lines)) return _10;
   String first = Var_as_string(Array_getindex(lines, 0));
-  if(! String_endswith(first, _11) || Array_len(lines) < 2) return first;
+  if(! String_endswith(first, cons(String_var(_11), NULL)) || Array_len(lines) < 2) return first;
   String next = Var_as_string(Array_getindex(lines, 1));
-  if(String_endswith(next, _11)) next = String_getslice(next, (-2147483647 - 1), x2c_slice_bound(String_len(next) - 1), 1);
+  if(String_endswith(next, cons(String_var(_11), NULL))) next = String_getslice(next, (-2147483647 - 1), x2c_slice_bound(String_len(next) - 1), 1);
   return String_join(NULL, cons(String_var(first), cons(String_var(_1), cons(String_var(next), NULL))));
 }
 
@@ -1011,7 +1011,7 @@ void Compiler_refuse_meta_call(Compiler c, String name, Token site, String why);
 void Compiler_refuse_record_meta_call(Compiler c, String name, Token site){
   if(! _init_guard_) _file_init_();
   String missing = Compiler_meta_call_missing(c, name);
-  if(String_startswith(missing, _16)) Compiler_refuse_meta_call(c, name, site, missing);
+  if(String_startswith(missing, cons(String_var(_16), NULL))) Compiler_refuse_meta_call(c, name, site, missing);
 }
 
 int Sym_is_var_type(Sym, Type);
@@ -1224,10 +1224,10 @@ static Array f9_selection____runtime_includes(Compiler c, String lib){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_8);
       hash = _x2c_gensym_macro_cursor_output_9;
       {
-        if(Var_is_row(hash, 11, 7, 1) && String_startswith(Var_as_string(hash), _34)) continue;
+        if(Var_is_row(hash, 11, 7, 1) && String_startswith(Var_as_string(hash), cons(String_var(_34), NULL))) continue;
         if(String_equal(Compiler_canonical_path(c, path), Compiler_canonical_path(c, c -> filename))) continue;
         String dependency = path;
-        if(String_startswith(dependency, lib) && String_endswith(dependency, _35) && !(String_contains(String_getslice(dependency, x2c_slice_bound(String_len(lib)), (-2147483647 - 1), 1), _0))){
+        if(String_startswith(dependency, cons(String_var(lib), NULL)) && String_endswith(dependency, cons(String_var(_35), NULL)) && !(String_contains(String_getslice(dependency, x2c_slice_bound(String_len(lib)), (-2147483647 - 1), 1), _0))){
           Var index;
           if(Map_try_get(meta_build_tables, String_var(Path_absolute(dependency)), &(index))) Array_insert(ordered, groups ++, List_var(cons(_24, cons(String_var(String_join(NULL, cons(String_var(_36), cons(String_var(Var_str(index)), cons(String_var(_37), NULL))))), NULL))));
           else Array_push(ordered, List_var(cons(_24, cons(String_var(String_join(NULL, cons(String_var(_32), cons(String_var(Path_basename(dependency)), cons(String_var(_33), NULL))))), NULL))));

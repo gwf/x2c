@@ -2092,18 +2092,18 @@ Buffer ArrayChar_write_str(ArrayChar _x2c_gensym_macro_array_37, Buffer _x2c_gen
   return ArrayChar_write_elements(_x2c_gensym_macro_array_37, _x2c_gensym_macro_out_8, 40228);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 String Buffer_str_free(Buffer);
 
 String ArrayChar_str(ArrayChar _x2c_gensym_macro_array_38){
-  Buffer _x2c_gensym_macro_out_9 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_9 = Buffer_new(NULL);
   ArrayChar_write_str(_x2c_gensym_macro_array_38, _x2c_gensym_macro_out_9);
   return Buffer_str_free(_x2c_gensym_macro_out_9);
 }
 
 String ArrayChar_repr(ArrayChar _x2c_gensym_macro_array_39){
-  Buffer _x2c_gensym_macro_out_10 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_10 = Buffer_new(NULL);
   ArrayChar_write_repr(_x2c_gensym_macro_array_39, _x2c_gensym_macro_out_10);
   return Buffer_str_free(_x2c_gensym_macro_out_10);
 }
@@ -2691,13 +2691,13 @@ Buffer ArrayShort_write_str(ArrayShort _x2c_gensym_macro_array_86, Buffer _x2c_g
 }
 
 String ArrayShort_str(ArrayShort _x2c_gensym_macro_array_87){
-  Buffer _x2c_gensym_macro_out_22 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_22 = Buffer_new(NULL);
   ArrayShort_write_str(_x2c_gensym_macro_array_87, _x2c_gensym_macro_out_22);
   return Buffer_str_free(_x2c_gensym_macro_out_22);
 }
 
 String ArrayShort_repr(ArrayShort _x2c_gensym_macro_array_88){
-  Buffer _x2c_gensym_macro_out_23 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_23 = Buffer_new(NULL);
   ArrayShort_write_repr(_x2c_gensym_macro_array_88, _x2c_gensym_macro_out_23);
   return Buffer_str_free(_x2c_gensym_macro_out_23);
 }
@@ -3271,13 +3271,13 @@ Buffer ArrayInt_write_str(ArrayInt _x2c_gensym_macro_array_135, Buffer _x2c_gens
 }
 
 String ArrayInt_str(ArrayInt _x2c_gensym_macro_array_136){
-  Buffer _x2c_gensym_macro_out_35 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_35 = Buffer_new(NULL);
   ArrayInt_write_str(_x2c_gensym_macro_array_136, _x2c_gensym_macro_out_35);
   return Buffer_str_free(_x2c_gensym_macro_out_35);
 }
 
 String ArrayInt_repr(ArrayInt _x2c_gensym_macro_array_137){
-  Buffer _x2c_gensym_macro_out_36 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_36 = Buffer_new(NULL);
   ArrayInt_write_repr(_x2c_gensym_macro_array_137, _x2c_gensym_macro_out_36);
   return Buffer_str_free(_x2c_gensym_macro_out_36);
 }
@@ -3853,13 +3853,13 @@ Buffer ArrayLong_write_str(ArrayLong _x2c_gensym_macro_array_184, Buffer _x2c_ge
 }
 
 String ArrayLong_str(ArrayLong _x2c_gensym_macro_array_185){
-  Buffer _x2c_gensym_macro_out_48 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_48 = Buffer_new(NULL);
   ArrayLong_write_str(_x2c_gensym_macro_array_185, _x2c_gensym_macro_out_48);
   return Buffer_str_free(_x2c_gensym_macro_out_48);
 }
 
 String ArrayLong_repr(ArrayLong _x2c_gensym_macro_array_186){
-  Buffer _x2c_gensym_macro_out_49 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_49 = Buffer_new(NULL);
   ArrayLong_write_repr(_x2c_gensym_macro_array_186, _x2c_gensym_macro_out_49);
   return Buffer_str_free(_x2c_gensym_macro_out_49);
 }
@@ -4433,13 +4433,13 @@ Buffer ArrayFloat_write_str(ArrayFloat _x2c_gensym_macro_array_233, Buffer _x2c_
 }
 
 String ArrayFloat_str(ArrayFloat _x2c_gensym_macro_array_234){
-  Buffer _x2c_gensym_macro_out_61 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_61 = Buffer_new(NULL);
   ArrayFloat_write_str(_x2c_gensym_macro_array_234, _x2c_gensym_macro_out_61);
   return Buffer_str_free(_x2c_gensym_macro_out_61);
 }
 
 String ArrayFloat_repr(ArrayFloat _x2c_gensym_macro_array_235){
-  Buffer _x2c_gensym_macro_out_62 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_62 = Buffer_new(NULL);
   ArrayFloat_write_repr(_x2c_gensym_macro_array_235, _x2c_gensym_macro_out_62);
   return Buffer_str_free(_x2c_gensym_macro_out_62);
 }
@@ -5013,13 +5013,13 @@ Buffer ArrayDbl_write_str(ArrayDbl _x2c_gensym_macro_array_282, Buffer _x2c_gens
 }
 
 String ArrayDbl_str(ArrayDbl _x2c_gensym_macro_array_283){
-  Buffer _x2c_gensym_macro_out_74 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_74 = Buffer_new(NULL);
   ArrayDbl_write_str(_x2c_gensym_macro_array_283, _x2c_gensym_macro_out_74);
   return Buffer_str_free(_x2c_gensym_macro_out_74);
 }
 
 String ArrayDbl_repr(ArrayDbl _x2c_gensym_macro_array_284){
-  Buffer _x2c_gensym_macro_out_75 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_75 = Buffer_new(NULL);
   ArrayDbl_write_repr(_x2c_gensym_macro_array_284, _x2c_gensym_macro_out_75);
   return Buffer_str_free(_x2c_gensym_macro_out_75);
 }
@@ -5595,13 +5595,13 @@ Buffer ArrayString_write_str(ArrayString _x2c_gensym_macro_array_331, Buffer _x2
 }
 
 String ArrayString_str(ArrayString _x2c_gensym_macro_array_332){
-  Buffer _x2c_gensym_macro_out_87 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_87 = Buffer_new(NULL);
   ArrayString_write_str(_x2c_gensym_macro_array_332, _x2c_gensym_macro_out_87);
   return Buffer_str_free(_x2c_gensym_macro_out_87);
 }
 
 String ArrayString_repr(ArrayString _x2c_gensym_macro_array_333){
-  Buffer _x2c_gensym_macro_out_88 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_88 = Buffer_new(NULL);
   ArrayString_write_repr(_x2c_gensym_macro_array_333, _x2c_gensym_macro_out_88);
   return Buffer_str_free(_x2c_gensym_macro_out_88);
 }

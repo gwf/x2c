@@ -278,7 +278,7 @@ Map Args_parse(List args, List spec){
 
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 Buffer Buffer_printf(Buffer, const char *, ...);
 
@@ -301,7 +301,7 @@ String Args_usage(String program, List spec){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_3);
     {
-      Buffer synopsis = Buffer_new(0);
+      Buffer synopsis = Buffer_new(NULL);
       {
         _x2c_gensym_defer_env_7 _x2c_gensym_macro_environment_6 ={
           0
@@ -314,7 +314,7 @@ String Args_usage(String program, List spec){
         ;
         x2c_cleanup_push(& _x2c_gensym_defer_record_4);
         {
-          Buffer options = Buffer_new(0);
+          Buffer options = Buffer_new(NULL);
           {
             _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_5 ={
               0
@@ -327,7 +327,7 @@ String Args_usage(String program, List spec){
             ;
             x2c_cleanup_push(& _x2c_gensym_defer_record_5);
             {
-              Buffer operands = Buffer_new(0);
+              Buffer operands = Buffer_new(NULL);
               {
                 _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_4 ={
                   0
@@ -340,7 +340,7 @@ String Args_usage(String program, List spec){
                 ;
                 x2c_cleanup_push(& _x2c_gensym_defer_record_6);
                 {
-                  Buffer out = Buffer_new(0);
+                  Buffer out = Buffer_new(NULL);
                   {
                     _x2c_gensym_defer_env_4 _x2c_gensym_macro_environment_3 ={
                       0
@@ -484,7 +484,7 @@ static Spec _read_spec(List spec){
 
 }
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 static int Var_is_row(Var, unsigned, unsigned long, unsigned long);
 
@@ -492,7 +492,7 @@ String String_join(String, List);
 
 static void _read_row(Option * o, List row, Map index, int position){
   String first = Var_str(List_car(row));
-  (* o).operand = ! String_startswith(first, _4);
+  (* o).operand = ! String_startswith(first, cons(String_var(_4), NULL));
   {
     Var word;
     List _x2c_gensym_macro_object_1 = row;
@@ -506,8 +506,8 @@ static void _read_row(Option * o, List row, Map index, int position){
           continue;
         }
         String text = Var_str(word);
-        if(String_startswith(text, _4)){
-          if(! String_truth((* o).spelling) ||(String_startswith(text, _0) && ! String_startswith((* o).spelling, _0)))(* o).spelling = text;
+        if(String_startswith(text, cons(String_var(_4), NULL))){
+          if(! String_truth((* o).spelling) ||(String_startswith(text, cons(String_var(_0), NULL)) && ! String_startswith((* o).spelling, cons(String_var(_0), NULL))))(* o).spelling = text;
           (* o).spellings = String_truth((* o).spellings) ?({
             Var _x2c_gensym_literal_part_1 = String_var((* o).spellings);  String_join(NULL, cons(_x2c_gensym_literal_part_1, cons(String_var(_5), cons(String_var(text), NULL))));
           }
@@ -524,7 +524,7 @@ static void _read_row(Option * o, List row, Map index, int position){
   }
   if((* o).operand)(* o).name = first;
   else{
-    int dashes = String_startswith((* o).spelling, _0) ? 2 : 1;
+    int dashes = String_startswith((* o).spelling, cons(String_var(_0), NULL)) ? 2 : 1;
     (* o).name = String_getslice((* o).spelling, x2c_slice_bound(dashes), (-2147483647 - 1), 1);
   }
   if((* o).defaulted) return;
@@ -690,7 +690,7 @@ static String _label(Option * o){
     Var _x2c_gensym_literal_part_5 = String_var(label);  Var _x2c_gensym_literal_part_6 = String_var((* o).value);  String_join(NULL, cons(_x2c_gensym_literal_part_5, cons(String_var(_21), cons(_x2c_gensym_literal_part_6, cons(String_var(_17), NULL)))));
   }
   );
-  return String_startswith(label, _0) ? String_join(NULL, cons(String_var(_22), cons(String_var(label), NULL))) : label;
+  return String_startswith(label, cons(String_var(_0), NULL)) ? String_join(NULL, cons(String_var(_22), cons(String_var(label), NULL))) : label;
 }
 
 static void _write_row(Buffer out, String label, String help){
