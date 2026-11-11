@@ -240,9 +240,7 @@ static List _typeof_specifier(Compiler c) {
       c.token = operand;
       type = NULL;
     }
-  if (!type) {
-    type = _typeof_type(c.parse_expression());
-  }
+  if (!type) type = _typeof_type(c.parse_expression());
   c.expect(<)>);
   if (!unqualified) return type;
   if (type ~= %("__typeof__" *)) return %(unqual @type);
