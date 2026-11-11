@@ -534,6 +534,9 @@ static List _bind_invocation(
   Compiler c, Var definition, Var arguments, Var invocation, Symbol context,
   int pending) {
   Token site = c.macro_invocation_site(invocation);
+  /* An application a finished expansion returned, such as a row of
+     `expand`, binds at the token its result is bound at. */
+  if (!site && invocation == <m-invoke>) site = c.token;
   if (invocation != <m-invoke>)
     return c.expand_macro_invocation_node(
       definition, arguments, site, context);
