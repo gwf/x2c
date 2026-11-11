@@ -199,6 +199,30 @@ macro Unit $cui.widget5(Name $method) {
     $cui_call($ui, $method, $options, $a, $b, $c, $d, $e);
 }
 
+macro Unit $cui.widget6(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(
+    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f,
+    Entry @options) =>
+    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e, $f);
+}
+
+macro Unit $cui.widget7(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(
+    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g,
+    Entry @options) =>
+    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e, $f, $g);
+}
+
+macro Unit $cui.widget8(Name $method) {
+  $cui.named($method)
+  macro Expression $cui.widget(
+    Expr $ui, Expr $a, Expr $b, Expr $c, Expr $d, Expr $e, Expr $f, Expr $g, Expr $h,
+    Entry @options) =>
+    $cui_call($ui, $method, $options, $a, $b, $c, $d, $e, $f, $g, $h);
+}
+
 /* The block templates. The receiver is evaluated once; the end call is
    deferred, so it also runs when the block leaves early; a block whose
    begin call reports whether it is open runs only while it is open. */
@@ -280,6 +304,9 @@ meta static Macro _widget_form(int count) {
     case 3: return $cui.widget3;
     case 4: return $cui.widget4;
     case 5: return $cui.widget5;
+    case 6: return $cui.widget6;
+    case 7: return $cui.widget7;
+    case 8: return $cui.widget8;
   }
   return NULL;
 }
@@ -307,7 +334,7 @@ meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
   "menu_bar" "toolbar" "status_bar");
 meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
   "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
-  "user_menu" "menu_bar_menu" "inspector");
+  "user_menu" "menu_bar_menu" "inspector" "tree");
 
 /** Returns the begin call of a block, `ui.NAME_begin(...)` made by
     `cui_call`, as a test that is true while the block is open.
@@ -330,3 +357,17 @@ meta static List _method_form(String method, int count, int options) {
   Macro form = options && !block ? _widget_form(count) : NULL;
   return form ? Macro_apply(form, %($method)) : NULL;
 }
+
+/** Returns the method form of `method`, a `Ui` method written in x2c
+    rather than generated, when it takes an option record last.
+*/
+meta List cui_form(String method) {
+  Type ui = $!Type{ Ui };
+  List types = Type.parameters(Type.resolve_member(ui, method, 1)[2]);
+  int options = _option_record(types[types.len() - 1]);
+  List form = _method_form(method, types.len() - 1 - options, options);
+  return form ? $(form) : %();
+}
+
+/** Defines the method form of the `Ui` method `$method`. */
+macro Unit $cui.form(Name $method) { @cui_form($method) }

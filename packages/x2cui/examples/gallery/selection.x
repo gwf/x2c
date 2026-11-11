@@ -10,31 +10,31 @@ void page_selection(Ui ui, Gallery g) {
     $cui.column(ui, { .gap = 12 }) {
       section(ui, "Checkbox", NULL);
       $cui.card(ui, { .gap = 14 }) {
-        ui.checkbox("Email notifications", g.newsletter, {
-          .description = "Product news, at most once a month." });
-        ui.checkbox("Marketing", g.marketing, {
-          .description = "Offers from our partners." });
-        ui.checkbox("Disabled option", g.terms, { .disabled = true });
+        ui.checkbox("Email notifications", g.newsletter,
+          description: "Product news, at most once a month.");
+        ui.checkbox("Marketing", g.marketing,
+          description: "Offers from our partners.");
+        ui.checkbox("Disabled option", g.terms, disabled: true);
       }
     }
     $cui.column(ui, { .gap = 12 }) {
       section(ui, "Switch", NULL);
       $cui.card(ui, { .gap = 14 }) {
-        ui.switch("Wi-Fi", g.wifi, {});
-        ui.switch("Bluetooth", g.bluetooth, {});
-        ui.switch("Airplane mode", g.airplane, {
-          .description = "Turns off all radios." });
+        ui.switch("Wi-Fi", g.wifi);
+        ui.switch("Bluetooth", g.bluetooth);
+        ui.switch("Airplane mode", g.airplane,
+          description: "Turns off all radios.");
       }
     }
   }
   section(ui, "Radio group", NULL);
   $cui.card(ui, { .gap = 12 }) {
-    ui.radio("Every change", g.plan, 0, {
-      .description = "Save as you type. Uses the most disk." });
-    ui.radio("Every 5 minutes", g.plan, 1, {
-      .description = "A good balance for most projects." });
-    ui.radio("Only when I save", g.plan, 2, {
-      .description = "Nothing is written until you press Ctrl S." });
+    ui.radio("Every change", g.plan, 0,
+      description: "Save as you type. Uses the most disk.");
+    ui.radio("Every 5 minutes", g.plan, 1,
+      description: "A good balance for most projects.");
+    ui.radio("Only when I save", g.plan, 2,
+      description: "Nothing is written until you press Ctrl S.");
   }
   section(ui, "Radio cards",
           "For choices that need a sentence of explanation.");
@@ -49,14 +49,14 @@ void page_selection(Ui ui, Gallery g) {
         CUI_ICON_LAYERS, NULL },
     };
     // The page ignores the result, so the method stands in for the macro.
-    ui.radio_cards("places", places, $cui.count(places), g.plan_card, {});
+    ui.radio_cards("places", places, $cui.count(places), g.plan_card);
   }
   section(ui, "Sliders",
           "Drag past either end: the track stretches like rubber.");
   $cui.card(ui, { .gap = 20 }) {
-    ui.slider("Volume", g.volume, 0, 100, { .show_value = true });
-    ui.slider("Brightness", g.brightness, 0, 100, {
-      .step = 10, .show_value = true, .format = "%.0f%%" });
+    ui.slider("Volume", g.volume, 0, 100, show_value: true);
+    ui.slider("Brightness", g.brightness, 0, 100,
+      step: 10, show_value: true, format: "%.0f%%");
     ui.range_slider("Price range", g.lo, g.hi, 0, 100);
   }
   section(ui, "Chips and rating", NULL);
@@ -66,7 +66,7 @@ void page_selection(Ui ui, Gallery g) {
                      "Finance");
       int i = 0;
       foreach (String chip in chips) {
-        ui.chip(chip, g.chips[i], {});
+        ui.chip(chip, g.chips[i]);
         i++;
       }
     }

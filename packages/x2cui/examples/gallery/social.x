@@ -102,15 +102,15 @@ void page_social(Ui ui, Gallery g) {
                           "indicator.");
       $cui.card(ui, { .gap = 0, .pad = 16 }) {
         ui.chat_divider("Today");
-        ui.chat_message("Did the data grid make it into 1.1?", {
-          .author = "Jonas Berg", .time = "9:41", .last_in_group = false });
-        ui.chat_message("I need it for the billing page.", {
-          .author = "Jonas Berg", .grouped = true, .last_in_group = true });
+        ui.chat_message("Did the data grid make it into 1.1?",
+          author: "Jonas Berg", time: "9:41", last_in_group: false);
+        ui.chat_message("I need it for the billing page.",
+          author: "Jonas Berg", grouped: true, last_in_group: true);
         ui.chat_message("It did. 2,000 rows scroll at 60 fps on my laptop.",
-                        { .mine = true });
-        ui.chat_message("Shift and Ctrl clicks select like a spreadsheet.", {
-          .mine = true, .grouped = true, .last_in_group = true,
-          .status = "Read", .time = "9:43" });
+                        mine: true);
+        ui.chat_message("Shift and Ctrl clicks select like a spreadsheet.",
+          mine: true, grouped: true, last_in_group: true,
+          status: "Read", time: "9:43");
         ui.typing_indicator("Jonas");
       }
     }
@@ -119,26 +119,26 @@ void page_social(Ui ui, Gallery g) {
       $cui.card(ui, { .gap = 4, .pad = 14 }) {
         ui.comment("c1", "Tomas Rivera", "The new numbers match the staging "
                    "run. I would still test the import on a large file "
-                   "before Friday.", {
-          .time = "2h", .likes = &likes[0], .liked = &liked[0],
-          .badge = "Author" });
+                   "before Friday.",
+          time: "2h", likes: &likes[0], liked: &liked[0],
+          badge: "Author");
         ui.comment("c2", "Priya Nair", "Agreed. I have a 2 GB export we can "
-                   "use.", {
-          .time = "1h", .depth = 1, .likes = &likes[1],
-          .liked = &liked[1] });
-        ui.comment("c3", "Maya Okafor", "Scheduled it for 3 pm.", {
-          .time = "40m", .depth = 1, .likes = &likes[2], .liked = &liked[2],
-          .edited = true });
+                   "use.",
+          time: "1h", depth: 1, likes: &likes[1],
+          liked: &liked[1]);
+        ui.comment("c3", "Maya Okafor", "Scheduled it for 3 pm.",
+          time: "40m", depth: 1, likes: &likes[2], liked: &liked[2],
+          edited: true);
       }
     }
   }
   section(ui, "Presence", "Who is here now. Hover to spread them out.");
   $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_CENTER }) {
     ui.presence("here", who, $cui.count(who), 5, 30);
-    ui.counter("rev", revenue, { .format = "$%.0f", .size = 34,
-                                 .group_thousands = true });
-    if (ui.button("Add a sale", { .size = CUI_SIZE_SM,
-                                  .icon = CUI_ICON_PLUS }))
+    ui.counter("rev", revenue, format: "$%.0f", size: 34,
+                               group_thousands: true);
+    if (ui.button("Add a sale", size: CUI_SIZE_SM,
+                                icon: CUI_ICON_PLUS))
       revenue += 1287;
   }
 
@@ -149,7 +149,7 @@ void page_social(Ui ui, Gallery g) {
     { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
     { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 },
   };
-  ui.ticker("tick", tick, $cui.count(tick), {});
+  ui.ticker("tick", tick, $cui.count(tick));
 
   section(ui, "Carousel", "Drag, flick, scroll sideways or use the arrows "
                           "and dots.");
@@ -168,9 +168,9 @@ void page_social(Ui ui, Gallery g) {
       $cui.box(ui, { .width = CUI_FILL, .height = CUI_FILL,
                      .bg = CUI_RGB(tops[k]), .radius = 16, .pad = 28,
                      .gap = 8, .justify = CUI_JUSTIFY_END }) {
-        ui.text(title, { .font = CUI_FONT_DISPLAY, .size = 24,
-                         .color = CUI_RGB(0xffffff) });
-        ui.text(desc, { .color = CUI_RGBA(0xffffffc0) });
+        ui.text(title, font: CUI_FONT_DISPLAY, size: 24,
+                       color: CUI_RGB(0xffffff));
+        ui.text(desc, color: CUI_RGBA(0xffffffc0));
       }
     }
   }
@@ -183,20 +183,20 @@ void page_social(Ui ui, Gallery g) {
       section(ui, "Image viewer", "Wheel to zoom around the pointer, drag "
                                   "to pan, double-click for 100%.");
       ui.image_viewer("viewer", after, 640, 400, view,
-                      { .height = CUI_PX(260) });
+                      height: CUI_PX(260));
     }
     $cui.column(ui, { .width = CUI_GROW(2), .min_width = 240, .gap = 10 }) {
       section(ui, "Cropper", "Drag the corners; the square keeps its "
                              "shape.");
-      ui.cropper("cropper", after, 640, 400, crop, {
-        .aspect = 1, .height = CUI_PX(260) });
+      ui.cropper("cropper", after, 640, 400, crop,
+        aspect: 1, height: CUI_PX(260));
     }
   }
   $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
     $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
       section(ui, "Before and after", "Drag the divider.");
-      ui.image_compare("cmp", before, after, split, {
-        .height = 230, .aspect = 640.0f / 400.0f });
+      ui.image_compare("cmp", before, after, split,
+        height: 230, aspect: 640.0f / 400.0f);
     }
     $cui.column(ui, { .width = CUI_GROW(1), .gap = 10,
                       .align = CUI_ALIGN_CENTER }) {
@@ -213,17 +213,17 @@ void page_social(Ui ui, Gallery g) {
         $cui.box(ui, { .width = CUI_FILL, .height = CUI_FILL,
                        .bg = CUI_RGB(cols[idx]), .radius = 25, .pad = 20,
                        .justify = CUI_JUSTIFY_END, .gap = 4 }) {
-          ui.text(name, { .font = CUI_FONT_DISPLAY, .size = 22,
-                          .color = CUI_RGB(0xffffff) });
-          ui.text("Swipe right to save", {
-            .size = 13, .font = CUI_FONT_MEDIUM,
-            .color = CUI_RGBA(0xfffffff0) });
+          ui.text(name, font: CUI_FONT_DISPLAY, size: 22,
+                        color: CUI_RGB(0xffffff));
+          ui.text("Swipe right to save",
+            size: 13, font: CUI_FONT_MEDIUM,
+            color: CUI_RGBA(0xfffffff0));
         }
       }
       int dir = ui.card_stack_end();
       if (dir) {
         deck = (deck + 1) % 5;
-        ui.toast(dir > 0 ? "Saved" : "Skipped", {});
+        ui.toast(dir > 0 ? "Saved" : "Skipped");
       }
     }
   }

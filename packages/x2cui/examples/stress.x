@@ -137,9 +137,9 @@ static void draw_components(Ui ui, Stress &stress) {
       $cui.card(ui, { .width = CUI_PX(96), .pad = 8, .gap = 6 }) {
         $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
           ui.spinner(14);
-          ui.badge(%"$i", { .tone = (cui_tone) (i % 9) });
+          ui.badge(%"$i", tone: (cui_tone) (i % 9));
         }
-        ui.progress(value, {});
+        ui.progress(value);
       }
     }
   }
@@ -149,9 +149,9 @@ static void draw_components(Ui ui, Stress &stress) {
 
 static void figure(Ui ui, String label, String value) {
   $cui.column(ui, { .width = CUI_PX(120), .gap = 2 }) {
-    ui.text(label, { .size = 12, .color = CUI_COLOR_TEXT_MUTED });
-    ui.text(value, { .size = 22, .font = CUI_FONT_MEDIUM, .tabular = true,
-                     .nowrap = true });
+    ui.text(label, size: 12, color: CUI_COLOR_TEXT_MUTED);
+    ui.text(value, size: 22, font: CUI_FONT_MEDIUM, tabular: true,
+                   nowrap: true);
   }
 }
 
@@ -186,7 +186,7 @@ static void draw_history(Ui ui, Stress &stress) {
   memcpy(history.times, stress.times, sizeof history.times);
   $cui.column(ui, { .width = CUI_FILL, .min_width = 240, .gap = 2 }) {
     ui.text("Between frames, last 240, with a guide at 16.7 ms",
-            { .size = 12, .color = CUI_COLOR_TEXT_MUTED, .nowrap = true });
+            size: 12, color: CUI_COLOR_TEXT_MUTED, nowrap: true);
     // The canvas copies the history, because it paints when the frame ends.
     ui.canvas("history", CUI_FILL, CUI_PX(40), paint_history, &history,
               sizeof history);
@@ -206,10 +206,10 @@ static void draw(Ui ui, Stress &stress) {
       draw_history(ui, stress);
     }
     $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER }) {
-      if (ui.segmented("load", %("Shapes" "Components"), stress.load, {}))
+      if (ui.segmented("load", %("Shapes" "Components"), stress.load))
         stress.items = stress.load == SHAPES ? 2000 : 200;
       ui.slider("items", stress.items, 10, item_limit(stress.load),
-                { .step = 10, .show_value = true, .width = CUI_FILL });
+                step: 10, show_value: true, width: CUI_FILL);
     }
     if (stress.load == SHAPES) draw_shapes(ui, stress);
     else draw_components(ui, stress);

@@ -19,8 +19,8 @@ void page_code(Ui ui, Gallery g) {
     "    cui_textf(ui, \"Clicked %d times\", clicks);\n"
     "    float ratio = clicks / 10.0f;   // grows with each click\n"
     "}\n",
-    { .lang = "c", .title = "counter.c", .line_numbers = true,
-      .highlight_from = 7 });
+    lang: "c", title: "counter.c", line_numbers: true,
+    highlight_from: 7);
   $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
     $cui.box(ui, { .width = CUI_GROW(1) })
       ui.code_block("py",
@@ -31,14 +31,14 @@ void page_code(Ui ui, Gallery g) {
         "    return fib(n - 1) + fib(n - 2)\n"
         "\n"
         "print([fib(k) for k in range(10)])\n",
-        { .lang = "python", .title = "fib.py" });
+        lang: "python", title: "fib.py");
     $cui.box(ui, { .width = CUI_GROW(1) })
       ui.code_block("sh",
         "git clone https://github.com/yappologistic/CUI.git\n"
         "cmake -S CUI -B build\n"
         "cmake --build build\n"
         "./build/examples/gallery  # run it\n",
-        { .lang = "shell" });
+        lang: "shell");
   }
   section(ui, "JSON viewer", "Collapsible, with counts. Click a brace to "
                              "fold it.");
@@ -50,6 +50,6 @@ void page_code(Ui ui, Gallery g) {
     "\"vsync\": true, \"msaa\": null},\n"
     " \"authors\": [{\"name\": \"Maya\", \"commits\": 412}, "
     "{\"name\": \"Jonas\", \"commits\": 388}]}",
-    { .expand_depth = 2 });
-  ui.json_view("broken", "{\"ok\": true, \"oops\": [1, 2,}", {});
+    expand_depth: 2);
+  ui.json_view("broken", "{\"ok\": true, \"oops\": [1, 2,}");
 }

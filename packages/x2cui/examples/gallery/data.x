@@ -55,13 +55,13 @@ void page_data(Ui ui, Gallery g) {
       person_row *r = &rows[order[k]];
       if (ui.table_row(g.selected_row == order[k])) g.selected_row = order[k];
       ui.table_cell();
-      ui.avatar(r.name, { .size = 26 });
-      ui.text(r.name, { .font = CUI_FONT_MEDIUM, .nowrap = true });
+      ui.avatar(r.name, size: 26);
+      ui.text(r.name, font: CUI_FONT_MEDIUM, nowrap: true);
       ui.table_cell();
-      ui.text(r.email, { .color = CUI_COLOR_TEXT_SECONDARY, .nowrap = true });
+      ui.text(r.email, color: CUI_COLOR_TEXT_SECONDARY, nowrap: true);
       ui.table_cell_text(r.role);
       ui.table_cell();
-      ui.badge(r.status, { .tone = r.status_tone, .dot = true });
+      ui.badge(r.status, tone: r.status_tone, dot: true);
       ui.table_cell_text(r.amount);
     }
   }
@@ -92,15 +92,15 @@ void page_data(Ui ui, Gallery g) {
     $cui.column(ui, { .gap = 12 }) {
       section(ui, "List", NULL);
       $cui.card(ui, { .pad = 8, .gap = 2 }) {
-        ui.list_item("Design review", {
-          .avatar = "Jonas Berg", .subtitle = "Tomorrow at 10:00",
-          .trailing = "45m" });
-        ui.list_item("Release 1.0", {
-          .avatar = "Priya Nair", .subtitle = "Ship it", .trailing = "2h",
-          .selected = true });
-        ui.list_item("Planning", {
-          .avatar = "Tomas Rivera", .subtitle = "Q1 roadmap",
-          .trailing = "1h" });
+        ui.list_item("Design review",
+          avatar: "Jonas Berg", subtitle: "Tomorrow at 10:00",
+          trailing: "45m");
+        ui.list_item("Release 1.0",
+          avatar: "Priya Nair", subtitle: "Ship it", trailing: "2h",
+          selected: true);
+        ui.list_item("Planning",
+          avatar: "Tomas Rivera", subtitle: "Q1 roadmap",
+          trailing: "1h");
       }
     }
   }
@@ -121,11 +121,11 @@ void page_data(Ui ui, Gallery g) {
       $cui.reorder_item(ui, i) {
         int t = g.task_order[i];
         String task = tasks[t], label = labels[t];
-        ui.text(task, { .nowrap = true, .width = CUI_FILL });
-        ui.badge(label, { .tone = tones[t] });
+        ui.text(task, nowrap: true, width: CUI_FILL);
+        ui.badge(label, tone: tones[t]);
       }
     }
-    if (ui.reorder_end()) ui.toast("Order saved", {});
+    if (ui.reorder_end()) ui.toast("Order saved");
   }
   section(ui, "Accordion", NULL);
   $cui.card(ui, { .pad_y = 4, .gap = 0 }) {
@@ -153,12 +153,12 @@ void page_data(Ui ui, Gallery g) {
                                       (h >> 4) % 100);
         $cui.row(ui, { .height = CUI_PX(36), .pad_x = 12, .gap = 12 }) {
           ui.icon(CUI_ICON_FILE_TEXT, 16, CUI_COLOR_TEXT_MUTED);
-          ui.text(invoice, { .nowrap = true, .width = CUI_FILL,
-                             .tabular = true });
-          ui.text(amount, { .size = 13, .tabular = true, .nowrap = true });
-          ui.text((h >> 20) % 5 == 0 ? "Due" : "Paid", {
-            .size = 12, .color = CUI_COLOR_TEXT_MUTED, .nowrap = true,
-            .width = CUI_PX(32) });
+          ui.text(invoice, nowrap: true, width: CUI_FILL,
+                           tabular: true);
+          ui.text(amount, size: 13, tabular: true, nowrap: true);
+          ui.text((h >> 20) % 5 == 0 ? "Due" : "Paid",
+            size: 12, color: CUI_COLOR_TEXT_MUTED, nowrap: true,
+            width: CUI_PX(32));
         }
       }
     }

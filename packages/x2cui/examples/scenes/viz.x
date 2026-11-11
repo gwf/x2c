@@ -112,15 +112,15 @@ static void scene_donut_chart(Ui ui) {
   $cui.card(ui, { .align = CUI_ALIGN_CENTER })
     ui.donut_chart("platforms", shares,
                    %("Windows" "macOS" "Linux" "Other"),
-                   { .height = 200, .format = "%.0f%%" });
+                   height: 200, format: "%.0f%%");
 }
 
 static void scene_activity_rings(Ui ui) {
   static const cui_viz_item rings[] = {
     { "Move", 0.82f }, { "Exercise", 1.24f }, { "Stand", 0.58f } };
   $cui.card(ui, { .pad = 18 })
-    ui.activity_rings("rings", rings, $cui.count(rings), {
-      .size = 170, .center = "82%", .caption = "of goal", .legend = true });
+    ui.activity_rings("rings", rings, $cui.count(rings),
+      size: 170, center: "82%", caption: "of goal", legend: true);
 }
 
 static void scene_bar_list(Ui ui) {
@@ -130,20 +130,20 @@ static void scene_bar_list(Ui ui) {
     { "/pricing", 640 } };
   $cui.card(ui, { .width = CUI_FILL, .max_width = 480, .gap = 10 }) {
     ui.label("Top pages this week");
-    ui.bar_list("pages", pages, $cui.count(pages), {});
+    ui.bar_list("pages", pages, $cui.count(pages));
   }
 }
 
 static void scene_calendar_heatmap(Ui ui) {
   $cui.card(ui, { .pad = 18 })
     ui.calendar_heatmap("activity", (cui_date){ 2026, 1, 1 }, commits,
-                        $cui.count(commits), { .unit = "commits" });
+                        $cui.count(commits), unit: "commits");
 }
 
 static void scene_candlestick(Ui ui) {
   $cui.card(ui, { .width = CUI_FILL, .max_width = 660, .gap = 10 }) {
     ui.label("Price, 60 trading days");
-    ui.candlestick("price", candles, $cui.count(candles), { .height = 260 });
+    ui.candlestick("price", candles, $cui.count(candles), height: 260);
   }
 }
 
@@ -152,7 +152,7 @@ static void scene_funnel(Ui ui) {
     { "Visited", 12840 }, { "Signed up", 4210 }, { "Activated", 2380 },
     { "Subscribed", 860 } };
   $cui.card(ui, { .width = CUI_FILL, .max_width = 520 })
-    ui.funnel("signups", stages, $cui.count(stages), {});
+    ui.funnel("signups", stages, $cui.count(stages));
 }
 
 static void scene_heatmap(Ui ui) {
@@ -163,8 +163,8 @@ static void scene_heatmap(Ui ui) {
     "12h", NULL, NULL, "15h", NULL, NULL, "18h", NULL, NULL, "21h", NULL,
     NULL };
   $cui.card(ui, { .pad = 18, .width = CUI_FILL, .max_width = 660 })
-    ui.heatmap("traffic", traffic, 7, 24, {
-      .row_labels = weekdays, .col_labels = hours, .format = "%.0f req" });
+    ui.heatmap("traffic", traffic, 7, 24,
+      row_labels: weekdays, col_labels: hours, format: "%.0f req");
 }
 
 static void scene_radar_chart(Ui ui) {
@@ -176,7 +176,7 @@ static void scene_radar_chart(Ui ui) {
   $cui.card(ui, { .pad = 18 })
     ui.radar_chart("qualities", releases, $cui.count(releases),
                    %("Speed" "Size" "Polish" "Docs" "Platforms" "Tests"),
-                   { .size = 240, .max = 100 });
+                   size: 240, max: 100);
 }
 
 static void scene_sankey(Ui ui) {
@@ -186,7 +186,7 @@ static void scene_sankey(Ui ui) {
   $cui.card(ui, { .pad = 18, .width = CUI_FILL, .max_width = 660 })
     ui.sankey("signups", %("Search" "Social" "Referral" "Sign up" "Bounced"
                            "Trial" "Paid" "Churned"),
-              links, $cui.count(links), { .height = 260 });
+              links, $cui.count(links), height: 260);
 }
 
 static void scene_scatter_chart(Ui ui) {
@@ -195,9 +195,9 @@ static void scene_scatter_chart(Ui ui) {
       $cui.count(software_points) },
     { "OpenGL", opengl_points, opengl_sizes, $cui.count(opengl_points) } };
   $cui.card(ui, { .pad = 18, .width = CUI_FILL, .max_width = 660 })
-    ui.scatter_chart("frames", series, $cui.count(series), {
-      .height = 280, .x_label = "Nodes", .y_label = "Frame time (ms)",
-      .y_format = "%.2f" });
+    ui.scatter_chart("frames", series, $cui.count(series),
+      height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
+      y_format: "%.2f");
 }
 
 static void scene_split_bar(Ui ui) {
@@ -206,7 +206,7 @@ static void scene_split_bar(Ui ui) {
     { "Other", 8 } };
   $cui.card(ui, { .width = CUI_FILL, .max_width = 520, .gap = 10 }) {
     ui.label("Frame time by stage");
-    ui.split_bar("frame", parts, $cui.count(parts), { .format = "%.0f ms" });
+    ui.split_bar("frame", parts, $cui.count(parts), format: "%.0f ms");
   }
 }
 
@@ -217,7 +217,7 @@ static void scene_treemap(Ui ui) {
     { "Theme", 9 }, { "Icons", 7 }, { "Grid", 6 } };
   $cui.box(ui, { .width = CUI_FILL, .max_width = 620 })
     ui.treemap("bundle", modules, $cui.count(modules),
-               { .height = 280, .format = "%.0f KB" });
+               height: 280, format: "%.0f KB");
 }
 
 static void scene_waffle(Ui ui) {
@@ -225,7 +225,7 @@ static void scene_waffle(Ui ui) {
     { "Windows", 46 }, { "macOS", 31 }, { "Linux", 23 } };
   $cui.card(ui, { .pad = 18, .gap = 10 }) {
     ui.label("Platforms of the last 100 installs");
-    ui.waffle("installs", platforms, $cui.count(platforms), { .cell = 16 });
+    ui.waffle("installs", platforms, $cui.count(platforms), cell: 16);
   }
 }
 
@@ -233,13 +233,13 @@ static void scene_waveform(Ui ui) {
   static float progress = 0.36f;
   $cui.card(ui, { .pad = 14, .width = CUI_PX(380) })
   $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_CENTER, .width = CUI_FILL }) {
-    ui.icon_button(CUI_ICON_PLAY, { .size = CUI_SIZE_SM,
-                                    .variant = CUI_BUTTON_SECONDARY });
+    ui.icon_button(CUI_ICON_PLAY, size: CUI_SIZE_SM,
+                                  variant: CUI_BUTTON_SECONDARY);
     $cui.box(ui, { .width = CUI_FILL })
       ui.waveform("track", peaks, $cui.count(peaks), progress,
-                  { .height = 34 });
-    ui.text("0:42", { .size = 12, .tabular = true,
-                      .color = CUI_COLOR_TEXT_MUTED });
+                  height: 34);
+    ui.text("0:42", size: 12, tabular: true,
+                    color: CUI_COLOR_TEXT_MUTED);
   }
 }
 
@@ -248,8 +248,8 @@ static void scene_level_meter(Ui ui) {
   static float levels[] = { 0.42f, 0.61f };
   $cui.card(ui, { .gap = 10 }) {
     ui.label("Master");
-    ui.level_meter("master", levels, $cui.count(levels), {
-      .horizontal = true, .length = 280, .scale = true, .segmented = true });
+    ui.level_meter("master", levels, $cui.count(levels),
+      horizontal: true, length: 280, scale: true, segmented: true);
   }
 }
 
@@ -259,7 +259,7 @@ static void scene_histogram_slider(Ui ui) {
   static float lo = 40, hi = 160;
   $cui.card(ui, { .width = CUI_PX(380), .gap = 6 }) {
     ui.histogram_slider("Price", bins, $cui.count(bins), lo, hi, 0, 240,
-                        { .format = "$%.0f" });
+                        format: "$%.0f");
     ui.muted("1,204 listings in range");
   }
 }
@@ -275,7 +275,7 @@ static void scene_time_histogram(Ui ui) {
   $cui.box(ui, { .width = CUI_FILL, .max_width = 660 })
     ui.time_histogram("logs", day, 900, $cui.count(info_lines), levels,
                       $cui.count(levels), from, to,
-                      { .utc = true, .height = 150 });
+                      utc: true, height: 150);
 }
 
 static void scene_uptime(Ui ui) {
@@ -284,8 +284,8 @@ static void scene_uptime(Ui ui) {
     { "Website", web_days, $cui.count(web_days) },
     { "CDN", cdn_days, $cui.count(cdn_days) } };
   $cui.box(ui, { .width = CUI_FILL, .max_width = 660 })
-    ui.uptime("status", services, $cui.count(services), {
-      .last_day = (cui_date){ 2026, 11, 9 } });
+    ui.uptime("status", services, $cui.count(services),
+      last_day: (cui_date){ 2026, 11, 9 });
 }
 
 static void scene_ticker(Ui ui) {
@@ -294,7 +294,7 @@ static void scene_ticker(Ui ui) {
     { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
     { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 } };
   $cui.box(ui, { .width = CUI_FILL })
-    ui.ticker("figures", figures, $cui.count(figures), {});
+    ui.ticker("figures", figures, $cui.count(figures));
 }
 
 static Scene viz_scenes[] = {

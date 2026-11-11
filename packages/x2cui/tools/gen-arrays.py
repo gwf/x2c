@@ -11,6 +11,11 @@ and its count, as CUI declares them; a call site passes a C array and
 `$cui.count(array)`. It keeps CUI's parameter names. Rerun it after
 changing the pinned CUI version and review the difference. Variadic
 functions get no form.
+
+It also writes the table of the methods in src/x2cui.x, generated here or
+written by hand, whose last parameter is an option record; each has a
+method form, `ui.tab_bar("tabs", tabs, $cui.count(tabs), selected,
+variant: pill)`.
 """
 import re
 import sys
@@ -145,6 +150,18 @@ def forms(header, existing):
   return methods
 
 
+def option_methods(source):
+  """Names the methods of `source` whose last parameter is an option
+  record."""
+  pattern = r"^(?:inline )?[\w ]+ Ui\.(\w+)\(([^()]*)\)\s*(?:=>|\{)"
+  names = []
+  for match in re.finditer(pattern, source, flags=re.M):
+    last = " ".join(match.group(2).split(",")[-1].split())
+    if re.match(r"cui_\w+_opts \w+$", last):
+      names.append(match.group(1))
+  return names
+
+
 def replace(path, kind, items):
   source = open(path).read()
   begin, end = BEGIN % kind, END % kind
@@ -165,7 +182,11 @@ def main():
     existing |= {"cui_" + method, "cui_" + method + "_ex"}
   methods = forms(header, existing)
   replace("src/x2cui.x", "methods", methods)
-  print(f"{len(methods)} methods")
+  names = option_methods(open("src/x2cui.x").read())
+  table = wrap("expand %(", names, ")", "  ").replace(", ", " ").replace(",\n", "\n")
+  replace("src/x2cui.x", "forms",
+          [table + "\nmacro Unit(Name $method) { $cui.form($method); }"])
+  print(f"{len(methods)} methods, {len(names)} forms")
 
 
 if __name__ == "__main__":

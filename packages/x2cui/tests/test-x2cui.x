@@ -25,13 +25,13 @@ typedef struct Form {
 
 static void draw_form(Ui ui, Form &form) {
   $cui.column(ui, { .pad = 16, .gap = 12, .width = CUI_FILL }) {
-    form.clicks += ui.button("Save", { .variant = CUI_BUTTON_PRIMARY });
+    form.clicks += ui.button("Save", variant: CUI_BUTTON_PRIMARY);
     form.button = ui.last_rect();
-    ui.checkbox("I agree", form.agree, {});
+    ui.checkbox("I agree", form.agree);
     form.box = ui.last_rect();
-    form.typed |= ui.input("name", form.name, { .width = CUI_FILL });
+    form.typed |= ui.input("name", form.name, width: CUI_FILL);
     form.field = ui.last_rect();
-    ui.segmented("tab", %("One" "Two" "Three"), form.tab, {});
+    ui.segmented("tab", %("One" "Two" "Three"), form.tab);
   }
 }
 
@@ -196,11 +196,11 @@ static void a_string_list_lasts_until_the_frame_is_painted(void) {
     // The first array is built inside a region, which must not free it.
     if (pass == 0) auto {
       screen.ui().wheel_picker(
-        "month", %("January" "February" "March"), month, {});
+        "month", %("January" "February" "March"), month);
     }
     else
       screen.ui().wheel_picker(
-        "month", %("January" "February" "March"), month, {});
+        "month", %("January" "February" "March"), month);
     screen.end();
   }
   EXPECT_TRUE(screen.commands() > 0);

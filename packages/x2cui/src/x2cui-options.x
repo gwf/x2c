@@ -14,7 +14,8 @@
     Every value, and every ordinary argument, is lowered by the C type of
     its field or parameter:
 
-      a name x2c does not know       a short name for a CUI constant:
+      a lower-case name x2c does     a short name for a CUI constant:
+      not know
         an enum                      its member: center is CUI_ALIGN_CENTER
                                      for a cui_align, primary is
                                      CUI_BUTTON_PRIMARY for a
@@ -28,8 +29,8 @@
       grow(w) for a cui_size         CUI_GROW(w)
       test ? a : b                   each arm lowered
 
-    A declared name keeps its own value, and so does a name already
-    spelled as a CUI constant, such as CUI_FILL.
+    A short name is in lower case. A declared name keeps its own value,
+    and so does a C macro such as CUI_FILL or NULL.
 
     These functions run in the compiler of the unit that calls a method
     form, so they are public.
@@ -130,7 +131,7 @@ meta static List _free_name(String spelling) =>
 meta static int _size(Type type) => type ~= %("cui_size");
 
 meta static List _short(Type type, String name, List value) {
-  String constant = name.startswith("CUI_") ? NULL : _constant(type, name);
+  String constant = name == name.lower() ? _constant(type, name) : NULL;
   return constant ? _free_name(constant) : value;
 }
 

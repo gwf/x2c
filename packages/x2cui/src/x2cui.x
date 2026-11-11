@@ -848,3 +848,21 @@ inline void Ui.draw_polygon(
   cui_draw_polygon(ui, points, count, color);
 
 /* gen-arrays: end generated methods */
+
+/* The method forms of the methods above that take an option record. */
+
+/* gen-arrays: begin generated forms */
+
+expand %(
+  prop_vec2 prop_vec3 prop_vec4 tree_begin donut_chart line_chart
+  bar_chart tour toggle_group speed_dial tree_table_begin ticker heatmap
+  calendar_heatmap treemap radar_chart funnel sankey waffle split_bar
+  bar_list activity_rings scatter_chart candlestick tab_bar waveform
+  agent_plan prompt_suggestions model_picker week_calendar month_calendar
+  gantt checklist multi_select histogram_slider level_meter doc_tabs
+  prop_vec hex_view flame_graph curve_editor gradient_editor
+  timeline_editor kv_editor problems pipeline query_builder keymap
+  commit_graph graph_view waterfall trace_view test_explorer stack_trace
+  uptime time_histogram coverage blame feature_flags api_explorer)
+macro Unit(Name $method) { $cui.form($method); }
+/* gen-arrays: end generated forms */

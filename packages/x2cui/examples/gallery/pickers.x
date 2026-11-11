@@ -38,15 +38,15 @@ void page_pickers(Ui ui, Gallery g) {
   List items = %("C" "C++" "Rust" "Zig" "Go" "Swift" "Kotlin" "Odin");
   $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_START })
   $cui.box(ui, { .width = CUI_PX(320) })
-    ui.multi_select("langs", items, langs, { .label = "Languages",
-                                             .searchable = true });
+    ui.multi_select("langs", items, langs, label: "Languages",
+                                           searchable: true);
 
   section(ui, "Date range",
           "Presets on the left, two months to pick a start and an end.");
   $cui.row(ui, { .gap = 12, .wrap = true }) {
-    ui.date_range_picker("range", range, { .width = CUI_PX(300) });
-    ui.date_range_picker("stay", stay, { .width = CUI_PX(300),
-                                         .no_presets = true });
+    ui.date_range_picker("range", range, width: CUI_PX(300));
+    ui.date_range_picker("stay", stay, width: CUI_PX(300),
+                                       no_presets: true);
   }
   // As wide as its months.
   $cui.row(ui, {}) $cui.card(ui, { .pad = 16 })
@@ -55,9 +55,9 @@ void page_pickers(Ui ui, Gallery g) {
   section(ui, "Time",
           "A field with hour and minute columns, 24 hour or 12 hour.");
   $cui.row(ui, { .gap = 12, .wrap = true }) {
-    ui.time_picker("start", hour, minute, {});
-    ui.time_picker("end", h2, m2, { .twelve_hour = true,
-                                    .minute_step = 15 });
+    ui.time_picker("start", hour, minute);
+    ui.time_picker("end", h2, m2, twelve_hour: true,
+                                  minute_step: 15);
   }
 
   section(ui, "Wheels and dial",
@@ -68,13 +68,13 @@ void page_pickers(Ui ui, Gallery g) {
                     "July" "August" "September" "October" "November"
                     "December");
     $cui.card(ui, { .dir = CUI_ROW, .gap = 0, .pad = 8 }) {
-      ui.wheel_picker("day", days, day, { .width = CUI_PX(64), .loop = true,
-                                          .join_right = true });
-      ui.wheel_picker("month", months, month, {
-        .width = CUI_PX(128), .loop = true, .join_left = true,
-        .join_right = true });
-      ui.wheel_picker("year", years, year, { .width = CUI_PX(80),
-                                             .join_left = true });
+      ui.wheel_picker("day", days, day, width: CUI_PX(64), loop: true,
+                                        join_right: true);
+      ui.wheel_picker("month", months, month,
+        width: CUI_PX(128), loop: true, join_left: true,
+        join_right: true);
+      ui.wheel_picker("year", years, year, width: CUI_PX(80),
+                                           join_left: true);
     }
     ui.time_dial("dial", dh, dm, 232);
   }
@@ -84,15 +84,15 @@ void page_pickers(Ui ui, Gallery g) {
           "data.");
   $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START }) {
     $cui.column(ui, { .width = CUI_FILL, .gap = 20 }) {
-      ui.ruler_slider("Height", height, 120, 220, { .unit = "cm" });
-      ui.ruler_slider("Temperature", temp, 10, 30, {
-        .step = 0.5f, .major_every = 4, .spacing = 14, .format = "%.1f",
-        .unit = "\xc2\xb0" "C" });
+      ui.ruler_slider("Height", height, 120, 220, unit: "cm");
+      ui.ruler_slider("Temperature", temp, 10, 30,
+        step: 0.5f, major_every: 4, spacing: 14, format: "%.1f",
+        unit: "\xc2\xb0" "C");
     }
     $cui.card(ui, { .width = CUI_FILL, .gap = 6 }) {
       // The page ignores the result, so the method stands in for the macro.
       ui.histogram_slider("Price", bins, $cui.count(bins), lo, hi, 0, 240,
-                          { .format = "$%.0f" });
+                          format: "$%.0f");
       ui.muted("1,204 listings in range");
     }
   }

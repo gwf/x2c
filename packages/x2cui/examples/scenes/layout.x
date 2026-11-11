@@ -17,7 +17,7 @@ static void scene_box(Ui ui) {
                  .bg = CUI_COLOR_SURFACE_MUTED }) {
     ui.label("A box");
     ui.text("A box holds children and has padding, a gap between "
-            "children, a background, and a corner radius.", {});
+            "children, a background, and a corner radius.");
   }
 }
 
@@ -42,8 +42,8 @@ static void scene_card(Ui ui) {
   $cui.card(ui, { .width = CUI_PX(320), .pad = 20, .gap = 8 }) {
     ui.heading("Quarterly report", 4);
     ui.text("A card is a surface with a border. This one holds a heading, "
-            "a paragraph, and an action.", { .color = CUI_COLOR_TEXT_MUTED });
-    ui.button("Open", { .variant = CUI_BUTTON_OUTLINE });
+            "a paragraph, and an action.", color: CUI_COLOR_TEXT_MUTED);
+    ui.button("Open", variant: CUI_BUTTON_OUTLINE);
   }
 }
 
@@ -69,20 +69,20 @@ static void scene_id_scope(Ui ui) {
   // Both rows hold a switch labelled "Enabled"; the scope keeps them apart.
   $cui.id_scope(ui, "wifi") $cui.row(ui, { .gap = 12 }) {
     ui.label("Wi-Fi");
-    ui.switch("Enabled", first, {});
+    ui.switch("Enabled", first);
   }
   $cui.id_scope(ui, "bluetooth") $cui.row(ui, { .gap = 12 }) {
     ui.label("Bluetooth");
-    ui.switch("Enabled", second, {});
+    ui.switch("Enabled", second);
   }
 }
 
 static void scene_disabled_scope(Ui ui) {
   static bool locked = true, notify = true;
-  ui.switch("Lock the form", locked, {});
+  ui.switch("Lock the form", locked);
   $cui.disabled_scope(ui, locked) $cui.column(ui, { .gap = 8 }) {
-    ui.checkbox("Send notifications", notify, {});
-    ui.button("Save", { .variant = CUI_BUTTON_PRIMARY });
+    ui.checkbox("Send notifications", notify);
+    ui.button("Save", variant: CUI_BUTTON_PRIMARY);
   }
 }
 
@@ -90,32 +90,32 @@ static void scene_text(Ui ui) {
   ui.heading("Heading", 2);
   ui.label("A label has medium weight.");
   ui.text("Body text wraps to the width it is given and follows the theme.",
-          { .width = CUI_PX(320) });
-  ui.text("Muted, smaller text.", { .color = CUI_COLOR_TEXT_MUTED,
-                                    .size = 12 });
+          width: CUI_PX(320));
+  ui.text("Muted, smaller text.", color: CUI_COLOR_TEXT_MUTED,
+                                  size: 12);
 }
 
 static void scene_button(Ui ui) {
   static int clicks = 0;
   $cui.row(ui, { .gap = 8, .wrap = true }) {
-    if (ui.button("Primary", { .variant = CUI_BUTTON_PRIMARY,
-                               .icon = CUI_ICON_PLUS }))
+    if (ui.button("Primary", variant: CUI_BUTTON_PRIMARY,
+                             icon: CUI_ICON_PLUS))
       clicks++;
-    ui.button("Secondary", {});
-    ui.button("Outline", { .variant = CUI_BUTTON_OUTLINE });
-    ui.button("Ghost", { .variant = CUI_BUTTON_GHOST });
-    ui.button("Danger", { .variant = CUI_BUTTON_DANGER });
-    ui.button("Saving", { .variant = CUI_BUTTON_PRIMARY, .loading = true });
+    ui.button("Secondary");
+    ui.button("Outline", variant: CUI_BUTTON_OUTLINE);
+    ui.button("Ghost", variant: CUI_BUTTON_GHOST);
+    ui.button("Danger", variant: CUI_BUTTON_DANGER);
+    ui.button("Saving", variant: CUI_BUTTON_PRIMARY, loading: true);
   }
-  ui.text(%"Primary was clicked $clicks times.", {});
+  ui.text(%"Primary was clicked $clicks times.");
 }
 
 static void scene_icon_button(Ui ui) {
   $cui.row(ui, { .gap = 8 }) {
-    ui.icon_button(CUI_ICON_SETTINGS, { .tooltip = "Settings" });
-    ui.icon_button(CUI_ICON_SEARCH, { .variant = CUI_BUTTON_OUTLINE });
-    ui.icon_button(CUI_ICON_X, { .variant = CUI_BUTTON_GHOST,
-                                 .size = CUI_SIZE_SM });
+    ui.icon_button(CUI_ICON_SETTINGS, tooltip: "Settings");
+    ui.icon_button(CUI_ICON_SEARCH, variant: CUI_BUTTON_OUTLINE);
+    ui.icon_button(CUI_ICON_X, variant: CUI_BUTTON_GHOST,
+                               size: CUI_SIZE_SM);
   }
 }
 

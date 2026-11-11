@@ -21,7 +21,7 @@ static void scene_radio_cards(Ui ui) {
       CUI_ICON_LAYERS, NULL } };
   static int place = 1;
   $cui.box(ui, { .width = CUI_FILL, .max_width = 420 })
-    ui.radio_cards("places", places, $cui.count(places), place, {});
+    ui.radio_cards("places", places, $cui.count(places), place);
 }
 
 static void scene_toggle_group(Ui ui) {
@@ -31,9 +31,9 @@ static void scene_toggle_group(Ui ui) {
   static bool align[3] = { true, false, false };
   $cui.row(ui, { .gap = 12, .wrap = true }) {
     ui.toggle_group("format", %("Bold" "Italic" "Underline" "Code"), format,
-                    { .icons = format_icons, .icon_only = true });
+                    icons: format_icons, icon_only: true);
     ui.toggle_group("align", %("Left" "Center" "Right"), align,
-                    { .exclusive = true });
+                    exclusive: true);
   }
 }
 
@@ -41,8 +41,8 @@ static void scene_multi_select(Ui ui) {
   static bool chosen[8] = { true, false, true, false, false, true };
   $cui.box(ui, { .width = CUI_PX(320) })
     ui.multi_select("langs", %("C" "C++" "Rust" "Zig" "Go" "Swift" "Kotlin"
-                               "Odin"), chosen, { .label = "Languages",
-                                                  .searchable = true });
+                               "Odin"), chosen, label: "Languages",
+                                                searchable: true);
 }
 
 static void scene_tab_bar(Ui ui) {
@@ -54,10 +54,10 @@ static void scene_tab_bar(Ui ui) {
     $cui.column(ui, { .pad = 20, .gap = 8, .width = CUI_FILL }) {
       ui.heading("Inbox", 3);
       ui.text("4 unread messages from your team.",
-              { .color = CUI_COLOR_TEXT_SECONDARY });
+              color: CUI_COLOR_TEXT_SECONDARY);
     }
     $cui.box(ui, { .pad = 12, .width = CUI_FILL })
-      ui.tab_bar("tabs", tabs, $cui.count(tabs), tab, { .width = CUI_FILL });
+      ui.tab_bar("tabs", tabs, $cui.count(tabs), tab, width: CUI_FILL);
   }
 }
 
@@ -70,17 +70,17 @@ static void scene_doc_tabs(Ui ui) {
   static int open = 4, selected = 1;
   $cui.card(ui, { .width = CUI_FILL, .max_width = 620, .pad = 1,
                   .gap = 0 }) {
-    cui_doc_tabs_result result = ui.doc_tabs("docs", tabs, open, selected, {
-      .no_reorder = true });
+    cui_doc_tabs_result result = ui.doc_tabs("docs", tabs, open, selected,
+      no_reorder: true);
     if (result.close >= 0) {
       for (int k = result.close; k < open - 1; k++) tabs[k] = tabs[k + 1];
       open--;
       if (selected >= open) selected = open - 1;
     }
     if (open > 0) $cui.column(ui, { .pad = 16, .gap = 6, .width = CUI_FILL }) {
-      ui.text(tabs[selected].tooltip, { .font = CUI_FONT_MEDIUM });
+      ui.text(tabs[selected].tooltip, font: CUI_FONT_MEDIUM);
       ui.text(tabs[selected].dirty ? "Unsaved changes" : "Saved",
-              { .size = 13, .color = CUI_COLOR_TEXT_MUTED });
+              size: 13, color: CUI_COLOR_TEXT_MUTED);
     }
   }
 }
@@ -92,10 +92,10 @@ static void scene_speed_dial(Ui ui) {
   static int chosen = 1;
   $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER }) {
     int picked = ui.speed_dial("create", actions, $cui.count(actions),
-                               { .tooltip = "Create" });
+                               tooltip: "Create");
     if (picked >= 0) chosen = picked;
     ui.text(%"Last created: $(actions[chosen].label)",
-            { .color = CUI_COLOR_TEXT_SECONDARY });
+            color: CUI_COLOR_TEXT_SECONDARY);
   }
 }
 
@@ -111,8 +111,8 @@ static void scene_checklist(Ui ui) {
     { "Turn on notifications", "Get pinged when something needs you.",
       "Enable", false } };
   $cui.box(ui, { .width = CUI_PX(460) }) {
-    int done = ui.checklist("onboarding", steps, $cui.count(steps), {
-      .title = "Set up your workspace" });
+    int done = ui.checklist("onboarding", steps, $cui.count(steps),
+      title: "Set up your workspace");
     if (done >= 0) steps[done].done = true;
   }
 }
@@ -134,20 +134,20 @@ static void scene_tour(Ui ui) {
                    .pad = 12 }) {
       ui.heading("Q3 field report", 4);
       ui.spacer();
-      ui.button("Share", { .icon = CUI_ICON_USERS,
-                           .variant = CUI_BUTTON_OUTLINE });
+      ui.button("Share", icon: CUI_ICON_USERS,
+                         variant: CUI_BUTTON_OUTLINE);
       steps[1].target = ui.last_id();
-      ui.button("Export", { .icon = CUI_ICON_DOWNLOAD,
-                            .variant = CUI_BUTTON_PRIMARY });
+      ui.button("Export", icon: CUI_ICON_DOWNLOAD,
+                          variant: CUI_BUTTON_PRIMARY);
       steps[2].target = ui.last_id();
     }
     ui.separator();
     $cui.column(ui, { .pad = 20, .gap = 10, .width = CUI_FILL })
       ui.text("Survey results from the coastal sites, with photos and the "
               "soil samples sent to the lab.",
-              { .color = CUI_COLOR_TEXT_SECONDARY });
+              color: CUI_COLOR_TEXT_SECONDARY);
   }
-  if (step >= 0) ui.tour("intro", steps, $cui.count(steps), step, {});
+  if (step >= 0) ui.tour("intro", steps, $cui.count(steps), step);
 }
 
 static void scene_agent_plan(Ui ui) {
@@ -158,8 +158,8 @@ static void scene_agent_plan(Ui ui) {
     { "Draft the summary", NULL, CUI_TASK_PENDING },
     { "Check the citations", NULL, CUI_TASK_PENDING } };
   $cui.box(ui, { .width = CUI_FILL, .max_width = 460 })
-    ui.agent_plan("plan", steps, $cui.count(steps), {
-      .title = "Research plan" });
+    ui.agent_plan("plan", steps, $cui.count(steps),
+      title: "Research plan");
 }
 
 static void scene_prompt_suggestions(Ui ui) {
@@ -172,7 +172,7 @@ static void scene_prompt_suggestions(Ui ui) {
   $cui.column(ui, { .gap = 12, .width = CUI_FILL, .max_width = 560 }) {
     ui.heading("What can I help with?", 3);
     int chosen = ui.prompt_suggestions(
-      "starters", suggestions, $cui.count(suggestions), { .columns = 2 });
+      "starters", suggestions, $cui.count(suggestions), columns: 2);
     if (chosen >= 0) picked = chosen;
     if (picked >= 0) ui.muted(suggestions[picked].title);
   }
@@ -186,9 +186,9 @@ static void scene_model_picker(Ui ui) {
     { "Atlas Mini", "Runs on your own machine", NULL, CUI_ICON_BOX } };
   static int model = 1;
   $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
-    ui.text("Answer with", { .color = CUI_COLOR_TEXT_SECONDARY });
-    ui.model_picker("model", models, $cui.count(models), model, {
-      .placement = CUI_PLACE_BOTTOM_START });
+    ui.text("Answer with", color: CUI_COLOR_TEXT_SECONDARY);
+    ui.model_picker("model", models, $cui.count(models), model,
+      placement: CUI_PLACE_BOTTOM_START);
   }
 }
 
@@ -205,8 +205,8 @@ static void scene_month_calendar(Ui ui) {
       CUI_TONE_SUCCESS },
     { "Board meeting", { 2026, 11, 30 }, { 0 }, 10, false, CUI_TONE_DANGER } };
   static cui_date month = { 2026, 11, 1 }, picked = { 2026, 11, 10 };
-  ui.month_calendar("month", month, events, $cui.count(events), {
-    .selected = &picked, .today = { 2026, 11, 10 }, .cell_height = 58 });
+  ui.month_calendar("month", month, events, $cui.count(events),
+    selected: &picked, today: { 2026, 11, 10 }, cell_height: 58);
 }
 
 static void scene_week_calendar(Ui ui) {
@@ -218,9 +218,9 @@ static void scene_week_calendar(Ui ui) {
     { "Customer call", "Northlight", 3, 15, 16, CUI_TONE_DANGER },
     { "Demo day", "All hands", 4, 11, 12.5f, CUI_TONE_SUCCESS } };
   cui_date monday = { 2026, 11, 9 };
-  ui.week_calendar("week", monday, events, $cui.count(events), {
-    .start_hour = 8, .end_hour = 18, .hour_height = 34,
-    .height = CUI_PX(344) });
+  ui.week_calendar("week", monday, events, $cui.count(events),
+    start_hour: 8, end_hour: 18, hour_height: 34,
+    height: CUI_PX(344));
 }
 
 static void scene_gantt(Ui ui) {
@@ -234,8 +234,8 @@ static void scene_gantt(Ui ui) {
     { "Docs and launch", "Priya Nair", 18, 20, 0, CUI_TONE_SUCCESS, 4,
       false } };
   cui_date origin = { 2026, 11, 2 };
-  ui.gantt("plan", tasks, $cui.count(tasks), origin, 21, {
-    .day_width = 20, .today = 8 });
+  ui.gantt("plan", tasks, $cui.count(tasks), origin, 21,
+    day_width: 20, today: 8);
 }
 
 // A shot: a logo that slides in and fades up, over a sound clip.
@@ -257,8 +257,8 @@ static void scene_timeline_editor(Ui ui) {
     { "Sound", CUI_ICON_AUDIO_LINES, 0, .color = 3, .clips = sounds,
       .clip_count = $cui.count(sounds) } };
   static float time = 1.5f;
-  ui.timeline_editor("shot", tracks, $cui.count(tracks), time, {
-    .end = 5, .fps = 24, .toggles = true });
+  ui.timeline_editor("shot", tracks, $cui.count(tracks), time,
+    end: 5, fps: 24, toggles: true);
 }
 
 static void scene_curve_editor(Ui ui) {
@@ -267,9 +267,9 @@ static void scene_curve_editor(Ui ui) {
     { 1.2f, 1.08f }, { 2, 1 } };
   static int count = 4, selected = 1;
   $cui.box(ui, { .width = CUI_FILL, .max_width = 620 })
-    ui.curve_editor("ease", keys, count, $cui.count(keys), {
-      .x_max = 2, .y_max = 1.2f, .x_label = "Time", .y_label = "Value",
-      .selected = &selected });
+    ui.curve_editor("ease", keys, count, $cui.count(keys),
+      x_max: 2, y_max: 1.2f, x_label: "Time", y_label: "Value",
+      selected: &selected);
 }
 
 static void scene_gradient_editor(Ui ui) {
@@ -279,10 +279,10 @@ static void scene_gradient_editor(Ui ui) {
     { 1, { 0x5C, 0x1F, 0x16, 0x00 } } };
   static int count = 4, selected = 2;
   $cui.column(ui, { .width = CUI_FILL, .max_width = 560, .gap = 10 }) {
-    ui.text("Flame color over lifetime", { .font = CUI_FONT_MEDIUM,
-                                           .size = 13 });
-    ui.gradient_editor("flame", stops, count, $cui.count(stops), {
-      .selected = &selected });
+    ui.text("Flame color over lifetime", font: CUI_FONT_MEDIUM,
+                                         size: 13);
+    ui.gradient_editor("flame", stops, count, $cui.count(stops),
+      selected: &selected);
   }
 }
 
@@ -293,10 +293,10 @@ static void scene_prop_vec2(Ui ui) {
                   .pad_y = 6, .gap = 0 })
   $cui.inspector(ui, "canvas", {}) {
     if (ui.inspector_group("Canvas", open)) {
-      ui.prop_vec2("Size", size, { .step = 1, .format = "%.0f",
-                                   .suffix = "px" });
-      ui.prop_vec2("Anchor", anchor, { .min = 0, .max = 1,
-                                       .format = "%.2f" });
+      ui.prop_vec2("Size", size, step: 1, format: "%.0f",
+                                 suffix: "px");
+      ui.prop_vec2("Anchor", anchor, min: 0, max: 1,
+                                     format: "%.2f");
     }
   }
 }
@@ -309,10 +309,10 @@ static void scene_prop_vec3(Ui ui) {
                   .pad_y = 6, .gap = 0 })
   $cui.inspector(ui, "transform", {}) {
     if (ui.inspector_group("Transform", open)) {
-      ui.prop_vec3("Position", position, { .step = 0.05f,
-                                           .format = "%.2f" });
-      ui.prop_vec3("Rotation", rotation, { .step = 1, .format = "%.0f" });
-      ui.prop_vec3("Scale", scale, { .step = 0.01f, .format = "%.2f" });
+      ui.prop_vec3("Position", position, step: 0.05f,
+                                         format: "%.2f");
+      ui.prop_vec3("Rotation", rotation, step: 1, format: "%.0f");
+      ui.prop_vec3("Scale", scale, step: 0.01f, format: "%.2f");
     }
   }
 }
@@ -325,10 +325,10 @@ static void scene_prop_vec4(Ui ui) {
                   .pad_y = 6, .gap = 0 })
   $cui.inspector(ui, "light", {}) {
     if (ui.inspector_group("Light", open)) {
-      ui.prop_vec4("Orientation", orientation, { .min = -1, .max = 1,
-                                                 .format = "%.2f" });
-      ui.prop_vec4("Tint", tint, { .min = 0, .max = 1,
-                                   .format = "%.2f" });
+      ui.prop_vec4("Orientation", orientation, min: -1, max: 1,
+                                               format: "%.2f");
+      ui.prop_vec4("Tint", tint, min: 0, max: 1,
+                                 format: "%.2f");
     }
   }
 }

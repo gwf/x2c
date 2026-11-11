@@ -23,15 +23,15 @@ void page_reader(Ui ui, Gallery g) {
         ui.heading(toc[k].title, toc[k].level ? 4 : 3);
         for (int p = 0; p < 3; p++) {
           ui.push_id_int(k * 10 + p);
-          ui.text(para, { .color = CUI_COLOR_TEXT_SECONDARY });
+          ui.text(para, color: CUI_COLOR_TEXT_SECONDARY);
           ui.pop_id();
         }
       }
       ui.gap(200);
     }
     $cui.column(ui, { .width = CUI_PX(200), .gap = 10 }) {
-      ui.text("On this page", { .size = 12, .font = CUI_FONT_MEDIUM,
-                                .color = CUI_COLOR_TEXT_MUTED });
+      ui.text("On this page", size: 12, font: CUI_FONT_MEDIUM,
+                              color: CUI_COLOR_TEXT_MUTED);
       ui.toc("reader", toc, $cui.count(toc));
     }
   }
