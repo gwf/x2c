@@ -99,7 +99,7 @@ List Type.parameters(Type type) {
 
 /** Implements `Type.return_type`, declared in `lib/meta.x`. */
 Type Type.return_type(Type type) =>
-  type.canonicalize().apply().canonicalize();
+  _x2c_type_unqualified(type.declared().apply());
 
 /** Implements `Type.reverse_name`, declared in `lib/meta.x`. */
 String Type.reverse_name(String base, String participant) {

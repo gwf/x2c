@@ -88,7 +88,9 @@ typedef List Source;
 
 /** Returns the canonical semantic type of captured code in the current
     expansion. Unbound expressions, name values, and untyped quotations are
-    resolved in that expansion.
+    resolved in that expansion. The type omits the qualifiers of the value
+    itself and keeps those of what a pointer points at and of what a
+    function returns.
 */
 meta Type Code.type(Code value);
 
