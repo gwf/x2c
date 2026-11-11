@@ -905,6 +905,8 @@ canonical `String`, use the copy-producing
 
 For anything longer, use `Buffer`. It grows, it tracks indentation, and a
 `String` destination calls `Buffer.str` for the finished canonical `String`.
+`Buffer.new()` defaults to zero padding; `Buffer.new(4)` makes `pad()` write
+four spaces.
 
 ```x2c
 Buffer out = Buffer.new();

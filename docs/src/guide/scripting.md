@@ -267,6 +267,10 @@ on the text alone. `stem` and `extension` return a `String`; the others that
 return text return a `Path`. `absolute` resolves a path against the working
 directory.
 
+`root.join("out", "report.txt")` accepts several components in order.
+An absolute component replaces the path accumulated before it. `root.join()`
+returns `root`; `root.join(@components)` splices an existing List of paths.
+
 ### Asking about a path
 
 `exists`, `is_dir`, `is_file`, `is_executable`, `size`, and `modified_time`
