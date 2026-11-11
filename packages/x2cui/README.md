@@ -227,7 +227,7 @@ CUI's C gallery.
 as its slider asks for: moving circles on a canvas, or cards that each
 hold a spinner, a badge, and a moving progress bar. The header shows
 frames per second, the time between frames, the time the program spent
-describing the frame, and the frame's vertices and draw commands. A
+describing the frame, and the frame's vertices and triangles. A
 window waits for the display, so the rate stops at the display's rate;
 `stress --no-vsync` lifts that to CUI's limit of 120 frames per second.
 `stress --frames N [shapes|components [ITEMS]]` times N frames off screen

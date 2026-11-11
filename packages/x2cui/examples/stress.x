@@ -6,7 +6,7 @@
     item with a spinner, a badge, and a moving progress bar, which measures
     layout and component work. The header shows the frame rate, the time
     between frames, the time the program spent describing the frame, and
-    the vertices and draw commands of the frame before.
+    the vertices and triangles of the frame before.
 
       stress [--no-vsync]                   open a window
       stress --frames N [LOAD [ITEMS]]      time N frames off screen
@@ -33,7 +33,7 @@ typedef struct Stress {
   double frame_sum;    // seconds between frames since the figures changed
   double draw_sum;     // seconds spent in `draw` since the figures changed
   int frames;          // frames since the figures changed
-  String rate, frame_time, draw_time, vertices, commands;
+  String rate, frame_time, draw_time, vertices, triangles;
 } Stress;
 
 static float item_limit(int load) => load == SHAPES ? 50000 : 3000;
@@ -41,7 +41,7 @@ static float item_limit(int load) => load == SHAPES ? 50000 : 3000;
 static Stress stress_new(int load, float items) {
   Stress stress = { .load = load, .items = items, .times = [],
                     .rate = "-", .frame_time = "-", .draw_time = "-",
-                    .vertices = "-", .commands = "-" };
+                    .vertices = "-", .triangles = "-" };
   for (int i = 0; i < HISTORY; i++) stress.times.push(0);
   return stress;
 }
@@ -56,14 +56,14 @@ static void record(Stress &stress, double frame, double draw, Ui ui) {
   stress.frames++;
   if (stress.frame_sum < 0.25) return;
   const cui_draw_data *data = ui.get_draw_data();
-  int vertices = data.vertex_count, commands = data.command_count;
+  int vertices = data.vertex_count, triangles = data.index_count / 3;
   stress.rate = String.format("%.0f", stress.frames / stress.frame_sum);
   stress.frame_time =
     String.format("%.1f ms", stress.frame_sum * 1000 / stress.frames);
   stress.draw_time =
     String.format("%.1f ms", stress.draw_sum * 1000 / stress.frames);
   stress.vertices = %"$vertices";
-  stress.commands = %"$commands";
+  stress.triangles = %"$triangles";
   stress.frame_sum = stress.draw_sum = 0;
   stress.frames = 0;
 }
@@ -166,7 +166,7 @@ static void draw(Ui ui, Stress &stress) {
       figure(ui, "Between frames", stress.frame_time);
       figure(ui, "Describing a frame", stress.draw_time);
       figure(ui, "Vertices", stress.vertices);
-      figure(ui, "Draw commands", stress.commands);
+      figure(ui, "Triangles", stress.triangles);
       ui.sparkline(stress.times, CUI_PX(240), 40, CUI_COLOR_ACCENT);
     }
     $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER }) {
@@ -230,12 +230,12 @@ static int time_frames(Stress stress, int count) {
   double whole = seconds() - start;
   const cui_draw_data *data = screen.ui().get_draw_data();
   int items = (int) stress.items;
-  int vertices = data.vertex_count, commands = data.command_count;
+  int vertices = data.vertex_count, triangles = data.index_count / 3;
   String load = stress.load == SHAPES ? "shapes" : "components";
   printf("%s, %d items, %d frames\n", load, items, count);
   printf("  describing a frame  %8.3f ms\n", describing * 1000 / count);
   printf("  whole frame         %8.3f ms\n", whole * 1000 / count);
-  printf("  vertices %d, draw commands %d\n", vertices, commands);
+  printf("  vertices %d, triangles %d\n", vertices, triangles);
   return 0;
 }
 
