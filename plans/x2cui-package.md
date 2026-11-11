@@ -256,7 +256,8 @@ Upstream records, enums, constants, and macros keep their C names:
 ### Method rules
 
 Every `cui.h` function whose first parameter is `cui_ctx *` has a `Ui`
-method (433 functions, less the variadic ones among them, which stay raw calls).
+method. A variadic function has a method that takes a List rest parameter;
+see [Formatted text](#formatted-text).
 
 Name: remove `cui_`; remove a trailing `_ex`. `cui_button_ex` is
 `ui.button`; `cui_draw_rect` is `ui.draw_rect`.
@@ -354,12 +355,16 @@ A field edits in place in a fixed buffer, as CUI requires. The program
 gets a String only when it asks. A String per keystroke would add one pool
 entry per edit.
 
-### Fast-changing text
+### Formatted text
 
-Interpolated labels are the ordinary form. For a value that differs on
-nearly every frame, such as a timer, the documented form is the raw call
-`cui_textf(ui, "%.1f s", seconds)`. CUI formats it in its own per-frame
-memory, and no String is created.
+Interpolated labels are the ordinary form. CUI's four variadic functions
+also have methods: `ui.textf`, `ui.table_cell_textf`,
+`cui_terminal_buffer.printf`, and `cui_log_buffer.append`. Each takes a
+format and a List rest parameter, formats with `String.format`, and
+passes the result to the C function through `"%s"`. Each formatted text
+is a String in the global pool, as a label is. An earlier version of this
+plan said variadic functions had no x2c form; that was wrong, because the
+rest parameter was not tried.
 
 ### Errors
 
@@ -611,8 +616,9 @@ then settled the call form:
   most results and x2c does not let a value-returning macro stand alone as
   a statement. The macros were removed. `$cui.table` and `$cui.data_grid`
   remain, because they are blocks.
-- Three variadic functions and the functions that fill caller buffers
-  without a `cui_ctx` have no form and are called as C.
+- The functions that fill caller buffers without a `cui_ctx` have no form
+  and are called as C. The variadic functions have methods; see
+  [Formatted text](#formatted-text).
 
 ### Delivery 3: browser
 
