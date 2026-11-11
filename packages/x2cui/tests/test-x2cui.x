@@ -226,6 +226,167 @@ static void formatted_text_takes_x2c_values(void) {
   EXPECT_TRUE(screen.commands() > 0);
 }
 
+// method forms
+
+// Draws three frames of `draw` and writes the last to `path`.
+static void shoot(String path, void (*draw)(Ui ui)) {
+  Offscreen screen = auto Offscreen.open(360, 240);
+  for (int pass = 0; pass < 3; pass++) {
+    screen.begin();
+    draw(screen.ui());
+    screen.end();
+  }
+  screen.write_png(path);
+}
+
+// Whether `draw` and `expected` draw the same pixels.
+static bool same_pixels(void (*draw)(Ui ui), void (*expected)(Ui ui)) {
+  Path directory = Path.temp_dir();
+  defer directory.remove_tree();
+  Path one = directory.join("one.png"), two = directory.join("two.png");
+  shoot(one, draw);
+  shoot(two, expected);
+  FILE *a = fopen(one, "rb"), *b = fopen(two, "rb");
+  defer { fclose(a); fclose(b); }
+  int x, y;
+  do {
+    x = fgetc(a);
+    y = fgetc(b);
+  } while (x == y && x != EOF);
+  return x == y;
+}
+
+/* Short names, numbers, `grow`, `?:`, a declared name, and NULL, each
+   lowered by the type of its field or parameter. */
+static void short_forms(Ui ui) {
+  int variant = CUI_BUTTON_DANGER;
+  bool wide = true;
+  ui.column (width: fill, pad: 12, gap: 8, bg: surface_muted) {
+    ui.row (gap: 8, align: center) {
+      ui.button("Add", variant: primary, icon: plus);
+      ui.icon_button(x, variant: ghost, size: sm);
+      ui.box (width: grow(2)) ui.text("wide", font: wide ? medium : body,
+                                     color: accent);
+      ui.box (width: 30, height: 10, bg: border) {}
+    }
+    ui.button("Declared", variant: variant, tooltip: NULL);
+    ui.text("plain");
+  }
+}
+
+static void c_forms(Ui ui) {
+  $cui.column(ui, { .width = CUI_FILL, .pad = 12, .gap = 8,
+                    .bg = CUI_COLOR_SURFACE_MUTED }) {
+    $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
+      cui_button_ex(ui, "Add", &(cui_button_opts){
+        .variant = CUI_BUTTON_PRIMARY, .icon = CUI_ICON_PLUS });
+      cui_icon_button_ex(ui, CUI_ICON_X, &(cui_button_opts){
+        .variant = CUI_BUTTON_GHOST, .size = CUI_SIZE_SM });
+      $cui.box(ui, { .width = CUI_GROW(2) })
+        cui_text_ex(ui, "wide", &(cui_text_opts){
+          .font = CUI_FONT_MEDIUM, .color = CUI_COLOR_ACCENT });
+      $cui.box(ui, { .width = CUI_PX(30), .height = CUI_PX(10),
+                     .bg = CUI_COLOR_BORDER }) {}
+    }
+    cui_button_ex(ui, "Declared", &(cui_button_opts){
+      .variant = CUI_BUTTON_DANGER });
+    cui_text_ex(ui, "plain", &(cui_text_opts){ 0 });
+  }
+}
+
+static void method_forms_draw_what_the_c_calls_draw(void) {
+  EXPECT_TRUE(same_pixels(short_forms, c_forms));
+  // The comparison tells different screens apart.
+  EXPECT_FALSE(same_pixels(short_forms, a_map_of_columns));
+}
+
+static void a_map_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 1 };
+  ui.table ("people", sort: &sort,
+            columns: {"Name": fill, "Role": unsorted(80),
+                      "Score": right(grow(0.5)), "Seen": center(70)})
+  ui.each (String name in %("Ada" "Grace")) ui.table_row (row) {
+    ui.cell_text(name);
+    ui.cell () ui.badge("Admin", tone: info);
+    ui.cell_text("12");
+    ui.cell_text("Mon");
+  }
+}
+
+static void an_array_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 1 };
+  cui_table_column columns[] = {
+    { "Name", CUI_FILL, CUI_TEXT_LEFT, true },
+    { "Role", CUI_PX(80), CUI_TEXT_LEFT, false },
+    { "Score", CUI_GROW(0.5), CUI_TEXT_RIGHT, true },
+    { "Seen", CUI_PX(70), CUI_TEXT_CENTER, true },
+  };
+  $cui.table(ui, "people", columns, { .sort = &sort }) {
+    foreach (String name in %("Ada" "Grace")) {
+      cui_push_id_int(ui, name == "Ada" ? 0 : 1);
+      cui_table_row(ui, false);
+      cui_table_cell_text(ui, name);
+      cui_table_cell(ui);
+      cui_badge_ex(ui, "Admin", &(cui_badge_opts){ .tone = CUI_TONE_INFO });
+      cui_table_cell_text(ui, "12");
+      cui_table_cell_text(ui, "Mon");
+      cui_pop_id(ui);
+    }
+  }
+}
+
+static void a_table_takes_its_columns_from_a_map(void) {
+  EXPECT_TRUE(same_pixels(a_map_of_columns, an_array_of_columns));
+}
+
+// lists
+
+typedef struct Picks {
+  int clicked, passes;
+  bool hovered;
+  cui_rect second;       // the second row's label
+} Picks;
+
+static void draw_list(Ui ui, Picks &p) {
+  ui.column (width: fill, pad: 8) {
+    ui.each (String name in %("one" "two" "skipped" "three"), key: name) {
+      p.passes++;
+      if (name == "skipped") continue;
+      ui.item (row, selected: name == "three") {
+        if (row.clicked) p.clicked = name == "two" ? 2 : 1;
+        if (name == "two") p.hovered = row.hovered;
+        ui.label(name);
+        if (name == "two") p.second = ui.last_rect();
+      }
+    }
+  }
+}
+
+static void list_frame(Offscreen screen, Picks &p) {
+  screen.begin();
+  draw_list(screen.ui(), p);
+  screen.end();
+}
+
+static void an_item_reports_what_the_pointer_did(void) {
+  Picks p = {};
+  Offscreen screen = auto Offscreen.open(240, 240);
+  list_frame(screen, p);
+  list_frame(screen, p);
+  EXPECT_INT_EQ(p.passes, 8);
+  EXPECT_INT_EQ(p.clicked, 0);
+  Ui ui = screen.ui();
+  ui.input_mouse_move(p.second.x + p.second.w / 2, p.second.y + 4);
+  list_frame(screen, p);
+  list_frame(screen, p);
+  EXPECT_TRUE(p.hovered);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  list_frame(screen, p);
+  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  list_frame(screen, p);
+  EXPECT_INT_EQ(p.clicked, 2);
+}
+
 void x2cui_suite(void) {
   $test.run(offscreen_draws_and_writes_a_png);
   $test.run(write_png_raises_io_failure);
@@ -238,6 +399,9 @@ void x2cui_suite(void) {
   $test.run(a_string_list_reaches_a_component);
   $test.run(a_string_list_lasts_until_the_frame_is_painted);
   $test.run(formatted_text_takes_x2c_values);
+  $test.run(method_forms_draw_what_the_c_calls_draw);
+  $test.run(a_table_takes_its_columns_from_a_map);
+  $test.run(an_item_reports_what_the_pointer_did);
 }
 
 int main(void) {

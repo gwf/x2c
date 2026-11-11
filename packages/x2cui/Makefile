@@ -22,12 +22,14 @@ check: test run
 
 short-example: builds/todo
 
-example: builds/gallery
+example: builds/gallery builds/mail builds/orders
 
 # The gated runs draw off screen and write PNGs. A window needs a
 # WindowServer connection, which no gate has.
-run: builds/todo builds/scenes builds/stress
+run: builds/todo builds/mail builds/orders builds/scenes builds/stress
 	./builds/todo --shot builds/todo.png
+	./builds/mail --shot builds/mail.png
+	./builds/orders --shot builds/orders.png
 	./builds/stress --frames 30
 	./builds/scenes --shots builds/shots
 	./builds/scenes --check $(CUI_INCLUDE)/cui/cui.h

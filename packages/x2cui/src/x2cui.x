@@ -310,6 +310,71 @@ void Ui.bar_chart(
   cui_bar_chart_ex(ui, id, series, count, &opts);
 }
 
+// lists and tables
+
+/* The items drawn so far in the innermost `ui.each` of this thread. A
+   `Ui` belongs to one thread, so the trail does too. */
+static _Thread_local ItemTrail item_trail;
+
+/** Begins the passes of `ui.each` and returns the trail of the list it is
+    in, which `Ui.each_end` restores.
+*/
+ItemTrail Ui.each_begin(Ui ui) {
+  ItemTrail outer = item_trail;
+  item_trail = (ItemTrail){ .listing = true };
+  return outer;
+}
+
+/** Ends the passes of `ui.each`. */
+void Ui.each_end(Ui ui, ItemTrail outer) {
+  item_trail = outer;
+}
+
+/* What an item's painter needs: its state and whether it draws the
+   hairline along its top edge. */
+typedef struct ItemPaint { bool hovered, selected, rule; } ItemPaint;
+
+// A quiet fill when selected or hovered, otherwise the hairline.
+static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
+  ItemPaint *paint = user;
+  if (paint.selected)
+    cui_draw_rect(ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_ACTIVE));
+  else if (paint.hovered)
+    cui_draw_rect(ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_HOVER));
+  else if (paint.rule)
+    cui_draw_rect(ui, (cui_rect){ r.x + 12, r.y, r.w - 24, 1 }, CUI_CORNERS(0),
+                  cui_token_color(ui, CUI_TOKEN_BORDER_SUBTLE));
+}
+
+/** Begins an interactive row of a list, a stack box the width of its
+    parent, and returns what the pointer did to it. The row draws its own
+    fill when selected or hovered. Inside `ui.each`, it draws a hairline
+    along its top edge unless it is the first item, it is selected, or the
+    item before it is selected. `Ui.box_end` ends it.
+*/
+RowState Ui.item_begin(Ui ui, RowOptions opts) {
+  cui_box_begin(ui, &(cui_box){ .dir = CUI_STACK, .width = CUI_FILL });
+  bool rule = item_trail.listing && item_trail.items && !item_trail.selected &&
+              !opts.selected;
+  item_trail.items++;
+  item_trail.selected = opts.selected;
+  bool *hovered = cui_state(ui, cui_make_id(ui, "x2cui-item"), sizeof(bool));
+  ItemPaint paint = { *hovered, opts.selected, rule };
+  cui_canvas_result result = cui_canvas(
+    ui, "x2cui-item", CUI_FILL, CUI_FILL, _paint_item, &paint, sizeof paint);
+  *hovered = result.hovered;
+  return (RowState){ result.hovered, result.pressed, result.clicked };
+}
+
+/** Begins a row of a table and returns whether it was clicked. CUI does
+    not report a table row's hover or press, so those stay false.
+*/
+RowState Ui.table_row_begin(Ui ui, RowOptions opts) =>
+  (RowState){ .clicked = cui_table_row(ui, opts.selected) };
+
+/// Draws the next cell of a table row with one text.
+void Ui.cell_text(Ui ui, String text) => cui_table_cell_text(ui, text);
+
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
 

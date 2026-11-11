@@ -78,6 +78,47 @@ meta List cui_record(Type record, List options) {
   return $!( ($record){ @rows } );
 }
 
+/** Returns `name = value` for the variable the declaration `element`
+    declares, as one pass of `ui.each` assigns its element.
+*/
+meta List cui_assign(List element, List value) {
+  match (element) {
+    case %(declare ? (bindings (bind ?name ()))): {
+      List variable = %(expr () (ident $name));
+      return $!( $variable = $value );
+    }
+  }
+  return element;
+}
+
+/** Returns the call that pushes the id of one pass of `ui.each`: the
+    `key:` row of `options`, a text or an integer, or else `position`.
+*/
+meta List cui_push_key(List ui, List position, List options) {
+  List key = _option(options, "key");
+  if (!key) return $!( $ui.push_id_int($position) );
+  return Type.is_text(Code.type(key)) ? $!( $ui.push_id($key) )
+                                      : $!( $ui.push_id_int($key) );
+}
+
+/** Returns the `cui_table_column` initializers of the `columns:` row of
+    `options`, a Map literal of titles and widths. A width is a size, as
+    for `cui_value`: pixels, `fill`, `fit`, or `grow(w)`. `right(w)` and
+    `center(w)` align the column, and `unsorted(w)` keeps it from being
+    sorted; every other column is sortable.
+*/
+meta List cui_columns(List options) =>
+  _columns(options).map(%!(List entry) => _column(entry));
+
+/** Returns the begin call of `ui.table`, with `columns` the array that
+    `cui_columns` filled and the other rows of `options` as its record.
+*/
+meta List cui_table_begin(List ui, List id, List columns, List options) {
+  int count = _columns(options).len();
+  List rest = options.filter(%!(List row) => _key(row) != "columns");
+  return cui_call(ui, "table_begin", rest, id, columns, $!( $count ));
+}
+
 // calls
 
 meta static Type _signature(List ui, String method) {
@@ -103,13 +144,51 @@ meta static List _call(
 /* `name: value` sets the field `name`. A name the record does not have
    keeps its value, so the C compiler reports the field. */
 meta static List _field(List fields, List row) {
+  String name = _key(row);
+  List field = fields.find(%!(List f) => f.car() == name);
+  return %(dotinit ($name) $(cui_value(field ? field[1] : NULL, row[2])));
+}
+
+// The name of a `name: value` row.
+meta static String _key(List row) {
   match (row) {
-    case %(map-entry (expr ? (literal ? ?(String name) ?)) ?value): {
-      List field = fields.find(%!(List f) => f.car() == name);
-      return %(dotinit ($name) $(cui_value(field ? field[1] : NULL, value)));
-    }
+    case %(map-entry (expr ? (literal ? ?(String name) ?)) ?): return name;
   }
-  return row;
+  return NULL;
+}
+
+// The value of the row of `options` named `name`, or NULL.
+meta static List _option(List options, String name) {
+  List row = options.find(%!(List r) => _key(r) == name);
+  return row ? row[2] : NULL;
+}
+
+// columns
+
+// The entries of the Map literal of `columns:`.
+meta static List _columns(List options) {
+  match (_option(options, "columns")) {
+    case %(expr ? (map *entries)): return entries;
+  }
+  return %();
+}
+
+meta static List _column(List entry) => _column_of(entry[1], entry[2], "LEFT", 1);
+
+/* `right(w)`, `center(w)`, and `unsorted(w)` wrap a width; they nest. */
+meta static List _column_of(
+  List title, List width, String align, int sortable) {
+  match (width) {
+    case %(expr ? (call (expr ? (ident (binding ? "right"))) (args ?w))):
+      return _column_of(title, w, "RIGHT", sortable);
+    case %(expr ? (call (expr ? (ident (binding ? "center"))) (args ?w))):
+      return _column_of(title, w, "CENTER", sortable);
+    case %(expr ? (call (expr ? (ident (binding ? "unsorted"))) (args ?w))):
+      return _column_of(title, w, align, 0);
+  }
+  List size = cui_value(%("cui_size"), width);
+  List aligned = _free_name(%"CUI_TEXT_$align");
+  return $!( { $title, $size, $aligned, $sortable } );
 }
 
 // values

@@ -410,3 +410,121 @@ macro Decorator $cui.id_index(Stmt $body, Expr $ui, Expr $index) {
     $body
   }
 }
+
+/*  Lists and tables
+
+    `ui.each` runs a block once for each element of a collection, under an
+    id of its own; `ui.item` is an interactive row of such a list. A table
+    takes its columns as a Map literal and its rows from `ui.table_row`,
+    whose cells are `ui.cell` and `ui.cell_text`:
+
+      ui.each (Message m in shown, key: m.id)
+      ui.item (row, selected: a.selected == m) {
+        if (row.clicked) a.selected = m;
+        ui.text(m.subject);
+      }
+
+      ui.table ("orders", columns: {"Order": 90, "Customer": fill})
+      ui.each (Order o in shown, key: o.id)
+      ui.table_row (row, selected: s.selected == o) {
+        ui.cell_text(o.id);
+        ui.cell () ui.avatar(o.customer, size: 28);
+      }
+*/
+
+#include <stdbool.h>
+#include "x2cui-options.x"
+
+/** What a row of a list or a table did in this frame: `ui.item` and
+    `ui.table_row` bind one to the name they are given.
+*/
+typedef struct RowState { bool hovered, pressed, clicked; } RowState;
+
+/** The options of `ui.item` and `ui.table_row`. */
+typedef struct RowOptions { bool selected; } RowOptions;
+
+/** What `ui.each` has seen of the items drawn in it so far. */
+typedef struct ItemTrail { bool listing, selected; int items; } ItemTrail;
+
+/** Runs the block once for each element of `$items`, with the variable
+    `$element` declares holding it, as `foreach` holds it. Each pass pushes
+    the id `key:` names, or the element's position, so a row keeps its
+    state when the list is filtered or reordered. The id is popped on
+    every exit.
+
+    A template cannot pass a declaration to `foreach`, so the variable is
+    declared before the loop and assigned in each pass; see
+    `cui_assign`.
+*/
+macro Decorator $Ui.each(
+  Stmt $body, Expr $ui, Decl $element, Expr $items, Entry @options) {
+  using ItemTrail;
+  {
+    typeof($ui) ui = $ui;
+    ItemTrail trail = ui.each_begin();
+    defer ui.each_end(trail);
+    int position = 0;
+    $element;
+    foreach (Var value in $items) {
+      $cui_assign($element, value);
+      $cui_push_key(ui, position, $options);
+      defer {
+        cui_pop_id(ui);
+        position++;
+      }
+      $body
+    }
+  }
+}
+
+/** Runs the block inside a row of a list made by `Ui.item_begin`, with
+    `$row` bound to the `RowState` of this frame.
+*/
+macro Decorator $Ui.item(Stmt $body, Expr $ui, Name $row, Entry @options) {
+  using RowState;
+  {
+    typeof($ui) ui = $ui;
+    RowState $row = $cui_call(ui, "item_begin", $options);
+    defer cui_box_end(ui);
+    $body
+  }
+}
+
+/** Runs the block while the table `$id` is open. `columns:` is a Map
+    literal of titles and widths, lowered at compile time to a static
+    `cui_table_column` array by `cui_columns`. The other options are those
+    of `cui_table_opts`.
+*/
+macro Decorator $Ui.table(Stmt $body, Expr $ui, Expr $id, Entry @options) {
+  {
+    typeof($ui) ui = $ui;
+    static cui_table_column columns[] = { @cui_columns($options) };
+    if ($cui_table_begin(ui, $id, columns, $options)) {
+      defer cui_table_end(ui);
+      $body
+    }
+  }
+}
+
+/** Runs the block as one row of a table, with `$row` bound to the
+    `RowState` of this frame. Its cells follow as `ui.cell` and
+    `ui.cell_text`.
+*/
+macro Decorator $Ui.table_row(
+  Stmt $body, Expr $ui, Name $row, Entry @options) {
+  using RowState;
+  {
+    typeof($ui) ui = $ui;
+    RowState $row = $cui_call(ui, "table_row_begin", $options);
+    $body
+  }
+}
+
+/** Runs the block in the next cell of a table row. */
+macro Decorator $Ui.cell(Stmt $body, Expr $ui) {
+  {
+    typeof($ui) ui = $ui;
+    cui_table_cell(ui);
+    $body
+  }
+}
