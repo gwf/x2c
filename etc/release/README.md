@@ -172,7 +172,11 @@ packages, dispatch `stage.yml` from dev with `mode=website`, a full
 The candidate inputs are unused in this mode. The existing staging publication
 concurrency group and output compare-and-swap also protect this path.
 
-`staging-website.yml` builds only Astro and mdBook. It copies the staged
+`staging-website.yml` builds Astro, mdBook, and fresh WebAssembly examples.
+It builds a local compiler and wasm runtime for those browser programs, but
+does not publish new compiler or package archives. `PLAYGROUND_REQUIRED=1`
+makes missing WebAssembly prerequisites fail deployment builds rather than
+produce a read-only website. It copies the staged
 installer, version, release-candidate identity, package directory, domain,
 and existing release PDF byte for byte. It never uploads release assets.
 `website-deployment.json` records the website source and hashes of retained

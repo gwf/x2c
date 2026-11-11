@@ -15,6 +15,7 @@ permissions:
 
 env:
   CC: clang
+  PLAYGROUND_REQUIRED: "1"
 
 jobs:
   select:

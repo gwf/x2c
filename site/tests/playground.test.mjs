@@ -65,3 +65,13 @@ test("precompiled programs run the examples without a compile service",
     assert.match(home, /playground\/\?example=love%2Fcollections/);
     assert.match(home, /href="[^"]*examples\/">examples</);
   });
+
+
+test("deployment builds reject missing WebAssembly prerequisites", () => {
+  const result = spawnSync(process.execPath, [
+    "scripts/playground-programs.mjs", "compile",
+  ], { cwd: site, encoding: "utf8", env: { ...process.env,
+    PLAYGROUND_REQUIRED: "1", WASM_CC: "x2c-missing-emcc" } });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /required programs unavailable/);
+});

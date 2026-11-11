@@ -27,7 +27,17 @@ for attempt in range(12):
         for path, digest in expected["preserved_sha256"].items():
             if hashlib.sha256(read(path)).hexdigest() != digest:
                 raise ValueError(f"retained release file differs: {path}")
-        print("Live staging website verified; retained release files are unchanged.")
+        programs = json.loads((args.site / "playground/programs/programs.json").read_text())
+        if not programs:
+            raise ValueError("website has no precompiled programs")
+        for program in programs:
+            for suffix in (".js", ".wasm"):
+                path = "playground/programs/" + program + suffix
+                if hashlib.sha256(read(path)).digest() != hashlib.sha256(
+                        (args.site / path).read_bytes()).digest():
+                    raise ValueError(f"live browser program differs: {path}")
+        print(f"Live staging website verified with {len(programs)} browser programs; "
+              "retained release files are unchanged.")
         break
     except Exception:
         if attempt == 11:

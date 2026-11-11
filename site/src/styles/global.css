@@ -434,7 +434,7 @@ main:focus {
 
 .hero-prose {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, calc(53% + 2.6rem));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(24px, 3vw, 44px);
   align-items: start;
 }

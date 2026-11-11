@@ -20,6 +20,7 @@ jobs:
       SITE_RELEASE_CHANNEL: staging
       SITE_URL: https://staging.x2c-lang.dev
       SITE_BASE: /
+      PLAYGROUND_REQUIRED: "1"
     steps:
       - uses: actions/checkout@v5
         with:
@@ -61,9 +62,17 @@ jobs:
       - name: Install website dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cloc
+          sudo apt-get install -y cloc clang
           npm ci --prefix source/site
-      - name: Build website without rebuilding release binaries
+      - uses: ./trusted/.github/actions/select-clang
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 6.0.13
+      - name: Build compiler and WebAssembly runtime for website examples
+        run: |
+          make -C source build-safe
+          make -C source wasm-runtime
+      - name: Build complete runnable website
         run: npm --prefix source/site run build
       - name: Retain staged release and check site
         env:
