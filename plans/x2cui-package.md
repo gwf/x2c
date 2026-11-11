@@ -529,22 +529,41 @@ Compiler observations from this work, none repaired and none blocking:
 
 ### Delivery 2: record and array widgets
 
-The remaining 49 components take arrays of C structs (`cui_series`,
-`cui_table_column`, tree nodes) or numeric arrays. Rules:
+75 functions and 61 components take arrays of records, numbers, or flags.
 
-- A numeric array parameter takes a packed typed Array (`ArrayFloat`,
-  `ArrayInt`) and passes its elements and length.
-- A struct array parameter takes a `List` of rows. A generated converter,
-  built from `Type.fields` of the C struct, fills a stack array. Rows are
-  positional, in field order, and may omit trailing fields.
-- Virtual components (`data_grid`, `virtual_list`, `tree_table`) keep CUI's
-  model: the container reports the visible row range and the program draws
-  only those rows from its own collection. No data is copied.
+The rules first written here were: a packed typed Array for numbers, and a
+`List` of rows for records, converted to a C array on each call. A study
+of the 75 functions on 2026-11-10 showed the second rule does not hold:
 
-Write the chart, table, and data grid scenes first and show them to Gary
-before converting the other record widgets. This delivery completes the
-gallery and the completeness check. Estimated 1,000 to 1,500 lines of
-package source. Not prototyped.
+- CUI writes into many record arrays: calendar events and Gantt tasks that
+  are dragged, checklist steps, key-value pairs, curve keys, feature flags.
+  A converted copy cannot carry those changes back.
+- Many records hold fields a `List` row cannot: `cui_size`, `cui_color`,
+  fixed `char` arrays, and nested arrays.
+- CUI may read an array when it paints, after the call returns, so a
+  converted copy needs storage that lasts the frame.
+
+Revised rules, built and verified for the line chart, bar chart, table,
+and data grid:
+
+- **An array of CUI records is a C array of those records**, written with
+  designated initializers. A `$cui.` macro takes the array itself and
+  supplies its count with `$cui.count`, so no call site writes one.
+  `$cui.count` of a pointer does not compile. The array may be static, a
+  local, or a variable-length array filled from a collection. CUI writes
+  into the caller's own array. This needs no copy, no converter, and no
+  frame storage.
+- **A method of the same name takes the pointer and the count**, for a
+  program that holds its records another way.
+- **Numbers are a packed `ArrayFloat`.** `cui_series.of(name, values)`
+  builds a chart series over one, so no record holds a count by hand.
+- **Rows of data stay in x2c collections.** A table or grid block draws
+  each row from a `List` or `Array`, as the gallery scenes do.
+- **An array option that every use needs becomes a parameter.** A chart's
+  x axis labels are a `List` parameter, not two option fields.
+
+Gary reviews the chart, table, and data grid scenes in
+`examples/gallery/data.x` before the other components are converted.
 
 ### Delivery 3: browser
 

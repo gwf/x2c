@@ -16,6 +16,7 @@
 #include "gallery/controls.x"
 #include "gallery/display.x"
 #include "gallery/media.x"
+#include "gallery/data.x"
 #include "gallery/tools.x"
 #include "gallery/chrome.x"
 
@@ -33,6 +34,7 @@ static void add_families(void) {
   add_family(controls_family());
   add_family(display_family());
   add_family(media_family());
+  add_family(data_family());
   add_family(tools_family());
   add_family(chrome_family());
 }

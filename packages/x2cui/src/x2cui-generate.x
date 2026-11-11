@@ -14,6 +14,7 @@
       const char *                     String
       char *, size_t                   TextField
       const char *const *, int         List of Strings
+      const RECORD *, int              unchanged: an array and its count
       const RECORD *                   RECORD by value, as `{ .field = v }`
       T *                              T &
 
@@ -77,6 +78,11 @@ meta List cui_method(Code target, Code buffer, Code strings) {
       i++;
     }
     else if (_pointer(type) && _spelled(Type.element(type), "(void)")) {
+      params.push($!Param{ $type $p });
+      args.push($!( $p ));
+    }
+    else if (_const_pointer(type) && next && _spelled(next, "(int)")) {
+      // An array of records and its count pass as C; see $cui.count.
       params.push($!Param{ $type $p });
       args.push($!( $p ));
     }

@@ -27,6 +27,7 @@
 
 #include "cui-1.3.h"
 #include "cleanup.x"
+#include "typed-array.x"
 
 /** Names CUI's `cui_ctx *` as the receiver of every component method. */
 typedef cui_ctx *Ui;
@@ -46,6 +47,7 @@ typedef struct TextField {
 // The generator names Ui and TextField in the methods it builds.
 #include "x2cui-generate.x"
 #include "x2cui-containers.x"
+#include "x2cui-arrays.x"
 
 /** Closes the window; idempotent on NULL, and returns NULL. */
 App App.close(App app);
@@ -186,6 +188,42 @@ String TextField.take(TextField field) {
 }
 
 // component methods
+
+/** Returns a chart series named `name` over `values`. The series borrows
+    the values, which a chart copies when it is drawn.
+*/
+cui_series cui_series.of(String name, ArrayFloat values) =>
+  (cui_series){ .name = name, .values = (const float *) values.bytes,
+                .count = (int) values.len() };
+
+// The x axis labels of a chart are a List in x2c and two option fields in C.
+static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
+  if (labels) {
+    opts.labels = x2cui_strings(labels);
+    opts.label_count = labels.len();
+  }
+  return opts;
+}
+
+/** Draws a line chart of `count` series, with `labels` along the x axis,
+    or NULL for none. `$cui.line_chart` supplies the count of an array.
+*/
+void Ui.line_chart(
+  Ui ui, String id, const cui_series *series, int count, List labels,
+  cui_chart_opts opts) {
+  opts = _labelled(opts, labels);
+  cui_line_chart_ex(ui, id, series, count, &opts);
+}
+
+/** Draws a bar chart of `count` series, with `labels` along the x axis,
+    or NULL for none. `$cui.bar_chart` supplies the count of an array.
+*/
+void Ui.bar_chart(
+  Ui ui, String id, const cui_series *series, int count, List labels,
+  cui_chart_opts opts) {
+  opts = _labelled(opts, labels);
+  cui_bar_chart_ex(ui, id, series, count, &opts);
+}
 
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
@@ -363,6 +401,7 @@ $cui.method(cui_tree_clicked);
 $cui.method(cui_list_item_ex);
 $cui.method(cui_virtual_list_begin);
 $cui.method(cui_virtual_list_end);
+$cui.method(cui_table_begin_ex);
 $cui.method(cui_table_row);
 $cui.method(cui_table_cell);
 $cui.method(cui_table_cell_text);
@@ -393,6 +432,7 @@ $cui.method(cui_theme_toggle);
 $cui.method(cui_user_menu_begin);
 $cui.method(cui_user_menu_end);
 $cui.method(cui_swipe_item_end);
+$cui.method(cui_data_grid_begin_ex);
 $cui.method(cui_data_grid_row);
 $cui.method(cui_data_grid_cell_text);
 $cui.method(cui_data_grid_end);
