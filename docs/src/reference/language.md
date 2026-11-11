@@ -1237,7 +1237,11 @@ typedef struct Record { String names[2]; Var last; } Record;
 Record record = {.names[1] = "second", "last"};
 ```
 
-Each supplied value converts to its destination element or field type. After
+Each supplied value converts to its destination element or field type. A
+value that the converter of an aggregate destination accepts converts to
+that whole aggregate instead of initializing its first member: with
+`Size int.size(int)` and a field `Size width`, `{ .width = 5 }` stores
+`int_size(5)`. After
 `.names[1] = "second"` above, the next value initializes `last`, including its
 ordinary conversion to `Var`. With `.names = "first", "second", "last"`,
 brace elision fills both array elements before continuing to `last`. Explicit
