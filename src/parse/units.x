@@ -302,14 +302,18 @@ static int _skip_collected_form(Compiler c) {
   }
   if ((!c.collect_protocols || c.signature_only) &&
       c.skip_named_type_declaration()) return 1;
-  if (!c.macro_starts_target_at(<unit>)) return 0;
-  if (!c.signature_only && c.collect_protocols &&
-      c.collect_unit_macro()) return 1;
-  do {
-    c.skip_macro_invocation();
-    if (c.test(<;>)) return 1;
-  } while (c.macro_starts_target_at(<unit>));
-  return 0;
+  if (c.macro_starts_target_at(<unit>) && !c.signature_only &&
+      c.collect_protocols && c.collect_unit_macro()) return 1;
+  // A method-form application is skipped like a `$` one.
+  for (;;) {
+    Token target = c.method_decorator_target();
+    if (target) c.token = target;
+    else if (!c.macro_starts_target_at(<unit>)) return 0;
+    else {
+      c.skip_macro_invocation();
+      if (c.test(<;>)) return 1;
+    }
+  }
 }
 
 static List _top_level_decorator(Compiler c) {

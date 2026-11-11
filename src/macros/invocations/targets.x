@@ -37,6 +37,12 @@ List Compiler.try_parse_macro_target_at(Compiler c, Symbol position) =>
    statement does. */
 module List _target_at(Compiler c, Symbol position, int open) {
   if (c.macro_holes && c.peek_macro_hole()) return NULL;
+  /* At file scope a method-form decorator stands where a `$` application
+     does; see `method_decorator_target`. */
+  if (position == <unit> && c.method_decorator_target()) {
+    List method = c.parse_unit_method_decorator();
+    if (method) return method;
+  }
   Token invocation = c.token;
   List definition = _take_invocation(c, position);
   if (!definition) return NULL;

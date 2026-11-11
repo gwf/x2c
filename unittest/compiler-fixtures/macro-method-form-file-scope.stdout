@@ -1,0 +1,15 @@
+route /x
+handler
+route /outer
+route /inner
+stacked
+route /dollar
+traced
+dollar
+route /index
+indexed
+route /pointer
+pointed
+route /template
+template
+7 30 40
