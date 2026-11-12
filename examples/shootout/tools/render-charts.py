@@ -4,6 +4,7 @@ import argparse
 import csv
 import hashlib
 import json
+import os
 from pathlib import Path
 from statistics import fmean, geometric_mean, median
 
@@ -24,6 +25,7 @@ SERIES = [
     ("go", "Go", "#477435", "v"),
     ("java", "Java", "#a34783", "h"),
 ]
+ROOT = Path(__file__).resolve().parents[3]
 TICKS = [.1, .2, .3, .5, .75, 1, 1.25, 1.5, 2, 3, 5, 10, 20, 30, 50, 100, 200]
 
 
@@ -266,7 +268,7 @@ def main():
         writer.writeheader()
         writer.writerows(rows)
     provenance = {
-        "report_path": str(args.results.resolve()),
+        "report_path": os.path.relpath(args.results.resolve(), ROOT),
         "report_sha256": hashlib.sha256(args.results.read_bytes()).hexdigest(),
         "run_id": report["run_id"], "profile": report["profile"],
         "measured_revision": report["machine"]["repository"]["revision"],

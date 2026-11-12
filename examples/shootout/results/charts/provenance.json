@@ -1,5 +1,5 @@
 {
-  "report_path": "/Users/gary/.codex/worktrees/a893/x2c/examples/shootout/results/current.json",
+  "report_path": "examples/shootout/results/current.json",
   "report_sha256": "8d1b2dda4ad2d10fc6a7bd815ea75c05fa30456a848f4987a3fa6e0544c22f6e",
   "run_id": "20261112T054633Z",
   "profile": "local",
