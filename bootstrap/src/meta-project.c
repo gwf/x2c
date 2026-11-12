@@ -41,11 +41,11 @@ typedef struct Scan{
 }
 Scan;
 
-static List _121, _119, _118, _116, _114, _111, _109, _108, _106, _104, _90, _89, _84, _53, _52, _51, _50, _19, _18, _17;
+static List _123, _121, _120, _118, _116, _113, _111, _110, _108, _106, _92, _91, _86, _53, _52, _51, _50, _19, _18, _17;
 
-static String _112, _102, _100, _99, _98, _97, _96, _87, _85, _82, _80, _79, _78, _77, _76, _75, _74, _73, _71, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _48, _46, _44, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _15, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _114, _104, _102, _101, _100, _99, _98, _89, _87, _84, _82, _81, _80, _79, _78, _77, _76, _75, _73, _71, _70, _69, _68, _67, _66, _65, _64, _63, _62, _61, _60, _59, _58, _57, _56, _55, _54, _48, _46, _44, _42, _41, _40, _39, _38, _37, _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _15, _13, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
-static Var _120, _117, _115, _113, _110, _107, _105, _103, _101, _95, _94, _93, _92, _91, _88, _86, _83, _81, _72, _70, _49, _47, _45, _43, _16, _14, _12;
+static Var _122, _119, _117, _115, _112, _109, _107, _105, _103, _97, _96, _95, _94, _93, _90, _88, _85, _83, _74, _72, _49, _47, _45, _43, _16, _14, _12;
 
 static int _init_guard_ = 0;
 
@@ -113,6 +113,8 @@ static String _base(Helper * h, int index);
 
 static String _link(Helper * h, int count);
 
+static String _link_failure(Helper * h, String failure);
+
 static String _support(Helper * h, String * failure);
 
 static String _loop_text(void);
@@ -163,14 +165,14 @@ static Func _x2c_gensym_func_handle_0;
 
 
 
-_x2c_gensym_initializer_choice_D04FB246_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _111)))
+_x2c_gensym_initializer_choice_D04FB246_0((_x2c_gensym_func_handle_0 = x2c_func_shared(_x2c_gensym_func_adapt_0, _113)))
 static Var _x2c_gensym_lambda_1(String path);
 
 static Var _x2c_gensym_func_adapt_1(Func _x2c_gensym_func_binding_1, const FuncArg * _x2c_gensym_func_argv_1);
 
 static Func _x2c_gensym_func_handle_1;
 
-_x2c_gensym_initializer_choice_D04FB246_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _121)))
+_x2c_gensym_initializer_choice_D04FB246_1((_x2c_gensym_func_handle_1 = x2c_func_shared(_x2c_gensym_func_adapt_1, _123)))
 typedef struct _x2c_gensym_defer_env_2{
   const void * _x2c_gensym_defer_capture_3;
   const void * _x2c_gensym_defer_capture_4;
@@ -275,66 +277,68 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _59 = String_new("-o");
   _60 = String_new("/group-");
   _61 = String_new("/tables.c");
-  _62 = String_new("cannot read the helper's loop sources");
-  _63 = String_new("/meta-helper.o");
-  _64 = String_new("");
-  _65 = String_new("/etc/meta-helper.x");
-  _66 = String_new("/etc/meta-queries.x");
-  _67 = String_new("/meta-helper.x");
-  _68 = String_new("the matching x2c compiler is unavailable");
-  _69 = String_new("translate");
-  _70 = String_var(_69);
-  _71 = String_new("--out-dir");
+  _62 = String_new("the helper did not link: ");
+  _63 = String_new("; ");
+  _64 = String_new("cannot read the helper's loop sources");
+  _65 = String_new("/meta-helper.o");
+  _66 = String_new("");
+  _67 = String_new("/etc/meta-helper.x");
+  _68 = String_new("/etc/meta-queries.x");
+  _69 = String_new("/meta-helper.x");
+  _70 = String_new("the matching x2c compiler is unavailable");
+  _71 = String_new("translate");
   _72 = String_var(_71);
-  _73 = String_new("cannot translate ");
-  _74 = String_new(": ");
-  _75 = String_new("/meta-helper.c");
-  _76 = String_new("%ld");
-  _77 = String_new(".");
-  _78 = String_new("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
-  _79 = String_new("-Wl,-force_load,");
-  _80 = String_new("-Wl,--export-dynamic,--whole-archive");
-  _81 = String_var(_80);
-  _82 = String_new("-Wl,--no-whole-archive");
+  _73 = String_new("--out-dir");
+  _74 = String_var(_73);
+  _75 = String_new("cannot translate ");
+  _76 = String_new(": ");
+  _77 = String_new("/meta-helper.c");
+  _78 = String_new("%ld");
+  _79 = String_new(".");
+  _80 = String_new("Map x2c_meta_helper_table(int index) {\n  switch (index) {\n");
+  _81 = String_new("-Wl,-force_load,");
+  _82 = String_new("-Wl,--export-dynamic,--whole-archive");
   _83 = String_var(_82);
-  _84 = cons(_83, NULL);
-  _85 = String_new("-fsigned-char");
-  _86 = String_var(_85);
-  _87 = String_new("-O1");
+  _84 = String_new("-Wl,--no-whole-archive");
+  _85 = String_var(_84);
+  _86 = cons(_85, NULL);
+  _87 = String_new("-fsigned-char");
   _88 = String_var(_87);
-  _89 = cons(_88, NULL);
-  _90 = cons(_86, _89);
-  _91 = Symbol_var(508537894);
-  _92 = Symbol_var(415094903142);
-  _93 = Symbol_var(12971715722);
-  _94 = Symbol_var(273446);
-  _95 = Symbol_var(7495586120);
-  _96 = String_new("/manifest");
-  _97 = String_new("cwd:");
-  _98 = String_new("search:absent");
-  _99 = String_new(":");
-  _100 = String_new("-I");
-  _101 = Symbol_var(437126);
-  _102 = String_new("Var");
-  _103 = String_var(_102);
-  _104 = cons(_103, NULL);
-  _105 = List_var(_104);
+  _89 = String_new("-O1");
+  _90 = String_var(_89);
+  _91 = cons(_90, NULL);
+  _92 = cons(_88, _91);
+  _93 = Symbol_var(508537894);
+  _94 = Symbol_var(415094903142);
+  _95 = Symbol_var(12971715722);
+  _96 = Symbol_var(273446);
+  _97 = Symbol_var(7495586120);
+  _98 = String_new("/manifest");
+  _99 = String_new("cwd:");
+  _100 = String_new("search:absent");
+  _101 = String_new(":");
+  _102 = String_new("-I");
+  _103 = Symbol_var(437126);
+  _104 = String_new("Var");
+  _105 = String_var(_104);
   _106 = cons(_105, NULL);
   _107 = List_var(_106);
   _108 = cons(_107, NULL);
-  _109 = cons(_101, _108);
-  _110 = List_var(_109);
-  _111 = cons(_110, _104);
-  _112 = String_new("String");
-  _113 = String_var(_112);
-  _114 = cons(_113, NULL);
-  _115 = List_var(_114);
+  _109 = List_var(_108);
+  _110 = cons(_109, NULL);
+  _111 = cons(_103, _110);
+  _112 = List_var(_111);
+  _113 = cons(_112, _106);
+  _114 = String_new("String");
+  _115 = String_var(_114);
   _116 = cons(_115, NULL);
   _117 = List_var(_116);
   _118 = cons(_117, NULL);
-  _119 = cons(_101, _118);
-  _120 = List_var(_119);
-  _121 = cons(_120, _104);
+  _119 = List_var(_118);
+  _120 = cons(_119, NULL);
+  _121 = cons(_103, _120);
+  _122 = List_var(_121);
+  _123 = cons(_122, _106);
   _x2c_gensym_static_initialize_0();
   _x2c_gensym_static_initialize_1();
 }
@@ -1232,13 +1236,30 @@ static String _link(Helper * h, int count){
   failure = Compiler_meta_cc_run(_link_arguments(&((* h)), output, tables, support), NULL);
   if(! String_truth(failure)) Path_move_to(output, helper);
   else if(Path_exists(helper)) Path_remove_file(helper);
-  return failure;
+  return String_truth(failure) ? _link_failure(&((* h)), failure) :(String) NULL;
+}
+
+static String _link_failure(Helper * h, String failure){
+  Array reasons = Array_new();
+  {
+    List row;
+    Array _x2c_gensym_macro_object_24 =(* h).failures;
+    int _x2c_gensym_macro_cursor_24 = 0;
+    Var _x2c_gensym_macro_cursor_output_24;
+    while(Array_try_next(_x2c_gensym_macro_object_24, &(_x2c_gensym_macro_cursor_24), &(_x2c_gensym_macro_cursor_output_24))){
+      row = Var_list_payload(_x2c_gensym_macro_cursor_output_24);
+      Array_push(reasons, List_cadr(row));
+    }
+
+  }
+  Array_push(reasons, String_var(String_join(NULL, cons(String_var(_62), cons(String_var(failure), NULL)))));
+  return String_join(_63, Array_list_free(reasons));
 }
 
 static String _support(Helper * h, String * failure){
   String text = _loop_text();
   if(! String_truth(text)){
-    (* failure) = _62;
+    (* failure) = _64;
     return NULL;
   }
   String key = String_sha256(({
@@ -1249,7 +1270,7 @@ static String _support(Helper * h, String * failure){
     Var _x2c_gensym_literal_part_32 = String_var(Compiler_cache_root());  String_join(NULL, cons(_x2c_gensym_literal_part_32, cons(String_var(_4), cons(String_var(key), NULL))));
   }
   );
-  String object = String_join(NULL, cons(String_var(directory), cons(String_var(_63), NULL)));
+  String object = String_join(NULL, cons(String_var(directory), cons(String_var(_65), NULL)));
   if(Path_is_file(object)) return object;
   Path_make_dirs(directory);
   int lock = Path_lock_file(String_join(NULL, cons(String_var(directory), cons(String_var(_0), NULL))), 1);
@@ -1290,14 +1311,14 @@ static String _support(Helper * h, String * failure){
 }
 
 static String _loop_text(void){
-  String text = _64;
+  String text = _66;
   {
     String path;
-    List _x2c_gensym_macro_object_24 = _loop_sources();
-    List _x2c_gensym_macro_cursor_24 = _x2c_gensym_macro_object_24;
-    Var _x2c_gensym_macro_cursor_output_24;
-    while(List_try_next(_x2c_gensym_macro_object_24, &(_x2c_gensym_macro_cursor_24), &(_x2c_gensym_macro_cursor_output_24))){
-      path = Var_as_string(_x2c_gensym_macro_cursor_output_24);
+    List _x2c_gensym_macro_object_25 = _loop_sources();
+    List _x2c_gensym_macro_cursor_25 = _x2c_gensym_macro_object_25;
+    Var _x2c_gensym_macro_cursor_output_25;
+    while(List_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_25), &(_x2c_gensym_macro_cursor_output_25))){
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_25);
       {
         if(! Path_is_file(path)) return NULL;
         _x2c_gensym_proto_string_add_update(&(text), 56, Path_read_text(path));
@@ -1311,25 +1332,25 @@ static String _loop_text(void){
 
 static List _loop_sources(void){
   return({
-    Var _x2c_gensym_literal_part_33 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_65), NULL))));  Var _x2c_gensym_literal_part_34 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_66), NULL))));  cons(_x2c_gensym_literal_part_33, cons(_x2c_gensym_literal_part_34, NULL));
+    Var _x2c_gensym_literal_part_33 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_67), NULL))));  Var _x2c_gensym_literal_part_34 = String_var(String_join(NULL, cons(String_var(x2c_get_root()), cons(String_var(_68), NULL))));  cons(_x2c_gensym_literal_part_33, cons(_x2c_gensym_literal_part_34, NULL));
   }
   );
 }
 
 static String _compile_support(Helper * h, String text, String directory, String object){
-  String source = String_join(NULL, cons(String_var(directory), cons(String_var(_67), NULL)));
+  String source = String_join(NULL, cons(String_var(directory), cons(String_var(_69), NULL)));
   Path_write_text(source, text);
   String driver = Compiler_driver_executable();
-  if(! String_truth(driver)) return _68;
+  if(! String_truth(driver)) return _70;
   String printed = NULL, errors = NULL;
-  if(tool_capture(cons(String_var(driver), cons(_70, cons(_72, cons(String_var(directory), cons(String_var(source), NULL))))), &(printed), &(errors))) return({
-    Var _x2c_gensym_literal_part_35 = String_var(source);  Var _x2c_gensym_literal_part_36 = String_var(String_strip(errors, NULL));  String_join(NULL, cons(String_var(_73), cons(_x2c_gensym_literal_part_35, cons(String_var(_74), cons(_x2c_gensym_literal_part_36, NULL)))));
+  if(tool_capture(cons(String_var(driver), cons(_72, cons(_74, cons(String_var(directory), cons(String_var(source), NULL))))), &(printed), &(errors))) return({
+    Var _x2c_gensym_literal_part_35 = String_var(source);  Var _x2c_gensym_literal_part_36 = String_var(String_strip(errors, NULL));  String_join(NULL, cons(String_var(_75), cons(_x2c_gensym_literal_part_35, cons(String_var(_76), cons(_x2c_gensym_literal_part_36, NULL)))));
   }
   );
   Toolchain t =(* h).toolchain;
   String include =(* h).include, output = _temporary(object);
   String failure = Compiler_meta_cc_run(({
-    Var _x2c_gensym_literal_part_37 = String_var(t -> cc);  List _x2c_gensym_literal_part_38 = _cc_flags();  Var _x2c_gensym_literal_part_39 = String_var(directory);  Var _x2c_gensym_literal_part_40 = String_var(include);  Var _x2c_gensym_literal_part_41 = String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_75), NULL))));  cons(_x2c_gensym_literal_part_37, List_append(_x2c_gensym_literal_part_38, cons(String_var(_23), cons(_x2c_gensym_literal_part_39, cons(String_var(_23), cons(_x2c_gensym_literal_part_40, cons(String_var(_58), cons(_x2c_gensym_literal_part_41, cons(String_var(_59), cons(String_var(output), NULL))))))))));
+    Var _x2c_gensym_literal_part_37 = String_var(t -> cc);  List _x2c_gensym_literal_part_38 = _cc_flags();  Var _x2c_gensym_literal_part_39 = String_var(directory);  Var _x2c_gensym_literal_part_40 = String_var(include);  Var _x2c_gensym_literal_part_41 = String_var(String_join(NULL, cons(String_var(directory), cons(String_var(_77), NULL))));  cons(_x2c_gensym_literal_part_37, List_append(_x2c_gensym_literal_part_38, cons(String_var(_23), cons(_x2c_gensym_literal_part_39, cons(String_var(_23), cons(_x2c_gensym_literal_part_40, cons(String_var(_58), cons(_x2c_gensym_literal_part_41, cons(String_var(_59), cons(String_var(output), NULL))))))))));
   }
   ), NULL);
   if(! String_truth(failure)) Path_move_to(output, object);
@@ -1338,7 +1359,7 @@ static String _compile_support(Helper * h, String text, String directory, String
 
 static String _temporary(String path){
   return({
-    Var _x2c_gensym_literal_part_42 = String_var(path);  Var _x2c_gensym_literal_part_43 = String_var(String_printf(_76, (long) getpid()));  String_join(NULL, cons(_x2c_gensym_literal_part_42, cons(String_var(_77), cons(_x2c_gensym_literal_part_43, NULL))));
+    Var _x2c_gensym_literal_part_42 = String_var(path);  Var _x2c_gensym_literal_part_43 = String_var(String_printf(_78, (long) getpid()));  String_join(NULL, cons(_x2c_gensym_literal_part_42, cons(String_var(_79), cons(_x2c_gensym_literal_part_43, NULL))));
   }
   );
 }
@@ -1348,23 +1369,23 @@ static String _tables(Array built, int count){
   Buffer_write(out, "#include \"x2c.h\"\n");
   {
     int index;
-    Array _x2c_gensym_macro_object_25 = built;
-    int _x2c_gensym_macro_cursor_25 = 0;
-    Var _x2c_gensym_macro_cursor_output_25;
-    while(Array_try_next(_x2c_gensym_macro_object_25, &(_x2c_gensym_macro_cursor_25), &(_x2c_gensym_macro_cursor_output_25))){
-      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_25, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 631}; & _x2c_gensym_error_site_7; })));
-      Buffer_printf(out, "Map x2c_module_targets_%d(void);\n", index);
-    }
-
-  }
-  Buffer_write(out, _78);
-  {
-    int index;
     Array _x2c_gensym_macro_object_26 = built;
     int _x2c_gensym_macro_cursor_26 = 0;
     Var _x2c_gensym_macro_cursor_output_26;
     while(Array_try_next(_x2c_gensym_macro_object_26, &(_x2c_gensym_macro_cursor_26), &(_x2c_gensym_macro_cursor_output_26))){
-      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_26, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 638}; & _x2c_gensym_error_site_8; })));
+      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_26, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 640}; & _x2c_gensym_error_site_7; })));
+      Buffer_printf(out, "Map x2c_module_targets_%d(void);\n", index);
+    }
+
+  }
+  Buffer_write(out, _80);
+  {
+    int index;
+    Array _x2c_gensym_macro_object_27 = built;
+    int _x2c_gensym_macro_cursor_27 = 0;
+    Var _x2c_gensym_macro_cursor_output_27;
+    while(Array_try_next(_x2c_gensym_macro_object_27, &(_x2c_gensym_macro_cursor_27), &(_x2c_gensym_macro_cursor_output_27))){
+      index = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_27, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../src/meta-project.x",.function = "_tables",.line = 647}; & _x2c_gensym_error_site_8; })));
       Buffer_printf(out, "    case %d: return x2c_module_targets_%d();\n", index, index);
     }
 
@@ -1377,9 +1398,9 @@ static String _tables(Array built, int count){
 static List _link_arguments(Helper * h, String output, String tables, String support){
   Toolchain t =(* h).toolchain;
 #ifdef __APPLE__
-  t -> ld_args = List_append(t -> ld_args, cons(String_var(String_join(NULL, cons(String_var(_79), cons(String_var(t -> runtime_lib), NULL)))), NULL));
+  t -> ld_args = List_append(t -> ld_args, cons(String_var(String_join(NULL, cons(String_var(_81), cons(String_var(t -> runtime_lib), NULL)))), NULL));
 #else
-  t -> ld_args = List_append(t -> ld_args, cons(_81, cons(String_var(t -> runtime_lib), _84)));
+  t -> ld_args = List_append(t -> ld_args, cons(_83, cons(String_var(t -> runtime_lib), _86)));
 #endif
   List inputs =({
     List _x2c_gensym_literal_part_44 = Array_list((* h).objects);  List_append(_x2c_gensym_literal_part_44, cons(String_var(tables), cons(String_var(support), NULL)));
@@ -1395,12 +1416,12 @@ static List _link_arguments(Helper * h, String output, String tables, String sup
 }
 
 static List _cc_flags(void){
-  return _90;
+  return _92;
 }
 
 static List _write_manifest(Helper * h, String failure){
   List manifest =({
-    Var _x2c_gensym_literal_part_48 = List_var(cons(_91, cons(List_var(Array_list((* h).groups)), NULL)));  Var _x2c_gensym_literal_part_49 = List_var(cons(_92, cons(List_var(Array_list((* h).failures)), NULL)));  Var _x2c_gensym_literal_part_50 = List_var(cons(_93, cons(String_truth(failure) ? String_var(failure) : String_var(_64), NULL)));  Var _x2c_gensym_literal_part_51 = List_var(cons(_94, cons(List_var(_digests((* h).deps)), NULL)));  Var _x2c_gensym_literal_part_52 = List_var(cons(_95, cons(int_var(!(* h).uncovered), NULL)));  cons(_x2c_gensym_literal_part_48, cons(_x2c_gensym_literal_part_49, cons(_x2c_gensym_literal_part_50, cons(_x2c_gensym_literal_part_51, cons(_x2c_gensym_literal_part_52, NULL)))));
+    Var _x2c_gensym_literal_part_48 = List_var(cons(_93, cons(List_var(Array_list((* h).groups)), NULL)));  Var _x2c_gensym_literal_part_49 = List_var(cons(_94, cons(List_var(Array_list((* h).failures)), NULL)));  Var _x2c_gensym_literal_part_50 = List_var(cons(_95, cons(String_truth(failure) ? String_var(failure) : String_var(_66), NULL)));  Var _x2c_gensym_literal_part_51 = List_var(cons(_96, cons(List_var(_digests((* h).deps)), NULL)));  Var _x2c_gensym_literal_part_52 = List_var(cons(_97, cons(int_var(!(* h).uncovered), NULL)));  cons(_x2c_gensym_literal_part_48, cons(_x2c_gensym_literal_part_49, cons(_x2c_gensym_literal_part_50, cons(_x2c_gensym_literal_part_51, cons(_x2c_gensym_literal_part_52, NULL)))));
   }
   );
   Buffer out = Buffer_new(NULL);
@@ -1418,7 +1439,7 @@ static List _write_manifest(Helper * h, String failure){
     x2c_cleanup_push(& _x2c_gensym_defer_record_5);
     {
       Buffer_write_datum(out, List_var(manifest), 0);
-      Path_write_text(String_join(NULL, cons(String_var((* h).directory), cons(String_var(_96), NULL))), Buffer_str(out));
+      Path_write_text(String_join(NULL, cons(String_var((* h).directory), cons(String_var(_98), NULL))), Buffer_str(out));
       {
         List _x2c_gensym_return_value_4 = manifest;
         {
@@ -1439,13 +1460,13 @@ static List _digests(Map paths){
   {
     String path;
     int _;
-    Map _x2c_gensym_macro_object_27 = paths;
-    unsigned _x2c_gensym_macro_cursor_27 = 0;
-    Var _x2c_gensym_macro_cursor_output_27;
+    Map _x2c_gensym_macro_object_28 = paths;
+    unsigned _x2c_gensym_macro_cursor_28 = 0;
     Var _x2c_gensym_macro_cursor_output_28;
-    while(Map_try_next(_x2c_gensym_macro_object_27, &(_x2c_gensym_macro_cursor_27), &(_x2c_gensym_macro_cursor_output_27), &(_x2c_gensym_macro_cursor_output_28))){
-      path = Var_as_string(_x2c_gensym_macro_cursor_output_27);
-      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_28, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/meta-project.x",.function = "_digests",.line = 689}; & _x2c_gensym_error_site_9; })));
+    Var _x2c_gensym_macro_cursor_output_29;
+    while(Map_try_next(_x2c_gensym_macro_object_28, &(_x2c_gensym_macro_cursor_28), &(_x2c_gensym_macro_cursor_output_28), &(_x2c_gensym_macro_cursor_output_29))){
+      path = Var_as_string(_x2c_gensym_macro_cursor_output_28);
+      _ = Var_int(Var_convert_at(_x2c_gensym_macro_cursor_output_29, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../src/meta-project.x",.function = "_digests",.line = 698}; & _x2c_gensym_error_site_9; })));
       {
         String digest = _digest(path);
         if(String_truth(digest)) Array_push(rows, List_var(cons(String_var(path), cons(String_var(digest), NULL))));
@@ -1458,7 +1479,7 @@ static List _digests(Map paths){
 }
 
 static List _current(String directory){
-  String path = String_join(NULL, cons(String_var(directory), cons(String_var(_96), NULL)));
+  String path = String_join(NULL, cons(String_var(directory), cons(String_var(_98), NULL)));
   if(! Path_is_file(path)) return NULL;
   String text = Path_read_text(path);
   unsigned cursor = 0;
@@ -1517,13 +1538,13 @@ static List _current(String directory){
   if(! Var_truth(List_assoc(manifest, Symbol_var(7495586120)))) return NULL;
   {
     List row;
-    Iter _x2c_gensym_macro_iterator_28 = Var_iter(List_assoc(manifest, Symbol_var(273446)), &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_29 = Var_iter(List_assoc(manifest, Symbol_var(273446)), &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_28;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_28, &(_x2c_gensym_macro_item_28))){
-      row = Var_list_payload(_x2c_gensym_macro_item_28);
+    Var _x2c_gensym_macro_item_29;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_29, &(_x2c_gensym_macro_item_29))){
+      row = Var_list_payload(_x2c_gensym_macro_item_29);
       {
         List _x2c_gensym_destructure_0 = row;
         String file = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 0));
@@ -1540,8 +1561,8 @@ static List _current(String directory){
 int SourceView_exists(SourceView, String);
 
 static String _digest(String path){
-  if(String_startswith(path, cons(String_var(_97), NULL))) path = String_getslice(path, 4, (-2147483647 - 1), 1);
-  if(! SourceView_exists(NULL, path)) return _98;
+  if(String_startswith(path, cons(String_var(_99), NULL))) path = String_getslice(path, 4, (-2147483647 - 1), 1);
+  if(! SourceView_exists(NULL, path)) return _100;
   File input = fopen(path, "rb");
   {
     _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
@@ -1565,7 +1586,7 @@ static String _digest(String path){
       }
       {
         String _x2c_gensym_return_value_7 =({
-          Var _x2c_gensym_literal_part_53 = String_var(Path_absolute(path));  Var _x2c_gensym_literal_part_54 = String_var(File_sha256(input));  String_join(NULL, cons(_x2c_gensym_literal_part_53, cons(String_var(_99), cons(_x2c_gensym_literal_part_54, NULL))));
+          Var _x2c_gensym_literal_part_53 = String_var(Path_absolute(path));  Var _x2c_gensym_literal_part_54 = String_var(File_sha256(input));  String_join(NULL, cons(_x2c_gensym_literal_part_53, cons(String_var(_101), cons(_x2c_gensym_literal_part_54, NULL))));
         }
         );
         {
@@ -1592,7 +1613,7 @@ static void _x2c_gensym_defer_cleanup_1(void * _x2c_gensym_defer_opaque_1){
 }
 
 static Var _x2c_gensym_lambda_0(Var dir){
-  return List_var(cons(String_var(_100), cons(dir, NULL)));
+  return List_var(cons(String_var(_102), cons(dir, NULL)));
   ;
 }
 

@@ -1662,7 +1662,7 @@ static void _prescribe(Compiler c, List row, Array prescribed, Array aliases){
 }
 
 static String _alias_spelling(Var target, List binding){
-  String spelling = Var_is_row(target, 11, 7, 1) ? Var_as_string(target) : NULL;
+  String spelling = Var_as_string(Var_is_row(target, 11, 7, 1) ? target : Var_null());
   {
     List _x2c_gensym_match_expr_14 = binding;
     switch(0){

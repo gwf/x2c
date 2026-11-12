@@ -1299,7 +1299,7 @@ static Symbol _tag_value(List expression){
 }
 
 static Symbol f8_registry____published_storage(f8_registry___AdoptionDraft * a, String spelling){
-  Compiler c =(* a).c;  if((* a).storage == 1317118534) return 1317118534;  if(c -> source_private < 0) return(* a).storage;  Var occurrence_value;  List occurrence = Map_try_get(c -> protocols, List_var((* a).base), &(occurrence_value)) ? Var_list_payload(occurrence_value) : NULL;  List record = List_truth(occurrence) ? Var_list_payload(List_car(occurrence)) : NULL;  int private_native = List_truth(record) && f8_registry____has_private_native(c, List_cdr(Var_list(List_last(record))));  String base_name = _base_name((* a).base);  String forward = String_truth(base_name) ? _member_spelling((* a).participant, String_lower(base_name)) :(String) NULL;  String reverse = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _118, spelling) :(String) NULL;  String alternate = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _119, spelling) :(String) NULL;  int private = c -> source_private > 0 ||(List_truth(occurrence) && f8_registry____occurrence_storage(occurrence) == 1317118534) || _is_private(c, spelling) ||(String_truth(forward) && _is_private(c, forward)) ||(String_truth(reverse) && _is_private(c, reverse)) ||(String_truth(alternate) && _is_private(c, alternate)) || private_native;  return private ? 1317118534 :(* a).storage;
+  Compiler c =(* a).c;  if((* a).storage == 1317118534) return 1317118534;  if(c -> source_private < 0) return(* a).storage;  Var occurrence_value;  List occurrence = Var_list_payload(Map_try_get(c -> protocols, List_var((* a).base), &(occurrence_value)) ? occurrence_value : Var_null());  List record = Var_list_payload(List_truth(occurrence) ? List_car(occurrence) : Var_null());  int private_native = List_truth(record) && f8_registry____has_private_native(c, List_cdr(Var_list(List_last(record))));  String base_name = _base_name((* a).base);  String forward = String_truth(base_name) ? _member_spelling((* a).participant, String_lower(base_name)) :(String) NULL;  String reverse = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _118, spelling) :(String) NULL;  String alternate = String_truth(base_name) ? Compiler_reverse_converter_spelling(c, base_name, _119, spelling) :(String) NULL;  int private = c -> source_private > 0 ||(List_truth(occurrence) && f8_registry____occurrence_storage(occurrence) == 1317118534) || _is_private(c, spelling) ||(String_truth(forward) && _is_private(c, forward)) ||(String_truth(reverse) && _is_private(c, reverse)) ||(String_truth(alternate) && _is_private(c, alternate)) || private_native;  return private ? 1317118534 :(* a).storage;
 }
 
 static Symbol f8_registry____occurrence_storage(List occurrence){
@@ -1308,7 +1308,7 @@ static Symbol f8_registry____occurrence_storage(List occurrence){
 
 int Type_is_bare_typedef_name(Type);
 static String _base_name(Type base){
-  return Type_is_bare_typedef_name(base) ? Var_as_string(List_car(Type_list(base))) : NULL;
+  return Var_as_string(Type_is_bare_typedef_name(base) ? List_car(Type_list(base)) : Var_null());
 }
 
 static String _member_spelling(Type participant, String member){
@@ -1559,7 +1559,7 @@ static List _visible_adoption(Compiler c, Type base, Type participant){
 }
 
 static List f8_registry____adoption_row(Compiler c, Type base, Type participant, Symbol storage){
-  String path = _path(c);  List key = storage == 1317118534 ? cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))) : cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  return Map_try_get(c -> adoptions, List_var(key), &(stored)) ? Var_list_payload(stored) : NULL;
+  String path = _path(c);  List key = storage == 1317118534 ? cons(List_var(base), cons(List_var(participant), cons(String_var(path), NULL))) : cons(List_var(base), cons(List_var(participant), NULL));  Var stored;  return Var_list_payload(Map_try_get(c -> adoptions, List_var(key), &(stored)) ? stored : Var_null());
 }
 
 List Compiler_parse_protocol_declaration(Compiler c){
@@ -1573,7 +1573,7 @@ static void f12_declarations____head(f12_declarations___ProtocolSyntax * p){
   Compiler c =(* p).c;  if(Compiler_at_word(c, _153)){
     (* p).meta = c -> token;  Compiler_next(c);
   }
-  if(Compiler_test(c, 1317118534))(* p).storage = 1317118534;  Compiler_next(c); (* p).generated_base = Map_truth(c -> macro_holes) && Compiler_peek(c, 0) == 73; (* p).base = Compiler_parse_type_name(c);  Compiler_expect(c, 81); (* p).participant_token = c -> token; (* p).participant_type = Compiler_parse_type_name(c);  Type participant =(* p).participant_type; (* p).participant = List_len(Type_list(participant)) == 1 && Var_is_row(List_car(Type_list(participant)), 11, 7, 1) ? Var_as_string(List_car(Type_list(participant))) : NULL;  Compiler_expect(c, 83);  f12_declarations____modifiers(&((* p)));
+  if(Compiler_test(c, 1317118534))(* p).storage = 1317118534;  Compiler_next(c); (* p).generated_base = Map_truth(c -> macro_holes) && Compiler_peek(c, 0) == 73; (* p).base = Compiler_parse_type_name(c);  Compiler_expect(c, 81); (* p).participant_token = c -> token; (* p).participant_type = Compiler_parse_type_name(c);  Type participant =(* p).participant_type; (* p).participant = Var_as_string(List_len(Type_list(participant)) == 1 && Var_is_row(List_car(Type_list(participant)), 11, 7, 1) ? List_car(Type_list(participant)) : Var_null());  Compiler_expect(c, 83);  f12_declarations____modifiers(&((* p)));
 }
 
 Type Type_canonicalize(Type);

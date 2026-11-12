@@ -4047,7 +4047,7 @@ List Compiler_bind_syntax(Compiler c, Var syntax, Symbol context, Type return_ty
 
 static List _bind_api_source(Compiler c, Var line, Var doc, Var syntax){
   List bound = Compiler_bind_syntax(c, syntax, 1405544, List_type(c -> return_type));
-  Token invocation = List_truth(c -> macro_stack) ? Var_token(List_getindex(Var_list(List_last(c -> macro_stack)), 3)) : NULL;
+  Token invocation = Var_token(List_truth(c -> macro_stack) ? List_getindex(Var_list(List_last(c -> macro_stack)), 3) : Var_null());
   String invocation_doc = invocation ? Compiler_definition_doc(c, invocation) :(String) NULL;
   line = invocation ? int_var(invocation -> line) : line;
   doc = String_var(String_truth(invocation_doc) ? invocation_doc : f5_units____filled_doc(c, Var_as_string(doc)));
@@ -7867,7 +7867,7 @@ static List _bind_collected_function(Compiler c, List input, Var return_type, Va
       }
       ;  x2c_cleanup_push(& _x2c_gensym_defer_record_30); {
         * _x2c_gensym_macro_address_13 = Var_list_payload(construction); {
-          Token invocation = List_truth(c -> macro_stack) ? Var_token(List_getindex(Var_list(List_last(c -> macro_stack)), 3)) : NULL; {
+          Token invocation = Var_token(List_truth(c -> macro_stack) ? List_getindex(Var_list(List_last(c -> macro_stack)), 3) : Var_null()); {
             int * _x2c_gensym_macro_address_12 = & c -> origin;  int _x2c_gensym_macro_previous_12 = * _x2c_gensym_macro_address_12; {
               _x2c_gensym_defer_env_31 _x2c_gensym_macro_environment_30 ={
                 0
