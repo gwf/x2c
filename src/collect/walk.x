@@ -464,7 +464,7 @@ static void _split(FileWalk &w, Token first) {
       hidden = Compiler.hidden_group(open);
     String directive = Compiler.preproc_directive(token.text);
     if (Compiler.preproc_conditional_kind(token.text) ||
-        directive.startswith("define") || directive.startswith("undef"))
+        directive.startswith("define", "undef"))
       w.parts.push(_cpp_event(w, token));
     int split = !(cpp ? cpp.hidden() : hidden) && _directive(w, token);
     if (cpp) {

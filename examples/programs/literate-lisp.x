@@ -264,7 +264,7 @@ typedef struct Repl {
 int main(int argc, char **argv) {                                                // Standard C argc/argv entry point.
   auto {                                                                     // Session-wide allocation region.
     try {                                                                        // Structured exception boundary.
-      Array args = range(0, argc - 1, 1)                                         // Lazy range iterator.
+      Array args = range(argc - 1)                                         // Lazy range iterator.
         .map(%!(int i) using &argv => String.new(argv[i]));                      // Capture &argv; convert each entry.
       Interp self = _interpreter();                                              // Session record returned by value.
       String source;                                                             // Immutable String held by a handle.
@@ -473,7 +473,7 @@ static Var _bool(int x)      => x ? <true>.var() : %().var();                   
 static Var _reserved(void) => Var.null();                                        // Expression body; void Var value.
 
 static int _repl(Interp &self) {
-  Buffer source = auto Buffer.new(0);                                            // Release Buffer on block exit.
+  Buffer source = auto Buffer.new();                                            // Release Buffer on block exit.
   Repl repl = { .source = source, .interactive = isatty(Stdin.fileno()) };       // Named fields; POSIX terminal check.
   defer repl.storage.destroy();                                                  // Destroy remaining tokens on exit.
   int failed = 0;                                                                // Written by catch, so kept apart.

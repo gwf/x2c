@@ -22,7 +22,7 @@ typedef struct Tokenizer{
 }
 * Tokenizer;
 
-static String _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
+static String _36, _35, _34, _33, _32, _31, _30, _29, _28, _27, _26, _25, _24, _23, _22, _21, _20, _19, _18, _17, _16, _15, _14, _13, _12, _11, _10, _9, _8, _7, _6, _5, _4, _3, _2, _1, _0;
 
 static int _init_guard_ = 0;
 
@@ -285,33 +285,34 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _6 = String_new(", ");
   _7 = String_new("}}");
   _8 = String_new("#pragma indent");
-  _9 = String_new("tag");
-  _10 = String_new("not");
-  _11 = String_new("is");
-  _12 = String_new("to");
-  _13 = String_new("alias");
-  _14 = String_new("?");
-  _15 = String_new(":");
-  _16 = String_new(".");
-  _17 = String_new("{");
-  _18 = String_new("do");
-  _19 = String_new("};");
-  _20 = String_new("}");
-  _21 = String_new("struct");
-  _22 = String_new("union");
-  _23 = String_new("enum");
-  _24 = String_new("while");
-  _25 = String_new(";");
-  _26 = String_new("else");
-  _27 = String_new("(");
-  _28 = String_new("for");
-  _29 = String_new("if");
-  _30 = String_new("foreach");
-  _31 = String_new("switch");
-  _32 = String_new("match");
-  _33 = String_new("case");
-  _34 = String_new("default");
-  _35 = String_new("catch");
+  _9 = String_new(" \t\r\n");
+  _10 = String_new("tag");
+  _11 = String_new("not");
+  _12 = String_new("is");
+  _13 = String_new("to");
+  _14 = String_new("alias");
+  _15 = String_new("?");
+  _16 = String_new(":");
+  _17 = String_new(".");
+  _18 = String_new("{");
+  _19 = String_new("do");
+  _20 = String_new("};");
+  _21 = String_new("}");
+  _22 = String_new("struct");
+  _23 = String_new("union");
+  _24 = String_new("enum");
+  _25 = String_new("while");
+  _26 = String_new(";");
+  _27 = String_new("else");
+  _28 = String_new("(");
+  _29 = String_new("for");
+  _30 = String_new("if");
+  _31 = String_new("foreach");
+  _32 = String_new("switch");
+  _33 = String_new("match");
+  _34 = String_new("case");
+  _35 = String_new("default");
+  _36 = String_new("catch");
 }
 
 Tokenizer Tokenizer_alloc(void);
@@ -365,12 +366,12 @@ Buffer Tokenizer_write_str(Tokenizer value, Buffer out){
   return Buffer_printf(out, "<Tokenizer: 0x%012lX>", (long) value);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 String Buffer_str(Buffer);
 
 String Tokenizer_str(Tokenizer value){
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -473,7 +474,7 @@ Buffer Tokenizer_write_repr(Tokenizer value, Buffer out){
 }
 
 String Tokenizer_repr(Tokenizer value){
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -727,16 +728,16 @@ static int _common_tokens(Tokenizer t){
 
 int scan_preprocessor(char *);
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 int String_equal(String, String);
 
-String String_strip(String, char *);
+String String_strip(String, List);
 
 static int _preprocessor(Tokenizer t){
   if(! Tokenizer_do_scanner(t, scan_preprocessor, 35579270086)) return 0;
   Token directive = _significant_back(t, 0), before = directive;
-  if(t -> layout || ! String_startswith(directive -> text, _8) || ! String_equal(String_strip(directive -> text, " \t\r\n"), _8)) return 1;
+  if(t -> layout || ! String_startswith(directive -> text, cons(String_var(_8), NULL)) || ! String_equal(String_strip(directive -> text, cons(String_var(_9), NULL)), _8)) return 1;
   while((before = _significant_before(t, before)) && before -> type == 35579270086){
 
   }
@@ -987,12 +988,12 @@ static inline int _can_start_symbol_literal(Tokenizer tokenizer){
   Token keyword = _significant_back(tokenizer, 0);
   int back = 1;
   if(keyword -> type != 19147688) return 0;
-  if(String_equal(keyword -> text, _9)) return 1;
-  if(String_equal(keyword -> text, _10)){
+  if(String_equal(keyword -> text, _10)) return 1;
+  if(String_equal(keyword -> text, _11)){
     keyword = _significant_back(tokenizer, back ++);
     if(! keyword || keyword -> type != 19147688) return 0;
   }
-  return String_equal(keyword -> text, _11) && _token_ends_operand(_significant_back(tokenizer, back));
+  return String_equal(keyword -> text, _12) && _token_ends_operand(_significant_back(tokenizer, back));
 }
 
 static inline int _prev_token_ends_operand(Tokenizer tokenizer){
@@ -1002,11 +1003,11 @@ static inline int _prev_token_ends_operand(Tokenizer tokenizer){
 }
 
 static int _alias_value_starts(Tokenizer tokenizer, Token token){
-  if(token -> type != 19147688 || ! String_equal(token -> text, _12)) return 0;
+  if(token -> type != 19147688 || ! String_equal(token -> text, _13)) return 0;
   Token name = _significant_before(tokenizer, token);
   if(! name || name -> type != 19147688) return 0;
   Token head = _significant_before(tokenizer, name);
-  return head && head -> type == 19147688 && String_equal(head -> text, _13);
+  return head && head -> type == 19147688 && String_equal(head -> text, _14);
 }
 
 static int _layout_statement_start(Tokenizer tokenizer){
@@ -1161,8 +1162,8 @@ static void _split_lines(_Layout * l){
     (* l).lines[(* l).nlines - 1].last = k;
     if(_closes(tok)) depth --;
     (* l).depths[k] = depth;
-    if(! depth && String_equal(tok -> text, _14)) pending ++;
-    else if(! depth && String_equal(tok -> text, _15) && pending){
+    if(! depth && String_equal(tok -> text, _15)) pending ++;
+    else if(! depth && String_equal(tok -> text, _16) && pending){
       (* l).ternary[k] = 1;
       pending --;
     }
@@ -1175,7 +1176,7 @@ static void _split_lines(_Layout * l){
 static int _starts_line(_Layout * l, int k, int depth, int end_line){
   Token tok =(* l).sig[k];
   if(tok -> type == 35579270086 || !(* l).nlines ||(* l).lines[(* l).nlines - 1].directive) return 1;
-  return depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _16) &&(tok -> col <=(* l).lines[(* l).nlines - 1].indent ||(String_equal((* l).sig[k - 1] -> text, _15) && !(* l).ternary[k - 1]));
+  return depth == 0 && tok -> line > end_line && ! String_equal(tok -> text, _17) &&(tok -> col <=(* l).lines[(* l).nlines - 1].indent ||(String_equal((* l).sig[k - 1] -> text, _16) && !(* l).ternary[k - 1]));
 }
 
 static void _check_tab(_Layout * l, Token tok){
@@ -1197,14 +1198,14 @@ static int String_truth(String);
 static void _edit_line(_Layout * l, int i){
   _LayoutLine line =(* l).lines[i];
   if(line.directive){
-    if(String_equal(String_strip((* l).sig[line.first] -> text, " \t\r\n"), _8)) _edit(&((* l)), line.first) -> type = 7477210024;
+    if(String_equal(String_strip((* l).sig[line.first] -> text, cons(String_var(_9), NULL)), _8)) _edit(&((* l)), line.first) -> type = 7477210024;
     return;
   }
   if(!(* l).top && !(* l).indents[0])(* l).indents[0] = line.indent;
   int j = _next_statement(&((* l)), i);
   int next = j <(* l).nlines ?(* l).lines[j].indent :(* l).indents[0];
   String suffix = NULL;
-  if(String_equal((* l).sig[line.last] -> text, _15) && !(* l).ternary[line.last] && next > line.indent) _open_block(&((* l)), line, j, next);
+  if(String_equal((* l).sig[line.last] -> text, _16) && !(* l).ternary[line.last] && next > line.indent) _open_block(&((* l)), line, j, next);
   else suffix = _end_statement(&((* l)), line);
   while((* l).top && next <(* l).indents[(* l).top]) suffix =({
     Var _x2c_gensym_literal_part_2 = String_var(suffix);  Var _x2c_gensym_literal_part_3 = String_var((* l).closers[(* l).top --]);  String_join(NULL, cons(_x2c_gensym_literal_part_2, cons(_x2c_gensym_literal_part_3, NULL)));
@@ -1224,21 +1225,21 @@ static int _next_statement(_Layout * l, int i){
 static void _open_block(_Layout * l, _LayoutLine line, int j, int next){
   Token first =(* l).sig[line.first];
   _LayoutHeader header = _header(&((* l)), line);
-  if(header.labeled) _edit(&((* l)), line.last) -> after = _17;
-  else if(! _condition(&((* l)), line.first, line.last, _17)) _edit(&((* l)), line.last) -> type = 247;
-  if(String_equal(first -> text, _18) && line.last == line.first + 1 && _bare_do(&((* l)), line, j)) _edit(&((* l)), line.first) -> type = 40896714;
+  if(header.labeled) _edit(&((* l)), line.last) -> after = _18;
+  else if(! _condition(&((* l)), line.first, line.last, _18)) _edit(&((* l)), line.last) -> type = 247;
+  if(String_equal(first -> text, _19) && line.last == line.first + 1 && _bare_do(&((* l)), line, j)) _edit(&((* l)), line.first) -> type = 40896714;
   (* l).indents[++(* l).top] = next;
   (* l).enums[(* l).top] = header.enumeration;
   int alias = first -> type == 44661285196 ||(first -> type == 1317118534 &&(* l).sig[line.first + 1] -> type == 44661285196);
-  (* l).closers[(* l).top] = header.aggregate && ! alias ? _19 : _20;
+  (* l).closers[(* l).top] = header.aggregate && ! alias ? _20 : _21;
 }
 
 static _LayoutHeader _header(_Layout * l, _LayoutLine line){
   int aggregate = 0, enumeration = 0, parameters = 0, labeled = 0;
   for(int m = line.first;  m < line.last;  m ++){
     String word =(* l).sig[m] -> text;
-    aggregate |= String_equal(word, _21) || String_equal(word, _22) || String_equal(word, _23);
-    enumeration |= String_equal(word, _23);
+    aggregate |= String_equal(word, _22) || String_equal(word, _23) || String_equal(word, _24);
+    enumeration |= String_equal(word, _24);
     parameters |=(* l).sig[m] -> type == 81;
     labeled |= !(* l).depths[m] && _is_label(word);
   }
@@ -1253,7 +1254,7 @@ static int _bare_do(_Layout * l, _LayoutLine line, int j){
   for(;  k <(* l).nlines;  k ++) if(!(* l).lines[k].directive &&(* l).lines[k].indent <= line.indent) break;
   if(k ==(* l).nlines) return 1;
   _LayoutLine trailer =(* l).lines[k];
-  return trailer.indent != line.indent || ! String_equal((* l).sig[trailer.first] -> text, _24) || String_equal((* l).sig[trailer.last] -> text, _15);
+  return trailer.indent != line.indent || ! String_equal((* l).sig[trailer.first] -> text, _25) || String_equal((* l).sig[trailer.last] -> text, _16);
 }
 
 static String _end_statement(_Layout * l, _LayoutLine line){
@@ -1263,7 +1264,7 @@ static String _end_statement(_Layout * l, _LayoutLine line){
     return NULL;
   }
   if((* l).sig[line.last] -> type == 119 ||(* l).enums[(* l).top] || _hole(&((* l)), line)) return NULL;
-  return _25;
+  return _26;
 }
 
 static void _one_line_body(_Layout * l, _LayoutLine line){
@@ -1271,8 +1272,8 @@ static void _one_line_body(_Layout * l, _LayoutLine line){
     String word =(* l).sig[m] -> text;
     if((* l).depths[m]) continue;
     if(_is_label(word)) return;
-    if(! String_equal(word, _15) ||(* l).ternary[m]) continue;
-    if(! _condition(&((* l)), line.first, m, NULL) && String_equal((* l).sig[m - 1] -> text, _26)) _edit(&((* l)), m) -> type = 40896714;
+    if(! String_equal(word, _16) ||(* l).ternary[m]) continue;
+    if(! _condition(&((* l)), line.first, m, NULL) && String_equal((* l).sig[m - 1] -> text, _27)) _edit(&((* l)), m) -> type = 40896714;
     return;
   }
 
@@ -1294,7 +1295,7 @@ static int _condition(_Layout * l, int first, int colon, String body){
   _LayoutEdit * tail = _edit(&((* l)), colon);
   if(_wrapped(&((* l)), key, colon)) tail -> type = String_truth(body) ? 247 : 40896714;
   else{
-    _edit(&((* l)), key + 1) -> before = _27;
+    _edit(&((* l)), key + 1) -> before = _28;
     tail -> type = 83;
     tail -> after = body;
   }
@@ -1307,12 +1308,12 @@ static _LayoutEdit * _edit(_Layout * l, int k){
 
 static int _control_keyword(_Layout * l, int first, int colon){
   int key = - 1;
-  for(int m = first;  m < colon;  m ++) if(!(* l).depths[m] && _conditional((* l).sig[m]) &&(m == first || ! String_equal((* l).sig[m - 1] -> text, _16))) key = m;
+  for(int m = first;  m < colon;  m ++) if(!(* l).depths[m] && _conditional((* l).sig[m]) &&(m == first || ! String_equal((* l).sig[m - 1] -> text, _17))) key = m;
   return key;
 }
 
 static int _wrapped(_Layout * l, int key, int colon){
-  int wrapped = String_equal((* l).sig[key] -> text, _28) ||((* l).sig[key + 1] -> type == 81 &&(* l).sig[colon - 1] -> type == 83);
+  int wrapped = String_equal((* l).sig[key] -> text, _29) ||((* l).sig[key + 1] -> type == 81 &&(* l).sig[colon - 1] -> type == 83);
   for(int m = key + 2;  wrapped && m < colon - 1;  m ++) wrapped =(* l).depths[m] > 0;
   return wrapped;
 }
@@ -1369,11 +1370,11 @@ static inline int _closes(Token t){
 }
 
 static inline int _conditional(Token t){
-  return String_equal(t -> text, _29) || String_equal(t -> text, _24) || String_equal(t -> text, _28) || String_equal(t -> text, _30) || String_equal(t -> text, _31) || String_equal(t -> text, _32);
+  return String_equal(t -> text, _30) || String_equal(t -> text, _25) || String_equal(t -> text, _29) || String_equal(t -> text, _31) || String_equal(t -> text, _32) || String_equal(t -> text, _33);
 }
 
 static int _is_label(String word){
-  return String_equal(word, _33) || String_equal(word, _34) || String_equal(word, _35);
+  return String_equal(word, _34) || String_equal(word, _35) || String_equal(word, _36);
 }
 
 static inline String _x2c_gensym_proto_token_str_0(Var a0){

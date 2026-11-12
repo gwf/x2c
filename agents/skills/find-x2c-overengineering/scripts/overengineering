@@ -33,7 +33,7 @@ static int _word_char(int ch) => isalnum(ch) || ch == '_'
 
 /* The output of `command`, run from the repository root. */
 static String _run(List command) =>
-  command.job().options({dir: root, stderr: <capture>}).output()
+  command.job().options(dir: root, stderr: <capture>).output()
 
 /* The output of `command`, or NULL when it fails. */
 static String _try_run(List command):

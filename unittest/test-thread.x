@@ -1306,11 +1306,11 @@ static void parallel_map_rejects_arguments_at_the_call(void) {
   $test.scoped();
   Pool pool = Pool.current();
   String raised = NULL;
-  try range(0, 2, 1).parallel_map(NULL, 2);
+  try range(2).parallel_map(NULL, 2);
   catch %(?code (operation ?op)): raised = %"$raised$code $op; ";
-  try range(0, 2, 1).parallel_map_in(pool, NULL, 2);
+  try range(2).parallel_map_in(pool, NULL, 2);
   catch %(?code (operation ?op)): raised = %"$raised$code $op; ";
-  try range(0, 2, 1).parallel_map(_parallel_count, 0);
+  try range(2).parallel_map(_parallel_count, 0);
   catch %(?code (operation ?op)): raised = %"$raised$code $op; ";
   EXPECT_STR_EQ(
     raised, "bad-arg Iter.parallel_map; bad-arg Iter.parallel_map_in; "
@@ -1487,7 +1487,7 @@ static void parallel_map_borrows_selected_pool(void) {
   defer borrowed.release();
   defer parallel_expected_pool = NULL;
   parallel_expected_pool = borrowed;
-  int total = range(0, 15, 1).parallel_map_in(borrowed, _parallel_in_pool, 4)
+  int total = range(15).parallel_map_in(borrowed, _parallel_in_pool, 4)
     .foldl(0, %!(int sum, int value) => sum + value);
   EXPECT_INT_EQ(total, 16);
   EXPECT_PTR_EQ(Pool.current(), caller);
@@ -1506,7 +1506,7 @@ static void parallel_map_borrowed_pool_survives_failure(void) {
   Pool caller = Pool.current(), borrowed = caller.retain();
   defer borrowed.release();
   int caught = 0;
-  try range(0, 2, 1).parallel_map_in(borrowed, _parallel_pool_error, 2)
+  try range(2).parallel_map_in(borrowed, _parallel_pool_error, 2)
     .foldl(0, %!(int sum, int value) => sum + value);
   catch %(join-fail *): caught = 1;
   EXPECT_INT_EQ(caught, 1);
@@ -1519,11 +1519,11 @@ static void parallel_map_borrowed_pool_survives_failure(void) {
 static void parallel_map_null_reducer_raises_when_called(void) {
   $test.scoped();
   _parallel_reset();
-  Var empty = range(1, 0, 1).parallel_map(_parallel_count, 2)
+  Var empty = range(1, 0).parallel_map(_parallel_count, 2)
     .foldl(7, (Func) NULL);
   EXPECT_INT_EQ(empty.int(), 7);
   String raised = NULL;
-  try range(0, 2, 1).parallel_map(_parallel_count, 2).foldl(0, (Func) NULL);
+  try range(2).parallel_map(_parallel_count, 2).foldl(0, (Func) NULL);
   catch %(?code (operation ?op) *): raised = %"$code $op";
   EXPECT_STR_EQ(raised, "bad-arg Func.apply");
   EXPECT_INT_EQ(atomic_load(&parallel_active), 0);

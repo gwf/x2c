@@ -137,6 +137,8 @@ typedef struct Compiler{
   Map prepared_rewrites;
   SlotWatch slot_watch;
   Token meta_statement;
+  List method_decorator;
+  List method_receiver;
   int import_protocols;
   int in_pattern, match_is, runtime_literals, inline_header;
   int permanent_literals;

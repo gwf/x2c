@@ -1,7 +1,7 @@
 #include "x2c.x"
 
 meta List mapped(int bias) {
-  return range(1, 4, 1).map(%!(Var value) => value + bias);
+  return range(1, 4).map(%!(Var value) => value + bias);
 }
 
 meta int keys_valid(void) {
@@ -23,14 +23,14 @@ meta Var counted(Map state, Var value) {
 
 meta int lazy(void) {
   Map state = {"calls": 0};
-  int count = range(1, 4, 1)
+  int count = range(1, 4)
     .map(%!(Var value) => counted(state, value))
     .head(0).count();
   return count * 10 + state["calls"].integer();
 }
 
 meta int x2c_truth(void) {
-  return range(1, 3, 1).filter(%!(Var value) => 0).count();
+  return range(1, 3).filter(%!(Var value) => 0).count();
 }
 
 meta Var mutate_after_first(Map values, Map state, Var value) {
@@ -53,7 +53,7 @@ meta int folds(void) {
   Array values = [1, 2, 3];
   return %(1 2 3).foldl(void, %!(Var a, Var b) => a + b).integer() * 100 +
     values.foldl(void, %!(Var a, Var b) => a + b).integer() * 10 +
-    range(1, 3, 1).foldl(void, %!(Var a, Var b) => a + b).integer();
+    range(1, 3).foldl(void, %!(Var a, Var b) => a + b).integer();
 }
 
 meta int void_consumers(void) {
@@ -61,17 +61,17 @@ meta int void_consumers(void) {
   try %(4 5).foldl(void, (Func) 0);
   catch %(bad-arg *): missing = 1;
   return missing && %().foldl(void, (Func) 0).is_void() &&
-    range(1, 0, 1).foldl(void, (Func) 0).is_void() &&
-    range(1, 0, 1).next().is_void() &&
-    range(1, 0, 1).find(%!(Var value) => value).is_void() &&
-    range(1, 0, 1).min().is_void() &&
-    range(1, 0, 1).max().is_void() &&
+    range(1, 0).foldl(void, (Func) 0).is_void() &&
+    range(1, 0).next().is_void() &&
+    range(1, 0).find(%!(Var value) => value).is_void() &&
+    range(1, 0).min().is_void() &&
+    range(1, 0).max().is_void() &&
     %(4).foldl(void, (Func) 0).integer() == 4;
 }
 
 meta int found(void) {
   return %(0 2 3).find(%!(Var value) => value).integer() * 10 +
-    range(1, 3, 1).find(%!(Var value) => value > 1).integer();
+    range(1, 3).find(%!(Var value) => value > 1).integer();
 }
 
 /* Each iterator here gets the Iter storage the compiler supplies. */
@@ -79,7 +79,7 @@ meta int sequences(int bias) {
   Array values = [1, 2, 3];
   Var boxed = %(4 5);
   long total = 0;
-  foreach (Var value, range(0, 5, 1)) total += value.integer();
+  foreach (Var value, range(5)) total += value.integer();
   return "abc".iter().count() + %(1 2 3).iter().sum() +
     values.iter().sum() + boxed.iter().sum() + total + bias;
 }

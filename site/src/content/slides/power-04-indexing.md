@@ -1,7 +1,11 @@
 ---
 slug: indexing
+aliases: [counting]
 section: power
+home: true
+order: 2
 tab: indexing
+title: Build an index. Ask it questions.
 ---
 
 ```x2c
@@ -41,7 +45,4 @@ Array Index.find(Index index, String word)
   => index.words.getdefault(word.lower(), []);
 ```
 
-`Index` combines an `Array` of document names with a `Map` from words
-to document IDs. `Iter.unique` prevents duplicate IDs within a document.
-`Index.find` ignores case and returns IDs in insertion order; an unknown
-word yields an empty Array without changing the index.
+Collect document words into an index, then combine the indexed results. Maps, Arrays, and iterator operations make the useful structure visible in the program.

@@ -548,7 +548,7 @@ Buffer HttpRequest_write_str(HttpRequest value, Buffer out){
   return Buffer_printf(out, "<HttpRequest: 0x%012lX>", (long) value);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -557,7 +557,7 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String HttpRequest_str(HttpRequest value){
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -653,7 +653,7 @@ Buffer HttpRequest_write_repr(HttpRequest value, Buffer out){
 }
 
 String HttpRequest_repr(HttpRequest value){
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -716,7 +716,7 @@ Buffer HttpResponse_write_str(HttpResponse value, Buffer out){
 }
 
 String HttpResponse_str(HttpResponse value){
-  Buffer _x2c_gensym_macro_out_2 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_2 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_3 _x2c_gensym_macro_environment_3 ={
       0
@@ -786,7 +786,7 @@ Buffer HttpResponse_write_repr(HttpResponse value, Buffer out){
 }
 
 String HttpResponse_repr(HttpResponse value){
-  Buffer _x2c_gensym_macro_out_3 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_3 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_5 _x2c_gensym_macro_environment_5 ={
       0
@@ -849,7 +849,7 @@ Buffer Router_write_str(Router value, Buffer out){
 }
 
 String Router_str(Router value){
-  Buffer _x2c_gensym_macro_out_4 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_4 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_6 _x2c_gensym_macro_environment_6 ={
       0
@@ -915,7 +915,7 @@ Buffer Router_write_repr(Router value, Buffer out){
 }
 
 String Router_repr(Router value){
-  Buffer _x2c_gensym_macro_out_5 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_5 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_8 _x2c_gensym_macro_environment_8 ={
       0
@@ -978,7 +978,7 @@ Buffer HttpServer_write_str(HttpServer value, Buffer out){
 }
 
 String HttpServer_str(HttpServer value){
-  Buffer _x2c_gensym_macro_out_6 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_6 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_9 _x2c_gensym_macro_environment_9 ={
       0
@@ -1072,7 +1072,7 @@ Buffer HttpServer_write_repr(HttpServer value, Buffer out){
 }
 
 String HttpServer_repr(HttpServer value){
-  Buffer _x2c_gensym_macro_out_7 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_7 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_11 _x2c_gensym_macro_environment_11 ={
       0
@@ -1116,7 +1116,7 @@ void Http_fail(int status, String reason){
 
 static int String_truth(String);
 
-List String_split(String, String);
+List String_split(String, String, List);
 
 int List_len(List);
 
@@ -1140,7 +1140,7 @@ String String_lower(String);
 
 String String_new_len(const char *, int);
 
-String String_strip(String, char *);
+String String_strip(String, List);
 
 String String_new(const char *);
 
@@ -1183,7 +1183,7 @@ HttpRequest HttpRequest_read(File input, int body_limit){
     if(feof(input)) return NULL;
     Http_fail(400, _0);
   }
-  List parts = String_split(first, _1);
+  List parts = String_split(first, _1, NULL);
   if(List_len(parts) != 3) Http_fail(400, _2);
   String method = Var_as_string(List_getindex(parts, 0)), target = Var_as_string(List_getindex(parts, 1)), version = Var_as_string(List_getindex(parts, 2));
   if(! String_equal(version, _3) && ! String_equal(version, _4)) Http_fail(400, _5);
@@ -1283,7 +1283,7 @@ HttpResponse HttpResponse_new(void){
   HttpResponse res = Scope_calloc(1, sizeof(struct HttpResponse));
   res -> code = 200;
   res -> headers = Map_new();
-  res -> body = Buffer_new(0);
+  res -> body = Buffer_new(NULL);
   return res;
 }
 
@@ -1373,7 +1373,7 @@ int File_write_all(File, const void *, size_t);
 void File_path_error(Var, String, int);
 
 static void _write(HttpResponse res, File output, int keep_alive, int head_only){
-  Buffer head = Buffer_new(0);
+  Buffer head = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_0 = head;
   {
     _x2c_gensym_defer_env_13 _x2c_gensym_macro_environment_13 ={
@@ -1427,7 +1427,7 @@ Router Router_route(Router r, Symbol method, String pattern, Func handler){
   if(! _init_guard_) _file_init_();
   HttpRoute route = Scope_calloc(1, sizeof(struct HttpRoute));
   route -> method = method;
-  route -> segments = String_split(pattern, _33);
+  route -> segments = String_split(pattern, _33, NULL);
   route -> handler = handler;
   Array_push(r -> routes, Var_new(3683441, route));
   return r;
@@ -1453,12 +1453,12 @@ Router Router_delete(Router r, String p, Func fn){
   return Router_route(r, 279719178, p, fn);
 }
 
-int String_endswith(String, String);
+int String_endswith(String, List);
 
 Router Router_files(Router router, String prefix, Path directory){
   if(! _init_guard_) _file_init_();
   String pattern = String_format(_34, ({
-    Var _x2c_gensym_literal_part_1 = String_var(prefix);  Var _x2c_gensym_literal_part_2 = String_var(String_endswith(prefix, _33) ? _35 : _33);  cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL));
+    Var _x2c_gensym_literal_part_1 = String_var(prefix);  Var _x2c_gensym_literal_part_2 = String_var(String_endswith(prefix, cons(String_var(_33), NULL)) ? _35 : _33);  cons(_x2c_gensym_literal_part_1, cons(_x2c_gensym_literal_part_2, NULL));
   }
   ));
   return Router_get(router, pattern, ({
@@ -1485,7 +1485,7 @@ Var Func_apply(Func, unsigned, const FuncArg *);
 void Router_dispatch(Router router, HttpRequest req, HttpResponse res){
   if(! _init_guard_) _file_init_();
   int found = 0;
-  List segments = String_split(req -> path, _33);
+  List segments = String_split(req -> path, _33, NULL);
   Symbol method = req -> method;
   if(method == 534600 && ! _routed(router, method, segments)) method = 14696;
   {
@@ -1544,7 +1544,7 @@ HttpServer HttpServer_new(Router router, Map options){
       s -> idle_ms = Map_contains(options, Symbol_var(19621346150)) ? Var_integer(Map_getindex(options, Symbol_var(19621346150))) : 5000;
       s -> body_limit = Map_contains(options, Symbol_var(174053508344424)) ? Var_integer(Map_getindex(options, Symbol_var(174053508344424))) : 1048576;
       if(s -> workers < 1 || s -> idle_ms < 1 || s -> body_limit < 0){
-        static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 290,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 291,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
         __builtin_unreachable();
       }
@@ -1555,7 +1555,7 @@ HttpServer HttpServer_new(Router router, Map options){
         Logger_add_stderr_sink(s -> logger);
       }
       if(! s -> logger){
-        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 297,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/http.x",.function = "HttpServer_new",.line = 298,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.new")), NULL))));
         __builtin_unreachable();
       }
@@ -1618,7 +1618,7 @@ HttpServer HttpServer_new(Router router, Map options){
 
 int HttpServer_port(HttpServer s){
   if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "HttpServer_port",.line = 313,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/http.x",.function = "HttpServer_port",.line = 314,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.port")), NULL))));
     __builtin_unreachable();
   }
@@ -1630,7 +1630,7 @@ Thread Thread_start(ThreadValueFn, Var);
 void HttpServer_serve(HttpServer s){
   if(! _init_guard_) _file_init_();
   if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/http.x",.function = "HttpServer_serve",.line = 321,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/http.x",.function = "HttpServer_serve",.line = 322,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.serve")), NULL))));
     __builtin_unreachable();
   }
@@ -1698,12 +1698,12 @@ void HttpServer_serve(HttpServer s){
 void HttpServer_start(HttpServer s){
   if(! _init_guard_) _file_init_();
   if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 344,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 345,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }
   if(s -> acceptor || s -> running){
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 346,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/http.x",.function = "HttpServer_start",.line = 347,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.start")), NULL))));
     __builtin_unreachable();
   }
@@ -1714,7 +1714,7 @@ Var Thread_join(Thread);
 
 void HttpServer_stop(HttpServer s){
   if(! s){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/http.x",.function = "HttpServer_stop",.line = 354,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/http.x",.function = "HttpServer_stop",.line = 355,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("HttpServer.stop")), NULL))));
     __builtin_unreachable();
   }
@@ -1981,7 +1981,7 @@ static Var _worker(Var value){
     );
     Var _x2c_gensym_macro_item_4;
     while(Iter_try_next(_x2c_gensym_macro_iterator_4, &(_x2c_gensym_macro_item_4))){
-      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/http.x",.function = "_worker",.line = 503,.runtime = 1}; & _x2c_gensym_error_site_9; })));
+      fd = Var_int(Var_convert_at(_x2c_gensym_macro_item_4, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/http.x",.function = "_worker",.line = 504,.runtime = 1}; & _x2c_gensym_error_site_9; })));
       {
         Context connection = Context_open_isolated_named("connection");
         const Context _x2c_gensym_macro_acquired_2 = connection;
@@ -2423,7 +2423,7 @@ static void _x2c_gensym_defer_cleanup_13(void * _x2c_gensym_defer_opaque_13){
   Buffer_cleanup((*(const Buffer *) _x2c_gensym_defer_data_13->_x2c_gensym_defer_capture_14));
 }
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 static int List_try_next(List, List *, Var *);
 
@@ -2433,10 +2433,10 @@ FileReadStatus File_read_into(File, Block);
 
 static Var _x2c_gensym_lambda_0(HttpRequest req, HttpResponse res, Path directory){
   String rest = Var_as_string(Map_getindex(req -> params, String_var(_108)));
-  if(String_startswith(rest, _33)) Http_fail(404, _62);
+  if(String_startswith(rest, cons(String_var(_33), NULL))) Http_fail(404, _62);
   {
     String segment;
-    List _x2c_gensym_macro_object_1 = String_split(rest, _33);
+    List _x2c_gensym_macro_object_1 = String_split(rest, _33, NULL);
     List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2))){
@@ -2445,8 +2445,8 @@ static Var _x2c_gensym_lambda_0(HttpRequest req, HttpResponse res, Path director
     }
 
   }
-  Path path = Path_join(directory, rest);
-  if(Path_is_dir(path)) path = Path_join(path, _110);
+  Path path = Path_join(directory, cons(String_var(rest), NULL));
+  if(Path_is_dir(path)) path = Path_join(path, cons(String_var(_110), NULL));
   if(! Path_is_file(path)) Http_fail(404, _62);
   File file = File_open(path, "rb");
   const File _x2c_gensym_macro_acquired_1 = file;

@@ -349,19 +349,36 @@ int Buffer_truth(Buffer b){
   return b != NULL && b -> content -> length != 0;
 }
 
-Buffer Buffer_new(size_t padding){
+static List List_cdr(List);
+
+int List_len(List);
+
+static Var List_car(List);
+
+Buffer Buffer_new(List padding){
+  if(List_truth(padding) && List_truth(List_cdr(padding))){
+    Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Buffer.new")), NULL)));
+    Var _x2c_gensym_literal_part_3 = int_var(List_len(padding));
+    {
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/buffer.x",.function = "Buffer_new",.line = 261,.runtime = 1};
+      x2c_error_raise_n(& _x2c_gensym_error_site_16, 4477439593778, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(28035345754), int_var(1), Symbol_var(74754136), _x2c_gensym_literal_part_3);
+      __builtin_unreachable();
+    }
+
+  }
+  size_t spaces = List_truth(padding) ? Var_ulong(List_car(padding)) : 0;
   Buffer buf = xmalloc(sizeof(struct Buffer));
   buf -> content = Block_new(sizeof(char));
   buf -> indents = Block_new(sizeof(size_t));
-  buf -> padding = padding;
+  buf -> padding = spaces;
   buf -> pos = buf -> _indent = 0;
   return buf;
 }
 
 Buffer Buffer_reserve(Buffer buf, size_t minimum){
   if(buf == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/buffer.x",.function = "Buffer_reserve",.line = 276,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.reserve")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/buffer.x",.function = "Buffer_reserve",.line = 281,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.reserve")), NULL))));
     __builtin_unreachable();
   }
   Block_reserve(buf -> content, minimum);
@@ -370,8 +387,8 @@ Buffer Buffer_reserve(Buffer buf, size_t minimum){
 
 Buffer Buffer_clear(Buffer buf){
   if(buf == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/buffer.x",.function = "Buffer_clear",.line = 283,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_17, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.clear")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/buffer.x",.function = "Buffer_clear",.line = 288,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.clear")), NULL))));
     __builtin_unreachable();
   }
   Block_clear(buf -> content);
@@ -396,13 +413,13 @@ void Buffer_free(Buffer buf){
 
 static Buffer _write_char(Buffer buf, char value){
   if(buf == NULL){
-    static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 315,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_18, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_char")), NULL))));
+    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 320,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_19, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_char")), NULL))));
     __builtin_unreachable();
   }
   if(! value){
-    static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 317,.runtime = 1};
-    x2c_error_raise_n(& _x2c_gensym_error_site_19, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_char")), NULL))), Symbol_var(46228810), int_var(0));
+    static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/buffer.x",.function = "_write_char",.line = 322,.runtime = 1};
+    x2c_error_raise_n(& _x2c_gensym_error_site_20, 4372499598, 2, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Buffer.write_char")), NULL))), Symbol_var(46228810), int_var(0));
     __builtin_unreachable();
   }
   Block_append(buf -> content, & value, 1);

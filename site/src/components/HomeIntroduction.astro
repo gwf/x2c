@@ -1,0 +1,54 @@
+---
+import { Code } from "astro:components";
+import { markdownToHtml } from "satteri";
+import source from "../content/home.md?raw";
+import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cLightTheme } from "../../shiki-x2c-theme.mjs";
+import { wordmark } from "../../wordmark.mjs";
+
+const render = async (text: string) =>
+  (await markdownToHtml(text, { mdastPlugins: [wordmark] })).html;
+const body = source.replace(/^---[\s\S]*?\n---\n/, "");
+const [introduction, ...sections] = body.split(/<!-- example: /);
+const examples = await Promise.all(sections.map(async (section) => {
+  const end = section.indexOf(" -->");
+  const label = section.slice(0, end);
+  const content = section.slice(end + 4);
+  const [before, code, after] = content.split(/```x2c(?:,ignore)?\n([\s\S]*?)\n```/);
+  const [, heading, tagline, detail] = before.trim()
+    .match(/^([\s\S]*?\.)\s+([\s\S]*?\.)\s+([\s\S]*)$/)!;
+  return {
+    label,
+    heading,
+    tagline,
+    detail: await render(detail),
+    code: code.split("\n").filter(line => !line.startsWith("~")).join("\n"),
+    closing: after.includes("<!-- closing -->")
+      ? await render(after.split("<!-- closing -->")[1]) : "",
+  };
+}));
+const language = { ...grammar, name: "x2c" };
+---
+<div class="hero-prose">
+  <div class="hero-copy">
+    <Fragment set:html={await render(introduction)} />
+    <Fragment set:html={examples.at(-1)!.closing} />
+  </div>
+  <aside class="hero-ideas" aria-labelledby="hero-ideas-title">
+    <h2 id="hero-ideas-title">x2c's values expressed in code</h2>
+    <ul class="idea-list">
+      {examples.map(example => (
+        <li data-value={example.label}>
+          <p>
+            <strong class="idea-title">{example.heading}</strong>{" "}
+            <em class="idea-tagline">{example.tagline}</em>
+          </p>
+          <div class="idea-code">
+            <Code code={example.code} lang={language} theme={x2cLightTheme} />
+          </div>
+          <div class="idea-detail" set:html={example.detail} />
+        </li>
+      ))}
+    </ul>
+  </aside>
+</div>

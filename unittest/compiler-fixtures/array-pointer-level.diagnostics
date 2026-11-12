@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/array-pointer-level.x:10:3: type: cannot convert Array to const char *const *
+    Holder h = { ["a", "bb"], 2 };
+    ^^^^^^
+  note: the pointer types are unrelated: cast the expression to make the conversion explicit
+

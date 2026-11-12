@@ -46,7 +46,7 @@ List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
   int fixed = params.len() - 1;
   if (args.len() < fixed)
     c.report_error(
-      <xform>, "too few arguments for rest function", NULL, NULL);
+      <xform>, "too few arguments for rest function", NULL);
   Array prefix = [];
   for (int i = 0; i < fixed; i++, args = args.cdr()) {
     _require_rest(c, args.car());
@@ -68,13 +68,13 @@ List Compiler.pack_rest_arguments(Compiler c, List params, List args) {
 /* A splice or entry outside a rest tail has no container to enter. */
 static void _require_rest(Compiler c, List argument) {
   if (argument ~= %(expr ? (splice ?)))
-    c.report_error(<xform>, "splice requires a rest argument", NULL, NULL);
+    c.report_error(<xform>, "splice requires a rest argument", NULL);
   if (argument ~= %(expr ? (map-entry ? ?))) _entry_without_map(c);
 }
 
 static void _entry_without_map(Compiler c) =>
   c.report_error(
-    <xform>, "key: value argument requires a Map rest parameter", NULL, NULL);
+    <xform>, "key: value argument requires a Map rest parameter", NULL);
 
 module Ast _slice_node(
   Compiler c, List expression, Type type, List start, List stop, List step) {
@@ -311,7 +311,12 @@ module List _call(Compiler c, List ast) {
     }
     // A typedef names the signature of a call through a function pointer.
     List parameters = NULL;
-    if (c.sym.resolve_key(callee.cadr()).function_parts(parameters, NULL))
+    Type signature = c.sym.resolve_key(callee.cadr());
+    if (signature.function_parts(parameters, NULL))
+      return _typed_call(c, callee, parameters, arguments);
+    if (signature.is_pointer() &&
+        c.sym.resolve_key(signature.dereference())
+          .function_parts(parameters, NULL))
       return _typed_call(c, callee, parameters, arguments);
   }
   return ast;

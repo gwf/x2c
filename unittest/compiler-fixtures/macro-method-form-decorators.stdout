@@ -1,0 +1,29 @@
+row 1 {
+  row 2 {
+    stacked
+  }
+}
+row 3 {
+  call
+}
+row 4 {
+  field
+}
+row 5 {
+  arrow field
+}
+row 6 {
+  index
+}
+row 7 {
+  parenthesized
+}
+calls 2
+row 8 {
+}
+row 9 {
+}
+no decorator
+22
+adder decorator
+adder target

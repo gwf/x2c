@@ -1,10 +1,13 @@
 ---
 slug: imports
 section: power
-tab: imports
+home: true
+order: 7
+tab: packages
+title: Bring a library into the language.
 ---
 
-<!-- ignore: requires the separately built PCRE2 package -->
+<!-- ignore: requires the linked package. -->
 ```x2c,ignore
 ~#include <assert.h>
 // Import the package under a name you choose.
@@ -38,10 +41,6 @@ foreach (String line in text.lines()) {
 ~}
 ```
 
-Build the PCRE2 package before running the
-[complete example](https://github.com/gwf/x2c/blob/main/examples/power/imports.x).
-`import ... as rx` gives the shipped PCRE2 package a local alias and
-exposes its main type, `rx.Regexp`. `rx.Regexp.compile` builds the pattern;
-`rx.Regexp.match` returns named captures. Indexing and ordinary control
-flow use the results, while `auto` releases the
-compiled pattern.
+Import PCRE2 under the name `rx`, compile a pattern, and read named captures. Package types and methods work alongside ordinary x2c Strings, iteration, and scoped cleanup.
+
+[Full source](https://github.com/gwf/x2c/blob/main/examples/power/imports.x).

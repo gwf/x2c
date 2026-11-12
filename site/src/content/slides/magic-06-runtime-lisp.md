@@ -1,7 +1,10 @@
 ---
 slug: runtime-lisp
 section: magic
-tab: scripting
+home: true
+order: 6
+tab: runtime Lisp
+title: Keep a rule editable at runtime.
 ---
 
 ```x2c
@@ -28,7 +31,4 @@ printf("together: %d; split: %d\n", whole, partial);
 int seats_left(String plan) => plan == "pro" ? 25 : 2;
 ```
 
-`$lisp.bind` exposes the native `seats_left` function to `Lisp.eval`.
-Two `List` policies call that binding: one rejects an oversized party,
-the other admits those who fit. Rules travel as data, and assigning
-the evaluator's results converts them to `int`.
+Evaluate a Lisp expression using a native binding supplied by the host program. The surrounding program stays compiled while the policy remains data that can be changed and evaluated.

@@ -43,7 +43,7 @@ meta static List mixed_hit(List code) {
       if (!declared || !receiver ||
           List.compare(name, declared) != 0 ||
           List.compare(record, receiver) != 0)
-        x2c_diagnostic_fail("mixed Name capture lost source subtree", %());
+        x2c_diagnostic_fail("mixed Name capture lost source subtree");
       return $!int{ 1 };
     }
   }
@@ -92,11 +92,11 @@ meta static List wrong_reference_case(List code, List other) {
   if (!original || !replacement ||
       List.compare(original, replacement) == 0 ||
       original.caddr() != replacement.caddr())
-    x2c_diagnostic_fail("wrong-reference setup failed", %());
+    x2c_diagnostic_fail("wrong-reference setup failed");
   List changed = code.search_replace(
     %(ident (!quote $original)), %(ident $replacement));
   if (List.compare(changed, code) == 0)
-    x2c_diagnostic_fail("wrong-reference substitution failed", %());
+    x2c_diagnostic_fail("wrong-reference substitution failed");
   return mixed_hit(changed);
 }
 macro Expression $wrong_reference(Stmt $code, Stmt $other) =>

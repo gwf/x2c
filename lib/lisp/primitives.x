@@ -177,17 +177,17 @@ Var lisp_substring(String string, int start, int stop) =>
 /** Returns a boxed lower-case copy of `string`. */
 Var lisp_string_downcase(String string) => string.lower();
 
-/** Trims the bytes in `chars`, using whitespace for an empty String. */
-String lisp_string_strip(String string, Var chars) =>
-  string.strip(_string_charset(chars));
+/** Trims the bytes in `chars`, using whitespace when omitted or nil. */
+String lisp_string_strip(String string, List @chars) =>
+  string.strip(@chars);
 
 /** Trims leading bytes, accepting the same charset values as `strip`. */
-String lisp_string_lstrip(String string, Var chars) =>
-  string.lstrip(_string_charset(chars));
+String lisp_string_lstrip(String string, List @chars) =>
+  string.lstrip(@chars);
 
 /** Trims trailing bytes, accepting the same charset values as `strip`. */
-String lisp_string_rstrip(String string, Var chars) =>
-  string.rstrip(_string_charset(chars));
+String lisp_string_rstrip(String string, List @chars) =>
+  string.rstrip(@chars);
 
 /** Returns the instantiated `template` when `input` matches `pat`.
     `List.match_replace` returns a `List`, so a template that is a bare binder
@@ -254,7 +254,3 @@ static int _number_class(long double magnitude) {
   if (magnitude == -1.0L / 0.0L) return 0;
   return 1;
 }
-
-static char *_string_charset(Var chars) =>
-  chars.is_nil() || (chars.is_integer() && !chars.integer())
-    ? NULL : chars.string();

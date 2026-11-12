@@ -559,7 +559,8 @@ expression syntax and its resolution.
 Public functions:
 
 `Compiler.parse_pattern_operand`, `Compiler.parse_parenthesized_statement`,
-`Compiler.parse_macro_expression_target`, `Compiler.parse_expression`,
+`Compiler.parse_macro_expression_target`, `Compiler.at_map_entry`,
+`Compiler.parse_call`, `Compiler.parse_expression`,
 `Compiler.parse_assignment`, `Compiler.parse_conditional`,
 `Compiler.parse_call_splice`, `Compiler.parse_primary`,
 `Compiler.parse_call_entry`, `Compiler.parse_variable`,
@@ -629,13 +630,17 @@ Public functions:
 `Compiler.rewrite_written`, `Compiler.rewrite_lowered`,
 `Compiler.lower_rewrite`, `Compiler.applying_shipped`, `Compiler.rebound`,
 `Compiler.watched_step`, `Compiler.publish_macro_definition_node`,
-`Compiler.install_compile_time_effects`, `Compiler.macro_form_is_definition`,
-`Compiler.local_macro_form_is_definition`,
+`Compiler.macro_definition_name`, `Compiler.install_compile_time_effects`,
+`Compiler.macro_form_is_definition`, `Compiler.local_macro_form_is_definition`,
 `Compiler.keyword_form_is_definition`, `Compiler.parse_keyword_definition`,
 `Compiler.macro_starts_target_at`, `Compiler.macro_starts_entry`,
 `Compiler.macro_invocation_collection`, `Compiler.skip_named_type_declaration`,
 `Compiler.skip_macro_invocation`, `Compiler.macro_targets_unit`,
 `Compiler.try_parse_macro_target_at`, `Compiler.try_parse_macro_expression`,
+`Compiler.try_parse_method_macro`, `Compiler.try_parse_static_macro`,
+`Compiler.parse_method_decorator`, `Compiler.method_decorator_target`,
+`Compiler.parse_unit_method_decorator`, `Compiler.mark_method_call`,
+`Compiler.bind_method_macro`, `Compiler.bind_method_decorator`,
 `Compiler.evaluate_macro_rows`, `Compiler.evaluate_macro_slot`,
 `Compiler.evaluate_meta_value`, `Compiler.evaluate_declaration_recipe`,
 `x2c_template_call`, `Compiler.rebuild_expression`,
@@ -822,18 +827,18 @@ Public functions:
 `Compiler.record_declaration_visibility`, `Compiler.private_prefix`,
 `Compiler.declared_spelling`, `Compiler.scoped_spelling`,
 `Compiler.file_prefixes`, `Compiler.unprefixed`, `Compiler.package_spelling`,
-`Compiler.register_package_alias`, `Compiler.register_package_member`,
-`Compiler.package_member_spelling`, `Compiler.imported_spelling`,
-`Compiler.imported_providers`, `Sym.sole_typedef`, `Sym.local_type`,
-`Sym.resolve_numeric_type`, `Sym.var_tag_for_type`, `Sym.is_var_type`,
-`Sym.is_string_type`, `Sym.is_array_type`, `Sym.is_map_type`,
-`Sym.is_named_value_type`, `Sym.lookup_field`, `Sym.normalize_declared_type`,
-`Sym.declare_field_order`, `Sym.mark_field`, `Sym.marked_fields`,
-`Sym.aggregate_of`, `Sym.next_typedef`, `Sym.same_rest_convention`,
-`Sym.resolve_key`, `Sym.field_order`, `Sym.put`, `Sym.drop`,
-`Compiler.begin_semantic_transaction`, `SymTxn.local_macros_changed`,
-`Sym.transacting`, `SymTxn.commit_transient`, `SymTxn.commit`,
-`SymTxn.rollback`
+`Compiler.package_source_name`, `Compiler.register_package_alias`,
+`Compiler.register_package_member`, `Compiler.package_member_spelling`,
+`Compiler.imported_spelling`, `Compiler.imported_providers`,
+`Sym.sole_typedef`, `Sym.local_type`, `Sym.resolve_numeric_type`,
+`Sym.var_tag_for_type`, `Sym.is_var_type`, `Sym.is_string_type`,
+`Sym.is_array_type`, `Sym.is_map_type`, `Sym.is_named_value_type`,
+`Sym.lookup_field`, `Sym.normalize_declared_type`, `Sym.declare_field_order`,
+`Sym.mark_field`, `Sym.marked_fields`, `Sym.aggregate_of`, `Sym.next_typedef`,
+`Sym.same_rest_convention`, `Sym.resolve_key`, `Sym.field_order`, `Sym.put`,
+`Sym.drop`, `Compiler.begin_semantic_transaction`,
+`SymTxn.local_macros_changed`, `Sym.transacting`, `SymTxn.commit_transient`,
+`SymTxn.commit`, `SymTxn.rollback`
 
 ### [src/transform/transform.x](../src/transform/transform.x)
 
@@ -1140,11 +1145,11 @@ single-pass pull iterators.
 
 Public functions:
 
-`Iter.new`, `Iter.next`, `Iter.iter`, `range`, `Iter.map`, `Iter.filter`,
-`Iter.scan`, `Iter.accumulate`, `Iter.zip`, `Iter.map2`, `Iter.zip_with`,
-`Iter.enumerate`, `Iter.chain`, `Iter.head`, `Iter.repeat`, `Iter.unique`,
-`Iter.unzip`, `Iter.init`, `Iter.foldl`, `Iter.any`, `Iter.all`, `Iter.find`,
-`Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`,
+`Iter.new`, `Iter.next`, `Iter.iter`, `range`, `_range_arguments`, `Iter.map`,
+`Iter.filter`, `Iter.scan`, `Iter.accumulate`, `Iter.zip`, `Iter.map2`,
+`Iter.zip_with`, `Iter.enumerate`, `Iter.chain`, `Iter.head`, `Iter.repeat`,
+`Iter.unique`, `Iter.unzip`, `Iter.init`, `Iter.foldl`, `Iter.any`, `Iter.all`,
+`Iter.find`, `Iter.count`, `Iter.sum`, `Iter.product`, `Iter.max`, `Iter.min`,
 `Iter.try_next`
 
 ### [lib/json.x](../lib/json.x)

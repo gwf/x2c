@@ -66,7 +66,7 @@ Type Type_element(Type t);
 
 List Type_parameters(Type type);
 
-Type Type_return_type(Type type);
+Type Type_return_type(Type t);
 
 String Type_reverse_name(String base, String participant);
 

@@ -117,7 +117,7 @@
               (declare ("FuncArg") 
                (bindings 
                 (bind (binding 28 "_x2c_gensym_macro_storage_0") 
-                 ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+                 ((dim (expr (int) (literal (int) "1"))))))) 
               (if (expr ("List") 
                    (call (expr ((func (("Func") (unsigned) (unsigned))) "List") 
                           (ident (binding 29 "x2c_func_reference_type"))) 
@@ -129,7 +129,7 @@
                 (expr ("FuncArg") 
                  (op = (expr ("FuncArg") 
                         (index 
-                         (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                         (expr ((dim ("1")) "FuncArg") 
                           (ident (binding 28 "_x2c_gensym_macro_storage_0"))) 
                          (expr (int) (literal (int) "0")))) 
                   (expr ("FuncArg") 
@@ -141,7 +141,7 @@
                 (expr ("FuncArg") 
                  (op = (expr ("FuncArg") 
                         (index 
-                         (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                         (expr ((dim ("1")) "FuncArg") 
                           (ident (binding 28 "_x2c_gensym_macro_storage_0"))) 
                          (expr (int) (literal (int) "0")))) 
                   (expr ("FuncArg") 
@@ -158,7 +158,7 @@
                  (args (expr ("Func") 
                         (ident (binding 27 "_x2c_gensym_macro_function_0"))) 
                   (expr (int) (literal (int) "1")) 
-                  (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                  (expr ((dim ("1")) "FuncArg") 
                    (ident (binding 28 "_x2c_gensym_macro_storage_0")))))))))))))) 
   (at 9 (declare ("Func") 
          (bindings 
@@ -196,7 +196,7 @@
          (declare ("FuncArg") 
           (bindings 
            (bind (binding 41 "_x2c_gensym_macro_storage_1") 
-            ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+            ((dim (expr (int) (literal (int) "1"))))))) 
          (if (expr ("List") 
               (call (expr ((func (("Func") (unsigned) (unsigned))) "List") 
                      (ident (binding 29 "x2c_func_reference_type"))) 
@@ -208,7 +208,7 @@
            (expr ("FuncArg") 
             (op = (expr ("FuncArg") 
                    (index 
-                    (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                    (expr ((dim ("1")) "FuncArg") 
                      (ident (binding 41 "_x2c_gensym_macro_storage_1"))) 
                     (expr (int) (literal (int) "0")))) 
              (expr ("FuncArg") 
@@ -220,7 +220,7 @@
            (expr ("FuncArg") 
             (op = (expr ("FuncArg") 
                    (index 
-                    (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                    (expr ((dim ("1")) "FuncArg") 
                      (ident (binding 41 "_x2c_gensym_macro_storage_1"))) 
                     (expr (int) (literal (int) "0")))) 
              (expr ("FuncArg") 
@@ -237,7 +237,7 @@
             (args (expr ("Func") 
                    (ident (binding 38 "_x2c_gensym_macro_function_1"))) 
              (expr (int) (literal (int) "1")) 
-             (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+             (expr ((dim ("1")) "FuncArg") 
               (ident (binding 41 "_x2c_gensym_macro_storage_1")))))))))))))) 
   (at 12 
    (declare ("Var") 
@@ -278,7 +278,7 @@
                   (declare ("FuncArg") 
                    (bindings 
                     (bind (binding 47 "_x2c_gensym_macro_storage_2") 
-                     ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+                     ((dim (expr (int) (literal (int) "1"))))))) 
                   (if (expr ("List") 
                        (call (expr ((func (("Func") (unsigned) (unsigned))) 
                                     "List") 
@@ -292,7 +292,7 @@
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
                             (index 
-                             (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                             (expr ((dim ("1")) "FuncArg") 
                               (ident (binding 47 "_x2c_gensym_macro_storage_2"))) 
                              (expr (int) (literal (int) "0")))) 
                       (expr ("FuncArg") 
@@ -304,7 +304,7 @@
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
                             (index 
-                             (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                             (expr ((dim ("1")) "FuncArg") 
                               (ident (binding 47 "_x2c_gensym_macro_storage_2"))) 
                              (expr (int) (literal (int) "0")))) 
                       (expr ("FuncArg") 
@@ -321,7 +321,7 @@
                      (args (expr ("Func") 
                             (ident (binding 46 "_x2c_gensym_macro_function_2"))) 
                       (expr (int) (literal (int) "1")) 
-                      (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                      (expr ((dim ("1")) "FuncArg") 
                        (ident (binding 47 "_x2c_gensym_macro_storage_2"))))))))))))) 
        (expr (long) 
         (call (expr ((func (("Var"))) (long)) (ident (binding 45 "Var_integer"))) 
@@ -335,7 +335,7 @@
                   (declare ("FuncArg") 
                    (bindings 
                     (bind (binding 49 "_x2c_gensym_macro_storage_3") 
-                     ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+                     ((dim (expr (int) (literal (int) "1"))))))) 
                   (if (expr ("List") 
                        (call (expr ((func (("Func") (unsigned) (unsigned))) 
                                     "List") 
@@ -349,7 +349,7 @@
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
                             (index 
-                             (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                             (expr ((dim ("1")) "FuncArg") 
                               (ident (binding 49 "_x2c_gensym_macro_storage_3"))) 
                              (expr (int) (literal (int) "0")))) 
                       (expr ("FuncArg") 
@@ -361,7 +361,7 @@
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
                             (index 
-                             (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                             (expr ((dim ("1")) "FuncArg") 
                               (ident (binding 49 "_x2c_gensym_macro_storage_3"))) 
                              (expr (int) (literal (int) "0")))) 
                       (expr ("FuncArg") 
@@ -378,7 +378,7 @@
                      (args (expr ("Func") 
                             (ident (binding 48 "_x2c_gensym_macro_function_3"))) 
                       (expr (int) (literal (int) "1")) 
-                      (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                      (expr ((dim ("1")) "FuncArg") 
                        (ident (binding 49 "_x2c_gensym_macro_storage_3"))))))))))))) 
        (expr (long) 
         (call (expr ((func (("Var"))) (long)) (ident (binding 45 "Var_integer"))) 
@@ -392,7 +392,7 @@
                   (declare ("FuncArg") 
                    (bindings 
                     (bind (binding 51 "_x2c_gensym_macro_storage_4") 
-                     ((dim (expr (macro-expr) (expr (int) (literal (int) "1")))))))) 
+                     ((dim (expr (int) (literal (int) "1"))))))) 
                   (if (expr ("List") 
                        (call (expr ((func (("Func") (unsigned) (unsigned))) 
                                     "List") 
@@ -406,7 +406,7 @@
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
                             (index 
-                             (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                             (expr ((dim ("1")) "FuncArg") 
                               (ident (binding 51 "_x2c_gensym_macro_storage_4"))) 
                              (expr (int) (literal (int) "0")))) 
                       (expr ("FuncArg") 
@@ -418,7 +418,7 @@
                     (expr ("FuncArg") 
                      (op = (expr ("FuncArg") 
                             (index 
-                             (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                             (expr ((dim ("1")) "FuncArg") 
                               (ident (binding 51 "_x2c_gensym_macro_storage_4"))) 
                              (expr (int) (literal (int) "0")))) 
                       (expr ("FuncArg") 
@@ -435,7 +435,7 @@
                      (args (expr ("Func") 
                             (ident (binding 50 "_x2c_gensym_macro_function_4"))) 
                       (expr (int) (literal (int) "1")) 
-                      (expr ((dim (expr (macro-expr) ("1"))) "FuncArg") 
+                      (expr ((dim ("1")) "FuncArg") 
                        (ident (binding 51 "_x2c_gensym_macro_storage_4"))))))))))))) 
        (expr (long) 
         (call (expr ((func (("Var"))) (long)) (ident (binding 45 "Var_integer"))) 

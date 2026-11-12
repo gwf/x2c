@@ -1,15 +1,18 @@
 ---
 slug: autodiff
-section: magic
-tab: autodiff
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/autodiff/examples/energy-gradient.x
   - label: Three-mode example
     href: https://github.com/gwf/x2c/blob/main/packages/autodiff/examples/autodiff.x
+section: magic
+home: true
+order: 5
+tab: autodiff
+title: Differentiate the program.
 ---
 
-<!-- ignore: the import needs the autodiff package directory. -->
+<!-- ignore: requires the linked package. -->
 ```x2c,ignore
 ~#include <assert.h>
 ~#include <math.h>
@@ -37,9 +40,4 @@ double value = energy_grad(1.0, 2.0, 5, &dx, &dy);
 ~}
 ```
 
-The compiler has no derivative-specific implementation. `$ad.reverse()` is an
-ordinary decorator written with x2c `meta` functions. It reads the typed AST
-of `energy`, keeps the function, and emits `energy_grad` beside
-it: the same computation recorded on a tape, then replayed backwards to
-accumulate the derivative with respect to each `double` parameter. Loops,
-branches, `break`, `continue`, and early `return` all replay exactly.
+Automatic differentiation transforms a function into code that computes derivatives. The example combines syntax transformation with ordinary numeric code; the linked full source includes executable checks.

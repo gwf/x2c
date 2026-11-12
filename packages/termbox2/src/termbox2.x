@@ -318,7 +318,7 @@ static String _termbox_cell_text(struct tb_cell *cell) {
     int length = tb_utf8_unicode_to_char(bytes, cell->ch);
     return String.new_len(bytes, length > 0 ? length : 0);
   }
-  Buffer text = Buffer.new(0).reserve(cell->nech * sizeof(bytes));
+  Buffer text = Buffer.new().reserve(cell->nech * sizeof(bytes));
   uint32_t *cluster = cell->ech;
   for (size_t index = 0; index < cell->nech; index++) {
     int step = tb_utf8_unicode_to_char(bytes, cluster[index]);

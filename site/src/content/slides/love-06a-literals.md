@@ -1,7 +1,10 @@
 ---
 slug: literals
 section: love
+home: true
+order: 3
 tab: literals
+title: Data you can read.
 ---
 
 ```x2c
@@ -46,7 +49,4 @@ Map workshop = {
 ~}
 ```
 
-One `Map` literal describes the workshop. Symbol keys and values mix
-with strings, integers, and decimals; nested `Map`, `Array`, and `List`
-values use braces, brackets, and parentheses. The outer `%` introduces
-the whole description. No parser or construction code is needed.
+Describe nested data directly with collection literals. The punctuation shows how the pieces fit together, and expressions supply the values that vary.

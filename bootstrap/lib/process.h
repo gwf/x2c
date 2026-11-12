@@ -54,7 +54,7 @@ extern char * * environ;
 
 Job List_job(List command);
 
-Job Job_pipe(Job job, List command);
+Job Job_pipe(Job job, List commands);
 
 Job Job_options(Job job, Map options);
 

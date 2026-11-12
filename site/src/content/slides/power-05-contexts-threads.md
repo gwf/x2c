@@ -1,5 +1,6 @@
 ---
 slug: threads
+home: false
 section: power
 tab: threads
 ---

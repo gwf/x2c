@@ -12,18 +12,18 @@
     (declare (static "MatchCaptureSite") 
      (bindings 
       (bind (binding 4 "_x2c_gensym_macro_arms_0") 
-       ((dim (expr (macro-expr) (expr (int) (literal (int) "3")))))))) 
+       ((dim (expr (int) (literal (int) "3"))))))) 
     (declare ("Var") 
      (bindings 
       (bind (binding 5 "_x2c_gensym_macro_patterns_0") 
-       ((dim (expr (macro-expr) (expr (int) (literal (int) "3")))))))) 
+       ((dim (expr (int) (literal (int) "3"))))))) 
     (declare (static "ErrorCatchSite") 
      (bindings 
       (op = (bind (binding 6 "_x2c_gensym_macro_site_0") ()) 
        (expr () 
         (composite 
          (commas 
-          (expr ((dim (expr (macro-expr) ("3"))) static "MatchCaptureSite") 
+          (expr ((dim ("3")) static "MatchCaptureSite") 
            (ident (binding 4 "_x2c_gensym_macro_arms_0"))) 
           (expr (int) (literal (int) "2")) (expr (int) (literal (int) "3")) 
           (expr (int) "ERROR_CATCH_PENDING") 
@@ -39,7 +39,7 @@
        (expr ("Var") 
         (op = (expr ("Var") 
                (index 
-                (expr ((dim (expr (macro-expr) ("3"))) "Var") 
+                (expr ((dim ("3")) "Var") 
                  (ident (binding 5 "_x2c_gensym_macro_patterns_0"))) 
                 (expr (int) (literal (int) "0")))) 
          (expr ("Var") 
@@ -90,7 +90,7 @@
        (expr ("Var") 
         (op = (expr ("Var") 
                (index 
-                (expr ((dim (expr (macro-expr) ("3"))) "Var") 
+                (expr ((dim ("3")) "Var") 
                  (ident (binding 5 "_x2c_gensym_macro_patterns_0"))) 
                 (expr (int) (literal (int) "1")))) 
          (expr ("Var") 
@@ -121,7 +121,7 @@
           (expr (* static "ErrorCatchSite") 
            (op & (expr (static "ErrorCatchSite") 
                   (ident (binding 6 "_x2c_gensym_macro_site_0"))))) 
-          (expr ((dim (expr (macro-expr) ("3"))) "Var") 
+          (expr ((dim ("3")) "Var") 
            (ident (binding 5 "_x2c_gensym_macro_patterns_0"))))))))) 
     (stmnt 
      (expr (void) 

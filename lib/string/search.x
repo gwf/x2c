@@ -86,27 +86,33 @@ meta native int String.find_within(
   return p ? p - str : -1;
 }
 
-/** Reports whether `str` starts with `prefix`.
-    An empty `prefix` is a prefix of every `String`. `String.remove_prefix`
-    performs the same test and returns the remainder, so there is rarely a
-    reason to run both.
+/** Reports whether `str` starts with any supplied prefix.
+    No prefixes returns false. An empty prefix matches every String.
+    Arguments and splices are evaluated once in order before matching.
 */
-meta native int String.startswith(String str, String prefix) {
-  int str_len = str.len(), prefix_len = prefix.len();
-  if (prefix_len == 0) return 1;
-  return str && prefix_len <= str_len && memcmp(str, prefix, prefix_len) == 0;
+meta native int String.startswith(String str, List @prefixes) {
+  int length = str.len();
+  foreach (String prefix in prefixes) {
+    int count = prefix.len();
+    if (!count || (str && count <= length && !memcmp(str, prefix, count)))
+      return 1;
+  }
+  return 0;
 }
 
-/** Reports whether `str` ends with `suffix`.
-    An empty `suffix` is a suffix of every `String`. The comparison is
-    bytewise, so this is a safe test for a file extension but not for a
-    case-insensitive one; lower both sides first.
+/** Reports whether `str` ends with any supplied suffix.
+    No suffixes returns false. An empty suffix matches every String.
+    Matching is bytewise and case-sensitive. Arguments and splices are
+    evaluated once in order before matching.
 */
-meta native int String.endswith(String str, String suffix) {
-  int str_len = str.len(), suffix_len = suffix.len();
-  if (suffix_len == 0) return 1;
-  return str && suffix_len <= str_len &&
-         memcmp(str + str_len - suffix_len, suffix, suffix_len) == 0;
+meta native int String.endswith(String str, List @suffixes) {
+  int length = str.len();
+  foreach (String suffix in suffixes) {
+    int count = suffix.len();
+    if (!count || (str && count <= length &&
+                   !memcmp(str + length - count, suffix, count))) return 1;
+  }
+  return 0;
 }
 
 module const char *_find_bytes(

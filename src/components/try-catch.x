@@ -23,8 +23,8 @@
 macro Stmt $fail.try_finalizer_label(Expr $site, Expr $label) =>
   x2c_diagnostic_fail_at(
     $site, <emit>, "a finally body cannot define a label",
-    %("a finalizer runs on every path that leaves its region, so '$(
-      Code.binding_spelling($label))' would be defined once for each"));
+    %"a finalizer runs on every path that leaves its region, so '$(
+      Code.binding_spelling($label))' would be defined once for each");
 
 // catch sites
 
@@ -133,7 +133,7 @@ meta List _x2c_try_landing(List frame, List clause, List exits) {
 meta List _x2c_try_exits_placement(List exits) {
   Atom token = Atom.intern("?__try_cleanup");
   if (exits ~= %(code-value ? ?statements ?))
-    return Code.lowered(statements, %((cleanup $token $statements)));
+    return Code.lowered(statements, %(cleanup $token $statements));
   return NULL;
 }
 
@@ -284,7 +284,7 @@ meta static Code _try_landing(
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code $(rows.list_free())), NULL);
+  return Code.lowered(%(landing $code $(rows.list_free())));
 }
 
 $rewrite($caught)

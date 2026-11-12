@@ -6,17 +6,17 @@
 meta static List one_word(Source node) {
   String text = Code.source_text(node);
   if (text.contains(" "))
-    x2c_diagnostic_fail("this argument must be one word", %());
+    x2c_diagnostic_fail("this argument must be one word");
   return $!String{ $text };
 }
 
 meta static void require_word(Source node) {
   if (Code.source_text(node).contains(" "))
-    x2c_diagnostic_fail("this statement needs one word", %());
+    x2c_diagnostic_fail("this statement needs one word");
 }
 
 meta static void fail_inner(String text) {
-  x2c_diagnostic_fail("the nested helper failed", %("text: $text"));
+  x2c_diagnostic_fail("the nested helper failed", %"text: $text");
 }
 
 meta static List fail_outer(Source node) {

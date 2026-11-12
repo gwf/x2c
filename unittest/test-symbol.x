@@ -91,7 +91,7 @@ static void symbol_repr_uses_encoding(void) {
   EXPECT_STR_EQ(forced.str(), "ABC");
   EXPECT_STR_EQ(forced.repr(), "<\"ABC\">");
 
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   forced.write_repr(out);
   EXPECT_STR_EQ(out.str_free(), forced.repr());
 
@@ -101,7 +101,7 @@ static void symbol_repr_uses_encoding(void) {
 
 static void symbol_repr_escapes_match_writer(void) {
   Symbol quote = Symbol.new("\""), slash = Symbol.new("\\");
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
 
   quote.write_repr(out);
   EXPECT_STR_EQ(out.str(), quote.repr());

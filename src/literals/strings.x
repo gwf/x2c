@@ -3,12 +3,12 @@
 static macro Stmt $fail.literals_string_segment(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "expected string segment",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.literals_string_brace(Expr $c, Expr $site) =>
   $c.report_error(
     <parse>, "'${' no longer inserts into a String",
-    $site, %("use '$$(expression)' to insert an expression"));
+    $site, %"use '$$(expression)' to insert an expression");
 
 /* strings
 

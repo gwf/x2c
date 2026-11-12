@@ -14,7 +14,7 @@ void Compiler.check_regions(Compiler c, List ast) {
   foreach (List warning in w.warnings) {
     (Symbol code, int at, String message, List notes) = warning;
     c.origin = at;
-    c.report_warning(code, message, NULL, notes);
+    c.report_warning(code, message, NULL, @notes);
   }
   c.origin = origin;
 }
@@ -39,7 +39,7 @@ void Compiler.check_meta_regions(Compiler c, List fn) {
   _fixpoint(w, fn);
   if (!w.warnings.len()) return;
   (Symbol code, int at, String message, List notes) = w.warnings[0];
-  with (c.origin = at) { c.report_error(code, message, NULL, notes); }
+  with (c.origin = at) { c.report_error(code, message, NULL, @notes); }
 }
 
 /** Computes one unit's region summaries and findings for an optional

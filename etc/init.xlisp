@@ -303,7 +303,13 @@
 (def Iter.all    (bind "Lisp_Iter_all" nil))
 (def Iter.find   (bind "Lisp_Iter_find" nil))
 (def Var.iter (C.iterator.call (bind "Var_iter_into" nil) 1))
-(def range (C.iterator.call (bind "range_into" nil) 3))
+(def range
+  (let ((call (C.iterator.call (bind "range_into" nil) 3)))
+    (lambda (. arguments)
+      (apply call
+        (cond ((eq? (length arguments) 1) (list 0 (car arguments) 1))
+              ((eq? (length arguments) 2) (append arguments (list 1)))
+              (true arguments))))))
 (def Iter.map (C.iterator.call (bind "Iter_map_into" nil) 2))
 (def Iter.zip (C.iterator.call (bind "Iter_zip_into" nil) 2))
 (def Iter.zip_with (C.iterator.call (bind "Iter_zip_with_into" nil) 3))

@@ -29,7 +29,7 @@ $test()
 static void user_skip(void) { Test.skip("not available"); }
 
 static String long_skip_reason(void) {
-  Buffer reason = auto Buffer.new(0);
+  Buffer reason = auto Buffer.new();
   for (int i = 0; i < 20; i++)
     reason.printf("dynamic-%02d-abcdefghijklmnop;", i);
   return reason;

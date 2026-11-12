@@ -9,6 +9,7 @@ static typedef struct CallSite {
   List receiver, field, supplied;
   Token origin;
   String method;
+  Atom owner;
 } CallSite;
 
 /* dynamic Func calls
@@ -255,7 +256,7 @@ module List _native(Resolve &r, String callee, List supplied) {
 module List _call(Resolve &r, List function, List supplied) {
   CallSite site = {
     .c = r.c, .result_type = r.type, .supplied = supplied,
-    .origin = r.origin};
+    .origin = r.origin, .owner = r.owner};
   match (function)
     case %(expr ? (op . ?receiver (!set ?field (?name)))):
       return _method(site, receiver, field);
@@ -268,6 +269,13 @@ static List _method(CallSite &k, List receiver, List field) {
   k.receiver = receiver;
   k.field = field;
   List resolution = _lookup(k);
+  /* A template's receiver may get its type only where the template
+     expands, and a method-form macro of that type then takes the call. */
+  if (k.c.macro_stack && !k.c.macro_holes) {
+    List macro =
+      k.c.bind_method_macro(k.receiver, k.method, k.supplied, k.owner);
+    if (macro) return macro;
+  }
   if (!resolution && _deferred_receiver(k.receiver)) {
     List callee = %(expr (<macro-expr>) (op . $(k.receiver) $(k.field)));
     return _finish(k, k.result_type, callee, NULL, NULL);
@@ -348,8 +356,12 @@ static List _finish(
   List receiver) {
   if (result_type === %(<macro-expr>)) result_type = NULL;
   Type applied = callee_type.apply();
-  if (!applied && callee_type)
-    applied = k.c.sym.resolve_key(callee_type).apply();
+  if (!applied && callee_type) {
+    Type signature = k.c.sym.resolve_key(callee_type);
+    applied = signature.apply();
+    if (!applied && signature.is_pointer())
+      applied = k.c.sym.resolve_key(signature.dereference()).apply();
+  }
   List arguments = _resolve_call_arguments(
     k.c, receiver, k.supplied, k.origin);
   if (!callee_type && !k.c.macro_holes)
@@ -522,18 +534,23 @@ static List _resolve_call_arguments(
     if (value is <list> && !value.is_nil() &&
         value.car() == <seq>)
       foreach (List item in value.list().cdr())
-        arguments.push(c.resolve_expression(item, origin));
+        arguments.push(c.resolve_expression(_entry_argument(item), origin));
     else if (slot)
       arguments.push(
         c.resolve_expression(
           c.lift_meta_expression(value, origin), origin)
       );
     else if (value is <list>)
-      arguments.push(c.resolve_expression(value, origin));
+      arguments.push(c.resolve_expression(_entry_argument(value), origin));
     else arguments.push(value);
   }
   return arguments.list_free();
 }
+
+/* An `Entry` row spliced into a call is a `key: value` argument, spelled
+   as `parse_call_entry` spells one. */
+static List _entry_argument(List item) =>
+  item.car() == <map-entry> ? %(expr ("Map") $item) : item;
 
 /* Returns the printf-family entry a callee names, or `NULL`. A resolved
    user function that happens to use a libc spelling is not one. */

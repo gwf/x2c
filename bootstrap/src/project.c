@@ -424,7 +424,7 @@ static void _parse_manifest(Project p){
   ;
   {
     String text;
-    List _x2c_gensym_macro_object_1 = String_split_lines(p -> text, 0);
+    List _x2c_gensym_macro_object_1 = String_split_lines(p -> text, NULL);
     List _x2c_gensym_macro_cursor_1 = _x2c_gensym_macro_object_1;
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
@@ -499,7 +499,7 @@ static void f8_manifest____target_header(f8_manifest___Manifest * m, String head
     profile = String_getslice(name, x2c_slice_bound(split + 9), (-2147483647 - 1), 1);
     name = String_getslice(name, (-2147483647 - 1), x2c_slice_bound(split), 1);
   }
-  if(! String_startswith(header, _7) || ! ProjectBuild_valid_name(name) ||(split >= 0 && ! ProjectBuild_valid_name(profile))) _error(p, (* m).line, _9);
+  if(! String_startswith(header, cons(String_var(_7), NULL)) || ! ProjectBuild_valid_name(name) ||(split >= 0 && ! ProjectBuild_valid_name(profile))) _error(p, (* m).line, _9);
   ProjectTarget target = _target(p, name);
   if(! target) target = f8_manifest____new_target(p, name);
   if(split < 0) f8_manifest____enter_target(&((* m)), target);
@@ -675,7 +675,7 @@ static List f8_manifest____string_array(Project p, int line, String value){
 static String f8_manifest____parse_string(Project p, int line, char * * cursor){
   char * at = f8_manifest____skip_space(* cursor ? * cursor : "");
   if(* at != '"') _error(p, line, _27);
-  Buffer out = Buffer_new(0);
+  Buffer out = Buffer_new(NULL);
   for(at ++;  * at && * at != '"';  at ++){
     char ch = * at;
     if(ch == '\\') ch = f8_manifest____escape(p, line, * ++ at);
@@ -811,7 +811,7 @@ ProjectBuild ProjectBuild_plan(CliRequest request){
 
 Path Path_dirname(Path);
 
-Path Path_join(Path, Path);
+Path Path_join(Path, List);
 
 int SourceView_exists(SourceView, String);
 
@@ -819,7 +819,7 @@ String CliRequest_project_manifest(CliRequest c){
   if(! _init_guard_) _file_init_();
   if(String_truth(c -> manifest)) return c -> manifest;
   for(Path directory = Path_absolute(_38); ;  directory = Path_dirname(directory)){
-    String candidate = Path_join(directory, _39);
+    String candidate = Path_join(directory, cons(String_var(_39), NULL));
     if(SourceView_exists(c -> sources, candidate)) return candidate;
     if(String_equal(directory, _40)) return NULL;
   }
@@ -856,8 +856,8 @@ static ProjectTarget f8_planning____selected_target(Project p){
 
 static String f8_planning____build_root(Project p){
   String dir = p -> command -> build_dir;
-  if(String_truth(dir)) return Path_join(Path_absolute(_38), dir);
-  if(String_truth(p -> build_dir)) return Path_join(p -> root, p -> build_dir);
+  if(String_truth(dir)) return Path_join(Path_absolute(_38), cons(String_var(dir), NULL));
+  if(String_truth(p -> build_dir)) return Path_join(p -> root, cons(String_var(p -> build_dir), NULL));
   return String_join(NULL, cons(String_var(p -> root), cons(String_var(_46), NULL)));
 }
 
@@ -1017,7 +1017,7 @@ static List f8_planning____target_modules(Project p, ProjectTarget target){
 }
 
 static String f8_planning____target_output(Project p, ProjectTarget target, Symbol kind){
-  if(String_truth(target -> output)) return Path_join(p -> root, target -> output);
+  if(String_truth(target -> output)) return Path_join(p -> root, cons(String_var(target -> output), NULL));
   return({
     Var _x2c_gensym_literal_part_8 = String_var(p -> build_root);  Var _x2c_gensym_literal_part_9 = String_var(TargetKind_product(kind, target -> name));  String_join(NULL, cons(_x2c_gensym_literal_part_8, cons(String_var(_62), cons(_x2c_gensym_literal_part_9, NULL))));
   }
@@ -1139,7 +1139,7 @@ static Array _target_sources(Project p, ProjectTarget target){
     Var _x2c_gensym_macro_cursor_output_9;
     while(Array_try_next(_x2c_gensym_macro_object_9, &(_x2c_gensym_macro_cursor_9), &(_x2c_gensym_macro_cursor_output_9))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_9);
-      if(!(Path_is_x2c_source(path) || String_endswith(path, _96))) _error_name(p, 0, _97, path);
+      if(!(Path_is_x2c_source(path) || String_endswith(path, cons(String_var(_96), NULL)))) _error_name(p, 0, _97, path);
     }
 
   }
@@ -1193,7 +1193,7 @@ int Path_glob_match(Path, Path);
 
 static Array f7_sources____glob(Project p, String pattern){
   String prefix = String_equal(p -> root, _40) ? _40 : String_join(NULL, cons(String_var(p -> root), cons(String_var(_62), NULL)));
-  List found = Path_glob(Path_join(f7_sources____glob_literal(p -> root), pattern));
+  List found = Path_glob(Path_join(f7_sources____glob_literal(p -> root), cons(String_var(pattern), NULL)));
   if(p -> sources) found = List_append(found, Iter_list(Map_keys(p -> sources -> overlays, &(struct Iter){
     int_var(0)
   }
@@ -1206,7 +1206,7 @@ static Array f7_sources____glob(Project p, String pattern){
     Var _x2c_gensym_macro_cursor_output_12;
     while(List_try_next(_x2c_gensym_macro_object_12, &(_x2c_gensym_macro_cursor_12), &(_x2c_gensym_macro_cursor_output_12))){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_12);
-      if(String_startswith(path, prefix) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_62), NULL))))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
+      if(String_startswith(path, cons(String_var(prefix), NULL)) && Path_glob_match(pattern, String_remove_prefix(path, prefix)) && !(String_truth(p -> build_root) && String_startswith(path, cons(String_var(String_join(NULL, cons(String_var(p -> build_root), cons(String_var(_62), NULL)))), NULL))) && SourceView_exists(p -> sources, path) && !(Array_contains(matches, String_var(path)))) Array_push(matches, String_var(path));
     }
 
   }
@@ -1214,12 +1214,12 @@ static Array f7_sources____glob(Project p, String pattern){
 }
 
 static String f7_sources____glob_literal(String text){
-  return String_replace(String_replace(String_replace(String_replace(text, _100, _101), _102, _103), _104, _105), _106, _107);
+  return String_replace(String_replace(String_replace(String_replace(text, _100, _101, NULL), _102, _103, NULL), _104, _105, NULL), _106, _107, NULL);
 }
 
 static Array f7_sources____named_file(Project p, String pattern){
   Array matches = Array_new();
-  String path = Path_join(p -> root, pattern);
+  String path = Path_join(p -> root, cons(String_var(pattern), NULL));
   if(SourceView_exists(p -> sources, path)) Array_push(matches, String_var(path));
   return matches;
 }
@@ -1267,7 +1267,7 @@ static Var _x2c_gensym_func_adapt_0(Func _x2c_gensym_func_binding_0, const FuncA
 }
 
 static Var _x2c_gensym_lambda_1(String flag){
-  return int_var(String_startswith(flag, _123));
+  return int_var(String_startswith(flag, cons(String_var(_123), NULL)));
   ;
 }
 
@@ -1300,7 +1300,7 @@ static Var _x2c_gensym_lambda_4(Func _x2c_gensym_lambda_closure_0, const FuncArg
 }
 
 static Var _x2c_gensym_lambda_5(String value, String root){
-  return String_var(Path_join(root, value));
+  return String_var(Path_join(root, cons(String_var(value), NULL)));
   ;
 }
 

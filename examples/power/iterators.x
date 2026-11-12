@@ -9,7 +9,7 @@ int main(void) {
     printf("queue: %s\n", urgent.iter()
       .chain(routine.iter()).head(4).list().repr());
 
-    printf("first square over threshold: %d\n", range(1, 20, 1)
+    printf("first square over threshold: %d\n", range(1, 20)
       .map(%!(value) => value * value)
       .find(%!(value) => value > 70).int());
 

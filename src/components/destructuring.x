@@ -16,7 +16,7 @@
 /* The linked meta copies include these diagnostics from this owner. */
 macro Stmt $fail.destructure_list_source(Expr $site) =>
   x2c_diagnostic_fail_at(
-    $site, <type>, "destructuring requires a List source", NULL);
+    $site, <type>, "destructuring requires a List source");
 
 /* The List `source` holds, converted as a List destination converts it.
    A numeric source is reported before conversion, which would otherwise
@@ -62,7 +62,7 @@ meta static List _destructure_writes(List targets, Atom values) {
 meta static Code _destructure_bound(List code, Atom values, Atom result) {
   List names = %((new-name $values "destructure"));
   if (result) names = cons(%(new-name $result "destructure_result"), names);
-  return Code.bound(code, names);
+  return Code.bound(code, @names);
 }
 
 $rewrite(%(dstrdecl *))

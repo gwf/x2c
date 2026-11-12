@@ -246,7 +246,7 @@ Buffer Job_write_str(Job value, Buffer out){
   return Buffer_printf(out, "<Job: 0x%012lX>", (long) value);
 }
 
-Buffer Buffer_new(size_t);
+Buffer Buffer_new(List);
 
 void x2c_cleanup_push(X2CCleanup *);
 
@@ -255,7 +255,7 @@ String Buffer_str(Buffer);
 void x2c_cleanup_leave(X2CCleanup *);
 
 String Job_str(Job value){
-  Buffer _x2c_gensym_macro_out_0 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_0 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_0 _x2c_gensym_macro_environment_0 ={
       0
@@ -372,7 +372,7 @@ Buffer Job_write_repr(Job value, Buffer out){
 }
 
 String Job_repr(Job value){
-  Buffer _x2c_gensym_macro_out_1 = Buffer_new(0);
+  Buffer _x2c_gensym_macro_out_1 = Buffer_new(NULL);
   {
     _x2c_gensym_defer_env_2 _x2c_gensym_macro_environment_2 ={
       0
@@ -411,6 +411,10 @@ static Var String_var(String);
 
 String String_join(String, List);
 
+static int List_try_next(List, List *, Var *);
+
+static List Var_list_payload(Var);
+
 List List_append(List, List);
 
 #include "error.h"
@@ -418,15 +422,25 @@ List List_append(List, List);
 
 
 
-Job Job_pipe(Job job, List command){
+Job Job_pipe(Job job, List commands){
   if(! _init_guard_) _file_init_();
   if(! job){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/process.x",.function = "Job_pipe",.line = 160,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/process.x",.function = "Job_pipe",.line = 161,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.pipe")), NULL))));
     __builtin_unreachable();
   }
   _unstarted(job, _0);
-  job -> stages = List_append(job -> stages, _stages(command));
+  {
+    List command;
+    List _x2c_gensym_macro_object_0 = commands;
+    List _x2c_gensym_macro_cursor_0 = _x2c_gensym_macro_object_0;
+    Var _x2c_gensym_macro_cursor_output_0;
+    while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
+      command = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
+      job -> stages = List_append(job -> stages, _stages(command));
+    }
+
+  }
   return job;
 }
 
@@ -437,26 +451,26 @@ int Var_is(Var, Symbol);
 Job Job_options(Job job, Map options){
   if(! _init_guard_) _file_init_();
   if(! job){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/process.x",.function = "Job_options",.line = 187,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/process.x",.function = "Job_options",.line = 191,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL))));
     __builtin_unreachable();
   }
   _unstarted(job, _1);
   {
     Var key, value;
-    Map _x2c_gensym_macro_object_0 = options;
-    unsigned _x2c_gensym_macro_cursor_0 = 0;
-    Var _x2c_gensym_macro_cursor_output_0;
+    Map _x2c_gensym_macro_object_1 = options;
+    unsigned _x2c_gensym_macro_cursor_1 = 0;
     Var _x2c_gensym_macro_cursor_output_1;
-    while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
-      key = _x2c_gensym_macro_cursor_output_0;
-      value = _x2c_gensym_macro_cursor_output_1;
+    Var _x2c_gensym_macro_cursor_output_2;
+    while(Map_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1), &(_x2c_gensym_macro_cursor_output_2))){
+      key = _x2c_gensym_macro_cursor_output_1;
+      value = _x2c_gensym_macro_cursor_output_2;
       {
         if(! Var_is(key, 1328354264)){
           Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL)));
           Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("option keys are atoms")), NULL)));
           {
-            static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/process.x",.function = "Job_options",.line = 190,.runtime = 1};
+            static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/process.x",.function = "Job_options",.line = 194,.runtime = 1};
             x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1218550748), _x2c_gensym_literal_part_1);
             __builtin_unreachable();
           }
@@ -483,7 +497,7 @@ void Job_run(Job job){
 Job Job_live(Job job){
   if(! _init_guard_) _file_init_();
   if(! job){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/process.x",.function = "Job_live",.line = 211,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/process.x",.function = "Job_live",.line = 215,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.live")), NULL))));
     __builtin_unreachable();
   }
@@ -491,13 +505,13 @@ Job Job_live(Job job){
   return job;
 }
 
-List String_split_lines(String, int);
+List String_split_lines(String, List);
 
 String Job_output(Job job);
 
 List Job_lines(Job job){
   if(! _init_guard_) _file_init_();
-  return String_split_lines(Job_output(job), 0);
+  return String_split_lines(Job_output(job), NULL);
 }
 
 String Job_output(Job job){
@@ -507,8 +521,6 @@ String Job_output(Job job){
 }
 
 int Job_status(Job job);
-
-static List Var_list_payload(Var);
 
 static int List_truth(List);
 
@@ -528,22 +540,22 @@ Job Job_check(Job job){
   int captured = job -> launch.capture_output;
   int logged = job -> launch.capture_errors;
   if(captured && logged){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/process.x",.function = "Job_check",.line = 245,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/process.x",.function = "Job_check",.line = 249,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 234409560664, 4, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output), Symbol_var(374504614), String_var(errors));
     __builtin_unreachable();
   }
   if(captured){
-    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/process.x",.function = "Job_check",.line = 247,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/process.x",.function = "Job_check",.line = 251,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_5, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(1052018024), String_var(output));
     __builtin_unreachable();
   }
   if(logged){
-    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/process.x",.function = "Job_check",.line = 249,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_6 = {.file = "../../lib/process.x",.function = "Job_check",.line = 253,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_6, 234409560664, 3, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status), Symbol_var(374504614), String_var(errors));
     __builtin_unreachable();
   }
   {
-    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/process.x",.function = "Job_check",.line = 250,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../lib/process.x",.function = "Job_check",.line = 254,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_7, 234409560664, 2, Symbol_var(7477201800), List_var(command), Symbol_var(1317119334), int_var(status));
     __builtin_unreachable();
   }
@@ -569,7 +581,7 @@ int Job_status(Job job){
 Job Job_start(Job job){
   if(! _init_guard_) _file_init_();
   if(! job){
-    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/process.x",.function = "Job_start",.line = 282,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/process.x",.function = "Job_start",.line = 286,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_8, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))));
     __builtin_unreachable();
   }
@@ -585,7 +597,7 @@ void Job_cleanup(Job job){
 
 void Job_kill(Job job, int signal){
   if(! job){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/process.x",.function = "Job_kill",.line = 300,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/process.x",.function = "Job_kill",.line = 304,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.kill")), NULL))));
     __builtin_unreachable();
   }
@@ -603,14 +615,14 @@ Var Array_remove(Array, int);
 Job Job_wait_any(Array jobs){
   {
     Job job;
-    Array _x2c_gensym_macro_object_1 = jobs;
-    int _x2c_gensym_macro_cursor_1 = 0;
-    Var _x2c_gensym_macro_cursor_output_2;
-    while(Array_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_2))){
-      job = Var_job(_x2c_gensym_macro_cursor_output_2);
+    Array _x2c_gensym_macro_object_2 = jobs;
+    int _x2c_gensym_macro_cursor_2 = 0;
+    Var _x2c_gensym_macro_cursor_output_3;
+    while(Array_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_3))){
+      job = Var_job(_x2c_gensym_macro_cursor_output_3);
       {
         if(! job){
-          static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 311,.runtime = 1};
+          static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 315,.runtime = 1};
           x2c_error_raise_n(& _x2c_gensym_error_site_10, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.wait_any")), NULL))));
           __builtin_unreachable();
         }
@@ -618,7 +630,7 @@ Job Job_wait_any(Array jobs){
           Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("Job.wait_any")), NULL)));
           Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("a job has not started")), NULL)));
           {
-            static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 312,.runtime = 1};
+            static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/process.x",.function = "Job_wait_any",.line = 316,.runtime = 1};
             x2c_error_raise_n(& _x2c_gensym_error_site_11, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(1218550748), _x2c_gensym_literal_part_3);
             __builtin_unreachable();
           }
@@ -642,7 +654,7 @@ Job Job_wait_any(Array jobs){
 
 int Job_ready(Job job){
   if(! job){
-    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/process.x",.function = "Job_ready",.line = 329,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_12 = {.file = "../../lib/process.x",.function = "Job_ready",.line = 333,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_12, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.ready")), NULL))));
     __builtin_unreachable();
   }
@@ -724,7 +736,7 @@ static Job _unstarted(Job job, String operation){
     Var _x2c_gensym_literal_part_4 = String_var(operation);
     Var _x2c_gensym_literal_part_5 = String_var(String_join(NULL, cons(String_var(String_new("the job has started")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/process.x",.function = "_unstarted",.line = 411,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_13 = {.file = "../../lib/process.x",.function = "_unstarted",.line = 415,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_13, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_4, Symbol_var(1218550748), _x2c_gensym_literal_part_5);
       __builtin_unreachable();
     }
@@ -753,7 +765,7 @@ static void _set(JobLaunch * l, Symbol name, Var value){
     default:{
       Var _x2c_gensym_literal_part_6 = String_var(String_join(NULL, cons(String_var(String_new("Job.options")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/process.x",.function = "_set",.line = 422,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_14 = {.file = "../../lib/process.x",.function = "_set",.line = 426,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_14, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_6, Symbol_var(1041517532), Symbol_var(name));
         __builtin_unreachable();
       }
@@ -766,13 +778,13 @@ static void _set(JobLaunch * l, Symbol name, Var value){
 
 static void _route_output(JobLaunch * l, Var value){
   (* l).capture_output = _is(value, 6544469130);
-  (* l).stdout_path =(* l).capture_output || _is(value, 20284019304) ? NULL : Var_as_string(value);
+  (* l).stdout_path = Var_as_string((* l).capture_output || _is(value, 20284019304) ? Var_null() : value);
 }
 
 static void _route_errors(JobLaunch * l, Var value){
   (* l).capture_errors = _is(value, 6544469130);
   (* l).errors_to_output = _is(value, 1317305704);
-  (* l).stderr_path =(* l).capture_errors ||(* l).errors_to_output || _is(value, 20284019304) ? NULL : Var_as_string(value);
+  (* l).stderr_path = Var_as_string((* l).capture_errors ||(* l).errors_to_output || _is(value, 20284019304) ? Var_null() : value);
 }
 
 static int _is(Var value, Symbol name){
@@ -803,13 +815,13 @@ static char * * _environment(Map env){
   Map names = Map_new();
   {
     Var name;
-    Iter _x2c_gensym_macro_iterator_2 = Map_keys(env, &(struct Iter){
+    Iter _x2c_gensym_macro_iterator_3 = Map_keys(env, &(struct Iter){
       int_var(0)
     }
     );
-    Var _x2c_gensym_macro_item_2;
-    while(Iter_try_next(_x2c_gensym_macro_iterator_2, &(_x2c_gensym_macro_item_2))){
-      name = _x2c_gensym_macro_item_2;
+    Var _x2c_gensym_macro_item_3;
+    while(Iter_try_next(_x2c_gensym_macro_iterator_3, &(_x2c_gensym_macro_item_3))){
+      name = _x2c_gensym_macro_item_3;
       Map_setindex(names, String_var(Var_str(name)), int_var(1));
     }
 
@@ -822,13 +834,13 @@ static char * * _environment(Map env){
   }
   {
     Var name, value;
-    Map _x2c_gensym_macro_object_3 = env;
-    unsigned _x2c_gensym_macro_cursor_3 = 0;
-    Var _x2c_gensym_macro_cursor_output_3;
+    Map _x2c_gensym_macro_object_4 = env;
+    unsigned _x2c_gensym_macro_cursor_4 = 0;
     Var _x2c_gensym_macro_cursor_output_4;
-    while(Map_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3), &(_x2c_gensym_macro_cursor_output_4))){
-      name = _x2c_gensym_macro_cursor_output_3;
-      value = _x2c_gensym_macro_cursor_output_4;
+    Var _x2c_gensym_macro_cursor_output_5;
+    while(Map_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_4), &(_x2c_gensym_macro_cursor_output_5))){
+      name = _x2c_gensym_macro_cursor_output_4;
+      value = _x2c_gensym_macro_cursor_output_5;
       Array_push(entries, String_var(({
         Var _x2c_gensym_literal_part_7 = String_var(Var_str(name));  Var _x2c_gensym_literal_part_8 = String_var(Var_str(value));  String_join(NULL, cons(_x2c_gensym_literal_part_7, cons(String_var(_5), cons(_x2c_gensym_literal_part_8, NULL))));
       }
@@ -840,19 +852,17 @@ static char * * _environment(Map env){
   int index = 0;
   {
     String entry;
-    Array _x2c_gensym_macro_object_4 = entries;
-    int _x2c_gensym_macro_cursor_4 = 0;
-    Var _x2c_gensym_macro_cursor_output_5;
-    while(Array_try_next(_x2c_gensym_macro_object_4, &(_x2c_gensym_macro_cursor_4), &(_x2c_gensym_macro_cursor_output_5))){
-      entry = Var_as_string(_x2c_gensym_macro_cursor_output_5);
+    Array _x2c_gensym_macro_object_5 = entries;
+    int _x2c_gensym_macro_cursor_5 = 0;
+    Var _x2c_gensym_macro_cursor_output_6;
+    while(Array_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
+      entry = Var_as_string(_x2c_gensym_macro_cursor_output_6);
       out[index ++] = entry;
     }
 
   }
   return out;
 }
-
-static int List_try_next(List, List *, Var *);
 
 static void _start(Job j){
   j -> started = 1;
@@ -893,11 +903,11 @@ static void _start(Job j){
           int index = 0;
           {
             List stage;
-            List _x2c_gensym_macro_object_5 = j -> stages;
-            List _x2c_gensym_macro_cursor_5 = _x2c_gensym_macro_object_5;
-            Var _x2c_gensym_macro_cursor_output_6;
-            while(List_try_next(_x2c_gensym_macro_object_5, &(_x2c_gensym_macro_cursor_5), &(_x2c_gensym_macro_cursor_output_6))){
-              stage = Var_list_payload(_x2c_gensym_macro_cursor_output_6);
+            List _x2c_gensym_macro_object_6 = j -> stages;
+            List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
+            Var _x2c_gensym_macro_cursor_output_7;
+            while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_7))){
+              stage = Var_list_payload(_x2c_gensym_macro_cursor_output_7);
               stdio.input = _stage(j, index ++, stage, stdio);
             }
 
@@ -919,7 +929,7 @@ static void _open_table(Job job){
   int count = List_len(job -> stages);
   job -> pids = calloc(count + 1, sizeof(long) + sizeof(int));
   if(! job -> pids){
-    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/process.x",.function = "_open_table",.line = 484,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_15 = {.file = "../../lib/process.x",.function = "_open_table",.line = 488,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_15, 97614135954008, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL))));
     __builtin_unreachable();
   }
@@ -1067,7 +1077,7 @@ static char * * _argv(List stage){
     Var _x2c_gensym_literal_part_9 = String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL)));
     Var _x2c_gensym_literal_part_10 = String_var(String_join(NULL, cons(String_var(String_new("empty command")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/process.x",.function = "_argv",.line = 568,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_16 = {.file = "../../lib/process.x",.function = "_argv",.line = 572,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_16, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_9, Symbol_var(1218550748), _x2c_gensym_literal_part_10);
       __builtin_unreachable();
     }
@@ -1077,11 +1087,11 @@ static char * * _argv(List stage){
   int index = 0;
   {
     Var word;
-    List _x2c_gensym_macro_object_6 = stage;
-    List _x2c_gensym_macro_cursor_6 = _x2c_gensym_macro_object_6;
-    Var _x2c_gensym_macro_cursor_output_7;
-    while(List_try_next(_x2c_gensym_macro_object_6, &(_x2c_gensym_macro_cursor_6), &(_x2c_gensym_macro_cursor_output_7))){
-      word = _x2c_gensym_macro_cursor_output_7;
+    List _x2c_gensym_macro_object_7 = stage;
+    List _x2c_gensym_macro_cursor_7 = _x2c_gensym_macro_object_7;
+    Var _x2c_gensym_macro_cursor_output_8;
+    while(List_try_next(_x2c_gensym_macro_object_7, &(_x2c_gensym_macro_cursor_7), &(_x2c_gensym_macro_cursor_output_8))){
+      word = _x2c_gensym_macro_cursor_output_8;
       {
         String text = Var_str(word);
         argv[index ++] = String_truth(text) ? text : "";
@@ -1145,7 +1155,7 @@ _Noreturn static void _child_failed(Failure failure, String dir, char * * argv){
   if(error == ENOENT){
     Var _x2c_gensym_literal_part_11 = String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/process.x",.function = "_child_failed",.line = 624,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_17 = {.file = "../../lib/process.x",.function = "_child_failed",.line = 628,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_17, 31862161386376, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_11, Symbol_var(35599650906), String_var(program), Symbol_var(11703198), int_var(error));
       __builtin_unreachable();
     }
@@ -1154,7 +1164,7 @@ _Noreturn static void _child_failed(Failure failure, String dir, char * * argv){
   {
     Var _x2c_gensym_literal_part_12 = String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/process.x",.function = "_child_failed",.line = 625,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_18 = {.file = "../../lib/process.x",.function = "_child_failed",.line = 629,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_18, 20399393368, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_12, Symbol_var(35599650906), String_var(program), Symbol_var(11703198), int_var(error));
       __builtin_unreachable();
     }
@@ -1177,7 +1187,7 @@ static int _open_output(String path){
     {
       Var _x2c_gensym_literal_part_13 = String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL)));
       {
-        static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/process.x",.function = "_open_output",.line = 641,.runtime = 1};
+        static const X2CErrorSite _x2c_gensym_error_site_19 = {.file = "../../lib/process.x",.function = "_open_output",.line = 645,.runtime = 1};
         x2c_error_raise_n(& _x2c_gensym_error_site_19, 20399393368, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_13, Symbol_var(1051920), String_var(path), Symbol_var(11703198), int_var(error));
         __builtin_unreachable();
       }
@@ -1207,7 +1217,7 @@ _Noreturn static void _io_fail(int error){
   {
     Var _x2c_gensym_literal_part_14 = String_var(String_join(NULL, cons(String_var(String_new("Job.start")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/process.x",.function = "_io_fail",.line = 662,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_20 = {.file = "../../lib/process.x",.function = "_io_fail",.line = 666,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_20, 20399393368, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_14, Symbol_var(11703198), int_var(error));
       __builtin_unreachable();
     }
@@ -1291,7 +1301,7 @@ static String _text(String text, int nul, String operation){
     Var _x2c_gensym_literal_part_15 = String_var(operation);
     Var _x2c_gensym_literal_part_16 = String_var(String_join(NULL, cons(String_var(String_new("embedded NUL")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/process.x",.function = "_text",.line = 689,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_21 = {.file = "../../lib/process.x",.function = "_text",.line = 693,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_21, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_15, Symbol_var(1218550748), _x2c_gensym_literal_part_16);
       __builtin_unreachable();
     }

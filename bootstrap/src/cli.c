@@ -1147,7 +1147,7 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _170 = String_new(".so");
   _171 = String_new("shared-library");
   _172 = String_new("shared-library is not supported by this compiler");
-  _173 = String_new("x2c 0.15.1");
+  _173 = String_new("x2c 0.16.0");
   _174 = String_new("input is a directory: ");
   _175 = String_new("input is not a regular file: ");
   _176 = String_new("input does not exist: ");
@@ -1240,7 +1240,7 @@ CliRequest CliRequest_package_options(String path, String package){
         Var _x2c_gensym_macro_cursor_output_0;
         while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
           word = Var_as_string(_x2c_gensym_macro_cursor_output_0);
-          Array_push(words, String_var(String_replace(word, _88, package)));
+          Array_push(words, String_var(String_replace(word, _88, package, NULL)));
         }
 
       }
@@ -1272,7 +1272,7 @@ CliRequest CliRequest_package_options(String path, String package){
 
 int CliRequest_dependency_option(String s){
   if(! _init_guard_) _file_init_();
-  return String_truth(s) &&(String_startswith(s, _89) || String_startswith(s, _90) || String_startswith(s, _91) || String_startswith(s, _92) || String_contains(s, _93) || String_contains(s, _94) || String_contains(s, _95) || String_contains(s, _96));
+  return String_truth(s) &&(String_startswith(s, cons(String_var(_89), cons(String_var(_90), cons(String_var(_91), cons(String_var(_92), NULL))))) || String_contains(s, _93) || String_contains(s, _94) || String_contains(s, _95) || String_contains(s, _96));
 }
 
 int CliRequest_is_builtin(const char * word){
@@ -1302,7 +1302,7 @@ static void f7_parsing____word(f7_parsing___Parse * p, int * i){
 }
 
 static int f7_parsing____expands(f7_parsing___Parse * p, String arg, int i){
-  return(* p).request -> command == 1282559016 && !(* p).operands && i >=(* p).expanded && String_startswith(arg, _98);
+  return(* p).request -> command == 1282559016 && !(* p).operands && i >=(* p).expanded && String_startswith(arg, cons(String_var(_98), NULL));
 }
 
 static void f7_parsing____expand(f7_parsing___Parse * p, String arg, int * i){
@@ -1366,7 +1366,7 @@ static CliCommand * f7_parsing____command_row(const char * word){
 
 static void f7_parsing____option(f7_parsing___Parse * p, String arg, int * i){
   if(String_equal(arg, _31) &&(* p).request -> command == 45220543335690) f7_parsing____cli_fail_output_command();
-  if((SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", (* p).request -> command)) && String_startswith(arg, _106)){
+  if((SymbolSet_contains((SymbolSet) "\001\000\000\000\002\000\000\000\001\000\000\000\025\174\112\177\271\171\067\236\000\001\000\000\000\000\010\113\125\000\000\000\000\000\134\225\000\000\000\000\000\000", (* p).request -> command)) && String_startswith(arg, cons(String_var(_106), NULL))){
     f7_parsing____save_temps_dir((* p).request, arg);
     return;
   }
@@ -1383,7 +1383,7 @@ static void f7_parsing____save_temps_dir(CliRequest r, String arg){
 
 static f7_parsing___Given f7_parsing____take_option(Array args, int * i, Symbol command){
   String arg = Var_as_string(Array_getindex(args, (* i))), written = arg, joined = NULL, suffix = NULL;
-  int equals = String_startswith(arg, _97) ? String_find(arg, _107) : - 1;
+  int equals = String_startswith(arg, cons(String_var(_97), NULL)) ? String_find(arg, _107) : - 1;
   if(equals > 2){
     written = String_getslice(arg, (-2147483647 - 1), x2c_slice_bound(equals), 1);
     joined = String_getslice(arg, x2c_slice_bound(equals + 1), (-2147483647 - 1), 1);
@@ -1555,7 +1555,7 @@ static CliOption * f7_parsing____find_option(String spelling, Symbol command, St
     if(!(SymbolSet_contains(option -> commands, command))) continue;
     String form = option -> spelling;
     int form_length = String_len(form);
-    int longer = length > form_length && String_startswith(spelling, form);
+    int longer = length > form_length && String_startswith(spelling, cons(String_var(form), NULL));
     if(option -> prefix){
       if(longer) return option;
       continue;
@@ -1577,7 +1577,7 @@ static void f7_parsing____cli_fail_one_dash_removed(String arg, String use){
 static void f7_parsing____native(f7_parsing___Parse * p, int * i){
   String arg = Var_as_string(Array_getindex((* p).args, (* i)));
   if(! String_truth(arg)) Diagnostics_driver_error("empty package native argument");
-  if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, _130)){
+  if(String_getindex(arg, 0) != '-' && String_getindex(arg, 0) != '@' && String_endswith(arg, cons(String_var(_130), NULL))){
     Array_push((* p).ld_args, String_var(arg));
     return;
   }
@@ -1701,7 +1701,7 @@ static String f9_responses____read_response_file(String path){
 
 static Array f9_responses____response_words(String path, String text){
   f9_responses___Words w ={
-    .out = Array_new(), .path = path, .word = Buffer_new(0), .line = 1, .blank = 1
+    .out = Array_new(), .path = path, .word = Buffer_new(NULL), .line = 1, .blank = 1
   }
   ;
   {
@@ -1843,12 +1843,12 @@ static int _external_listed(String name){
   if(! String_truth(manifest) || ! Path_is_file(manifest)) return 0;
   {
     String line;
-    List _x2c_gensym_macro_object_3 = String_split_lines(Path_read_text(manifest), 0);
+    List _x2c_gensym_macro_object_3 = String_split_lines(Path_read_text(manifest), NULL);
     List _x2c_gensym_macro_cursor_3 = _x2c_gensym_macro_object_3;
     Var _x2c_gensym_macro_cursor_output_3;
     while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
       line = Var_as_string(_x2c_gensym_macro_cursor_output_3);
-      if(String_startswith(line, String_join(NULL, cons(String_var(name), cons(String_var(_159), NULL))))) return 1;
+      if(String_startswith(line, cons(String_var(String_join(NULL, cons(String_var(name), cons(String_var(_159), NULL)))), NULL))) return 1;
     }
 
   }
@@ -1908,7 +1908,7 @@ static void f4_help____print_option(const CliOption * option){
     Var _x2c_gensym_literal_part_9 = String_var(spelled);  Var _x2c_gensym_literal_part_10 = String_var(String_new((* option).value));  String_join(NULL, cons(_x2c_gensym_literal_part_9, cons(String_var(_161), cons(_x2c_gensym_literal_part_10, NULL))));
   }
   ) : spelled;
-  f4_help____print_help_row(label, (* option).description, String_startswith(label, _97) ? 6 : 2);
+  f4_help____print_help_row(label, (* option).description, String_startswith(label, cons(String_var(_97), NULL)) ? 6 : 2);
 }
 
 static void f4_help____print_help_row(const char * label, const char * description, int indent){

@@ -16,8 +16,7 @@
 macro Stmt $fail.access_read(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
     $site, <xform>,
-    %"type $($type.spelling()) does not support bracket indexing",
-    NULL);
+    %"type $($type.spelling()) does not support bracket indexing");
 
 macro Stmt $fail.access_string_store(Expr $site) {
   {
@@ -26,7 +25,7 @@ macro Stmt $fail.access_string_store(Expr $site) {
                   "transient String.malloc buffer";
     x2c_diagnostic_fail_at(
       $site, <xform>, "String does not support bracket assignment",
-      $(note));
+      note);
   }
 }
 
@@ -34,14 +33,14 @@ macro Stmt $fail.access_store(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
     $site, <xform>,
     %"type $($type.spelling()) does not support bracket assignment",
-    %("use an explicit copy-producing method where available"));
+    "use an explicit copy-producing method where available");
 
 macro Stmt $fail.access_update(Expr $site, Expr $type, Expr $value) {
   {
     String what = $value ? "compound assignment" : "increment or decrement";
     x2c_diagnostic_fail_at(
       $site, <xform>,
-      %"type $($type.spelling()) does not support indexed $what", NULL);
+      %"type $($type.spelling()) does not support indexed $what");
   }
 }
 
@@ -51,7 +50,7 @@ macro Stmt $fail.access_operand(Expr $site, Expr $op, Expr $type) {
       ? "indexed += requires a numeric, Var, or String operand"
       : "indexed compound assignment requires a numeric or Var operand";
     x2c_diagnostic_fail_at(
-      $site, <xform>, message, %("right type: $($type.spelling())"));
+      $site, <xform>, message, %"right type: $($type.spelling())");
   }
 }
 

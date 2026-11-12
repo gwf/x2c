@@ -1,37 +1,42 @@
 ---
 slug: strings
 section: love
-tab: strings
+home: true
+order: 4
+tab: text
+title: Text is something you work with.
 ---
 
 ```x2c
 #include <assert.h>
-#include <string.h>
 
-~int main(void) {
-// Transform and slice values; keep the original input.
-String raw = "  tea:42  ", row = raw.strip(NULL);
-String name = row[:3].upper(), title = name + " ORDER";
+int main(void) {
+  String line = "  GET /docs/guide/values.html  ";
 
-// Equal contents compare in constant time, however they were built.
-assert(title == "tea order".upper());
+  // Slice, strip, split, and case-fold; the original is untouched.
+  String request = line.strip(NULL);
+  (String method, String path) = request.split(" ");
+  assert(line.len() == 31 && method == "GET");
 
-// Parse a sliced field and interpolate the result.
-long quantity;
-if (row[4:].try_long(quantity))
-  puts(%"$title: $(quantity + 1)");
+  // Interpolate values and expressions in place.
+  String title = path.split("/").last().str().replace(".html", "");
+  puts(%"$method $title ($(path.len()) bytes)");
 
-// Iterate bytes directly, or use ordinary C string functions.
-assert(strcmp(raw, "  tea:42  ") == 0);
-foreach (char ch in name)
-  putchar(ch);
-printf(" has %zu letters; original: [%s]\n", strlen(name), raw);
-~return 0;
-~}
+  // A switch on a String selects its case by content.
+  switch (method.lower()) {
+    case "get":  puts("read it");  break;
+    case "post": puts("write it"); break;
+    default:     puts("refuse it");
+  }
+
+  // Join and repeat build text; equality is one pointer compare.
+  String rule = "-".repeat(3) + " " + ", ".join(%("a" "b" "c"));
+  assert(rule == "--- a, b, c");
+  puts(rule);
+  return 0;
+}
 ```
 
-`String.strip` and `String.upper` transform text without changing the
-original. Slicing selects bytes; `String.try_long` parses a number, and
-`%"..."` interpolates the result. Immutable strings share safely and compare
-in constant time. Nonempty values pass directly to read-only C string
-functions such as `strcmp`.
+Split an HTTP request, select a path component, and format the result. Slices, splitting, interpolation, and joining turn text processing into ordinary expressions.
+
+Strings are immutable values, so transformations produce a result without changing the original.

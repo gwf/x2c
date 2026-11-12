@@ -356,7 +356,7 @@ static List _selector_double(List steps){
 
 int List_contains(List, Var);
 
-int String_startswith(String, String);
+int String_startswith(String, List);
 
 List Macro_apply(Macro, List);
 
@@ -367,7 +367,7 @@ static List _selector_units(List middles, Macro car, Macro cdr){
   if(List_contains(_67, String_var(middle))) return rest;
   String name = String_join(NULL, cons(String_var(_68), cons(String_var(middle), cons(String_var(_69), NULL))));
   return({
-    Var _x2c_gensym_literal_part_3 = List_var(String_startswith(middle, _70) ? Macro_apply(car, cons(String_var(name), NULL)) : Macro_apply(cdr, cons(String_var(name), NULL)));  cons(_x2c_gensym_literal_part_3, rest);
+    Var _x2c_gensym_literal_part_3 = List_var(String_startswith(middle, cons(String_var(_70), NULL)) ? Macro_apply(car, cons(String_var(name), NULL)) : Macro_apply(cdr, cons(String_var(name), NULL)));  cons(_x2c_gensym_literal_part_3, rest);
   }
   );
 }

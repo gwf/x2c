@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 }
 
 static void _repeat(int count) {
-  Buffer line = auto Buffer.new(0);
+  Buffer line = auto Buffer.new();
   for (int start = 0; start < count; start += 60) {
     line.clear();
     int end = start + 60 < count ? start + 60 : count;
@@ -45,7 +45,7 @@ static void _repeat(int count) {
 
 static void _random(String letters, Array probabilities, int count) {
   Array choices = _choices(letters, probabilities);
-  Buffer line = auto Buffer.new(0);
+  Buffer line = auto Buffer.new();
   for (int start = 0; start < count; start += 60) {
     line.clear();
     int end = start + 60 < count ? start + 60 : count;

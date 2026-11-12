@@ -267,7 +267,7 @@ int Toolchain.preprocess(
   /* The empty standard input is the main file, so the unit is an included
      file whose own `#pragma once` stops an include cycle from splicing it
      again. The host ignores that pragma in a main file. */
-  Job command = _captured(arguments).options({input: ""});
+  Job command = _captured(arguments).options(input: "");
   int status = _capture(command, arguments.car(), output, errors);
   /* The dependency file is consumed and removed even after host failure. The
      returned status tells the caller whether stdout is usable. */
@@ -341,7 +341,7 @@ static String _recorded_tool(String name) {
   if (!home) return NULL;
   try record = Path.read_text(%"$home/lib/x2c/toolchain");
   catch %(not-found *): {}
-  foreach (String line in record.split_lines(0))
+  foreach (String line in record.split_lines())
     if (line.startswith(%"$name=")) return line.remove_prefix(%"$name=");
   return NULL;
 }
@@ -388,7 +388,7 @@ static List _module_shape(String loader) {
 // tool execution
 
 static Job _captured(List arguments) =>
-  arguments.job().options({stdout: <capture>, stderr: <capture>});
+  arguments.job().options(stdout: <capture>, stderr: <capture>);
 
 /* A tool that cannot start has no job and leaves the error in `failure`.
    Callers give it the status 127 a shell gives a missing program. */
@@ -487,7 +487,7 @@ static List _includes(String option, List directories) =>
    stops at `End of search list`. */
 static void _add_include_directories(Array directories, String listing) {
   int listed = 0;
-  foreach (String line in listing.split_lines(0)) {
+  foreach (String line in listing.split_lines()) {
     if (line.startswith("End of search list")) return;
     if ("search starts here" in line) listed = 1;
     else if (listed) _add_include_directory(directories, line);
@@ -505,7 +505,7 @@ static void _add_include_directory(Array directories, String line) {
 }
 
 static void _add_library_directories(Array directories, String output) {
-  foreach (String line in output.split_lines(0)) {
+  foreach (String line in output.split_lines()) {
     if (!line.startswith("libraries: ")) continue;
     String list = line.remove_prefix("libraries: ").remove_prefix("=");
     foreach (String directory in list.split(":"))

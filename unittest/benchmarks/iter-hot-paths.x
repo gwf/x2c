@@ -253,7 +253,7 @@ int main(void) {
   result("map-filter-explicit", now_ns() - start, count);
 
   start = now_ns();
-  sink += range(0, 2 * count - 1, 1)
+  sink += range(2 * count - 1)
     .map(increment).filter(is_even).sum().integer();
   result("map-filter-implicit", now_ns() - start, count);
 

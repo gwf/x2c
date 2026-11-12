@@ -517,6 +517,48 @@ target: `$project.checked() value + 1` checks `value`, while
 `$project.checked() (value + 1)` checks the complete addition. Chained
 expression decorators remain closest-first.
 
+### Call a type's macros with method syntax
+
+A decorator or Expression macro named after a type, as `$Panel.section` is,
+can be called on a receiver of that type. The receiver becomes the first
+argument:
+
+```x2c
+~#include <stdio.h>
+typedef struct Panel { int depth; } Panel;
+
+int Panel.label(Panel panel, int n) => panel.depth + n;
+
+macro Expression $Panel.label(Expr $panel, Expr $n) =>
+  $panel.label($n) * 10;
+
+macro Decorator $Panel.section(Stmt $body, Expr $panel) {
+  {
+    printf("section %d\n", ($panel).depth);
+    $body
+  }
+}
+
+int main(void) {
+  Panel panel = { 2 };
+  panel.section() printf("%d\n", panel.label(3));
+  return 0;
+}
+```
+
+```text
+section 2
+50
+```
+
+`panel.section() TARGET` is `$Panel.section(panel) TARGET`, and
+`panel.label(3)` is `$Panel.label(panel, 3)`. The macro shadows the method
+of the same name. Written in `$Panel.label`'s own template,
+`$panel.label($n)` is the method, so the macro wraps it. Other templates use
+method forms too, as `$panel.section() ...` with a hole receiver. The
+[method-form rules](../reference/language.md#method-form-macros) state when
+a statement is a decorator application.
+
 ### Give macros local keyword spellings
 
 A `keyword` declaration removes the qualified `$` spelling while preserving

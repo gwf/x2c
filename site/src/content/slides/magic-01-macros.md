@@ -1,7 +1,10 @@
 ---
 slug: macros
 section: magic
+home: true
+order: 1
 tab: macros
+title: Make a repeated pattern a construct.
 ---
 
 ```x2c
@@ -26,7 +29,4 @@ printf("%d %d; %s %s\n", left, right, first, last);
 ~}
 ```
 
-`$swap` receives parsed expressions, and `Code.type` supplies
-the temporary's type. A declaration written in a macro body is hygienic,
-so `temporary` cannot collide with caller names. The same three generated
-statements swap integers or strings, without a separate macro for each type.
+A macro receives syntax and returns syntax. This swap works with different types because it expands into the surrounding program, where the compiler resolves those types.

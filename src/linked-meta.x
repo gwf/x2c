@@ -18,6 +18,7 @@
 #include "common.x"
 #include "compiler-meta.x"
 #include "derive.x"
+#include "iter.x"
 #include "lisp-bindings.x"
 #include "list-selectors.x"
 #include "native-scalar-types.x"
@@ -123,12 +124,12 @@ List _derive_fields(Type type, Symbol kind) {
     if (category == <pointer>)
       x2c_diagnostic_fail(
         %"derive: field '$(field.car())' of $(type.car()) has pointer type "
-          + field.cadr().repr(), %());
+          + field.cadr().repr());
     if ((kind == <args> && (category == <value> || category == <struct>)) ||
         (kind == <row> && category == <struct>))
       x2c_diagnostic_fail(
         %"derive: field '$(field.car())' of $(type.car()) "
-          + %"is not supported by <$(kind)>", %());
+          + %"is not supported by <$(kind)>");
     result.push($( @field, category ));
   }
   return result.list_free();
@@ -600,7 +601,7 @@ static void _delegate_fail_packages(
   x2c_diagnostic_fail_at(
     NULL, <type>,
     %"method '$method' is provided by multiple imported packages",
-    notes.list_free());
+    @(notes.list_free()));
 }
 
 static void _delegate_search(
@@ -640,14 +641,14 @@ static void _delegate_fail_ambiguous(
   String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"method '$method' has multiple delegate paths",
-    notes.list_free());
+    @(notes.list_free()));
 }
 
 static void _delegate_fail_cycle(Type outer, String member, List fields) {
   String method = %"$(_delegate_type_name(outer)).$member";
   x2c_diagnostic_fail_at(
     NULL, <type>, %"delegation cycle resolving $method",
-    %("delegate path: $(_delegate_path(outer, fields, NULL))"));
+    %"delegate path: $(_delegate_path(outer, fields, NULL))");
 }
 
 static List _delegate_fields(Type outer, String member) {
@@ -713,7 +714,7 @@ static List _destructure_writes(List targets, Atom values) {
 static Code _destructure_bound(List code, Atom values, Atom result) {
   List names = %((new-name $values "destructure"));
   if (result) names = cons(%(new-name $result "destructure_result"), names);
-  return Code.bound(code, names);
+  return Code.bound(code, @names);
 }
 
 /** Declares the names of `T (a, b) = source;` and then reads the source
@@ -816,9 +817,9 @@ Code dynamic_binary(Code code) {
     String lane = _dynamic_lane(op);
     if (lane) {
       List call = %(call $lane (args $left_var $right_var));
-      return Code.lowered(%(expr ("Var") $call), NULL);
+      return Code.lowered(%(expr ("Var") $call));
     }
-    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
+    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) });
   }
   return code;
 }
@@ -831,7 +832,7 @@ static Code _dynamic_update(
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
-  return Code.lowered(%(expr $type $call), NULL);
+  return Code.lowered(%(expr $type $call));
 }
 
 static String _dynamic_helper(Type type) {
@@ -885,7 +886,7 @@ Code dynamic_change(Code code) {
 Code dynamic_unary(Code code) {
   x2c_diagnostic_fail_at(
     NULL, <xform>, "dynamic unary numeric operators are not supported",
-    %("use Var.binary with an explicit numeric operand"));
+    "use Var.binary with an explicit numeric operand");
   return code;
 }
 
@@ -966,13 +967,13 @@ static List _lambda_kept_items(
   foreach (List item in items) {
     if (item === original.car()) run.push(item);
     else {
-      if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
+      if (run.len()) out.push(Code.lowered(%(seq @(run.list()))));
       run.truncate(0);
-      out.push(item in declaring ? item : Code.lowered(item, NULL));
+      out.push(item in declaring ? item : Code.lowered(item));
     }
     original = original.cdr();
   }
-  if (run.len()) out.push(Code.lowered(%(seq @(run.list())), NULL));
+  if (run.len()) out.push(Code.lowered(%(seq @(run.list()))));
   return out.list_free();
 }
 
@@ -998,10 +999,10 @@ static Code _lambda_declare_cells(List node, Map cells) {
         }
         celled |= !!cell;
         items.push(
-          cell ? cell : Code.lowered(%(declare $base (bindings $item)), NULL));
+          cell ? cell : Code.lowered(%(declare $base (bindings $item))));
       }
     case %(dstrdecl *): {
-      items.push(Code.lowered(node, NULL));
+      items.push(Code.lowered(node));
       foreach (List binding in _lambda_targets(node)) {
         Code copy = _lambda_copied_cell(binding, cells);
         if (copy) items.push(copy);
@@ -1013,7 +1014,7 @@ static Code _lambda_declare_cells(List node, Map cells) {
         _lambda_declare_cells(%(declare $base $bindings), cells);
       if (declaration ~= %(seq *initial))
         return %(block @initial
-                 $(Code.lowered(%(for () $test $next $body), NULL)));
+                 $(Code.lowered(%(for () $test $next $body))));
     }
   }
   return celled ? %(seq @(items.list_free())) : node;
@@ -1124,7 +1125,7 @@ static List _lambda_closure_params(
 
 static Code _lambda_function(List name, List params, Code body) {
   if (!params) params = %((param (void) (bind () ())));
-  List lowered = Code.lowered(%(seq @(_lambda_items(body))), NULL);
+  List lowered = Code.lowered(%(seq @(_lambda_items(body))));
   return %(function (static "Var") (bind $name ((fnmod (params @params))))
            (block $lowered));
 }
@@ -1137,7 +1138,7 @@ Code lambda_lift(Code node) {
     List name = x2c_binding_fresh("lambda");
     x2c_place(
       %(unit-support), _lambda_function(name, _lambda_params(params), body));
-    return Code.bound(%(expr $type (ident $name)), NULL);
+    return Code.bound(%(expr $type (ident $name)));
   }
   return node;
 }
@@ -1160,8 +1161,7 @@ static Code _lambda_record(List context, List types) {
   }
   return Code.bound(
     %(typedef (static struct $context (fields @(fields.list_free())))
-       (bindings (bind $context ()))),
-    NULL);
+       (bindings (bind $context ()))));
 }
 
 static Code _lambda_adapter(
@@ -1211,8 +1211,7 @@ static Code _lambda_adapter(
        (bind $adapter
          ((fnmod (params (param ("Func") (bind $closure ()))
                          (param (const "FuncArg") (bind $argv (*)))))))
-       (block @(items.list_free()))),
-    NULL);
+       (block @(items.list_free()))));
 }
 
 static Code _lambda_bridge(
@@ -1307,7 +1306,7 @@ Code lambda_closure(Code node) {
       x2c_place(%(unit-support), function);
       x2c_place(%(unit-support), adapter_function);
       Code value = _lambda_value(adapter, context, adapted.car(), captures);
-      return Code.bound(value, NULL);
+      return Code.bound(value);
     }
   return node;
 }
@@ -1389,14 +1388,14 @@ Code lambda_cells(Code node) {
 
 List _x2c_expand_rows(List generator, List input) {
   if (generator.assoc(<kind>) == <decorator>)
-    x2c_diagnostic_fail("expand requires a code-producing macro", %());
+    x2c_diagnostic_fail("expand requires a code-producing macro");
   Compiler c = Compiler.expanding();
   Var value = input ~= %(expr ? (meta-call *))
     ? c.evaluate_meta_value(input, c.token, 1)
     : c.resolve_expression(input, c.token);
   if (value ~= %(expr *)) value = Code.value(value);
   if (value is not <list>)
-    x2c_diagnostic_fail("expand requires a compile-time List", %());
+    x2c_diagnostic_fail("expand requires a compile-time List");
   List rows = value, parameters = generator.assoc(<parameters>);
   int sequence = parameters &&
     parameters.last().list().assoc(<sequence>).int();
@@ -1411,9 +1410,11 @@ List _x2c_expand_rows(List generator, List input) {
       String expected = sequence ? %"at least $required" : required.str();
       String noun = !sequence && required == 1 ? "argument" : "arguments";
       x2c_diagnostic_fail(
-        %"expand row $index expects $expected $noun; got $supplied", %());
+        %"expand row $index expects $expected $noun; got $supplied");
     }
-    code.push(Macro_apply(generator, arguments));
+    List application =
+      c.evaluate_macro_slot(Macro_apply(generator, arguments));
+    code.push(%(macro-invoke @(application[1:3]) $(c.token)));
   }
   return %(seq @(code.list_free()));
 }
@@ -2085,7 +2086,7 @@ static Code _match_lowered(Code subject, List rows) {
     selector = %(op $choose $expr (op . (op -> $expr car) u64) $selector);
   List prologue = _match_prologue(subject, frame, viewing, values);
   List switched = Code.lowered(
-    %(placed (switch $selector (block @(items.list_free())))), NULL);
+    %(placed (switch $selector (block @(items.list_free())))));
   return %(block @prologue $switched);
 }
 
@@ -2130,7 +2131,7 @@ static Code _match_condition(Code subject, List pattern, List body) {
   }
   if (subject.type().is_named("Var")) arm = _match_listed(arm, none);
   List prologue = _match_prologue(subject, frame, viewing, values);
-  List kept = Code.lowered(%(placed $arm), NULL);
+  List kept = Code.lowered(%(placed $arm));
   return $!{ { @prologue $kept } };
 }
 
@@ -2149,7 +2150,7 @@ static void _printf_fail(Code call, String message) {
   if (call ~= %(expr ? (call ?callee *)))
     x2c_diagnostic_fail_at(
       call, <xform>, message,
-      %("printf-family call: $(Code.binding_spelling(callee))"));
+      %"printf-family call: $(Code.binding_spelling(callee))");
 }
 
 static int _printf_valid(String length, int conversion) {
@@ -2462,7 +2463,7 @@ Code raise_lowering(Code node) {
     }
     if (changed)
       return Code.lowered(
-        %(raise $symbol (args @(converted.list_free()))), NULL);
+        %(raise $symbol (args @(converted.list_free()))));
   }
   return node;
 }
@@ -2548,7 +2549,7 @@ Code string_switch_lowering(Code node) {
     List numbered = _string_cases(body, indices, labels, NULL);
     Code helper = _string_switch_helper(type, labels.list_free());
     return Code.lowered(
-      %(switch $($!int{ $helper($selector) }) $numbered), NULL);
+      %(switch $($!int{ $helper($selector) }) $numbered));
   }
   return node;
 }
@@ -2578,7 +2579,7 @@ List _x2c_try_catch_cases(List selected, List arms) {
 List _x2c_try_exits_placement(List exits) {
   Atom token = Atom.intern("?__try_cleanup");
   if (exits ~= %(code-value ? ?statements ?))
-    return Code.lowered(statements, %((cleanup $token $statements)));
+    return Code.lowered(statements, %(cleanup $token $statements));
   return NULL;
 }
 
@@ -2694,7 +2695,7 @@ static Code _try_landing(
   List clause = _try_catch_clause(handle, arms, rows);
   Macro shape = $x2c.try.frame;
   List code = shape(frame, clause, lowered, exits);
-  return Code.lowered(%(landing $code $(rows.list_free())), NULL);
+  return Code.lowered(%(landing $code $(rows.list_free())));
 }
 
 /** Lowers the parsed try `node` to its landing form. */
@@ -2933,6 +2934,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_x2c_operator_rows", _x2c_operator_rows);
   $linked.row(rows, "_x2c_operator_row", _x2c_operator_row);
   $linked.row(rows, "_derive_list", _derive_list);
+  $linked.row(rows, "_range_arguments", _range_arguments);
   $linked.row(rows, "_scalar_tag", _scalar_tag);
   $linked.row(rows, "_scalar_key", _scalar_key);
   $linked.row(rows, "_scalar_access_rows", _scalar_access_rows);

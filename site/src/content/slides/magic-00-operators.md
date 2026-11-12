@@ -1,5 +1,6 @@
 ---
 slug: operators
+home: false
 section: magic
 tab: operators
 ---

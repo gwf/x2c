@@ -1,5 +1,6 @@
 ---
 slug: counting
+home: false
 section: power
 tab: counting
 ---

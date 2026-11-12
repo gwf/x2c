@@ -24,7 +24,7 @@ meta static void _printf_fail(Code call, String message) {
   if (call ~= %(expr ? (call ?callee *)))
     x2c_diagnostic_fail_at(
       call, <xform>, message,
-      %("printf-family call: $(Code.binding_spelling(callee))"));
+      %"printf-family call: $(Code.binding_spelling(callee))");
 }
 
 /* The linked meta copies include these diagnostics from this owner. */

@@ -106,6 +106,8 @@ Ast Compiler_watched_step(Compiler c, Ast ast);
 
 List Compiler_publish_macro_definition_node(Compiler c, List node);
 
+Atom Compiler_macro_definition_name(Var name);
+
 void Compiler_install_compile_time_effects(Compiler c, List rows);
 
 int Compiler_macro_form_is_definition(Compiler c);
@@ -131,6 +133,22 @@ int Compiler_macro_targets_unit(Compiler c);
 List Compiler_try_parse_macro_target_at(Compiler c, Symbol position);
 
 List Compiler_try_parse_macro_expression(Compiler c);
+
+List Compiler_try_parse_method_macro(Compiler c, List receiver, Token start, Token dot);
+
+List Compiler_try_parse_static_macro(Compiler c, String spelling, Token start);
+
+List Compiler_parse_method_decorator(Compiler c, Token start, Symbol position);
+
+Token Compiler_method_decorator_target(Compiler c);
+
+List Compiler_parse_unit_method_decorator(Compiler c);
+
+List Compiler_mark_method_call(Compiler c, List call, Var member);
+
+List Compiler_bind_method_macro(Compiler c, List receiver, String name, List supplied, Var own);
+
+List Compiler_bind_method_decorator(Compiler c, List call, List target, Symbol position);
 
 List Compiler_evaluate_macro_rows(Compiler c, Var value);
 

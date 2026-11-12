@@ -1,5 +1,6 @@
 ---
 slug: lists
+home: false
 section: love
 tab: lists
 ---

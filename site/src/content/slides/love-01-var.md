@@ -1,7 +1,10 @@
 ---
 slug: var
 section: love
-tab: var
+home: true
+order: 0
+tab: one value
+title: One value, many kinds.
 ---
 
 ```x2c
@@ -30,7 +33,4 @@ printf("%d %f %f\n", count, ratio, sin(ratio));
 ~}
 ```
 
-One eight-byte `Var` holds a supported value or pointer with its type tag.
-`+` adds numbers or joins strings. Assignment converts a `Var` to the
-destination C type; a call to `sin` converts it to the parameter's type.
-The stored type remains available for runtime inspection.
+A Var holds a number, text, or a collection. Operators and methods let you work with the value it holds, while ordinary C types remain available when you want them.

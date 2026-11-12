@@ -83,7 +83,7 @@ static String _read_response_file(String path) {
 
 static Array _response_words(String path, String text) {
   Words w = {
-    .out = [], .path = path, .word = Buffer.new(0), .line = 1, .blank = 1};
+    .out = [], .path = path, .word = Buffer.new(), .line = 1, .blank = 1};
   foreach (char ch in text) _scan(w, (unsigned char) ch);
   _finish_words(w);
   w.word.free();

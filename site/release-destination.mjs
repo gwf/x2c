@@ -9,8 +9,10 @@ export function releaseDestination(env = process.env) {
   if (sourceRef !== "main" && !/^[a-f0-9]{40}$/.test(sourceRef)) {
     throw new Error("SITE_SOURCE_REF must be a full source SHA");
   }
+  const stagedSource = env.SITE_STAGED_SOURCE_REF || sourceRef;
   if (staging && (sourceRef === "main" ||
-      !new RegExp(`^candidate-${sourceRef}-[0-9]+-[0-9]+$`).test(candidate))) {
+      !/^[a-f0-9]{40}$/.test(stagedSource) ||
+      !new RegExp(`^candidate-${stagedSource}-[0-9]+-[0-9]+$`).test(candidate))) {
     throw new Error("staging requires a source SHA and SITE_CANDIDATE_ID");
   }
   return { sourceRef, staging, candidate };
@@ -47,6 +49,7 @@ export function finalizeDestination(html, config = destination) {
     // Staging is never indexed, and its canonical URLs name production.
     const metadata = `<meta name="x2c-release-channel" content="staging">` +
       `<meta name="x2c-candidate" content="${escapeHtml(config.candidate)}">` +
+      `<meta name="x2c-site-source" content="${escapeHtml(config.sourceRef)}">` +
       `<meta name="robots" content="noindex">`;
     const robots = /\s*<meta\b(?=[^>]*\bname=["']robots["'])[^>]*>/gi;
     html = html.replace(robots, "")

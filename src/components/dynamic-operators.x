@@ -22,24 +22,23 @@ macro Stmt $fail.operators_numeric_operands(
     String left_name = $left_type.repr(), right_name = $right_type.repr();
     x2c_diagnostic_fail_at(
       $site, <xform>, "dynamic numeric operators require numeric operands",
-      %("operator: $op left type: $left_name right type: $right_name"));
+      %"operator: $op left type: $left_name right type: $right_name");
   }
 }
 
 macro Stmt $fail.operators_enum_target(Expr $site) =>
   x2c_diagnostic_fail_at(
-    $site, <xform>, "dynamic compound assignment cannot target an enum",
-    NULL);
+    $site, <xform>, "dynamic compound assignment cannot target an enum");
 
 macro Stmt $fail.operators_numeric_target(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
     $site, <xform>, "dynamic compound assignment requires a numeric lvalue",
-    %("left type: $($type.repr())"));
+    %"left type: $($type.repr())");
 
 macro Stmt $fail.operators_bitfield_target(Expr $site) =>
   x2c_diagnostic_fail_at(
     $site, <xform>,
-    "dynamic compound assignment cannot target a bitfield", NULL);
+    "dynamic compound assignment cannot target a bitfield");
 
 macro Stmt $fail.operators_operand(
   Expr $site, Expr $operation, Expr $right_type) =>
@@ -47,7 +46,7 @@ macro Stmt $fail.operators_operand(
     $site, <xform>, $operation == <+>
       ? "dynamic += requires a numeric, Var, or String operand"
       : "dynamic compound assignment requires a numeric or Var operand",
-    %("right type: $($right_type.repr())"));
+    %"right type: $($right_type.repr())");
 
 // dynamic operators
 
@@ -84,9 +83,9 @@ meta Code dynamic_binary(Code code) {
     String lane = _dynamic_lane(op);
     if (lane) {
       List call = %(call $lane (args $left_var $right_var));
-      return Code.lowered(%(expr ("Var") $call), NULL);
+      return Code.lowered(%(expr ("Var") $call));
     }
-    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) }, NULL);
+    return Code.lowered($!Var{ Var_binary($left_var, $op, $right_var) });
   }
   return code;
 }
@@ -103,7 +102,7 @@ meta static Code _dynamic_update(
   List call = value
     ? %(call $helper (args $address $operation $value))
     : %(call $helper (args $address $operation));
-  return Code.lowered(%(expr $type $call), NULL);
+  return Code.lowered(%(expr $type $call));
 }
 
 /* The update helper for a target of `type`, which must be numeric and not
@@ -164,6 +163,6 @@ $rewrite(%(expr ("Var") (op (!or + - ~) ?)))
 meta Code dynamic_unary(Code code) {
   x2c_diagnostic_fail_at(
     NULL, <xform>, "dynamic unary numeric operators are not supported",
-    %("use Var.binary with an explicit numeric operand"));
+    "use Var.binary with an explicit numeric operand");
   return code;
 }

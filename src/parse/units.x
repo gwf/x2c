@@ -302,14 +302,18 @@ static int _skip_collected_form(Compiler c) {
   }
   if ((!c.collect_protocols || c.signature_only) &&
       c.skip_named_type_declaration()) return 1;
-  if (!c.macro_starts_target_at(<unit>)) return 0;
-  if (!c.signature_only && c.collect_protocols &&
-      c.collect_unit_macro()) return 1;
-  do {
-    c.skip_macro_invocation();
-    if (c.test(<;>)) return 1;
-  } while (c.macro_starts_target_at(<unit>));
-  return 0;
+  if (c.macro_starts_target_at(<unit>) && !c.signature_only &&
+      c.collect_protocols && c.collect_unit_macro()) return 1;
+  // A method-form application is skipped like a `$` one.
+  for (;;) {
+    Token target = c.method_decorator_target();
+    if (target) c.token = target;
+    else if (!c.macro_starts_target_at(<unit>)) return 0;
+    else {
+      c.skip_macro_invocation();
+      if (c.test(<;>)) return 1;
+    }
+  }
 }
 
 static List _top_level_decorator(Compiler c) {
@@ -682,7 +686,7 @@ module List _bind_api_source(Compiler c, Var line, Var doc, Var syntax) {
 static String _filled_doc(Compiler c, String doc) {
   if (!doc || !c.macro_stack || doc.find("$") < 0) return doc;
   Map spellings = _hole_spellings(c);
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   for (char *text = doc; *text;) {
     int named = *text == '$' &&
       (scan_ascii_alpha((unsigned char) text[1]) || text[1] == '_');

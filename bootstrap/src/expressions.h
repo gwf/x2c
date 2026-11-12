@@ -32,6 +32,10 @@ List Compiler_parse_parenthesized_statement(Compiler c);
 
 List Compiler_parse_macro_expression_target(Compiler c);
 
+int Compiler_at_map_entry(Compiler c);
+
+List Compiler_parse_call(Compiler c, List callee);
+
 List Compiler_parse_expression(Compiler c);
 
 List Compiler_parse_assignment(Compiler c);

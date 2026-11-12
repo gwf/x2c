@@ -47,6 +47,16 @@ module int _identifier_needs_resolution(Compiler c, List binding) {
      !retained_parameter && !retained_capture);
 }
 
+/* The spelling a name a macro lists with `using` keeps. In a package, a
+   name that no declaration supplies yet takes the package spelling, since
+   a later declaration in the file has it; a native name falls back to its
+   own spelling where the expansion lands. */
+static String _kept_spelling(Compiler c, String name) {
+  Type declared = NULL;
+  (void) c.sym.resolve_global($(name), declared);
+  return c.package && !declared ? c.package_spelling(name) : name;
+}
+
 module List _resolve_identifier(
   Compiler c, Var value, Type type, Token origin) {
   if (!c.macro_holes && value ~= %(binding-name ?(String spelling))) {
@@ -61,7 +71,8 @@ module List _resolve_identifier(
     String name = Ast.binding_spelling(binding);
     int free = _template_free_name(c, binding);
     if (c.macro_holes[%(using $name)] is <list>)
-      return %(expr (<macro-expr>) (ident (binding-global $name)));
+      return %(expr (<macro-expr>)
+               (ident (binding-global $(_kept_spelling(c, name)))));
     if (free) return %(expr (<macro-expr>) (ident (binding-name $name)));
   }
   int macro_binder = value.is_binder() ||
@@ -142,7 +153,11 @@ static List _identifier_binding(
       return _landed_name(c, spelling, type);
     case %(binding-global ?(String spelling)): {
       List global = c.sym.resolve_global($(spelling), type);
-      return global ? global : c.sym.reference_global($(spelling));
+      if (global) return global;
+      // A package spelling no declaration supplies names a native name.
+      String source = c.package_source_name(spelling);
+      global = c.sym.resolve_global($(source), type);
+      return global ? global : c.sym.reference_global($(source));
     }
     case %((!is ? type string)):
       return c.sym.reference(name, type);

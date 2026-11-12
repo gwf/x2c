@@ -1,7 +1,10 @@
 ---
 slug: generics
 section: power
-tab: generics
+home: true
+order: 9
+tab: typed collections
+title: Choose the representation you need.
 ---
 
 ```x2c
@@ -32,8 +35,4 @@ for (ListInt rest = codes; rest; rest = rest.cdr()) {
 ~}
 ```
 
-`ArrayInt` and `MapIntInt` access and update native values without
-boxing through `Var`. Array indexing and arithmetic updates become direct
-C operations; typed map methods expose concrete types to the C optimizer.
-`ListInt` supplies typed methods over shared `List` cells. Familiar literals
-construct all three.
+Typed collections retain concrete element types while offering familiar collection operations. Count response codes without giving up native numeric storage.

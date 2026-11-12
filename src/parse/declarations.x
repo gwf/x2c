@@ -46,6 +46,9 @@ List Compiler.parse_simple_declaration(Compiler c) => _declaration_group(c, 0);
     delimiter remains current; flat destructuring may omit its initializer.
 */
 List Compiler.parse_declaration_argument(Compiler c) {
+  // In a template, a Decl hole forwards its captured declaration.
+  List slot = c.try_parse_macro_slot(<decl>);
+  if (slot) return slot;
   if (c.test(<(>)) {
     Array declarations = [];
     do declarations.push(c.parse_declaration_argument()); while (c.test(<,>));
@@ -241,16 +244,22 @@ static int _type_name_starts(Compiler c, int require_declarator) {
               : c.package_member_spelling(c.token.text);
   Type lookup = c.sym.get($(name ? name : c.token.text));
   if (lookup && !lookup.is_typedef()) return 0;
+  int raise = c.at_contextual("raise");
   c.next();
   if (alias) { c.next(); c.next(); }
   Symbol next = c.peek(0);
   int is_operator = c.at_word("is");
   // `int a, b __attribute__((unused));` declares `b`, not a type named `b`.
   int attribute = _attribute_starts(c);
+  /* In a template a `Name` hole is a declarator as an identifier is, as in
+     `_Bool $flag`. */
+  List hole = c.macro_holes && !raise ? c.peek_macro_hole() : NULL;
+  int declarator = next == <ident> ||
+    (hole && hole.assoc(<kind>) == <name>);
   c.token = head;
   if (c.macro_holes && is_operator) return 0;
   if (lookup.is_typedef() && !require_declarator) return next != <.>;
-  return next == <*> || next == <&> || (next == <ident> && !attribute) ||
+  return next == <*> || next == <&> || (declarator && !attribute) ||
          (!require_declarator && next == <)>) ||
          (require_declarator && (next == <^> || next.is_type_qualifier()));
 }

@@ -8,27 +8,27 @@ meta static int constructed(void) {
   List expected = %("x2c.quoted" seq
     (declare $type (bindings (op = (bind $binding ()) $value))));
   if (actual !== expected)
-    x2c_diagnostic_fail("quotation must insert supplied syntax immediately", NULL);
+    x2c_diagnostic_fail("quotation must insert supplied syntax immediately");
 
   type = %(* int);
   actual = $!{ $type $binding; };
   expected = %("x2c.quoted" seq
     (declare (int) (bindings (bind $binding (*)))));
   if (actual !== expected)
-    x2c_diagnostic_fail("quotation must normalize a supplied pointer type", NULL);
+    x2c_diagnostic_fail("quotation must normalize a supplied pointer type");
 
   type = %(int);
-  value = Code.lowered($!int{ 42 }, NULL);
+  value = Code.lowered($!int{ 42 });
   actual = $!{ $type $binding = $value; };
   expected = %("x2c.quoted" seq
     (declare $type (bindings (op = (bind $binding ()) $value))));
   if (actual !== expected)
-    x2c_diagnostic_fail("quotation must preserve the supplied stage", NULL);
+    x2c_diagnostic_fail("quotation must preserve the supplied stage");
   return 1;
 }
 
 meta static Code finished(void) {
-  Code value = Code.lowered($!int{ 41 }, NULL);
+  Code value = Code.lowered($!int{ 41 });
   return $!( $value + 1 );
 }
 

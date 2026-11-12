@@ -29,7 +29,7 @@ List Compiler.parse_declarator_argument(Compiler c) {
 List Compiler.parse_parameter_list(Compiler c) {
   Array parameters = auto [];
   while (1) {
-    _x2c_complete_here(c, <type>, _x2c_type_keywords());
+    _x2c_complete_here(c, <type>, @(_x2c_type_keywords()));
     List parameter = c.try_parse_macro_slot(<param>);
     if (!parameter) parameter = c.parse_parameter();
     parameters.push(parameter);
@@ -54,7 +54,7 @@ List Compiler.parse_parameter(Compiler c) {
   List declarator = _declarator(c, type, NULL, method, first, after);
   if (rest && (declarator.caddr() || c.peek(0) == <,>))
     c.report_error(
-      <parse>, "rest parameter must be a final name", c.token, NULL);
+      <parse>, "rest parameter must be a final name", c.token);
   return _finish_parameter(c, type, declarator, method, first, after);
 }
 
@@ -219,7 +219,7 @@ static List _declarator_suffix(Compiler c) {
    the captured scope. */
 static List _function_parameters(Compiler c) {
   c.next();
-  _x2c_complete_here(c, <type>, _x2c_type_keywords());
+  _x2c_complete_here(c, <type>, @(_x2c_type_keywords()));
   if (c.peek(0) == <)>)
     $fail.parse_params_empty(c, c.token);
   SymScope saved = c.params, parsed;
@@ -604,8 +604,8 @@ module String _syntax_exact_name(Var value) {
   return NULL;
 }
 
-/* Constructed function modifiers have not passed through the parameter
-   parser. Bind their parameter types in the same temporary prototype scope. */
+/* Constructed modifiers bind dimensions and prototype parameters through
+   the same expression and parameter owners as parsed declarators. */
 module List _finish_fnmods(Compiler c, List declarator) {
   match (declarator) {
     case %(op = ?binding ?value):
@@ -621,8 +621,14 @@ module List _finish_fnmods(Compiler c, List declarator) {
 }
 
 static Var _finish_fnmod(Compiler c, Var modifier) {
-  if (modifier ~= %(fnmod (params *parameters)))
-    return %(fnmod (params @(_finish_prototype(c, parameters))));
+  match (modifier) {
+    case %(fnmod (params *parameters)):
+      return %(fnmod (params @(_finish_prototype(c, parameters))));
+    // A dimension `Type.parts` copied from a Type is already its spelling.
+    case %(dim ((!is ? type string))): return modifier;
+    case %(dim ?expression):
+      return %(dim $(c.bind_syntax(expression, <expression>, NULL)));
+  }
   return modifier;
 }
 

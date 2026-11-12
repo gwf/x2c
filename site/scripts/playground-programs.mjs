@@ -107,6 +107,8 @@ async function compile() {
   await rm(manifest, { force: true });
   const missing = missingTool();
   if (missing) {
+    if (process.env.PLAYGROUND_REQUIRED === "1")
+      throw new Error(`playground: required programs unavailable (${missing}).`);
     console.log(`playground: skipping precompiled programs (${missing}).`);
     return;
   }
@@ -137,6 +139,8 @@ async function compile() {
 async function install() {
   if (!existsSync(manifest)) return;
   const ids = JSON.parse(await readFile(manifest, "utf8"));
+  await mkdir(output, { recursive: true });
+  await copyFile(manifest, path.join(output, "programs.json"));
   for (const id of ids) {
     await mkdir(path.dirname(path.join(output, id)), { recursive: true });
     for (const suffix of [".js", ".wasm"])

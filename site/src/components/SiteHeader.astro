@@ -1,6 +1,4 @@
 ---
-import { playgroundRuns } from "../lib/examples";
-
 interface Props {
   home?: boolean;
 }
@@ -50,17 +48,12 @@ const taglines = [
       <span class="tagline-status" role="status" data-tagline-status></span>
     </div>
     <nav class="landing-nav" aria-label="Primary navigation">
-      <div class="landing-page-nav">
-        <a href={section("love")}>love</a>
-        <a href={section("power")}>power</a>
-        <a href={section("magic")}>magic</a>
-      </div>
       <div class="landing-site-nav">
         <a href={section("install")}>install</a>
         <a href={section("packages")}>packages</a>
       </div>
       <div class="landing-reference-nav">
-        {playgroundRuns && <a href={local("playground/")}>playground</a>}
+        <a href={local("examples/")}>examples</a>
         <a href={local("about/")}>about</a>
         <a href={local("docs/")}>docs</a>
         <a href="https://github.com/gwf/x2c">source</a>

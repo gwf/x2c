@@ -58,8 +58,10 @@ List Compiler.try_parse_macro_member(Compiler c) {
 */
 List Compiler.try_parse_macro_slot(Compiler c, Symbol role) {
   if (!c.macro_holes) return NULL;
-  if (c.peek(0) == <@> && !c.peek_macro_hole())
+  if (c.peek(0) == <@> && !c.peek_macro_hole()) {
+    if (role == <argument> && c.peek(1) == <(>) return NULL;
     return _meta_call_slot(c, role);
+  }
   String name;
   if (role != <expression> && role != <statement> &&
       c.peek(0) == <$> && _scan_name(c, name).type == <(> && name &&

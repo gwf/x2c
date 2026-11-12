@@ -29,7 +29,7 @@ const String bind_end = "/* x2c bind: end generated raw tier */";
 
 /** Returns the generated region of the entry unit, markers included. */
 String Survey.region(Survey s, BindRequest request) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   out.printf(
     $dedent(%"
     %s
@@ -93,7 +93,7 @@ String Survey.shim(Survey s, BindRequest request) {
 
 /** Returns the package Makefile. */
 String Survey.makefile(Survey s, BindRequest request) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   out.printf(
     $dedent(%"
     PACKAGE := %s
@@ -112,7 +112,7 @@ String Survey.makefile(Survey s, BindRequest request) {
 
 /** Returns the README stub: what was generated and what remains. */
 String Survey.readme(Survey s, BindRequest request) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   _readme_generated(s, request, out);
   _readme_inventory(s, out);
   out.write(
@@ -208,7 +208,7 @@ static String _method(
 static String _wrap(String text) {
   int open = text.find("(");
   if (text.len() <= 76) return text;
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   out.write_len(text, open + 1);
   String line = NULL;
   foreach (String piece in _arguments(text[open + 1:text.len()])) {

@@ -21,33 +21,33 @@
 static macro Stmt $fail.lambdas_param_ident(Expr $c, Expr $site) {
   $c.report_error(
     <parse>, "expected identifier in parameter list",
-    $site, NULL);
+    $site);
 }
 
 static macro Stmt $fail.lambdas_ident_untyped(
   Expr $c, Expr $origin, Expr $spelling) {
   $c.report_error(
     <type>, %"identifier '$($spelling)' has no semantic type",
-    $origin, NULL);
+    $origin);
 }
 
 static macro Stmt $fail.lambdas_capture_enclosing(
   Expr $c, Expr $site, Expr $original) {
   $c.report_error(
     <type>, "reference capture requires an enclosing reference capture",
-    $site, %("binding: $(Ast.binding_spelling($original))"));
+    $site, %"binding: $(Ast.binding_spelling($original))");
 }
 
 static macro Stmt $fail.lambdas_capture_ref(
   Expr $c, Expr $site, Expr $binding) {
   $c.report_error(
     <type>, "captured value requires 'using &name' for reference access",
-    $site, %("binding: $(Ast.binding_spelling($binding))"));
+    $site, %"binding: $(Ast.binding_spelling($binding))");
 }
 
 static macro Stmt $fail.lambdas_capture_const(Expr $c, Expr $site) =>
   $c.report_error(
-    <type>, "cannot write a const object in a lambda", $site, NULL);
+    <type>, "cannot write a const object in a lambda", $site);
 
 /* One binding's capture through one lambda frame: the frame's fields, the
    binding and type that the frame sees, and the identifier's source
@@ -114,7 +114,7 @@ List Compiler.lift_lambda_types(Compiler c, List function) {
       declarations.push(_lambda_type_declaration(c, body, public));
     }
   return %(seq @(declarations.list_free())
-           $(Code.bound(Ast.replace_nodes(function, replaced), NULL)));
+           $(Code.bound(Ast.replace_nodes(function, replaced))));
 }
 
 /* lambda literals
@@ -315,7 +315,7 @@ static Code _lambda_type_declaration(Compiler c, Type type, int public) {
       List binding = member.car() == <op> ? member.caddr() : member;
       c.set_fact(%(emitted $binding), c.fresh_name(%"$(role)_enumerator"));
     }
-  return Code.bound(declaration, NULL);
+  return Code.bound(declaration);
 }
 
 static List _parse_params(Compiler c) =>

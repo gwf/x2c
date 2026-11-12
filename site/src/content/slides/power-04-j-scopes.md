@@ -1,7 +1,10 @@
 ---
 slug: scopes
-section: power
-tab: scopes
+section: love
+home: true
+order: 8
+tab: memory
+title: Working memory has a home.
 ---
 
 ```x2c
@@ -68,9 +71,4 @@ printf("processed: %zu files\n", total);
 ~Map inspect_file(String path) => {sizes: [12, 24], errors: 0};
 ```
 
-The `Scope` module frees memory by lifetime, not by pointer. `auto`
-retains a region around the statement it decorates and releases it on every
-exit, including a `return` or an `Error`. Decorating a loop body gives
-one region per iteration, so each file's working data is freed before the
-day's file list, with no individual `free` calls. The translator warns when
-a value can outlive its region, so the rule is checked, not just recommended.
+An auto scope reclaims temporary storage together when its block ends. Nested scopes let a program finish one file before moving to the next, while keeping results in their intended destination.

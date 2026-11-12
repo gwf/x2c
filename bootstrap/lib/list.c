@@ -77,6 +77,7 @@ static inline Var Var_caddr(Var var){
 static inline Var List_car(List lst);
 
 static inline int List_try_next(List lst, List * cursor, Var * out){
+  (void) lst;
   if(! cursor) return 0;
   if(! out) return 0;
   List rest =(* cursor);
@@ -580,7 +581,7 @@ List List_subseq(List list, int start, int stop, int step){
   if(step < 1){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("List.subseq")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/list/traversal.x",.function = "List_subseq",.line = 194,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/list/traversal.x",.function = "List_subseq",.line = 195,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -596,7 +597,7 @@ List List_getslice(List list, int start, int stop, int step){
   if(! step){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("List.getslice")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/list/traversal.x",.function = "List_getslice",.line = 213,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/list/traversal.x",.function = "List_getslice",.line = 214,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1286496), int_var(step));
       __builtin_unreachable();
     }
@@ -730,7 +731,7 @@ static int f9_traversal____unpack_va(List src, unsigned n, va_list ap, int lists
   if(n > INT_MAX){
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("List.unpack_n")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f9_traversal____unpack_va",.line = 306,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/list/traversal.x",.function = "f9_traversal____unpack_va",.line = 307,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_3, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_2, Symbol_var(7318440), unsigned_var(n));
       __builtin_unreachable();
     }
@@ -1542,7 +1543,7 @@ static Var f15_transformations____sublis_node(List alist, Var node){
 Buffer List_write_str(List lst, Buffer out);
 
 String List_str(List lst){
-  Buffer buf = Buffer_new(0);
+  Buffer buf = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_19 = buf;
   {
     _x2c_gensym_defer_env_21 _x2c_gensym_macro_environment_21 ={
@@ -1615,7 +1616,7 @@ Buffer List_write_str(List lst, Buffer out){
 Buffer List_write_repr(List lst, Buffer out);
 
 String List_repr(List lst){
-  Buffer buf = Buffer_new(0);
+  Buffer buf = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_20 = buf;
   {
     _x2c_gensym_defer_env_22 _x2c_gensym_macro_environment_22 ={
@@ -1690,7 +1691,7 @@ static void f9_rendering____nil(Buffer out){
 }
 
 static int f9_rendering____fits(f9_rendering___Render * r, List elem){
-  Buffer line = Buffer_new((* r).out -> padding);
+  Buffer line = Buffer_new(NULL);
   const Buffer _x2c_gensym_macro_acquired_21 = line;
   {
     _x2c_gensym_defer_env_23 _x2c_gensym_macro_environment_23 ={
@@ -1704,6 +1705,7 @@ static int f9_rendering____fits(f9_rendering___Render * r, List elem){
     ;
     x2c_cleanup_push(& _x2c_gensym_defer_record_24);
     {
+      line -> padding =(* r).out -> padding;
       f9_rendering___Render flat ={
         line, (* r).mode
       }

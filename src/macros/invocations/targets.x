@@ -37,6 +37,12 @@ List Compiler.try_parse_macro_target_at(Compiler c, Symbol position) =>
    statement does. */
 module List _target_at(Compiler c, Symbol position, int open) {
   if (c.macro_holes && c.peek_macro_hole()) return NULL;
+  /* At file scope a method-form decorator stands where a `$` application
+     does; see `method_decorator_target`. */
+  if (position == <unit> && c.method_decorator_target()) {
+    List method = c.parse_unit_method_decorator();
+    if (method) return method;
+  }
   Token invocation = c.token;
   List definition = _take_invocation(c, position);
   if (!definition) return NULL;
@@ -87,10 +93,15 @@ module List _decorate(
   _check_decoration_position(d);
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
+  /* The Name arguments and the target are read in a scope of their own;
+     the expansion binds after it closes, in the caller's block. */
   int block_scope = !c.macro_holes && d.kind == <block>;
-  if (block_scope) c.sym.push_new_scope();
-  defer if (block_scope) c.sym.pop_scope();
-  List node = _decoration_node(d, _arguments(d, block_scope));
+  List node = NULL;
+  {
+    if (block_scope) c.sym.push_new_scope();
+    defer if (block_scope) c.sym.pop_scope();
+    node = _decoration_node(d, _arguments(d, block_scope));
+  }
   if (deferred) {
     transaction.commit();
     if (_on_body(d))

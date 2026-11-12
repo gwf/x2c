@@ -107,7 +107,7 @@ static void _begin(int index, int candidate):
   Job job = _limited(%($compiler build @mode @build_flags
                        --build-dir $(work.join("build")) --output $program
                        $(work.join("sample.x"))))
-  _launch(job.options({dir: root, input: "", stderr: <capture>}),
+  _launch(job.options(dir: root, input: "", stderr: <capture>),
           %($index $candidate $work <build>))
 
 static void _failed(int index, int candidate, String detail):
@@ -141,7 +141,7 @@ static void _advance(List attempt):
   String output = _stdout(job), errors = job.errors()
   if phase == <build> && !exit && runs:
     _launch(_limited($(work.join("sample")))
-              .options({dir: work, input: "", stderr: <capture>}),
+              .options(dir: work, input: "", stderr: <capture>),
             %($index $candidate $work <run>))
     return
   work.remove_tree()

@@ -121,7 +121,7 @@ static Var _plain(Var form) {
 static List _ast(String path) {
   String dump = NULL;
   Job job = %($x2c translate --dump-ast $path);
-  try dump = job.options({stderr: <capture>}).output();
+  try dump = job.options(stderr: <capture>).output();
   catch %(cmd-fail *): return NULL;
   Array forms = [];
   unsigned cursor = 0;

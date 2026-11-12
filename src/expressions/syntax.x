@@ -39,7 +39,7 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
         List decl = %(decl $base (bindings $binding));
         List cast = _parse_cast_operand(
           c, decl, parameter.type_from_ast(), origin);
-        return _finish_paren_statement(c, cast, 0);
+        return _finish_paren_statement(c, cast);
       }
     foreach (List parameter in parameters)
       c.check_reference_placement(parameter.type_from_ast());
@@ -50,7 +50,8 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
       %(dstrdecl (params @parameters) $source), origin);
   }
 
-  return _finish_paren_statement(c, _parse_group_rest(c), 1);
+  return _finish_paren_statement(
+    c, _parse_postfix_tail(c, _parse_group_rest(c), origin));
 }
 
 // casts and unary operators
@@ -60,6 +61,13 @@ List Compiler.parse_parenthesized_statement(Compiler c) {
     the target.
 */
 List Compiler.parse_macro_expression_target(Compiler c) => _parse_cast(c);
+
+/** Reports whether a `key: value` call argument begins at the cursor. */
+int Compiler.at_map_entry(Compiler c) => _at_map_entry(c);
+
+/** Parses the argument list at the cursor as a call of `callee`. */
+List Compiler.parse_call(Compiler c, List callee) =>
+  _parse_postfix_apply(c, callee);
 
 /** Parses an assignment expression and any following comma expressions.
     A comma expression retains source order and takes the type of its final
@@ -106,7 +114,7 @@ List Compiler.parse_call_splice(Compiler c) {
 */
 List Compiler.parse_primary(Compiler c) {
   c.require_input();
-  _x2c_complete_here(c, <expr>, %());
+  _x2c_complete_here(c, <expr>);
   List slot = c.try_parse_macro_slot(<expression>);
   if (slot) return slot;
   switch (c.peek(0)) {
@@ -152,15 +160,23 @@ List Compiler.parse_call_entry(Compiler c) {
 List Compiler.parse_variable(Compiler c) {
   Token origin = c.token;
   Var definition;
-  // A macro defined to a string literal is that literal after preprocessing.
-  if (c.object_macros.try_get(origin.text, definition) &&
-      definition == <string>) {
+  /* A macro defined to a string literal is that literal after preprocessing,
+     and so is a name this unit cannot resolve that stands before a literal,
+     as a header's string macro does. */
+  if (c.object_macros.try_get(origin.text, definition)
+        ? definition == <string>
+        : c.peek(1) == <lit-char*> && !c.sym.get($(origin.text))) {
     c.next();
     return _join_c_string_literals(
       c, %(expr (* char) (literal (* char) $(origin.text))));
   }
   List name = c.parse_complex_identifier();
   Token after = c.token;
+  // `T.name(...)` invokes a macro `$T.name` when one applies.
+  if (c.peek(0) == <(> && name.car() is <string>) {
+    List macro = c.try_parse_static_macro(name.car(), origin);
+    if (macro) return macro;
+  }
   List result = c.resolve_expression(%(expr () (ident $name)), origin);
   if (c.source_facts) match (result)
     case %(expr ?type (ident ?binding)):
@@ -315,11 +331,11 @@ static List _parse_cast_operand(
   if (c.peek(0) != <"{">)
     return _finish_cast(c, decl, type, _parse_cast(c), origin);
   List literal = _finish_cast(c, decl, type, _parse_composite(c), origin);
-  return _parse_postfix_tail(c, literal);
+  return _parse_postfix_tail(c, literal, origin);
 }
 
 static List _parse_unary_op(Compiler c) {
-  _x2c_complete_here(c, <expr>, %());
+  _x2c_complete_here(c, <expr>);
   Symbol op = c.peek(0);
   Token origin = c.token;
   if (op == <sizeof>) return _parse_sizeof(c);
@@ -381,21 +397,24 @@ static List _parse_offsetof(Compiler c) {
   return %(expr ("size_t") (offsetof $type $member));
 }
 
-static List _parse_postfix(Compiler c) =>
-  _parse_postfix_tail(c, c.parse_primary());
+static List _parse_postfix(Compiler c) {
+  Token start = c.token;
+  return _parse_postfix_tail(c, c.parse_primary(), start);
+}
 
-static List _parse_postfix_tail(Compiler c, List expr) {
+// The postfix expression whose operand is `expr` begins at `start`.
+static List _parse_postfix_tail(Compiler c, List expr, Token start) {
   while (_postfix_operator(c.peek(0))) {
     /* The operator makes what precedes it a receiver or a base, and neither
        is a destination, so a converter call noted before it never reaches
        one. */
     c.protocol_helpers.del("explicit-converter");
     switch (c.peek(0)) {
-      case <[>:      expr = _parse_postfix_index(c, expr);   break;
-      case <(>:      expr = _parse_postfix_apply(c, expr);   break;
-      case <"->">:   expr = _parse_postfix_arrow(c, expr);   break;
-      case <.>:      expr = _parse_postfix_dot(c, expr);     break;
-      default:       expr = _parse_postfix_decinc(c, expr);  break;
+      case <[>:      expr = _parse_postfix_index(c, expr);      break;
+      case <(>:      expr = _parse_postfix_apply(c, expr);      break;
+      case <"->">:   expr = _parse_postfix_arrow(c, expr);      break;
+      case <.>:      expr = _parse_postfix_dot(c, expr, start); break;
+      default:       expr = _parse_postfix_decinc(c, expr);     break;
     }
   }
   return expr;
@@ -433,7 +452,8 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   Array arguments = [], notes = [];
   if (c.peek(0) == <)>) arguments.push(%(expr (void) ()));
   while (c.peek(0) != <)>) {
-    List argument = c.try_parse_macro_slot(<argument>);
+    List argument = _entry_rows_slot(c);
+    if (!argument) argument = c.try_parse_macro_slot(<argument>);
     if (!argument) argument = c.parse_call_splice();
     if (!argument) argument = c.parse_call_entry();
     arguments.push(argument ? argument : c.parse_assignment());
@@ -455,7 +475,18 @@ static List _parse_postfix_apply(Compiler c, List expr) {
   if (method && supplied === %((expr (void) ())))
     match (expr) case %(expr () (op . ? (?name))):
       _note_explicit_converter(c, result, name.str(), origin);
+  if (method && c.macro_holes)
+    match (expr) case %(expr () (op . ? (?member))):
+      return c.mark_method_call(result, member);
   return result;
+}
+
+/* In a template, an `Entry` hole spliced into a call forwards its rows as
+   the call's `key: value` arguments. */
+static List _entry_rows_slot(Compiler c) {
+  List hole = c.peek_macro_hole();
+  return hole && hole.assoc(<kind>) == <map-entry>
+    ? c.try_parse_macro_slot(<map-entry>) : NULL;
 }
 
 /* A delegate rewrite selects its method after the initial member lookup.
@@ -851,7 +882,7 @@ static List _parse_postfix_arrow(Compiler c, List expr) {
   return result;
 }
 
-static List _parse_postfix_dot(Compiler c, List expr) {
+static List _parse_postfix_dot(Compiler c, List expr, Token start) {
   Token origin = c.token;
   c.expect(<.>);
   if (c.at_completion()) {
@@ -871,6 +902,8 @@ static List _parse_postfix_dot(Compiler c, List expr) {
       _record_postfix_field(c, expr, field, <.>, first, after);
     return result;
   }
+  List macro = c.try_parse_method_macro(expr, start, origin);
+  if (macro) return macro;
   // Allocate a method identity before parsing its arguments.
   if (c.source_facts) {
     List binding = NULL;
@@ -992,8 +1025,7 @@ static int _test_dot_init(Compiler c) {
     Token.skip_trivia(token + 1).type == <ident>;
 }
 
-static List _finish_paren_statement(Compiler c, List expression, int postfix) {
-  if (postfix) expression = _parse_postfix_tail(c, expression);
+static List _finish_paren_statement(Compiler c, List expression) {
   expression = _parse_binary_levels_from(c, expression);
   expression = _parse_conditional_tail(c, expression);
   expression = _parse_assignment_tail(c, expression);

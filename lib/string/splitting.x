@@ -2,17 +2,20 @@
 
 // trimming and splitting
 
-/** Returns `str` with leading and trailing bytes in `negChars` removed.
-    `negChars` is a NUL-terminated C string listing the bytes to remove, not
+/** Returns `str` with leading and trailing bytes in `chars` removed.
+    `chars` is a NUL-terminated C string listing the bytes to remove, not
     a substring and not a pattern; order and repetition in it are irrelevant.
-    Passing NULL uses the default whitespace set " \t\n\v\f\r". Trimming
+    Omitting `chars` or passing NULL uses the whitespace set " \t\n\v\f\r".
+    An empty String selects no bytes, including a typed String NULL. Trimming
     stops at each end on the first byte not in the set, and `str` itself is
     returned when nothing is trimmed.
-    Raises: `<alloc-fail>` while constructing the result. A `String` made
+    Raises: `<bad-arity>` for more than one charset, or `<alloc-fail>`
+    while constructing the result. A `String` made
     entirely of removable bytes trims to NULL, the empty `String`, without
     raising.
 */
-String String.strip(String str, char *negChars) {
+String String.strip(String str, List @chars) {
+  char *negChars = _charset(chars, "String.strip");
   if (!negChars) negChars = " \t\n\v\f\r";
   int start = 0, end = str.len();
   while (start < end && strchr(negChars, str[start])) start++;
@@ -21,12 +24,14 @@ String String.strip(String str, char *negChars) {
   return String.new_len(str + start, end - start);
 }
 
-/** Removes leading bytes found in the C string `negChars`.
-    Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input
-    returns NULL and an unchanged input is returned as-is.
-    Raises: `<alloc-fail>` while constructing a changed result.
+/** Removes leading bytes found in the C string `chars`.
+    Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+    canonical; null input returns NULL. An unchanged input is returned as-is.
+    Raises: `<bad-arity>` for more than one charset, or `<alloc-fail>`
+    while constructing a changed result.
 */
-String String.lstrip(String str, char *negChars) {
+String String.lstrip(String str, List @chars) {
+  char *negChars = _charset(chars, "String.lstrip");
   if (!negChars) negChars = " \t\n\v\f\r";
   int beg = 0, length = str.len();
   while (beg < length && strchr(negChars, str[beg])) beg++;
@@ -34,12 +39,14 @@ String String.lstrip(String str, char *negChars) {
   return String.new(str + beg);
 }
 
-/** Removes trailing bytes found in the C string `negChars`.
-    Passing NULL uses `" \t\n\v\f\r"`. The result is canonical; null input
-    returns NULL and an unchanged input is returned as-is.
-    Raises: `<alloc-fail>` while constructing a changed result.
+/** Removes trailing bytes found in the C string `chars`.
+    Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+    canonical; null input returns NULL. An unchanged input is returned as-is.
+    Raises: `<bad-arity>` for more than one charset, or `<alloc-fail>`
+    while constructing a changed result.
 */
-String String.rstrip(String str, char *negChars) {
+String String.rstrip(String str, List @chars) {
+  char *negChars = _charset(chars, "String.rstrip");
   if (!negChars) negChars = " \t\n\v\f\r";
   int len = str.len();
   while (len > 0 && strchr(negChars, str[len - 1])) len--;
@@ -143,4 +150,19 @@ meta native List String.rpartition(String str, String sep) {
 static int _newline_width(String str) {
   if (str.startswith("\r\n")) return 2;
   return str.startswith("\n") ? 1 : 0;
+}
+
+/* Optional positional arguments keep their defaults at the String owner. */
+module Var _optional(List values, Var fallback, String operation) {
+  if (values && values.cdr())
+    raise %(bad-arity (operation $operation));
+  return values ? values.car() : fallback;
+}
+
+static char *_charset(List chars, String operation) {
+  Var value = _optional(chars, NULL, operation);
+  if (value.is_null() || value.is_nil() ||
+      (value.is_integer() && !value.integer())) return NULL;
+  String charset = value.string();
+  return charset ? charset : "";
 }

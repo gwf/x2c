@@ -295,7 +295,7 @@ void Test_expect_same_text(
   EXPECT_TRUE(comparison < 0);
   EXPECT_TRUE(boxed.compare(later) < 0);
 
-  Buffer boxed_str = Buffer.new(0), boxed_repr = Buffer.new(0);
+  Buffer boxed_str = Buffer.new(), boxed_repr = Buffer.new();
   EXPECT_TRUE(boxed.write_str(boxed_str) == boxed_str);
   EXPECT_TRUE(boxed.write_repr(boxed_repr) == boxed_repr);
   EXPECT_STR_EQ(boxed_str.str(), ordinary.str());

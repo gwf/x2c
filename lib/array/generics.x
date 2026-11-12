@@ -656,14 +656,14 @@ macro Unit $array.typed.observe(
 
   /** Returns the packed-Array display String. */
   String $family.str($family array) {
-    Buffer out = Buffer_new(0);
+    Buffer out = Buffer_new();
     array.write_str(out);
     return out.str_free();
   }
 
   /** Returns the readable packed-Array representation. */
   String $family.repr($family array) {
-    Buffer out = Buffer_new(0);
+    Buffer out = Buffer_new();
     array.write_repr(out);
     return out.str_free();
   }

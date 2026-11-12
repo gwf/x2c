@@ -163,3 +163,27 @@ Validate the `staging-pages.yml` template in a temporary workflow tree as
 needed. None of these adds a gate. Finish a change to the release workflows
 or helpers with `tools/gate-state.py ensure agent-pr-check`; in a sandboxed
 checkout, set `X2C_CACHE_DIR` to a writable scratch directory.
+
+## Website-only staging
+
+To update the website from dev without replacing the staged compiler or
+packages, dispatch `stage.yml` from dev with `mode=website`, a full
+`source_sha`, and the current staging repository `main` as `expected_output`.
+The candidate inputs are unused in this mode. The existing staging publication
+concurrency group and output compare-and-swap also protect this path.
+
+`staging-website.yml` builds Astro, mdBook, and fresh WebAssembly examples.
+It builds a local compiler and wasm runtime for those browser programs, but
+does not publish new compiler or package archives. `PLAYGROUND_REQUIRED=1`
+makes missing WebAssembly prerequisites fail deployment builds rather than
+produce a read-only website. It copies the staged
+installer, version, release-candidate identity, package directory, domain,
+and existing release PDF byte for byte. It never uploads release assets.
+`website-deployment.json` records the website source and hashes of retained
+files; HTML separately identifies its website source and staged candidate.
+The resulting website is not a newly verified compiler candidate and does not
+alter immutable candidate archives or promotion receipts. Full-candidate
+staging will replace this website-only update on its next deployment.
+
+Local checks are `python3 etc/release/test-prepare-website.py` and
+`node --test site/tests/release-destination.test.mjs`.

@@ -23,6 +23,7 @@ The compiler's semantic symbol table.
 | [`Compiler.macro_definition_locals`](#Compiler.macro_definition_locals) | Returns the active macro definition's borrowed local map, or `NULL`. |
 | [`Compiler.macro_template_local`](#Compiler.macro_template_local) | Reports whether `binding` is a local of the active macro definition or of a template that encloses it; a nested definition's literal names share the enclosing template's names. |
 | [`Compiler.package_member_spelling`](#Compiler.package_member_spelling) | Returns a visible `with` name's package-prefixed spelling, or `NULL`. |
+| [`Compiler.package_source_name`](#Compiler.package_source_name) | Returns the source name of a package-prefixed `spelling`, as `Ui` for `x2cui__Ui`, or `spelling` when no package of this unit owns it. |
 | [`Compiler.package_spelling`](#Compiler.package_spelling) | Returns a name in the current package namespace, preserving prefixes. |
 | [`Compiler.private_prefix`](#Compiler.private_prefix) | Returns the prefix that a file-scope declaration of `type` takes in the current module file, or NULL. |
 | [`Compiler.record_declaration_visibility`](#Compiler.record_declaration_visibility) | Records the visibility of one parsed top-level declaration. |
@@ -229,6 +230,17 @@ Source: `src/symtab/scopes.x`
 Returns a visible `with` name's package-prefixed spelling, or `NULL`.
 
 An ordinary declaration of the local spelling shadows the `with` name.
+
+Source: `src/symtab/namespaces.x`
+
+<a id="Compiler.package_source_name"></a>
+#### Compiler.package_source_name
+
+`String Compiler.package_source_name(Compiler c, String spelling)`
+
+Returns the source name of a package-prefixed `spelling`, as `Ui` for
+`x2cui__Ui`, or `spelling` when no package of this unit owns it. Only a
+known package splits, because a foreign header may spell `__` in a name.
 
 Source: `src/symtab/namespaces.x`
 

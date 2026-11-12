@@ -14,7 +14,7 @@ static macro Stmt $fail.meta_sdk_binding_syntax(Expr $syntax) =>
 static macro Stmt $fail.meta_sdk_binding_known(Expr $value) =>
   MetaContext.reject(
     "Code.binding_spelling requires a known binding",
-    %("binding: $($value.repr())"));
+    %"binding: $($value.repr())");
 
 static macro Stmt $fail.meta_sdk_binding_identifier(Expr $syntax) =>
   _reject_value(
@@ -35,10 +35,10 @@ static macro Stmt $fail.meta_sdk_parameter_missing(
   Expr $function, Expr $wanted) =>
   MetaContext.reject(
     %"Code.parameter cannot find '$($wanted)'",
-    %("function: $(Code.name($function).repr())"));
+    %"function: $(Code.name($function).repr())");
 
 static alias fail_constant to MetaContext.reject(
-  "captured code is not a compile-time constant", NULL);
+  "captured code is not a compile-time constant");
 
 static macro Stmt $fail.meta_sdk_enclosing_role(Expr $value) =>
   _reject_value(
@@ -65,18 +65,18 @@ Var Code.value(Code code) {
 Code Code.call_in_order(Code member, List arguments, Type type) {
   _require_expansion("Code.call_in_order");
   List call = active.expander.call_in_order(member, arguments);
-  return Code.lowered(%(expr $type $call), NULL);
+  return Code.lowered(%(expr $type $call));
 }
 
 /** Implements `Code.lowered`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes.
 */
-Code Code.lowered(Code c, List effects) => %(code-value "lowered" $c $effects);
+Code Code.lowered(Code c, List @effects) => %(code-value "lowered" $c $effects);
 
 /** Implements `Code.bound`, declared in `lib/meta.x`, with the carrier
     `Compiler.take_code_value` consumes.
 */
-Code Code.bound(Code c, List effects) => %(code-value "bound" $c $effects);
+Code Code.bound(Code c, List @effects) => %(code-value "bound" $c $effects);
 
 /** Implements `Code.func_parameters`, declared in `lib/meta.x`. */
 List Code.func_parameters(Code parameters, Code fn, Code argv) {
@@ -284,11 +284,18 @@ Type Code.type(Code value) {
       Type type = matched_type;
       if (type === %(<macro-expr>))
         type = active.expander.resolve_expression(value, active.site).cadr();
-      return type.canonicalize();
+      return _queried(type);
     }
-    case %(param ? ?): return value.type_from_ast().canonicalize();
+    /* A name value and an untyped quotation are typed where the expansion
+       stands, as the syntax a template left untyped is. */
+    case %("x2c.ident" ?):
+      return Code.type(%(expr (<macro-expr>) (ident $value)));
+    case %("x2c.quoted" *):
+      return _queried(
+        active.expander.resolve_expression(value, active.site).cadr());
+    case %(param ? ?): return _queried(value.type_from_ast());
     case %((!or declare decl typedef) *):
-      return value.type_from_ast().canonicalize();
+      return _queried(value.type_from_ast());
   }
   List binding = NULL;
   if (Ast.try_binding(value, NULL, NULL)) binding = value;
@@ -298,9 +305,15 @@ Type Code.type(Code value) {
         binding = captured;
       case %(bind (!set ?captured (*)) *): binding = captured;
     }
-  if (binding) return _binding_type(binding).canonicalize();
-  return List.type(value).canonicalize();
+  if (binding) return _queried(_binding_type(binding));
+  return _queried(List.type(value));
 }
+
+/* The type a query reports: the declared type without the storage classes
+   and qualifiers of the value itself. What a pointer points at and what a
+   function returns keep their qualifiers, which a declaration of the type
+   needs. */
+static Type _queried(Type type) => _x2c_type_unqualified(type.declared());
 
 // ancestry and placement
 

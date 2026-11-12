@@ -9,6 +9,18 @@ typedef int MyInt;
 
 static int statement_result;
 
+macro Expr $dimension_width() => 3;
+macro Unit $dimension_global(Name $name) { int $name[$dimension_width()]; }
+macro Stmt $dimension_local(Name $name) { int $name[$dimension_width()]; }
+macro Unit $dimension_parameter(Name $name) {
+  static int $name(int values[$dimension_width()]) {
+    return values[0];
+  }
+}
+
+$dimension_global(dimension_values);
+$dimension_parameter(first_dimension_value);
+
 meta static List private_int(String spelling, String value) {
   return %(declare (static int)
     (bindings
@@ -201,6 +213,8 @@ static void stop(void) {
 }
 
 int main(void) {
+  $dimension_local(local_dimension_values);
+  local_dimension_values[0] = 7;
   int result = 0;
   int abs = 7;
   MyInt is = 3;
@@ -213,7 +227,10 @@ int main(void) {
   }
   stop();
   $statement_outer(capture_statement);
-  return result == 5 && preserved_public == 3 &&
+  return sizeof(dimension_values) == 3 * sizeof(int) &&
+         sizeof(local_dimension_values) == 3 * sizeof(int) &&
+         first_dimension_value(local_dimension_values) == 7 &&
+         result == 5 && preserved_public == 3 &&
          preserved_nested_public == 4 &&
          preserved_variadic_public == 5 &&
          preserved_direct_variadic_public == 6 &&

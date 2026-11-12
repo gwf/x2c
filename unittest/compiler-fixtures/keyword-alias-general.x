@@ -2,6 +2,13 @@
 
 #include "keyword-alias-general-import.x"
 
+static int calls;
+
+static int count_call(int value) {
+  calls += value;
+  return value;
+}
+
 static int add(int left, int right) {
   return left + right;
 }
@@ -92,6 +99,9 @@ int main(void) {
   int direct_total = 0, total = 0;
   int call = 1;
   int range = 2;
+  $fixture.call(count_call, 1);
+  call(count_call, 2);
+  if (calls != 3) return 1;
   $fixture.swap(left, right);
   swap(left, right);
   $fixture.range(i, 1, 4) {

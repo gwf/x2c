@@ -20,28 +20,28 @@ static typedef struct ProtocolSyntax {
 static macro Stmt $fail.protocol_tag_var(Expr $c, Expr $origin) =>
   $c.report_error(
     <protocol>, "'tag' applies only to a Var adoption",
-    $origin, NULL);
+    $origin);
 
 static macro Stmt $fail.protocol_modifier_conflict(Expr $c, Expr $origin) =>
   $c.report_error(
     <protocol>, "a Var adoption cannot use both 'as' and 'tag'",
-    $origin, NULL);
+    $origin);
 
 static macro Stmt $fail.protocol_as_var(Expr $c, Expr $origin) =>
   $c.report_error(
     <protocol>, "'as' applies only to a Var adoption",
-    $origin, NULL);
+    $origin);
 
 static macro Stmt $fail.protocol_static_adoption(Expr $c, Expr $origin) =>
   $c.report_error(
     <protocol>, "'static' applies only to a concrete protocol adoption",
-    $origin, %("remove 'static' from the reusable protocol body"));
+    $origin, "remove 'static' from the reusable protocol body");
 
 static macro Stmt $fail.protocol_participant_expected(
   Expr $c, Expr $origin) =>
   $c.report_error(
     <protocol>, "expected protocol participant name",
-    $origin, NULL);
+    $origin);
 
 static macro Stmt $fail.protocol_modifier_adoption(
   Expr $c, Expr $origin, Expr $representation) =>
@@ -49,56 +49,56 @@ static macro Stmt $fail.protocol_modifier_adoption(
     <protocol>, $representation
       ? "'as' applies only to a concrete protocol adoption"
       : "'tag' applies only to a concrete protocol adoption",
-    $origin, NULL);
+    $origin);
 
 static macro Stmt $fail.protocol_meta_adoption(Expr $c, Expr $origin) =>
   $c.report_error(
     <protocol>, "'meta' applies only to a concrete protocol adoption",
-    $origin, %("mark each adoption: meta protocol BASE(TYPE);"));
+    $origin, "mark each adoption: meta protocol BASE(TYPE);");
 
 static macro Stmt $fail.protocol_assoc_order(Expr $c, Expr $site) =>
   $c.report_error(
     <protocol>, "associated types must precede protocol members",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.protocol_type_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <protocol>, %"duplicate protocol type variable '$($name)'",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.protocol_assoc_expected(Expr $c, Expr $site) =>
   $c.report_error(
     <protocol>, "expected associated type name",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.protocol_member_duplicate(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <protocol>, %"duplicate protocol member '$($name)'",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.protocol_member_function(
   Expr $c, Expr $site, Expr $name) =>
   $c.report_error(
     <protocol>, "protocol member must be a function",
-    $site, $("member:", $name));
+    $site, "member:", $name);
 
 static macro Stmt $fail.protocol_member_owner(
   Expr $c, Expr $site, Expr $participant) =>
   $c.report_error(
     <protocol>, "protocol member must be owned by its participant",
-    $site, $("expected receiver:", $participant));
+    $site, "expected receiver:", $participant);
 
 static macro Stmt $fail.protocol_member_single(Expr $c, Expr $site) =>
   $c.report_error(
     <protocol>, "protocol member must declare one function",
-    $site, NULL);
+    $site);
 
 static macro Stmt $fail.protocol_native_ident(Expr $c, Expr $site) =>
   $c.report_error(
     <protocol>, "native protocol member requires an identifier",
-    $site, NULL);
+    $site);
 
 static macro Stmt $warn.protocol_protocol_binder(
   Expr $c, Expr $token, Expr $participant) {
@@ -108,7 +108,7 @@ static macro Stmt $warn.protocol_protocol_binder(
     $c.report_warning(
       <shadow>,
       %"protocol binder '$($participant)' shadows a visible type name",
-      $token, $(hint));
+      $token, hint);
   }
 }
 

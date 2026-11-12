@@ -4,7 +4,7 @@ Each section summarizes what changed for a user of the compiler, runtime,
 commands, and packages since the previous release. The
 [installation chapter](../guide/installation.md) carries the upgrade steps.
 
-## Unreleased
+## 0.16.0 (unreleased)
 
 [Upgrading from 0.15.x](../guide/installation.md#upgrading-from-015x) gives
 the source changes that the breaking entries below require.
@@ -208,6 +208,17 @@ the source changes that the breaking entries below require.
 - The sqlite package joins the checked packages.
 
 ### Fixed defects
+
+- Regex matching checks the stack floor for sequential and nested groups,
+  so excessive matching recursion raises a catchable size-limit error.
+- Calls through a pointer to a function typedef now convert arguments as
+  calls through a function-pointer typedef do, including boxing into `Var`.
+- An array dimension constructed by a macro can contain another expression
+  macro; the ordinary binder resolves it before interface emission.
+- Typed callback adapters retain pointee qualifiers in their result checks
+  and generated calls. A const result cannot become a mutable pointer result.
+- Region diagnostics now follow receiver returns from `Array.update_n`,
+  `Map.update_n`, and `Map.merge_with`, including compile-time definitions.
 
 - A `~=` pattern condition whose false branch continues with `else if` now
   places that continuation inside a block, so the generated C keeps the

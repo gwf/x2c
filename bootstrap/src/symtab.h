@@ -139,6 +139,8 @@ String Compiler_unprefixed(Compiler c, String name);
 
 String Compiler_package_spelling(Compiler c, String name);
 
+String Compiler_package_source_name(Compiler c, String spelling);
+
 void Compiler_register_package_alias(Compiler c, String name, String alias, Token token);
 
 void Compiler_register_package_member(Compiler c, String name, String member, String local, Token member_token, Token local_token);

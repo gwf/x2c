@@ -78,7 +78,7 @@ meta Code string_switch(Code node) {
     if (others.len())
       x2c_diagnostic_fail_at(
         others[0], <macro>,
-        "a string switch label must be a string literal", %());
+        "a string switch label must be a string literal");
     Code value = $!String{ (String)$subject };
     String selected = "switch_subject";
     Code dispatch = _tswitch_dispatch(x2c_ident(selected), labels, 0);

@@ -72,7 +72,7 @@ static void http_parser_rejections(void) {
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: -1\r\n\r\n", 100), 400);
   EXPECT_INT_EQ(_rejected("POST / HTTP/1.1\r\nHost: x\r\nContent-Length: 2\r\n\r\nx", 100), 400);
   EXPECT_INT_EQ(_rejected("GET / HTTP/1.1\r\nHost: x\r\n", 100), 400);
-  Buffer longline = auto Buffer.new(0);
+  Buffer longline = auto Buffer.new();
   longline.write("GET /").write_repeat('x', 8192).write(" HTTP/1.1\r\nHost: x\r\n\r\n");
   EXPECT_INT_EQ(_rejected(longline, 100), 400);
   longline.clear().write("GET / HTTP/1.1\r\nHost: x\r\nBig: ").write_repeat('x', 65536).write("\r\n\r\n");
@@ -180,7 +180,7 @@ static long _head(Socket client, int &code) {
   long length = 0;
   for (;;) {
     String line = client.input.readline();
-    if (!line || !line.strip(NULL)) break;
+    if (!line || !line.strip()) break;
     if (line.startswith("content-length:")) length = atol(line + 15);
   }
   return length;
@@ -215,8 +215,8 @@ static void http_loopback(void) {
   defer logger.free();
   List events = NULL;
   logger.add_memory_sink(&events);
-  HttpServer server = HttpServer.new(routes, {host: "127.0.0.1", port: 0, workers: 2,
-    logger: Var.new(<p48>, logger), <idle-ms>: 100});
+  HttpServer server = HttpServer.new(routes, host: "127.0.0.1", port: 0, workers: 2,
+    logger: Var.new(<p48>, logger), <idle-ms>: 100);
   defer server.close();
   server.start();
   Socket client = auto Socket.connect("127.0.0.1", server.port(), 1000);
@@ -281,14 +281,14 @@ static void http_server_rejects_null_logger(void) {
   $test.scoped();
   String raised = NULL;
   try HttpServer.new(
-    Router.new(), {host: "127.0.0.1", port: 0, logger: Var.new(<p48>, NULL)});
+    Router.new(), host: "127.0.0.1", port: 0, logger: Var.new(<p48>, NULL));
   catch %(?code (operation ?op) *): raised = %"$code $op";
   EXPECT_STR_EQ(raised, "bad-arg HttpServer.new");
 }
 
 static void _failed_server(void) {
   Context context = auto Context.open_isolated();
-  try HttpServer.new(Router.new(), {host: "127.0.0.1", port: -1});
+  try HttpServer.new(Router.new(), host: "127.0.0.1", port: -1);
   catch %(bad-arg *): return;
   EXPECT_TRUE(0);
 }
@@ -300,7 +300,7 @@ static void http_constructor_failure_releases_owned_resources(void) {
   for (int i = 0; i < 3; i++) _failed_server();
   Context context = Context.open_isolated();
   HttpServer server = HttpServer.new(
-    Router.new(), {host: "127.0.0.1", port: 0});
+    Router.new(), host: "127.0.0.1", port: 0);
   server.close();
   context.close();
   ScopeStats after = Scope.stats();
@@ -317,7 +317,7 @@ static void http_constructor_failure_preserves_borrowed_logger(void) {
   logger.add_memory_sink(&events);
   int caught = 0;
   try HttpServer.new(
-    Router.new(), {host: "127.0.0.1", port: -1, logger: logger});
+    Router.new(), host: "127.0.0.1", port: -1, logger: logger);
   catch %(bad-arg *): caught++;
   logger.info(<test>, %(message "still usable"));
   EXPECT_INT_EQ(caught, 1);
@@ -326,8 +326,13 @@ static void http_constructor_failure_preserves_borrowed_logger(void) {
 
 static void http_close_twice_is_harmless(void) {
   $test.scoped();
-  HttpServer server = HttpServer.new(
-    Router.new(), {host: "127.0.0.1", port: 0});
+  Map options = {host: "127.0.0.1", port: -1};
+  HttpServer server = HttpServer.new(Router.new(), @options, port: 0);
+  EXPECT_TRUE(server.port() > 0);
+  EXPECT_INT_EQ(server.workers, 8);
+  EXPECT_INT_EQ(server.idle_ms, 5000);
+  EXPECT_INT_EQ(server.body_limit, 1048576);
+  EXPECT_INT_EQ(options[<port>].integer(), -1);
   server.close();
   ScopeStats before = Scope.stats();
   server.close();

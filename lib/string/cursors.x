@@ -44,7 +44,8 @@ static struct Split {
   int (*next)(Split split, int *cursor, String *out);
 };
 
-/** Splits `str` on every occurrence of `sep` into a `List` of `String`s.
+/** Splits `str` on `sep`, with an optional maximum number of splits.
+    Omitting the limit or passing a negative value splits every occurrence.
     Separators are not coalesced, so adjacent ones produce empty fields and
     the result holds one more element than the number of separators found.
     An empty field is the empty `String`, the null pointer. An empty or null
@@ -56,9 +57,11 @@ static struct Split {
     printf("%s\n", "a:b:c".split(":").repr());
     printf("%s\n", "a::b".split(":").repr());
     ```
-    Raises: the same causes as `String.split_n`.
+    Raises: `<bad-arity>` for more than one limit, conversion failures,
+    or the same causes as `String.split_n`.
 */
-meta native List String.split(String str, String sep) => str.split_n(sep, -1);
+meta native List String.split(String str, String sep, List @limit) =>
+  str.split_n(sep, _optional(limit, -1, "String.split").int());
 
 /** Splits `str` at no more than `max_splits` separators.
     A negative limit splits every occurrence; zero returns `str` as one field.
@@ -83,16 +86,19 @@ meta native List String.split_n(String str, String sep, int max_splits) {
 }
 
 /** Splits `str` into a `List` of lines.
-    LF, CR, and CRLF all end a line, and CRLF counts as one ending. A
-    nonzero `keep_ends` leaves each line's ending attached to it. A trailing
+    LF, CR, and CRLF all end a line, and CRLF counts as one ending. The
+    optional `keep_ends` defaults to zero. A nonzero value keeps each ending.
+    A trailing
     line ending does not produce a final empty line, so text that ends in a
     newline yields as many lines as it has endings. A null or empty `str`
     returns `nil`. The canonical fields and `List` remain live until their
     actual `String` and `List` pools are released.
-    Raises: `<alloc-fail>` or `<size-limit>` while constructing fields or the
-    result.
+    Raises: `<bad-arity>` for more than one option, conversion failures,
+    or `<alloc-fail>` or `<size-limit>` while constructing fields or
+    the result.
 */
-meta native List String.split_lines(String str, int keep_ends) {
+meta native List String.split_lines(String str, List @options) {
+  int keep_ends = _optional(options, 0, "String.split_lines").int();
   if (!str) return %();
   Array results = [], int start = 0;
   while (start < str.len()) {
@@ -121,7 +127,7 @@ meta native Split String.words(String str) => _new(str, NULL, _words_next);
 
 /** Returns a lazy cursor over lines in `str`, with endings removed.
     LF, CR, and CRLF end a line, with CRLF counted as one ending. The yielded
-    fields agree with `str.split_lines(0)`, including empty interior lines and
+    fields agree with `str.split_lines()`, including empty interior lines and
     the rule that a trailing ending does not add a final empty line.
 
     Each yielded field is a canonical `String`. Distinct fields remain resident

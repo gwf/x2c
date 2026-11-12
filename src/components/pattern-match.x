@@ -823,7 +823,7 @@ meta static Code _match_lowered(Code subject, List rows) {
     selector = %(op $choose $expr (op . (op -> $expr car) u64) $selector);
   List prologue = _match_prologue(subject, frame, viewing, values);
   List switched = Code.lowered(
-    %(placed (switch $selector (block @(items.list_free())))), NULL);
+    %(placed (switch $selector (block @(items.list_free())))));
   return %(block @prologue $switched);
 }
 
@@ -873,7 +873,7 @@ meta static Code _match_condition(Code subject, List pattern, List body) {
   }
   if (subject.type().is_named("Var")) arm = _match_listed(arm, none);
   List prologue = _match_prologue(subject, frame, viewing, values);
-  List kept = Code.lowered(%(placed $arm), NULL);
+  List kept = Code.lowered(%(placed $arm));
   return $!{ { @prologue $kept } };
 }
 

@@ -199,7 +199,7 @@ static void typed_list_common_capabilities_cover_every_family(void) {
 
   ListChar chars = ListChar.cons(1, ListChar.cons(2, NULL));
   ListChar later_chars = ListChar.cons(1, ListChar.cons(3, NULL));
-  Buffer char_str = Buffer.new(0), char_repr = Buffer.new(0);
+  Buffer char_str = Buffer.new(), char_repr = Buffer.new();
   chars.write_str(char_str); chars.write_repr(char_repr);
   _expect_typed_list_common(
     chars, later_chars, chars, chars, chars.repr(), chars.hash(),
@@ -207,28 +207,28 @@ static void typed_list_common_capabilities_cover_every_family(void) {
 
   ListShort shorts = ListShort.cons(10, ListShort.cons(20, NULL));
   ListShort later_shorts = ListShort.cons(10, ListShort.cons(30, NULL));
-  Buffer short_str = Buffer.new(0), short_repr = Buffer.new(0);
+  Buffer short_str = Buffer.new(), short_repr = Buffer.new();
   shorts.write_str(short_str); shorts.write_repr(short_repr);
   _expect_typed_list_common(
     shorts, later_shorts, shorts, shorts, shorts.repr(),
     shorts.hash(), short_str, short_repr, shorts.compare(later_shorts));
 
   ListInt ints = %(100 200), later_ints = %(100 300);
-  Buffer int_str = Buffer.new(0), int_repr = Buffer.new(0);
+  Buffer int_str = Buffer.new(), int_repr = Buffer.new();
   ints.write_str(int_str); ints.write_repr(int_repr);
   _expect_typed_list_common(
     ints, later_ints, ints, ints, ints.repr(), ints.hash(),
     int_str, int_repr, ints.compare(later_ints));
 
   ListFloat floats = %(1.5f 2.5f), later_floats = %(1.5f 3.5f);
-  Buffer float_str = Buffer.new(0), float_repr = Buffer.new(0);
+  Buffer float_str = Buffer.new(), float_repr = Buffer.new();
   floats.write_str(float_str); floats.write_repr(float_repr);
   _expect_typed_list_common(
     floats, later_floats, floats, floats, floats.repr(),
     floats.hash(), float_str, float_repr, floats.compare(later_floats));
 
   ListDbl doubles = %(1.5 2.5), later_doubles = %(1.5 3.5);
-  Buffer double_str = Buffer.new(0), double_repr = Buffer.new(0);
+  Buffer double_str = Buffer.new(), double_repr = Buffer.new();
   doubles.write_str(double_str); doubles.write_repr(double_repr);
   _expect_typed_list_common(
     doubles, later_doubles, doubles, doubles, doubles.repr(),
@@ -236,14 +236,14 @@ static void typed_list_common_capabilities_cover_every_family(void) {
 
   ListString strings = %("alpha" "one");
   ListString later_strings = %("alpha" "two");
-  Buffer string_str = Buffer.new(0), string_repr = Buffer.new(0);
+  Buffer string_str = Buffer.new(), string_repr = Buffer.new();
   strings.write_str(string_str); strings.write_repr(string_repr);
   _expect_typed_list_common(
     strings, later_strings, strings, strings, strings.repr(),
     strings.hash(), string_str, string_repr, strings.compare(later_strings));
 
   ListSymbol symbols = %(alpha one), later_symbols = %(alpha two);
-  Buffer symbol_str = Buffer.new(0), symbol_repr = Buffer.new(0);
+  Buffer symbol_str = Buffer.new(), symbol_repr = Buffer.new();
   symbols.write_str(symbol_str); symbols.write_repr(symbol_repr);
   _expect_typed_list_common(
     symbols, later_symbols, symbols, symbols, symbols.repr(),

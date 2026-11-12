@@ -280,7 +280,7 @@ static int _package(Scan &s, Tokenizer tokens) {
 static int _include(Scan &s, String directive, String directory) {
   int angle = 0;
   String target = Compiler.preproc_include_target(directive, angle);
-  if (!target || !(target.endswith(".x") || target.endswith(".xp"))) return 0;
+  if (!target || !(target.endswith(".x", ".xp"))) return 0;
   String file = s.request.sources.resolve_include(
     s.request.include_dirs, directory, target, angle);
   if (!file) return 0;
@@ -558,7 +558,16 @@ static String _link(Helper &h, int count) {
     _link_arguments(h, output, tables, support), NULL);
   if (!failure) Path.move_to(output, helper);
   else if (Path.exists(helper)) Path.remove_file(helper);
-  return failure;
+  return failure ? _link_failure(h, failure) : NULL;
+}
+
+/* A group that did not compile leaves the symbols the other groups call
+   undefined, so a link failure names those groups' failures first. */
+static String _link_failure(Helper &h, String failure) {
+  Array reasons = [];
+  foreach (List row in h.failures) reasons.push(row.cadr());
+  reasons.push(%"the helper did not link: $failure");
+  return "; ".join(reasons.list_free());
 }
 
 /* The object of the helper's protocol loop, which this compiler translates
@@ -609,7 +618,7 @@ static String _compile_support(
   if (tool_capture(
     %($driver "translate" "--out-dir" $directory $source),
     printed, errors))
-    return %"cannot translate $source: $(errors.strip(NULL))";
+    return %"cannot translate $source: $(errors.strip())";
   Toolchain t = h.toolchain;
   String include = h.include, output = _temporary(object);
   String failure = Compiler.meta_cc_run(
@@ -626,7 +635,7 @@ static String _temporary(String path) =>
 
 /* The unit that gives the helper each built table by index. */
 static String _tables(Array built, int count) {
-  Buffer out = Buffer.new(0);
+  Buffer out = Buffer.new();
   out.write("#include \"x2c.h\"\n");
   foreach (int index in built)
     out.printf("Map x2c_module_targets_%d(void);\n", index);
@@ -677,7 +686,7 @@ static List _write_manifest(Helper &h, String failure) {
     (groups $(h.groups.list())) (failures $(h.failures.list()))
     (failure $(failure ? failure : "")) (deps $(_digests(h.deps)))
     (covered $(!h.uncovered)));
-  Buffer out = auto Buffer.new(0);
+  Buffer out = auto Buffer.new();
   out.write_datum(manifest, 0);
   Path.write_text(%"$(h.directory)/manifest", out);
   return manifest;

@@ -73,3 +73,42 @@ Array reversed_parameter(Array a) {
   }
   return NULL;
 }
+
+Array updated_array(void) {
+  auto {
+    Array a = [];
+    return a.update_n(0);
+  }
+  return NULL;
+}
+
+Map updated_map(void) {
+  auto {
+    Map m = {};
+    return m.update_n(0);
+  }
+  return NULL;
+}
+
+Map merged_with(Map other) {
+  auto {
+    Map m = {};
+    return m.merge_with(other, NULL);
+  }
+  return NULL;
+}
+
+Map merged_with_null(Map other) {
+  auto {
+    Map m = NULL;
+    return m.merge_with(other, NULL);
+  }
+  return NULL;
+}
+
+Array updated_parameter(Array a) {
+  auto {
+    return a.update_n(0);
+  }
+  return NULL;
+}

@@ -812,7 +812,7 @@ ordinary local declaration:
 ```x2c
 int main(void) {
 Array items = auto [];
-Buffer text = auto Buffer.new(0);
+Buffer text = auto Buffer.new();
 items.push(42);
 text.write(items.repr());
 printf("%s\n", text.str());
@@ -2010,6 +2010,11 @@ arguments at the call site; the compiler packs the arguments after the fixed
 parameters into that List. With no trailing arguments, the List is empty.
 There can be one rest parameter, with zero or more fixed parameters before it.
 
+In a named macro body, use `@(expression)` for a runtime splice argument.
+A registered `@hole` still splices captured syntax, and `@meta_function()`
+still inserts the meta function's result. In a quotation, expression holes
+keep their construction-time meaning.
+
 ```x2c
 static int count_items(String label, List @items) => items.len();
 
@@ -2582,7 +2587,11 @@ typedef struct Record { String names[2]; Var last; } Record;
 Record record = {.names[1] = "second", "last"};
 ```
 
-Each supplied value converts to its destination element or field type. After
+Each supplied value converts to its destination element or field type. A
+value that the converter of an aggregate destination accepts converts to
+that whole aggregate instead of initializing its first member: with
+`Size int.size(int)` and a field `Size width`, `{ .width = 5 }` stores
+`int_size(5)`. After
 `.names[1] = "second"` above, the next value initializes `last`, including its
 ordinary conversion to `Var`. With `.names = "first", "second", "last"`,
 brace elision fills both array elements before continuing to `last`. Explicit
@@ -2614,7 +2623,9 @@ expression's type, so `typeof(name) copy = name;` declares `copy` with the
 type of `name`. An operand that only C can type, such as a system header's
 macro, gives a type x2c does not resolve; the generated C spells it
 `__typeof__(operand)`, and C types it. `typeof_unqual` names the same type
-without its qualifiers.
+without its qualifiers. In a macro body, an operand that holds a hole is
+typed where the macro expands, so `typeof($value) copy = $value;` declares
+`copy` with the argument's type and `copy.method()` resolves.
 
 ### Alignment, atomic, and complex types
 
@@ -2905,6 +2916,28 @@ identifier targets, but it may not contain multiple comma-separated
 declarators. Parentheses group independently typed declarations, such as
 `(String word, int count)`. A grouped capture is a canonical `seq` of ordinary
 declarations; each declaration follows the same binding and placement rules.
+A template may place a `Decl` hole wherever a declaration argument is read,
+as in a `foreach` header; the captured declaration is then declared there:
+
+```x2c
+#include "x2c.x"
+macro Decorator $each(Stmt $body, Decl $element, Expr $items) {
+  foreach ($element in $items) $body
+}
+
+int main(void) {
+  $each(String s in %("a" "b")) puts(s);
+  return 0;
+}
+```
+
+```text
+a
+b
+```
+
+The caller may write `in` after a `Decl` argument in place of a comma, as in
+`foreach`.
 
 A `DeclaratorRow` argument has no leading type or trailing semicolon. A
 declaration template supplies the shared type, and a trailing
@@ -2965,7 +2998,29 @@ before the adoption.
 
 `@name` is a sequence hole. It captures zero or more arguments of one
 element kind, must be the final argument, and `@name` in the body is the
-splice point:
+splice point. One exception: a final `Entry @rows` hole may follow it. The
+sequence then takes the arguments before the first `key: value` row, and
+the `Entry` hole takes the rows:
+
+```x2c
+#include "x2c.x"
+int scaled(int a, int b, Map @options) =>
+  (a + b) * options.getdefault(<scale>, 1).integer();
+
+macro Expression $scaled(Expr @args, Entry @options) =>
+  scaled(@args, @options);
+
+int main(void) {
+  printf("%d %d\n", $scaled(1, 2), $scaled(1, 2, scale: 10));
+  return 0;
+}
+```
+
+```text
+3 30
+```
+
+A sequence hole alone is the final argument:
 
 ```x2c
 static int sum(int a, int b) {
@@ -3006,7 +3061,30 @@ The `@items` position is part of the macro template; `$(expression)`
 inside an ordinary quoted `Array` still inserts one value.
 
 `Entry` holes capture one `key: value` row; `Entry @rows` captures and
-forwards zero or more complete rows.
+forwards zero or more complete rows. Spliced into a call's arguments,
+`@rows` passes its rows as the call's `key: value` arguments, so a template
+forwards them to a function with a [`Map` rest
+parameter](https://x2c-lang.dev/docs/reference/language.html#map-rest-parameters) or to another macro's `Entry` hole:
+
+```x2c
+#include "x2c.x"
+String label(String text, Map @options) {
+  int size = options.getdefault(<size>, 12).integer();
+  return %"$text@$size";
+}
+
+macro Expression $label(Expr $text, Entry @options) =>
+  label($text, @options);
+
+int main(void) {
+  printf("%s %s\n", $label("a"), $label("b", size: 20));
+  return 0;
+}
+```
+
+```text
+a@12 b@20
+```
 
 A `Captures` hole holds a complete lambda capture clause as one value.
 In a template, `%!(@params) using $captures => $body` preserves its
@@ -3403,6 +3481,37 @@ A nested macro can use an enclosing template's holes. Its own holes shadow
 same-spelled enclosing holes. Substitution embeds those values in the returned
 template; it does not make an arbitrary local-data closure.
 
+A component of a nested definition's name may be an enclosing `Name` hole,
+as in `$W.$m` or `$$m`. The name is joined where the enclosing template
+expands, so one generator defines a family of macros:
+
+```x2c
+#include <stdio.h>
+typedef struct W { int n; } W;
+
+int W.add(W w, int k) => w.n + k;
+int W.sub(W w, int k) => w.n - k;
+
+macro Unit $scaled(Name $m) {
+  macro Expression $W.$m(Expr $w, Expr $k) => $w.$m($k * 10);
+}
+$scaled(add);
+$scaled(sub);
+
+int main(void) {
+  W w = { 1 };
+  printf("%d %d\n", w.add(2), w.sub(2));
+  return 0;
+}
+```
+
+```text
+21 -19
+```
+
+Inside each generated template, `$w.$m(...)` names the macro being defined,
+so it is the method.
+
 A `Macro` target and an explicit `Macro` hole accept an anonymous or named
 macro definition, a bare macro value such as `$generator`, or a parenthesized
 compile-time Macro expression. Macro holes are singular. A Macro-target
@@ -3415,6 +3524,207 @@ During decorator application, transforming an anonymous macro into a
 Decorator continues onto its next target. Defining a named decorator does
 not apply it. Constructing or storing a Macro value in ordinary code also
 does not consume following source.
+
+### Method-form macros
+
+A decorator or Expression macro named `$T.NAME`, where `T` is a named type,
+can also be invoked with method syntax on a receiver of type `T`. The
+receiver becomes the macro's first explicit argument, and the parenthesized
+arguments follow it:
+
+```x2c
+#include <stdio.h>
+typedef struct Ui { int *depth; } Ui;
+
+int Ui.text(Ui ui, String text) =>
+  printf("%*s%s\n", *ui.depth * 2, "", text);
+
+macro Decorator $Ui.row(Stmt $body, Expr $ui, Expr $label) {
+  {
+    Ui row = $ui;
+    row.text($label);
+    (*row.depth)++;
+    $body
+    (*row.depth)--;
+  }
+}
+
+int main(void) {
+  int depth = 0;
+  Ui ui = { &depth };
+  ui.row ("outer")
+  ui.row ("inner") {
+    ui.text("hello");
+  }
+  return 0;
+}
+```
+
+```text
+outer
+  inner
+    hello
+```
+
+`ui.row ("inner") { ... }` is `$Ui.row(ui, "inner") { ... }`. A statement of
+the form
+
+```text
+RECEIVER . NAME ( ARGUMENTS ) TARGET
+```
+
+is a decorator application when all of these hold:
+
+- the statement begins with `RECEIVER`, and `RECEIVER` has a named type `T`;
+- a decorator `$T.NAME` is visible; and
+- the token after the closing `)` is `{`, `$`, or a word other than `is` and
+  `in`.
+
+An expression cannot continue with one of those tokens after a call, so the
+statement has no other reading; `is` and `in` are excluded because they are
+operators. Decorators stack as `$` applications do. `RECEIVER` may be any postfix
+expression: a name, a call, a field, an index, or a parenthesized
+expression, as in `app.ui().row (...)`, `app->ui.row (...)`, or
+`(ui_of(app)).row (...)`. It is captured like any other argument, so the
+expansion decides how often it is evaluated. A call followed by `(`, as in
+`ui.pick(0)(21)`, stays an ordinary call. The statement after a target may
+begin with `*` or `(`; it is not read as an operand of the call.
+
+The decorator form applies only to a whole statement. Inside a larger
+expression, such as `k = ui.row (1) { }`, the call is an ordinary method call,
+and the method's absence is the ordinary error "type Ui has no method row".
+
+In any expression, `RECEIVER.NAME(ARGUMENTS)` invokes the Expression macro
+`$T.NAME` the same way. When `$T.NAME` is visible, it takes every method-form
+call of `NAME`, even where a method `T.NAME` exists.
+
+Method forms also work in macro templates. A receiver there may be a hole,
+whose type is known only where the template expands, so the form is
+recognized then. A statement form needs the same statement start and the
+same following target as in source; its target is a statement. The
+arguments of a form recognized this way are read as a call's arguments:
+expressions, `key: value` entries, and splices, with a sequence hole taking
+the rest.
+
+A `RECEIVER.NAME(...)` call written in `$T.NAME`'s own template is the
+method `T.NAME`, so a macro can wrap the method it shadows. The rule
+follows where the call is written, not what is expanding. A target or
+argument passed into `$T.NAME`, and the template of any other macro that
+its expansion invokes, still use `$T.NAME`: a template may nest
+`$ui.row (...) { $ui.row (...) $body }`. Two macros whose templates use
+each other's method forms therefore recurse until the macro expansion
+depth limit reports it.
+
+```x2c
+#include <stdio.h>
+typedef struct Meter { int scale; } Meter;
+
+int Meter.read(Meter meter, int raw) => raw * meter.scale;
+
+macro Expression $Meter.read(Expr $meter, Expr $raw) =>
+  $meter.read($raw) + 1;
+
+macro Expression $Meter.read_twice(Expr $meter, Expr $raw) =>
+  $meter.read($raw) + $meter.read($raw);
+
+int main(void) {
+  Meter meter = { 10 };
+  printf("%d %d\n", meter.read(4), meter.read_twice(4));
+  return 0;
+}
+```
+
+```text
+41 82
+```
+
+In `$Meter.read`, `$meter.read($raw)` is the method. In `$Meter.read_twice`,
+each `$meter.read($raw)` is the macro `$Meter.read`.
+
+A call on a type name, `T.NAME(ARGUMENTS)`, also invokes `$T.NAME` when it
+is visible, with the arguments unchanged, as `$T.NAME(ARGUMENTS)` takes
+them. A method `T.NAME` is a function callable both as `receiver.NAME(x)`
+and as `T.NAME(receiver, x)`, so both spellings reach the same macro: for a
+macro whose first parameter is the receiver, `Ui.button(ui, "Add")` is
+`ui.button("Add")`. A function with no receiver gets a macro the same way:
+
+```x2c
+#include "x2c.x"
+typedef struct Desc { int width, height; } Desc;
+typedef struct Win { int area; } *Win;
+
+Win Win.open(Desc desc) {
+  Win w = xmalloc(sizeof *w);
+  w.area = desc.width * desc.height;
+  return w;
+}
+
+Desc desc_of(Map @options) => (Desc){
+  options.getdefault(<width>, 1).integer(),
+  options.getdefault(<height>, 1).integer() };
+
+macro Expression $Win.open(Entry @options) =>
+  Win.open(desc_of(@options));
+
+int main(void) {
+  printf("%d\n", Win.open(width: 3, height: 4).area);
+  return 0;
+}
+```
+
+```text
+12
+```
+
+In `$Win.open`'s own template, `Win.open(...)` is the function, as the
+self-call rule states for the receiver form. At the start of a statement,
+`T.NAME(ARGUMENTS) TARGET` applies a decorator `$T.NAME` under the same
+target test. A type name is known where a template is defined, so the form
+is recognized there without waiting for the expansion. At file scope only
+the receiver form applies a decorator.
+
+A package's type `Ui` is `x2cui__Ui` in generated C, but its macros keep the
+source spelling `$Ui.row`. A method form looks for `$T.NAME` under the
+receiver type's generated name and then under its source name, so the
+package's macros apply in the package and in every importing file. Method
+forms are recognized only with `.`.
+
+At file scope, a method-form decorator stands where a `$T.NAME(receiver,
+...)` application does, before the same targets. A file-scope item is one
+when it begins with a variable, not a type; its postfix chain ends in
+`.NAME(ARGUMENTS)`; a target follows; and some macro is named `$T.NAME`.
+Any other item is read as a declaration, as before:
+
+```x2c
+#include "x2c.x"
+#include "meta.x"
+typedef struct App { int routes; } App;
+App app;
+
+macro Decorator $App.route(Function $function, Expr $app, Expr $path) {
+  printf("route %s\n", $path);
+  @Code.body($function)
+}
+
+app.route ("/home")
+void home(void) { puts("home"); }
+
+int main(void) {
+  home();
+  return 0;
+}
+```
+
+```text
+route /home
+home
+```
+
+A file-scope receiver begins with a name, so `(expression).NAME (...)` is
+not recognized there. In a template that expands at file scope, the
+receiver of a decorator form has no type where the template is defined,
+so the template writes `$T.NAME(receiver, ...)` instead. The Expression form
+works in file-scope initializers and in templates that expand there.
 
 ### Macro values
 
@@ -3565,6 +3875,8 @@ the original binding syntax.
 
 A template can call a `meta` function in a slot and pass it a sequence hole
 written with `$name`; the function receives the captured items as one `List`.
+Written `@name` for a `List @rest` parameter, the items are separate
+arguments, as `$count(@args)` passes each captured argument.
 Applying a macro value with one `List` of syntax as the last argument passes
 that List as the whole trailing sequence, so `outer(head, items)` and
 `outer(head, a, b)` build the same code. A `List` of numbers or Strings, such
@@ -3869,10 +4181,10 @@ x2c_invocation_line()
 x2c_invocation_column()
 x2c_enclosing(what)
 x2c_place(where, code)
-x2c_diagnostic_fail(message, notes)
-x2c_diagnostic_fail_at(node, category, message, notes)
-x2c_diagnostic_error_at(node, category, message, notes)
-x2c_diagnostic_warn(message, notes)
+x2c_diagnostic_fail(message, @notes)
+x2c_diagnostic_fail_at(node, category, message, @notes)
+x2c_diagnostic_error_at(node, category, message, @notes)
+x2c_diagnostic_warn(message, @notes)
 ```
 
 A macro body calls one with `$`, as in `$Code.type($value)` or
@@ -3890,7 +4202,14 @@ or 0.
 `Code.type` returns the canonical semantic `Type` for supported typed
 syntax. During expansion, syntax a template left untyped is resolved where the
 expansion stands, so a template's locals, casts, and method results report
-their declared types.
+their declared types. An `x2c_ident` name value and an untyped quotation are
+resolved the same way, so `Code.type(x2c_ident("puts"))` is the type of the
+function `puts`. The `Type` omits the storage class and the qualifiers of the
+value itself. It keeps the qualifiers of what a pointer points at and of what
+a function returns: a `const char *` local reports `(* const char)`, and
+`Type.return_type` of a function that returns `const char *` reports the
+same. A declaration written with the reported `Type` therefore accepts the
+value it was read from.
 
 `Code.binding_spelling` accepts a name hole's valid identifier `String` or
 compiler-issued identifier and binding syntax, and returns its source spelling
@@ -3905,8 +4224,10 @@ where it was written. Constructed syntax, derived subtrees, name values, and
 calls outside expansion are rejected.
 
 `x2c_diagnostic_fail` reports a macro diagnostic at its source location with
-`String` notes and does not return. `x2c_diagnostic_fail_at` reports at
-syntax the macro received, and `x2c_diagnostic_error_at` reports there and
+`String` notes and does not return. Pass notes as separate arguments; omit
+them for no notes, or splice an existing List with `@notes`.
+`x2c_diagnostic_fail_at` reports at syntax the macro received, and
+`x2c_diagnostic_error_at` reports there and
 returns, failing the translation when it finishes.
 
 `x2c_ident` returns the tagged name value described above and accepts a
@@ -4402,8 +4723,8 @@ therefore produces a mutable pointer variable; a pointer to const data keeps
 its pointee qualification.
 
 An `auto` immediately after `=` instead manages the acquired value. For
-example, `Buffer buffer = auto Buffer.new(0);` has the same meaning as
-`Buffer buffer = $auto(Buffer.new(0));`. The keyword covers the complete
+example, `Buffer buffer = auto Buffer.new();` has the same meaning as
+`Buffer buffer = $auto(Buffer.new());`. The keyword covers the complete
 initializer; it is not accepted inside an operator or call argument.
 Declaration `auto` cannot be combined with initializer `auto` or `$auto`
 in the same declaration group, including through forwarding macros.
@@ -6301,7 +6622,10 @@ prefix without a qualifier, then a prefix with one, such as zlib's
 In a collected header, a name with no visible definition directly before a
 builtin type word, qualifier, storage class, or `inline`, as in
 `API int f(void);` with `API` defined only for the C compiler, contributes
-nothing.
+nothing. So does an undeclared name directly before a second name that a
+declarator follows: in `API handle *open(void);` and
+`API bool ready(void);` the second name is the type. A macro that another
+header defines has no visible definition in the header that uses it.
 
 A GNU attribute or a function-like attribute macro after a declarator or
 parameter, `int a __attribute__((unused)) = 1, b = 2;` or

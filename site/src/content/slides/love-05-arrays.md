@@ -1,5 +1,6 @@
 ---
 slug: arrays
+home: false
 section: love
 tab: arrays
 ---
