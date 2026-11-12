@@ -8,7 +8,7 @@ title: Give a value a name.
 ---
 
 ```x2c
-#include <assert.h>
+~#include <assert.h>
 
 ~int main(void) {
   // Names are values, without declaring enum constants.
@@ -23,9 +23,9 @@ title: Give a value a name.
 
   // An ordered vocabulary, built entirely at compile time.
   SymbolSet stages = %<queued running done>;
-  assert(stages.contains(state) && !stages.contains(<failed>));
+~  assert(stages.contains(state) && !stages.contains(<failed>));
   state = stages[stages.index(state) + 1];
-  assert(state == running);
+~  assert(state == running);
 
   // Iterate in declared order and recover each name's text.
   foreach (Symbol stage in stages)

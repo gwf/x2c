@@ -8,15 +8,15 @@ title: Text is something you work with.
 ---
 
 ```x2c
-#include <assert.h>
+~#include <assert.h>
 
-int main(void) {
+~int main(void) {
   String line = "  GET /docs/guide/values.html  ";
 
   // Slice, strip, split, and case-fold; the original is untouched.
-  String request = line.strip(NULL);
+  String request = line.strip();
   (String method, String path) = request.split(" ");
-  assert(line.len() == 31 && method == "GET");
+~  assert(line.len() == 31 && method == "GET");
 
   // Interpolate values and expressions in place.
   String title = path.split("/").last().str().replace(".html", "");
@@ -31,10 +31,10 @@ int main(void) {
 
   // Join and repeat build text; equality is one pointer compare.
   String rule = "-".repeat(3) + " " + ", ".join(%("a" "b" "c"));
-  assert(rule == "--- a, b, c");
+~  assert(rule == "--- a, b, c");
   puts(rule);
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 Split an HTTP request, select a path component, and format the result. Slices, splitting, interpolation, and joining turn text processing into ordinary expressions.

@@ -4,8 +4,7 @@ import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
 import ExamplesShell from "../../components/ExamplesShell.astro";
 import ExamplesTopic from "../../components/ExamplesTopic.astro";
-import { exampleEntries } from "../../lib/example-catalog";
-const routes = Object.fromEntries(exampleEntries.map(entry => [entry.id, entry.article ? `${entry.article.frontmatter.slug}/` : entry.section === "programs" ? `${entry.id.split("/").pop()}/` : `${entry.section}/#${entry.id.replaceAll("/", "-")}`]));
+import { exampleRoutes as routes } from "../../lib/example-catalog";
 ---
 <BaseLayout title="Examples - x2c" description="Browse x2c examples, from everyday values to complete programs.">
 <Fragment slot="header"><SiteHeader examples /></Fragment>

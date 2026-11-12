@@ -19,5 +19,5 @@ export function x2cExcerpt(source) {
     }
   }
   if (body) appendBody();
-  return result.join("\n").replace(/^\n+|\n+$/g, "");
+  return result.join("\n").replace(/^\n+|\n+$/g, "").replace(/\n{3,}/g, "\n\n");
 }

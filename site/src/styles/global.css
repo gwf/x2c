@@ -1397,8 +1397,7 @@ a.docs-card:hover {
     font-size: 11px;
   }
 
-  .carousel-track>div>pre,
-  .carousel-track>div>div:first-child {
+  .carousel-track .feature-code > pre {
     max-height: 390px;
     overflow: auto;
   }

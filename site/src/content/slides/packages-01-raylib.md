@@ -42,7 +42,8 @@ chart.export(output);
 Turn seven daily temperatures into a PNG with ordinary vectors, Lists,
 and drawing methods. Each temperature becomes a point; lines join the
 points over a pale filled area, and labels mark the days and highs. The complete program
-renders this chart into memory, with no display or GPU.
+draws this chart into an image and exports it as a PNG. It initializes a small
+window before loading the font.
 
 raylib has no release bundle. Build it from a checkout with
 `make -C packages/raylib run`.

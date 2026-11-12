@@ -25,17 +25,15 @@ const notes = await Promise.all(entries.map(async entry => {
   <div class="reading-example-prose" data-about-body set:html={notes[i]} />
   <div class="reading-source-bar"><span>{entry.path}</span><a href={`#${entry.id.replaceAll("/", "-")}`} aria-label={`Link to ${entry.label}`}>link</a></div>
   <div class="reading-source"><Code code={entry.source} lang={{...grammar, name:"x2c"}} theme={x2cDarkTheme} /></div>
-  <textarea hidden readonly aria-label="Published source">{entry.source}</textarea><pre data-highlight hidden></pre>
-  <div class="reading-run"><button type="button" data-run hidden>Run</button><button type="button" data-stop hidden>Stop</button><button type="button" data-reset hidden>Reset</button><span data-status role="status"></span></div>
+  <div class="reading-run"><button type="button" data-run hidden>Run</button><button type="button" data-stop hidden>Stop</button><span data-status role="status"></span></div>
   <section class="reading-output" data-output-comparison aria-label="Program results">
     <div><h3 data-output-title>Actual output</h3><pre data-output role="log" aria-label="Actual output"></pre></div>
     <div><h3>Expected output</h3><pre data-expected-output aria-label="Expected output">{entry.output ?? "No console output."}</pre></div>
   </section>
   <p class="reading-local">Run locally: <code>{entry.recipe ?? `x2c run ${entry.path}`}</code></p>
-  <script type="application/json" data-theme set:html={json(x2cDarkTheme)} />
-  <script type="application/json" data-examples set:html={json([entry].map(({id,path,source,visible,runnable,program,output})=>({id,path,source,visible,runnable,program,output})))} />
+  <script type="application/json" data-examples set:html={json([entry].map(({id,path,source,runnable,program,output})=>({id,path,source,runnable,program,output})))} />
 </article>)}
 <script>
-  import { setupPlayground } from "../lib/playground";
-  document.querySelectorAll<HTMLElement>(".reading-example[data-playground]").forEach(root => setupPlayground(root));
+  import { setupExampleRunner } from "../lib/example-runner";
+  document.querySelectorAll<HTMLElement>(".reading-example[data-playground]").forEach(root => setupExampleRunner(root));
 </script>

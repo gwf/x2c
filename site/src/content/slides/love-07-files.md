@@ -8,7 +8,7 @@ title: Read the file. Use its contents.
 ---
 
 ```x2c
-#include <stdlib.h>
+~#include <stdlib.h>
 ~#include "path.x"
 
 ~// The checked-in data sits beside the examples wherever they live.
@@ -18,8 +18,8 @@ title: Read the file. Use its contents.
 ~}
 
 ~int main(int argc, char **argv) {
-  String path = argc > 1 ? argv[1]
-                        : example_data("love-files/quantities.txt");
+~  String path = argc > 1 ? argv[1]
+~                        : example_data("love-files/quantities.txt");
 
   // Read the whole text file and close it in one expression.
   String text = path.open("r").string_close();
