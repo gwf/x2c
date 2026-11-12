@@ -17,7 +17,7 @@ const href = (entry) => entry.article
     <div class="sidebar-scrollbox">
       <ol class="chapter">
         {exampleSections.map(section => <li class:list={["chapter-item", {expanded: current === section || (section === "programs" && !["love", "power", "magic"].includes(current))}]}>
-          <span class="chapter-link-wrapper"><a href={`${base}examples/${section}/`} class:list={{active: current === section}}>{section}</a><button class="chapter-fold-toggle" aria-label={`Toggle ${section}`} aria-expanded={current === section || (section === "programs" && !["love", "power", "magic"].includes(current))}><div aria-hidden="true">&#10097;</div></button></span>
+          <span class="chapter-link-wrapper"><a href={`${base}examples/${section}/`} class:list={{active: current === section}}>{section[0].toUpperCase() + section.slice(1)}</a><button class="chapter-fold-toggle" aria-label={`Toggle ${section}`} aria-expanded={current === section || (section === "programs" && !["love", "power", "magic"].includes(current))}><div aria-hidden="true">&#10097;</div></button></span>
           <ol class="section">{exampleEntries.filter(entry => entry.section === section).map(entry =>
             <li><a href={href(entry)} data-index-link class:list={{active: current === (entry.article?.frontmatter.slug ?? entry.id.split("/").pop())}}>{entry.label}</a></li>)}</ol>
         </li>)}
@@ -32,6 +32,10 @@ const href = (entry) => entry.article
   const checkbox = document.getElementById("mdbook-sidebar-toggle-anchor");
   let visible = window.innerWidth >= 1080;
   try { visible = visible && localStorage.getItem("mdbook-sidebar") !== "hidden"; } catch {}
+  try {
+    const width = Number(localStorage.getItem("examples-sidebar-width"));
+    if (width >= 150) document.documentElement.style.setProperty("--sidebar-target-width", `${width}px`);
+  } catch {}
   checkbox.checked = visible;
   document.documentElement.classList.toggle("sidebar-visible", visible);
   document.getElementById("mdbook-sidebar-toggle").setAttribute("aria-expanded", String(visible));
@@ -54,6 +58,14 @@ const href = (entry) => entry.article
     if (innerWidth < 1080 && (event.target as HTMLElement).closest("a") && checkbox.checked) button.click();
   });
   addEventListener("keydown", event => { if (event.key === "Escape" && checkbox.checked) { button.click(); button.focus(); } });
+  document.getElementById("mdbook-sidebar-resize-handle")!.addEventListener("mousedown", () => {
+    window.addEventListener("mouseup", () => {
+      const width = parseFloat(document.documentElement.style.getPropertyValue("--sidebar-target-width"));
+      if (Number.isFinite(width)) {
+        try { localStorage.setItem("examples-sidebar-width", String(width)); } catch {}
+      }
+    }, { once: true });
+  });
   const mark = () => {
     for (const link of index.querySelectorAll<HTMLAnchorElement>("[data-index-link]")) {
       const url = new URL(link.href);

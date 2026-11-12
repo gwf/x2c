@@ -5,7 +5,7 @@ import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 const { topic = "love" } = Astro.props;
 const entries = exampleEntries.filter(entry => entry.section === topic && topic !== "programs" && !entry.article);
-const titles = { love: "Everyday values and operations.", power: "Compose larger programs.", magic: "Extend the language.", programs: "Explore a complete program." };
+const titles = { love: "Everyday values and operations.", power: "Compose larger programs.", magic: "Extend the language.", programs: "Complete programs." };
 const descriptions = { love: "Values, text, and collections. Read down the page or choose an example from the index.", power: "Types, protocols, control flow, and concurrency, working together.", magic: "Operators, macros, and compile-time code that shape the language.", programs: "Longer examples bring the pieces together." };
 const json = value => JSON.stringify(value).replaceAll("<", "\u003c");
 const notes = await Promise.all(entries.map(async entry => {
@@ -15,8 +15,11 @@ const notes = await Promise.all(entries.map(async entry => {
   return at < 0 ? html : html.slice(at + 6);
 }));
 ---
-<header class="examples-topic-heading"><p class="about-eyebrow">examples / {topic}</p><h1>{titles[topic]}</h1><p>{descriptions[topic]}</p></header>
-{topic === "programs" && <div class="examples-program-list">{exampleEntries.filter(entry => entry.section === "programs").map(entry => <p><a href={`${import.meta.env.BASE_URL}examples/${entry.article?.frontmatter.slug ?? entry.id.split("/").pop()}/`}>{entry.label}</a> - {entry.article?.frontmatter.description ?? entry.description}</p>)}</div>}
+<header class="examples-topic-heading"><h1>{titles[topic]}</h1><p>{descriptions[topic]}</p></header>
+{topic === "programs" && <ul class="examples-program-list">{exampleEntries.filter(entry => entry.section === "programs").map(entry => <li>
+  <h2><a href={`${import.meta.env.BASE_URL}examples/${entry.article?.frontmatter.slug ?? entry.id.split("/").pop()}/`}>{entry.label} <span aria-hidden="true">&rarr;</span></a></h2>
+  <p>{entry.article?.frontmatter.description ?? entry.description}</p>
+</li>)}</ul>}
 {entries.map((entry, i) => <article class="reading-example" id={entry.id.replaceAll("/", "-")} data-playground data-programs={`${import.meta.env.BASE_URL}playground/programs/`}>
   <header><p class="about-eyebrow">{entry.label}</p><h2>{entry.slide?.frontmatter.title ?? entry.label}</h2></header>
   <div class="reading-example-prose" data-about-body set:html={notes[i]} />

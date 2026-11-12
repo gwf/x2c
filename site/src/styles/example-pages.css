@@ -66,13 +66,6 @@
   background: transparent;
 }
 .code-note { display: flow-root; margin-top: 24px; }
-.example-demonstration .feature-copy p {
-  font-size: clamp(14px, 1.3vw, 15px);
-  line-height: 1.6;
-}
-.example-demonstration .feature-copy :is(h2, h3) {
-  font-size: clamp(26px, 2.9vw, 34px);
-}
 .example-demonstration .feature-result-image {
   width: 100%;
   max-width: 500px;
