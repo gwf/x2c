@@ -13,7 +13,8 @@ changing the pinned CUI version and review the difference. Variadic
 functions get no form.
 
 It also writes the table of the methods in src/x2cui.x, generated here or
-written by hand, that may have a method form. A row names a method and
+written by hand, that may have a method form, and the table in
+src/x2cui-options.x of the parameters that name an icon. A row names a method and
 the positions of its arrays whose count follows them, so the form
 supplies each count: `ui.tab_bar("tabs", tabs, selected, variant: pill)`.
 """
@@ -171,6 +172,36 @@ def written_methods(source):
   return rows
 
 
+def is_icon(name):
+  """Whether a parameter or field named `name` holds an icon."""
+  return name == "icon" or name.startswith("icon_") or name.endswith("_icon")
+
+
+def icon_parameters(header, hand):
+  """Rows `("method" position)` for the parameters that name an icon,
+  counted after the receiver among a method's x2c parameters."""
+  rows = []
+  for result, name, params in prototypes(header):
+    if not params[0].startswith("cui_ctx *"):
+      continue
+    if name in SKIP or "..." in params or any("va_list" in p for p in params):
+      continue
+    short = name[4:-3] if name.endswith("_ex") else name[4:]
+    if not any(is_icon(p.split("*")[-1].strip()) for p in params):
+      continue
+    declared = classify(name, params)[0]
+    for position, param in enumerate(declared):
+      if param.startswith("String ") and is_icon(param.split()[-1]):
+        rows.append(f'("{short}" {position})')
+  pattern = r"^(?:inline )?[\w ]+ Ui\.(\w+)\(([^()]*)\)\s*(?:=>|\{)"
+  for match in re.finditer(pattern, hand, flags=re.M):
+    params = [" ".join(p.split()) for p in match.group(2).split(",")][1:]
+    for position, param in enumerate(params):
+      if param.startswith("String ") and is_icon(param.split()[-1]):
+        rows.append(f'("{match.group(1)}" {position})')
+  return list(dict.fromkeys(rows))
+
+
 def replace(path, kind, items):
   source = open(path).read()
   begin, end = BEGIN % kind, END % kind
@@ -196,7 +227,11 @@ def main():
   replace("src/x2cui.x", "forms",
           [table + "\nmacro Unit(Name $method, Literal @pairs) {\n"
            "  @x2cui_form($method, $pairs)\n}"])
-  print(f"{len(methods)} methods, {len(names)} rows")
+  icons = icon_parameters(header, hand)
+  replace("src/x2cui-options.x", "icons",
+          [wrap("meta static List _icon_parameters = %(", icons, ");", "  ")
+           .replace(", ", " ").replace(",\n", "\n")])
+  print(f"{len(methods)} methods, {len(names)} rows, {len(icons)} icons")
 
 
 if __name__ == "__main__":

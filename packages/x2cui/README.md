@@ -118,7 +118,7 @@ its field or parameter decides the constant:
 | an enum, such as `cui_align` or `cui_button_variant` | `center`, `primary` | the member with the enum's prefix: `CUI_ALIGN_CENTER`, `CUI_BUTTON_PRIMARY` |
 | `cui_size` | `fill`, `fit` | `CUI_FILL`, `CUI_FIT` |
 | another `cui_T`, such as `cui_color` or `cui_font` | `accent`, `medium` | `CUI_COLOR_ACCENT`, `CUI_FONT_MEDIUM` |
-| text | `plus` | the icon `CUI_ICON_PLUS` |
+| an icon: an option named `icon`, `icon_*`, or `*_icon`, or a parameter CUI names `icon` | `plus` | `CUI_ICON_PLUS` |
 
 A number for a `cui_size` is pixels: `width: 26` is `CUI_PX(26)`, and
 `grow(1.5)` is `CUI_GROW(1.5)`. In `font: m.unread ? medium : body`, each

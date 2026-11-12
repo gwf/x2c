@@ -25,7 +25,10 @@
         another cui_T                accent is CUI_COLOR_ACCENT for a
                                      cui_color, medium is CUI_FONT_MEDIUM
                                      for a cui_font
-        text                         an icon: plus is CUI_ICON_PLUS
+        an icon                      plus is CUI_ICON_PLUS, in a text
+                                     option named icon, icon_*, or
+                                     *_icon, or a parameter CUI names
+                                     icon
       a number for a cui_size        pixels: 26 is CUI_PX(26)
       grow(w) for a cui_size         CUI_GROW(w)
       test ? a : b                   each arm lowered
@@ -79,7 +82,9 @@ meta List x2cui_arguments(
     if (at == args.len()) break;
     List value = args[at++];
     values.push(value);
-    passed.push(x2cui_value(types[i], value));
+    Type type = types[i];
+    if (_icon_parameter(method, i)) type = _icon();
+    passed.push(x2cui_value(type, value));
   }
   while (at < args.len()) passed.push(args[at++]);
   if (record) passed.push(x2cui_record(types[ordinary], options));
@@ -200,7 +205,9 @@ meta static Type _signature(List ui, String method) {
 meta static List _field(List fields, List row) {
   String name = _key(row);
   List field = fields.find(%!(List f) => f.car() == name);
-  return %(dotinit ($name) $(x2cui_value(field ? field[1] : NULL, row[2])));
+  Type type = field ? field[1] : NULL;
+  if (type && Type.is_text(type) && _icon_field(name)) type = _icon();
+  return %(dotinit ($name) $(x2cui_value(type, row[2])));
 }
 
 /* The count field that follows the array field `name`: `part_count`
@@ -320,10 +327,37 @@ meta static List _short(Type type, String name, List value) {
   return constant ? _free_name(constant) : value;
 }
 
+/* The type of a parameter or field that names an icon: a text field
+   named `icon`, `icon_*`, or `*_icon`, or a parameter `_icon_parameters`
+   lists.
+   Other text takes no short names, so an undeclared name there stays an
+   undeclared name. */
+meta static Type _icon(void) => %(icon);
+
+meta static int _icon_field(String name) =>
+  name == "icon" || name.startswith("icon_") || name.endswith("_icon");
+
+/* The parameters of the `Ui` methods that name an icon, as
+   `("method" position)` rows counted after the receiver. CUI names
+   them `icon`; tools/gen-arrays.py reads them from cui.h. */
+/* gen-arrays: begin generated icons */
+
+meta static List _icon_parameters = %(
+  ("icon" 0) ("icon_button" 0) ("tree_cell" 4) ("tree_table_name" 1)
+  ("dock_item" 0) ("toolbar_button" 0) ("draw_icon" 0));
+/* gen-arrays: end generated icons */
+
+meta static int _icon_parameter(String method, int position) {
+  foreach (List row in _icon_parameters)
+    if (row[0] == method && (int) row[1] == position) return 1;
+  return 0;
+}
+
 /* The CUI constant that the short name `name` spells for a `type`. */
 meta static String _constant(Type type, String name) {
   String upper = name.upper();
-  if (Type.is_text(type)) return %"CUI_ICON_$upper";
+  if (type ~= %(icon)) return %"CUI_ICON_$upper";
+  if (Type.is_text(type)) return NULL;
   Type resolved = Type.resolve(type);
   if (resolved ~= %(enum *)) return _member(Type.members(resolved), upper);
   Var head = type.car();
