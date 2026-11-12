@@ -7,8 +7,8 @@
 void page_overlays(Ui ui, Gallery g) {
   section(ui, "Dialogs and sheets",
           "Esc or a click outside closes them. Focus stays inside.");
-  $cui.card(ui, {})
-  $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.card ()
+  ui.row (gap: 8, wrap: true) {
     if (ui.button("Edit profile", icon: CUI_ICON_PENCIL))
       g.dialog_open = true;
     if (ui.button("Open sheet", icon: CUI_ICON_PANEL_LEFT))
@@ -22,30 +22,30 @@ void page_overlays(Ui ui, Gallery g) {
       g.palette_open = true;
   }
   section(ui, "Popover and context menu", NULL);
-  $cui.card(ui, { .gap = 16 }) {
-    $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.card (gap: 16) {
+    ui.row (gap: 8, wrap: true) {
       if (ui.button("Filters", icon: CUI_ICON_FILTER))
         ui.popover_toggle("filters");
-      $cui.popover(ui, "filters", { .width = 280 }) {
+      ui.popover ("filters", width: 280) {
         ui.label("Filter results");
         ui.checkbox("Only active", g.newsletter);
         ui.checkbox("Include archived", g.marketing);
         ui.slider("Minimum score", g.brightness, 0, 100,
                   show_value: true);
-        $cui.row(ui, { .gap = 8, .justify = CUI_JUSTIFY_END }) {
+        ui.row (gap: 8, justify: CUI_JUSTIFY_END) {
           if (ui.button("Apply", variant: CUI_BUTTON_PRIMARY,
                                  size: CUI_SIZE_SM))
             ui.popover_close("filters");
         }
       }
     }
-    $cui.card(ui, { .muted = true, .id = "ctx-area", .pad = 28,
-                    .align = CUI_ALIGN_CENTER, .hoverable = true }) {
+    ui.card (muted: true, id: "ctx-area", pad: 28,
+             align: CUI_ALIGN_CENTER, hoverable: true) {
       ui.icon(CUI_ICON_ELLIPSIS, 18, CUI_COLOR_TEXT_MUTED);
       ui.text("Right click this area",
         color: CUI_COLOR_TEXT_SECONDARY, align: CUI_TEXT_CENTER);
     }
-    $cui.context_menu(ui, "ctx") {
+    ui.context_menu ("ctx") {
       ui.menu_item("Cut", icon: CUI_ICON_SCISSORS,
                           shortcut: "Ctrl X");
       ui.menu_item("Copy", icon: CUI_ICON_COPY, shortcut: "Ctrl C");
@@ -57,8 +57,8 @@ void page_overlays(Ui ui, Gallery g) {
   }
   section(ui, "Toasts", "They stack, expand on hover and pause while you "
                         "read.");
-  $cui.card(ui, {})
-  $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.card ()
+  ui.row (gap: 8, wrap: true) {
     if (ui.button("Save profile"))
       ui.toast("Changes saved",
         description: "Your profile is up to date.",
@@ -75,8 +75,8 @@ void page_overlays(Ui ui, Gallery g) {
         tone: CUI_TONE_INFO);
   }
   section(ui, "Tooltips", NULL);
-  $cui.card(ui, {})
-  $cui.row(ui, { .gap = 4, .wrap = true }) {
+  ui.card ()
+  ui.row (gap: 4, wrap: true) {
     ui.icon_button(CUI_ICON_BOLD, tooltip: "Bold",
                                   shortcut: "Ctrl B");
     ui.icon_button(CUI_ICON_ITALIC, tooltip: "Italic",

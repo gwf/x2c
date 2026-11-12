@@ -43,14 +43,10 @@ void page_data(Ui ui, Gallery g) {
     }
     order[j + 1] = v;
   }
-  cui_table_column cols[5] = {
-    { "Name", CUI_FILL, CUI_TEXT_LEFT, true },
-    { "Email", CUI_GROW(1.2), CUI_TEXT_LEFT, false },
-    { "Role", CUI_PX(110), CUI_TEXT_LEFT, true },
-    { "Status", CUI_PX(120), CUI_TEXT_LEFT, true },
-    { "Revenue", CUI_PX(110), CUI_TEXT_RIGHT, false },
-  };
-  $cui.table(ui, "people", cols, { .sort = &g.sort, .selectable = true }) {
+  ui.table ("people", sort: &g.sort, selectable: true,
+            columns: {"Name": fill, "Email": unsorted(grow(1.2)),
+                      "Role": 110, "Status": 120,
+                      "Revenue": right(unsorted(110))}) {
     for (int k = 0; k < 5; k++) {
       person_row *r = &rows[order[k]];
       if (ui.table_row(g.selected_row == order[k])) g.selected_row = order[k];
@@ -65,14 +61,14 @@ void page_data(Ui ui, Gallery g) {
       ui.table_cell_text(r.amount);
     }
   }
-  $cui.box(ui, { .dir = CUI_GRID, .columns = 2, .min_column_width = 260,
-                 .gap = 16 }) {
-    $cui.column(ui, { .gap = 12 }) {
+  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+          gap: 16) {
+    ui.column (gap: 12) {
       section(ui, "Tree view", NULL);
-      $cui.card(ui, { .pad = 10, .gap = 1 })
-      $cui.tree(ui, "src", g.tree_src, {}) {
+      ui.card (pad: 10, gap: 1)
+      ui.tree ("src", g.tree_src) {
         // A leaf has no open state, so it passes NULL for the flag.
-        $cui.tree(ui, "components", g.tree_ui, {}) {
+        ui.tree ("components", g.tree_ui) {
           int i = 0;
           foreach (String file in %("button.c" "dialog.c" "slider.c"
                                     "table.c")) {
@@ -82,16 +78,16 @@ void page_data(Ui ui, Gallery g) {
             i++;
           }
         }
-        $cui.tree(ui, "assets", g.tree_assets, {}) {
+        ui.tree ("assets", g.tree_assets) {
           ui.tree_begin("logo.png", NULL, {
             .leaf = true, .icon = CUI_ICON_IMAGE });
         }
         ui.tree_begin("main.c", NULL, { .leaf = true });
       }
     }
-    $cui.column(ui, { .gap = 12 }) {
+    ui.column (gap: 12) {
       section(ui, "List", NULL);
-      $cui.card(ui, { .pad = 8, .gap = 2 }) {
+      ui.card (pad: 8, gap: 2) {
         ui.list_item("Design review",
           avatar: "Jonas Berg", subtitle: "Tomorrow at 10:00",
           trailing: "45m");
@@ -107,7 +103,7 @@ void page_data(Ui ui, Gallery g) {
   section(ui, "Reorderable list", "Drag a row. The others make room as you "
                                   "go.");
   // The rows carry their own edges: no card around them.
-  $cui.column(ui, { .width = CUI_FILL }) {
+  ui.column (width: CUI_FILL) {
     List tasks = %("Write the release notes" "Record the demo video"
                    "Update the screenshots" "Tag version 1.0"
                    "Post the announcement");
@@ -118,7 +114,7 @@ void page_data(Ui ui, Gallery g) {
     List labels = %("Docs" "Video" "Docs" "Release" "Blog");
     ui.reorder_begin("tasks", g.task_order);
     for (int i = 0; i < 5; i++) {
-      $cui.reorder_item(ui, i) {
+      ui.reorder_item (i) {
         int t = g.task_order[i];
         String task = tasks[t], label = labels[t];
         ui.text(task, nowrap: true, width: CUI_FILL);
@@ -128,30 +124,30 @@ void page_data(Ui ui, Gallery g) {
     if (ui.reorder_end()) ui.toast("Order saved");
   }
   section(ui, "Accordion", NULL);
-  $cui.card(ui, { .pad_y = 4, .gap = 0 }) {
-    $cui.accordion(ui, "Is it really dependency free?", g.acc[0])
+  ui.card (pad_y: 4, gap: 0) {
+    ui.accordion ("Is it really dependency free?", g.acc[0])
       ui.secondary("Yes. The core is plain C99. Windows uses Win32, macOS "
                    "uses Cocoa and Linux uses X11. Fonts and icons are "
                    "embedded.");
-    $cui.accordion(ui, "Can I use my own renderer?", g.acc[1])
+    ui.accordion ("Can I use my own renderer?", g.acc[1])
       ui.secondary("CUI outputs vertices and draw commands. Port the 60 "
                    "line shader to Vulkan, Metal or Direct3D and you are "
                    "done.");
-    $cui.accordion(ui, "Does it respect reduced motion?", g.acc[2])
+    ui.accordion ("Does it respect reduced motion?", g.acc[2])
       ui.secondary("Every animation has a reduced motion path that keeps "
                    "the final state and feedback.");
   }
   section(ui, "Virtual list", "Ten thousand rows. Only the visible ones are "
                               "built.");
-  $cui.card(ui, { .pad = 6 }) {
+  ui.card (pad: 6) {
     int first = 0, last = 0;
-    $cui.virtual_list(ui, "big", 10000, 36, CUI_PX(220), first, last) {
+    ui.virtual_list ("big", 10000, 36, CUI_PX(220), first, last) {
       for (int i = first; i < last; i++) {
         unsigned h = (unsigned) (i + 1) * 2654435761u;
         String invoice = String.format("Invoice 2026-%05d", 10000 - i);
         String amount = String.format("$%u.%02u", 40 + (h >> 8) % 2400,
                                       (h >> 4) % 100);
-        $cui.row(ui, { .height = CUI_PX(36), .pad_x = 12, .gap = 12 }) {
+        ui.row (height: CUI_PX(36), pad_x: 12, gap: 12) {
           ui.icon(CUI_ICON_FILE_TEXT, 16, CUI_COLOR_TEXT_MUTED);
           ui.text(invoice, nowrap: true, width: CUI_FILL,
                            tabular: true);

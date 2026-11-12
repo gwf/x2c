@@ -24,7 +24,7 @@ typedef struct Form {
 } Form;
 
 static void draw_form(Ui ui, Form &form) {
-  $cui.column(ui, { .pad = 16, .gap = 12, .width = CUI_FILL }) {
+  ui.column (pad: 16, gap: 12, width: CUI_FILL) {
     form.clicks += ui.button("Save", variant: CUI_BUTTON_PRIMARY);
     form.button = ui.last_rect();
     ui.checkbox("I agree", form.agree);
@@ -141,7 +141,7 @@ static void a_text_field_sets_and_takes_text(void) {
 // A block left early must still end, or CUI's layout stack is unbalanced.
 static int draw_rows(Ui ui, int stop_at) {
   for (int i = 0; i < 4; i++) {
-    $cui.id_index(ui, i) $cui.row(ui, { .gap = 4 }) {
+    $cui.id_index(ui, i) ui.row (gap: 4) {
       if (i == 1) continue;
       if (i == stop_at) return i;
       ui.label(%"row $i");
@@ -155,7 +155,7 @@ static void a_block_left_early_still_ends(void) {
   int stopped = 0;
   for (int pass = 0; pass < 3; pass++) {
     screen.begin();
-    $cui.column(screen.ui(), { .gap = 4 }) {
+    screen.ui().column (gap: 4) {
       stopped = draw_rows(screen.ui(), 2);
       screen.ui().label("after the rows");
     }
@@ -274,6 +274,7 @@ static void short_forms(Ui ui) {
   }
 }
 
+// The C calls, inside the earlier `$cui.*` decorators, which still work.
 static void c_forms(Ui ui) {
   $cui.column(ui, { .width = CUI_FILL, .pad = 12, .gap = 8,
                     .bg = CUI_COLOR_SURFACE_MUTED }) {
@@ -337,6 +338,44 @@ static void an_array_of_columns(Ui ui) {
 
 static void a_table_takes_its_columns_from_a_map(void) {
   EXPECT_TRUE(same_pixels(a_map_of_columns, an_array_of_columns));
+}
+
+static void a_grid_with_a_map_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 0 };
+  ui.data_grid ("grid", 30, first, last,
+                columns: {"Name": 120, "Done": unsorted(60),
+                          "Score": right(80)},
+                height: 200, sort: &sort)
+    for (int row = first; row < last; row++) {
+      ui.data_grid_row(row);
+      ui.data_grid_cell_text(%"name $row");
+      ui.data_grid_cell_text(row % 2 ? "yes" : "no");
+      ui.data_grid_cell_text(%"$(row * 3)");
+    }
+}
+
+static void a_grid_with_an_array_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 0 };
+  static cui_grid_column columns[] = {
+    { "Name", 120, CUI_TEXT_LEFT, true },
+    { "Done", 60, CUI_TEXT_LEFT, false },
+    { "Score", 80, CUI_TEXT_RIGHT, true },
+  };
+  $cui.data_grid(ui, "grid", columns, 30, first, last,
+                 { .height = CUI_PX(200), .sort = &sort })
+    for (int row = first; row < last; row++) {
+      ui.data_grid_row(row);
+      ui.data_grid_cell_text(%"name $row");
+      ui.data_grid_cell_text(row % 2 ? "yes" : "no");
+      ui.data_grid_cell_text(%"$(row * 3)");
+    }
+}
+
+/* The data grid's method form draws what `$cui.data_grid` draws with the
+   same columns as a C array. */
+static void a_data_grid_takes_its_columns_from_a_map(void) {
+  EXPECT_TRUE(same_pixels(a_grid_with_a_map_of_columns,
+                          a_grid_with_an_array_of_columns));
 }
 
 // lists
@@ -474,6 +513,7 @@ void x2cui_suite(void) {
   $test.run(formatted_text_takes_x2c_values);
   $test.run(method_forms_draw_what_the_c_calls_draw);
   $test.run(a_table_takes_its_columns_from_a_map);
+  $test.run(a_data_grid_takes_its_columns_from_a_map);
   $test.run(an_item_reports_what_the_pointer_did);
   $test.run(a_virtual_list_draws_the_rows_in_view);
   $test.run(a_table_row_reports_what_the_pointer_did);

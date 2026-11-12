@@ -166,7 +166,7 @@ static void scene_feature_flags(Ui ui) {
 static void scene_flame_graph(Ui ui) {
   static cui_flame_view view;
   static int selected = 6;
-  $cui.column(ui, { .width = CUI_PX(640), .gap = 10 }) {
+  ui.column (width: CUI_PX(640), gap: 10) {
     if (selected >= 0) {
       cui_flame_span span = flame_spans[selected];
       double ms = (span.end - span.start) * 1e3;
@@ -241,7 +241,7 @@ static void scene_kv_editor(Ui ui) {
     { "Accept", "application/json", true },
     { "X-Request-Id", "7d1c0a", false } };
   static int count = 3;
-  $cui.column(ui, { .width = CUI_PX(600), .gap = 10 }) {
+  ui.column (width: CUI_PX(600), gap: 10) {
     ui.text("Headers", font: CUI_FONT_MEDIUM);
     ui.kv_editor("headers", headers, count, $cui.count(headers));
   }

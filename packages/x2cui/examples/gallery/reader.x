@@ -15,9 +15,9 @@ void page_reader(Ui ui, Gallery g) {
                 "input and return what happened. Your variables are the "
                 "source of truth, so there is nothing to keep in sync, and "
                 "conditional interface is just an if statement. ";
-  $cui.row(ui, { .gap = 28, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.scroll(ui, { .id = "reader", .height = CUI_PX(560),
-                      .width = CUI_FILL, .gap = 14, .fade_edges = true }) {
+  ui.row (gap: 28, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.scroll (id: "reader", height: CUI_PX(560),
+               width: CUI_FILL, gap: 14, fade_edges: true) {
       for (int k = 0; k < $cui.count(toc); k++) {
         ui.toc_anchor(toc[k].anchor);
         ui.heading(toc[k].title, toc[k].level ? 4 : 3);
@@ -29,7 +29,7 @@ void page_reader(Ui ui, Gallery g) {
       }
       ui.gap(200);
     }
-    $cui.column(ui, { .width = CUI_PX(200), .gap = 10 }) {
+    ui.column (width: CUI_PX(200), gap: 10) {
       ui.text("On this page", size: 12, font: CUI_FONT_MEDIUM,
                               color: CUI_COLOR_TEXT_MUTED);
       ui.toc("reader", toc, $cui.count(toc));

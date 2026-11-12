@@ -108,11 +108,14 @@ list either by name.
 ## Foreign-declaration limits
 
 - x2c does not expand CUI's lowercase `cui_name(...)` macros, which supply
-  named arguments and block scopes in C. The package's methods and `$cui.`
-  macros replace them.
+  named arguments and block scopes in C. The package's methods and their
+  method forms, such as `ui.button("Add", variant: primary)` and
+  `ui.row (gap: 8) { ... }`, replace them.
 - x2c does not check C macro constants such as `CUI_COLOR_ACCENT`. A
   misspelled one is reported by the C compiler, not by x2c.
 - A header string macro such as `CUI_ICON_CHECK` is a value. It cannot be
   written next to a string literal for C to join.
-- Variadic functions, such as `cui_textf`, have no method and are called
-  as C.
+- A variadic function, such as `cui_textf`, has no generated method. The
+  four that format text have hand-written methods that take x2c values,
+  such as `ui.textf("%d items", n)`; the C functions remain callable as
+  C.

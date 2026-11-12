@@ -32,10 +32,10 @@ void page_audio(Ui ui, Gallery g) {
   if (ui.button("Take the tour", icon: CUI_ICON_SPARKLES,
                                  variant: CUI_BUTTON_OUTLINE))
     tour = 0;
-  $cui.row(ui, { .gap = 16, .wrap = true, .align = CUI_ALIGN_START }) {
-    $cui.card(ui, { .gap = 16, .min_width = 280 }) {
+  ui.row (gap: 16, wrap: true, align: CUI_ALIGN_START) {
+    ui.card (gap: 16, min_width: 280) {
       ui.heading("Synth", 4);
-      $cui.row(ui, { .gap = 14, .wrap = true }) {
+      ui.row (gap: 14, wrap: true) {
         ui.knob("Cutoff", cutoff, 20, 20000,
           unit: "Hz", log_scale: true, reset: 1000);
         steps[0].target = ui.last_id();
@@ -51,7 +51,7 @@ void page_audio(Ui ui, Gallery g) {
         segmented: true);
       steps[1].target = ui.last_id();
     }
-    $cui.card(ui, { .dir = CUI_ROW, .gap = 8, .wrap = true }) {
+    ui.card (dir: CUI_ROW, gap: 8, wrap: true) {
       for (int k = 0; k < 6; k++) $cui.id_index(ui, k) {
         String name = names[k];
         ui.fader(name, faders[k], -48, 6,

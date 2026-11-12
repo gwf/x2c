@@ -245,10 +245,25 @@ records, such as a calendar whose events are dragged. `$cui.count` of a
 pointer does not compile; a program that holds a pointer passes its own
 count.
 
-Two block components take the array itself and supply the count:
+The table and the data grid take their columns as a Map literal instead;
+see [Lists and tables](#lists-and-tables). The data grid draws only the
+rows on screen: its block builds rows `first` up to `last`, two `int`
+variables the form declares, and its widths are points:
+
+```x2c
+ui.data_grid ("people", people.len(), first, last,
+              columns: {"Name": 240, "Commits": right(100)},
+              height: 300, selected: selected, sort: &sort)
+  for (int row = first; row < last; row++) {
+    ui.data_grid_row(row);
+    ui.data_grid_cell_text(names[row]);
+    ui.data_grid_cell_text(%"$(commits[row])");
+  }
+```
+
+Their earlier spellings with a C array of columns remain:
 `$cui.table(ui, id, columns, opts) { ... }` and
-`$cui.data_grid(ui, id, columns, rows, first, last, opts) { ... }`. The
-data grid draws only the rows on screen, from `first` up to `last`.
+`$cui.data_grid(ui, id, columns, rows, first, last, opts) { ... }`.
 
 Chart numbers may also be a packed `ArrayFloat`:
 `cui_series.of(name, values)` builds a series over one, and

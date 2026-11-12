@@ -17,7 +17,7 @@ static void prepare(void) {
 }
 
 static void scene_empty_state(Ui ui) {
-  $cui.card(ui, { .width = CUI_PX(480), .pad = 0 }) {
+  ui.card (width: CUI_PX(480), pad: 0) {
     if (ui.empty_state("No projects yet",
           icon: CUI_ICON_FOLDER_OPEN, action: "New project",
           description: "A project holds your screens, their builds and "
@@ -31,7 +31,7 @@ static void scene_metric(Ui ui) {
   // `const float *spark, int spark_count` pair.
   static const float installs[] = { 3, 5, 4, 7, 6, 9, 11 };
   static const float frame_time[] = { 9, 7, 8, 6, 5, 6, 4, 4, 3 };
-  $cui.row(ui, { .gap = 16, .width = CUI_FILL }) {
+  ui.row (gap: 16, width: CUI_FILL) {
     ui.metric("Weekly installs", "3,912",
       icon: CUI_ICON_DOWNLOAD, delta: 8.1f,
       delta_label: "+8.1% vs last week", spark: installs,
@@ -45,13 +45,13 @@ static void scene_metric(Ui ui) {
 
 static void scene_accordion(Ui ui) {
   static bool first = true, second = false, third = false;
-  $cui.card(ui, { .width = CUI_PX(520), .pad_y = 4, .gap = 0 }) {
-    $cui.accordion(ui, "Is it really dependency free?", first)
+  ui.card (width: CUI_PX(520), pad_y: 4, gap: 0) {
+    ui.accordion ("Is it really dependency free?", first)
       ui.secondary("Yes. The core is plain C99, and fonts and icons are "
                    "embedded.");
-    $cui.accordion(ui, "Can I use my own renderer?", second)
+    ui.accordion ("Can I use my own renderer?", second)
       ui.secondary("CUI outputs vertices and draw commands for any GPU API.");
-    $cui.accordion(ui, "Does it respect reduced motion?", third)
+    ui.accordion ("Does it respect reduced motion?", third)
       ui.secondary("Every animation keeps its final state and feedback.");
   }
 }
@@ -63,13 +63,13 @@ static void tree_file(Ui ui, String name, bool selected) {
 
 static void scene_tree(Ui ui) {
   static bool src = true, widgets = true, assets = false;
-  $cui.card(ui, { .width = CUI_PX(280), .pad = 10, .gap = 1 }) {
-    $cui.tree(ui, "src", src, {}) {
-      $cui.tree(ui, "widgets", widgets, {}) {
+  ui.card (width: CUI_PX(280), pad: 10, gap: 1) {
+    ui.tree ("src", src) {
+      ui.tree ("widgets", widgets) {
         tree_file(ui, "button.c", false);
         tree_file(ui, "slider.c", true);
       }
-      $cui.tree(ui, "assets", assets, {}) tree_file(ui, "logo.png", false);
+      ui.tree ("assets", assets) tree_file(ui, "logo.png", false);
       tree_file(ui, "main.c", false);
     }
   }
@@ -84,7 +84,7 @@ static void scene_list_item(Ui ui) {
   static const char *times[] = { "Tomorrow at 10:00", "Ship it",
                                  "Q1 roadmap" };
   static const char *lengths[] = { "45m", "2h", "1h" };
-  $cui.card(ui, { .width = CUI_PX(360), .pad = 8, .gap = 2 }) {
+  ui.card (width: CUI_PX(360), pad: 8, gap: 2) {
     for (int i = 0; i < 3; i++) {
       if (ui.list_item(titles[i], avatar: people[i],
                                   subtitle: times[i],
@@ -99,11 +99,11 @@ static void scene_virtual_list(Ui ui) {
   int first = 0, last = 0;
   ui.text("Ten thousand rows. Only the visible ones are built.",
           color: CUI_COLOR_TEXT_MUTED);
-  $cui.card(ui, { .width = CUI_PX(420), .pad = 6 })
-  $cui.virtual_list(ui, "invoices", 10000, 36, CUI_PX(288), first, last) {
+  ui.card (width: CUI_PX(420), pad: 6)
+  ui.virtual_list ("invoices", 10000, 36, CUI_PX(288), first, last) {
     for (int i = first; i < last; i++) {
-      $cui.row(ui, { .height = CUI_PX(36), .pad_x = 12, .gap = 12,
-                     .align = CUI_ALIGN_CENTER }) {
+      ui.row (height: CUI_PX(36), pad_x: 12, gap: 12,
+              align: CUI_ALIGN_CENTER) {
         ui.icon(CUI_ICON_FILE_TEXT, 16, CUI_COLOR_TEXT_MUTED);
         ui.text(%"Invoice 2026-$(20000 - i)",
                 nowrap: true, tabular: true, width: CUI_FILL);
@@ -144,13 +144,13 @@ static void scene_image(Ui ui) {
 }
 
 static void scene_tag_input(Ui ui) {
-  $cui.column(ui, { .width = CUI_PX(420) })
+  ui.column (width: CUI_PX(420))
     ui.tag_input("topics", topics, label: "Topics",
                                    placeholder: "Add a topic");
 }
 
 static void scene_button_group(Ui ui) {
-  $cui.button_group(ui) {
+  ui.button_group () {
     ui.button("Bold", icon: CUI_ICON_BOLD);
     ui.button("Italic", icon: CUI_ICON_ITALIC);
     ui.button("Underline", icon: CUI_ICON_UNDERLINE);
@@ -176,13 +176,13 @@ static void scene_reorder_item(Ui ui) {
                                     CUI_TONE_TEAL };
   ui.text("Drag a row. The others make room as you go.",
           color: CUI_COLOR_TEXT_MUTED);
-  $cui.column(ui, { .width = CUI_PX(440) }) {
+  ui.column (width: CUI_PX(440)) {
     // cui_reorder_begin(cui_ctx *, const char *id,
     // int *order, int count) has no method for its array and count.
     cui_reorder_begin(ui, "tasks", order, 5);
     for (int i = 0; i < 5; i++) {
       int task = order[i];
-      $cui.reorder_item(ui, i) {
+      ui.reorder_item (i) {
         ui.text(tasks[task], nowrap: true, width: CUI_FILL);
         ui.badge(labels[task], tone: tones[task]);
       }
@@ -192,7 +192,7 @@ static void scene_reorder_item(Ui ui) {
 }
 
 static void scene_timeline_item(Ui ui) {
-  $cui.column(ui, { .width = CUI_PX(380), .gap = 0 }) {
+  ui.column (width: CUI_PX(380), gap: 0) {
     ui.timeline_item("Deployed to production",
       time: "2m ago", description: "Release 1.0.3 is live in all "
                                        "regions.",
@@ -225,7 +225,7 @@ static void scene_kanban_column_begin(Ui ui) {
     for (int k = 0; k < counts[c]; k++) {
       ui.kanban_card_begin(c * 10 + k);
       ui.text(cards[c][k], font: CUI_FONT_MEDIUM, size: 13.5f);
-      $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
+      ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
         ui.avatar(owners[c][k], size: 22);
         ui.text(owners[c][k], size: 12, color: CUI_COLOR_TEXT_MUTED);
       }
@@ -237,8 +237,8 @@ static void scene_kanban_column_begin(Ui ui) {
 }
 
 static void scene_reasoning(Ui ui) {
-  $cui.column(ui, { .width = CUI_PX(520), .gap = 10 })
-  $cui.reasoning(ui, "think", { .thinking = true, .seconds = 6 }) {
+  ui.column (width: CUI_PX(520), gap: 10)
+  ui.reasoning ("think", thinking: true, seconds: 6) {
     ui.text("The question is about perceived speed: how little work a "
             "frame does, and how fast input reaches the screen.",
             size: 13.5f, color: CUI_COLOR_TEXT_SECONDARY);
@@ -249,7 +249,7 @@ static void scene_reasoning(Ui ui) {
 }
 
 static void scene_tool_call(Ui ui) {
-  $cui.column(ui, { .width = CUI_PX(560), .gap = 10 }) {
+  ui.column (width: CUI_PX(560), gap: 10) {
     ui.tool_call("search", "web_search",
       icon: CUI_ICON_GLOBE, detail: "immediate mode gui performance",
       status: CUI_TASK_DONE, seconds: 1.4f,
@@ -277,7 +277,7 @@ static void scene_context_meter(Ui ui) {
   // `const cui_viz_item *parts, int part_count` pair.
   static const cui_viz_item parts[] = {
     { "System", 3200 }, { "Files", 41800 }, { "Messages", 68400 } };
-  $cui.row(ui, { .gap = 10, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 10, align: CUI_ALIGN_CENTER) {
     ui.context_meter("context", 113400, 200000,
                      parts: parts, part_count: 3);
     ui.text("113k of 200k tokens used. Hover the ring for a breakdown.",
@@ -289,7 +289,7 @@ static void scene_response_actions(Ui ui) {
   // cui_response_actions_opts takes the vote as `int *vote`,
   // an option field that needs `&`.
   static int vote = 1;
-  $cui.column(ui, { .width = CUI_PX(520), .gap = 8 }) {
+  ui.column (width: CUI_PX(520), gap: 8) {
     ui.text("They do very little work per frame: the interface is rebuilt "
             "from your data, laid out once and drawn in a handful of "
             "batches.");
@@ -321,10 +321,10 @@ static void scene_voice_orb(Ui ui) {
   static const char *names[] = { "Idle", "Listening", "Thinking",
                                  "Speaking" };
   static const float levels[] = { 0.2f, 0.7f, 0.2f, 0.5f };
-  $cui.row(ui, { .gap = 18, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 18, align: CUI_ALIGN_CENTER) {
     for (int k = 0; k < 4; k++) {
-      $cui.id_index(ui, k) $cui.column(ui, { .align = CUI_ALIGN_CENTER,
-                                             .gap = 6 }) {
+      $cui.id_index(ui, k) ui.column (align: CUI_ALIGN_CENTER,
+                                      gap: 6) {
         ui.voice_orb("orb", (cui_voice_state) k, levels[k], size: 130);
         ui.text(names[k], size: 13, color: CUI_COLOR_TEXT_SECONDARY);
       }
@@ -333,14 +333,14 @@ static void scene_voice_orb(Ui ui) {
 }
 
 static void scene_shimmer_text(Ui ui) {
-  $cui.row(ui, { .gap = 10, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 10, align: CUI_ALIGN_CENTER) {
     ui.loader(style: CUI_LOADER_DOTS, size: 22);
     ui.shimmer_text("Thinking about your question...", size: 15);
   }
 }
 
 static void scene_typewriter(Ui ui) {
-  $cui.column(ui, { .width = CUI_PX(520) })
+  ui.column (width: CUI_PX(520))
     ui.typewriter("answer", "CUI draws a full frame in a fraction of a "
                   "millisecond, so text can stream in as fast as it "
                   "arrives.", size: 15, caret: true, speed: 400);
@@ -355,7 +355,7 @@ static void scene_text_reveal(Ui ui) {
 }
 
 static void scene_word_rotate(Ui ui) {
-  $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
     ui.text("Deploying to", font: CUI_FONT_DISPLAY, size: 26);
     ui.word_rotate("regions", %("staging." "eu-west." "all regions."), 2.2f,
                    font: CUI_FONT_DISPLAY, size: 26);
@@ -367,7 +367,7 @@ static void scene_number_roll(Ui ui) {
   ui.text("Visitors this week", color: CUI_COLOR_TEXT_MUTED);
   ui.number_roll("visits", %"$(visits / 10).$(visits % 10)k",
                  font: CUI_FONT_DISPLAY, size: 40);
-  $cui.row(ui, { .gap = 8 }) {
+  ui.row (gap: 8) {
     if (ui.button("Add 100", icon: CUI_ICON_PLUS)) visits++;
     if (ui.button("Remove 100", variant: CUI_BUTTON_GHOST) &&
         visits > 0)
@@ -389,11 +389,11 @@ static void scene_spotlight(Ui ui) {
     "Plain C into a pixel buffer. No GPU needed.",
     "The default on desktop. Deploying now.",
     "The core emits triangles; bring any GPU API." };
-  $cui.row(ui, { .gap = 14, .align = CUI_ALIGN_STRETCH, .width = CUI_FILL }) {
+  ui.row (gap: 14, align: CUI_ALIGN_STRETCH, width: CUI_FILL) {
     for (int k = 0; k < 3; k++) {
       $cui.id_index(ui, k)
-      $cui.spotlight(ui, "renderer", { .width = CUI_GROW(1),
-                                       .beam = k == 1 }) {
+      ui.spotlight ("renderer", width: CUI_GROW(1),
+                                beam: k == 1) {
         ui.text(titles[k], font: CUI_FONT_MEDIUM, size: 15);
         ui.text(blurbs[k], size: 13, color: CUI_COLOR_TEXT_SECONDARY);
       }
@@ -403,9 +403,9 @@ static void scene_spotlight(Ui ui) {
 
 static void scene_loader(Ui ui) {
   static const char *names[] = { "Dots", "Bars", "Pulse", "Orbit", "Grid" };
-  $cui.row(ui, { .gap = 36, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 36, align: CUI_ALIGN_CENTER) {
     for (int k = 0; k < 5; k++) {
-      $cui.column(ui, { .gap = 10, .align = CUI_ALIGN_CENTER }) {
+      ui.column (gap: 10, align: CUI_ALIGN_CENTER) {
         ui.loader(style: (cui_loader_style) k, size: 30);
         ui.text(names[k], size: 12, color: CUI_COLOR_TEXT_MUTED);
       }
@@ -414,9 +414,9 @@ static void scene_loader(Ui ui) {
 }
 
 static void scene_dock(Ui ui) {
-  $cui.column(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                    .justify = CUI_JUSTIFY_END, .align = CUI_ALIGN_CENTER })
-  $cui.dock(ui, "dock", {}) {
+  ui.column (width: CUI_FILL, height: CUI_FILL,
+             justify: CUI_JUSTIFY_END, align: CUI_ALIGN_CENTER)
+  ui.dock ("dock") {
     if (ui.dock_item(CUI_ICON_FOLDER, "Files",
                      color: CUI_RGB(0x3b82f6), running: true))
       ui.toast("Files");

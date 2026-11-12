@@ -87,7 +87,7 @@ void page_files(Ui ui, Gallery g) {
   cui_file_browser_result r = ui.file_browser("files", folder,
     list: files_list, height: CUI_PX(380));
   if (r.picked) chosen.set(r.picked);
-  $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER, .wrap = true }) {
+  ui.row (gap: 8, align: CUI_ALIGN_CENTER, wrap: true) {
     if (ui.button("Open\xe2\x80\xa6", icon: CUI_ICON_FOLDER_OPEN))
       open_dlg = true;
     if (ui.button("Save as\xe2\x80\xa6", icon: CUI_ICON_DOWNLOAD))

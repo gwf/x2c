@@ -7,8 +7,8 @@
 void page_buttons(Ui ui, Gallery g) {
   section(ui, "Variants",
           "One primary action per view. Secondary for everything else.");
-  $cui.card(ui, {})
-  $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.card ()
+  ui.row (gap: 8, wrap: true) {
     ui.button("Primary", variant: CUI_BUTTON_PRIMARY);
     ui.button("Secondary");
     ui.button("Outline", variant: CUI_BUTTON_OUTLINE);
@@ -17,13 +17,13 @@ void page_buttons(Ui ui, Gallery g) {
     ui.button("Link", variant: CUI_BUTTON_LINK);
   }
   section(ui, "Sizes and icons", NULL);
-  $cui.card(ui, { .gap = 16 }) {
-    $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.card (gap: 16) {
+    ui.row (gap: 8, wrap: true) {
       ui.button("Small", size: CUI_SIZE_SM);
       ui.button("Medium");
       ui.button("Large", size: CUI_SIZE_LG);
     }
-    $cui.row(ui, { .gap = 8, .wrap = true }) {
+    ui.row (gap: 8, wrap: true) {
       ui.button("New project", variant: CUI_BUTTON_PRIMARY,
                                icon: CUI_ICON_PLUS);
       ui.button("Download", icon: CUI_ICON_DOWNLOAD);
@@ -40,8 +40,8 @@ void page_buttons(Ui ui, Gallery g) {
   }
   section(ui, "States",
           "Loading keeps the label so the layout does not jump.");
-  $cui.card(ui, {})
-  $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.card ()
+  ui.row (gap: 8, wrap: true) {
     if (ui.button(g.loading ? "Saving" : "Save changes",
           variant: CUI_BUTTON_PRIMARY, loading: g.loading))
       g.loading = true;
@@ -52,15 +52,15 @@ void page_buttons(Ui ui, Gallery g) {
   }
   section(ui, "Groups, copy and hold to confirm",
           "Hold the button until it fills to confirm a destructive action.");
-  $cui.card(ui, {})
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
-    $cui.button_group(ui) {
+  ui.card ()
+  ui.row (gap: 12, wrap: true) {
+    ui.button_group () {
       ui.button("Bold##group", icon: CUI_ICON_BOLD);
       ui.button("Italic##group", icon: CUI_ICON_ITALIC);
       ui.button("Underline##group", icon: CUI_ICON_UNDERLINE);
     }
-    $cui.row(ui, { .gap = 6, .bg = CUI_COLOR_SURFACE_MUTED, .radius = 18,
-                   .pad_left = 14, .pad_right = 4, .pad_y = 2 }) {
+    ui.row (gap: 6, bg: CUI_COLOR_SURFACE_MUTED, radius: 18,
+            pad_left: 14, pad_right: 4, pad_y: 2) {
       ui.text("npm i cui", font: CUI_FONT_MONO, nowrap: true);
       ui.copy_button("install", "npm i cui");
     }
@@ -69,7 +69,7 @@ void page_buttons(Ui ui, Gallery g) {
   }
   section(ui, "Segmented control",
           "A highlight glides to the selected option.");
-  $cui.card(ui, { .gap = 16 }) {
+  ui.card (gap: 16) {
     static const char *view_icons[] = { CUI_ICON_LIST,
                                         CUI_ICON_LAYOUT_DASHBOARD,
                                         CUI_ICON_HISTORY };
@@ -79,9 +79,9 @@ void page_buttons(Ui ui, Gallery g) {
                  size: CUI_SIZE_SM);
   }
   section(ui, "Dropdown menu", NULL);
-  $cui.card(ui, {})
-  $cui.row(ui, { .gap = 8, .wrap = true }) {
-    $cui.menu(ui, "Options", { .icon = CUI_ICON_SETTINGS }) {
+  ui.card ()
+  ui.row (gap: 8, wrap: true) {
+    ui.menu ("Options", icon: CUI_ICON_SETTINGS) {
       ui.menu_label("Project");
       ui.menu_item("Rename", icon: CUI_ICON_PENCIL, shortcut: "F2");
       ui.menu_item("Duplicate", icon: CUI_ICON_COPY,
@@ -92,8 +92,8 @@ void page_buttons(Ui ui, Gallery g) {
                                  danger: true))
         g.confirm_open = true;
     }
-    $cui.menu(ui, "More actions", { .icon_only = true,
-                                    .icon = CUI_ICON_ELLIPSIS }) {
+    ui.menu ("More actions", icon_only: true,
+                             icon: CUI_ICON_ELLIPSIS) {
       ui.menu_item("Archive", icon: CUI_ICON_ARCHIVE);
       ui.menu_item("Export", icon: CUI_ICON_DOWNLOAD);
     }

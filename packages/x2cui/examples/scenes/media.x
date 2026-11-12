@@ -9,9 +9,9 @@
 #include <math.h>
 
 static void scene_dock_item(Ui ui) {
-  $cui.row(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                 .justify = CUI_JUSTIFY_CENTER, .align = CUI_ALIGN_END })
-  $cui.dock(ui, "dock", {}) {
+  ui.row (width: CUI_FILL, height: CUI_FILL,
+          justify: CUI_JUSTIFY_CENTER, align: CUI_ALIGN_END)
+  ui.dock ("dock") {
     ui.dock_item(CUI_ICON_FOLDER, "Files", color: CUI_RGB(0x3b82f6),
                                            running: true);
     ui.dock_item(CUI_ICON_MAIL, "Mail", color: CUI_RGB(0x0ea5e9),
@@ -30,15 +30,15 @@ static void scene_dock_item(Ui ui) {
 
 static void scene_control_tile(Ui ui) {
   static bool wifi = true, hotspot = false, focus = true, dark = true;
-  $cui.box(ui, { .dir = CUI_GRID, .columns = 2, .gap = 10,
-                 .width = CUI_PX(300) }) {
+  ui.box (dir: CUI_GRID, columns: 2, gap: 10,
+          width: CUI_PX(300)) {
     ui.control_tile("Wi-Fi", wifi, icon: CUI_ICON_WIFI,
                                    detail: "Home");
     ui.control_tile("Hotspot", hotspot, icon: CUI_ICON_RADIO);
     ui.control_tile("Focus", focus, icon: CUI_ICON_MOON,
                                     detail: "Until 6 pm");
   }
-  $cui.box(ui, { .width = CUI_PX(300) })
+  ui.box (width: CUI_PX(300))
     ui.control_tile("Dark appearance", dark, icon: CUI_ICON_SUN,
                                              wide: true,
                                              width: CUI_FILL);
@@ -56,7 +56,7 @@ static void scene_radial_gauge(Ui ui) {
   static const cui_gauge_band load[] = {
     { 60, CUI_TONE_SUCCESS }, { 85, CUI_TONE_WARNING },
     { 100, CUI_TONE_DANGER } };
-  $cui.row(ui, { .gap = 28, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 28, align: CUI_ALIGN_CENTER) {
     ui.radial_gauge("cpu", 72, 0, 100, unit: "%", label: "CPU load",
                                        bands: load, band_count: 3);
     ui.radial_gauge("rps", 1840, 0, 2500,
@@ -66,7 +66,7 @@ static void scene_radial_gauge(Ui ui) {
 }
 
 static void scene_chat_message(Ui ui) {
-  $cui.card(ui, { .width = CUI_FILL, .pad = 16, .gap = 0 }) {
+  ui.card (width: CUI_FILL, pad: 16, gap: 0) {
     ui.chat_divider("Today");
     ui.chat_message("Did the data grid make it into 1.1?",
                     author: "Jonas Berg", time: "9:41");
@@ -84,7 +84,7 @@ static void scene_chat_message(Ui ui) {
 static void scene_comment(Ui ui) {
   static int likes[3] = { 12, 3, 0 };
   static bool liked[3] = { true, false, false };
-  $cui.card(ui, { .width = CUI_FILL, .pad = 14, .gap = 4 }) {
+  ui.card (width: CUI_FILL, pad: 14, gap: 4) {
     ui.comment("c1", "Tomas Rivera",
                "The new numbers match the staging run. I would still test "
                "the import on a large file before Friday.",
@@ -108,11 +108,11 @@ static void scene_carousel(Ui ui) {
     "Linux and macOS jobs can run on ARM64 machines in every plan.",
     "Every action in the editor has a key, listed under Help, Shortcuts." };
   static const unsigned colors[] = { 0x1f2a37, 0x0f3d3e, 0x3a2e22 };
-  $cui.carousel(ui, "tour", 3, slide, { .height = 200 }) {
-    for (int k = 0; k < 3; k++) $cui.carousel_slide(ui)
-    $cui.box(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                   .bg = CUI_RGB(colors[k]), .radius = 16, .pad = 28,
-                   .gap = 8, .justify = CUI_JUSTIFY_END }) {
+  ui.carousel ("tour", 3, slide, height: 200) {
+    for (int k = 0; k < 3; k++) ui.carousel_slide ()
+    ui.box (width: CUI_FILL, height: CUI_FILL,
+            bg: CUI_RGB(colors[k]), radius: 16, pad: 28,
+            gap: 8, justify: CUI_JUSTIFY_END) {
       ui.text(titles[k], font: CUI_FONT_DISPLAY, size: 24,
                          color: CUI_RGB(0xffffff));
       ui.text(notes[k], color: CUI_RGBA(0xffffffc0));
@@ -167,10 +167,10 @@ static void scene_card_stack_item(Ui ui) {
   static String cities[] = { "Kyoto", "Lisbon", "Reykjavik" };
   static const unsigned colors[] = { 0xc8553d, 0x2d3047, 0x5b8e7d };
   ui.card_stack_begin("deck", 3, { .width = CUI_PX(240), .height = 200 });
-  for (int k = 0; k < 3; k++) $cui.card_stack_item(ui, k)
-  $cui.box(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                 .bg = CUI_RGB(colors[k]), .radius = 25, .pad = 20,
-                 .gap = 4, .justify = CUI_JUSTIFY_END }) {
+  for (int k = 0; k < 3; k++) ui.card_stack_item (k)
+  ui.box (width: CUI_FILL, height: CUI_FILL,
+          bg: CUI_RGB(colors[k]), radius: 25, pad: 20,
+          gap: 4, justify: CUI_JUSTIFY_END) {
     ui.text(cities[k], font: CUI_FONT_DISPLAY, size: 22,
                        color: CUI_RGB(0xffffff));
     ui.text("Swipe right to save", size: 13, font: CUI_FONT_MEDIUM,
@@ -213,13 +213,13 @@ static void scene_json_view(Ui ui) {
 }
 
 static void scene_hover_card(Ui ui) {
-  $cui.row(ui, { .gap = 6, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 6, align: CUI_ALIGN_CENTER) {
     ui.text("Assigned to");
     ui.link("@jonas");
-    $cui.hover_card(ui, "jonas-card", { .width = 300 })
-    $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_START }) {
+    ui.hover_card ("jonas-card", width: 300)
+    ui.row (gap: 12, align: CUI_ALIGN_START) {
       ui.avatar("Jonas Berg", size: 44, status: "online");
-      $cui.column(ui, { .gap = 4, .width = CUI_FILL }) {
+      ui.column (gap: 4, width: CUI_FILL) {
         ui.text("Jonas Berg", font: CUI_FONT_MEDIUM);
         ui.text("Engineer on the rendering team.",
                 size: 13, color: CUI_COLOR_TEXT_SECONDARY);
@@ -245,7 +245,7 @@ static void scene_confirm_popover(Ui ui) {
 }
 
 static void scene_expandable_text(Ui ui) {
-  $cui.box(ui, { .width = CUI_PX(440) })
+  ui.box (width: CUI_PX(440))
     ui.expandable_text("about",
       "CUI is a component library for C. It draws everything itself, so an "
       "app looks the same on Windows, macOS and Linux, and it ships the "
@@ -255,19 +255,19 @@ static void scene_expandable_text(Ui ui) {
 
 static void scene_expandable_card(Ui ui) {
   static bool billing = true, security = false;
-  $cui.column(ui, { .gap = 14, .width = CUI_PX(440) }) {
-    $cui.expandable_card(ui, "Billing", billing, {
-        .description = "Pro plan, renews on December 1",
-        .icon = CUI_ICON_CREDIT_CARD, .badge = "Active",
-        .badge_tone = CUI_TONE_SUCCESS })
-    $cui.row(ui, { .gap = 8 }) {
+  ui.column (gap: 14, width: CUI_PX(440)) {
+    ui.expandable_card ("Billing", billing,
+        description: "Pro plan, renews on December 1",
+        icon: CUI_ICON_CREDIT_CARD, badge: "Active",
+        badge_tone: CUI_TONE_SUCCESS)
+    ui.row (gap: 8) {
       ui.button("Change plan", size: CUI_SIZE_SM);
       ui.button("Invoices", size: CUI_SIZE_SM,
                             variant: CUI_BUTTON_GHOST);
     }
-    $cui.expandable_card(ui, "Security", security, {
-        .description = "Two-factor authentication is on",
-        .icon = CUI_ICON_SHIELD })
+    ui.expandable_card ("Security", security,
+        description: "Two-factor authentication is on",
+        icon: CUI_ICON_SHIELD)
       ui.text("Recovery codes");
   }
 }
@@ -279,11 +279,11 @@ static void scene_banner(Ui ui) {
 }
 
 static void scene_countdown(Ui ui) {
-  $cui.column(ui, { .gap = 8 }) {
+  ui.column (gap: 8) {
     ui.label("Launch in");
     ui.countdown("launch", 2 * 86400 + 5 * 3600 + 42 * 60 + 18);
   }
-  $cui.column(ui, { .gap = 8 }) {
+  ui.column (gap: 8) {
     ui.label("Sale ends in");
     ui.countdown("sale", 5 * 3600 + 42 * 60 + 18,
                  compact: true, hide_days: true);
@@ -292,7 +292,7 @@ static void scene_countdown(Ui ui) {
 
 static void scene_date_range_picker(Ui ui) {
   static cui_date_range trip = { { 2026, 11, 3 }, { 2026, 11, 14 } };
-  $cui.box(ui, { .width = CUI_PX(300) })
+  ui.box (width: CUI_PX(300))
     ui.date_range_picker("trip", trip, label: "Trip dates",
                                        width: CUI_FILL);
 }
@@ -300,7 +300,7 @@ static void scene_date_range_picker(Ui ui) {
 static void scene_time_picker(Ui ui) {
   static int start_hour = 9, start_minute = 30;
   static int end_hour = 18, end_minute = 45;
-  $cui.row(ui, { .gap = 12 }) {
+  ui.row (gap: 12) {
     ui.time_picker("start", start_hour, start_minute,
                    label: "Start", width: CUI_PX(180));
     ui.time_picker("end", end_hour, end_minute,
@@ -318,7 +318,7 @@ static void scene_wheel_picker(Ui ui) {
                   "August" "September" "October" "November" "December");
   List years = %("2020" "2021" "2022" "2023" "2024" "2025" "2026" "2027"
                  "2028" "2029" "2030" "2031");
-  $cui.row(ui, {}) $cui.card(ui, { .pad = 8 }) $cui.row(ui, { .gap = 0 }) {
+  ui.row () ui.card (pad: 8) ui.row (gap: 0) {
     ui.wheel_picker("day", days, day,
       width: CUI_PX(64), loop: true, join_right: true);
     ui.wheel_picker("month", months, month,
@@ -331,15 +331,15 @@ static void scene_wheel_picker(Ui ui) {
 
 static void scene_ruler_slider(Ui ui) {
   static float height = 172;
-  $cui.box(ui, { .width = CUI_PX(400) })
+  ui.box (width: CUI_PX(400))
     ui.ruler_slider("Height", height, 120, 220, unit: "cm");
 }
 
 static void scene_knob(Ui ui) {
   static float cutoff = 2400, resonance = 0.35f, drive = 4.5f, pan = -0.2f;
-  $cui.row(ui, {}) $cui.card(ui, { .pad = 18, .gap = 16 }) {
+  ui.row () ui.card (pad: 18, gap: 16) {
     ui.label("Filter");
-    $cui.row(ui, { .gap = 14 }) {
+    ui.row (gap: 14) {
       ui.knob("Cutoff", cutoff, 20, 20000,
               unit: "Hz", log_scale: true, reset: 1000);
       ui.knob("Resonance", resonance, 0, 1, format: "%.2f");
@@ -353,7 +353,7 @@ static void scene_fader(Ui ui) {
   static float gains[4] = { -6, 0, -12.5f, -3 };
   static String names[4] = { "Vocals", "Guitar", "Bass", "Drums" };
   static const float marks[] = { 6, 0, -6, -12, -24, -48 };
-  $cui.row(ui, {}) $cui.card(ui, { .pad = 18, .dir = CUI_ROW, .gap = 10 }) {
+  ui.row () ui.card (pad: 18, dir: CUI_ROW, gap: 10) {
     for (int k = 0; k < 4; k++) $cui.id_index(ui, k)
       ui.fader(names[k], gains[k], -48, 6,
         unit: "dB", length: 170, ticks: k == 0 ? marks : NULL,
@@ -362,7 +362,7 @@ static void scene_fader(Ui ui) {
 }
 
 static void scene_signature_pad(Ui ui) {
-  $cui.column(ui, { .gap = 8, .width = CUI_PX(400) }) {
+  ui.column (gap: 8, width: CUI_PX(400)) {
     ui.label("Sign here");
     ui.signature_pad("signature", width: CUI_FILL, height: 140,
                                   placeholder: "Draw your signature");
@@ -370,7 +370,7 @@ static void scene_signature_pad(Ui ui) {
 }
 
 static void scene_dropzone(Ui ui) {
-  $cui.box(ui, { .width = CUI_PX(400) })
+  ui.box (width: CUI_PX(400))
     ui.dropzone("files", description: "PNG, JPG or PDF, up to 25 MB",
                          accept: "png;jpg;pdf", height: 200);
 }

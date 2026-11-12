@@ -64,22 +64,22 @@ void page_viz(Ui ui, Gallery g) {
     "0h", NULL, NULL, "3h", NULL, NULL, "6h", NULL, NULL, "9h", NULL, NULL,
     "12h", NULL, NULL, "15h", NULL, NULL, "18h", NULL, NULL, "21h", NULL,
     NULL };
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL })
-  $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL)
+  ui.column (width: CUI_GROW(1), gap: 10) {
     section(ui, "Heatmap", "Requests by weekday and hour.");
-    $cui.card(ui, { .pad = 18, .width = CUI_FILL })
+    ui.card (pad: 18, width: CUI_FILL)
       ui.heatmap("traffic", traffic, 7, 24,
         row_labels: wd, col_labels: hours, format: "%.0f req");
   }
   section(ui, "Calendar heatmap", "A year of activity, one square a day.");
-  $cui.card(ui, { .pad = 18 }) {
+  ui.card (pad: 18) {
     cui_date start =
       cui_date_from_days(cui_date_to_days(cui_date_today()) - 363);
     ui.calendar_heatmap("activity", start, days, $cui.count(days),
                         unit: "contributions");
   }
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.column(ui, { .width = CUI_GROW(1.3f), .gap = 10 }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.column (width: CUI_GROW(1.3f), gap: 10) {
       section(ui, "Treemap", "Bundle size by module.");
       static const cui_viz_item mods[] = {
         { "Layout", 55 }, { "Text", 42 }, { "Draw", 35 },
@@ -89,8 +89,8 @@ void page_viz(Ui ui, Gallery g) {
       ui.treemap("bundle", mods, $cui.count(mods),
                  height: 280, format: "%.0f KB");
     }
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10,
-                      .align = CUI_ALIGN_CENTER }) {
+    ui.column (width: CUI_GROW(1), gap: 10,
+               align: CUI_ALIGN_CENTER) {
       section(ui, "Radar", "Two releases across six qualities.");
       static const float a[] = { 82, 64, 90, 58, 75, 88 };
       static const float b[] = { 70, 85, 72, 80, 60, 79 };
@@ -101,15 +101,15 @@ void page_viz(Ui ui, Gallery g) {
                      size: 220, max: 100);
     }
   }
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Funnel", "Sign up conversion.");
       static const cui_viz_item stages[] = {
         { "Visited", 12840 }, { "Signed up", 4210 }, { "Activated", 2380 },
         { "Subscribed", 860 } };
       ui.funnel("funnel", stages, $cui.count(stages));
     }
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+    ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Split bar", "Where the time goes.");
       static const cui_viz_item parts[] = {
         { "Layout", 38 }, { "Text", 24 }, { "Paint", 21 }, { "Input", 9 },
@@ -127,12 +127,12 @@ void page_viz(Ui ui, Gallery g) {
     { 0, 3, 420 }, { 1, 3, 260 }, { 2, 3, 180 }, { 0, 4, 300 },
     { 1, 4, 220 }, { 3, 5, 860 }, { 5, 6, 580 }, { 5, 7, 280 },
   };
-  $cui.card(ui, { .pad = 18, .width = CUI_FILL })
+  ui.card (pad: 18, width: CUI_FILL)
     ui.sankey("flow", %("Search" "Social" "Referral" "Sign up" "Bounced"
                         "Trial" "Paid" "Churned"),
               links, $cui.count(links), height: 280);
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.column(ui, { .width = CUI_GROW(1.4f), .gap = 10 }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.column (width: CUI_GROW(1.4f), gap: 10) {
       section(ui, "Bar list", "Ranked, keyed by label: press Shuffle and "
                               "the rows slide to their new rank.");
       static cui_viz_item pages[] = {
@@ -146,8 +146,8 @@ void page_viz(Ui ui, Gallery g) {
         for (int k = 0; k < 6; k++)
           pages[k].value = (float) (500 + rand() % 5000);
     }
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10,
-                      .align = CUI_ALIGN_CENTER }) {
+    ui.column (width: CUI_GROW(1), gap: 10,
+               align: CUI_ALIGN_CENTER) {
       section(ui, "Activity rings", "Past one, a ring keeps winding.");
       static const cui_viz_item rings[] = {
         { "Move", 0.82f }, { "Exercise", 1.24f }, { "Stand", 0.58f } };
@@ -160,15 +160,15 @@ void page_viz(Ui ui, Gallery g) {
   cui_scatter_series ss[] = {
     { "Software", points_a, sizes_a, $cui.count(points_a) },
     { "OpenGL", points_b, sizes_b, $cui.count(points_b) } };
-  $cui.card(ui, { .pad = 18, .width = CUI_FILL })
+  ui.card (pad: 18, width: CUI_FILL)
     ui.scatter_chart("scatter", ss, $cui.count(ss),
       height: 300, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
   static const cui_gauge_band bands[] = {
     { 60, CUI_TONE_SUCCESS }, { 85, CUI_TONE_WARNING },
     { 100, CUI_TONE_DANGER } };
-  $cui.card(ui, { .pad = 18, .width = CUI_FILL, .dir = CUI_ROW,
-                  .wrap = true, .gap = 24, .align = CUI_ALIGN_CENTER }) {
+  ui.card (pad: 18, width: CUI_FILL, dir: CUI_ROW,
+           wrap: true, gap: 24, align: CUI_ALIGN_CENTER) {
     ui.radial_gauge("cpu", 64, 0, 100,
       unit: "%", label: "CPU", bands: bands,
       band_count: $cui.count(bands), size: 180);
@@ -179,7 +179,7 @@ void page_viz(Ui ui, Gallery g) {
       format: "%.1f", unit: "GB", label: "Memory", no_needle: true,
       ticks: -1, size: 150);
   }
-  $cui.card(ui, { .pad = 18, .width = CUI_FILL, .gap = 10 }) {
+  ui.card (pad: 18, width: CUI_FILL, gap: 10) {
     ui.label("Price, 2,000 periods");
     ui.candlestick("price", candles, $cui.count(candles), height: 280);
   }

@@ -52,6 +52,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.mark_method_call`](#Compiler.mark_method_call) | Marks a template's call `receiver.name(...)` written in the template of a macro `$T.name` as `(expr () (method-call DEFINITION CALL))`, so that where the template expands the call is `$T.name`'s method, not the macro. |
 | [`Compiler.marked_rewrite`](#Compiler.marked_rewrite) | Matches the member rules registered for each field keyword that `aggregate` declares a field with, as `Compiler.rewrite` matches those keyed by a receiver type. |
 | [`Compiler.meta_call_starts_declaration`](#Compiler.meta_call_starts_declaration) | Returns whether tokens after an explicit meta call continue a declaration. |
+| [`Compiler.method_decorator_target`](#Compiler.method_decorator_target) | Returns where the target begins when a file-scope item at the cursor has the shape of a method-form decorator application, `receiver.name(arguments) TARGET`, or NULL. |
 | [`Compiler.named_alias_expression`](#Compiler.named_alias_expression) | Resolves a visible alias by spelling for parsed and constructed names. |
 | [`Compiler.parse_alias_declaration`](#Compiler.parse_alias_declaration) | Parses an alias or its removal at file scope. |
 | [`Compiler.parse_alias_member`](#Compiler.parse_alias_member) | Parses an alias among the members of an aggregate or enum body, where `position` is `<field>` or `<enumerator>` and `context` is the aggregate type. |
@@ -60,6 +61,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.parse_macro_definition`](#Compiler.parse_macro_definition) | Parses the macro definition at the current token into a `macrodef` `List`. |
 | [`Compiler.parse_macro_quotation`](#Compiler.parse_macro_quotation) | Parses a quotation at `$!` into the code it builds from the locals its body names. |
 | [`Compiler.parse_method_decorator`](#Compiler.parse_method_decorator) | Parses the method-form decorator application whose arguments begin at the cursor, after `try_parse_method_macro` raised `<method-dec>` for the expression statement that begins at `start`. |
+| [`Compiler.parse_unit_method_decorator`](#Compiler.parse_unit_method_decorator) | Parses the file-scope method-form decorator application at the cursor, which `method_decorator_target` recognized, through the ordinary expression parse of its receiver. |
 | [`Compiler.peek_macro_hole`](#Compiler.peek_macro_hole) | Returns the registered hole descriptor for a named or expression hole. |
 | [`Compiler.place`](#Compiler.place) | Places `code` where `where` says, under the active expansion's transaction: `(after-statement)` after the enclosing block item or initialized declarator; `(block-exit)` on every exit from the enclosing block from that point on, as a `defer` placed after it; `(function-entry)` at the entry of the enclosing function, at parse or transform time, in placement order before its first statement; `(unit-support)` among the unit's support declarations, once per KEY with `(unit-support KEY)`; or `(unit-init)` in the unit's file initialization, in AREA with `(unit-init AREA)`. |
 | [`Compiler.print_macro_expansion`](#Compiler.print_macro_expansion) | Prints one invocation frame and the bound result of its expansion. |
@@ -536,6 +538,21 @@ the compiler cursor; a visible source macro retains its own grammar.
 
 Source: `src/macros/definitions/slots.x`
 
+<a id="Compiler.method_decorator_target"></a>
+#### Compiler.method_decorator_target
+
+`Token Compiler.method_decorator_target(Compiler c)`
+
+Returns where the target begins when a file-scope item at the cursor
+has the shape of a method-form decorator application,
+`receiver.name(arguments) TARGET`, or NULL. The item begins with a
+variable, followed by a postfix chain whose last step is `.name(...)`,
+a target follows, and some macro is named `$T.name`. No declaration has
+that shape, so every other item keeps the declaration parser and its
+diagnostics. This query does not consume tokens.
+
+Source: `src/macros/invocations/expressions.x`
+
 <a id="Compiler.named_alias_expression"></a>
 #### Compiler.named_alias_expression
 
@@ -628,6 +645,18 @@ the cursor, after `try_parse_method_macro` raised `<method-dec>` for
 the expression statement that begins at `start`. In a template whose
 receiver has no type yet, the result is `(method-decorator CALL
 TARGET)`, which `bind_method_decorator` applies where it expands.
+
+Source: `src/macros/invocations/expressions.x`
+
+<a id="Compiler.parse_unit_method_decorator"></a>
+#### Compiler.parse_unit_method_decorator
+
+`List Compiler.parse_unit_method_decorator(Compiler c)`
+
+Parses the file-scope method-form decorator application at the cursor,
+which `method_decorator_target` recognized, through the ordinary
+expression parse of its receiver. Returns NULL, with the cursor
+restored, when the receiver's type has no such decorator.
 
 Source: `src/macros/invocations/expressions.x`
 

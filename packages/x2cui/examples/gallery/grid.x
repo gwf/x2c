@@ -90,18 +90,12 @@ void page_grid(Ui ui, Gallery g) {
   section(ui, "Data grid", "2,000 rows, virtualized. Sort, resize columns, "
                            "select with Shift and Ctrl, edit names with a "
                            "double click.");
-  static const cui_grid_column cols[] = {
-    { "Name", 200, CUI_TEXT_LEFT, true },
-    { "Email", 196, CUI_TEXT_LEFT, false },
-    { "Team", 110, CUI_TEXT_LEFT, true },
-    { "Commits", 96, CUI_TEXT_RIGHT, true },
-    { "Score", 130, CUI_TEXT_RIGHT, true },
-  };
   int n_sel = 0;
   for (int k = 0; k < PEOPLE; k++) n_sel += people_sel[k];
-  $cui.data_grid(ui, "people", cols, PEOPLE, f0, l0, {
-      .height = CUI_PX(420), .selected = people_sel,
-      .sort = &people_sort }) {
+  ui.data_grid ("people", PEOPLE, f0, l0,
+                columns: {"Name": 200, "Email": unsorted(196), "Team": 110,
+                          "Commits": right(96), "Score": right(130)},
+                height: 420, selected: people_sel, sort: &people_sort) {
     for (int r = f0; r < l0; r++) {
       person *p = &people[order_ix[r]];
       ui.data_grid_row(r);
@@ -126,12 +120,10 @@ void page_grid(Ui ui, Gallery g) {
                             "indentation, totals.");
   {
     static bool open_src = true, open_ui = false;
-    cui_table_column tc[] = {
-      { "Name", CUI_FILL, CUI_TEXT_LEFT, false },
-      { "Files", CUI_PX(80), CUI_TEXT_RIGHT, false },
-      { "Size", CUI_PX(100), CUI_TEXT_RIGHT, false } };
     // A leaf has no open state, so it passes NULL for the flag.
-    $cui.table(ui, "tree", tc, {}) {
+    ui.table ("tree", columns: {"Name": unsorted(fill),
+                                "Files": right(unsorted(80)),
+                                "Size": right(unsorted(100))}) {
       ui.table_row(false);
       ui.table_cell();
       ui.tree_cell("src", 0, true, open_src, CUI_ICON_FOLDER);

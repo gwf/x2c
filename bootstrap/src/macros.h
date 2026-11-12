@@ -138,6 +138,10 @@ List Compiler_try_parse_method_macro(Compiler c, List receiver, Token start, Tok
 
 List Compiler_parse_method_decorator(Compiler c, Token start, Symbol position);
 
+Token Compiler_method_decorator_target(Compiler c);
+
+List Compiler_parse_unit_method_decorator(Compiler c);
+
 List Compiler_mark_method_call(Compiler c, List call, Var member);
 
 List Compiler_bind_method_macro(Compiler c, List receiver, String name, List supplied, Var own);

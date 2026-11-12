@@ -105,7 +105,7 @@ static void accent_row(Ui ui, Gallery g) {
   static const unsigned colors[CUI_ACCENT_COUNT] = {
     0x555555, 0x7747ff, 0x0562ef, 0x00864b, 0xf3ad20, 0xc25300, 0xd1403a,
     0xd23286 };
-  $cui.row(ui, { .justify = CUI_JUSTIFY_BETWEEN }) {
+  ui.row (justify: CUI_JUSTIFY_BETWEEN) {
     for (int accent = 0; accent < CUI_ACCENT_COUNT; accent++) {
       Swatch swatch = { CUI_RGB(colors[accent]), g.accent == accent };
       // The canvas copies the swatch, because it paints when the frame ends.
@@ -123,16 +123,16 @@ static void accent_row(Ui ui, Gallery g) {
 
 // The page list: a column beside the page, or the body of a drawer.
 static void sidebar(Ui ui, Gallery g, bool drawer) {
-  $cui.column(ui, {
-      .width = drawer ? CUI_FILL : CUI_PX(240), .height = CUI_FILL,
-      .bg = drawer ? CUI_TRANSPARENT : CUI_COLOR_SURFACE_MUTED,
-      .pad = drawer ? 0 : 12, .gap = 2 }) {
-    if (!drawer) $cui.row(ui, { .gap = 10, .pad_x = 8, .pad_top = 6,
-                                .pad_bottom = 18 }) {
-      $cui.box(ui, { .width = CUI_PX(28), .height = CUI_PX(28), .radius = 9,
-                     .bg = CUI_COLOR_FOREGROUND, .dir = CUI_STACK,
-                     .align = CUI_ALIGN_CENTER,
-                     .justify = CUI_JUSTIFY_CENTER })
+  ui.column (
+      width: drawer ? CUI_FILL : CUI_PX(240), height: CUI_FILL,
+      bg: drawer ? CUI_TRANSPARENT : CUI_COLOR_SURFACE_MUTED,
+      pad: drawer ? 0 : 12, gap: 2) {
+    if (!drawer) ui.row (gap: 10, pad_x: 8, pad_top: 6,
+                         pad_bottom: 18) {
+      ui.box (width: CUI_PX(28), height: CUI_PX(28), radius: 9,
+              bg: CUI_COLOR_FOREGROUND, dir: CUI_STACK,
+              align: CUI_ALIGN_CENTER,
+              justify: CUI_JUSTIFY_CENTER)
         ui.text("C", font: CUI_FONT_DISPLAY, size: 16,
                      color: CUI_COLOR_BACKGROUND, line_height: 1.0f);
       ui.text("CUI", font: CUI_FONT_MEDIUM, size: 15, nowrap: true);
@@ -141,7 +141,7 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
       int major = CUI_VERSION_MAJOR, minor = CUI_VERSION_MINOR;
       ui.badge(%"v$major.$minor", size: CUI_SIZE_SM);
     }
-    $cui.scroll(ui, { .id = "nav", .height = CUI_FILL, .gap = 2 }) {
+    ui.scroll (id: "nav", height: CUI_FILL, gap: 2) {
       ui.nav_section("Components");
       for (int page = 0; page < page_total(); page++) {
         if (page == PAGE_COUNT) {
@@ -154,7 +154,7 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
           go_to(ui, g, page);
       }
     }
-    $cui.column(ui, { .gap = 12, .pad = 8 }) {
+    ui.column (gap: 12, pad: 8) {
       static const char *mode_icons[] = { CUI_ICON_SUN, CUI_ICON_MOON };
       int mode = g.dark;
       if (ui.segmented("theme", %("Light" "Dark"), mode,
@@ -166,13 +166,13 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
 }
 
 static void dialogs(Ui ui, Gallery g) {
-  $cui.dialog(ui, "Edit profile", g.dialog_open, {
-      .description = "Changes are visible to your team." }) {
+  ui.dialog ("Edit profile", g.dialog_open,
+      description: "Changes are visible to your team.") {
     ui.input("dlg-name", g.name, label: "Name");
     ui.input("dlg-email", g.email, label: "Email",
                                    icon: CUI_ICON_MAIL);
     ui.switch("Public profile", g.wifi);
-    $cui.dialog_footer(ui) {
+    ui.dialog_footer () {
       if (ui.button("Cancel")) g.dialog_open = false;
       if (ui.button("Save changes", variant: CUI_BUTTON_PRIMARY)) {
         g.dialog_open = false;
@@ -180,11 +180,11 @@ static void dialogs(Ui ui, Gallery g) {
       }
     }
   }
-  $cui.dialog(ui, "Delete this project?", g.confirm_open, {
-      .description = "This removes the project and its history for "
+  ui.dialog ("Delete this project?", g.confirm_open,
+      description: "This removes the project and its history for "
                      "everyone. You cannot undo this.",
-      .width = 400 })
-  $cui.dialog_footer(ui) {
+      width: 400)
+  ui.dialog_footer () {
     if (ui.button("Cancel##confirm")) g.confirm_open = false;
     if (ui.button("Delete project", variant: CUI_BUTTON_DANGER)) {
       g.confirm_open = false;
@@ -192,8 +192,8 @@ static void dialogs(Ui ui, Gallery g) {
                                   action: "Undo");
     }
   }
-  $cui.sheet(ui, "Notifications", g.sheet_open, {
-      .description = "Choose what we tell you about." }) {
+  ui.sheet ("Notifications", g.sheet_open,
+      description: "Choose what we tell you about.") {
     ui.switch("Comments", g.newsletter,
       description: "When someone replies to you.");
     ui.switch("Mentions", g.wifi,
@@ -238,7 +238,7 @@ static void dialogs(Ui ui, Gallery g) {
 static void draw_page(Ui ui, Gallery g) {
   if (g.page >= page_total()) g.page = PAGE_OVERVIEW;
   if (g.page != PAGE_OVERVIEW)
-    $cui.column(ui, { .gap = 6, .pad_bottom = 8 })
+    ui.column (gap: 6, pad_bottom: 8)
       ui.heading(pages[g.page].name, 2);
   // The page's name scopes its ids, so ids on different pages never meet.
   $cui.id_scope(ui, pages[g.page].name) pages[g.page].draw(ui, g);
@@ -253,18 +253,18 @@ static void draw(Ui ui, Gallery g) {
   // Below 760 points the page list moves into a drawer behind a button.
   bool narrow = ui.viewport_size().x < 760;
   if (!narrow) g.drawer = false;
-  $cui.row(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                 .align = CUI_ALIGN_STRETCH, .bg = CUI_COLOR_BACKGROUND }) {
+  ui.row (width: CUI_FILL, height: CUI_FILL,
+          align: CUI_ALIGN_STRETCH, bg: CUI_COLOR_BACKGROUND) {
     if (!narrow) {
       sidebar(ui, g, false);
       ui.separator();
     }
-    $cui.scroll(ui, { .id = "main", .width = CUI_FILL, .fade_edges = true })
-    $cui.row(ui, { .justify = CUI_JUSTIFY_CENTER, .align = CUI_ALIGN_START })
-    $cui.column(ui, { .width = CUI_FILL, .max_width = 920,
-                      .pad_x = narrow ? 16 : 40, .pad_top = narrow ? 12 : 36,
-                      .pad_bottom = 64, .gap = 20 }) {
-      if (narrow) $cui.row(ui, { .gap = 8, .width = CUI_FILL }) {
+    ui.scroll (id: "main", width: CUI_FILL, fade_edges: true)
+    ui.row (justify: CUI_JUSTIFY_CENTER, align: CUI_ALIGN_START)
+    ui.column (width: CUI_FILL, max_width: 920,
+               pad_x: narrow ? 16 : 40, pad_top: narrow ? 12 : 36,
+               pad_bottom: 64, gap: 20) {
+      if (narrow) ui.row (gap: 8, width: CUI_FILL) {
         if (ui.icon_button(CUI_ICON_MENU, tooltip: "Components"))
           g.drawer = true;
         ui.text("CUI", font: CUI_FONT_MEDIUM, size: 15);
@@ -272,7 +272,7 @@ static void draw(Ui ui, Gallery g) {
       draw_page(ui, g);
     }
   }
-  $cui.sheet(ui, "CUI", g.drawer, { .side = CUI_SIDE_LEFT, .size = 280 })
+  ui.sheet ("CUI", g.drawer, side: CUI_SIDE_LEFT, size: 280)
     sidebar(ui, g, true);
   dialogs(ui, g);
 }

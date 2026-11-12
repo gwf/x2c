@@ -34,7 +34,7 @@ static void scene_line_chart(Ui ui) {
                           cui_series.of("Cloud spend", cloud_spend) };
   List months = %("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep"
                   "Oct" "Nov" "Dec");
-  $cui.card(ui, { .width = CUI_FILL, .max_width = 660 })
+  ui.card (width: CUI_FILL, max_width: 660)
     ui.line_chart("revenue", series, $cui.count(series), months,
       area: true, smooth: true, height: 200, format: "$%.0fk");
 }
@@ -42,21 +42,19 @@ static void scene_line_chart(Ui ui) {
 static void scene_bar_chart(Ui ui) {
   cui_series series[] = { cui_series.of("Desktop", desktop),
                           cui_series.of("Mobile", mobile) };
-  $cui.card(ui, { .width = CUI_FILL, .max_width = 520 })
+  ui.card (width: CUI_FILL, max_width: 520)
     ui.bar_chart("visits", series, $cui.count(series),
                  %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), height: 200);
 }
 
 static void scene_table(Ui ui) {
-  static cui_table_column columns[] = {
-    { "Name", .sortable = true },
-    { "Team", .width = CUI_PX(110) },
-    { "Commits", .width = CUI_PX(100), .align = CUI_TEXT_RIGHT },
-    { "Score", .width = CUI_PX(90), .align = CUI_TEXT_RIGHT } };
   static cui_table_sort sort = { 0, false };
   static int chosen = 1;
-  $cui.box(ui, { .width = CUI_FILL, .max_width = 620 })
-  $cui.table(ui, "people", columns, { .sort = &sort, .selectable = true }) {
+  ui.box (width: CUI_FILL, max_width: 620)
+  ui.table ("people", sort: &sort, selectable: true,
+            columns: {"Name": fill, "Team": unsorted(110),
+                      "Commits": right(unsorted(100)),
+                      "Score": right(unsorted(90))}) {
     int index = 0;
     foreach (List person in people) {
       (String name, String team, int commits, double score) = person;
@@ -74,16 +72,13 @@ static void scene_table(Ui ui) {
 }
 
 static void scene_data_grid(Ui ui) {
-  static cui_grid_column columns[] = {
-    { "Name", .width = 240, .sortable = true },
-    { "Team", .width = 140, .sortable = true },
-    { "Commits", .width = 100, .align = CUI_TEXT_RIGHT, .sortable = true },
-    { "Score", .width = 120, .align = CUI_TEXT_RIGHT, .sortable = true } };
   static bool selected[6] = { false, true, true };
   static cui_table_sort sort = { 2, true };
   // The grid draws only the rows on screen, from `first` up to `last`.
-  $cui.data_grid(ui, "people", columns, people.len(), first, last, {
-      .height = CUI_PX(300), .selected = selected, .sort = &sort }) {
+  ui.data_grid ("people", people.len(), first, last,
+                columns: {"Name": 240, "Team": 140, "Commits": right(100),
+                          "Score": right(120)},
+                height: 300, selected: selected, sort: &sort) {
     for (int row = first; row < last; row++) {
       (String name, String team, int commits, double score) = people[row];
       ui.data_grid_row(row);

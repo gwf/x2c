@@ -65,7 +65,7 @@ static void prepare(void) {
 }
 
 static void scene_split_button(Ui ui) {
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     ui.split_button("Save", %("Save as draft" "Save and publish" "Schedule"),
                     icon: CUI_ICON_SAVE);
     ui.split_button("Export", %("PDF" "PNG" "SVG"),
@@ -80,7 +80,7 @@ static void scene_split_button(Ui ui) {
 }
 
 static void scene_confirm_button(Ui ui) {
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     ui.confirm_button("Delete project", icon: CUI_ICON_TRASH_2);
     ui.confirm_button("Remove member", icon: CUI_ICON_USER,
                                        confirm_label: "Remove Maya?",
@@ -91,7 +91,7 @@ static void scene_confirm_button(Ui ui) {
 }
 
 static void scene_status_button(Ui ui) {
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     ui.status_button("Deploy", CUI_STATUS_IDLE, icon: CUI_ICON_PLAY);
     ui.status_button("Save changes", CUI_STATUS_BUSY,
                      icon: CUI_ICON_SAVE);
@@ -104,10 +104,10 @@ static void scene_status_button(Ui ui) {
 }
 
 static void scene_user_menu(Ui ui) {
-  $cui.box(ui, { .width = CUI_PX(270) })
-  $cui.user_menu(ui, "Maya Okafor", { .detail = "maya@fieldwork.studio",
-                                      .status = "online",
-                                      .placement = CUI_PLACE_BOTTOM_START }) {
+  ui.box (width: CUI_PX(270))
+  ui.user_menu ("Maya Okafor", detail: "maya@fieldwork.studio",
+                               status: "online",
+                               placement: CUI_PLACE_BOTTOM_START) {
     ui.menu_item("Profile", icon: CUI_ICON_USER, shortcut: "Ctrl P");
     ui.menu_item("Billing", icon: CUI_ICON_CREDIT_CARD);
     ui.menu_item("Settings", icon: CUI_ICON_SETTINGS,
@@ -119,17 +119,17 @@ static void scene_user_menu(Ui ui) {
 
 // A muted caption in a fixed column, so the values beside it line up.
 static void caption(Ui ui, String text) {
-  $cui.box(ui, { .width = CUI_PX(64) }) ui.muted(text);
+  ui.box (width: CUI_PX(64)) ui.muted(text);
 }
 
 static void scene_inline_edit(Ui ui) {
-  $cui.column(ui, { .gap = 10, .width = CUI_FILL }) {
+  ui.column (gap: 10, width: CUI_FILL) {
     ui.inline_edit("title", title, font: CUI_FONT_DISPLAY, size: 26);
-    $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_CENTER }) {
+    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
       caption(ui, "Owner");
       ui.inline_edit("owner", owner);
     }
-    $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_CENTER }) {
+    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
       caption(ui, "Due");
       ui.inline_edit("due", due);
     }
@@ -138,7 +138,7 @@ static void scene_inline_edit(Ui ui) {
 
 static void scene_scrub(Ui ui) {
   static float opacity = 80, radius = 12, blur = 24;
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     ui.scrub("Opacity", opacity, 0, 100, suffix: "%");
     ui.scrub("Radius", radius, 0, 48, step: 0.5f, format: "%.1f",
                                       suffix: "px");
@@ -151,7 +151,7 @@ static void scene_scrub(Ui ui) {
 
 static void scene_money_input(Ui ui) {
   static double budget = 1249.5, rate = 86;
-  $cui.column(ui, { .gap = 12, .width = CUI_PX(260) }) {
+  ui.column (gap: 12, width: CUI_PX(260)) {
     ui.money_input("budget", budget, label: "Monthly budget",
                                      code: "USD",
                                      hint: "Billed on the first");
@@ -163,13 +163,13 @@ static void scene_money_input(Ui ui) {
 static void scene_shortcut_recorder(Ui ui) {
   static cui_key_combo palette = { CUI_MOD_CTRL | CUI_MOD_SHIFT, CUI_KEY_P };
   static cui_key_combo search = { 0, CUI_KEY_NONE };
-  $cui.column(ui, { .gap = 10 }) {
-    $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_CENTER }) {
-      $cui.box(ui, { .width = CUI_PX(140) }) ui.label("Command palette");
+  ui.column (gap: 10) {
+    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
+      ui.box (width: CUI_PX(140)) ui.label("Command palette");
       ui.shortcut_recorder("palette", palette);
     }
-    $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_CENTER }) {
-      $cui.box(ui, { .width = CUI_PX(140) }) ui.label("Search files");
+    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
+      ui.box (width: CUI_PX(140)) ui.label("Search files");
       ui.shortcut_recorder("search", search,
                            placeholder: "Record shortcut");
     }
@@ -178,32 +178,32 @@ static void scene_shortcut_recorder(Ui ui) {
 
 static void scene_menu_bar(Ui ui) {
   static bool sidebar = true, minimap = false, wrap = true;
-  $cui.card(ui, { .width = CUI_FILL, .pad = 0, .gap = 0 }) {
-    $cui.menu_bar(ui, "menubar", {}) {
-      $cui.menu_bar_menu(ui, "File", {}) {
+  ui.card (width: CUI_FILL, pad: 0, gap: 0) {
+    ui.menu_bar ("menubar") {
+      ui.menu_bar_menu ("File") {
         ui.menu_item("New file", shortcut: "Ctrl N");
         ui.menu_item("Open", shortcut: "Ctrl O");
         ui.menu_separator();
         ui.menu_item("Save", shortcut: "Ctrl S");
       }
-      $cui.menu_bar_menu(ui, "Edit", {}) {
+      ui.menu_bar_menu ("Edit") {
         ui.menu_item("Undo", shortcut: "Ctrl Z");
         ui.menu_item("Redo", shortcut: "Ctrl Shift Z",
                              disabled: true);
       }
-      $cui.menu_bar_menu(ui, "View", {}) {
+      ui.menu_bar_menu ("View") {
         if (ui.menu_item("Sidebar", checked: sidebar))
           sidebar = !sidebar;
         if (ui.menu_item("Minimap", checked: minimap))
           minimap = !minimap;
         if (ui.menu_item("Word wrap", checked: wrap)) wrap = !wrap;
       }
-      $cui.menu_bar_menu(ui, "Help", {}) {
+      ui.menu_bar_menu ("Help") {
         ui.menu_item("Keyboard shortcuts", shortcut: "Ctrl K");
         ui.menu_item("Release notes");
       }
     }
-    $cui.box(ui, { .pad = 16, .width = CUI_FILL })
+    ui.box (pad: 16, width: CUI_FILL)
       ui.text("Click a menu to open it. Alt or F10 focuses the bar, and "
               "the arrows move between menus.",
               color: CUI_COLOR_TEXT_MUTED);
@@ -212,8 +212,8 @@ static void scene_menu_bar(Ui ui) {
 
 static void scene_toolbar(Ui ui) {
   static bool bold = true, italic = false, underline = false, list = true;
-  $cui.card(ui, { .width = CUI_FILL, .pad = 0, .gap = 0 }) {
-    $cui.toolbar(ui, "tools", {}) {
+  ui.card (width: CUI_FILL, pad: 0, gap: 0) {
+    ui.toolbar ("tools") {
       ui.toolbar_button(CUI_ICON_PLUS, tooltip: "New file",
                                        shortcut: "Ctrl N");
       ui.toolbar_button(CUI_ICON_FOLDER_OPEN, tooltip: "Open");
@@ -236,7 +236,7 @@ static void scene_toolbar(Ui ui) {
       ui.toolbar_button(CUI_ICON_PLAY, label: "Preview");
       ui.toolbar_button(CUI_ICON_SHARE_2, label: "Share");
     }
-    $cui.box(ui, { .pad = 16, .width = CUI_FILL })
+    ui.box (pad: 16, width: CUI_FILL)
       ui.text("Bold and the bulleted list are on. Items that do not fit "
               "collapse into a menu at the end.",
               color: CUI_COLOR_TEXT_MUTED);
@@ -245,13 +245,13 @@ static void scene_toolbar(Ui ui) {
 
 static void scene_status_bar(Ui ui) {
   static int spaces = 4;
-  $cui.card(ui, { .width = CUI_FILL, .pad = 0, .gap = 0 }) {
-    $cui.box(ui, { .pad = 16, .width = CUI_FILL, .height = CUI_PX(120) })
+  ui.card (width: CUI_FILL, pad: 0, gap: 0) {
+    ui.box (pad: 16, width: CUI_FILL, height: CUI_PX(120))
       ui.text("The status bar runs along the bottom of a window.",
               color: CUI_COLOR_TEXT_MUTED);
     // The bar has no fill of its own; this box gives it one.
-    $cui.box(ui, { .width = CUI_FILL, .bg = CUI_COLOR_SURFACE_MUTED })
-    $cui.status_bar(ui, "status", {}) {
+    ui.box (width: CUI_FILL, bg: CUI_COLOR_SURFACE_MUTED)
+    ui.status_bar ("status") {
       ui.status_bar_item("main", icon: CUI_ICON_GIT_BRANCH,
                                  tooltip: "Switch branch");
       ui.status_bar_text("Saved", icon: CUI_ICON_CHECK,
@@ -273,8 +273,8 @@ static void scene_inspector_begin(Ui ui) {
   static bool output_open = true;
   static int width = 1920, height = 1080, samples = 64;
   static bool denoise = true, cast = true;
-  $cui.card(ui, { .width = CUI_FILL, .max_width = 460, .pad_x = 16,
-                  .pad_y = 6, .gap = 0 }) {
+  ui.card (width: CUI_FILL, max_width: 460, pad_x: 16,
+           pad_y: 6, gap: 0) {
     if (ui.inspector_begin("render", {})) {
       if (ui.inspector_group("Output", output_open)) {
         ui.prop_int("Width", width, min: 16, max: 8192,
@@ -297,9 +297,9 @@ static void scene_inspector(Ui ui) {
   static cui_color base = { 0xC2, 0x6A, 0x3D, 255 };
   static int shader = 0;
   static bool double_sided = false;
-  $cui.card(ui, { .width = CUI_FILL, .max_width = 460, .pad_x = 16,
-                  .pad_y = 6, .gap = 0 })
-  $cui.inspector(ui, "props", {}) {
+  ui.card (width: CUI_FILL, max_width: 460, pad_x: 16,
+           pad_y: 6, gap: 0)
+  ui.inspector ("props") {
     if (ui.inspector_group("Material", material_open)) {
       ui.prop_text("Name", object_name);
       ui.prop_enum("Shader", %("Standard PBR" "Unlit" "Toon" "Glass"),
@@ -319,7 +319,7 @@ static void scene_log_view(Ui ui) {
 }
 
 static void scene_schedule_picker(Ui ui) {
-  $cui.column(ui, { .gap = 10, .width = CUI_FILL, .max_width = 560 })
+  ui.column (gap: 10, width: CUI_FILL, max_width: 560)
     ui.schedule_picker("backup", cron, now: 1794211200, utc: true,
                                        next_count: 3);
 }
@@ -331,7 +331,7 @@ static void scene_regex_tester(Ui ui) {
 static void scene_request_bar(Ui ui) {
   static int method = CUI_HTTP_POST;
   static bool sending = false;
-  $cui.column(ui, { .gap = 12, .width = CUI_FILL }) {
+  ui.column (gap: 12, width: CUI_FILL) {
     cui_request_bar_result result =
       ui.request_bar("request", method, url, loading: sending);
     if (result.send) sending = true;

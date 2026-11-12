@@ -97,22 +97,29 @@ meta List cui_push_key(List ui, List position, List options) {
                                       : $!( $ui.push_id_int($key) );
 }
 
-/** Returns the `cui_table_column` initializers of the `columns:` row of
-    `options`, a Map literal of titles and widths. A width is a size, as
-    for `cui_value`: pixels, `fill`, `fit`, or `grow(w)`. `right(w)` and
-    `center(w)` align the column, and `unsorted(w)` keeps it from being
-    sorted; every other column is sortable.
+/** Returns the initializers of an array of the column record `record`,
+    such as `cui_table_column`, from the `columns:` row of `options`: a Map
+    literal of titles and widths. A width is lowered by the type of the
+    record's `width` field, as `cui_value` lowers it: pixels, `fill`,
+    `fit`, or `grow(w)` for a `cui_size`, and a number of points for a
+    `float`. `right(w)` and `center(w)` align the column, and
+    `unsorted(w)` keeps it from being sorted; every other column is
+    sortable.
 */
-meta List cui_columns(List options) =>
-  _columns(options).map(%!(List entry) => _column(entry));
+meta List cui_columns(String record, List options) {
+  List width = Type.fields(%($record)).find(%!(List f) => f.car() == "width");
+  return _columns(options).map(
+    %!(List entry) => _column_of(entry[1], entry[2], width[1], "LEFT", 1));
+}
 
-/** Returns the begin call of `ui.table`, with `columns` the array that
-    `cui_columns` filled and the other rows of `options` as its record.
+/** Returns the option record of the `Ui` method `method` on `ui`, the
+    record its last parameter takes, built from the rows of `options`
+    other than `columns:`.
 */
-meta List cui_table_begin(List ui, List id, List columns, List options) {
-  int count = _columns(options).len();
+meta List cui_options(List ui, String method, List options) {
+  List types = Type.parameters(_signature(ui, method));
   List rest = options.filter(%!(List row) => _key(row) != "columns");
-  return cui_call(ui, "table_begin", rest, id, columns, $!( $count ));
+  return cui_record(types[types.len() - 1], rest);
 }
 
 // calls
@@ -157,23 +164,22 @@ meta static List _columns(List options) {
   return %();
 }
 
-meta static List _column(List entry) =>
-  _column_of(entry[1], entry[2], "LEFT", 1);
-
-/* `right(w)`, `center(w)`, and `unsorted(w)` wrap a width; they nest. */
+/* One column: its title, its width of type `size`, and its alignment and
+   sorting. `right(w)`, `center(w)`, and `unsorted(w)` wrap a width; they
+   nest. */
 meta static List _column_of(
-  List title, List width, String align, int sortable) {
+  List title, List width, Type size, String align, int sortable) {
   match (width) {
     case %(expr ? (call (expr ? (ident (binding ? "right"))) (args ?w))):
-      return _column_of(title, w, "RIGHT", sortable);
+      return _column_of(title, w, size, "RIGHT", sortable);
     case %(expr ? (call (expr ? (ident (binding ? "center"))) (args ?w))):
-      return _column_of(title, w, "CENTER", sortable);
+      return _column_of(title, w, size, "CENTER", sortable);
     case %(expr ? (call (expr ? (ident (binding ? "unsorted"))) (args ?w))):
-      return _column_of(title, w, align, 0);
+      return _column_of(title, w, size, align, 0);
   }
-  List size = cui_value(%("cui_size"), width);
+  List lowered = cui_value(size, width);
   List aligned = _free_name(%"CUI_TEXT_$align");
-  return $!( { $title, $size, $aligned, $sortable } );
+  return $!( { $title, $lowered, $aligned, $sortable } );
 }
 
 // values
