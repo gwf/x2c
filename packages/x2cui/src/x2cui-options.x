@@ -92,6 +92,9 @@ meta List x2cui_arguments(
     values.push(value);
     Type type = types[i];
     if (_icon_parameter(method, i)) type = _icon();
+    if (_record_array(value))
+      raise %(bad-arg (operation "array of records")
+              (reason "keep CUI's records in a collection, as Reactions.of([...])"));
     passed.push(x2cui_value(type, value));
   }
   while (at < args.len()) passed.push(args[at++]);
@@ -138,6 +141,7 @@ meta List x2cui_value(Type type, List value) {
     case %(expr ? (array *elements)):
       return _array(type, elements);
   }
+  if (type.car() == <*> && _collection(value)) return _records(type, value);
   if (!Type.numeric(Code.type(value))) return value;
   if (_size(type)) return _cui_call("CUI_PX", value);
   return type ~= %("cui_color") ? _cui_call("CUI_RGB", value) : value;
@@ -277,8 +281,27 @@ meta static List _count(List array) {
       return $!( $n );
     }
   }
+  if (_collection(array)) return $!( (int) ((Block) $array).length );
   Macro count = $x2cui.count;
   return Macro_apply(count, %($array));
+}
+
+/* Whether `value` is a collection: a `Block`, as `Reactions` and
+   `ArrayInt` are. */
+meta static int _collection(List value) =>
+  Type.resolve(Code.type(value)) ~= %(* struct "Block");
+
+// The records of the collection `value`, as the pointer `type`.
+meta static List _records(Type type, List value) =>
+  $!( ($type) ((Block) $value).bytes );
+
+// Whether `value` is a C array of records.
+meta static int _record_array(List value) {
+  Type type = Code.type(value);
+  if (!type) return 0;
+  Var head = type.car();
+  if (head is not <list> || ((List) head).car() != <dim>) return 0;
+  return Type.resolve(type.cdr()).car() == <struct>;
 }
 
 // The integer a literal holds.
@@ -372,7 +395,7 @@ meta static List _static(Type type, List elements, Array statics) {
   Type element = icons ? _icon() : type.cdr();
   if (!icons && element.car() != <const>)
     raise %(bad-arg (operation "Array literal")
-            (reason "CUI may write through this array: name it instead"));
+            (reason "CUI writes through this array: keep it in a collection, as Reactions.of([...])"));
   Type value = icons ? element : element.cdr();
   List rows = elements.map(%!(List e) => _element(value, e, statics));
   List name = x2c_binding_fresh("x2cui_array");
@@ -414,7 +437,7 @@ meta static List _lower(Type type, List value, Array statics) {
   }
   if (statics != NULL && !_fixed(value))
     raise %(bad-arg (operation "Array literal")
-            (reason "an element is not a constant: name the array instead"));
+            (reason "an element is not a constant: build a collection instead"));
   return x2cui_value(type, value);
 }
 

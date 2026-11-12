@@ -117,10 +117,10 @@ def classify(name, params):
       continue
     elif ("*" in ctype and after[0] == "int *" and after2[0] == "int"
           and after2[1] == "capacity"):
-      # An array the user grows: its live count, then its capacity.
-      pairs.append(len(declared))
-      declared += [f"{ctype}{pname}", f"int &{after[1]}", "int capacity"]
-      passed += [pname, f"&{after[1]}", "capacity"]
+      # An array the user grows: a collection, whose length is the live
+      # count and whose capacity the method reserves; see `grown`.
+      declared.append(f"Block {pname}")
+      passed += [f"({ctype.strip()}) {pname}.bytes", "&count", f"(int) {pname}.cap"]
       index += 3
       continue
     elif "*" in ctype and after[0] in ("int", "size_t"):
@@ -151,11 +151,28 @@ def forms(header, existing):
     rows.append(f"({short} {' '.join(map(str, pairs))})" if pairs else short)
     if result == "const char *":
       result = "String"
+    if "&count" in passed:
+      methods.append(grown(name, short, result, declared, passed))
+      continue
     methods.append(
       f"/** Calls `{name}`. */\n"
       + wrap(f"inline {result} Ui.{short}(", ["Ui u"] + declared, ") =>")
       + "\n" + wrap(f"  {name}(", ["u"] + passed, ");", "    ") + "\n")
   return methods, rows
+
+
+def grown(name, short, result, declared, passed):
+  """The method of an editor that grows its array in place: the records of
+  a collection, its length as the live count, and its capacity with one
+  record to spare, which `x2cui_spare` keeps."""
+  records = next(d.split()[1] for d in declared if d.startswith("Block "))
+  return (
+    f"/** Calls `{name}` on the records of `{records}`,\n"
+    "    which grow in place. */\n"
+    + wrap(f"{result} Ui.{short}(", ["Ui u"] + declared, ") {") + "\n"
+    + f"  int count = x2cui_spare({records});\n"
+    + wrap(f"  {result} result = {name}(", ["u"] + passed, ");", "    ")
+    + f"\n  {records}.length = count;\n  return result;\n}}\n")
 
 
 def written_methods(source):
@@ -231,14 +248,15 @@ NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
 # place, and the arrays a program both reads and passes to a component.
 COLLECTIONS = ["cui_api_param", "cui_cal_event", "cui_candle",
                "cui_check_step", "cui_curve_key", "cui_doc_tab",
-               "cui_feature_flag", "cui_file_entry", "cui_flame_span",
+               "cui_feature_flag", "cui_flame_span",
                "cui_gantt_task", "cui_gradient_stop", "cui_kv_pair",
-               "cui_log_line", "cui_month_event", "cui_plan_step",
+               "cui_month_event", "cui_plan_step",
                "cui_prompt_suggestion", "cui_query_field", "cui_query_node",
                "cui_reaction", "cui_series", "cui_source", "cui_speed_action",
-               "cui_terminal_line", "cui_timeline_clip", "cui_timeline_track",
+               "cui_timeline_track",
                "cui_toc_item", "cui_tour_step", "cui_trace_span",
-               "cui_trace_track", "cui_tree_node", "cui_viz_item"]
+               "cui_trace_track", "cui_tree_node", "cui_vec2", "cui_viz_item",
+               "cui_scatter_series"]
 
 
 def records(header):

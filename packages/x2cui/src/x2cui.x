@@ -457,6 +457,9 @@ macro Unit $x2cui.records(Type $record, Type $list) {
   inline $record *$list.at($list list, int index) =>
     &(($record *) ((Block) list).bytes)[index];
 
+  /** Returns the records, for a raw CUI call, valid until it grows. */
+  inline $record *$list.data($list list) => ($record *) ((Block) list).bytes;
+
   /** Returns how many records the collection holds. */
   inline int $list.len($list list) => (int) ((Block) list).length;
 
@@ -570,9 +573,6 @@ $x2cui.collection(DocTabs, cui_doc_tab);
 typedef Block FeatureFlags;
 $x2cui.records(cui_feature_flag, FeatureFlags);
 $x2cui.collection(FeatureFlags, cui_feature_flag);
-typedef Block FileEntries;
-$x2cui.records(cui_file_entry, FileEntries);
-$x2cui.collection(FileEntries, cui_file_entry);
 typedef Block FlameSpans;
 $x2cui.records(cui_flame_span, FlameSpans);
 $x2cui.collection(FlameSpans, cui_flame_span);
@@ -585,9 +585,6 @@ $x2cui.collection(GradientStops, cui_gradient_stop);
 typedef Block KvPairs;
 $x2cui.records(cui_kv_pair, KvPairs);
 $x2cui.collection(KvPairs, cui_kv_pair);
-typedef Block LogLines;
-$x2cui.records(cui_log_line, LogLines);
-$x2cui.collection(LogLines, cui_log_line);
 typedef Block MonthEvents;
 $x2cui.records(cui_month_event, MonthEvents);
 $x2cui.collection(MonthEvents, cui_month_event);
@@ -615,12 +612,6 @@ $x2cui.collection(Sources, cui_source);
 typedef Block SpeedActions;
 $x2cui.records(cui_speed_action, SpeedActions);
 $x2cui.collection(SpeedActions, cui_speed_action);
-typedef Block TerminalLines;
-$x2cui.records(cui_terminal_line, TerminalLines);
-$x2cui.collection(TerminalLines, cui_terminal_line);
-typedef Block TimelineClips;
-$x2cui.records(cui_timeline_clip, TimelineClips);
-$x2cui.collection(TimelineClips, cui_timeline_clip);
 typedef Block TimelineTracks;
 $x2cui.records(cui_timeline_track, TimelineTracks);
 $x2cui.collection(TimelineTracks, cui_timeline_track);
@@ -639,106 +630,40 @@ $x2cui.collection(TraceTracks, cui_trace_track);
 typedef Block TreeNodes;
 $x2cui.records(cui_tree_node, TreeNodes);
 $x2cui.collection(TreeNodes, cui_tree_node);
+typedef Block Vec2s;
+$x2cui.records(cui_vec2, Vec2s);
+$x2cui.collection(Vec2s, cui_vec2);
 typedef Block VizItems;
 $x2cui.records(cui_viz_item, VizItems);
 $x2cui.collection(VizItems, cui_viz_item);
+typedef Block ScatterSeries;
+$x2cui.records(cui_scatter_series, ScatterSeries);
+$x2cui.collection(ScatterSeries, cui_scatter_series);
 /* gen-arrays: end generated records */
 
-// key-value pairs
+// helpers over raw calls
 
-/** One pair of `ui.kv_editor`: a key, its value, whether the pair is on,
-    and whether its value shows as dots. */
-class KeyValue {
-  String key, value;
-  bool enabled, secret;
-} *;
-
-void KeyValue.init(
-  KeyValue kv, String key, String value, bool enabled, bool secret) {
-  kv.key = key;
-  kv.value = value;
-  kv.enabled = enabled;
-  kv.secret = secret;
-}
-
-/* The C pairs CUI edits for one editor, kept between frames: CUI types a
-   new pair into the slot after the last until it is complete. */
-typedef struct PairSlots {
-  cui_kv_pair *pairs;
-  int capacity;
-} PairSlots;
-
-static void _free_slots(cui_ctx *ui, void *data) {
-  PairSlots *slots = data;
-  free(slots.pairs);
-}
-
-/** Edits `pairs`, an `Array` of `KeyValue`, in place, and returns true when
-    anything changed. Typing in the empty row at the end adds a pair, and
-    the x removes one. CUI edits its own C records, kept for the editor
-    between frames; each frame copies the pairs into them, and a change is
-    copied back, so `pairs` holds what the editor shows.
-*/
-bool Ui.kv_editor(Ui u, String id, Array pairs, cui_kv_editor_opts opts) {
-  cui_id key = cui_make_id(u, id) ^ 0x6b76;
-  PairSlots *slots = cui_state(u, key, sizeof *slots);
-  int count = (int) pairs.len();
-  if (slots.capacity < count + 1) {
-    slots.capacity = count + 8;
-    slots.pairs = realloc(slots.pairs, slots.capacity * sizeof *slots.pairs);
-    size_t added = (slots.capacity - count) * sizeof *slots.pairs;
-    memset(slots.pairs + count, 0, added);
-    cui_state_on_free(u, key, _free_slots);
-  }
-  for (int i = 0; i < count; i++) _pair_to_c(pairs[i], slots.pairs[i]);
-  int edited = count;
-  bool changed = cui_kv_editor_ex(
-    u, id, slots.pairs, &edited, slots.capacity, &opts);
-  if (changed) _pairs_from_c(pairs, slots.pairs, edited);
-  return changed;
-}
-
-/** Returns the query parameters of `url`, up to 32, as an `Array` of
-    `KeyValue`, all on. */
-Array KeyValue.of_url(String url) {
-  cui_kv_pair found[32];
-  int count = cui_url_params(url, found, 32);
-  Array pairs = [];
-  _pairs_from_c(pairs, found, count);
+/** Returns the query parameters of `url`, up to 32, as key-value pairs,
+    all on. */
+KvPairs KvPairs.of_url(String url) {
+  Block pairs = Block.new(sizeof(cui_kv_pair));
+  Block.reserve(pairs, 32);
+  pairs.length = cui_url_params(url, (cui_kv_pair *) pairs.bytes, 32);
   return pairs;
 }
 
-/** Replaces the query of the URL in `url` with the pairs of `pairs` that
+/** Replaces the query of the URL in `field` with the pairs of `pairs` that
     are on. */
-void TextField.set_url_params(TextField field, Array pairs) {
-  int count = (int) pairs.len();
-  cui_kv_pair *c = calloc(count ? count : 1, sizeof *c);
-  for (int i = 0; i < count; i++) _pair_to_c(pairs[i], c[i]);
-  cui_url_set_params(field.buffer, field.capacity, c, count);
-  free(c);
+void TextField.set_url_params(TextField field, KvPairs pairs) {
+  cui_url_set_params(field.buffer, field.capacity, pairs.data(), pairs.len());
 }
 
-static void _pair_to_c(KeyValue kv, cui_kv_pair &pair) {
-  snprintf(pair.key, sizeof pair.key, "%s", kv.key);
-  snprintf(pair.value, sizeof pair.value, "%s", kv.value);
-  pair.enabled = kv.enabled;
-  pair.secret = kv.secret;
-}
-
-static void _pairs_from_c(Array pairs, cui_kv_pair *edited, int count) {
-  while ((int) pairs.len() > count) pairs.take_last();
-  for (int i = 0; i < count; i++) {
-    cui_kv_pair pair = edited[i];
-    KeyValue kv = i < (int) pairs.len() ? pairs[i] : NULL;
-    if (!kv) {
-      kv = KeyValue.new("", "", false, false);
-      pairs.push(kv);
-    }
-    kv.key = String.new(pair.key);
-    kv.value = String.new(pair.value);
-    kv.enabled = pair.enabled;
-    kv.secret = pair.secret;
-  }
+/** Returns the query `nodes` builds over `fields`, as a sentence. */
+String QueryFields.text(QueryFields fields, QueryNodes nodes) {
+  char text[256];
+  cui_query_text(fields.data(), fields.len(), nodes.data(), nodes.len(),
+                 text, sizeof text);
+  return String.new(text);
 }
 
 /* One native array for each List of Strings a component has been given,
@@ -1114,23 +1039,43 @@ inline cui_flame_result Ui.flame_graph(
   cui_flame_view &view, int &selected, cui_flame_opts opts) =>
   cui_flame_graph_ex(u, id, spans, count, &view, &selected, &opts);
 
-/** Calls `cui_curve_editor_ex`. */
-inline cui_curve_result Ui.curve_editor(
-  Ui u, String id, cui_curve_key *keys, int &count, int capacity,
-  cui_curve_opts opts) =>
-  cui_curve_editor_ex(u, id, keys, &count, capacity, &opts);
+/** Calls `cui_curve_editor_ex` on the records of `keys`,
+    which grow in place. */
+cui_curve_result Ui.curve_editor(
+  Ui u, String id, Block keys, cui_curve_opts opts) {
+  int count = x2cui_spare(keys);
+  cui_curve_result result = cui_curve_editor_ex(
+    u, id, (cui_curve_key *) keys.bytes, &count, (int) keys.cap, &opts);
+  keys.length = count;
+  return result;
+}
 
-/** Calls `cui_gradient_editor_ex`. */
-inline cui_gradient_result Ui.gradient_editor(
-  Ui u, String id, cui_gradient_stop *stops, int &count, int capacity,
-  cui_gradient_opts opts) =>
-  cui_gradient_editor_ex(u, id, stops, &count, capacity, &opts);
+/** Calls `cui_gradient_editor_ex` on the records of `stops`,
+    which grow in place. */
+cui_gradient_result Ui.gradient_editor(
+  Ui u, String id, Block stops, cui_gradient_opts opts) {
+  int count = x2cui_spare(stops);
+  cui_gradient_result result = cui_gradient_editor_ex(
+    u, id, (cui_gradient_stop *) stops.bytes, &count, (int) stops.cap, &opts);
+  stops.length = count;
+  return result;
+}
 
 /** Calls `cui_timeline_editor_ex`. */
 inline cui_timeline_editor_result Ui.timeline_editor(
   Ui u, String id, cui_timeline_track *tracks, int count, float &time,
   cui_timeline_editor_opts opts) =>
   cui_timeline_editor_ex(u, id, tracks, count, &time, &opts);
+
+/** Calls `cui_kv_editor_ex` on the records of `pairs`,
+    which grow in place. */
+bool Ui.kv_editor(Ui u, String id, Block pairs, cui_kv_editor_opts opts) {
+  int count = x2cui_spare(pairs);
+  bool result = cui_kv_editor_ex(
+    u, id, (cui_kv_pair *) pairs.bytes, &count, (int) pairs.cap, &opts);
+  pairs.length = count;
+  return result;
+}
 
 /** Calls `cui_problems_ex`. */
 inline cui_problems_result Ui.problems(
@@ -1145,12 +1090,18 @@ inline cui_pipeline_result Ui.pipeline(
   cui_pipeline_ex(
     u, id, x2cui_strings(stages), stages.len(), jobs, job_count, &opts);
 
-/** Calls `cui_query_builder_ex`. */
-inline bool Ui.query_builder(
-  Ui u, String id, const cui_query_field *fields, int field_count,
-  cui_query_node *nodes, int &count, int capacity, cui_query_opts opts) =>
-  cui_query_builder_ex(
-    u, id, fields, field_count, nodes, &count, capacity, &opts);
+/** Calls `cui_query_builder_ex` on the records of `nodes`,
+    which grow in place. */
+bool Ui.query_builder(
+  Ui u, String id, const cui_query_field *fields, int field_count, Block nodes,
+  cui_query_opts opts) {
+  int count = x2cui_spare(nodes);
+  bool result = cui_query_builder_ex(
+    u, id, fields, field_count, (cui_query_node *) nodes.bytes, &count,
+    (int) nodes.cap, &opts);
+  nodes.length = count;
+  return result;
+}
 
 /** Calls `cui_keymap_ex`. */
 inline cui_keymap_result Ui.keymap(
@@ -1259,7 +1210,7 @@ expand %(
   prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell donut_chart
   sparkline otp_input reorder_begin (line_chart 1) (bar_chart 1)
   each_begin each_end item_begin table_row_begin cell_text grid_cell_text
-  kv_editor (tour 1) toggle_group (reactions 1) (speed_dial 1)
+  (tour 1) toggle_group (reactions 1) (speed_dial 1)
   (swipe_item_begin 1 3) (filter_bar 1) (tree_table_begin 1 3)
   diff_view_rows (presence 1) (ticker 1) heatmap (calendar_heatmap 2)
   (treemap 1) (radar_chart 1) (funnel 1) (sankey 2) (waffle 1)
@@ -1268,11 +1219,11 @@ expand %(
   (prompt_suggestions 1) (model_picker 1) (week_calendar 2)
   (month_calendar 2) (gantt 1) (toc 1) (checklist 1) multi_select
   (histogram_slider 1) (level_meter 1) (doc_tabs 1) (prop_vec 1)
-  (hex_view 1) (flame_graph 1) (curve_editor 1) (gradient_editor 1)
-  (timeline_editor 1) (problems 1) (pipeline 2) (query_builder 1 3)
-  (keymap 1) (commit_graph 1) (graph_view 1 3) (waterfall 1)
-  (trace_view 1 3) (test_explorer 1) (stack_trace 1) (uptime 1)
-  (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
+  (hex_view 1) (flame_graph 1) curve_editor gradient_editor
+  (timeline_editor 1) kv_editor (problems 1) (pipeline 2)
+  (query_builder 1) (keymap 1) (commit_graph 1) (graph_view 1 3)
+  (waterfall 1) (trace_view 1 3) (test_explorer 1) (stack_trace 1)
+  (uptime 1) (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
   (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
 macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)
