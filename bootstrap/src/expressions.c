@@ -540,6 +540,8 @@ static void f11_conversions____check_native_crossing(Compiler c, List expr, Type
 
 static int f11_conversions____unrelated_pointers(Compiler c, Type source, Type target);
 
+static int f11_conversions____known_level(Type type);
+
 static int f11_conversions____known_pointee(Type type);
 
 static String f11_conversions____not_null_pointer_constant(Compiler c, List expr);
@@ -2561,7 +2563,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1944 = cons(_1943, NULL);
   _1945 = cons(_250, _1944);
   _1946 = List_var(_1945);
-  _1947 = int_var(89386);
+  _1947 = int_var(88975);
   _1948 = cons(_1947, NULL);
   _1949 = cons(_255, _1948);
   _1950 = List_var(_1949);
@@ -2760,7 +2762,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2140 = cons(_2139, NULL);
   _2141 = cons(_242, _2140);
   _2142 = List_var(_2141);
-  _2143 = int_var(89748);
+  _2143 = int_var(89337);
   _2144 = cons(_2143, NULL);
   _2145 = cons(_255, _2144);
   _2146 = List_var(_2145);
@@ -2877,7 +2879,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2257 = cons(_2256, NULL);
   _2258 = cons(_242, _2257);
   _2259 = List_var(_2258);
-  _2260 = int_var(90510);
+  _2260 = int_var(90099);
   _2261 = cons(_2260, NULL);
   _2262 = cons(_255, _2261);
   _2263 = List_var(_2262);
@@ -2975,7 +2977,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2355 = cons(_2354, NULL);
   _2356 = cons(_242, _2355);
   _2357 = List_var(_2356);
-  _2358 = int_var(90594);
+  _2358 = int_var(90183);
   _2359 = cons(_2358, NULL);
   _2360 = cons(_255, _2359);
   _2361 = List_var(_2360);
@@ -3100,7 +3102,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2480 = cons(_2479, NULL);
   _2481 = cons(_242, _2480);
   _2482 = List_var(_2481);
-  _2483 = int_var(90331);
+  _2483 = int_var(89920);
   _2484 = cons(_2483, NULL);
   _2485 = cons(_255, _2484);
   _2486 = List_var(_2485);
@@ -3201,7 +3203,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2578 = cons(_2577, NULL);
   _2579 = cons(_242, _2578);
   _2580 = List_var(_2579);
-  _2581 = int_var(90160);
+  _2581 = int_var(89749);
   _2582 = cons(_2581, NULL);
   _2583 = cons(_255, _2582);
   _2584 = List_var(_2583);
@@ -3423,7 +3425,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2800 = cons(_2799, NULL);
   _2801 = cons(_242, _2800);
   _2802 = List_var(_2801);
-  _2803 = int_var(90801);
+  _2803 = int_var(90390);
   _2804 = cons(_2803, NULL);
   _2805 = cons(_255, _2804);
   _2806 = List_var(_2805);
@@ -3631,7 +3633,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3008 = List_var(_3007);
   _3009 = cons(_202, _84);
   _3010 = List_var(_3009);
-  _3011 = int_var(93203);
+  _3011 = int_var(92792);
   _3012 = cons(_3011, NULL);
   _3013 = cons(_255, _3012);
   _3014 = List_var(_3013);
@@ -5943,7 +5945,7 @@ static void f11_identifiers____capture_identifier(Compiler c, List binding){
 }
 
 static int f11_identifiers____shadow_identifier(Compiler c, List * binding, Type type, String spelling, Map binding_facts, int kept){
-  if(! String_truth(spelling)) return 0;  Type visible_type = NULL;  List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(visible_type));  if(! List_truth(visible) || List_equal(visible, (* binding))) return 0;  int forward = ! Sym_binding_is_local(c -> sym, (* binding)) && !(Map_contains(binding_facts, List_var(cons(_2, cons(List_var((* binding)), NULL))))) && !(Map_contains(binding_facts, List_var(cons(_879, cons(List_var((* binding)), NULL))))) && ! List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL));  if((Sym_binding_is_local(c -> sym, (* binding)) && !(Map_contains(binding_facts, List_var(cons(_1497, cons(List_var((* binding)), NULL))))) && !(Map_contains(binding_facts, List_var(cons(_879, cons(List_var((* binding)), NULL)))))) ||(! kept && List_truth(Type_list(visible_type)) &&(forward || f11_identifiers____expansion_introduced(c, visible)))){
+  if(! String_truth(spelling)) return 0;  Type visible_type = NULL;  List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(visible_type));  if(! List_truth(visible) || List_equal(visible, (* binding))) return 0;  if((Sym_binding_is_local(c -> sym, (* binding)) && !(Map_contains(binding_facts, List_var(cons(_1497, cons(List_var((* binding)), NULL))))) && !(Map_contains(binding_facts, List_var(cons(_879, cons(List_var((* binding)), NULL)))))) ||(! kept && List_truth(Type_list(visible_type)) && f11_identifiers____expansion_introduced(c, visible))){
     (* binding) = visible;  return 1;
   }
   if(! List_truth(Type_list(visible_type)) || !(Map_contains(binding_facts, List_var(cons(_1499, cons(List_var(visible), NULL))))) ||(List_truth(Type_list(type)) && ! List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL)))) return 0;  f11_identifiers____unshadow_visible(c, visible, spelling);  return 0;
@@ -8343,9 +8345,13 @@ static void f11_conversions____check_native_crossing(Compiler c, List expr, Type
 
 static int f11_conversions____unrelated_pointers(Compiler c, Type source, Type target){
   source = Sym_resolve_key(c -> sym, source);  target = Sym_resolve_key(c -> sym, target);  if(! Type_is_pointer(source) || ! Type_is_pointer(target)) return 0;  while(1){
-    source = Sym_resolve_key(c -> sym, List_cdr(source));  target = Sym_resolve_key(c -> sym, List_cdr(target));  if(List_equal(Type_list(source), Type_list(target))) return 0;  if(! Type_is_pointer(source) || ! Type_is_pointer(target)) return f11_conversions____known_pointee(source) && f11_conversions____known_pointee(target);
+    source = Sym_resolve_key(c -> sym, List_cdr(source));  target = Sym_resolve_key(c -> sym, List_cdr(target));  if(List_equal(Type_list(source), Type_list(target))) return 0;  if(! Type_is_pointer(source) || ! Type_is_pointer(target)) return f11_conversions____known_level(source) && f11_conversions____known_level(target);
   }
 
+}
+
+static int f11_conversions____known_level(Type type){
+  return Type_is_pointer(type) || f11_conversions____known_pointee(type);
 }
 
 static int f11_conversions____known_pointee(Type type){
