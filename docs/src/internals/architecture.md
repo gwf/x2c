@@ -457,27 +457,29 @@ expression and lambda normalization within the function.
  (block
   (at 2 (return
          (expr ("String")
-          ("String_join(NULL, "
-           (expr ("List")
-            (cons (expr ("Var")
-                   (call (expr ((func (("String"))) "Var")
-                          (ident (binding 3 "String_var")))
-                    (args (expr ("String") (cache 0)))))
+          (call (expr ((func (("String") ("List"))) "String")
+                 (ident (binding 3 "String_join")))
+           (args (expr () (ident (binding 4 "NULL")))
+            (expr ("List")
              (cons (expr ("Var")
                     (call (expr ((func (("String"))) "Var")
-                           (ident (binding 3 "String_var")))
-                     (args (expr ("String") (ident (binding 2 "name"))))))
-              (nil)))) ")"))))))
+                           (ident (binding 5 "String_var")))
+                     (args (expr ("String") (cache 0)))))
+              (expr ("List")
+               (cons (expr ("Var")
+                      (call (expr ((func (("String"))) "Var")
+                             (ident (binding 5 "String_var")))
+                       (args (expr ("String") (ident (binding 2 "name"))))))
+                (nil))))))))))))
 ```
 
-The interpolation is gone, replaced by a `String_join` call over a cons list
-of boxed `Var` values, each `String_var` call naming its callee as a resolved
-binding carrying that function's type.
+The interpolation is gone, replaced by an ordinary `String_join` call. Its
+arguments are `NULL` and a cons list of boxed `Var` values. Each callee,
+`String_join` and each `String_var`, is a resolved binding carrying that
+function's type, so the emitter prints the call from typed nodes.
 `src/components/interpolation.x` wrote the join; see [builtin
 components](#builtin-components). The `return` no longer carries a type
-annotation; nothing downstream needs it. Some children are now raw C text.
-Lowering may produce emitter-ready fragments, so `"String_join(NULL, "` sits
-in the tree as a `String` instead of a call node.
+annotation; nothing downstream needs it.
 
 ### Generation and cache staging
 

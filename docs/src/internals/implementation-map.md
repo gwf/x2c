@@ -52,7 +52,7 @@ Print the AST after lowering:
     (expr ("List") (ident (binding 5 "_x2c_gensym_macro_object_0"))))))
  (declare ("Var")
   (bindings (bind (binding 7 "_x2c_gensym_macro_cursor_output_0") ())))
- (at 20
+ (at 12
   (while
    (expr (int)
     (call ... (ident (binding 8 "List_try_next")))
