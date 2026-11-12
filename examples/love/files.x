@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include "path.x"
 
-
 // The checked-in data sits beside the examples wherever they live.
 String example_data(String name) {
   Path source = String.new(__FILE__);

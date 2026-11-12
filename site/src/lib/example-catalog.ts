@@ -20,26 +20,34 @@ const expected = new Map(read("examples/manifest.txt").split("\n")
   .filter((row) => row[4] && row[4] !== "-")
   .map((row) => [`examples/${row[0]}.x`, `examples/${row[4]}`]));
 const outputFor = (path: string, fallback?: string) => {
-  const file = expected.get(path) ?? fallback;
-  return file ? read(file) : undefined;
+  const declared = expected.get(path) ?? fallback;
+  if (declared) return read(declared);
+  // Optional examples have checked output outside the core manifest.
+  const file = path.startsWith("packages/")
+    ? path.replace(/\/examples\/([^/]+)\.x$/, "/examples/expected/$1.stdout")
+    : `examples/expected/${path.slice("examples/".length, -2).replaceAll("/", "-")}.stdout`;
+  return existsSync(join(import.meta.env.X2C_REPOSITORY_ROOT, file)) ? read(file) : undefined;
 };
 
 const galleryEntries = gallery.flatMap((entry) => {
   if (entry.language) return [];
   const path = entry.example ? `examples/${entry.example}.x` : entry.source;
-  if (!path?.startsWith("examples/") || !path.endsWith(".x")) return [];
-  const id = path.slice("examples/".length, -2);
+  if (!path?.endsWith(".x")) return [];
+  const slide = slides.find((item) => item.file?.endsWith(`/${entry.slide}`))!;
+  if (slide.frontmatter.section === "packages") return [];
+  const id = entry.example ?? (path.startsWith("examples/")
+    ? path.slice("examples/".length, -2)
+    : `${slide.frontmatter.section}/${slide.frontmatter.slug}`);
   const flagFile = path.slice(0, -2) + ".flags";
   const flags = existsSync(join(import.meta.env.X2C_REPOSITORY_ROOT, flagFile))
     ? read(flagFile).trim() : "";
   const source = read(path);
-  const slide = slides.find((item) => item.file?.endsWith(`/${entry.slide}`))!;
   return [{
     id, section: slide.frontmatter.section, path, source,
     label: slide.frontmatter.tab
       ?? id.split("/").pop()!.replaceAll("-", " "),
     runnable: runnable.has(id),
-    visible: source, program: published.get(id)?.program ?? false,
+    program: published.get(id)?.program ?? false,
     recipe: `x2c run ${flags ? flags + " " : ""}${path}`,
     output: outputFor(path), slide,
   }];
@@ -55,7 +63,7 @@ const programEntries = articles.map((article) => {
   const source = read(page.source);
   return {
     id: `programs/${page.slug}`, section: "programs", path: page.source,
-    source, visible: source,
+    source,
     label: page.navTitle, runnable: false, program: false,
     output: outputFor(page.source, page.output), article,
     recipe: (page.run ?? recipes[page.slug]).trim(),
@@ -65,8 +73,14 @@ const programEntries = articles.map((article) => {
 // Every program on the examples page, in list order.
 export const exampleEntries: {
   id: string; section: string; path: string; source: string; label: string;
-  runnable: boolean; visible: string; program: boolean; output?: string; slide?: ExampleMarkdown;
+  runnable: boolean; program: boolean; output?: string; slide?: ExampleMarkdown;
   article?: ExampleMarkdown; recipe?: string; description?: string;
 }[] = [...galleryEntries, ...programEntries];
 export const exampleSections = ["love", "power", "magic", "programs"];
 
+// All entry points use the same complete-example destination.
+export const exampleRoute = (entry: typeof exampleEntries[number]) => entry.article
+  ? `${entry.article.frontmatter.slug}/`
+  : `${entry.section}/#${entry.id.replaceAll("/", "-")}`;
+export const exampleRoutes = Object.fromEntries(
+  exampleEntries.map(entry => [entry.id, exampleRoute(entry)]));

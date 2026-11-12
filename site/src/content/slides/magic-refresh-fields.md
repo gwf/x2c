@@ -8,7 +8,7 @@ title: The compiler can describe your types.
 ---
 
 ```x2c
-#include "meta.x"
+~#include "meta.x"
 
 typedef struct Reading { int celsius; String station; int gusts; } Reading;
 
@@ -26,11 +26,11 @@ meta static List show_fields(List receiver, TypeInfo type) {
 // The macro captures the expression; the meta function writes the code.
 macro Stmt $show(Expr $value) => $show_fields($value, $value);
 
-int main(void) {
+~int main(void) {
   Reading noon = { 21, "roof", 12 };
   $show(noon);
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 Inspect a type's fields at compile time and generate code that visits them. This is the same general technique behind derived operations: the declaration supplies the information instead of a second handwritten field list.

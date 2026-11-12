@@ -8,9 +8,9 @@ title: Walk the data, name its parts.
 ---
 
 ```x2c
-#include <assert.h>
+~#include <assert.h>
 
-int main(void) {
+~int main(void) {
   Array orders = [%(tea 2 "Ada"), %(coffee 1 "Grace"), %(tea 1 "Linus")];
 
   // foreach walks anything with elements; destructure as you go.
@@ -27,10 +27,10 @@ int main(void) {
   // Lambdas and iterator chains read left to right.
   Var total = orders.iter().map(%!(List order) => order[1])
     .foldl(0, %!(sum, count) => sum + count);
-  assert(total == 4);
+~  assert(total == 4);
 
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 `foreach` walks a container while destructuring gives each part a name. Pattern conditions select the orders that matter, and an iterator chain totals their quantities.

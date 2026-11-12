@@ -9,7 +9,7 @@ title: Your types join in.
 ---
 
 ```x2c
-#include <assert.h>
+~#include <assert.h>
 
 // A value class: construction, equality, hashing, and printing come free.
 class Point { int x; int y; };
@@ -26,9 +26,9 @@ void Account.deposit(Account account, long cents) => account.cents += cents;
 String Account.repr(Account account) =>
   %"Account($(account.owner), $(account.cents) cents)";
 
-int main(void) {
+~int main(void) {
   Point here = Point.new(3, 4), there = Point.new(3, 4);
-  assert(here == there);
+~  assert(here == there);
   Map labels = {};
   labels[here] = "home";
   printf("%s is %s\n", there.repr(), labels[there]);
@@ -37,8 +37,8 @@ int main(void) {
   ada.deposit(1250);
   ada.deposit(75);
   printf("%s\n", ada.repr());
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 Define the data and behavior of a Point or an Account. Constructors, methods, and generated operations let your own types participate in the same style of code as the built-ins.

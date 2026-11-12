@@ -9,9 +9,9 @@ title: Different containers, familiar operations.
 ---
 
 ```x2c
-#include <assert.h>
+~#include <assert.h>
 
-int main(void) {
+~int main(void) {
   // Lists are immutable and share structure; cons is constant time.
   List prices = %(3 5 8), extended = cons(2, prices);
   List doubled = extended.map(%!(price) => price * 2);
@@ -31,8 +31,8 @@ int main(void) {
   assert(stock.try_get(<sugar>, sugar) && sugar == 0);
   assert(stock.getdefault(<milk>, -1) == -1 && !stock.contains(<milk>));
   printf("%s %s %s\n", doubled.repr(), ranked.repr(), stock[<tea>]);
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 Lists, Arrays, and Maps serve different purposes. Their shared operations let you transform a sequence, rank values, and look up a result without rebuilding those operations for each container.

@@ -8,8 +8,8 @@ title: Describe the record once.
 ---
 
 ```x2c
-/*  derive.x -- record mapping, representation, and nested equality */
-#include <derive.x>
+~/*  derive.x -- record mapping, representation, and nested equality */
+~#include <derive.x>
 
 typedef struct Point { int x, y; } Point;
 typedef struct Person {
@@ -23,7 +23,7 @@ typedef struct Person {
 $derive(Point, <map>, <equal>, <repr>);
 $derive(Person, <json>, <equal>, <repr>);
 
-int main(void) {
+~int main(void) {
   Person p = { 42, "Ada", 1.5, { 3, 4 }, ["x", 2] };
   Map m = p.to_map();
   Map home = m["home"];
@@ -34,8 +34,8 @@ int main(void) {
   printf("equal %d\n", p.equal(q));
   q.home.y = 9;
   printf("equal %d %s\n", p.equal(q), q.repr().str());
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 Generated record operations keep field mappings, equality, and representation tied to the type declaration. The same fields work with the surrounding collection and serialization operations.

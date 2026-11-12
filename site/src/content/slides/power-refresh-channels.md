@@ -9,9 +9,9 @@ title: Give each worker a job.
 ---
 
 ```x2c
-#include <assert.h>
+~#include <assert.h>
 
-int main(void) {
+~int main(void) {
   // A bounded channel carries values between native threads.
   Channel lines = auto Channel.new(<string>, 4);
   Map counts = {};
@@ -29,10 +29,10 @@ int main(void) {
     }
   ]);
 
-  assert(counts["cake"] == 3 && counts["and"] == 2);
+~  assert(counts["cake"] == 3 && counts["and"] == 2);
   printf("cake: %s, tea: %s\n", counts["cake"], counts["tea"]);
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 Channels connect a producer and consumer. One worker updates the counts, and the caller reads the result after joining. Ownership and communication remain visible in the code.

@@ -9,10 +9,10 @@ title: Choose the representation you need.
 
 ```x2c
 ~#include <assert.h>
-// Opt into the ready-made typed collection families.
-#include "typed-array.x"
-#include "typed-map.x"
-#include "typed-list.x"
+~// Opt into the ready-made typed collection families.
+~#include "typed-array.x"
+~#include "typed-map.x"
+~#include "typed-list.x"
 
 ~int main(void) {
   // Store native ints and count each response code.
