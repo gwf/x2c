@@ -1,0 +1,44 @@
+--- a/include/cui/cui.h
++++ b/include/cui/cui.h
+@@ -3437,6 +3437,12 @@
+ typedef void (*cui_paint_fn)(cui_ctx *ui, cui_rect rect, void *user);
+ typedef struct cui_canvas_result { cui_rect rect; bool hovered, pressed, clicked; cui_vec2 mouse; } cui_canvas_result;
+ CUI_API cui_canvas_result cui_canvas(cui_ctx *ui, const char *id, cui_size width, cui_size height, cui_paint_fn paint, const void *user, size_t user_size);
++/* A canvas with interaction flags. CUI_CANVAS_FOCUSABLE puts it in the Tab
++ * order, and with keyboard focus Enter or Space clicks it, as a button. */
++enum { CUI_CANVAS_FOCUSABLE = 1 };
++CUI_API cui_canvas_result cui_canvas_ex(cui_ctx *ui, const char *id, cui_size width, cui_size height, cui_paint_fn paint, const void *user, size_t user_size, int flags);
++/* Whether `id` has keyboard focus with its ring showing; for a painter. */
++CUI_API bool cui_focus_visible(cui_ctx *ui, cui_id id);
+ 
+ /* Persistent per-id storage for your own components (zeroed on first use).
+  * State not used for about 300 frames is freed (and zeroed again if it comes
+--- a/src/cui_widgets.c
++++ b/src/cui_widgets.c
+@@ -994,15 +994,24 @@
+ }
+ 
+ cui_canvas_result cui_canvas(cui_ctx *ui, const char *id_str, cui_size w, cui_size h, cui_paint_fn paint, const void *user, size_t user_size) {
++    return cui_canvas_ex(ui, id_str, w, h, paint, user, user_size, 0);
++}
++
++bool cui_focus_visible(cui_ctx *ui, cui_id id) {
++    return id && ui->focus == id && ui->focus_visible;
++}
++
++cui_canvas_result cui_canvas_ex(cui_ctx *ui, const char *id_str, cui_size w, cui_size h, cui_paint_fn paint, const void *user, size_t user_size, int flags) {
+     cui_canvas_result res;
+     memset(&res, 0, sizeof res);
+     cui_id id = cui_make_id(ui, id_str ? id_str : "canvas");
+-    cui_interact r = cui__interact(ui, id, CUI_IF_DRAG);
++    int focus = (flags & CUI_CANVAS_FOCUSABLE) ? CUI_IF_FOCUSABLE : 0;
++    cui_interact r = cui__interact(ui, id, CUI_IF_DRAG | focus);
+     res.rect = cui__prev_rect(ui, id);
+     res.hovered = r.hovered; res.pressed = r.pressed; res.clicked = r.clicked;
+     res.mouse.x = ui->mx - res.rect.x; res.mouse.y = ui->my - res.rect.y;
+     int i = cui__leaf(ui, id, w, h);
+-    cui__mark_interactive(ui, i, 0);
++    cui__mark_interactive(ui, i, focus);
+     if (paint) {
+         cui__canvas_paint *p = cui__frame_alloc(ui, sizeof *p);
+         p->fn = paint;

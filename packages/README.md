@@ -9,8 +9,8 @@ Releases publish prebuilt bundles for PCRE2, yyjson, libcurl, termbox2,
 libuv, and BLIS on macOS (arm64, x86_64) and Linux (arm64, x86_64), and for
 torch on macOS arm64 and Linux x86_64. Autodiff and the
 [greet](../examples/packages/greet/) example are published as source
-packages. SQLite and raylib have no release bundle; build them from this
-checkout. [The package index](https://x2c-lang.dev/packages/index.txt) lists
+packages. SQLite, raylib, and x2cui have no release bundle; build them from
+this checkout. [The package index](https://x2c-lang.dev/packages/index.txt) lists
 each release's archives, and `x2c install <name>` installs one.
 
 | Package | What it provides |
@@ -25,6 +25,7 @@ each release's archives, and `x2c install <name>` installs one.
 | [libuv](libuv/README.md) | Event loops, processes, files, and networking |
 | [raylib](raylib/README.md) | Images, charts, and optional desktop windows |
 | [torch](torch/README.md) | Tensors, autograd, modules, optimizers, checkpoints, and TorchScript over libtorch |
+| [x2cui](x2cui/README.md) | Windows and drawn UI components over CUI; built from a checkout on macOS and Linux |
 
 torch links libtorch dynamically, so its programs are not self-contained;
 its README explains the required runtime libraries.
@@ -157,11 +158,20 @@ runs every standard application for that package.
   [libcurl/examples/inline-lisp.x](libcurl/examples/inline-lisp.x), [sqlite/examples/inline-lisp.x](sqlite/examples/inline-lisp.x), and
   [torch/examples/inline-lisp.x](torch/examples/inline-lisp.x): each installs its package's Lisp surface
   into a session and drives it.
+- [x2cui/examples/todo.x](x2cui/examples/todo.x): short. A to-do list in a
+  window, with a text field, a filter, a confirmation dialog, and a saved
+  file. [mail.x](x2cui/examples/mail.x): a mail message list of
+  interactive rows with `ui.each` and `ui.item`.
+  [orders.x](x2cui/examples/orders.x): a sortable table of orders whose
+  columns are a Map literal. [gallery.x](x2cui/examples/gallery.x): broad.
+  A port of CUI's own gallery of 26 pages, browsed in a window or drawn
+  off screen.
 - [http-json-releases](../examples/packages/http-json-releases/http-json-releases.x):
   two packages in one program, importing libcurl and yyjson and linking both
   archives.
 
-termbox2, blis, libuv, and raylib provide x2c interfaces but no Lisp bindings.
+termbox2, blis, libuv, raylib, and x2cui provide x2c interfaces but no Lisp
+bindings.
 Their objects represent native terminal state, matrices, event loops, and
 images. See each package's README for ownership rules and raw API access.
 

@@ -20,6 +20,18 @@ implementation plan based on `68ebfece6`. It records bounded repairs,
 performance decisions, packaging work, and deferred items. The small fixes are implemented;
 website work belongs to a separate session.
 
+## x2cui package
+
+[x2cui](x2cui-package.md) is the plan, specification, and running record of
+the package over the CUI user-interface library. Gary accepted its
+decisions on 2026-11-10. The package is implemented on macOS and in a
+browser; its Linux profile is written and has not been built.
+
+[x2cui lists and tables](x2cui-lists-and-tables.md) records `ui.each`,
+`ui.item`, `ui.table` with a Map of columns, `ui.table_row`, and `ui.cell`,
+with the package's generated method forms and their option values. Gary
+accepted its decisions on 2026-11-11. It is implemented in the package.
+
 ## Method-form macros
 
 [Method-form macros](method-form-macros.md) gives decorators and Expression

@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "cui",
+  "version": "1.3.1",
+  "profile": "static-app-x11-fonts",
+  "sources": [
+    {
+      "name": "cui",
+      "url": "https://github.com/yappologistic/CUI/archive/refs/tags/v1.3.1.tar.gz",
+      "sha256": "d925329943d377b748995efed5603b47ff469eb956c297244b562a73b74641d5",
+      "root": "CUI-1.3.1"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "patches/table-row-state.patch",
+      "sha256": "66b33b791c7516e57f2a40126a627cadeb859a13d4aebd17d9feaec7bcc05262"
+    },
+    {
+      "path": "patches/focusable-canvas.patch",
+      "sha256": "c91497d21bceaa1cd9daa82b87fb199b6de8259f7c1ff3662900265ed123fde3"
+    }
+  ],
+  "steps": [
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/table-row-state.patch"
+      ]
+    },
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/focusable-canvas.patch"
+      ]
+    },
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "python3",
+        "tools/amalgamate.py",
+        "{work}/amalgamation"
+      ]
+    },
+    {
+      "cwd": "{work}",
+      "argv": [
+        "{cc}",
+        "-c",
+        "amalgamation/cui.c",
+        "-O2",
+        "-std=gnu99",
+        "-o",
+        "{work}/cui.o"
+      ]
+    },
+    {
+      "cwd": "{work}",
+      "argv": [
+        "{ar}",
+        "rcs",
+        "{prefix}/lib/libcui.a",
+        "cui.o"
+      ]
+    }
+  ],
+  "copies": [
+    {
+      "from": "{source_cui}/include/cui/cui.h",
+      "to": "{prefix}/include/cui/cui.h"
+    },
+    {
+      "from": "{source_cui}/include/cui/cui_app.h",
+      "to": "{prefix}/include/cui/cui_app.h"
+    },
+    {
+      "from": "{source_cui}/include/cui/cui_icons.h",
+      "to": "{prefix}/include/cui/cui_icons.h"
+    },
+    {
+      "from": "{source_cui}/include/cui/cui_render.h",
+      "to": "{prefix}/include/cui/cui_render.h"
+    }
+  ],
+  "receipts": [
+    "{prefix}/include/cui/cui.h",
+    "{prefix}/include/cui/cui_app.h",
+    "{prefix}/include/cui/cui_icons.h",
+    "{prefix}/include/cui/cui_render.h",
+    "{prefix}/lib/libcui.a"
+  ],
+  "distribution": {
+    "copies": [
+      {
+        "from": "{prefix}/include/cui/cui.h",
+        "to": "native/include/cui/cui.h"
+      },
+      {
+        "from": "{prefix}/include/cui/cui_app.h",
+        "to": "native/include/cui/cui_app.h"
+      },
+      {
+        "from": "{prefix}/include/cui/cui_icons.h",
+        "to": "native/include/cui/cui_icons.h"
+      },
+      {
+        "from": "{prefix}/include/cui/cui_render.h",
+        "to": "native/include/cui/cui_render.h"
+      },
+      {
+        "from": "{prefix}/lib/libcui.a",
+        "to": "native/lib/libcui.a"
+      }
+    ],
+    "native_args": [
+      "--c-include-dir",
+      "{package}/native/include",
+      "{package}/native/lib/libcui.a",
+      "-l",
+      "X11",
+      "-l",
+      "dl",
+      "-l",
+      "m",
+      "-l",
+      "pthread"
+    ]
+  }
+}

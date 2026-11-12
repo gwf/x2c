@@ -1,0 +1,363 @@
+#!/usr/bin/env python3
+"""Writes the x2c forms of the CUI functions that take arrays.
+
+    python3 tools/gen-arrays.py deps/include/cui/cui.h
+
+A function in cui.h whose first parameter is `cui_ctx *` and which has no
+row in the `expand` table and no hand-written method in src/x2cui.x takes
+an array of records, numbers, or flags. This tool writes one `Ui` method for each,
+between markers in src/x2cui.x. The method takes each array as a pointer
+and its count, as CUI declares them; a call site passes a C array and
+`$x2cui.count(array)`. It keeps CUI's parameter names. Rerun it after
+changing the pinned CUI version and review the difference. Variadic
+functions get no form.
+
+It also writes CUI's parameter names for the methods `expand` defines,
+in src/x2cui-generate.x, and the table of the methods in src/x2cui.x, generated here or
+written by hand, that may have a method form, and the table in
+src/x2cui-options.x of the parameters that name an icon. A row names a method and
+the positions of its arrays whose count follows them, so the form
+supplies each count: `ui.tab_bar("tabs", tabs, selected, variant: pill)`.
+"""
+import re
+import sys
+
+BEGIN = "/* gen-arrays: begin generated %s */"
+END = "/* gen-arrays: end generated %s */"
+
+# No method: these return through pointers to pointers, or are variadic.
+SKIP = {"cui_signature_points",
+        # patches/focusable-canvas.patch adds these for `ui.item` alone.
+        "cui_canvas_ex", "cui_focus_visible"}
+# The parameter after the array that holds its count, where it is not the
+# next one. diff_view_rows takes the first row, then the capacity.
+COUNT_AFTER = {("cui_diff_view_rows", "rows"): "cap"}
+# Arrays whose count is another parameter's: no count of their own. The
+# filter bar reads one mask for each field.
+SHARED = {("cui_toggle_group_ex", "values"),
+          ("cui_multi_select_ex", "selected"),
+          ("cui_blame_ex", "line_commit"), ("cui_heatmap_ex", "values"),
+          ("cui_filter_bar", "selected")}
+
+
+def prototypes(header):
+  text = re.sub(r"/\*.*?\*/", "", header, flags=re.S).replace("\\\n", " ")
+  pattern = (r"CUI_API\s+([^;{]*?)\b(cui_\w+)\s*\(([^;]*?)\)"
+             r"\s*(?:CUI_PRINTF\([^)]*\))?\s*;")
+  for match in re.finditer(pattern, text, flags=re.S):
+    result = " ".join(match.group(1).split())
+    params = [" ".join(p.split()) for p in match.group(3).split(",")]
+    yield result, match.group(2), params
+
+
+def split(param):
+  match = re.match(r"(.*?)(\w+)$", param)
+  return match.group(1).strip(), match.group(2)
+
+
+def wrap(head, parts, tail, indent="  "):
+  """Joins comma-separated parts onto lines of at most 79 columns."""
+  one = head + ", ".join(parts) + tail
+  if len(one) <= 79:
+    return one
+  lines, line = [head.rstrip()], indent
+  for index, part in enumerate(parts):
+    piece = part + (", " if index + 1 < len(parts) else tail)
+    if len(line) + len(piece.rstrip()) > 79 and line.strip():
+      lines.append(line.rstrip())
+      line = indent
+    line += piece
+  lines.append(line.rstrip())
+  return "\n".join(lines)
+
+
+def classify(name, params):
+  """Returns the x2c parameters and the C arguments of a method, and the
+  positions among its parameters of the arrays whose count follows."""
+  declared, passed, pairs = [], [], []
+  rest = [split(p) for p in params[1:]]
+  index = 0
+  while index < len(rest):
+    ctype, pname = rest[index]
+    after = rest[index + 1] if index + 1 < len(rest) else ("", "")
+    after2 = rest[index + 2] if index + 2 < len(rest) else ("", "")
+    consumed = 1
+    if ctype == "const char *":
+      declared.append(f"String {pname}")
+      passed.append(pname)
+    elif re.match(r"const cui_\w+_opts \*$", ctype):
+      declared.append(f"{ctype[6:-2]} {pname}")
+      passed.append(f"&{pname}")
+    elif ctype == "char *" and after[0] == "size_t":
+      declared.append(f"TextField {pname}")
+      passed += [f"x2cui_buffer({pname})", f"{pname}.capacity"]
+      consumed = 2
+    elif ctype == "const char *const *" and after[0] == "int":
+      declared.append(f"List {pname}")
+      passed += [f"{pname}.c_strings()", f"{pname}.len()"]
+      consumed = 2
+    elif ctype == "const char *const *":
+      declared.append(f"List {pname}")
+      passed.append(f"{pname}.c_strings()")
+    elif "*" in ctype and (name, pname) in SHARED:
+      declared.append(f"{ctype}{pname}")
+      passed.append(pname)
+    elif "*" in ctype and (name, pname) in COUNT_AFTER:
+      counter = COUNT_AFTER[(name, pname)]
+      declared.append(f"{ctype}{pname}")
+      passed.append(pname)
+      index += 1
+      while rest[index][1] != counter:
+        declared.append(f"{rest[index][0]} {rest[index][1]}")
+        passed.append(rest[index][1])
+        index += 1
+      declared.append(f"{rest[index][0]} {rest[index][1]}")
+      passed.append(rest[index][1])
+      index += 1
+      continue
+    elif ("*" in ctype and after[0] == "int *" and after2[0] == "int"
+          and after2[1] == "capacity"):
+      # An array the user grows: a collection, whose length is the live
+      # count and whose capacity the method reserves; see `grown`.
+      declared.append(f"Block {pname}")
+      passed += [f"({ctype.strip()}) {pname}.bytes", "&count", f"(int) {pname}.cap"]
+      index += 3
+      continue
+    elif "*" in ctype and after[0] in ("int", "size_t"):
+      pairs.append(len(declared))
+      declared += [f"{ctype}{pname}", f"{after[0]} {after[1]}"]
+      passed += [pname, after[1]]
+      index += 2
+      continue
+    elif "*" in ctype and not ctype.startswith("const "):
+      declared.append(f"{ctype[:-1].strip()} &{pname}")
+      passed.append(f"&{pname}")
+    else:
+      declared.append(f"{ctype} {pname}".replace("* ", "*"))
+      passed.append(pname)
+    index += consumed
+  return declared, passed, pairs
+
+
+def forms(header, existing):
+  methods, rows = [], []
+  for result, name, params in prototypes(header):
+    if not params[0].startswith("cui_ctx *") or name in existing:
+      continue
+    if name in SKIP or "..." in params or any("va_list" in p for p in params):
+      continue
+    short = name[4:-3] if name.endswith("_ex") else name[4:]
+    declared, passed, pairs = classify(name, params)
+    rows.append(f"({short} {' '.join(map(str, pairs))})" if pairs else short)
+    if result == "const char *":
+      result = "String"
+    if "&count" in passed:
+      methods.append(grown(name, short, result, declared, passed))
+      continue
+    methods.append(
+      f"/** Calls `{name}`. */\n"
+      + wrap(f"inline {result} Ui.{short}(", ["Ui u"] + declared, ") =>")
+      + "\n" + wrap(f"  {name}(", ["u"] + passed, ");", "    ") + "\n")
+  return methods, rows
+
+
+def grown(name, short, result, declared, passed):
+  """The method of an editor that grows its array in place: the records of
+  a collection, its length as the live count, and its capacity with one
+  record to spare, which `x2cui_spare` keeps."""
+  records = next(d.split()[1] for d in declared if d.startswith("Block "))
+  return (
+    f"/** Calls `{name}` on the records of `{records}`,\n"
+    "    which grow in place. */\n"
+    + wrap(f"{result} Ui.{short}(", ["Ui u"] + declared, ") {") + "\n"
+    + f"  int count = x2cui_spare({records});\n"
+    + wrap(f"  {result} result = {name}(", ["u"] + passed, ");", "    ")
+    + f"\n  {records}.length = count;\n  return result;\n}}\n")
+
+
+def written_methods(source):
+  """Rows for the methods written by hand in `source`, except those that
+  take a sequence of values: a name, or a name and the positions of the
+  pointers that an `int` count follows."""
+  pattern = r"^(?:inline )?[\w ]+ Ui\.(\w+)\(([^()]*)\)\s*(?:=>|\{)"
+  rows = []
+  for match in re.finditer(pattern, source, flags=re.M):
+    if "@" in match.group(2):
+      continue
+    params = [" ".join(p.split()) for p in match.group(2).split(",")][1:]
+    pairs = [i for i in range(len(params) - 1)
+             if "*" in params[i] and params[i + 1].startswith("int ")]
+    name = match.group(1)
+    rows.append(f"({name} {' '.join(map(str, pairs))})" if pairs else name)
+  return rows
+
+
+def is_icon(name):
+  """Whether a parameter or field named `name` holds an icon."""
+  return name == "icon" or name.startswith("icon_") or name.endswith("_icon")
+
+
+def icon_parameters(header, hand):
+  """Rows `("method" position)` for the parameters that name an icon,
+  counted after the receiver among a method's x2c parameters."""
+  rows = []
+  for result, name, params in prototypes(header):
+    if not params[0].startswith("cui_ctx *"):
+      continue
+    if name in SKIP or "..." in params or any("va_list" in p for p in params):
+      continue
+    short = name[4:-3] if name.endswith("_ex") else name[4:]
+    if not any(is_icon(p.split("*")[-1].strip()) for p in params):
+      continue
+    declared = classify(name, params)[0]
+    for position, param in enumerate(declared):
+      if param.startswith("String ") and is_icon(param.split()[-1]):
+        rows.append(f'("{short}" {position})')
+  pattern = r"^(?:inline )?[\w ]+ Ui\.(\w+)\(([^()]*)\)\s*(?:=>|\{)"
+  for match in re.finditer(pattern, hand, flags=re.M):
+    params = [" ".join(p.split()) for p in match.group(2).split(",")][1:]
+    for position, param in enumerate(params):
+      if param.startswith("String ") and is_icon(param.split()[-1]):
+        rows.append(f'("{match.group(1)}" {position})')
+  return list(dict.fromkeys(rows))
+
+
+# The enums whose members data names by Symbol, and the prefix of each.
+NAMED = [("cui_tone", "CUI_TONE_"), ("cui_log_level", "CUI_LOG_")]
+
+
+def member_names(header, enum, prefix):
+  """The short names of `enum`'s members, which count up from 0, so a
+  member's position is its value; a closing `*_COUNT` is not a member."""
+  body = re.search(r"typedef enum %s \{(.*?)\}" % enum, header, re.S).group(1)
+  members = [m.strip() for m in body.split(",") if m.strip()]
+  names = []
+  for index, member in enumerate(members):
+    name, _, value = member.partition("=")
+    name = name.strip()
+    if name.endswith("_COUNT"):
+      continue
+    if value and int(value) != index:
+      sys.exit(f"{enum}: {name} is not {index}")
+    names.append(name[len(prefix):].lower())
+  return names
+
+
+def named(header, enum, prefix):
+  """`T.named(Symbol)`: the member of `enum` a Symbol names."""
+  names = member_names(header, enum, prefix)
+  short = enum[4:]
+  return (
+    f"static SymbolSet {short}_names =\n  %<" + " ".join(names) + ">;\n\n"
+    f"/** Returns the `{enum}` member `name` names, as `<{names[1]}>` names\n"
+    f"    `{prefix}{names[1].upper()}`, for one kept in quoted data; a name that is\n"
+    f"    not a member is `{prefix}{names[0].upper()}`. */\n"
+    f"{enum} {enum}.named(Symbol name) {{\n"
+    f"  int at = {short}_names.index(name);\n"
+    f"  return at < 0 ? {prefix}{names[0].upper()} : ({enum}) at;\n}}\n")
+
+
+# Records with no `T.of`: CUI's own plumbing, records an option already
+# builds, and `cui_series`, whose `of` is written by hand.
+NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
+               "cui_platform_iface", "cui_theme", "cui_strings",
+               "cui_text_metrics", "cui_size", "cui_box", "cui_color",
+               "cui_corners", "cui_shadow", "cui_vertex", "cui_draw_cmd",
+               "cui_draw_data", "cui_series"}
+
+# The records a program keeps by name: the arrays a component edits in
+# place, and the arrays a program both reads and passes to a component.
+COLLECTIONS = ["cui_cal_event", "cui_candle",
+               "cui_check_step", "cui_curve_key", "cui_doc_tab",
+               "cui_feature_flag", "cui_flame_span",
+               "cui_gantt_task", "cui_gradient_stop", "cui_kv_pair",
+               "cui_month_event", "cui_plan_step",
+               "cui_prompt_suggestion", "cui_query_field", "cui_query_node",
+               "cui_reaction", "cui_series", "cui_source", "cui_speed_action",
+               "cui_timeline_track",
+               "cui_toc_item", "cui_tour_step", "cui_trace_span",
+               "cui_trace_track", "cui_tree_node", "cui_vec2", "cui_viz_item",
+               "cui_scatter_series"]
+
+
+def records(header):
+  """The CUI record types that `T.of` builds."""
+  text = re.sub(r"/\*.*?\*/", "", header, flags=re.S)
+  names = re.findall(
+    r"typedef struct\s*\w*\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\s*(cui_\w+)\s*;",
+    text)
+  return [n for n in names if not n.endswith(("_opts", "_result"))
+          and n not in NOT_RECORDS]
+
+
+def collection_name(record):
+  """`cui_kv_pair` is `KvPairs`, `cui_file_entry` is `FileEntries`."""
+  words = record[4:].split("_")
+  last = words[-1]
+  if last.endswith("s"):
+    pass
+  elif last.endswith("y") and last[-2] not in "aeiou":
+    last = last[:-1] + "ies"
+  elif last.endswith(("x", "ch", "sh")):
+    last += "es"
+  else:
+    last += "s"
+  words[-1] = last
+  return "".join(w[:1].upper() + w[1:] for w in words)
+
+
+def replace(path, kind, items):
+  source = open(path).read()
+  begin, end = BEGIN % kind, END % kind
+  start, stop = source.index(begin), source.index(end)
+  body = begin + "\n\n" + "\n".join(items) + "\n"
+  open(path, "w").write(source[:start] + body + source[stop:])
+
+
+def main():
+  header = open(sys.argv[1]).read()
+  source = open("src/x2cui.x").read()
+  begin = source.index(BEGIN % "methods")
+  end = source.index(END % "methods")
+  hand = source[:begin] + source[end:]
+  table = re.search(r"^expand %\((.*?)\)$", hand, flags=re.M | re.S).group(1)
+  existing = set(table.split())
+  for method in re.findall(r"\bUi\.(\w+)\(", hand):
+    existing |= {"cui_" + method, "cui_" + method + "_ex"}
+  methods, rows = forms(header, existing)
+  replace("src/x2cui.x", "methods", methods)
+  names = written_methods(hand) + rows
+  table = wrap("expand %(", names, ")", "  ").replace(", ", " ").replace(",\n", "\n")
+  replace("src/x2cui.x", "forms",
+          [table + "\nmacro Unit(Name $method, Literal @pairs) {\n"
+           "  @x2cui_form($method, $pairs)\n}"])
+  expanded = set(re.search(r"^expand %\((.*?)\)$", hand,
+                           flags=re.M | re.S).group(1).split())
+  # A parameter with no plain name, such as a callback, keeps `pI`.
+  params = [f'("{name}"' + "".join(
+                ' "%s"' % (re.match(r".*?(\w+)$", q).group(1)
+                           if re.match(r".*?\w+$", q) and "(" not in q
+                           else f"p{i}")
+                for i, q in enumerate(qs[1:], 1)) + ")"
+            for result, name, qs in prototypes(header) if name in expanded]
+  replace("src/x2cui-generate.x", "parameter names",
+          [wrap("meta static List _parameter_names = %(", params, ");", "  ")
+           .replace(", ", " ").replace(",\n", "\n")])
+  replace("src/x2cui.x", "named enums",
+          [named(header, enum, prefix) for enum, prefix in NAMED])
+  rows = [wrap("", [f"$x2cui.record({r});" for r in records(header)], "",
+                "").replace(", ", " ").replace(",\n", "\n").lstrip("\n")]
+  for record in COLLECTIONS:
+    name = collection_name(record)
+    rows.append(f"$x2cui.collection({name}, {record});\n"
+                f"$x2cui.records({record}, {name});")
+  replace("src/x2cui.x", "records", rows)
+  icons = icon_parameters(header, hand)
+  replace("src/x2cui-options.x", "icons",
+          [wrap("meta static List _icon_parameters = %(", icons, ");", "  ")
+           .replace(", ", " ").replace(",\n", "\n")])
+  print(f"{len(methods)} methods, {len(names)} rows, {len(icons)} icons")
+
+
+if __name__ == "__main__":
+  main()

@@ -1,0 +1,5 @@
+#!/bin/sh
+# The C compiler for the browser build: Emscripten with the flags that
+# x2c's browser runtime is built with, and Emscripten's SDL2.
+exec "${WASM_CC:-emcc}" -fsigned-char -m64 -sSUPPORT_LONGJMP=emscripten \
+  -sUSE_SDL=2 "$@"
