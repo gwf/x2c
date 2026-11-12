@@ -14,7 +14,7 @@ title: Read the file. Use its contents.
 ~// The checked-in data sits beside the examples wherever they live.
 ~String example_data(String name) {
 ~  Path source = String.new(__FILE__);
-~  return source.dirname().join("../data").join(name);
+~  return source.dirname().join("../data", name);
 ~}
 
 ~int main(int argc, char **argv) {
@@ -31,7 +31,7 @@ title: Read the file. Use its contents.
 
   // Skip blank lines; each remaining row has three valid longs.
   foreach (String line in input) {
-    if (!line.strip(NULL)) continue;
+    if (!line.strip()) continue;
     String (a, b, c) = line.words().iter().list();
     long x = atol(a), y = atol(b), z = atol(c);
     total += x + y + z;
