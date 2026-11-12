@@ -1,13 +1,14 @@
 # Command-Line Interface
 
 After [installation and PATH setup](../guide/installation.md), run the
-compiler as `x2c`. Every invocation begins with a command. `x2c help` lists
-`translate`, `build`, `run`, `new`, `script`, `env`, `install`, `remove`,
-`list`, and `help`. The driver runs some of them through
+compiler as `x2c`. Every invocation begins with a command, and `x2c help`
+lists every command the compiler has. An installed compiler has `translate`,
+`build`, `run`, `new`, `script`, `env`, `install`, `remove`, `list`, `help`,
+`lsp`, `package`, and `test`. The driver runs some of them through
 [external commands](#commands): `build`, `run`, and `script` through
 `x2c-build`, `new` through `x2c-new`, and `install`, `remove`, and `list`
-through `x2c-package`. An installed compiler also includes the external
-commands `test` and `lsp`.
+through `x2c-package`. A checkout can also build the experimental commands
+`bind`, `graph`, `lint`, and `repl`, which an install does not include.
 
 This chapter's examples use `./x2c` from the root of a source checkout, which
 selects `builds/0/x2c`, the development compiler, without using `PATH`. In a
@@ -135,8 +136,8 @@ companion directory with the executable to retain native debug information.
 Symbol assembly adds time only to these requested debug links. Its failure
 fails the build and retains intermediates for diagnosis. A later `-Xcc -g0`
 overrides an earlier `-g`, including one selected by a project profile.
-Linux keeps its existing debug output; `--build-dir` and `--save-temps` remain
-available for retaining intermediate files on either platform.
+Linux builds produce no companion directory. `--build-dir` and `--save-temps`
+retain intermediate files on either platform.
 
 Inspection modes print an intermediate result and stop translation:
 
@@ -518,7 +519,7 @@ and runs as written:
 x2c new hello
 cd hello
 x2c run -q            # Hello, world!
-x2c run -q -- Gary    # Hello, Gary!
+x2c run -q -- Ada     # Hello, Ada!
 ```
 
 It writes `x2c.toml`, `src/main.x`, and `.gitignore`, which ignores the
@@ -772,6 +773,11 @@ are relative to the working directory. Each file runs through
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
 
+`-j <n>` runs up to `<n>` test files concurrently. `--filter <substring>`
+selects the test names that contain `<substring>`, and `--list` lists the
+matching tests. `-q` suppresses successful test lines. `--profile <name>`
+uses that manifest profile, as for `build`.
+
 The final line reports passed and failed files and tests. With a test-name filter,
 files containing no matching tests are omitted from output and file counts.
 The command returns 2 if filters select no tests across the whole run,
@@ -791,6 +797,11 @@ are positional, because collection records parameter types without names.
 The command does not write the ordinary x2c surface, Error conversion,
 dependency pins, or license files; see
 [Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
+
+`x2c graph` inspects x2c source graphs: it saves and queries snapshots of a
+build, or analyzes source files directly. It is experimental and available in
+checkout builds; an install does not include it. Run `x2c help graph` for its
+subcommands.
 
 `x2c lint` checks x2c source style and idioms. It is experimental and
 available in checkout builds; `make install` and release payloads do not
@@ -869,7 +880,7 @@ member calls use that binding.
 
 The server runs macros during analysis. Start it only for workspaces you
 trust. Formatting and native C compiler diagnostics are outside this server's
-current scope. Queued requests can be cancelled. A running request finishes
+scope. Queued requests can be cancelled. A running request finishes
 before the server handles another message, including a reference or rename
 request that analyzes several inputs.
 
@@ -887,7 +898,7 @@ Installed compilers include the server. To select a particular
 installation or a checkout build, set:
 
 ```json
-"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
+"x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
 ```
 
 Selection order is an explicit `x2c.semantic.compilerPath`, executable
@@ -925,10 +936,8 @@ describes which errors are reported together.
 ### Warnings
 
 Ordinary translation reports warnings without stopping the build. Warnings
-do not count against `--max-errors`. The internal self-host stage option
-`--fatal-warnings` makes warnings fail those builds; it is not a public
-per-warning suppression or escalation control. A warning reports code that
-may be deliberate; leave the code unchanged when it is.
+do not count against `--max-errors`. A warning reports code that may be
+deliberate; leave the code unchanged when it is.
 
 Eight codes are reported as warnings:
 
@@ -1052,8 +1061,8 @@ cc -iquote include/x2c /tmp/x2c-example/foreach.c \
 
 ## Help, version, and status
 
-`--help` and `--version` write to standard output and return `0`. Source,
-host-tool, and link failures return `1`. Invalid commands, options, response
-files, manifests, and preflight state return `2`. After a successful `run`,
-the program's status is returned. Diagnostics and action output use standard
+`--help` (`-h`) and `--version` (`-V`) write to standard output and return
+`0`. Source, host-tool, and link failures return `1`. Invalid commands,
+options, response files, manifests, and preflight state return `2`. After a
+successful `run`, the program's status is returned. Diagnostics and action output use standard
 error; requested dumps and program output use standard output.
