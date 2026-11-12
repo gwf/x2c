@@ -15,14 +15,12 @@ export function setupExampleRunner(root: HTMLElement) {
   const memory64 = WebAssembly.validate(new Uint8Array([
     0, 97, 115, 109, 1, 0, 0, 0, 5, 3, 1, 4, 0,
   ]));
-  // Native-only examples keep their local recipe and expected output.
+  // A build without precompiled programs keeps the local recipe.
   const ready = (message = "Ready.") => {
-    const available = example.runnable !== false && Boolean(programs && example.program);
+    const available = Boolean(programs && example.program);
     run.hidden = !available;
     if (!available) {
-      status.textContent = example.runnable === false
-        ? "This example needs the native toolchain. Use its local recipe."
-        : "Running programs is unavailable in this build. Use the local recipe to run this example.";
+      status.textContent = "Running programs is unavailable in this build. Use the local recipe to run this example.";
       return;
     }
     run.disabled = !memory64;

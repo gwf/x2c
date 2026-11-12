@@ -3,15 +3,12 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import gallery from "../../../examples/gallery.json";
 import { slides, articles, playgroundExamples } from "./examples";
-import { selectPlaygroundExamples } from "../../scripts/playground-examples.mjs";
+import { nativeReason } from "../../scripts/playground-examples.mjs";
 
 type ExampleMarkdown = MarkdownInstance<Record<string, any>>;
 const published = new Map(playgroundExamples.map(entry => [entry.id, entry]));
 const read = (path: string) =>
   readFileSync(join(import.meta.env.X2C_REPOSITORY_ROOT, path), "utf8");
-
-const runnable = new Set(selectPlaygroundExamples(gallery,
-  (id: string) => read(`examples/${id}.x`)).map(entry => entry.id));
 
 // The manifest names each example's expected stdout relative to examples/.
 const expected = new Map(read("examples/manifest.txt").split("\n")
@@ -46,12 +43,15 @@ const galleryEntries = gallery.flatMap((entry) => {
     id, section: slide.frontmatter.section, path, source,
     label: slide.frontmatter.tab
       ?? id.split("/").pop()!.replaceAll("-", " "),
-    runnable: runnable.has(id),
+    nativeReason: nativeReason(entry, source),
     program: published.get(id)?.program ?? false,
-    recipe: `x2c run ${flags ? flags + " " : ""}${path}`,
+    recipe: slide.frontmatter.run?.trim()
+      ?? `x2c run ${flags ? flags + " " : ""}${path}`,
     output: outputFor(path), slide,
   }];
-});
+// Home slides keep their carousel order; the others follow in gallery order.
+}).sort((a, b) => (a.slide.frontmatter.order ?? Number.MAX_SAFE_INTEGER)
+  - (b.slide.frontmatter.order ?? Number.MAX_SAFE_INTEGER));
 
 const recipes: Record<string, string> = {
   notes: "make -C examples/apps/notes prepare\nmake -C examples/apps/notes run",
@@ -64,7 +64,7 @@ const programEntries = articles.map((article) => {
   return {
     id: `programs/${page.slug}`, section: "programs", path: page.source,
     source,
-    label: page.navTitle, runnable: false, program: false,
+    label: page.navTitle, program: false,
     output: outputFor(page.source, page.output), article,
     recipe: (page.run ?? recipes[page.slug]).trim(),
   };
@@ -73,7 +73,8 @@ const programEntries = articles.map((article) => {
 // Every program on the examples page, in list order.
 export const exampleEntries: {
   id: string; section: string; path: string; source: string; label: string;
-  runnable: boolean; program: boolean; output?: string; slide?: ExampleMarkdown;
+  nativeReason?: string; program: boolean; output?: string;
+  slide?: ExampleMarkdown;
   article?: ExampleMarkdown; recipe?: string; description?: string;
 }[] = [...galleryEntries, ...programEntries];
 export const exampleSections = ["love", "power", "magic", "programs"];

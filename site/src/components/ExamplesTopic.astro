@@ -20,18 +20,27 @@ const notes = await Promise.all(entries.map(async entry => {
   <h2><a href={`${import.meta.env.BASE_URL}examples/${entry.article?.frontmatter.slug ?? entry.id.split("/").pop()}/`}>{entry.label} <span aria-hidden="true">&rarr;</span></a></h2>
   <p>{entry.article?.frontmatter.description ?? entry.description}</p>
 </li>)}</ul>}
-{entries.map((entry, i) => <article class="reading-example" id={entry.id.replaceAll("/", "-")} data-playground data-programs={`${import.meta.env.BASE_URL}playground/programs/`}>
-  <header><p class="about-eyebrow">{entry.label}</p><h2>{entry.slide?.frontmatter.title ?? entry.label}</h2></header>
+{entries.map((entry, i) => <article class="reading-example" id={entry.id.replaceAll("/", "-")} data-playground={entry.nativeReason ? undefined : ""} data-programs={entry.nativeReason ? undefined : `${import.meta.env.BASE_URL}playground/programs/`}>
+  <header>{entry.slide?.frontmatter.title && <p class="about-eyebrow">{entry.label}</p>}<h2>{entry.slide?.frontmatter.title ?? entry.label}</h2></header>
   <div class="reading-example-prose" data-about-body set:html={notes[i]} />
   <div class="reading-source-bar"><span>{entry.path}</span><a href={`#${entry.id.replaceAll("/", "-")}`} aria-label={`Link to ${entry.label}`}>link</a></div>
   <div class="reading-source"><Code code={entry.source} lang={{...grammar, name:"x2c"}} theme={x2cDarkTheme} /></div>
-  <div class="reading-run"><button type="button" data-run hidden>Run</button><button type="button" data-stop hidden>Stop</button><span data-status role="status"></span></div>
-  <section class="reading-output" data-output-comparison aria-label="Program results">
-    <div><h3 data-output-title>Actual output</h3><pre data-output role="log" aria-label="Actual output"></pre></div>
-    <div><h3>Expected output</h3><pre data-expected-output aria-label="Expected output">{entry.output ?? "No console output."}</pre></div>
-  </section>
-  <p class="reading-local">Run locally: <code>{entry.recipe ?? `x2c run ${entry.path}`}</code></p>
-  <script type="application/json" data-examples set:html={json([entry].map(({id,path,source,runnable,program,output})=>({id,path,source,runnable,program,output})))} />
+  {entry.nativeReason ? <>
+    <p class="reading-run">{entry.nativeReason}</p>
+    <section class="reading-output reading-output-expected" aria-label="Program results">
+      <div><h3>Expected output</h3><pre aria-label="Expected output">{entry.output || "No console output."}</pre></div>
+    </section>
+  </> : <>
+    <div class="reading-run"><button type="button" data-run hidden>Run</button><button type="button" data-stop hidden>Stop</button><span data-status role="status"></span></div>
+    <section class="reading-output" data-output-comparison aria-label="Program results">
+      <div><h3 data-output-title>Actual output</h3><pre data-output role="log" aria-label="Actual output"></pre></div>
+      <div><h3>Expected output</h3><pre data-expected-output aria-label="Expected output">{entry.output || "No console output."}</pre></div>
+    </section>
+    <script type="application/json" data-examples set:html={json([entry].map(({id,path,source,program,output})=>({id,path,source,program,output})))} />
+  </>}
+  {entry.recipe?.includes("\n")
+    ? <div class="reading-local">Run locally:<pre><code>{entry.recipe}</code></pre></div>
+    : <p class="reading-local">Run locally: <code>{entry.recipe ?? `x2c run ${entry.path}`}</code></p>}
 </article>)}
 <script>
   import { setupExampleRunner } from "../lib/example-runner";

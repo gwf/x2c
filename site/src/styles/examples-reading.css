@@ -32,6 +32,8 @@ html:has(.examples-shell) { --sidebar-target-width: 240px; --sidebar-width: min(
 .reading-output [data-output]:empty::before { content: "Run to see actual output."; color: var(--muted-dark); }
 .reading-run { min-height: 64px; }
 .reading-local { font-size: 12px; overflow-wrap: anywhere; }
+.reading-local pre { margin: 6px 0 0; white-space: pre-wrap; }
+.reading-output-expected { grid-template-columns: minmax(0, 1fr); }
 .examples-reading .example-page { padding: 0; width: 100%; }
 .examples-reading .example-heading h1 { font-size: clamp(38px, 4vw, 56px); }
 .examples-reading .example-demonstration { display: flex; flex-direction: column; }

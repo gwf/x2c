@@ -32,7 +32,9 @@ const split = (html: string) => {
 };
 const { left, right } = split(html);
 const base = import.meta.env.BASE_URL;
-const example = exampleEntries.find(entry => entry.slide?.frontmatter.slug === panel.slug);
+// A home slide links to the complete program it excerpts; an example page
+// already shows that program.
+const example = !part && exampleEntries.find(entry => entry.slide === slide);
 ---
 
 {part !== "notes" && <div

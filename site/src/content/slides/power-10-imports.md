@@ -5,6 +5,10 @@ home: true
 order: 7
 tab: packages
 title: Bring a library into the language.
+run: |
+  ./configure --packages pcre2
+  make -C packages/pcre2 builds/gallery-imports
+  ./packages/pcre2/builds/gallery-imports
 ---
 
 <!-- ignore: requires the linked package. -->

@@ -32,7 +32,10 @@ const source = page.source;
 const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
 const sourceUrl = page.sourceDownload ? local(page.sourceDownload)
   : `https://github.com/gwf/x2c/blob/main/${source}`;
-const outputs = import.meta.glob("../../../../examples/expected/*.stdout", {
+const outputs = import.meta.glob([
+  "../../../../examples/expected/*.stdout",
+  "../../../../packages/*/examples/expected/*.stdout",
+], {
   query: "?raw", import: "default", eager: true,
 });
 const output = page.output ? outputs[`../../../../${page.output}`] as string : null;
@@ -91,5 +94,5 @@ const previous = articles[(current + articles.length - 1) % articles.length];
     </nav>
   </article>
   </ExamplesShell>
-  <SiteFooter />
+  <SiteFooter slot="footer" />
 </BaseLayout>

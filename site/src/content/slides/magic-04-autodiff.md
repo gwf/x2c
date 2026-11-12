@@ -10,6 +10,9 @@ home: true
 order: 5
 tab: autodiff
 title: Differentiate the program.
+run: |
+  make -C packages/autodiff builds/example-energy-gradient
+  ./packages/autodiff/builds/example-energy-gradient
 ---
 
 <!-- ignore: requires the linked package. -->
@@ -40,4 +43,4 @@ double value = energy_grad(1.0, 2.0, 5, &dx, &dy);
 ~}
 ```
 
-Automatic differentiation transforms a function into code that computes derivatives. The example combines syntax transformation with ordinary numeric code; the linked full source includes executable checks.
+Automatic differentiation transforms a function into code that computes derivatives: `$ad.reverse()` generates `energy_grad`, which returns the value and writes both partial derivatives. The example combines syntax transformation with ordinary numeric code; the linked full source includes executable checks.
