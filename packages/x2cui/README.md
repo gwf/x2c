@@ -100,9 +100,14 @@ Each CUI component keeps its name. The C calling conventions change:
   `ui.id (key)` keeps the components drawn for different keys apart, with
   a text or an integer key, and `ui.disabled (condition)` disables the
   components in its block.
-- **A block whose end reports a result** stores it in a variable it is
-  given: `int swiped; ui.card_stack (swiped, "deck", 3) { ... }` and
-  `ui.swipe_item (action, "row", left, right) { ... }`.
+- **A block that reports a result** stores it in a variable it is given,
+  declared before the block: `int swiped; ui.card_stack (swiped, "deck",
+  3) { ... }`, `ui.swipe_item (action, "row", left, right) { ... }`, and
+  `ui.reorder (changed, "tasks", order) { ... }` store what their end
+  reports; `ui.kanban_column (added, title, count) { ... }` and
+  `ui.kanban_card (clicked, id) { ... }` store what their begin reports,
+  before the block runs; `ui.kanban (moved, move, "board") { ... }` sets
+  `moved` and the `cui_kanban_move` `move` when a card was dropped.
 
 These forms are built at compile time from CUI's C signatures by
 `src/x2cui-generate.x`.
