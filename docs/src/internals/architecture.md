@@ -155,7 +155,7 @@ were written. Ordinary directive scanning precedes parsing; optional
 
 After directive handling and optional CPP, the compiler changes contextual
 x2c keyword tokens to identifiers. Parsing then uses the ordinary symbol table
-to distinguish keyword forms from names. The scanner retains its existing
+to distinguish keyword forms from names. The scanner keeps its
 percent/angle literal choices; retagging does not rescan literal contents.
 C keywords, `defer`, and the two C thread-local spellings stay reserved.
 
@@ -222,13 +222,12 @@ to their own units and do not enter this unit's hash map.
 
 Linked providers retain one source hash and their direct dependency hashes.
 Imported functions refer to that provider record. The collector checks the
-dependency graph once per translation process, using its existing source
+dependency graph once per translation process, using its recorded source
 hashes. A changed provider or dependency requires rebuilding its meta code.
 
-The public `x2c_meta_definition_hashes()` query still returns String hashes for
-definitions parsed so far. A compiler-private native query reads their existing
-reference lists for linked generation; it adds no public library callable or
-separate stored inventory.
+The public `x2c_meta_definition_hashes()` query returns String hashes for
+definitions parsed so far. A compiler-private native query reads their
+reference lists for linked generation.
 
 #### Unit interfaces
 
@@ -254,7 +253,7 @@ imports a package records none. Cold collection and interface replay use
 the same ordered parts,
 while the full parser installs included compile-time definitions at their
 include positions. Macro names become visible immediately; their templates
-are decoded into the current unit only on first use. The existing semantic
+are decoded into the current unit only on first use. The semantic
 write log restores that decode if its expansion rolls back.
 Local declaration productions stay in their owning unit's
 Context until full parsing consumes them. Their syntax, macro frames, and

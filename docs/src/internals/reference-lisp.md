@@ -119,9 +119,8 @@ The reference follows x2c Lisp, including behavior that differs from Scheme:
 - `bind` looks up a fixed native registry; repeated lookup preserves identity.
 - Completed effects remain when a later form fails to read or evaluate.
 
-Native calls use x2c's existing checked `Func` boundary. Deliberate Lisp
-signature and form errors remain in the evaluator. No additional syntax
-validation is introduced.
+Native calls use x2c's checked `Func` boundary. Deliberate Lisp signature and
+form errors remain in the evaluator.
 
 Production closures also retain local names that mutable global or unknown
 callables may later read from current data. Captured local special identities
@@ -169,7 +168,7 @@ a List. Its result is:
 ```
 
 The example is listed in `examples/manifest.txt`, so `make examples` checks
-its output alongside the existing examples. The optional differential checker
+its output alongside the other examples. The optional differential checker
 builds both implementations and compares exit status, stdout, and stderr:
 
 ```sh
@@ -180,7 +179,7 @@ The corpus covers ordinary values, arithmetic, macros, capture, shadowing,
 reader failures, native errors, file imports, optional Lisp libraries, and
 REPL recovery. It avoids printing opaque addresses and performs no output
 normalization. Run it when changing this interpreter or the production Lisp
-semantics; it is not an additional publication gate.
+semantics.
 
 ## Basic benchmarks
 
