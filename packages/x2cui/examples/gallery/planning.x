@@ -73,27 +73,27 @@ void page_planning(Ui ui, Gallery g) {
       kb_card *cd = kb_find(kb_cols[c][k]);
       if (!cd) continue;
       if (ui.kanban_card_begin(cd.id)) ui.toast(cd.title);
-      ui.badge(cd.tag, tone: cd.tone, size: CUI_SIZE_SM);
-      ui.text(cd.title, font: CUI_FONT_MEDIUM, size: 13.5f,
+      ui.badge(cd.tag, tone: cd.tone, size: sm);
+      ui.text(cd.title, font: medium, size: 13.5f,
                         line_height: 1.35f);
       if (cd.progress > 0 && cd.progress < 1)
         ui.progress(cd.progress, height: 4);
-      ui.row (gap: 10, align: CUI_ALIGN_CENTER,
-              width: CUI_FILL) {
+      ui.row (gap: 10, align: center,
+              width: fill) {
         ui.avatar(cd.who, size: 22);
         ui.spacer();
         if (cd.files) {
-          ui.icon(CUI_ICON_PAPERCLIP, 12, CUI_COLOR_TEXT_MUTED);
+          ui.icon(paperclip, 12, text_muted);
           ui.text(%"$(cd.files)", size: 12,
-                                  color: CUI_COLOR_TEXT_MUTED);
+                                  color: text_muted);
         }
         if (cd.comments) {
-          ui.icon(CUI_ICON_MESSAGE_SQUARE, 12, CUI_COLOR_TEXT_MUTED);
+          ui.icon(message_square, 12, text_muted);
           ui.text(%"$(cd.comments)", size: 12,
-                                     color: CUI_COLOR_TEXT_MUTED);
+                                     color: text_muted);
         }
         if (cd.progress >= 1)
-          ui.icon(CUI_ICON_CIRCLE_CHECK, 14, CUI_COLOR_SUCCESS);
+          ui.icon(circle_check, 14, success);
       }
       ui.kanban_card_end();
     }
@@ -122,7 +122,7 @@ void page_planning(Ui ui, Gallery g) {
   int monday = td - ((td + 3) % 7 + 7) % 7;
   int ev = ui.week_calendar(
     "week", cui_date_from_days(monday), events,
-    start_hour: 8, end_hour: 19, height: CUI_PX(420));
+    start_hour: 8, end_hour: 19, height: 420);
   if (ev >= 0)
     ui.toast(events[ev].title, description: events[ev].detail);
 

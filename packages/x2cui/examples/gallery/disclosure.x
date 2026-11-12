@@ -23,7 +23,7 @@ void page_disclosure(Ui ui, Gallery g) {
                 "components.", banner,
         action: "Read the notes", dismissible: true))
     ui.toast("Opening release notes");
-  if (!banner && ui.button("Show the banner again", size: CUI_SIZE_SM))
+  if (!banner && ui.button("Show the banner again", size: sm))
     banner = true;
 
   section(ui, "Hover card", "Rest the pointer on a name.");
@@ -31,16 +31,16 @@ void page_disclosure(Ui ui, Gallery g) {
     ui.text("Assigned to");
     ui.link("@jonas");
     ui.hover_card ("grace-card", width: 300)
-    ui.row (gap: 12, align: CUI_ALIGN_START) {
+    ui.row (gap: 12, align: start) {
       ui.avatar("Jonas Berg", size: 44, status: "online");
-      ui.column (gap: 4, width: CUI_FILL) {
-        ui.text("Jonas Berg", font: CUI_FONT_MEDIUM);
+      ui.column (gap: 4, width: fill) {
+        ui.text("Jonas Berg", font: medium);
         ui.text("Engineer on the rendering team. Joined March 2024.",
-          size: 13, color: CUI_COLOR_TEXT_SECONDARY);
+          size: 13, color: text_secondary);
         ui.row (gap: 6, pad_top: 4, wrap: true) {
-          ui.icon(CUI_ICON_CALENDAR, 12, CUI_COLOR_TEXT_MUTED);
+          ui.icon(calendar, 12, text_muted);
           ui.text("Usually replies within an hour",
-            size: 12, color: CUI_COLOR_TEXT_MUTED);
+            size: 12, color: text_muted);
         }
       }
     }
@@ -49,7 +49,7 @@ void page_disclosure(Ui ui, Gallery g) {
 
   section(ui, "Confirm popover", "Ask right where the action is.");
   ui.row (gap: 12, wrap: true) {
-    if (ui.button("Delete branch", icon: CUI_ICON_TRASH_2))
+    if (ui.button("Delete branch", icon: trash_2))
       ui.popover_open("confirm-delete");
     if (ui.confirm_popover("confirm-delete",
           title: "Delete feature/grid?",
@@ -77,33 +77,33 @@ void page_disclosure(Ui ui, Gallery g) {
   ui.column (gap: 10) {
     ui.expandable_card ("Billing", card1,
         description: "Pro plan, renews on December 1",
-        icon: CUI_ICON_CREDIT_CARD, badge: "Active",
-        badge_tone: CUI_TONE_SUCCESS) {
+        icon: credit_card, badge: "Active",
+        badge_tone: success) {
       // Plain label and value pairs: a card inside the card would only add
       // edges.
       ui.row (gap: 40, wrap: true) {
         ui.column (gap: 2) {
           ui.muted("This month");
-          ui.text("$84.00", font: CUI_FONT_DISPLAY, size: 22,
+          ui.text("$84.00", font: display, size: 22,
                             tabular: true);
         }
         ui.column (gap: 2) {
           ui.muted("Seats");
-          ui.text("7 of 10", font: CUI_FONT_DISPLAY, size: 22,
+          ui.text("7 of 10", font: display, size: 22,
                              tabular: true);
         }
       }
       ui.row (gap: 8, wrap: true) {
-        ui.button("Change plan", size: CUI_SIZE_SM);
-        ui.button("Invoices", size: CUI_SIZE_SM,
-                              variant: CUI_BUTTON_GHOST);
+        ui.button("Change plan", size: sm);
+        ui.button("Invoices", size: sm,
+                              variant: ghost);
       }
     }
     ui.expandable_card ("Security", card2,
         description: "Two-factor authentication is on",
-        icon: CUI_ICON_SHIELD)
+        icon: shield)
       ui.text("Recovery codes were generated 3 months ago.",
-        color: CUI_COLOR_TEXT_SECONDARY);
+        color: text_secondary);
   }
 
   section(ui, "Countdown", "Digits roll as the time passes.");
@@ -111,7 +111,7 @@ void page_disclosure(Ui ui, Gallery g) {
     static double target;
     if (target == 0)
       target = ui.time() + 2 * 86400 + 5 * 3600 + 42 * 60 + 18;
-    ui.row (gap: 24, align: CUI_ALIGN_CENTER) {
+    ui.row (gap: 24, align: center) {
       ui.countdown("launch", target - ui.time());
       ui.countdown("sale", target - ui.time() - 86400 * 2,
         compact: true, hide_days: true);
@@ -119,17 +119,17 @@ void page_disclosure(Ui ui, Gallery g) {
   }
 
   section(ui, "Onboarding checklist", "Progress, with the next step open.");
-  ui.box (width: CUI_PX(460)) {
+  ui.box (width: 460) {
     int a = ui.checklist("onboarding", steps,
       title: "Set up your workspace");
     if (a >= 0) {
       steps[a].done = true;
-      ui.toast(steps[a].title, tone: CUI_TONE_SUCCESS);
+      ui.toast(steps[a].title, tone: success);
     }
   }
 
   section(ui, "Undo toast", "A draining line shows how long Undo stays.");
-  if (ui.button("Archive 3 conversations", icon: CUI_ICON_ARCHIVE))
+  if (ui.button("Archive 3 conversations", icon: archive))
     ui.toast("3 conversations archived", action: "Undo",
                                          show_timer: true);
 }

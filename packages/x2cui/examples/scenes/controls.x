@@ -87,9 +87,9 @@ static void scene_segmented(Ui ui) {
   ui.segmented("view", %("List" "Board" "Calendar"), view,
                icons: icons);
   ui.segmented("size", %("Small" "Medium" "Large"), size,
-               size: CUI_SIZE_SM);
+               size: sm);
   ui.text(%"Showing the $(view == 0 ? "list" : view == 1 ? "board"
-          : "calendar") view.", color: CUI_COLOR_TEXT_MUTED);
+          : "calendar") view.", color: text_muted);
 }
 
 static void scene_checkbox(Ui ui) {
@@ -103,7 +103,7 @@ static void scene_checkbox(Ui ui) {
 
 static void scene_switch(Ui ui) {
   static bool wifi = true, sync = false, airplane = false;
-  ui.column (gap: 14, width: CUI_PX(320)) {
+  ui.column (gap: 14, width: 320) {
     ui.switch("Wi-Fi", wifi, description: "Join known networks.");
     ui.switch("Sync over cellular", sync);
     ui.switch("Airplane mode", airplane, disabled: true);
@@ -121,7 +121,7 @@ static void scene_radio(Ui ui) {
 
 static void scene_slider(Ui ui) {
   static float volume = 64, brightness = 40, zoom = 1.5f;
-  ui.column (gap: 20, width: CUI_PX(420)) {
+  ui.column (gap: 20, width: 420) {
     ui.slider("Volume", volume, 0, 100, show_value: true);
     ui.slider("Brightness", brightness, 0, 100,
               step: 10, show_value: true, format: "%.0f%%");
@@ -134,20 +134,20 @@ static void scene_chip(Ui ui) {
   static bool picked[] = { true, false, true, false, false };
   List teams = %("Design" "Engineering" "Marketing" "Sales" "Support");
   ui.label("Teams");
-  ui.row (gap: 8, wrap: true, width: CUI_PX(420)) {
+  ui.row (gap: 8, wrap: true, width: 420) {
     int i = 0;
     foreach (String team in teams) {
       ui.chip(team, picked[i]);
       i++;
     }
   }
-  ui.chip("Starred", picked[4], icon: CUI_ICON_STAR);
+  ui.chip("Starred", picked[4], icon: star);
 }
 
 static void scene_input(Ui ui) {
-  ui.column (gap: 14, width: CUI_PX(360)) {
+  ui.column (gap: 14, width: 360) {
     ui.input("name", full_name, label: "Name");
-    ui.input("email", email, label: "Email", icon: CUI_ICON_MAIL,
+    ui.input("email", email, label: "Email", icon: mail,
                              placeholder: "you@company.com",
                              hint: "Used to sign in and for receipts.");
     ui.input("password", password, label: "Password", password: true,
@@ -156,7 +156,7 @@ static void scene_input(Ui ui) {
 }
 
 static void scene_textarea(Ui ui) {
-  ui.column (width: CUI_PX(440))
+  ui.column (width: 440)
     ui.textarea("bio", bio, label: "Bio", height: 90,
                             hint: "Shown on your profile.");
 }
@@ -164,7 +164,7 @@ static void scene_textarea(Ui ui) {
 static void scene_search(Ui ui) {
   List invoices = %("Invoice 1042, Northwind" "Invoice 1043, Contoso"
                     "Receipt 88, Fabrikam" "Invoice 1044, Litware");
-  ui.column (gap: 10, width: CUI_PX(360)) {
+  ui.column (gap: 10, width: 360) {
     ui.search("q", query, placeholder: "Search documents");
     String term = query.text();
     foreach (String name in invoices)
@@ -174,36 +174,36 @@ static void scene_search(Ui ui) {
 
 static void scene_number(Ui ui) {
   static double seats = 5, price = 12.5, weight = 2.4;
-  ui.row (gap: 16, align: CUI_ALIGN_END) {
+  ui.row (gap: 16, align: end) {
     ui.number("seats", seats, 1, 50, label: "Seats",
-                                     width: CUI_PX(140));
+                                     width: 140);
     ui.number("price", price, 0, 1000, label: "Price", step: 0.5,
                                        decimals: 2, suffix: "USD",
-                                       width: CUI_PX(160));
+                                       width: 160);
     ui.number("weight", weight, 0, 50, label: "Weight", step: 0.1,
                                        decimals: 1, suffix: "kg",
-                                       width: CUI_PX(140));
+                                       width: 140);
   }
 }
 
 static void scene_select(Ui ui) {
   static int country = 1, zone = -1;
-  ui.row (gap: 16, align: CUI_ALIGN_END) {
+  ui.row (gap: 16, align: end) {
     ui.select("country", %("Canada" "Denmark" "Germany" "Japan" "Kenya"),
-              country, label: "Country", width: CUI_PX(200));
+              country, label: "Country", width: 200);
     ui.select("zone", %("Pacific" "Eastern" "Central Europe" "Tokyo"),
               zone, label: "Time zone", placeholder: "Choose one",
-                    searchable: true, width: CUI_PX(220));
+                    searchable: true, width: 220);
   }
 }
 
 static void scene_date_picker(Ui ui) {
   static cui_date due = { 2026, 11, 20 }, start = { 0, 0, 0 };
-  ui.row (gap: 16, align: CUI_ALIGN_END) {
-    ui.date_picker("due", due, label: "Due date", width: CUI_PX(200));
+  ui.row (gap: 16, align: end) {
+    ui.date_picker("due", due, label: "Due date", width: 200);
     ui.date_picker("start", start, label: "Start date",
                                    placeholder: "Pick a date",
-                                   width: CUI_PX(200));
+                                   width: 200);
   }
 }
 
@@ -211,29 +211,29 @@ static void scene_tabs(Ui ui) {
   static int section = 0, settings = 1;
   static const char *icons[] = { CUI_ICON_USER, CUI_ICON_LOCK,
                                  CUI_ICON_CREDIT_CARD };
-  ui.column (gap: 20, width: CUI_PX(520)) {
+  ui.column (gap: 20, width: 520) {
     ui.tabs("sections", %("Overview" "Analytics" "Reports" "Settings"),
             section);
     ui.tabs("settings", %("Account" "Password" "Billing"), settings,
-            variant: CUI_TABS_PILL, icons: icons);
+            variant: pill, icons: icons);
   }
 }
 
 static void scene_nav_item(Ui ui) {
   static int chosen = 0;
-  ui.column (width: CUI_PX(240), pad: 12, gap: 2, radius: 12,
-             bg: CUI_COLOR_SURFACE_MUTED) {
+  ui.column (width: 240, pad: 12, gap: 2, radius: 12,
+             bg: surface_muted) {
     ui.nav_section("Workspace");
-    if (ui.nav_item("Inbox", icon: CUI_ICON_INBOX, badge: "12",
+    if (ui.nav_item("Inbox", icon: inbox, badge: "12",
                              selected: chosen == 0))
       chosen = 0;
-    if (ui.nav_item("Projects", icon: CUI_ICON_FOLDER,
+    if (ui.nav_item("Projects", icon: folder,
                                 selected: chosen == 1))
       chosen = 1;
-    if (ui.nav_item("Calendar", icon: CUI_ICON_CALENDAR,
+    if (ui.nav_item("Calendar", icon: calendar,
                                 selected: chosen == 2))
       chosen = 2;
-    if (ui.nav_item("Settings", icon: CUI_ICON_SETTINGS,
+    if (ui.nav_item("Settings", icon: settings,
                                 selected: chosen == 3))
       chosen = 3;
   }
@@ -242,15 +242,15 @@ static void scene_nav_item(Ui ui) {
 static void scene_popover(Ui ui) {
   static bool comments = true;
   if (first_frame(ui, "share-shown")) ui.popover_open("share");
-  if (ui.button("Share", icon: CUI_ICON_SHARE_2))
+  if (ui.button("Share", icon: share_2))
     ui.popover_toggle("share");
   ui.popover ("share", width: 300) {
     ui.label("Share this document");
     ui.text("Anyone with the link can view it.",
-            color: CUI_COLOR_TEXT_MUTED, size: 12);
+            color: text_muted, size: 12);
     ui.switch("Allow comments", comments);
-    ui.button("Copy link", variant: CUI_BUTTON_PRIMARY,
-                           icon: CUI_ICON_LINK);
+    ui.button("Copy link", variant: primary,
+                           icon: link);
   }
 }
 
@@ -258,14 +258,14 @@ static void scene_image_viewer(Ui ui) {
   static cui_image_view view = { 1.2f, 520, 200 };
   ui.label("Drag to pan; scroll to zoom.");
   ui.image_viewer("view", photo(ui), PHOTO_WIDTH, PHOTO_HEIGHT, view,
-                  height: CUI_PX(320));
+                  height: 320);
 }
 
 static void scene_cropper(Ui ui) {
   static cui_rect crop = { 380, 40, 300, 300 };
   ui.label("Choose the part of the picture for your avatar.");
   ui.cropper("crop", photo(ui), PHOTO_WIDTH, PHOTO_HEIGHT, crop,
-             round: true, height: CUI_PX(320));
+             round: true, height: 320);
 }
 
 /* A dropdown menu with a labelled group, shortcuts, and a dangerous item.
@@ -273,14 +273,14 @@ static void scene_cropper(Ui ui) {
    trigger is clicked. */
 static void scene_menu(Ui ui) {
   static bool pinned = true;
-  ui.menu ("Options", icon: CUI_ICON_SETTINGS) {
+  ui.menu ("Options", icon: settings) {
     ui.menu_label("Project");
-    ui.menu_item("Rename", icon: CUI_ICON_PENCIL, shortcut: "F2");
-    ui.menu_item("Duplicate", icon: CUI_ICON_COPY,
+    ui.menu_item("Rename", icon: pencil, shortcut: "F2");
+    ui.menu_item("Duplicate", icon: copy,
                               shortcut: "Ctrl D");
     if (ui.menu_item("Pinned", checked: pinned)) pinned = !pinned;
     ui.menu_separator();
-    ui.menu_item("Delete", icon: CUI_ICON_TRASH_2, danger: true);
+    ui.menu_item("Delete", icon: trash_2, danger: true);
   }
 }
 
@@ -288,7 +288,7 @@ static void scene_menu(Ui ui) {
 static void scene_menu_item(Ui ui) {
   static int order = 0;
   if (first_frame(ui, "sort-shown")) ui.popover_open("sort");
-  if (ui.button("Sort", icon: CUI_ICON_LIST))
+  if (ui.button("Sort", icon: list))
     ui.popover_toggle("sort");
   ui.popover ("sort", width: 220, pad: 6, gap: 1) {
     ui.menu_label("Sort by");
@@ -307,16 +307,16 @@ static void scene_menu_item(Ui ui) {
 // A context menu opens on a right click over the component before it.
 static void scene_context_menu(Ui ui) {
   ui.card (id: "report", hoverable: true,
-           width: CUI_PX(320), pad: 16, gap: 4) {
+           width: 320, pad: 16, gap: 4) {
     ui.label("Quarterly report.pdf");
     ui.text("Right-click the card for actions.",
-            color: CUI_COLOR_TEXT_MUTED, size: 12);
+            color: text_muted, size: 12);
   }
   ui.context_menu ("file") {
-    ui.menu_item("Open", icon: CUI_ICON_FILE_TEXT);
-    ui.menu_item("Download", icon: CUI_ICON_DOWNLOAD);
+    ui.menu_item("Open", icon: file_text);
+    ui.menu_item("Download", icon: download);
     ui.menu_separator();
-    ui.menu_item("Move to trash", icon: CUI_ICON_TRASH_2,
+    ui.menu_item("Move to trash", icon: trash_2,
                                   danger: true);
   }
 }
@@ -328,14 +328,14 @@ static void scene_dialog(Ui ui) {
   ui.skeleton(CUI_PCT(80), 14);
   ui.skeleton(CUI_PCT(60), 14);
   ui.skeleton(CUI_PCT(70), 14);
-  if (ui.button("Delete", variant: CUI_BUTTON_OUTLINE)) open = true;
+  if (ui.button("Delete", variant: outline)) open = true;
   ui.dialog ("Delete project?", open,
       description: "This removes the project for everyone. "
                      "You cannot undo this.",
       width: 380)
   ui.dialog_footer () {
     if (ui.button("Cancel")) open = false;
-    if (ui.button("Delete project", variant: CUI_BUTTON_DANGER))
+    if (ui.button("Delete project", variant: danger))
       open = false;
   }
 }
@@ -347,36 +347,36 @@ static void scene_sheet(Ui ui) {
       size: 320, description: "Choose what reaches your inbox.") {
     ui.switch("Daily digest", digest);
     ui.switch("Mentions only", mentions);
-    if (ui.button("Done", variant: CUI_BUTTON_PRIMARY)) open = false;
+    if (ui.button("Done", variant: primary)) open = false;
   }
 }
 
 static void scene_toast(Ui ui) {
-  if (ui.button("Save profile", variant: CUI_BUTTON_PRIMARY) ||
+  if (ui.button("Save profile", variant: primary) ||
       first_frame(ui, "toast-shown"))
     ui.toast("Changes saved", description: "Your profile is up to date.",
-                              tone: CUI_TONE_SUCCESS);
+                              tone: success);
 }
 
 static void scene_alert(Ui ui) {
-  ui.column (gap: 10, width: CUI_PX(560)) {
+  ui.column (gap: 10, width: 560) {
     ui.alert("Payment received",
       description: "Your invoice was paid on November 5.",
-      tone: CUI_TONE_SUCCESS);
+      tone: success);
     ui.alert("Storage almost full",
       description: "You have used 92% of your plan.",
-      tone: CUI_TONE_WARNING, dismissible: true);
+      tone: warning, dismissible: true);
     ui.alert("Sync failed", description: "Check your connection.",
-                            tone: CUI_TONE_DANGER);
+                            tone: danger);
   }
 }
 
 static void scene_progress(Ui ui) {
-  ui.column (gap: 18, width: CUI_PX(420)) {
+  ui.column (gap: 18, width: 420) {
     ui.progress(0.68f, label: "Uploading", show_value: true);
-    ui.progress(0.92f, label: "Storage", tone: CUI_TONE_WARNING,
+    ui.progress(0.92f, label: "Storage", tone: warning,
                        show_value: true);
-    ui.progress(1, label: "Backup complete", tone: CUI_TONE_SUCCESS);
+    ui.progress(1, label: "Backup complete", tone: success);
     ui.progress(5.0f / 8, height: 5);
   }
 }
@@ -384,17 +384,17 @@ static void scene_progress(Ui ui) {
 static void scene_badge(Ui ui) {
   ui.row (gap: 8, wrap: true) {
     ui.badge("Draft");
-    ui.badge("New", tone: CUI_TONE_ACCENT);
-    ui.badge("Active", tone: CUI_TONE_SUCCESS, dot: true);
-    ui.badge("Pending", tone: CUI_TONE_WARNING, dot: true);
-    ui.badge("Failed", tone: CUI_TONE_DANGER, dot: true);
+    ui.badge("New", tone: accent);
+    ui.badge("Active", tone: success, dot: true);
+    ui.badge("Pending", tone: warning, dot: true);
+    ui.badge("Failed", tone: danger, dot: true);
     ui.badge("Beta", solid: true);
-    ui.badge("Verified", tone: CUI_TONE_INFO, icon: CUI_ICON_CHECK);
+    ui.badge("Verified", tone: info, icon: check);
   }
 }
 
 static void scene_avatar(Ui ui) {
-  ui.row (gap: 14, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 14, align: center) {
     ui.avatar("Jonas Berg", size: 40, status: "online");
     ui.avatar("Priya Nair", size: 40, status: "away");
     ui.avatar("Kwame Asante", size: 40);

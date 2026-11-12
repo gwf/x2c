@@ -51,8 +51,8 @@ static void add_families(void) {
 
 // The page every scene is drawn on.
 static void draw_page(Ui ui, Scene *scene) {
-  ui.column (width: CUI_FILL, height: CUI_FILL, pad: 28,
-             gap: 16, bg: CUI_COLOR_BACKGROUND)
+  ui.column (width: fill, height: fill, pad: 28,
+             gap: 16, bg: background)
     scene.draw(ui);
 }
 

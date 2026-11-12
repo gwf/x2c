@@ -33,7 +33,7 @@ static void scene_line_chart(Ui ui) {
                           cui_series.of("Cloud spend", cloud_spend) };
   List months = %("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep"
                   "Oct" "Nov" "Dec");
-  ui.card (width: CUI_FILL, max_width: 660)
+  ui.card (width: fill, max_width: 660)
     ui.line_chart("revenue", series, months,
       area: true, smooth: true, height: 200, format: "$%.0fk");
 }
@@ -41,7 +41,7 @@ static void scene_line_chart(Ui ui) {
 static void scene_bar_chart(Ui ui) {
   cui_series series[] = { cui_series.of("Desktop", desktop),
                           cui_series.of("Mobile", mobile) };
-  ui.card (width: CUI_FILL, max_width: 520)
+  ui.card (width: fill, max_width: 520)
     ui.bar_chart("visits", series,
                  %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), height: 200);
 }
@@ -49,7 +49,7 @@ static void scene_bar_chart(Ui ui) {
 static void scene_table(Ui ui) {
   static cui_table_sort sort = { 0, false };
   static int chosen = 1;
-  ui.box (width: CUI_FILL, max_width: 620)
+  ui.box (width: fill, max_width: 620)
   ui.table ("people", sort: &sort, selectable: true,
             columns: {"Name": fill, "Team": unsorted(110),
                       "Commits": right(unsorted(100)),
@@ -61,7 +61,7 @@ static void scene_table(Ui ui) {
       index++;
       ui.table_cell();
       ui.avatar(name, size: 24);
-      ui.text(name, font: CUI_FONT_MEDIUM, nowrap: true);
+      ui.text(name, font: medium, nowrap: true);
       ui.table_cell();
       ui.badge(team);
       ui.table_cell_text(%"$commits");

@@ -122,20 +122,20 @@ static void draw_shapes(Ui ui, Stress &stress) {
   for (int i = 0; i < 6; i++)
     field.colors[i] = ui.color_of(CUI_COLOR_SERIES(i));
   // The canvas copies the field, because it paints when the frame ends.
-  ui.canvas("shapes", CUI_FILL, CUI_FILL, paint_shapes, &field,
+  ui.canvas("shapes", fill, fill, paint_shapes, &field,
             sizeof field);
 }
 
 static void draw_components(Ui ui, Stress &stress) {
   int count = (int) stress.items;
-  ui.row (width: CUI_FILL, height: CUI_FILL, wrap: true,
+  ui.row (width: fill, height: fill, wrap: true,
           gap: 8, scroll_y: true) {
     for (int i = 0; i < count; i++) {
       float value = sweep(stress.clock * (0.1f + 0.5f * chance(i, 6)) +
                           chance(i, 7));
       ui.id (i)
-      ui.card (width: CUI_PX(96), pad: 8, gap: 6) {
-        ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
+      ui.card (width: 96, pad: 8, gap: 6) {
+        ui.row (gap: 8, align: center) {
           ui.spinner(14);
           ui.badge(%"$i", tone: (cui_tone) (i % 9));
         }
@@ -148,9 +148,9 @@ static void draw_components(Ui ui, Stress &stress) {
 // the frame
 
 static void figure(Ui ui, String label, String value) {
-  ui.column (width: CUI_PX(120), gap: 2) {
-    ui.text(label, size: 12, color: CUI_COLOR_TEXT_MUTED);
-    ui.text(value, size: 22, font: CUI_FONT_MEDIUM, tabular: true,
+  ui.column (width: 120, gap: 2) {
+    ui.text(label, size: 12, color: text_muted);
+    ui.text(value, size: 22, font: medium, tabular: true,
                    nowrap: true);
   }
 }
@@ -181,23 +181,23 @@ static void paint_history(cui_ctx *context, cui_rect area, void *user) {
 }
 
 static void draw_history(Ui ui, Stress &stress) {
-  History history = { .line = ui.color_of(CUI_COLOR_ACCENT),
-                      .guide = ui.color_of(CUI_COLOR_BORDER) };
+  History history = { .line = ui.color_of(accent),
+                      .guide = ui.color_of(border) };
   memcpy(history.times, stress.times, sizeof history.times);
-  ui.column (width: CUI_FILL, min_width: 240, gap: 2) {
+  ui.column (width: fill, min_width: 240, gap: 2) {
     ui.text("Between frames, last 240, with a guide at 16.7 ms",
-            size: 12, color: CUI_COLOR_TEXT_MUTED, nowrap: true);
+            size: 12, color: text_muted, nowrap: true);
     // The canvas copies the history, because it paints when the frame ends.
-    ui.canvas("history", CUI_FILL, CUI_PX(40), paint_history, &history,
+    ui.canvas("history", fill, 40, paint_history, &history,
               sizeof history);
   }
 }
 
 static void draw(Ui ui, Stress &stress) {
   stress.clock += ui.delta_time();
-  ui.column (width: CUI_FILL, height: CUI_FILL, pad: 16,
-             gap: 12, bg: CUI_COLOR_BACKGROUND) {
-    ui.row (gap: 16, align: CUI_ALIGN_CENTER, wrap: true) {
+  ui.column (width: fill, height: fill, pad: 16,
+             gap: 12, bg: background) {
+    ui.row (gap: 16, align: center, wrap: true) {
       figure(ui, "Frames per second", stress.rate);
       figure(ui, "Between frames", stress.frame_time);
       figure(ui, "Describing a frame", stress.draw_time);
@@ -205,11 +205,11 @@ static void draw(Ui ui, Stress &stress) {
       figure(ui, "Triangles", stress.triangles);
       draw_history(ui, stress);
     }
-    ui.row (gap: 16, align: CUI_ALIGN_CENTER) {
+    ui.row (gap: 16, align: center) {
       if (ui.segmented("load", %("Shapes" "Components"), stress.load))
         stress.items = stress.load == SHAPES ? 2000 : 200;
       ui.slider("items", stress.items, 10, item_limit(stress.load),
-                step: 10, show_value: true, width: CUI_FILL);
+                step: 10, show_value: true, width: fill);
     }
     if (stress.load == SHAPES) draw_shapes(ui, stress);
     else draw_components(ui, stress);

@@ -24,12 +24,12 @@ typedef struct Form {
 } Form;
 
 static void draw_form(Ui ui, Form &form) {
-  ui.column (pad: 16, gap: 12, width: CUI_FILL) {
-    form.clicks += ui.button("Save", variant: CUI_BUTTON_PRIMARY);
+  ui.column (pad: 16, gap: 12, width: fill) {
+    form.clicks += ui.button("Save", variant: primary);
     form.button = ui.last_rect();
     ui.checkbox("I agree", form.agree);
     form.box = ui.last_rect();
-    form.typed |= ui.input("name", form.name, width: CUI_FILL);
+    form.typed |= ui.input("name", form.name, width: fill);
     form.field = ui.last_rect();
     ui.segmented("tab", %("One" "Two" "Three"), form.tab);
   }
@@ -46,9 +46,9 @@ static void click(Offscreen screen, Form &form, cui_rect target) {
   Ui ui = screen.ui();
   ui.input_mouse_move(target.x + target.w / 2, target.y + target.h / 2);
   frame(screen, form);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  ui.input_mouse_button(left, true);
   frame(screen, form);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  ui.input_mouse_button(left, false);
   frame(screen, form);
   frame(screen, form);
 }
@@ -479,9 +479,9 @@ static void an_item_reports_what_the_pointer_did(void) {
   list_frame(screen, p);
   list_frame(screen, p);
   EXPECT_TRUE(p.hovered);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  ui.input_mouse_button(left, true);
   list_frame(screen, p);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  ui.input_mouse_button(left, false);
   list_frame(screen, p);
   EXPECT_INT_EQ(p.clicked, 2);
 }
@@ -542,12 +542,12 @@ static void a_table_row_reports_what_the_pointer_did(void) {
   EXPECT_TRUE(t.rows[1].hovered);
   EXPECT_FALSE(t.rows[0].hovered);
   EXPECT_FALSE(t.rows[2].hovered);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  ui.input_mouse_button(left, true);
   table_frame(screen, t);
   EXPECT_TRUE(t.rows[1].pressed);
   EXPECT_FALSE(t.rows[0].pressed);
   EXPECT_FALSE(t.rows[1].clicked);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  ui.input_mouse_button(left, false);
   table_frame(screen, t);
   EXPECT_TRUE(t.rows[1].clicked);
   EXPECT_FALSE(t.rows[2].clicked);

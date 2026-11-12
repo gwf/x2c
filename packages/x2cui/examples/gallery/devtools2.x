@@ -19,7 +19,7 @@ static void prepare(void) {
 }
 
 static void devtools2_regex(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL, max_width: 760)
+  ui.column (gap: 10, width: fill, max_width: 760)
     ui.regex_tester("rx", rx_pat, rx_text, height: 110);
 }
 
@@ -43,7 +43,7 @@ static const cui_test_item tx_items[] = {
 };
 
 static void devtools2_tests(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL, max_width: 760)
+  ui.column (gap: 10, width: fill, max_width: 760)
     ui.test_explorer("tests", tx_items,
                      height: 500);
 }
@@ -65,7 +65,7 @@ static const cui_stack_frame st_frames[] = {
 };
 
 static void devtools2_stack(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL, max_width: 760)
+  ui.column (gap: 10, width: fill, max_width: 760)
     ui.stack_trace("trace", st_frames,
       title: "TypeError",
       message: "Cannot read properties of undefined (reading 'items')",
@@ -80,7 +80,7 @@ static int rq_n = -1;
 // calls on the field's buffer.
 static void devtools2_request(Ui ui) {
   if (rq_n < 0) rq_n = cui_url_params(rq_url.buffer, rq_params, 8);
-  ui.column (gap: 12, width: CUI_FILL, max_width: 760) {
+  ui.column (gap: 12, width: fill, max_width: 760) {
     cui_request_bar_result r = ui.request_bar("req", rq_method, rq_url);
     if (r.changed) rq_n = cui_url_params(rq_url.buffer, rq_params, 8);
     if (ui.kv_editor("params", rq_params, rq_n))
@@ -111,7 +111,7 @@ static void devtools2_uptime(Ui ui) {
   const cui_uptime_service sv[] = {
     { names_en[0], up_api, 90 }, { names_en[1], up_web, 90 },
     { names_en[2], up_db, 90 }, { names_en[3], up_cdn, 90 } };
-  ui.column (gap: 10, width: CUI_FILL, max_width: 860)
+  ui.column (gap: 10, width: fill, max_width: 860)
     ui.uptime("status", sv,
       last_day: (cui_date){ 2026, 11, 9 });
 }
@@ -135,7 +135,7 @@ static void devtools2_histogram(Ui ui) {
     { "Info", th_info, CUI_TONE_INFO },
     { "Warning", th_warn, CUI_TONE_WARNING },
     { "Error", th_err, CUI_TONE_DANGER } };
-  ui.column (gap: 10, width: CUI_FILL, max_width: 900)
+  ui.column (gap: 10, width: fill, max_width: 900)
     ui.time_histogram("logs", 1794240000, 900, 96, se,
                       th_s0, th_s1, utc: true, height: 150);
 }
@@ -152,7 +152,7 @@ static const cui_coverage_file cv_files[] = {
 };
 
 static void devtools2_coverage(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL, max_width: 820)
+  ui.column (gap: 10, width: fill, max_width: 820)
     ui.coverage("cov", cv_files, height: 372);
 }
 
@@ -178,7 +178,7 @@ static void devtools2_blame(Ui ui) {
     "    for (int i = 0; i < ui->node_count; i++)"
     "        measure(&ui->nodes[i]);"
     "    place(ui, 0);  /* the root */" "}");
-  ui.column (gap: 10, width: CUI_FILL, max_width: 900)
+  ui.column (gap: 10, width: fill, max_width: 900)
     ui.blame("blame", lines, bl_commit, 15, bl_commits,
                lang: "c", now: 1794211200, height: 320,
                first_line: 120);
@@ -196,7 +196,7 @@ static cui_feature_flag ff_flags[] = {
 };
 
 static void devtools2_flags(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL, max_width: 860)
+  ui.column (gap: 10, width: fill, max_width: 860)
     ui.feature_flags("flags", ff_flags,
                      %("Development" "Staging" "Production"));
 }
@@ -222,7 +222,7 @@ static const cui_api_endpoint ax_eps[] = {
 static int ax_sel = 2;
 
 static void devtools2_api(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL, max_width: 820)
+  ui.column (gap: 10, width: fill, max_width: 820)
     ui.api_explorer("api", ax_eps,
                     selected: &ax_sel);
 }

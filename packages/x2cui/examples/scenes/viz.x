@@ -115,7 +115,7 @@ static void prepare(void) {
 }
 
 static void scene_donut_chart(Ui ui) {
-  ui.card (align: CUI_ALIGN_CENTER)
+  ui.card (align: center)
     ui.donut_chart("platforms", shares,
                    %("Windows" "macOS" "Linux" "Other"),
                    height: 200, format: "%.0f%%");
@@ -134,7 +134,7 @@ static void scene_bar_list(Ui ui) {
     { "/docs", 4820 }, { "/", 3920 }, { "/gallery", 2410 },
     { "/blog/fast-ui-in-c", 1830 }, { "/download", 1210 },
     { "/pricing", 640 } };
-  ui.card (width: CUI_FILL, max_width: 480, gap: 10) {
+  ui.card (width: fill, max_width: 480, gap: 10) {
     ui.label("Top pages this week");
     ui.bar_list("pages", pages);
   }
@@ -146,7 +146,7 @@ static void scene_calendar_heatmap(Ui ui) {
 }
 
 static void scene_candlestick(Ui ui) {
-  ui.card (width: CUI_FILL, max_width: 660, gap: 10) {
+  ui.card (width: fill, max_width: 660, gap: 10) {
     ui.label("Price, 60 trading days");
     ui.candlestick("price", candles, height: 260);
   }
@@ -156,7 +156,7 @@ static void scene_funnel(Ui ui) {
   static const cui_viz_item stages[] = {
     { "Visited", 12840 }, { "Signed up", 4210 }, { "Activated", 2380 },
     { "Subscribed", 860 } };
-  ui.card (width: CUI_FILL, max_width: 520)
+  ui.card (width: fill, max_width: 520)
     ui.funnel("signups", stages);
 }
 
@@ -167,7 +167,7 @@ static void scene_heatmap(Ui ui) {
     "0h", NULL, NULL, "3h", NULL, NULL, "6h", NULL, NULL, "9h", NULL, NULL,
     "12h", NULL, NULL, "15h", NULL, NULL, "18h", NULL, NULL, "21h", NULL,
     NULL };
-  ui.card (pad: 18, width: CUI_FILL, max_width: 660)
+  ui.card (pad: 18, width: fill, max_width: 660)
     ui.heatmap("traffic", traffic, 7, 24,
       row_labels: weekdays, col_labels: hours, format: "%.0f req");
 }
@@ -188,7 +188,7 @@ static void scene_sankey(Ui ui) {
   static const cui_sankey_link links[] = {
     { 0, 3, 420 }, { 1, 3, 260 }, { 2, 3, 180 }, { 0, 4, 300 },
     { 1, 4, 220 }, { 3, 5, 860 }, { 5, 6, 580 }, { 5, 7, 280 } };
-  ui.card (pad: 18, width: CUI_FILL, max_width: 660)
+  ui.card (pad: 18, width: fill, max_width: 660)
     ui.sankey("signups", %("Search" "Social" "Referral" "Sign up" "Bounced"
                            "Trial" "Paid" "Churned"),
               links, height: 260);
@@ -198,7 +198,7 @@ static void scene_scatter_chart(Ui ui) {
   static const cui_scatter_series series[] = {
     { "Software", software_points, software_sizes, RUNS },
     { "OpenGL", opengl_points, opengl_sizes, RUNS } };
-  ui.card (pad: 18, width: CUI_FILL, max_width: 660)
+  ui.card (pad: 18, width: fill, max_width: 660)
     ui.scatter_chart("frames", series,
       height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
@@ -208,7 +208,7 @@ static void scene_split_bar(Ui ui) {
   static const cui_viz_item parts[] = {
     { "Layout", 38 }, { "Text", 24 }, { "Paint", 21 }, { "Input", 9 },
     { "Other", 8 } };
-  ui.card (width: CUI_FILL, max_width: 520, gap: 10) {
+  ui.card (width: fill, max_width: 520, gap: 10) {
     ui.label("Frame time by stage");
     ui.split_bar("frame", parts, format: "%.0f ms");
   }
@@ -219,7 +219,7 @@ static void scene_treemap(Ui ui) {
     { "Layout", 55 }, { "Text", 42 }, { "Draw", 35 }, { "Controls", 31 },
     { "Charts", 23 }, { "Overlays", 19 }, { "Platform", 16 },
     { "Theme", 9 }, { "Icons", 7 }, { "Grid", 6 } };
-  ui.box (width: CUI_FILL, max_width: 620)
+  ui.box (width: fill, max_width: 620)
     ui.treemap("bundle", modules,
                height: 280, format: "%.0f KB");
 }
@@ -235,15 +235,15 @@ static void scene_waffle(Ui ui) {
 
 static void scene_waveform(Ui ui) {
   static float progress = 0.36f;
-  ui.card (pad: 14, width: CUI_PX(380))
-  ui.row (gap: 12, align: CUI_ALIGN_CENTER, width: CUI_FILL) {
-    ui.icon_button(CUI_ICON_PLAY, size: CUI_SIZE_SM,
-                                  variant: CUI_BUTTON_SECONDARY);
-    ui.box (width: CUI_FILL)
+  ui.card (pad: 14, width: 380)
+  ui.row (gap: 12, align: center, width: fill) {
+    ui.icon_button(play, size: sm,
+                                  variant: secondary);
+    ui.box (width: fill)
       ui.waveform("track", peaks, progress,
                   height: 34);
     ui.text("0:42", size: 12, tabular: true,
-                    color: CUI_COLOR_TEXT_MUTED);
+                    color: text_muted);
   }
 }
 
@@ -261,7 +261,7 @@ static void scene_histogram_slider(Ui ui) {
   static const float bins[] = { 2, 4, 7, 12, 18, 26, 31, 29, 34, 40, 37,
                                 30, 24, 19, 15, 11, 8, 6, 4, 3 };
   static float lo = 40, hi = 160;
-  ui.card (width: CUI_PX(380), gap: 6) {
+  ui.card (width: 380, gap: 6) {
     ui.histogram_slider("Price", bins, lo, hi, 0, 240,
                         format: "$%.0f");
     ui.muted("1,204 listings in range");
@@ -276,7 +276,7 @@ static void scene_time_histogram(Ui ui) {
   // Seconds since 1970: the day starts at 2026-11-09 00:00 UTC.
   static double day = 1794182400;
   static double from = 1794182400 + 3600 * 15, to = 1794182400 + 3600 * 17.5;
-  ui.box (width: CUI_FILL, max_width: 660)
+  ui.box (width: fill, max_width: 660)
     ui.time_histogram("logs", day, 900, BUCKETS, levels, from, to,
                       utc: true, height: 150);
 }
@@ -286,7 +286,7 @@ static void scene_uptime(Ui ui) {
     { "API", api_days, UPTIME_DAYS },
     { "Website", web_days, UPTIME_DAYS },
     { "CDN", cdn_days, UPTIME_DAYS } };
-  ui.box (width: CUI_FILL, max_width: 660)
+  ui.box (width: fill, max_width: 660)
     ui.uptime("status", services,
       last_day: (cui_date){ 2026, 11, 9 });
 }
@@ -296,7 +296,7 @@ static void scene_ticker(Ui ui) {
     { "Revenue", "$48.2k", 6.9f }, { "Active users", "12,408", 3.1f },
     { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
     { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 } };
-  ui.box (width: CUI_FILL)
+  ui.box (width: fill)
     ui.ticker("figures", figures);
 }
 

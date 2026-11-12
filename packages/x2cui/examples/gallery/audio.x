@@ -29,10 +29,10 @@ void page_audio(Ui ui, Gallery g) {
     { 0, "Ride the faders", "Click a fader, then use the wheel or the "
                             "arrow keys.", CUI_PLACE_LEFT_START },
   };
-  if (ui.button("Take the tour", icon: CUI_ICON_SPARKLES,
-                                 variant: CUI_BUTTON_OUTLINE))
+  if (ui.button("Take the tour", icon: sparkles,
+                                 variant: outline))
     tour = 0;
-  ui.row (gap: 16, wrap: true, align: CUI_ALIGN_START) {
+  ui.row (gap: 16, wrap: true, align: start) {
     ui.card (gap: 16, min_width: 280) {
       ui.heading("Synth", 4);
       ui.row (gap: 14, wrap: true) {
@@ -51,7 +51,7 @@ void page_audio(Ui ui, Gallery g) {
         segmented: true);
       steps[1].target = ui.last_id();
     }
-    ui.card (dir: CUI_ROW, gap: 8, wrap: true) {
+    ui.card (dir: row, gap: 8, wrap: true) {
       for (int k = 0; k < 6; k++) ui.id (k) {
         String name = names[k];
         ui.fader(name, faders[k], -48, 6,

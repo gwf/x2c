@@ -34,7 +34,7 @@ void page_smart_inputs(Ui ui, Gallery g) {
   section(ui, "Inline edit",
           "Click the text to edit it in place. Enter saves, Esc cancels.");
   ui.column (gap: 6) {
-    ui.inline_edit("title", title, font: CUI_FONT_DISPLAY, size: 26);
+    ui.inline_edit("title", title, font: display, size: 26);
     ui.inline_edit("owner", owner, placeholder: "Add an owner");
   }
 
@@ -46,14 +46,14 @@ void page_smart_inputs(Ui ui, Gallery g) {
     ui.scrub("Radius", radius, 0, 48, step: 0.5f, format: "%.1f",
                                       suffix: "px");
     ui.scrub("Blur", blur, 0, 80, suffix: "px",
-                                  width: CUI_PX(140));
+                                  width: 140);
   }
 
   section(ui, "Money", "Grouped digits at rest, plain digits while typing.");
-  ui.row (gap: 12, align: CUI_ALIGN_START) {
-    ui.box (width: CUI_PX(240))
+  ui.row (gap: 12, align: start) {
+    ui.box (width: 240)
       ui.money_input("amount", amount, label: "Amount", code: "USD");
-    ui.box (width: CUI_PX(240))
+    ui.box (width: 240)
       ui.money_input("salary", salary,
         label: "Salary", symbol: "\xe2\x82\xac", code: "EUR",
         decimals: -1, hint: "Gross per year");
@@ -63,8 +63,8 @@ void page_smart_inputs(Ui ui, Gallery g) {
           "Any text field can carry muted text before and after the "
           "value.");
   ui.row (gap: 12, wrap: true) {
-    ui.input("url", url, prefix: "https://", width: CUI_PX(260));
-    ui.input("weight", weight, suffix: "kg", width: CUI_PX(120));
+    ui.input("url", url, prefix: "https://", width: 260);
+    ui.input("weight", weight, suffix: "kg", width: 120);
   }
 
   section(ui, "Shortcut recorder",
@@ -80,12 +80,12 @@ void page_smart_inputs(Ui ui, Gallery g) {
   section(ui, "Emoji picker",
           "Search by name, jump by group, pick a skin tone. Recent emoji "
           "come first.");
-  ui.row (gap: 8, align: CUI_ALIGN_CENTER, width: CUI_FILL,
+  ui.row (gap: 8, align: center, width: fill,
           max_width: 480) {
-    ui.input("message", message, width: CUI_FILL);
-    if (ui.icon_button(CUI_ICON_SMILE, tooltip: "Emoji"))
+    ui.input("message", message, width: fill);
+    if (ui.icon_button(smile, tooltip: "Emoji"))
       ui.popover_toggle("emoji-pop");
-    ui.popover ("emoji-pop", placement: CUI_PLACE_BOTTOM_END,
+    ui.popover ("emoji-pop", placement: bottom_end,
                              width: 340, pad: 0) {
       String e = ui.emoji_picker("emoji",
         recent: recent, recent_cap: sizeof recent, tone: &tone,

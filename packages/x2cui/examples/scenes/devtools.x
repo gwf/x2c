@@ -101,7 +101,7 @@ static void scene_api_explorer(Ui ui) {
     { "GET", "/v1/orders", "List orders (old)", "Orders", true } };
   static int selected = 2;
   ui.api_explorer("api", endpoints,
-    width: CUI_FILL, height: 320, selected: &selected);
+    width: fill, height: 320, selected: &selected);
 }
 
 static void scene_blame(Ui ui) {
@@ -114,7 +114,7 @@ static void scene_blame(Ui ui) {
     { "d4e5f6a7b8", "Leo Park", "Layout entry point", 1793000000 },
     { "e5f6a7b8c9", "Aiko Tanaka", "Measure every node", 1794100000 } };
   ui.blame("blame", blame_lines, line_commit, blame_lines.len(), commits,
-             width: CUI_FILL, height: 220, lang: "c",
+             width: fill, height: 220, lang: "c",
              now: 1794211200, first_line: 120);
 }
 
@@ -136,7 +136,7 @@ static void scene_commit_graph(Ui ui) {
       NULL, { -1, -1 } } };
   static int selected = 1;
   ui.commit_graph("history", commits,
-    width: CUI_FILL, height: 220, selected: &selected);
+    width: fill, height: 220, selected: &selected);
 }
 
 static void scene_coverage(Ui ui) {
@@ -147,7 +147,7 @@ static void scene_coverage(Ui ui) {
     { "src/render/gl.c", 1300, 410, 260, 60, 70, 22 },
     { "src/main.c", 120, 120, 10, 10, 4, 4 } };
   ui.coverage("cov", files,
-    width: CUI_PX(640), height: 340);
+    width: 640, height: 340);
 }
 
 static void scene_feature_flags(Ui ui) {
@@ -162,18 +162,18 @@ static void scene_feature_flags(Ui ui) {
     { "export-pdf", "Export reports as PDF", { false, false, false } } };
   ui.feature_flags("flags", flags,
                    %("Development" "Staging" "Production"),
-                   width: CUI_PX(640));
+                   width: 640);
 }
 
 static void scene_flame_graph(Ui ui) {
   static cui_flame_view view;
   static int selected = 6;
-  ui.column (width: CUI_PX(640), gap: 10) {
+  ui.column (width: 640, gap: 10) {
     if (selected >= 0) {
       cui_flame_span span = flame_spans[selected];
       double ms = (span.end - span.start) * 1e3;
       ui.text(String.format("%s, %.2f ms", span.name, ms),
-              size: 13, color: CUI_COLOR_TEXT_SECONDARY);
+              size: 13, color: text_secondary);
     }
     ui.flame_graph("profile", flame_spans, view,
                    selected);
@@ -192,7 +192,7 @@ static void scene_graph_view(Ui ui) {
     { 0, 1 }, { 0, 2 }, { 1, 3 }, { 2, 4 }, { 2, 5 }, { 3, 5 } };
   static int selected = 1;
   ui.graph_view("deps", nodes, edges,
-                width: CUI_PX(640), height: 280,
+                width: 640, height: 280,
                 selected: &selected);
 }
 
@@ -212,7 +212,7 @@ static void scene_hex_view(Ui ui) {
     { 33, 26, CUI_TONE_TEAL, "tEXt chunk, Software" } };
   static cui_hex_selection selection = { 0x10, 8, 0x17 };
   ui.hex_view("hex", png, sizeof png, selection,
-    width: CUI_PX(640), ranges: marks);
+    width: 640, ranges: marks);
 }
 
 static void scene_keymap(Ui ui) {
@@ -232,7 +232,7 @@ static void scene_keymap(Ui ui) {
                                       "Run and debug" };
   static int mods = CUI_MOD_PRIMARY;
   ui.keymap("keys", bindings,
-    width: CUI_PX(664), categories: categories, mods: &mods);
+    width: 664, categories: categories, mods: &mods);
 }
 
 static void scene_kv_editor(Ui ui) {
@@ -241,8 +241,8 @@ static void scene_kv_editor(Ui ui) {
     { "Accept", "application/json", true },
     { "X-Request-Id", "7d1c0a", false } };
   static int count = 3;
-  ui.column (width: CUI_PX(600), gap: 10) {
-    ui.text("Headers", font: CUI_FONT_MEDIUM);
+  ui.column (width: 600, gap: 10) {
+    ui.text("Headers", font: medium);
     ui.kv_editor("headers", headers, count);
   }
 }
@@ -257,7 +257,7 @@ static void scene_pipeline(Ui ui) {
     { "staging", 2, CUI_JOB_PENDING, -1 } };
   static int selected = 3;
   ui.pipeline("run", %("Build" "Test" "Deploy"), jobs,
-              width: CUI_PX(640), selected: &selected);
+              width: 640, selected: &selected);
 }
 
 static void scene_problems(Ui ui) {
@@ -272,7 +272,7 @@ static void scene_problems(Ui ui) {
       "src/core/layout.c", 402, 6, "clang-tidy",
       "misc-use-internal-linkage" } };
   ui.problems("problems", diagnostics,
-    width: CUI_PX(640), height: 250);
+    width: 640, height: 250);
 }
 
 static void scene_query_builder(Ui ui) {
@@ -287,7 +287,7 @@ static void scene_query_builder(Ui ui) {
     { 1, true, true }, { 2, false, false, 1, 0, "me" },
     { 2, false, false, 2, 2, "2" } };
   static int count = 5;
-  ui.query_builder("filter", fields, nodes, count, width: CUI_PX(640));
+  ui.query_builder("filter", fields, nodes, count, width: 640);
 }
 
 static void scene_stack_trace(Ui ui) {
@@ -302,7 +302,7 @@ static void scene_stack_trace(Ui ui) {
     { "next", "node_modules/express/lib/router/route.js", 149, 13, true },
     { "onRequest", "src/server.js", 41, 9 } };
   ui.stack_trace("trace", frames,
-    width: CUI_PX(640), title: "TypeError",
+    width: 640, title: "TypeError",
     message: "Cannot read properties of undefined (reading 'items')",
     lang: "js");
 }
@@ -321,7 +321,7 @@ static void scene_test_explorer(Ui ui) {
     { "soft shadows", 1, CUI_JOB_RUNNING, -1 },
     { "atlas growth", 1, CUI_JOB_PENDING, -1 } };
   ui.test_explorer("tests", tests,
-    width: CUI_PX(640), height: 370);
+    width: 640, height: 370);
 }
 
 static void scene_trace_view(Ui ui) {
@@ -336,7 +336,7 @@ static void scene_trace_view(Ui ui) {
     for (int i = 0; i < (int) (sizeof trace_spans / sizeof *trace_spans); i++)
       if (trace_spans[i].start == 0.0187) selected = i;
   ui.trace_view("trace", tracks, trace_spans, view, selected,
-                  width: CUI_PX(640), height: 170, markers: markers);
+                  width: 640, height: 170, markers: markers);
 }
 
 static void scene_waterfall(Ui ui) {
@@ -355,7 +355,7 @@ static void scene_waterfall(Ui ui) {
       { 0.004, 0.026, 0.031, 0.036, 0.12, 0 } } };
   static int selected = 2;
   ui.waterfall("net", requests,
-    width: CUI_FILL, height: 250, selected: &selected,
+    width: fill, height: 250, selected: &selected,
     dom_loaded: 0.395, loaded: 0.68);
 }
 
@@ -381,8 +381,8 @@ static void scene_tree_table(Ui ui) {
                  cursor: &cursor, guides: true)
     while ((node = ui.tree_table_row()) >= 0) {
       (String name, String size, String kind) = tree_files[node];
-      ui.tree_table_name(name, kind == "Folder" ? CUI_ICON_FOLDER
-                                                : CUI_ICON_FILE);
+      ui.tree_table_name(name, kind == "Folder" ? folder
+                                                : file);
       ui.data_grid_cell_text(size);
       ui.data_grid_cell_text(kind);
     }

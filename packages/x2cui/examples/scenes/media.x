@@ -9,39 +9,39 @@
 #include <math.h>
 
 static void scene_dock_item(Ui ui) {
-  ui.row (width: CUI_FILL, height: CUI_FILL,
-          justify: CUI_JUSTIFY_CENTER, align: CUI_ALIGN_END)
+  ui.row (width: fill, height: fill,
+          justify: center, align: end)
   ui.dock ("dock") {
-    ui.dock_item(CUI_ICON_FOLDER, "Files", color: CUI_RGB(0x3b82f6),
+    ui.dock_item(folder, "Files", color: CUI_RGB(0x3b82f6),
                                            running: true);
-    ui.dock_item(CUI_ICON_MAIL, "Mail", color: CUI_RGB(0x0ea5e9),
+    ui.dock_item(mail, "Mail", color: CUI_RGB(0x0ea5e9),
                                         badge: 3, running: true);
-    ui.dock_item(CUI_ICON_CALENDAR, "Calendar",
+    ui.dock_item(calendar, "Calendar",
                  color: CUI_RGB(0xef4444));
-    ui.dock_item(CUI_ICON_MUSIC, "Music", color: CUI_RGB(0xec4899),
+    ui.dock_item(music, "Music", color: CUI_RGB(0xec4899),
                                           running: true);
-    ui.dock_item(CUI_ICON_SQUARE_TERMINAL, "Terminal",
+    ui.dock_item(square_terminal, "Terminal",
                  color: CUI_RGB(0x27272a));
     ui.dock_separator();
-    ui.dock_item(CUI_ICON_SETTINGS, "Settings");
-    ui.dock_item(CUI_ICON_TRASH_2, "Trash");
+    ui.dock_item(settings, "Settings");
+    ui.dock_item(trash_2, "Trash");
   }
 }
 
 static void scene_control_tile(Ui ui) {
   static bool wifi = true, hotspot = false, focus = true, dark = true;
-  ui.box (dir: CUI_GRID, columns: 2, gap: 10,
-          width: CUI_PX(300)) {
+  ui.box (dir: grid, columns: 2, gap: 10,
+          width: 300) {
     ui.control_tile("Wi-Fi", wifi, icon: CUI_ICON_WIFI,
                                    detail: "Home");
-    ui.control_tile("Hotspot", hotspot, icon: CUI_ICON_RADIO);
-    ui.control_tile("Focus", focus, icon: CUI_ICON_MOON,
+    ui.control_tile("Hotspot", hotspot, icon: radio);
+    ui.control_tile("Focus", focus, icon: moon,
                                     detail: "Until 6 pm");
   }
-  ui.box (width: CUI_PX(300))
+  ui.box (width: 300)
     ui.control_tile("Dark appearance", dark, icon: CUI_ICON_SUN,
                                              wide: true,
-                                             width: CUI_FILL);
+                                             width: fill);
 }
 
 static void scene_now_playing(Ui ui) {
@@ -56,7 +56,7 @@ static void scene_radial_gauge(Ui ui) {
   static const cui_gauge_band load[] = {
     { 60, CUI_TONE_SUCCESS }, { 85, CUI_TONE_WARNING },
     { 100, CUI_TONE_DANGER } };
-  ui.row (gap: 28, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 28, align: center) {
     ui.radial_gauge("cpu", 72, 0, 100, unit: "%", label: "CPU load",
                                        bands: load, band_count: 3);
     ui.radial_gauge("rps", 1840, 0, 2500,
@@ -66,7 +66,7 @@ static void scene_radial_gauge(Ui ui) {
 }
 
 static void scene_chat_message(Ui ui) {
-  ui.card (width: CUI_FILL, pad: 16, gap: 0) {
+  ui.card (width: fill, pad: 16, gap: 0) {
     ui.chat_divider("Today");
     ui.chat_message("Did the data grid make it into 1.1?",
                     author: "Jonas Berg", time: "9:41");
@@ -84,7 +84,7 @@ static void scene_chat_message(Ui ui) {
 static void scene_comment(Ui ui) {
   static int likes[3] = { 12, 3, 0 };
   static bool liked[3] = { true, false, false };
-  ui.card (width: CUI_FILL, pad: 14, gap: 4) {
+  ui.card (width: fill, pad: 14, gap: 4) {
     ui.comment("c1", "Tomas Rivera",
                "The new numbers match the staging run. I would still test "
                "the import on a large file before Friday.",
@@ -110,10 +110,10 @@ static void scene_carousel(Ui ui) {
   static const unsigned colors[] = { 0x1f2a37, 0x0f3d3e, 0x3a2e22 };
   ui.carousel ("tour", 3, slide, height: 200) {
     for (int k = 0; k < 3; k++) ui.carousel_slide ()
-    ui.box (width: CUI_FILL, height: CUI_FILL,
+    ui.box (width: fill, height: fill,
             bg: CUI_RGB(colors[k]), radius: 16, pad: 28,
-            gap: 8, justify: CUI_JUSTIFY_END) {
-      ui.text(titles[k], font: CUI_FONT_DISPLAY, size: 24,
+            gap: 8, justify: end) {
+      ui.text(titles[k], font: display, size: 24,
                          color: CUI_RGB(0xffffff));
       ui.text(notes[k], color: CUI_RGBA(0xffffffc0));
     }
@@ -159,7 +159,7 @@ static void scene_image_compare(Ui ui) {
     after = ui.image_create(480, 300, color);
   }
   ui.image_compare("compare", before, after, split,
-    width: CUI_PX(480), height: 300, before_label: "Before",
+    width: 480, height: 300, before_label: "Before",
     after_label: "After", aspect: 480.0f / 300.0f);
 }
 
@@ -169,12 +169,12 @@ static void scene_card_stack_item(Ui ui) {
   int swiped;
   ui.card_stack (swiped, "deck", 3, width: 240, height: 200)
   for (int k = 0; k < 3; k++) ui.card_stack_item (k)
-  ui.box (width: CUI_FILL, height: CUI_FILL,
+  ui.box (width: fill, height: fill,
           bg: CUI_RGB(colors[k]), radius: 25, pad: 20,
-          gap: 4, justify: CUI_JUSTIFY_END) {
-    ui.text(cities[k], font: CUI_FONT_DISPLAY, size: 22,
+          gap: 4, justify: end) {
+    ui.text(cities[k], font: display, size: 22,
                        color: CUI_RGB(0xffffff));
-    ui.text("Swipe right to save", size: 13, font: CUI_FONT_MEDIUM,
+    ui.text("Swipe right to save", size: 13, font: medium,
                                    color: CUI_RGBA(0xfffffff0));
   }
   (void) swiped;
@@ -214,27 +214,27 @@ static void scene_json_view(Ui ui) {
 }
 
 static void scene_hover_card(Ui ui) {
-  ui.row (gap: 6, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 6, align: center) {
     ui.text("Assigned to");
     ui.link("@jonas");
     ui.hover_card ("jonas-card", width: 300)
-    ui.row (gap: 12, align: CUI_ALIGN_START) {
+    ui.row (gap: 12, align: start) {
       ui.avatar("Jonas Berg", size: 44, status: "online");
-      ui.column (gap: 4, width: CUI_FILL) {
-        ui.text("Jonas Berg", font: CUI_FONT_MEDIUM);
+      ui.column (gap: 4, width: fill) {
+        ui.text("Jonas Berg", font: medium);
         ui.text("Engineer on the rendering team.",
-                size: 13, color: CUI_COLOR_TEXT_SECONDARY);
+                size: 13, color: text_secondary);
       }
     }
     ui.text("and due Friday.");
   }
   ui.text("Rest the pointer on @jonas to open his card.",
-          size: 12, color: CUI_COLOR_TEXT_MUTED);
+          size: 12, color: text_muted);
 }
 
 static void scene_confirm_popover(Ui ui) {
   static bool open = true;
-  if (ui.button("Delete branch", icon: CUI_ICON_TRASH_2) || open) {
+  if (ui.button("Delete branch", icon: trash_2) || open) {
     ui.popover_open("confirm-delete");
     open = false;
   }
@@ -246,7 +246,7 @@ static void scene_confirm_popover(Ui ui) {
 }
 
 static void scene_expandable_text(Ui ui) {
-  ui.box (width: CUI_PX(440))
+  ui.box (width: 440)
     ui.expandable_text("about",
       "CUI is a component library for C. It draws everything itself, so an "
       "app looks the same on Windows, macOS and Linux, and it ships the "
@@ -256,19 +256,19 @@ static void scene_expandable_text(Ui ui) {
 
 static void scene_expandable_card(Ui ui) {
   static bool billing = true, security = false;
-  ui.column (gap: 14, width: CUI_PX(440)) {
+  ui.column (gap: 14, width: 440) {
     ui.expandable_card ("Billing", billing,
         description: "Pro plan, renews on December 1",
-        icon: CUI_ICON_CREDIT_CARD, badge: "Active",
-        badge_tone: CUI_TONE_SUCCESS)
+        icon: credit_card, badge: "Active",
+        badge_tone: success)
     ui.row (gap: 8) {
-      ui.button("Change plan", size: CUI_SIZE_SM);
-      ui.button("Invoices", size: CUI_SIZE_SM,
-                            variant: CUI_BUTTON_GHOST);
+      ui.button("Change plan", size: sm);
+      ui.button("Invoices", size: sm,
+                            variant: ghost);
     }
     ui.expandable_card ("Security", security,
         description: "Two-factor authentication is on",
-        icon: CUI_ICON_SHIELD)
+        icon: shield)
       ui.text("Recovery codes");
   }
 }
@@ -293,9 +293,9 @@ static void scene_countdown(Ui ui) {
 
 static void scene_date_range_picker(Ui ui) {
   static cui_date_range trip = { { 2026, 11, 3 }, { 2026, 11, 14 } };
-  ui.box (width: CUI_PX(300))
+  ui.box (width: 300)
     ui.date_range_picker("trip", trip, label: "Trip dates",
-                                       width: CUI_FILL);
+                                       width: fill);
 }
 
 static void scene_time_picker(Ui ui) {
@@ -303,10 +303,10 @@ static void scene_time_picker(Ui ui) {
   static int end_hour = 18, end_minute = 45;
   ui.row (gap: 12) {
     ui.time_picker("start", start_hour, start_minute,
-                   label: "Start", width: CUI_PX(180));
+                   label: "Start", width: 180);
     ui.time_picker("end", end_hour, end_minute,
       label: "End", twelve_hour: true, minute_step: 15,
-      width: CUI_PX(180));
+      width: 180);
   }
 }
 
@@ -321,18 +321,18 @@ static void scene_wheel_picker(Ui ui) {
                  "2028" "2029" "2030" "2031");
   ui.row () ui.card (pad: 8) ui.row (gap: 0) {
     ui.wheel_picker("day", days, day,
-      width: CUI_PX(64), loop: true, join_right: true);
+      width: 64, loop: true, join_right: true);
     ui.wheel_picker("month", months, month,
-      width: CUI_PX(128), loop: true, join_left: true,
+      width: 128, loop: true, join_left: true,
       join_right: true);
     ui.wheel_picker("year", years, year,
-      width: CUI_PX(80), join_left: true);
+      width: 80, join_left: true);
   }
 }
 
 static void scene_ruler_slider(Ui ui) {
   static float height = 172;
-  ui.box (width: CUI_PX(400))
+  ui.box (width: 400)
     ui.ruler_slider("Height", height, 120, 220, unit: "cm");
 }
 
@@ -354,7 +354,7 @@ static void scene_fader(Ui ui) {
   static float gains[4] = { -6, 0, -12.5f, -3 };
   static String names[4] = { "Vocals", "Guitar", "Bass", "Drums" };
   static const float marks[] = { 6, 0, -6, -12, -24, -48 };
-  ui.row () ui.card (pad: 18, dir: CUI_ROW, gap: 10) {
+  ui.row () ui.card (pad: 18, dir: row, gap: 10) {
     for (int k = 0; k < 4; k++) ui.id (k)
       ui.fader(names[k], gains[k], -48, 6,
         unit: "dB", length: 170, ticks: k == 0 ? marks : NULL,
@@ -363,15 +363,15 @@ static void scene_fader(Ui ui) {
 }
 
 static void scene_signature_pad(Ui ui) {
-  ui.column (gap: 8, width: CUI_PX(400)) {
+  ui.column (gap: 8, width: 400) {
     ui.label("Sign here");
-    ui.signature_pad("signature", width: CUI_FILL, height: 140,
+    ui.signature_pad("signature", width: fill, height: 140,
                                   placeholder: "Draw your signature");
   }
 }
 
 static void scene_dropzone(Ui ui) {
-  ui.box (width: CUI_PX(400))
+  ui.box (width: 400)
     ui.dropzone("files", description: "PNG, JPG or PDF, up to 25 MB",
                          accept: "png;jpg;pdf", height: 200);
 }

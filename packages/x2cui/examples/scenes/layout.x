@@ -8,13 +8,13 @@
 
 // A labelled tile, so a layout scene shows where each child lands.
 static void tile(Ui ui, String label) {
-  ui.box (pad: 12, bg: CUI_COLOR_SURFACE_MUTED, radius: 8)
+  ui.box (pad: 12, bg: surface_muted, radius: 8)
     ui.label(label);
 }
 
 static void scene_box(Ui ui) {
-  ui.box (width: CUI_PX(280), pad: 20, gap: 8, radius: 12,
-          bg: CUI_COLOR_SURFACE_MUTED) {
+  ui.box (width: 280, pad: 20, gap: 8, radius: 12,
+          bg: surface_muted) {
     ui.label("A box");
     ui.text("A box holds children and has padding, a gap between "
             "children, a background, and a corner radius.");
@@ -22,7 +22,7 @@ static void scene_box(Ui ui) {
 }
 
 static void scene_row(Ui ui) {
-  ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 8, align: center) {
     tile(ui, "First");
     tile(ui, "Second");
     ui.spacer();
@@ -31,7 +31,7 @@ static void scene_row(Ui ui) {
 }
 
 static void scene_column(Ui ui) {
-  ui.column (gap: 8, width: CUI_PX(240)) {
+  ui.column (gap: 8, width: 240) {
     tile(ui, "Top");
     tile(ui, "Middle");
     tile(ui, "Bottom");
@@ -39,16 +39,16 @@ static void scene_column(Ui ui) {
 }
 
 static void scene_card(Ui ui) {
-  ui.card (width: CUI_PX(320), pad: 20, gap: 8) {
+  ui.card (width: 320, pad: 20, gap: 8) {
     ui.heading("Quarterly report", 4);
     ui.text("A card is a surface with a border. This one holds a heading, "
-            "a paragraph, and an action.", color: CUI_COLOR_TEXT_MUTED);
-    ui.button("Open", variant: CUI_BUTTON_OUTLINE);
+            "a paragraph, and an action.", color: text_muted);
+    ui.button("Open", variant: outline);
   }
 }
 
 static void scene_scroll(Ui ui) {
-  ui.scroll (id: "rows", width: CUI_PX(280), height: CUI_PX(220),
+  ui.scroll (id: "rows", width: 280, height: 220,
              gap: 6) {
     for (int i = 1; i <= 24; i++) tile(ui, %"Row $i");
   }
@@ -56,8 +56,8 @@ static void scene_scroll(Ui ui) {
 
 static void scene_split(Ui ui) {
   static float ratio = 0.35f;
-  ui.split ("panes", ratio, width: CUI_FILL,
-                            height: CUI_PX(240)) {
+  ui.split ("panes", ratio, width: fill,
+                            height: 240) {
     tile(ui, "Navigation");
     ui.split_next();
     tile(ui, "Content. Drag the divider.");
@@ -82,7 +82,7 @@ static void scene_disabled_scope(Ui ui) {
   ui.switch("Lock the form", locked);
   ui.disabled (locked) ui.column (gap: 8) {
     ui.checkbox("Send notifications", notify);
-    ui.button("Save", variant: CUI_BUTTON_PRIMARY);
+    ui.button("Save", variant: primary);
   }
 }
 
@@ -90,32 +90,32 @@ static void scene_text(Ui ui) {
   ui.heading("Heading", 2);
   ui.label("A label has medium weight.");
   ui.text("Body text wraps to the width it is given and follows the theme.",
-          width: CUI_PX(320));
-  ui.text("Muted, smaller text.", color: CUI_COLOR_TEXT_MUTED,
+          width: 320);
+  ui.text("Muted, smaller text.", color: text_muted,
                                   size: 12);
 }
 
 static void scene_button(Ui ui) {
   static int clicks = 0;
   ui.row (gap: 8, wrap: true) {
-    if (ui.button("Primary", variant: CUI_BUTTON_PRIMARY,
-                             icon: CUI_ICON_PLUS))
+    if (ui.button("Primary", variant: primary,
+                             icon: plus))
       clicks++;
     ui.button("Secondary");
-    ui.button("Outline", variant: CUI_BUTTON_OUTLINE);
-    ui.button("Ghost", variant: CUI_BUTTON_GHOST);
-    ui.button("Danger", variant: CUI_BUTTON_DANGER);
-    ui.button("Saving", variant: CUI_BUTTON_PRIMARY, loading: true);
+    ui.button("Outline", variant: outline);
+    ui.button("Ghost", variant: ghost);
+    ui.button("Danger", variant: danger);
+    ui.button("Saving", variant: primary, loading: true);
   }
   ui.text(%"Primary was clicked $clicks times.");
 }
 
 static void scene_icon_button(Ui ui) {
   ui.row (gap: 8) {
-    ui.icon_button(CUI_ICON_SETTINGS, tooltip: "Settings");
-    ui.icon_button(CUI_ICON_SEARCH, variant: CUI_BUTTON_OUTLINE);
-    ui.icon_button(CUI_ICON_X, variant: CUI_BUTTON_GHOST,
-                               size: CUI_SIZE_SM);
+    ui.icon_button(settings, tooltip: "Settings");
+    ui.icon_button(search, variant: outline);
+    ui.icon_button(x, variant: ghost,
+                               size: sm);
   }
 }
 

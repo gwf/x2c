@@ -96,8 +96,8 @@ void page_social(Ui ui, Gallery g) {
   }
   // This frame's textures, from the state above.
   cui_texture before = tx.before, after = tx.after;
-  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
-    ui.column (width: CUI_GROW(1), gap: 10) {
+  ui.row (gap: 24, align: start, width: fill) {
+    ui.column (width: grow(1), gap: 10) {
       section(ui, "Chat", "Grouped bubbles, read receipts and a typing "
                           "indicator.");
       ui.card (gap: 0, pad: 16) {
@@ -114,7 +114,7 @@ void page_social(Ui ui, Gallery g) {
         ui.typing_indicator("Jonas");
       }
     }
-    ui.column (width: CUI_GROW(1), gap: 10) {
+    ui.column (width: grow(1), gap: 10) {
       section(ui, "Comments", "Threads with replies, likes and badges.");
       ui.card (gap: 4, pad: 14) {
         ui.comment("c1", "Tomas Rivera", "The new numbers match the staging "
@@ -133,12 +133,12 @@ void page_social(Ui ui, Gallery g) {
     }
   }
   section(ui, "Presence", "Who is here now. Hover to spread them out.");
-  ui.row (gap: 24, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 24, align: center) {
     ui.presence("here", who, 5, 30);
     ui.counter("rev", revenue, format: "$%.0f", size: 34,
                                group_thousands: true);
-    if (ui.button("Add a sale", size: CUI_SIZE_SM,
-                                icon: CUI_ICON_PLUS))
+    if (ui.button("Add a sale", size: sm,
+                                icon: plus))
       revenue += 1287;
   }
 
@@ -165,10 +165,10 @@ void page_social(Ui ui, Gallery g) {
                                      0x2b2f3a };
     for (int k = 0; k < 4; k++) ui.carousel_slide () {
       String title = titles[k], desc = descs[k];
-      ui.box (width: CUI_FILL, height: CUI_FILL,
+      ui.box (width: fill, height: fill,
               bg: CUI_RGB(tops[k]), radius: 16, pad: 28,
-              gap: 8, justify: CUI_JUSTIFY_END) {
-        ui.text(title, font: CUI_FONT_DISPLAY, size: 24,
+              gap: 8, justify: end) {
+        ui.text(title, font: display, size: 24,
                        color: CUI_RGB(0xffffff));
         ui.text(desc, color: CUI_RGBA(0xffffffc0));
       }
@@ -177,29 +177,29 @@ void page_social(Ui ui, Gallery g) {
 
   static cui_image_view view;
   static cui_rect crop;
-  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL,
+  ui.row (gap: 24, align: start, width: fill,
           wrap: true) {
-    ui.column (width: CUI_GROW(3), min_width: 280, gap: 10) {
+    ui.column (width: grow(3), min_width: 280, gap: 10) {
       section(ui, "Image viewer", "Wheel to zoom around the pointer, drag "
                                   "to pan, double-click for 100%.");
       ui.image_viewer("viewer", after, 640, 400, view,
-                      height: CUI_PX(260));
+                      height: 260);
     }
-    ui.column (width: CUI_GROW(2), min_width: 240, gap: 10) {
+    ui.column (width: grow(2), min_width: 240, gap: 10) {
       section(ui, "Cropper", "Drag the corners; the square keeps its "
                              "shape.");
       ui.cropper("cropper", after, 640, 400, crop,
-        aspect: 1, height: CUI_PX(260));
+        aspect: 1, height: 260);
     }
   }
-  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
-    ui.column (width: CUI_GROW(1), gap: 10) {
+  ui.row (gap: 24, align: start, width: fill) {
+    ui.column (width: grow(1), gap: 10) {
       section(ui, "Before and after", "Drag the divider.");
       ui.image_compare("cmp", before, after, split,
         height: 230, aspect: 640.0f / 400.0f);
     }
-    ui.column (width: CUI_GROW(1), gap: 10,
-               align: CUI_ALIGN_CENTER) {
+    ui.column (width: grow(1), gap: 10,
+               align: center) {
       section(ui, "Card stack", "Flick the top card away, left or right.");
       List names = %("Kyoto" "Lisbon" "Reykjavik" "Oaxaca" "Hanoi");
       static const unsigned cols[] = { 0xc8553d, 0x2d3047, 0x5b8e7d,
@@ -210,13 +210,13 @@ void page_social(Ui ui, Gallery g) {
         int idx = (deck + k) % 5;
         String name = names[idx];
         ui.card_stack_item (k)
-        ui.box (width: CUI_FILL, height: CUI_FILL,
+        ui.box (width: fill, height: fill,
                 bg: CUI_RGB(cols[idx]), radius: 25, pad: 20,
-                justify: CUI_JUSTIFY_END, gap: 4) {
-          ui.text(name, font: CUI_FONT_DISPLAY, size: 22,
+                justify: end, gap: 4) {
+          ui.text(name, font: display, size: 22,
                         color: CUI_RGB(0xffffff));
           ui.text("Swipe right to save",
-            size: 13, font: CUI_FONT_MEDIUM,
+            size: 13, font: medium,
             color: CUI_RGBA(0xfffffff0));
         }
       }

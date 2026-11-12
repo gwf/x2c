@@ -35,7 +35,7 @@ void page_charts(Ui ui, Gallery g) {
     ui.line_chart("revenue", s, months,
       area: true, smooth: true, height: 240, format: "$%.0fk");
   }
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.column (gap: 12) {
       section(ui, "Bar chart", NULL);
@@ -49,14 +49,14 @@ void page_charts(Ui ui, Gallery g) {
     }
     ui.column (gap: 12) {
       section(ui, "Donut chart", NULL);
-      ui.card (align: CUI_ALIGN_CENTER)
+      ui.card (align: center)
         ui.donut_chart("platforms", shares,
                        %("Windows" "macOS" "Linux" "Other"),
                        height: 180, format: "%.0f%%");
     }
   }
   section(ui, "Stacked bars and gauges", NULL);
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.card () {
       cui_series s[] = { cui_series.of("Passed", passed),
@@ -66,7 +66,7 @@ void page_charts(Ui ui, Gallery g) {
                    %("W1" "W2" "W3" "W4" "W5" "W6" "W7" "W8"),
                    stacked: true, height: 200);
     }
-    ui.card (dir: CUI_ROW, gap: 24, align: CUI_ALIGN_CENTER) {
+    ui.card (dir: row, gap: 24, align: center) {
       ui.gauge("CPU", 0.42f, 130);
       ui.gauge("Memory", 0.81f, 130);
     }

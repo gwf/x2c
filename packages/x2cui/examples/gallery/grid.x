@@ -107,9 +107,9 @@ void page_grid(Ui ui, Gallery g) {
       ui.badge(p.team);
       ui.data_grid_cell_text(%"$(p.commits)");
       ui.data_grid_cell();
-      ui.progress(p.score / 100, width: CUI_PX(70), height: 5);
+      ui.progress(p.score / 100, width: 70, height: 5);
       ui.text(String.format("%.1f", (double) p.score),
-        tabular: true, size: 13, color: CUI_COLOR_TEXT_SECONDARY);
+        tabular: true, size: 13, color: text_secondary);
     }
   }
   ui.muted(n_sel ? "Rows selected. Press Esc to clear."
@@ -126,31 +126,31 @@ void page_grid(Ui ui, Gallery g) {
                                 "Size": right(unsorted(100))}) {
       ui.table_row(false);
       ui.table_cell();
-      ui.tree_cell("src", 0, true, open_src, CUI_ICON_FOLDER);
+      ui.tree_cell("src", 0, true, open_src, folder);
       ui.table_cell_text("42");
       ui.table_cell_text("1.2 MB");
       if (open_src) {
         ui.table_row(false);
         ui.table_cell();
-        ui.tree_cell("ui", 1, true, open_ui, CUI_ICON_FOLDER);
+        ui.tree_cell("ui", 1, true, open_ui, folder);
         ui.table_cell_text("18");
         ui.table_cell_text("640 KB");
         if (open_ui) {
           ui.table_row(false);
           ui.table_cell();
-          ui.tree_cell("button.c", 2, false, NULL, CUI_ICON_FILE);
+          ui.tree_cell("button.c", 2, false, NULL, file);
           ui.table_cell_text("1");
           ui.table_cell_text("24 KB");
         }
         ui.table_row(false);
         ui.table_cell();
-        ui.tree_cell("main.c", 1, false, NULL, CUI_ICON_FILE);
+        ui.tree_cell("main.c", 1, false, NULL, file);
         ui.table_cell_text("1");
         ui.table_cell_text("8 KB");
       }
       ui.table_row(false);
       ui.table_cell();
-      ui.tree_cell("README.md", 0, false, NULL, CUI_ICON_FILE_TEXT);
+      ui.tree_cell("README.md", 0, false, NULL, file_text);
       ui.table_cell_text("1");
       ui.table_cell_text("12 KB");
     }

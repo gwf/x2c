@@ -5,7 +5,7 @@
 #include "state.x"
 
 void page_selection(Ui ui, Gallery g) {
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.column (gap: 12) {
       section(ui, "Checkbox", NULL);

@@ -76,7 +76,7 @@ static int page_total(void) => sizeof pages / sizeof *pages;
 
 static void set_theme(Ui ui, Gallery g, bool dark) {
   g.dark = dark;
-  ui.set_theme(dark ? CUI_THEME_DARK : CUI_THEME_LIGHT);
+  ui.set_theme(dark ? CUI_THEME_DARK : light);
 }
 
 static void go_to(Ui ui, Gallery g, int page) {
@@ -95,9 +95,9 @@ static void paint_swatch(Ui ui, cui_rect area, void *user) {
   Swatch *swatch = user;
   cui_vec2 centre = { area.x + area.w / 2, area.y + area.h / 2 };
   if (swatch.selected)
-    ui.draw_circle(centre, area.w / 2, ui.color_of(CUI_COLOR_FOREGROUND));
+    ui.draw_circle(centre, area.w / 2, ui.color_of(foreground));
   ui.draw_circle(centre, area.w / 2 - (swatch.selected ? 2.0f : 0.0f),
-                 ui.color_of(CUI_COLOR_SURFACE_MUTED));
+                 ui.color_of(surface_muted));
   ui.draw_circle(centre, area.w / 2 - 4, swatch.color);
 }
 
@@ -105,12 +105,12 @@ static void accent_row(Ui ui, Gallery g) {
   static const unsigned colors[CUI_ACCENT_COUNT] = {
     0x555555, 0x7747ff, 0x0562ef, 0x00864b, 0xf3ad20, 0xc25300, 0xd1403a,
     0xd23286 };
-  ui.row (justify: CUI_JUSTIFY_BETWEEN) {
+  ui.row (justify: between) {
     for (int accent = 0; accent < CUI_ACCENT_COUNT; accent++) {
       Swatch swatch = { CUI_RGB(colors[accent]), g.accent == accent };
       // The canvas copies the swatch, because it paints when the frame ends.
       cui_canvas_result result = ui.canvas(
-        %"accent-$accent", CUI_PX(22), CUI_PX(22), paint_swatch, &swatch,
+        %"accent-$accent", 22, 22, paint_swatch, &swatch,
         sizeof swatch);
       ui.tooltip(cui_accent_name((cui_accent) accent));
       if (result.clicked) {
@@ -124,24 +124,24 @@ static void accent_row(Ui ui, Gallery g) {
 // The page list: a column beside the page, or the body of a drawer.
 static void sidebar(Ui ui, Gallery g, bool drawer) {
   ui.column (
-      width: drawer ? CUI_FILL : CUI_PX(240), height: CUI_FILL,
-      bg: drawer ? CUI_TRANSPARENT : CUI_COLOR_SURFACE_MUTED,
+      width: drawer ? fill : 240, height: fill,
+      bg: drawer ? CUI_TRANSPARENT : surface_muted,
       pad: drawer ? 0 : 12, gap: 2) {
     if (!drawer) ui.row (gap: 10, pad_x: 8, pad_top: 6,
                          pad_bottom: 18) {
-      ui.box (width: CUI_PX(28), height: CUI_PX(28), radius: 9,
-              bg: CUI_COLOR_FOREGROUND, dir: CUI_STACK,
-              align: CUI_ALIGN_CENTER,
-              justify: CUI_JUSTIFY_CENTER)
-        ui.text("C", font: CUI_FONT_DISPLAY, size: 16,
-                     color: CUI_COLOR_BACKGROUND, line_height: 1.0f);
-      ui.text("CUI", font: CUI_FONT_MEDIUM, size: 15, nowrap: true);
+      ui.box (width: 28, height: 28, radius: 9,
+              bg: foreground, dir: stack,
+              align: center,
+              justify: center)
+        ui.text("C", font: display, size: 16,
+                     color: background, line_height: 1.0f);
+      ui.text("CUI", font: medium, size: 15, nowrap: true);
       ui.spacer();
       // x2c reads a C macro constant as a value only when its type is given.
       int major = CUI_VERSION_MAJOR, minor = CUI_VERSION_MINOR;
-      ui.badge(%"v$major.$minor", size: CUI_SIZE_SM);
+      ui.badge(%"v$major.$minor", size: sm);
     }
-    ui.scroll (id: "nav", height: CUI_FILL, gap: 2) {
+    ui.scroll (id: "nav", height: fill, gap: 2) {
       ui.nav_section("Components");
       for (int page = 0; page < page_total(); page++) {
         if (page == PAGE_COUNT) {
@@ -158,7 +158,7 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
       static const char *mode_icons[] = { CUI_ICON_SUN, CUI_ICON_MOON };
       int mode = g.dark;
       if (ui.segmented("theme", %("Light" "Dark"), mode,
-            full_width: true, icons: mode_icons, size: CUI_SIZE_SM))
+            full_width: true, icons: mode_icons, size: sm))
         set_theme(ui, g, mode == 1);
       accent_row(ui, g);
     }
@@ -170,13 +170,13 @@ static void dialogs(Ui ui, Gallery g) {
       description: "Changes are visible to your team.") {
     ui.input("dlg-name", g.name, label: "Name");
     ui.input("dlg-email", g.email, label: "Email",
-                                   icon: CUI_ICON_MAIL);
+                                   icon: mail);
     ui.switch("Public profile", g.wifi);
     ui.dialog_footer () {
       if (ui.button("Cancel")) g.dialog_open = false;
-      if (ui.button("Save changes", variant: CUI_BUTTON_PRIMARY)) {
+      if (ui.button("Save changes", variant: primary)) {
         g.dialog_open = false;
-        ui.toast("Profile updated", tone: CUI_TONE_SUCCESS);
+        ui.toast("Profile updated", tone: success);
       }
     }
   }
@@ -186,9 +186,9 @@ static void dialogs(Ui ui, Gallery g) {
       width: 400)
   ui.dialog_footer () {
     if (ui.button("Cancel##confirm")) g.confirm_open = false;
-    if (ui.button("Delete project", variant: CUI_BUTTON_DANGER)) {
+    if (ui.button("Delete project", variant: danger)) {
       g.confirm_open = false;
-      ui.toast("Project deleted", tone: CUI_TONE_DANGER,
+      ui.toast("Project deleted", tone: danger,
                                   action: "Undo");
     }
   }
@@ -253,26 +253,26 @@ static void draw(Ui ui, Gallery g) {
   // Below 760 points the page list moves into a drawer behind a button.
   bool narrow = ui.viewport_size().x < 760;
   if (!narrow) g.drawer = false;
-  ui.row (width: CUI_FILL, height: CUI_FILL,
-          align: CUI_ALIGN_STRETCH, bg: CUI_COLOR_BACKGROUND) {
+  ui.row (width: fill, height: fill,
+          align: stretch, bg: background) {
     if (!narrow) {
       sidebar(ui, g, false);
       ui.separator();
     }
-    ui.scroll (id: "main", width: CUI_FILL, fade_edges: true)
-    ui.row (justify: CUI_JUSTIFY_CENTER, align: CUI_ALIGN_START)
-    ui.column (width: CUI_FILL, max_width: 920,
+    ui.scroll (id: "main", width: fill, fade_edges: true)
+    ui.row (justify: center, align: start)
+    ui.column (width: fill, max_width: 920,
                pad_x: narrow ? 16 : 40, pad_top: narrow ? 12 : 36,
                pad_bottom: 64, gap: 20) {
-      if (narrow) ui.row (gap: 8, width: CUI_FILL) {
-        if (ui.icon_button(CUI_ICON_MENU, tooltip: "Components"))
+      if (narrow) ui.row (gap: 8, width: fill) {
+        if (ui.icon_button(menu, tooltip: "Components"))
           g.drawer = true;
-        ui.text("CUI", font: CUI_FONT_MEDIUM, size: 15);
+        ui.text("CUI", font: medium, size: 15);
       }
       draw_page(ui, g);
     }
   }
-  ui.sheet ("CUI", g.drawer, side: CUI_SIDE_LEFT, size: 280)
+  ui.sheet ("CUI", g.drawer, side: left, size: 280)
     sidebar(ui, g, true);
   dialogs(ui, g);
 }

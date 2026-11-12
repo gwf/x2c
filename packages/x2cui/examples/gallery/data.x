@@ -52,16 +52,16 @@ void page_data(Ui ui, Gallery g) {
       if (ui.table_row(g.selected_row == order[k])) g.selected_row = order[k];
       ui.table_cell();
       ui.avatar(r.name, size: 26);
-      ui.text(r.name, font: CUI_FONT_MEDIUM, nowrap: true);
+      ui.text(r.name, font: medium, nowrap: true);
       ui.table_cell();
-      ui.text(r.email, color: CUI_COLOR_TEXT_SECONDARY, nowrap: true);
+      ui.text(r.email, color: text_secondary, nowrap: true);
       ui.table_cell_text(r.role);
       ui.table_cell();
       ui.badge(r.status, tone: r.status_tone, dot: true);
       ui.table_cell_text(r.amount);
     }
   }
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.column (gap: 12) {
       section(ui, "Tree view", NULL);
@@ -80,7 +80,7 @@ void page_data(Ui ui, Gallery g) {
           }
         }
         ui.tree ("assets", g.tree_assets) {
-          ui.tree ("logo.png", NULL, leaf: true, icon: CUI_ICON_IMAGE) {}
+          ui.tree ("logo.png", NULL, leaf: true, icon: image) {}
         }
         ui.tree ("main.c", NULL, leaf: true) {}
       }
@@ -103,7 +103,7 @@ void page_data(Ui ui, Gallery g) {
   section(ui, "Reorderable list", "Drag a row. The others make room as you "
                                   "go.");
   // The rows carry their own edges: no card around them.
-  ui.column (width: CUI_FILL) {
+  ui.column (width: fill) {
     List tasks = %("Write the release notes" "Record the demo video"
                    "Update the screenshots" "Tag version 1.0"
                    "Post the announcement");
@@ -117,7 +117,7 @@ void page_data(Ui ui, Gallery g) {
       ui.reorder_item (i) {
         int t = g.task_order[i];
         String task = tasks[t], label = labels[t];
-        ui.text(task, nowrap: true, width: CUI_FILL);
+        ui.text(task, nowrap: true, width: fill);
         ui.badge(label, tone: tones[t]);
       }
     }
@@ -141,20 +141,20 @@ void page_data(Ui ui, Gallery g) {
                               "built.");
   ui.card (pad: 6) {
     int first = 0, last = 0;
-    ui.virtual_list ("big", 10000, 36, CUI_PX(220), first, last) {
+    ui.virtual_list ("big", 10000, 36, 220, first, last) {
       for (int i = first; i < last; i++) {
         unsigned h = (unsigned) (i + 1) * 2654435761u;
         String invoice = String.format("Invoice 2026-%05d", 10000 - i);
         String amount = String.format("$%u.%02u", 40 + (h >> 8) % 2400,
                                       (h >> 4) % 100);
-        ui.row (height: CUI_PX(36), pad_x: 12, gap: 12) {
-          ui.icon(CUI_ICON_FILE_TEXT, 16, CUI_COLOR_TEXT_MUTED);
-          ui.text(invoice, nowrap: true, width: CUI_FILL,
+        ui.row (height: 36, pad_x: 12, gap: 12) {
+          ui.icon(file_text, 16, text_muted);
+          ui.text(invoice, nowrap: true, width: fill,
                            tabular: true);
           ui.text(amount, size: 13, tabular: true, nowrap: true);
           ui.text((h >> 20) % 5 == 0 ? "Due" : "Paid",
-            size: 12, color: CUI_COLOR_TEXT_MUTED, nowrap: true,
-            width: CUI_PX(32));
+            size: 12, color: text_muted, nowrap: true,
+            width: 32);
         }
       }
     }

@@ -36,16 +36,16 @@ void page_pickers(Ui ui, Gallery g) {
   section(ui, "Multi-select",
           "Chips for the chosen items, checkboxes in the list.");
   List items = %("C" "C++" "Rust" "Zig" "Go" "Swift" "Kotlin" "Odin");
-  ui.row (gap: 12, align: CUI_ALIGN_START)
-  ui.box (width: CUI_PX(320))
+  ui.row (gap: 12, align: start)
+  ui.box (width: 320)
     ui.multi_select("langs", items, langs, label: "Languages",
                                            searchable: true);
 
   section(ui, "Date range",
           "Presets on the left, two months to pick a start and an end.");
   ui.row (gap: 12, wrap: true) {
-    ui.date_range_picker("range", range, width: CUI_PX(300));
-    ui.date_range_picker("stay", stay, width: CUI_PX(300),
+    ui.date_range_picker("range", range, width: 300);
+    ui.date_range_picker("stay", stay, width: 300,
                                        no_presets: true);
   }
   // As wide as its months.
@@ -63,17 +63,17 @@ void page_pickers(Ui ui, Gallery g) {
   section(ui, "Wheels and dial",
           "Drag, scroll or use the arrow keys. Several wheels make a date "
           "reel.");
-  ui.row (gap: 32, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 32, align: center) {
     List months = %("January" "February" "March" "April" "May" "June"
                     "July" "August" "September" "October" "November"
                     "December");
-    ui.card (dir: CUI_ROW, gap: 0, pad: 8) {
-      ui.wheel_picker("day", days, day, width: CUI_PX(64), loop: true,
+    ui.card (dir: row, gap: 0, pad: 8) {
+      ui.wheel_picker("day", days, day, width: 64, loop: true,
                                         join_right: true);
       ui.wheel_picker("month", months, month,
-        width: CUI_PX(128), loop: true, join_left: true,
+        width: 128, loop: true, join_left: true,
         join_right: true);
-      ui.wheel_picker("year", years, year, width: CUI_PX(80),
+      ui.wheel_picker("year", years, year, width: 80,
                                            join_left: true);
     }
     ui.time_dial("dial", dh, dm, 232);
@@ -82,14 +82,14 @@ void page_pickers(Ui ui, Gallery g) {
   section(ui, "Ruler and histogram",
           "A tape that slides under a fixed marker, and a range over its "
           "data.");
-  ui.row (gap: 24, align: CUI_ALIGN_START) {
-    ui.column (width: CUI_FILL, gap: 20) {
+  ui.row (gap: 24, align: start) {
+    ui.column (width: fill, gap: 20) {
       ui.ruler_slider("Height", height, 120, 220, unit: "cm");
       ui.ruler_slider("Temperature", temp, 10, 30,
         step: 0.5f, major_every: 4, spacing: 14, format: "%.1f",
         unit: "\xc2\xb0" "C");
     }
-    ui.card (width: CUI_FILL, gap: 6) {
+    ui.card (width: fill, gap: 6) {
       // The page ignores the result, so the method stands in for the macro.
       ui.histogram_slider("Price", bins, lo, hi, 0, 240,
                           format: "$%.0f");
