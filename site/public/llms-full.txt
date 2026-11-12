@@ -3641,6 +3641,48 @@ int main(void) {
 In `$Meter.read`, `$meter.read($raw)` is the method. In `$Meter.read_twice`,
 each `$meter.read($raw)` is the macro `$Meter.read`.
 
+A call on a type name, `T.NAME(ARGUMENTS)`, also invokes `$T.NAME` when it
+is visible, with the arguments unchanged, as `$T.NAME(ARGUMENTS)` takes
+them. A method `T.NAME` is a function callable both as `receiver.NAME(x)`
+and as `T.NAME(receiver, x)`, so both spellings reach the same macro: for a
+macro whose first parameter is the receiver, `Ui.button(ui, "Add")` is
+`ui.button("Add")`. A function with no receiver gets a macro the same way:
+
+```x2c
+#include "x2c.x"
+typedef struct Desc { int width, height; } Desc;
+typedef struct Win { int area; } *Win;
+
+Win Win.open(Desc desc) {
+  Win w = xmalloc(sizeof *w);
+  w.area = desc.width * desc.height;
+  return w;
+}
+
+Desc desc_of(Map @options) => (Desc){
+  options.getdefault(<width>, 1).integer(),
+  options.getdefault(<height>, 1).integer() };
+
+macro Expression $Win.open(Entry @options) =>
+  Win.open(desc_of(@options));
+
+int main(void) {
+  printf("%d\n", Win.open(width: 3, height: 4).area);
+  return 0;
+}
+```
+
+```text
+12
+```
+
+In `$Win.open`'s own template, `Win.open(...)` is the function, as the
+self-call rule states for the receiver form. At the start of a statement,
+`T.NAME(ARGUMENTS) TARGET` applies a decorator `$T.NAME` under the same
+target test. A type name is known where a template is defined, so the form
+is recognized there without waiting for the expansion. At file scope only
+the receiver form applies a decorator.
+
 A package's type `Ui` is `x2cui__Ui` in generated C, but its macros keep the
 source spelling `$Ui.row`. A method form looks for `$T.NAME` under the
 receiver type's generated name and then under its source name, so the

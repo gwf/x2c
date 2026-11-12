@@ -86,6 +86,7 @@ Source macros and the compile-time calls they run.
 | [`Compiler.try_parse_macro_subpattern`](#Compiler.try_parse_macro_subpattern) | Parses `$NAME(P, ...)` in a pattern, where each argument is a pattern, into the pattern for code NAME builds with each argument pattern in its hole. |
 | [`Compiler.try_parse_macro_target_at`](#Compiler.try_parse_macro_target_at) | Parses a direct or keyword-alias macro at the requested syntax position. |
 | [`Compiler.try_parse_method_macro`](#Compiler.try_parse_method_macro) | Expands `receiver.name(...)` as the Expression macro `$T.name` of the receiver's named type `T`, with the receiver as its first explicit argument. |
+| [`Compiler.try_parse_static_macro`](#Compiler.try_parse_static_macro) | Expands `T.name(...)` as the Expression macro `$T.name` when `T` names a type, with the call's arguments unchanged, as `$T.name(...)` takes them. |
 | [`Compiler.unbound_alias_names`](#Compiler.unbound_alias_names) | Returns the names of the unit's file-scope aliases that `globs`, the unit's names in source order, does not bind. |
 | [`Compiler.watched_step`](#Compiler.watched_step) | Lowers `ast` when it is a value the active lowering watches; NULL otherwise. |
 
@@ -945,6 +946,20 @@ applies; the call is then an ordinary method call.
 target follows the arguments, and `$T.name` is a decorator or, in a
 template other than `$T.name`'s own, may be one where the template
 expands. The statement continues with `parse_method_decorator`.
+
+Source: `src/macros/invocations/expressions.x`
+
+<a id="Compiler.try_parse_static_macro"></a>
+#### Compiler.try_parse_static_macro
+
+`List Compiler.try_parse_static_macro(Compiler c, String spelling, Token start)`
+
+Expands `T.name(...)` as the Expression macro `$T.name` when `T` names
+a type, with the call's arguments unchanged, as `$T.name(...)` takes
+them. `spelling` is the call's folded name, as `T_name`, whose `T.name`
+tokens end at the cursor. Returns NULL, consuming nothing, when no such
+macro applies. Raises `<method-dec>` as `try_parse_method_macro` does
+for a decorator `$T.name` at the start of a statement.
 
 Source: `src/macros/invocations/expressions.x`
 
