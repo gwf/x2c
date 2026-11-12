@@ -291,7 +291,7 @@ meta static List _count(List array) {
 meta static int _collection(List value) =>
   Type.resolve(Code.type(value)) ~= %(* struct "Block");
 
-// The records of the collection `value`, as the pointer `type`.
+// The pointer `type` to the first element `value` holds.
 meta static List _records(Type type, List value) =>
   $!( ($type) ((Block) $value).bytes );
 

@@ -1051,9 +1051,10 @@ The package has one way to write each component, its method form:
 - `ui.item` rows that take the keyboard, through
   `patches/focusable-canvas.patch`.
 - Data the program owns as x2c values: the kanban board's `Column` and
-  `Card` classes, and the key-value editor's `Array` of `KeyValue`.
-  State CUI edits in place stays a named array of CUI's records; the
-  README lists those parameters.
+  `Card` classes, and collections of CUI's records for state CUI edits
+  in place and data a program reads and passes, written with `T.of` and
+  `Ts.of([...])`; see
+  [Collections of CUI records](x2cui-lists-and-tables.md#collections-of-cui-records-2026-11-12).
 
 Review fixes (2026-11-11):
 
@@ -1076,8 +1077,8 @@ Remaining limits:
   remade for a CUI upgrade.
 - Constants in program logic, such as `status == CUI_STATUS_BUSY`, keep
   CUI's spelling; short names need a parameter or field type.
-- Data that is both a component argument and read by the program, such
-  as the Reader page's table of contents, stays a named C array.
+- A collection's record is reached with `c.at(i)`, not `c[i]`, until x2c
+  honors a pointer-returning `getindex`; `foreach` yields copies.
 - A form that declares a name is a block of its own, so an unbraced loop
   cannot take it as its body.
 - An Array literal outside a form compiles as a run-time `Array`; the

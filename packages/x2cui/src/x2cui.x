@@ -473,8 +473,8 @@ macro Unit $x2cui.records(Type $record, Type $list) {
     Block block = (Block) list;
     Block.append(block, &record, 1);
     $record *records = ($record *) block.bytes;
-    memmove(records + index + 1, records + index,
-            (block.length - 1 - index) * sizeof(*records));
+    size_t moved = (block.length - 1 - index) * sizeof(*records);
+    memmove(records + index + 1, records + index, moved);
     records[index] = record;
   }
 
@@ -482,8 +482,8 @@ macro Unit $x2cui.records(Type $record, Type $list) {
   void $list.remove($list list, int index) {
     Block block = (Block) list;
     $record *records = ($record *) block.bytes;
-    memmove(records + index, records + index + 1,
-            (block.length - 1 - index) * sizeof(*records));
+    size_t moved = (block.length - 1 - index) * sizeof(*records);
+    memmove(records + index, records + index + 1, moved);
     block.length--;
   }
 
@@ -503,13 +503,12 @@ int x2cui_spare(Block records) {
   size_t used = records.length;
   if (records.cap > used) return (int) used;
   Block.reserve(records, used + 8);
-  memset(records.bytes + used * records.width, 0,
-         (records.cap - used) * records.width);
+  size_t spare = (records.cap - used) * records.width;
+  memset(records.bytes + used * records.width, 0, spare);
   return (int) used;
 }
 
 /* gen-arrays: begin generated records */
-
 
 $x2cui.record(cui_vec2); $x2cui.record(cui_rect); $x2cui.record(cui_date);
 $x2cui.record(cui_tour_step); $x2cui.record(cui_table_column);
@@ -552,9 +551,6 @@ $x2cui.record(cui_uptime_service); $x2cui.record(cui_histogram_series);
 $x2cui.record(cui_coverage_file); $x2cui.record(cui_blame_commit);
 $x2cui.record(cui_feature_flag); $x2cui.record(cui_api_param);
 $x2cui.record(cui_api_endpoint);
-typedef Block ApiParams;
-$x2cui.records(cui_api_param, ApiParams);
-$x2cui.collection(ApiParams, cui_api_param);
 typedef Block CalEvents;
 $x2cui.records(cui_cal_event, CalEvents);
 $x2cui.collection(CalEvents, cui_cal_event);
@@ -661,8 +657,8 @@ void TextField.set_url_params(TextField field, KvPairs pairs) {
 /** Returns the query `nodes` builds over `fields`, as a sentence. */
 String QueryFields.text(QueryFields fields, QueryNodes nodes) {
   char text[256];
-  cui_query_text(fields.data(), fields.len(), nodes.data(), nodes.len(),
-                 text, sizeof text);
+  cui_query_text(
+    fields.data(), fields.len(), nodes.data(), nodes.len(), text, sizeof text);
   return String.new(text);
 }
 

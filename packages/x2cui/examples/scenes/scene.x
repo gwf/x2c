@@ -6,11 +6,11 @@
     static table, and exports one function that returns its Family.
 */
 
-import "x2cui" with ApiParams, CalEvents, Candles, CheckSteps, CurveKeys,
-  DocTabs, FeatureFlags, FlameSpans, GanttTasks, GradientStops, KvPairs,
-  Offscreen, PromptSuggestions, QueryNodes, ScatterSeries, Series,
-  SpeedActions, TextField, TimelineTracks, TourSteps, TraceSpans, TraceTracks,
-  TreeNodes, Ui, Vec2s;
+import "x2cui" with CalEvents, Candles, CheckSteps, CurveKeys, DocTabs,
+  FeatureFlags, FlameSpans, GanttTasks, GradientStops, KvPairs, Offscreen,
+  PromptSuggestions, QueryNodes, ScatterSeries, Series, SpeedActions,
+  TextField, TimelineTracks, TourSteps, TraceSpans, TraceTracks, TreeNodes, Ui,
+  Vec2s;
 
 /* One component shown in use. `draw` describes the scene's content;
    scenes.x supplies the page around it. */

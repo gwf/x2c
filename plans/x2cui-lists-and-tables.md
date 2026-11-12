@@ -195,7 +195,8 @@ Two kinds of literal are refused at compile time:
 - A pointer to elements that are not `const`, which CUI may write
   through, such as `cui_reactions`, `cui_checklist_ex`, or
   `cui_gantt_ex`. A literal must read as a value, and a static array CUI
-  edits would keep state between frames. That data is named program state.
+  edits would keep state between frames. That data is a collection; see
+  [Collections of CUI records](#collections-of-cui-records-2026-11-12).
 - An element that is not a constant: a variable, or a call of anything but
   a C macro. x2c gives a block-scope static with such an initializer a
   guarded one-time initialization, so the array would keep the variable's
@@ -205,8 +206,61 @@ Two kinds of literal are refused at compile time:
 Tests read the lowered values through probe methods: enum and icon short
 names in records, a nested `values:` with its `count`, a `_count` option
 field, a `const` enum scalar array, `[]`, and a program name that a fresh
-name does not hide. `make refused-literal` checks both refusals.
-Verified.
+name does not hide. `make refused-literal` checks both refusals, and a
+third: a C array of CUI's records passed to a form. Verified.
+
+## Collections of CUI records (2026-11-12)
+
+Gary: "Fix the C state arrays limit too." State CUI edits in place, and
+data a program both reads and passes to a component, are x2c values:
+
+1. `T.of(name: value ...)` builds one CUI record through `x2cui_record`,
+   with the short names options take. `$x2cui.record(T)` defines it, one
+   generated row for each CUI record type except CUI's plumbing and
+   `cui_series`, whose `of(name, values)` is written by hand.
+2. `$x2cui.records(T, Ts)` declares a collection: CUI's records packed in
+   a `Block`. `Ts.of([{...}])` copies a static Array literal once and
+   works as a file-static initializer; `at(i)` returns a pointer, so
+   `c.at(i).count += 1` changes the record in place; `len`, `push`,
+   `insert`, `remove`, `data`, and a by-value `foreach` cursor complete
+   it. `gen-arrays.py` writes 28 collections, listed in the README.
+3. `x2cui_arguments` passes a collection's records and length where a
+   component takes an array. The generated method of an editor that grows
+   its array (key-value, query builder, curve, gradient) takes the
+   collection: `x2cui_spare` keeps one zeroed record past the end, which
+   CUI types into, and the method stores CUI's count back as the length.
+   CUI works on the collection's own storage, so nothing is copied.
+4. A form refuses a C array of CUI's records, and an Array literal where
+   CUI writes through the array; both messages name a collection.
+5. `KeyValue`, `PairSlots`, and the per-frame copy are deleted.
+   `KvPairs.of_url`, `field.set_url_params`, and `fields.text(nodes)`
+   are the helpers over raw calls.
+
+The `of` form calls only `Block.new` and `Block.append`: a function of
+the package named in a macro's `using` list reaches an importing unit
+under its bare spelling, not its `x2cui__` one, so the C does not link.
+
+`collection.at(i).field` stands in for `collection[i].field`, which needs
+x2c to honor a pointer-returning `getindex` on a pointer typedef, and
+`foreach` yields copies until x2c accepts a cursor that yields a pointer.
+When it does, `at` becomes `getindex` in the template and each `.at(` in
+the programs becomes `[`; the README lists the operations.
+
+Verified on macOS arm64 by the package worker:
+
+- Tests: a collection at file scope shared by two functions, `of`, `at`,
+  `push`, `insert`, `remove`, `foreach`; the key-value editor growing its
+  collection through typed input; `T.of` with enum and icon short names,
+  a nested `choices:` filling `choice_count`, and `type: bool`, a short
+  name that is a C keyword, as `CUI_QUERY_BOOL`.
+- Every gallery page and scene draws the same image as before.
+- Pushing into a collection after passing it to `ui.bar_list` or
+  `ui.line_chart` in the same frame, with freed memory scribbled, draws
+  the same image: CUI copies what it paints during the call
+  (`cui_line_chart_ex` copies its series into frame memory).
+- `gallery --time` on the developer tools, more developer tools, and
+  planning pages, 300 frames, three alternating runs: describing a frame
+  takes the same time before and after within the runs' spread.
 
 ## Generated method forms
 
@@ -273,11 +327,11 @@ the ones Gary approved. Verified.
    an image; the package test covers clicks, hover, the keyboard, the
    column lowering, Array literals, the key-value editor, and a kanban
    move.
-7. Data the program owns is x2c values. State CUI edits in place, such as
-   a calendar's events or a checklist's steps, stays a named array of
-   CUI's records, which the form takes without a count; the README lists
-   those parameters. The key-value editor is the one component that
-   copies an `Array` of `KeyValue` to CUI's records and back each frame.
+7. Data a program keeps and state CUI edits are collections of CUI's
+   records. A timeline track's keys and clips stay C arrays the track
+   points to, because CUI grows them through the track's own count and
+   capacity fields, and the terminal's and log's line buffers stay C
+   arrays, because CUI keeps a pointer to them for good.
 8. A form that declares a result name expands to a declaration and a
    block, so an unbraced loop or `if` cannot take it as its one
    statement. A decorator declares the name with a type that a `Type`

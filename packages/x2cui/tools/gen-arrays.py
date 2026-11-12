@@ -246,7 +246,7 @@ NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
 
 # The records a program keeps by name: the arrays a component edits in
 # place, and the arrays a program both reads and passes to a component.
-COLLECTIONS = ["cui_api_param", "cui_cal_event", "cui_candle",
+COLLECTIONS = ["cui_cal_event", "cui_candle",
                "cui_check_step", "cui_curve_key", "cui_doc_tab",
                "cui_feature_flag", "cui_flame_span",
                "cui_gantt_task", "cui_gradient_stop", "cui_kv_pair",
@@ -326,7 +326,7 @@ def main():
           ["static SymbolSet tone_names =\n  %<"
            + " ".join(tone_names(header)) + ">;"])
   rows = [wrap("", [f"$x2cui.record({r});" for r in records(header)], "",
-                "").replace(", ", " ").replace(",\n", "\n")]
+                "").replace(", ", " ").replace(",\n", "\n").lstrip("\n")]
   for record in COLLECTIONS:
     name = collection_name(record)
     rows.append(f"typedef Block {name};\n$x2cui.records({record}, {name});\n"
