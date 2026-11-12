@@ -251,11 +251,12 @@ static List _cursor_spec(Type collection_type, Type owner, int arity) {
   return %($function $cursor_type $output_types reference);
 }
 
-/* Whether each output parameter points to a named type. */
+/* Whether each output parameter is a pointer or reference to its output,
+   which may itself be a pointer, as a cursor yielding element addresses
+   declares `Rec *&`. */
 static int _valid_outputs(List outputs) {
   foreach (Type output in outputs)
-    if (!output.canonicalize().is_pointer() || !_atom_type(output.element()))
-      return 0;
+    if (!output.canonicalize().is_pointer()) return 0;
   return 1;
 }
 
