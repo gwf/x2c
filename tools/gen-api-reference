@@ -646,8 +646,10 @@ static String _c_api(Array modules, Unit utils):
 
     # x2c C API
 
-    The `x2c_*` prefix is reserved for stable C entry points used by
-    generated code, native callers, or process-wide compiler setup.
+    The `x2c_*` prefix marks C entry points that generated code, native
+    callers, or process-wide compiler setup use. An entry listed under
+    runtime-internal callables on its module page is not supported as user
+    API.
     Typed operations use methods such as `Atom.promote`
     and `Lisp.eval`; their generated C spellings are not part of this
     prefix.
