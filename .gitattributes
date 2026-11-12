@@ -29,3 +29,6 @@ examples/shootout/specs/*.html -whitespace -text
 # Preserve generated chart bytes, including SVG spacing and CSV CRLF.
 examples/shootout/results/runs/*/charts/*.svg -whitespace -text
 examples/shootout/results/runs/*/charts/*.csv -whitespace -text
+# Preserve verbatim third-party license text and upstream patch context.
+packages/*/LICENSES/* -whitespace
+packages/*/patches/*.patch -whitespace
