@@ -3723,7 +3723,8 @@ contexts do not change Lisp `quote` or
 `quasiquote`.
 
 Percent strings are byte strings: they may span physical lines and their
-`\x`, `\u`, and `\U` escapes consume one or two hexadecimal digits.
+`\x`, `\u`, and `\U` escapes consume one or two hexadecimal digits and
+produce one byte, so `%"\u4142"` is `A42`.
 Ordinary C string and character literals instead follow C escape widths,
 including exactly four digits for `\u`, eight for `\U`, and one or more for
 `\x`; an unescaped newline does not continue an ordinary C literal.
