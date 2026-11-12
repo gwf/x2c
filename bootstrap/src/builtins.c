@@ -2233,7 +2233,7 @@ static int _valid_outputs(List outputs){
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       output = Var_type(_x2c_gensym_macro_cursor_output_1);
-      if(! Type_is_pointer(Type_canonicalize(output)) || ! _atom_type(Type_element(output))) return 0;
+      if(! Type_is_pointer(Type_canonicalize(output))) return 0;
     }
 
   }

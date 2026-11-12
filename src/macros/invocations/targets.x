@@ -93,10 +93,15 @@ module List _decorate(
   _check_decoration_position(d);
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
+  /* The Name arguments and the target are read in a scope of their own;
+     the expansion binds after it closes, in the caller's block. */
   int block_scope = !c.macro_holes && d.kind == <block>;
-  if (block_scope) c.sym.push_new_scope();
-  defer if (block_scope) c.sym.pop_scope();
-  List node = _decoration_node(d, _arguments(d, block_scope));
+  List node = NULL;
+  {
+    if (block_scope) c.sym.push_new_scope();
+    defer if (block_scope) c.sym.pop_scope();
+    node = _decoration_node(d, _arguments(d, block_scope));
+  }
   if (deferred) {
     transaction.commit();
     if (_on_body(d))

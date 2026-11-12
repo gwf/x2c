@@ -13,7 +13,7 @@ List _x2c_nominal_getindex(Compiler c, Type type) {
     String source = %"$(nominal)_getindex";
     if (source == c.fn_name && _collection_index_type(c, type)) return NULL;
     Type signature = c.sym.get($(source));
-    if (signature ~= %((func ($type ?)) ?))
+    if (signature ~= %((func ($type ?)) *))
       return $(c.sym.reference($(source), NULL), signature);
   }
   return NULL;
@@ -300,19 +300,21 @@ static List _typedef_index(Compiler c, List expr, List index, Type type) {
   if (!resolved && collection)
     resolved = c.resolve_protocol_member(type, "getindex");
   Type signature = resolved ? resolved.cadr() : NULL;
-  if (signature ~= %((func (!set ?params (?receiver ?))) ?rtype) &&
+  // The result type may span several elements, as a pointer's does.
+  if (signature ~= %((func (!set ?params (?receiver ?))) *) &&
       (collection || receiver == type))
-    return _getindex_expression(c, expr, index, params, rtype);
+    return _getindex_expression(c, expr, index, params, signature.cdr());
   return _native_index(c, expr, index, type);
 }
 
-/* The matched getter signature supplies its two-parameter List. */
+/* The matched getter signature supplies its two-parameter List and its
+   result type. */
 static List _getindex_expression(
-  Compiler c, List expr, List index, List params, Var rtype) {
+  Compiler c, List expr, List index, List params, Type rtype) {
   Type key = params.cadr(), supplied = index.cadr();
   if (key.is_integral() && c.sym.is_named_value_type(supplied, "Symbol"))
     $fail.expressions_index_symbol(c, c.token);
-  return %(expr ($rtype) (getindex $expr $index));
+  return %(expr $rtype (getindex $expr $index));
 }
 
 static List _native_index(Compiler c, List expr, List index, Type type) {

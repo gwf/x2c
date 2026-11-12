@@ -182,14 +182,12 @@ static void _capture_identifier(Compiler c, List binding) {
 /* A visible local replaces a stale local identity. A declaration the
    active expansion introduced, such as one a caller's `Name` argument
    spells, supplies a file-scope name written in the caller's arguments,
-   as it would where the expansion lands. A forward reference that no
-   file-scope declaration supplies, as a statement after a pending
-   decorator writes for the `Name` the decorator declares, reads the
-   visible declaration as C would. Each returns 1, since the identifier's
-   type is the new binding's. Any other file-scope identity that a visible
-   declaration hides, such as a name a template keeps, gives every visible
-   local of its spelling, the enclosing ones too, and their lambda captures
-   an emitted alias, and the visible declaration one if it has none. */
+   as it would where the expansion lands. Both return 1, since the
+   identifier's type is the new binding's. Any other file-scope identity
+   that a visible declaration hides, such as a name a template keeps,
+   gives every visible local of its spelling, the enclosing ones too, and
+   their lambda captures an emitted alias, and the visible declaration one
+   if it has none. */
 static int _shadow_identifier(
   Compiler c, List &binding, Type type, String spelling, Map binding_facts,
   int kept) {
@@ -197,15 +195,10 @@ static int _shadow_identifier(
   Type visible_type = NULL;
   List visible = c.sym.lookup($(spelling), visible_type);
   if (!visible || visible == binding) return 0;
-  int forward = !c.sym.binding_is_local(binding) &&
-    !(%(type $binding) in binding_facts) &&
-    !(%(lambda-depth $binding) in binding_facts) &&
-    !c.sym.resolve_global($(spelling), NULL);
   if ((c.sym.binding_is_local(binding) &&
        !(%(emitted $binding) in binding_facts) &&
        !(%(lambda-depth $binding) in binding_facts)) ||
-      (!kept && visible_type &&
-       (forward || _expansion_introduced(c, visible)))) {
+      (!kept && visible_type && _expansion_introduced(c, visible))) {
     binding = visible;
     return 1;
   }
