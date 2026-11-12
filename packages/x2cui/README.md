@@ -203,8 +203,10 @@ free those objects when the frame ends. Drawing itself leaves nothing
 behind to free: the to-do example holds 8.4 MB of resident memory after
 500 frames and after 16,000.
 
-A `Ui` belongs to one thread. Several windows each on their own thread are
-allowed by CUI; this package does not test that.
+Draw on one thread. CUI allows several windows each on their own thread,
+but this package keeps one unlocked table of the arrays it builds for
+Lists of Strings, shared by every `Ui` in the process, so it supports
+drawing on one thread only.
 
 ## Drawing without a window
 

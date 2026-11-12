@@ -381,53 +381,32 @@ void Ui.cell_text(Ui ui, String text) => cui_table_cell_text(ui, text);
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
 
-/* One native array for each List of Strings a component has been given.
-   A List is canonical, so equal Lists are one List and one entry. The
-   table is keyed by the List's address and is open-addressed. A Map would
-   box each address it looks up, which allocates on every call. */
-typedef struct StringArray {
-  List items;
-  const char **names;
-} StringArray;
+/* One native array for each List of Strings a component has been given,
+   keyed by the List. A List is canonical and lives as long as the pool
+   that interned it, so equal Lists share one entry and an entry never goes
+   stale; the array adds a constant factor to what the pool already holds.
+   Looking up an existing List allocates nothing. The table is shared by
+   the process and is not locked, so one thread draws; see the README. */
+static Map string_arrays = {};
 
-static StringArray *string_arrays;
-static size_t string_array_slots, string_array_count;
-
-// Returns the slot that holds `items`, or the empty slot where it belongs.
-static StringArray *_string_slot(
-  StringArray *table, size_t slots, List items) {
-  size_t at = ((uintptr_t) items >> 4) * 0x9E3779B97F4A7C15ull;
-  for (at &= slots - 1; table[at].items && table[at].items != items;)
-    at = (at + 1) & (slots - 1);
-  return &table[at];
-}
-
-// Keeps the table at most half full, so a probe always ends.
-static void _reserve_string_slot(void) {
-  if (2 * (string_array_count + 1) <= string_array_slots) return;
-  size_t slots = string_array_slots ? 2 * string_array_slots : 64;
-  StringArray *table = calloc(slots, sizeof *table);
-  for (size_t i = 0; i < string_array_slots; i++)
-    if (string_arrays[i].items)
-      *_string_slot(table, slots, string_arrays[i].items) = string_arrays[i];
-  free(string_arrays);
-  string_arrays = table;
-  string_array_slots = slots;
-}
+// The array of an empty List, which is NULL; it allocates nothing.
+static const char *no_strings[] = { NULL };
 
 /** Returns the Strings of `items` as the array a component reads. CUI may
     read the array until the frame ends, so the array is kept and is built
-    once for each distinct List.
+    once for each distinct List. A List interned inside a caller's
+    `Pool.open` bracket loses its identity at `Pool.close`, and its entry is
+    not used again.
 */
 const char *const *x2cui_strings(List items) {
-  _reserve_string_slot();
-  StringArray *slot = _string_slot(string_arrays, string_array_slots, items);
-  if (slot.items) return slot.names;
+  if (!items) return no_strings;
+  Var found;
+  if (string_arrays.try_get(items, found)) return found.pointer();
   const char **names = malloc((items.len() + 1) * sizeof *names);
   int index = 0;
   foreach (String item in items) names[index++] = item;
-  *slot = (StringArray){ items, names };
-  string_array_count++;
+  names[index] = NULL;
+  string_arrays[items] = Var.new(<p48>, names);
   return names;
 }
 

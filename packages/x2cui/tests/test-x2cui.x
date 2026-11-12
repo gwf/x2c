@@ -4,7 +4,9 @@
     components through CUI's own input functions, so none needs a window.
 */
 
-import "x2cui" with App, Offscreen, RowState, TextField, Ui;
+import "x2cui" with App, Offscreen, RowState, TextField, Ui, x2cui_strings;
+
+#include <malloc/malloc.h>
 
 #include "path.x"
 #include "test-support.x"
@@ -224,6 +226,29 @@ static void formatted_text_takes_x2c_values(void) {
   screen.ui().textf("%d of %d", 2, 3);
   screen.end();
   EXPECT_TRUE(screen.commands() > 0);
+}
+
+// Bytes the default malloc zone holds in use.
+static size_t bytes_in_use(void) {
+  malloc_statistics_t stats;
+  malloc_zone_statistics(NULL, &stats);
+  return stats.size_in_use;
+}
+
+/* The empty List and a List converted before allocate nothing, and a
+   List's array holds its Strings. */
+static void string_lists_convert_once(void) {
+  List labels = %("One" "Two");
+  const char *const *names = x2cui_strings(labels);
+  EXPECT_STR_EQ(names[1], "Two");
+  x2cui_strings(%());
+  size_t before = bytes_in_use();
+  for (int i = 0; i < 100000; i++) {
+    x2cui_strings(%());
+    x2cui_strings(labels);
+  }
+  EXPECT_INT_EQ(bytes_in_use() - before, 0);
+  EXPECT_TRUE(x2cui_strings(labels) == names);
 }
 
 // method forms
@@ -577,6 +602,7 @@ void x2cui_suite(void) {
   $test.run(an_item_reports_what_the_pointer_did);
   $test.run(an_id_scope_keeps_state_per_key);
   $test.run(an_array_form_passes_the_count);
+  $test.run(string_lists_convert_once);
   $test.run(a_virtual_list_draws_the_rows_in_view);
   $test.run(a_table_row_reports_what_the_pointer_did);
 }
