@@ -32,9 +32,10 @@ int main(void) {
 ## Status
 
 The package is a preview. Native builds are supported on macOS arm64
-only. The browser build needs Memory64, JavaScript Promise Integration,
-and WebGL 2; it was run in a Chromium-based browser and under Node. The
-Linux build is not run. CUI has no accessibility tree, no inline
+and on Linux arm64 and x86_64. On Linux the package check passes, which
+draws off screen; no window has been opened there. The browser build
+needs Memory64, JavaScript Promise Integration, and WebGL 2; it was run
+in a Chromium-based browser and under Node. CUI has no accessibility tree, no inline
 input-method composition, and no bidirectional text. The package
 applies two patches to CUI, `table-row-state` and `focusable-canvas`
 (see `PROFILE.md`), and an upgrade of CUI must remake them. A program
@@ -59,9 +60,9 @@ make -C packages/x2cui build
 ./hello
 ```
 
-Platforms: source only. macOS is built and tested, and the gallery runs
-in a browser; see [In a browser](#in-a-browser). The Linux profile is
-written and has not been built; see `PROFILE.md`.
+Platforms: source only. macOS and Linux are built and tested, and the
+gallery runs in a browser; see [In a browser](#in-a-browser). Linux needs
+the X11 development headers; see `PROFILE.md`.
 
 The driver adds the package's `builds` and `src` directories and links
 `builds/libx2cui.a` with CUI and the system frameworks. The `-I` lets x2c's

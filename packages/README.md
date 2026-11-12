@@ -9,8 +9,8 @@ Releases publish prebuilt bundles for PCRE2, yyjson, libcurl, termbox2,
 libuv, and BLIS on macOS (arm64, x86_64) and Linux (arm64, x86_64), and for
 torch on macOS arm64 and Linux x86_64. Autodiff and the
 [greet](../examples/packages/greet/) example are published as source
-packages. SQLite and raylib have no release bundle; build them from this
-checkout. [The package index](https://x2c-lang.dev/packages/index.txt) lists
+packages. SQLite, raylib, and x2cui have no release bundle; build them from
+this checkout. [The package index](https://x2c-lang.dev/packages/index.txt) lists
 each release's archives, and `x2c install <name>` installs one.
 
 | Package | What it provides |
@@ -25,7 +25,7 @@ each release's archives, and `x2c install <name>` installs one.
 | [libuv](libuv/README.md) | Event loops, processes, files, and networking |
 | [raylib](raylib/README.md) | Images, charts, and optional desktop windows |
 | [torch](torch/README.md) | Tensors, autograd, modules, optimizers, checkpoints, and TorchScript over libtorch |
-| [x2cui](x2cui/README.md) | Windows and drawn UI components over CUI; built from a checkout on macOS |
+| [x2cui](x2cui/README.md) | Windows and drawn UI components over CUI; built from a checkout on macOS and Linux |
 
 torch links libtorch dynamically, so its programs are not self-contained;
 its README explains the required runtime libraries.
