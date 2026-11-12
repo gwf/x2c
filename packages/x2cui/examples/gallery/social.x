@@ -160,19 +160,23 @@ void page_social(Ui ui, Gallery g) {
   section(ui, "Carousel", "Drag, flick, scroll sideways or use the arrows "
                           "and dots.");
   ui.carousel ("tour", 4, slide, height: 200, auto_advance: 6) {
-    List titles = %("Faster exports" "ARM64 runners" "Shortcuts everywhere"
-                    "Smaller downloads");
-    List descs = %(
-      "A 900 file project now exports in 40 seconds, down from four minutes."
-      "Linux and macOS jobs can run on ARM64 machines in every plan."
-      "Every action in the editor has a key, listed under Help, Shortcuts."
-      "The desktop app is 38 MB lighter after dropping the bundled browser.");
-    static const unsigned tops[] = { 0x1f2a37, 0x0f3d3e, 0x3a2e22,
-                                     0x2b2f3a };
-    for (int k = 0; k < 4; k++) ui.carousel_slide () {
-      String title = titles[k], desc = descs[k];
-      ui.box (width: fill, height: fill,
-              bg: tops[k], radius: 16, pad: 28,
+    // A slide is: title, description, and background color.
+    List slides = %(
+      ("Faster exports"
+       "A 900 file project now exports in 40 seconds, down from four minutes."
+       0x1f2a37)
+      ("ARM64 runners"
+       "Linux and macOS jobs can run on ARM64 machines in every plan."
+       0x0f3d3e)
+      ("Shortcuts everywhere"
+       "Every action in the editor has a key, listed under Help, Shortcuts."
+       0x3a2e22)
+      ("Smaller downloads"
+       "The desktop app is 38 MB lighter after dropping the bundled browser."
+       0x2b2f3a));
+    foreach (List slide in slides) ui.carousel_slide () {
+      (String title, String desc, unsigned top) = slide;
+      ui.box (width: fill, height: fill, bg: top, radius: 16, pad: 28,
               gap: 8, justify: end) {
         ui.text(title, font: display, size: 24,
                        color: 0xffffff);
@@ -207,16 +211,16 @@ void page_social(Ui ui, Gallery g) {
     ui.column (width: grow(1), gap: 10,
                align: center) {
       section(ui, "Card stack", "Flick the top card away, left or right.");
-      List names = %("Kyoto" "Lisbon" "Reykjavik" "Oaxaca" "Hanoi");
-      static const unsigned cols[] = { 0xc8553d, 0x2d3047, 0x5b8e7d,
-                                       0xb7791f, 0x1f3a5f };
+      // A card is: city and background color.
+      List cities = %(("Kyoto" 0xc8553d) ("Lisbon" 0x2d3047)
+                      ("Reykjavik" 0x5b8e7d) ("Oaxaca" 0xb7791f)
+                      ("Hanoi" 0x1f3a5f));
       ui.card_stack (dir, "deck", 3, width: 260, height: 200)
       for (int k = 0; k < 3; k++) {
-        int idx = (deck + k) % 5;
-        String name = names[idx];
+        (String name, unsigned color) = cities[(deck + k) % cities.len()];
         ui.card_stack_item (k)
         ui.box (width: fill, height: fill,
-                bg: cols[idx], radius: 25, pad: 20,
+                bg: color, radius: 25, pad: 20,
                 justify: end, gap: 4) {
           ui.text(name, font: display, size: 22,
                         color: 0xffffff);

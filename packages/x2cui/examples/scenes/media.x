@@ -102,21 +102,25 @@ static void scene_comment(Ui ui) {
 
 static void scene_carousel(Ui ui) {
   static int slide = 1;
-  static String titles[] = { "Faster exports", "ARM64 runners",
-                             "Shortcuts everywhere" };
-  static String notes[] = {
-    "A 900 file project now exports in 40 seconds, down from four minutes.",
-    "Linux and macOS jobs can run on ARM64 machines in every plan.",
-    "Every action in the editor has a key, listed under Help, Shortcuts." };
-  static const unsigned colors[] = { 0x1f2a37, 0x0f3d3e, 0x3a2e22 };
-  ui.carousel ("tour", 3, slide, height: 200) {
-    for (int k = 0; k < 3; k++) ui.carousel_slide ()
-    ui.box (width: fill, height: fill,
-            bg: colors[k], radius: 16, pad: 28,
-            gap: 8, justify: end) {
-      ui.text(titles[k], font: display, size: 24,
-                         color: 0xffffff);
-      ui.text(notes[k], color: CUI_RGBA(0xffffffc0));
+  // A slide is: title, note, and background color.
+  List slides = %(
+    ("Faster exports"
+     "A 900 file project now exports in 40 seconds, down from four minutes."
+     0x1f2a37)
+    ("ARM64 runners"
+     "Linux and macOS jobs can run on ARM64 machines in every plan."
+     0x0f3d3e)
+    ("Shortcuts everywhere"
+     "Every action in the editor has a key, listed under Help, Shortcuts."
+     0x3a2e22));
+  ui.carousel ("tour", slides.len(), slide, height: 200) {
+    foreach (List slide in slides) ui.carousel_slide () {
+      (String title, String note, unsigned color) = slide;
+      ui.box (width: fill, height: fill, bg: color, radius: 16, pad: 28,
+              gap: 8, justify: end) {
+        ui.text(title, font: display, size: 24, color: 0xffffff);
+        ui.text(note, color: CUI_RGBA(0xffffffc0));
+      }
     }
   }
 }
@@ -165,17 +169,19 @@ static void scene_image_compare(Ui ui) {
 }
 
 static void scene_card_stack_item(Ui ui) {
-  static String cities[] = { "Kyoto", "Lisbon", "Reykjavik" };
-  static const unsigned colors[] = { 0xc8553d, 0x2d3047, 0x5b8e7d };
-  ui.card_stack (swiped, "deck", 3, width: 240, height: 200)
-  for (int k = 0; k < 3; k++) ui.card_stack_item (k)
-  ui.box (width: fill, height: fill,
-          bg: colors[k], radius: 25, pad: 20,
-          gap: 4, justify: end) {
-    ui.text(cities[k], font: display, size: 22,
-                       color: 0xffffff);
-    ui.text("Swipe right to save", size: 13, font: medium,
-                                   color: CUI_RGBA(0xfffffff0));
+  // A card is: city and background color.
+  List cards = %(("Kyoto" 0xc8553d) ("Lisbon" 0x2d3047)
+                 ("Reykjavik" 0x5b8e7d));
+  ui.card_stack (swiped, "deck", cards.len(), width: 240, height: 200)
+  for (int k = 0; k < cards.len(); k++) {
+    (String city, unsigned color) = cards[k];
+    ui.card_stack_item (k)
+    ui.box (width: fill, height: fill, bg: color, radius: 25, pad: 20,
+            gap: 4, justify: end) {
+      ui.text(city, font: display, size: 22, color: 0xffffff);
+      ui.text("Swipe right to save", size: 13, font: medium,
+              color: CUI_RGBA(0xfffffff0));
+    }
   }
   (void) swiped;
 }
@@ -353,12 +359,11 @@ static void scene_knob(Ui ui) {
 static void scene_fader(Ui ui) {
   static float gains[4] = { -6, 0, -12.5f, -3 };
   static String names[4] = { "Vocals", "Guitar", "Bass", "Drums" };
-  static const float marks[] = { 6, 0, -6, -12, -24, -48 };
   ui.row () ui.card (pad: 18, dir: row, gap: 10) {
     for (int k = 0; k < 4; k++) ui.id (k)
       ui.fader(names[k], gains[k], -48, 6,
-        unit: "dB", length: 170, ticks: k == 0 ? marks : NULL,
-        tick_count: k == 0 ? 6 : 0);
+        unit: "dB", length: 170,
+        ticks: k == 0 ? [6, 0, -6, -12, -24, -48] : NULL);
   }
 }
 

@@ -11,7 +11,6 @@ void page_audio(Ui ui, Gallery g) {
   static int tick;
   tick++;
   List names = %("Kick" "Snare" "Bass" "Keys" "Vocals" "FX");
-  static const float marks[] = { 6, 0, -6, -12, -24, -48 };
   float lv[6][2];
   for (int k = 0; k < 6; k++)
     for (int c = 0; c < 2; c++) {
@@ -55,7 +54,8 @@ void page_audio(Ui ui, Gallery g) {
       for (int k = 0; k < 6; k++) ui.id (k) {
         String name = names[k];
         ui.fader(name, faders[k], -48, 6,
-          unit: "dB", length: 180, ticks: k == 0 ? marks : NULL,
+          unit: "dB", length: 180,
+          ticks: k == 0 ? [6, 0, -6, -12, -24, -48] : NULL,
           meter: lv[k],
           meter_channels: 2);
         if (k == 2) steps[2].target = ui.last_id();

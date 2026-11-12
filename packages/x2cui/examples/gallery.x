@@ -105,12 +105,13 @@ static void paint_swatch(Ui ui, cui_rect area, void *user) {
 }
 
 static void accent_row(Ui ui, Gallery g) {
-  static const unsigned colors[CUI_ACCENT_COUNT] = {
-    0x555555, 0x7747ff, 0x0562ef, 0x00864b, 0xf3ad20, 0xc25300, 0xd1403a,
-    0xd23286 };
+  // CUI's accents, in the order `cui_accent` declares them.
+  List colors = %(0x555555 0x7747ff 0x0562ef 0x00864b 0xf3ad20 0xc25300
+                  0xd1403a 0xd23286);
   ui.row (justify: between) {
-    for (int accent = 0; accent < CUI_ACCENT_COUNT; accent++) {
-      Swatch swatch = { CUI_RGB(colors[accent]), g.accent == accent };
+    for (int accent = 0; accent < colors.len(); accent++) {
+      unsigned hex = colors[accent];
+      Swatch swatch = { CUI_RGB(hex), g.accent == accent };
       // The canvas copies the swatch, because it paints when the frame ends.
       cui_canvas_result result = ui.canvas(
         %"accent-$accent", 22, 22, paint_swatch, &swatch,

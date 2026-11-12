@@ -267,16 +267,15 @@ static void scene_histogram_slider(Ui ui) {
 }
 
 static void scene_time_histogram(Ui ui) {
-  static const cui_histogram_series levels[] = {
-    { "Info", info_lines, CUI_TONE_INFO },
-    { "Warning", warning_lines, CUI_TONE_WARNING },
-    { "Error", error_lines, CUI_TONE_DANGER } };
   // Seconds since 1970: the day starts at 2026-11-09 00:00 UTC.
   static double day = 1794182400;
   static double from = 1794182400 + 3600 * 15, to = 1794182400 + 3600 * 17.5;
   ui.box (width: fill, max_width: 660)
-    ui.time_histogram("logs", day, 900, BUCKETS, levels, from, to,
-                      utc: true, height: 150);
+    ui.time_histogram("logs", day, 900, BUCKETS, [
+        {name: "Info", counts: info_lines, tone: info},
+        {name: "Warning", counts: warning_lines, tone: warning},
+        {name: "Error", counts: error_lines, tone: danger}],
+      from, to, utc: true, height: 150);
 }
 
 static void scene_uptime(Ui ui) {

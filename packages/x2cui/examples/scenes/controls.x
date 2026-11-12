@@ -82,10 +82,8 @@ static bool first_frame(Ui ui, String name) {
 
 static void scene_segmented(Ui ui) {
   static int view = 1, size = 0;
-  static const char *icons[] = { CUI_ICON_LIST, CUI_ICON_LAYOUT_DASHBOARD,
-                                 CUI_ICON_CALENDAR };
   ui.segmented("view", %("List" "Board" "Calendar"), view,
-               icons: icons);
+               icons: [list, layout_dashboard, calendar]);
   ui.segmented("size", %("Small" "Medium" "Large"), size,
                size: sm);
   ui.text(%"Showing the $(view == 0 ? "list" : view == 1 ? "board"
@@ -209,13 +207,11 @@ static void scene_date_picker(Ui ui) {
 
 static void scene_tabs(Ui ui) {
   static int section = 0, settings = 1;
-  static const char *icons[] = { CUI_ICON_USER, CUI_ICON_LOCK,
-                                 CUI_ICON_CREDIT_CARD };
   ui.column (gap: 20, width: 520) {
     ui.tabs("sections", %("Overview" "Analytics" "Reports" "Settings"),
             section);
     ui.tabs("settings", %("Account" "Password" "Billing"), settings,
-            variant: pill, icons: icons);
+            variant: pill, icons: [user, lock, credit_card]);
   }
 }
 

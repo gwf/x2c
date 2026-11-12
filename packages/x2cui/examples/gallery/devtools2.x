@@ -108,12 +108,10 @@ static void devtools2_uptime(Ui ui) {
       if (i == 88) up_db[i] = 0.97f;
     }
   }
-  static const char *names_en[] = { "API", "Website", "Database", "CDN" };
-  const cui_uptime_service sv[] = {
-    { names_en[0], up_api, 90 }, { names_en[1], up_web, 90 },
-    { names_en[2], up_db, 90 }, { names_en[3], up_cdn, 90 } };
   ui.column (gap: 10, width: fill, max_width: 860)
-    ui.uptime("status", sv,
+    ui.uptime("status", [
+        {name: "API", days: up_api}, {name: "Website", days: up_web},
+        {name: "Database", days: up_db}, {name: "CDN", days: up_cdn}],
       last_day: (cui_date){ 2026, 11, 9 });
 }
 
@@ -132,13 +130,12 @@ static void devtools2_histogram(Ui ui) {
       th_err[i] = (float) ((i * 7 % 5) + (i > 62 && i < 67 ? 30 : 0));
     }
   }
-  const cui_histogram_series se[] = {
-    { "Info", th_info, CUI_TONE_INFO },
-    { "Warning", th_warn, CUI_TONE_WARNING },
-    { "Error", th_err, CUI_TONE_DANGER } };
   ui.column (gap: 10, width: fill, max_width: 900)
-    ui.time_histogram("logs", 1794240000, 900, 96, se,
-                      th_s0, th_s1, utc: true, height: 150);
+    ui.time_histogram("logs", 1794240000, 900, 96, [
+        {name: "Info", counts: th_info, tone: info},
+        {name: "Warning", counts: th_warn, tone: warning},
+        {name: "Error", counts: th_err, tone: danger}],
+      th_s0, th_s1, utc: true, height: 150);
 }
 
 

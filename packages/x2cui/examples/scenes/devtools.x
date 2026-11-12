@@ -109,37 +109,42 @@ static void scene_api_explorer(Ui ui) {
 }
 
 static void scene_blame(Ui ui) {
-  static const cui_blame_commit commits[] = {
-    { "a1b2c3d4e5", "Maya Okafor", "First layout pass", 1730000000 },
-    { "b2c3d4e5f6", "Jonas Berg", "Measure: count padding once",
-      1760000000 },
-    { "c3d4e5f6a7", "Priya Nair", "Gaps between children", 1790000000 },
-    { "d4e5f6a7b8", "Leo Park", "Layout entry point", 1793000000 },
-    { "e5f6a7b8c9", "Aiko Tanaka", "Measure every node", 1794100000 } };
   ui.blame("blame", blame_lines, [0, 1, 2, 2, 1, 0, 0, 3, 3, 4, 3],
-           blame_lines.len(), commits,
+           blame_lines.len(), [
+             {hash: "a1b2c3d4e5", author: "Maya Okafor",
+              summary: "First layout pass", time: 1730000000},
+             {hash: "b2c3d4e5f6", author: "Jonas Berg",
+              summary: "Measure: count padding once", time: 1760000000},
+             {hash: "c3d4e5f6a7", author: "Priya Nair",
+              summary: "Gaps between children", time: 1790000000},
+             {hash: "d4e5f6a7b8", author: "Leo Park",
+              summary: "Layout entry point", time: 1793000000},
+             {hash: "e5f6a7b8c9", author: "Aiko Tanaka",
+              summary: "Measure every node", time: 1794100000}],
              width: fill, height: 220, lang: "c",
              now: 1794211200, first_line: 120);
 }
 
 static void scene_commit_graph(Ui ui) {
-  static const cui_commit commits[] = {
-    { "a91f3c2e", "Merge branch 'feature/trace-viewer'", "Maya Okafor",
-      "2 hours ago", "main, origin/main", { 1, 3 } },
-    { "c3d8a7f0", "Fix the ruler's last tick on narrow panels",
-      "Jonas Berg", "5 hours ago", NULL, { 2, -1 } },
-    { "1f22b9e4", "Release 1.2", "Jonas Berg", "yesterday", "tag: v1.2.0",
-      { 5, -1 } },
-    { "e8a0c55b", "Trace viewer: measure a range with Shift+drag",
-      "Priya Nair", "yesterday", "feature/trace-viewer", { 4, -1 } },
-    { "4d9e1a77", "Trace viewer: lanes, spans and markers", "Priya Nair",
-      "2 days ago", NULL, { 5, -1 } },
-    { "52ce8d0a", "Faster soft shadows in software", "Lena Fischer",
-      "3 days ago", NULL, { 6, -1 } },
-    { "0aa4c9e8", "Right to left layout", "Omid Saadat", "5 days ago",
-      NULL, { -1, -1 } } };
   static int selected = 1;
-  ui.commit_graph("history", commits,
+  ui.commit_graph("history", [
+    {hash: "a91f3c2e", message: "Merge branch 'feature/trace-viewer'",
+     author: "Maya Okafor", date: "2 hours ago", refs: "main, origin/main",
+     parent: [1, 3]},
+    {hash: "c3d8a7f0", message: "Fix the ruler's last tick on narrow panels",
+     author: "Jonas Berg", date: "5 hours ago", parent: [2, -1]},
+    {hash: "1f22b9e4", message: "Release 1.2", author: "Jonas Berg",
+     date: "yesterday", refs: "tag: v1.2.0", parent: [5, -1]},
+    {hash: "e8a0c55b",
+     message: "Trace viewer: measure a range with Shift+drag",
+     author: "Priya Nair", date: "yesterday", refs: "feature/trace-viewer",
+     parent: [4, -1]},
+    {hash: "4d9e1a77", message: "Trace viewer: lanes, spans and markers",
+     author: "Priya Nair", date: "2 days ago", parent: [5, -1]},
+    {hash: "52ce8d0a", message: "Faster soft shadows in software",
+     author: "Lena Fischer", date: "3 days ago", parent: [6, -1]},
+    {hash: "0aa4c9e8", message: "Right to left layout", author: "Omid Saadat",
+     date: "5 days ago", parent: [-1, -1]}],
     width: fill, height: 220, selected: &selected);
 }
 
@@ -189,15 +194,14 @@ static void scene_flame_graph(Ui ui) {
 }
 
 static void scene_graph_view(Ui ui) {
-  static const cui_graph_node nodes[] = {
-    { "app", "executable", CUI_TONE_VIOLET },
-    { "ui", "libcui.a", CUI_TONE_INFO },
-    { "net", "http client", CUI_TONE_INFO },
-    { "render", "software, OpenGL", CUI_TONE_INFO },
-    { "tls", "mbedtls", CUI_TONE_WARNING },
-    { "zlib", NULL, CUI_TONE_NEUTRAL } };
   static int selected = 1;
-  ui.graph_view("deps", nodes, [
+  ui.graph_view("deps", [
+    {label: "app", detail: "executable", tone: violet},
+    {label: "ui", detail: "libcui.a", tone: info},
+    {label: "net", detail: "http client", tone: info},
+    {label: "render", detail: "software, OpenGL", tone: info},
+    {label: "tls", detail: "mbedtls", tone: warning},
+    {label: "zlib", tone: neutral}], [
     {from: 0, to: 1}, {from: 0, to: 2}, {from: 1, to: 3}, {from: 2, to: 4},
     {from: 2, to: 5}, {from: 3, to: 5}],
                 width: 640, height: 280,

@@ -75,19 +75,15 @@ static void scene_tree(Ui ui) {
 
 static void scene_list_item(Ui ui) {
   static int chosen = 1;
-  static const char *titles[] = { "Design review", "Release 1.0",
-                                  "Planning" };
-  static const char *people[] = { "Jonas Berg", "Priya Nair",
-                                  "Tomas Rivera" };
-  static const char *times[] = { "Tomorrow at 10:00", "Ship it",
-                                 "Q1 roadmap" };
-  static const char *lengths[] = { "45m", "2h", "1h" };
+  // A row is: title, person, when, and length.
+  List rows = %(("Design review" "Jonas Berg" "Tomorrow at 10:00" "45m")
+                ("Release 1.0" "Priya Nair" "Ship it" "2h")
+                ("Planning" "Tomas Rivera" "Q1 roadmap" "1h"));
   ui.card (width: 360, pad: 8, gap: 2) {
-    for (int i = 0; i < 3; i++) {
-      if (ui.list_item(titles[i], avatar: people[i],
-                                  subtitle: times[i],
-                                  trailing: lengths[i],
-                                  selected: i == chosen))
+    for (int i = 0; i < rows.len(); i++) {
+      (String title, String person, String when, String length) = rows[i];
+      if (ui.list_item(title, avatar: person, subtitle: when,
+                       trailing: length, selected: i == chosen))
         chosen = i;
     }
   }
@@ -165,23 +161,21 @@ static void scene_hold_button(Ui ui) {
 static void scene_reorder_item(Ui ui) {
   static ArrayInt order;
   if (!order) order = [0, 1, 2, 3, 4];
-  static const char *tasks[] = {
-    "Write the release notes", "Record the demo video",
-    "Update the screenshots", "Tag version 1.0", "Post the announcement" };
-  static const char *labels[] = { "Docs", "Video", "Docs", "Release",
-                                  "Blog" };
-  static const cui_tone tones[] = { CUI_TONE_INFO, CUI_TONE_NEUTRAL,
-                                    CUI_TONE_INFO, CUI_TONE_WARNING,
-                                    CUI_TONE_TEAL };
+  // A task is: title, label, and the label's tone.
+  List tasks = %(("Write the release notes" "Docs" info)
+                 ("Record the demo video" "Video" neutral)
+                 ("Update the screenshots" "Docs" info)
+                 ("Tag version 1.0" "Release" warning)
+                 ("Post the announcement" "Blog" teal));
   ui.text("Drag a row. The others make room as you go.",
           color: text_muted);
   ui.column (width: 440) {
     ui.reorder (changed, "tasks", order)
-    for (int i = 0; i < 5; i++) {
-      int task = order[i];
+    for (int i = 0; i < tasks.len(); i++) {
+      (String title, String label, Symbol tone) = tasks[order[i]];
       ui.reorder_item (i) {
-        ui.text(tasks[task], nowrap: true, width: fill);
-        ui.badge(labels[task], tone: tones[task]);
+        ui.text(title, nowrap: true, width: fill);
+        ui.badge(label, tone: cui_tone.named(tone));
       }
     }
     if (changed) ui.toast("Order saved");
@@ -315,15 +309,15 @@ static void scene_chat_composer(Ui ui) {
 }
 
 static void scene_voice_orb(Ui ui) {
-  static const char *names[] = { "Idle", "Listening", "Thinking",
-                                 "Speaking" };
-  static const float levels[] = { 0.2f, 0.7f, 0.2f, 0.5f };
+  // An orb is its state's name and its input level, in state order.
+  List orbs = %(("Idle" 0.2) ("Listening" 0.7) ("Thinking" 0.2)
+                ("Speaking" 0.5));
   ui.row (gap: 18, align: center) {
-    for (int k = 0; k < 4; k++) {
-      ui.id (k) ui.column (align: center,
-                                      gap: 6) {
-        ui.voice_orb("orb", (cui_voice_state) k, levels[k], size: 130);
-        ui.text(names[k], size: 13, color: text_secondary);
+    for (int k = 0; k < orbs.len(); k++) {
+      (String name, float level) = orbs[k];
+      ui.id (k) ui.column (align: center, gap: 6) {
+        ui.voice_orb("orb", (cui_voice_state) k, level, size: 130);
+        ui.text(name, size: 13, color: text_secondary);
       }
     }
   }
@@ -381,27 +375,27 @@ static void scene_gradient_text(Ui ui) {
 }
 
 static void scene_spotlight(Ui ui) {
-  static const char *titles[] = { "Software", "OpenGL 3.3", "Your own" };
-  static const char *blurbs[] = {
-    "Plain C into a pixel buffer. No GPU needed.",
-    "The default on desktop. Deploying now.",
-    "The core emits triangles; bring any GPU API." };
+  List renderers = %(
+    ("Software" "Plain C into a pixel buffer. No GPU needed.")
+    ("OpenGL 3.3" "The default on desktop. Deploying now.")
+    ("Your own" "The core emits triangles; bring any GPU API."));
   ui.row (gap: 14, align: stretch, width: fill) {
-    for (int k = 0; k < 3; k++) {
+    for (int k = 0; k < renderers.len(); k++) {
+      (String title, String blurb) = renderers[k];
       ui.id (k)
-      ui.spotlight ("renderer", width: grow(1),
-                                beam: k == 1) {
-        ui.text(titles[k], font: medium, size: 15);
-        ui.text(blurbs[k], size: 13, color: text_secondary);
+      ui.spotlight ("renderer", width: grow(1), beam: k == 1) {
+        ui.text(title, font: medium, size: 15);
+        ui.text(blurb, size: 13, color: text_secondary);
       }
     }
   }
 }
 
 static void scene_loader(Ui ui) {
-  static const char *names[] = { "Dots", "Bars", "Pulse", "Orbit", "Grid" };
+  // The loader styles, in the order `cui_loader_style` declares them.
+  List names = %("Dots" "Bars" "Pulse" "Orbit" "Grid");
   ui.row (gap: 36, align: center) {
-    for (int k = 0; k < 5; k++) {
+    for (int k = 0; k < names.len(); k++) {
       ui.column (gap: 10, align: center) {
         ui.loader(style: (cui_loader_style) k, size: 30);
         ui.text(names[k], size: 12, color: text_muted);
