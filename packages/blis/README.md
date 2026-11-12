@@ -193,8 +193,9 @@ archive's member count and undefined symbols depend on the kernel set:
 `PROFILE-linux-x86_64.json`, and `PROFILE-linux-aarch64.json`. To add a
 platform, run
 [tools/record-blis-profile.sh](../../tools/record-blis-profile.sh) on
-that machine. `LICENSES/`
-records the incorporated notices.
+that machine. The recorded symbols omit `strcmp` and `strncmp`, which a
+compiler may compile inline, so a profile does not depend on the compiler
+version. `LICENSES/` records the incorporated notices.
 
 `bli_info_get_version_str` returns `const char *`; `Blis.version` copies
 that result into `String`. Raw callers must keep the upstream qualifiers.
