@@ -773,10 +773,11 @@ are relative to the working directory. Each file runs through
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
 
-`-j <n>` runs up to `<n>` test files concurrently. `--filter <substring>`
-selects the test names that contain `<substring>`, and `--list` lists the
-matching tests. `-q` suppresses successful test lines. `--profile <name>`
-uses that manifest profile, as for `build`.
+`-j <n>` runs up to `<n>` test files concurrently, and `-q` suppresses
+successful test lines. `--profile <name>` uses that manifest profile, as for
+`build`. The options that select and list tests by name pass through to each
+test program; `x2c help test` lists them, and
+[Selecting tests](../guide/testing.md#selecting-tests) describes them.
 
 The final line reports passed and failed files and tests. With a test-name filter,
 files containing no matching tests are omitted from output and file counts.
