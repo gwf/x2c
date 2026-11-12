@@ -46,7 +46,6 @@ typedef struct TextField {
 // The generator names Ui and TextField in the methods it builds.
 #include "x2cui-generate.x"
 #include "x2cui-containers.x"
-#include "x2cui-arrays.x"
 
 /** Closes the window; idempotent on NULL, and returns NULL. */
 App App.close(App app);
@@ -531,7 +530,7 @@ expand %(
   cui_draw_arc cui_draw_text cui_draw_icon cui_draw_image cui_push_clip
   cui_pop_clip cui_canvas cui_state cui_state_on_free cui_animate
   cui_animate_spring cui_get_draw_data)
-macro Unit(Name $target) { $cui.method($target); }
+macro Unit(Name $target) { $x2cui.method($target); }
 
 // Components that take arrays. Rerun tools/gen-arrays.py to refresh these.
 
@@ -924,15 +923,24 @@ inline void Ui.draw_polygon(
 /* gen-arrays: begin generated forms */
 
 expand %(
-  prop_vec2 prop_vec3 prop_vec4 tree_begin donut_chart line_chart
-  bar_chart tour toggle_group speed_dial tree_table_begin ticker heatmap
-  calendar_heatmap treemap radar_chart funnel sankey waffle split_bar
-  bar_list activity_rings scatter_chart candlestick tab_bar waveform
-  agent_plan prompt_suggestions model_picker week_calendar month_calendar
-  gantt checklist multi_select histogram_slider level_meter doc_tabs
-  prop_vec hex_view flame_graph curve_editor gradient_editor
-  timeline_editor kv_editor problems pipeline query_builder keymap
-  commit_graph graph_view waterfall trace_view test_explorer stack_trace
-  uptime time_histogram coverage blame feature_flags api_explorer)
-macro Unit(Name $method) { $cui.form($method); }
+  prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell donut_chart
+  sparkline otp_input reorder_begin (line_chart 1) (bar_chart 1)
+  each_begin each_end item_begin table_row_begin cell_text (tour 1)
+  toggle_group (reactions 1) (speed_dial 1) (swipe_item_begin 1 3)
+  (filter_bar 1) (tree_table_begin 1 3) diff_view_rows (presence 1)
+  (ticker 1) heatmap (calendar_heatmap 2) (treemap 1) (radar_chart 1)
+  (funnel 1) (sankey 2) (waffle 1) (split_bar 1) (bar_list 1)
+  (activity_rings 1) (scatter_chart 1) (candlestick 1) (tab_bar 1)
+  (waveform 1) (agent_plan 1) (source_list 1) (prompt_suggestions 1)
+  (model_picker 1) (week_calendar 2) (month_calendar 2) (gantt 1) (toc 1)
+  (checklist 1) multi_select (histogram_slider 1) (level_meter 1)
+  (doc_tabs 1) (prop_vec 1) (hex_view 1) (flame_graph 1) (curve_editor 1)
+  (gradient_editor 1) (timeline_editor 1) (kv_editor 1) (problems 1)
+  (pipeline 2) (query_builder 1 3) (keymap 1) (commit_graph 1)
+  (graph_view 1 3) (waterfall 1) (trace_view 1 3) (test_explorer 1)
+  (stack_trace 1) (uptime 1) (time_histogram 4) (coverage 1) (blame 4)
+  (feature_flags 1) (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
+macro Unit(Name $method, Literal @pairs) {
+  @x2cui_form($method, $pairs)
+}
 /* gen-arrays: end generated forms */

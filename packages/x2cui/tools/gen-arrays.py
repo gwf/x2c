@@ -8,14 +8,14 @@ row in the `expand` table and no hand-written method in src/x2cui.x takes
 an array of records, numbers, or flags. This tool writes one `Ui` method for each,
 between markers in src/x2cui.x. The method takes each array as a pointer
 and its count, as CUI declares them; a call site passes a C array and
-`$cui.count(array)`. It keeps CUI's parameter names. Rerun it after
+`$x2cui.count(array)`. It keeps CUI's parameter names. Rerun it after
 changing the pinned CUI version and review the difference. Variadic
 functions get no form.
 
 It also writes the table of the methods in src/x2cui.x, generated here or
-written by hand, whose last parameter is an option record; each has a
-method form, `ui.tab_bar("tabs", tabs, $cui.count(tabs), selected,
-variant: pill)`.
+written by hand, that may have a method form. A row names a method and
+the positions of its arrays whose count follows them, so the form
+supplies each count: `ui.tab_bar("tabs", tabs, selected, variant: pill)`.
 """
 import re
 import sys
@@ -68,8 +68,9 @@ def wrap(head, parts, tail, indent="  "):
 
 
 def classify(name, params):
-  """Returns the x2c parameters and the C arguments of a method."""
-  declared, passed = [], []
+  """Returns the x2c parameters and the C arguments of a method, and the
+  positions among its parameters of the arrays whose count follows."""
+  declared, passed, pairs = [], [], []
   rest = [split(p) for p in params[1:]]
   index = 0
   while index < len(rest):
@@ -113,11 +114,13 @@ def classify(name, params):
     elif ("*" in ctype and after[0] == "int *" and after2[0] == "int"
           and after2[1] == "capacity"):
       # An array the user grows: its live count, then its capacity.
+      pairs.append(len(declared))
       declared += [f"{ctype}{pname}", f"int &{after[1]}", "int capacity"]
       passed += [pname, f"&{after[1]}", "capacity"]
       index += 3
       continue
     elif "*" in ctype and after[0] in ("int", "size_t"):
+      pairs.append(len(declared))
       declared += [f"{ctype}{pname}", f"{after[0]} {after[1]}"]
       passed += [pname, after[1]]
       index += 2
@@ -129,37 +132,43 @@ def classify(name, params):
       declared.append(f"{ctype} {pname}".replace("* ", "*"))
       passed.append(pname)
     index += consumed
-  return declared, passed
+  return declared, passed, pairs
 
 
 def forms(header, existing):
-  methods = []
+  methods, rows = [], []
   for result, name, params in prototypes(header):
     if not params[0].startswith("cui_ctx *") or name in existing:
       continue
     if name in SKIP or "..." in params or any("va_list" in p for p in params):
       continue
     short = name[4:-3] if name.endswith("_ex") else name[4:]
-    declared, passed = classify(name, params)
+    declared, passed, pairs = classify(name, params)
+    rows.append(f"({short} {' '.join(map(str, pairs))})" if pairs else short)
     if result == "const char *":
       result = "String"
     methods.append(
       f"/** Calls `{name}`. */\n"
       + wrap(f"inline {result} Ui.{short}(", ["Ui ui"] + declared, ") =>")
       + "\n" + wrap(f"  {name}(", ["ui"] + passed, ");", "    ") + "\n")
-  return methods
+  return methods, rows
 
 
-def option_methods(source):
-  """Names the methods of `source` whose last parameter is an option
-  record."""
+def written_methods(source):
+  """Rows for the methods written by hand in `source`, except those that
+  take a sequence of values: a name, or a name and the positions of the
+  pointers that an `int` count follows."""
   pattern = r"^(?:inline )?[\w ]+ Ui\.(\w+)\(([^()]*)\)\s*(?:=>|\{)"
-  names = []
+  rows = []
   for match in re.finditer(pattern, source, flags=re.M):
-    last = " ".join(match.group(2).split(",")[-1].split())
-    if re.match(r"cui_\w+_opts \w+$", last):
-      names.append(match.group(1))
-  return names
+    if "@" in match.group(2):
+      continue
+    params = [" ".join(p.split()) for p in match.group(2).split(",")][1:]
+    pairs = [i for i in range(len(params) - 1)
+             if "*" in params[i] and params[i + 1].startswith("int ")]
+    name = match.group(1)
+    rows.append(f"({name} {' '.join(map(str, pairs))})" if pairs else name)
+  return rows
 
 
 def replace(path, kind, items):
@@ -180,13 +189,14 @@ def main():
   existing = set(table.split())
   for method in re.findall(r"\bUi\.(\w+)\(", hand):
     existing |= {"cui_" + method, "cui_" + method + "_ex"}
-  methods = forms(header, existing)
+  methods, rows = forms(header, existing)
   replace("src/x2cui.x", "methods", methods)
-  names = option_methods(open("src/x2cui.x").read())
+  names = written_methods(hand) + rows
   table = wrap("expand %(", names, ")", "  ").replace(", ", " ").replace(",\n", "\n")
   replace("src/x2cui.x", "forms",
-          [table + "\nmacro Unit(Name $method) { $cui.form($method); }"])
-  print(f"{len(methods)} methods, {len(names)} forms")
+          [table + "\nmacro Unit(Name $method, Literal @pairs) {\n"
+           "  @x2cui_form($method, $pairs)\n}"])
+  print(f"{len(methods)} methods, {len(names)} rows")
 
 
 if __name__ == "__main__":
