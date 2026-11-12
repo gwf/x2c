@@ -38,9 +38,10 @@ const language = { ...grammar, name: "x2c" };
     <h2 id="hero-ideas-title">x2c's values expressed in code</h2>
     <ul class="idea-list">
       {examples.map(example => (
-        <li data-value={example.label}>
-          <p>
-            <strong class="idea-title">{example.heading}</strong>{" "}
+        <li>
+          <p class="idea-heading-line">
+            <span class="idea-label">{example.label}</span>{" "}
+            <strong class="idea-title">{example.heading.slice(example.label.length).trimStart()}</strong>{" "}
             <em class="idea-tagline">{example.tagline}</em>
           </p>
           <div class="idea-code">

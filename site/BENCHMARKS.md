@@ -52,8 +52,7 @@ full-size figures. Keep PDFs as optional downloads.
   does not warm the measured JVM.
 - Use the report's shared problem cohort for summary charts. Per-problem
   tables retain unavailable cells and the suite's exclusion reasons.
-- Explain normalization against each problem's fastest, shortest, or smallest
-  admitted program. Summary scatters use geometric means; profile centres use
+- Explain normalization against each problem's C runtime and Python source size. Summary scatters use geometric means; profile centres use
   arithmetic means. Box plots describe variation across problems, not timing
   confidence intervals.
 - Distinguish source lines from compressed source size. Algorithms,

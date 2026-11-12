@@ -1,0 +1,51 @@
+html:has(.examples-shell) { --sidebar-target-width: 240px; --sidebar-width: min(var(--sidebar-target-width), 80vw); --sidebar-resize-indicator-width: 8px; --sidebar-resize-indicator-space: 2px; --icons: var(--muted-dark); }
+.examples-shell { --sans-font: Archivo, Helvetica, sans-serif; --mono-font: "JetBrains Mono", monospace; --examples-top: var(--landing-header-height, 69px); }
+.examples-toggle { position: absolute; top: 16px; left: 8px; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 28px; cursor: pointer; color: var(--muted-dark); }
+.examples-shell .sidebar { top: var(--examples-top); z-index: 19; border-right: 1px solid var(--line); font: 14px/1.4 Archivo, sans-serif; }
+.examples-shell .sidebar .sidebar-scrollbox { padding: 18px 18px 40px; }
+.examples-shell .chapter { margin: 0; }
+.examples-shell .chapter > li { margin-bottom: 18px; }
+.examples-reading { padding: 42px clamp(20px, 4vw, 64px) 80px; }
+.examples-reading > * { max-width: var(--reading-width, 720px); margin-left: auto; margin-right: auto; }
+@media (min-width: 1080px) { .sidebar-visible .examples-reading { margin-left: calc(var(--sidebar-width) + 8px); } }
+.examples-topic-heading { margin-bottom: 56px; }
+.examples-topic-heading h1 { font: 400 clamp(38px, 4vw, 56px)/1.05 "Instrument Serif", Georgia, serif; margin: 0 0 20px; }
+.examples-topic-heading > p:last-child, .reading-example-prose { color: var(--muted-dark); }
+.reading-example { padding-top: 30px; margin-bottom: 64px; border-top: 1px solid var(--line); scroll-margin-top: calc(var(--examples-top) + 20px); }
+.reading-example :is(h1, h2) { font: 400 34px/1.1 "Instrument Serif", Georgia, serif; margin: 0 0 20px; }
+.reading-example .about-eyebrow { margin-bottom: 10px; }
+.reading-example-prose { margin-bottom: 24px; }
+.reading-example-prose p { margin: 0 0 14px; }
+.reading-source-bar { display: flex; justify-content: space-between; gap: 16px; font: 12px/1.5 "JetBrains Mono", monospace; padding: 10px 0; overflow-wrap: anywhere; }
+.reading-source { min-width: 0; background: var(--code); }
+.reading-source pre { margin: 0; padding: 20px; overflow-x: auto; font-size: 13px; line-height: 1.7; }
+.reading-run { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px 0; font-size: 12px; color: var(--muted-dark); }
+.reading-run button { border: 0; padding: 8px 18px; background: var(--red-text); color: var(--paper); font: inherit; cursor: pointer; }
+.reading-run button:disabled { opacity: .5; }
+.reading-output h3 { font: 500 12px/1.5 "JetBrains Mono", monospace; margin: 8px 0; }
+.reading-output pre { margin: 0; padding: 16px; background: rgba(128,128,128,.06); font: 12px/1.7 "JetBrains Mono", monospace; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 360px; overflow-y: auto; }
+.reading-output { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid var(--line); background: rgba(128,128,128,.06); }
+.reading-output > div { min-width: 0; }
+.reading-output > div + div { border-left: 1px solid var(--line); }
+.reading-output h3 { margin: 0; padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.reading-output pre { background: none; min-height: 4.5em; }
+.reading-output [data-output]:empty::before { content: "Run to see actual output."; color: var(--muted-dark); }
+.reading-run { min-height: 64px; }
+.reading-local { font-size: 12px; overflow-wrap: anywhere; }
+.examples-reading .example-page { padding: 0; width: 100%; }
+.examples-reading .example-heading h1 { font-size: clamp(38px, 4vw, 56px); }
+.examples-reading .example-demonstration { display: flex; flex-direction: column; }
+.examples-reading .walkthrough-notes { order: -1; background: transparent; }
+.examples-reading .example-demonstration .feature-copy { padding: 0 0 24px; }
+.examples-reading .example-reading { display: block; }
+@media (max-width: 800px) {
+  .examples-reading { margin-left: 0; padding: 28px 20px 48px; }
+
+  .reading-source pre { padding: 14px; font-size: 12px; }
+}
+
+.reading-example:has(h1) { border-top: 0; padding-top: 0; }
+.reading-example h1 { font-size: clamp(38px, 4vw, 56px); }
+
+.examples-shell .chapter ol { list-style: none; }
+@media (max-width: 1279px) { .examples-header .landing-branding { margin-left: 24px; } }

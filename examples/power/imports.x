@@ -10,12 +10,12 @@
 import "pcre2" as rx;
 
 int main(void) {
-// Compile a pattern with named captures; release it on exit.
-auto rx.Regexp request = rx.Regexp.compile(
-  "^(?<method>[A-Z]+) (?<path>/[^ ]+)$", 0);
+  // Compile a pattern with named captures; release it on exit.
+  auto rx.Regexp request = rx.Regexp.compile(
+    "^(?<method>[A-Z]+) (?<path>/[^ ]+)$", 0);
 
-// Sample requests include lines the pattern will ignore.
-String text = %"\
+  // Sample requests include lines the pattern will ignore.
+  String text = %"\
 GET /docs
 POST /build
 -- idle --
@@ -23,15 +23,15 @@ DELETE /cache
 GET missing-slash
 ";
 
-int matches = 0;
-foreach (String line in text.lines()) {
-  rx.RegexpMatch found = request.match(line);
-  if (found)
-  {
-    puts(%"$(found[<method>]) requests $(found[<path>])");
-    matches++;
+  int matches = 0;
+  foreach (String line in text.lines()) {
+    rx.RegexpMatch found = request.match(line);
+    if (found)
+    {
+      puts(%"$(found[<method>]) requests $(found[<path>])");
+      matches++;
+    }
   }
-}
-assert(matches == 3);
-return 0;
+  assert(matches == 3);
+  return 0;
 }

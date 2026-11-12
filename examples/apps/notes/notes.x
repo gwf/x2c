@@ -15,20 +15,6 @@ import "sqlite" with Database, Prepared;
 class Notes { Database db; Mutex mutex; } *;
 static volatile sig_atomic_t stopping;
 
-int main(int argc, char **argv) {
-  try return run(options(argc, argv));
-  catch %(bad-arg *detail): {
-    Stderr.printf($dedent(%"
-      notes: %s
-      Try --help for usage.
-    "), detail.str());
-    return 2;
-  }
-  catch %(?cause *detail): {
-    Stderr.printf("notes: %s %s\n", cause, detail.repr());
-    return 1;
-  }
-}
 
 void Notes.init(Notes app) { app.db = NULL; app.mutex = NULL; }
 
@@ -228,3 +214,18 @@ static Map note_input(HttpRequest req) {
 static Map note_json(List row) =>
   {"id": row[0].str(), "title": row[1], "body": row[2],
    "tags": Json.parse(row[3]), "created": row[4], "updated": row[5]};
+
+int main(int argc, char **argv) {
+  try return run(options(argc, argv));
+  catch %(bad-arg *detail): {
+    Stderr.printf($dedent(%"
+      notes: %s
+      Try --help for usage.
+    "), detail.str());
+    return 2;
+  }
+  catch %(?cause *detail): {
+    Stderr.printf("notes: %s %s\n", cause, detail.repr());
+    return 1;
+  }
+}

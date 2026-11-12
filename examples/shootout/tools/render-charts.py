@@ -16,15 +16,15 @@ import numpy as np
 
 SERIES = [
     ("c", "C", "#39434d", "o"),
-    ("idiomatic", "Idiomatic x2c", "#007e87", "^"),
-    ("tuned", "Tuned x2c", "#7655aa", "D"),
+    ("idiomatic", "x2c", "#007e87", "^"),
+    ("tuned", "x2c*", "#7655aa", "D"),
     ("python", "Python", "#b47712", "s"),
     ("rust", "Rust", "#bd5038", "P"),
     ("cpp", "C++", "#346caf", "X"),
     ("go", "Go", "#477435", "v"),
     ("java", "Java", "#a34783", "h"),
 ]
-TICKS = [1, 1.25, 1.5, 2, 3, 5, 10, 20, 30, 50, 100, 200]
+TICKS = [.1, .2, .3, .5, .75, 1, 1.25, 1.5, 2, 3, 5, 10, 20, 30, 50, 100, 200]
 
 
 def read_rows(path):
@@ -37,11 +37,8 @@ def read_rows(path):
             for key, *_ in SERIES
             if key in entry or key in entry["references"]
         }
-        best_time = min(p["statistics"]["median_elapsed_ns"]
-                        for p in programs.values())
-        shortest = min(p["source"]["source_lines"] for p in programs.values())
-        smallest = min(p["source"]["game_style_gzip_bytes"]
-                       for p in programs.values())
+        c_time = programs["c"]["statistics"]["median_elapsed_ns"]
+        python_source = programs.get("python", {}).get("source")
         for key, label, *_ in SERIES:
             if key not in programs:
                 continue
@@ -53,17 +50,21 @@ def read_rows(path):
                 "source_lines": program["source"]["source_lines"],
                 "gzip_bytes": program["source"]["game_style_gzip_bytes"],
                 "time_ratio": program["statistics"]["median_elapsed_ns"]
-                              / best_time,
-                "loc_ratio": program["source"]["source_lines"] / shortest,
+                              / c_time,
+                "loc_ratio": program["source"]["source_lines"] / python_source["source_lines"] if python_source else None,
                 "gzip_ratio": program["source"]["game_style_gzip_bytes"]
-                              / smallest,
+                              / python_source["game_style_gzip_bytes"] if python_source else None,
             })
     return report, rows
 
 
+def upper_tick(value):
+    return next(tick for tick in TICKS if tick >= value)
+
+
 def ticks(ax, axis, limits, dense=False):
     selected = [x for x in TICKS if limits[0] <= x <= limits[1]
-                and (dense or x not in [1.25, 1.5, 30])]
+                and (dense or x not in [1.25, 1.5, 30] or x == limits[1])]
     target = ax.xaxis if axis == "x" else ax.yaxis
     target.set_major_locator(FixedLocator(selected))
     target.set_major_formatter(FuncFormatter(lambda value, _: f"{value:g}x"))
@@ -90,24 +91,26 @@ def footer(fig, report, detail):
              f"{report['machine'].get('cpu_model') or report['machine']['machine']} | "
              f"{report['profile']} inputs | "
              f"{report['samples']}-sample x2c medians | run {report['run_id']}\n"
-             + detail, fontsize=10.5, color="#53606b", va="bottom")
+             + detail + "\nx2c* = tuned x2c; x2c = idiomatic x2c.", fontsize=10.5, color="#53606b", va="bottom")
 
 
 def save(fig, output, name):
-    for extension in ["png", "svg", "pdf"]:
-        fig.savefig(output / f"{name}.{extension}", dpi=180,
-                    facecolor="white", metadata={"Creator": "matplotlib"})
+    names = [name, "runtime-source-size"] if name == "runtime-source-size-log" else [name]
+    for target in names:
+        for extension in ["png", "svg", "pdf"]:
+            fig.savefig(output / f"{target}.{extension}", dpi=180,
+                        facecolor="white", metadata={"Creator": "matplotlib"})
     plt.close(fig)
 
 
-def summary(report, rows, output):
+def summary(report, rows, output, logarithmic=False):
     fig, axes = plt.subplots(1, 2, figsize=(12, 6.5))
-    heading(fig, "Runtime and source size",
+    heading(fig, "Runtime and source size" + (" (log scales)" if logarithmic else " (linear scales)"),
             f"{len(SERIES)} implementations | geometric means across {len(report['summary_benchmarks'])} shared problems")
     for ax, metric, title, xlabel in zip(
         axes, ["loc_ratio", "gzip_ratio"],
         ["Source lines (LOC)", "Compressed source (Benchmarks Game metric)"],
-        ["LOC / shortest program", "Gzip bytes / smallest program"],
+        ["LOC / Python LOC", "Gzip bytes / Python gzip bytes"],
     ):
         means = []
         for key, label, color, marker in SERIES:
@@ -115,32 +118,47 @@ def summary(report, rows, output):
             x = geometric_mean(r[metric] for r in group)
             y = geometric_mean(r["time_ratio"] for r in group)
             means.append((x, y))
-            ax.scatter(x, y, color=color, marker=marker, s=100, zorder=4)
-            offsets = {"idiomatic": (10, 30), "tuned": (-12, 9), "cpp": (10, 14), "c": (-10, -14), "go": (-10, -18), "java": (10, 24)}
-            offset = offsets.get(key, (10, 8))
+            ax.scatter(x, y, color=color, marker=marker, s=100, zorder=4, label=label, clip_on=False)
+            offsets = {"c": (-8, 9), "tuned": (8, 0), "go": (8, 3)}
+            offset = offsets.get(key, (8, 0))
+            if not logarithmic:
+                continue
             ax.annotate(label, (x, y), xytext=offset,
                         ha="right" if offset[0] < 0 else "left",
-                        textcoords="offset points", fontsize=11.5, color=color)
-        ax.set(xscale="log", yscale="log", xlim=(.91, max(x for x, _ in means)*1.6),
-               ylim=(.78, max(y for _, y in means)*1.6))
-        ticks(ax, "x", ax.get_xlim(), dense=True)
-        ticks(ax, "y", ax.get_ylim())
+                        textcoords="offset points", va="center", fontsize=11.5, color=color)
+        scale = "log" if logarithmic else "linear"
+        ax.set(xscale=scale, yscale=scale,
+               xlim=(1, upper_tick(max(x for x, _ in means))),
+               ylim=(1, upper_tick(max(y for _, y in means))))
+        if logarithmic:
+            ticks(ax, "x", ax.get_xlim(), dense=True)
+            ticks(ax, "y", ax.get_ylim())
+        else:
+            ax.xaxis.set_major_formatter(FuncFormatter(lambda value, _: f"{value:g}x"))
+            ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _: f"{value:g}x"))
+            ax.set_yticks(sorted(set([1, *[v for v in ax.get_yticks() if 1 < v <= ax.get_ylim()[1]]])))
+        ax.axvline(1, color="#657480", linestyle="--", linewidth=1.2)
+        ax.axhline(1, color="#657480", linestyle="--", linewidth=1.2)
         ax.set_title(title, fontsize=12.5, pad=16)
         ax.set_xlabel(xlabel, labelpad=12)
-        ax.set_ylabel("Elapsed time / fastest program", labelpad=12)
+        ax.set_ylabel("Elapsed time / C time", labelpad=12)
         base_axes(ax)
-    footer(fig, report, "Normalize each problem against the best available program; "
+    if not logarithmic:
+        handles, labels = axes[0].get_legend_handles_labels()
+        fig.legend(handles, labels, loc="upper center", bbox_to_anchor=(.52, .88), ncol=8,
+                   frameon=False, fontsize=10, handletextpad=.3, columnspacing=1)
+    footer(fig, report, "Dashed lines: C time = 1x; Python source size = 1x. "
            "Java includes JVM startup and JIT compilation; these are local measurements.")
     fig.subplots_adjust(left=.075, right=.975, bottom=.19, top=.76, wspace=.30)
-    save(fig, output, "runtime-source-size")
+    save(fig, output, "runtime-source-size-log" if logarithmic else "runtime-source-size-linear")
 
 
 def profiles(report, rows, output):
     fig, axes = plt.subplots(4, 2, figsize=(11.2, 16), sharex=True, sharey=True)
     heading(fig, "Where each implementation varies",
             f"Marceau-style star plots | {len(report['summary_benchmarks'])} shared outcomes per panel | identical log scales")
-    xlim = (.86, max(r["time_ratio"] for r in rows)*1.32)
-    ylim = (.86, max(r["loc_ratio"] for r in rows)*1.3)
+    xlim = (min(r["time_ratio"] for r in rows)*.8, upper_tick(max(r["time_ratio"] for r in rows)))
+    ylim = (min(r["loc_ratio"] for r in rows)*.8, upper_tick(max(r["loc_ratio"] for r in rows)))
     for ax, (key, label, color, marker) in zip(axes.flat, SERIES):
         group = [r for r in rows if r["implementation"] == key]
         centre = (fmean(r["time_ratio"] for r in group),
@@ -163,10 +181,12 @@ def profiles(report, rows, output):
         ticks(ax, "x", xlim)
         ticks(ax, "y", ylim)
         base_axes(ax)
+        ax.axvline(1, color="#657480", linestyle="--", linewidth=1.2)
+        ax.axhline(1, color="#657480", linestyle="--", linewidth=1.2)
         ax.set_title(label, color=color, fontsize=14, loc="left", pad=11)
-    fig.supxlabel("Elapsed time / fastest program  (faster to the left)", y=.075,
+    fig.supxlabel("Elapsed time / C time  (faster to the left)", y=.075,
                   fontsize=12)
-    fig.supylabel("LOC / shortest program  (shorter toward the bottom)", x=.018,
+    fig.supylabel("LOC / Python LOC  (shorter toward the bottom)", x=.018,
                   fontsize=12)
     footer(fig, report, "One mark = one problem; spokes meet at the arithmetic centre (+). "
            "Grey marks show all shared programs. Java includes startup/JIT.")
@@ -194,8 +214,8 @@ def distributions(report, rows, output):
             "Benchmarks Game-style box plots | points retain individual problem outcomes")
     for ax, metric, title, ylabel in zip(
         axes, ["time_ratio", "loc_ratio"],
-        ["How many times slower?", "How many times longer?"],
-        ["Elapsed time / fastest program", "LOC / shortest program"],
+        ["Runtime relative to C", "Source lines relative to Python"],
+        ["Elapsed time / C time", "LOC / Python LOC"],
     ):
         axis_labels = []
         for position, (key, label, color, marker) in enumerate(SERIES, 1):
@@ -213,7 +233,7 @@ def distributions(report, rows, output):
             padding = "\n" if "\n" in label_lines else "\n\n"
             axis_labels.append(label_lines + padding + f"{stats['med']:.2f}x")
         ax.set_yscale("log")
-        ax.set_ylim(.85, max(r[metric] for r in rows)*1.55)
+        ax.set_ylim(min(r[metric] for r in rows)*.8, upper_tick(max(r[metric] for r in rows)))
         ticks(ax, "y", ax.get_ylim())
         ax.set_xticks(range(1, len(SERIES)+1), axis_labels)
         ax.set_xlim(.45, len(SERIES)+.55)
@@ -221,6 +241,7 @@ def distributions(report, rows, output):
         ax.set_ylabel(ylabel, labelpad=12)
         base_axes(ax)
         ax.xaxis.grid(False)
+        ax.axhline(1, color="#657480", linestyle="--", linewidth=1.2)
     footer(fig, report, "Boxes: middle 50% of problem ratios; centre line: median; "
            "whiskers: capped 1.5 IQR. Java includes JVM startup and JIT compilation. Only the report's shared cohort is included.")
     fig.subplots_adjust(left=.075, right=.975, bottom=.20, top=.76, wspace=.30)
@@ -252,7 +273,7 @@ def main():
         "quiet_window": report["machine"].get("quiet_window"),
         "java_process_model": "Fresh JVM per sample; startup and JIT compilation included",
         "samples": report["samples"], "baseline_sha256": report["baseline_sha256"],
-        "normalization": "Per-problem minima among available columns",
+        "normalization": "Per-problem C elapsed time; Python LOC and gzip bytes. Missing Python yields null source ratios.",
         "summary": "Geometric mean of the report's shared normalized problem values",
         "profile_centres": "Arithmetic means, following the historical star-plot form",
         "runtime": "Median wall-clock elapsed time from the existing report",
@@ -279,6 +300,7 @@ def main():
         writer.writerows(summary_rows)
     for plot in [summary, profiles, distributions]:
         plot(report, plotted, args.output)
+    summary(report, plotted, args.output, logarithmic=True)
     print(f"Rendered {len(SERIES)} columns: {len(rows)} measured outcomes, {len(plotted)} shared.")
 
 

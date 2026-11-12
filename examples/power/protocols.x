@@ -2,6 +2,16 @@
 // Reuse Map storage: its keys are the set members.
 typedef Map Set;
 
+Set Set.add(Set left, Set right) => left.copy().merge(right);
+Set Set.mul(Set left, Set right) => Set.new(left.keys()
+  .filter(%!(Var key) => key in right));
+Set Set.new(List keys) => keys.foldl(%{},
+  %!(Map set, Var key) => set.update_n(1, key, (Var) 1));
+
+// Connect add and mul to the + and * operators.
+protocol Map(T) { T T.add(T, T); T T.mul(T, T); }
+protocol Map(Set);
+
 int main(void) {
   // Create two sets, then take their union and intersection.
   Set fruit = Set.new(%(apple pear));
@@ -23,13 +33,3 @@ int main(void) {
   printf("%d in the union, %d in both\n", set_union.len(), intersection.len());
   return 0;
 }
-
-Set Set.add(Set left, Set right) => left.copy().merge(right);
-Set Set.mul(Set left, Set right) => Set.new(left.keys()
-  .filter(%!(Var key) => key in right));
-Set Set.new(List keys) => keys.foldl(%{},
-  %!(Map set, Var key) => set.update_n(1, key, (Var) 1));
-
-// Connect add and mul to the + and * operators.
-protocol Map(T) { T T.add(T, T); T T.mul(T, T); }
-protocol Map(Set);

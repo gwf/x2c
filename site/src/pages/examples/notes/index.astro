@@ -6,6 +6,7 @@ import { x2cDarkTheme } from "../../../../shiki-x2c-theme.mjs";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import SiteHeader from "../../../components/SiteHeader.astro";
 import SiteFooter from "../../../components/SiteFooter.astro";
+import ExamplesShell from "../../../components/ExamplesShell.astro";
 import ExampleHeading from "../../../components/ExampleHeading.astro";
 import CoreSetup from "../../../components/CoreSetup.astro";
 import "../../../styles/example-pages.css";
@@ -21,7 +22,8 @@ const html = await codeToHtml(source, {
 });
 ---
 <BaseLayout title={`${page.title.replace(/\.$/, "")} \u2014 x2c`} description={page.description}>
-  <Fragment slot="header"><SiteHeader /></Fragment>
+  <Fragment slot="header"><SiteHeader examples /></Fragment>
+  <ExamplesShell current="notes">
   <article class="example-page" data-example="notes" data-section="magic"
     data-surface="detail">
     <ExampleHeading page={page} sourceUrl="#source"
@@ -65,6 +67,7 @@ make -C examples/apps/notes check`} />
       </a>
     </nav>
   </article>
+  </ExamplesShell>
   <SiteFooter />
 </BaseLayout>
 <style>

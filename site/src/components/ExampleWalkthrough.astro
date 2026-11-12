@@ -32,7 +32,7 @@ const { panels, codeLabel } = Astro.props;
     const align = () => {
       pending = false;
       for (const note of notes) note.style.marginTop = "";
-      if (!wide.matches) return;
+      if (!wide.matches || walkthrough.closest(".examples-reading")) return;
       for (const note of notes) {
         const section = note.closest<HTMLElement>("[data-annotation-section]")!;
         const code = walkthrough.querySelector<HTMLElement>(

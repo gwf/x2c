@@ -7,14 +7,14 @@ interface Example {
   path?: string; runnable?: boolean; output?: string;
 }
 
-export function setupPlayground() {
-  const root = document.querySelector<HTMLElement>("[data-playground]");
+export function setupPlayground(root = document.querySelector<HTMLElement>("[data-playground]")) {
   if (!root) return;
   const source = root.querySelector<HTMLTextAreaElement>("textarea")!;
   const select = root.querySelector<HTMLSelectElement>("select");
   const links = [...root.querySelectorAll<HTMLAnchorElement>("[data-example-list] a[data-example]")];
   const notes = [...root.querySelectorAll<HTMLElement>("[data-about]")];
   const sourceName = root.querySelector<HTMLElement>("[data-source-name]");
+  const comparison = root.querySelector<HTMLElement>("[data-output-comparison]");
   const outputTitle = root.querySelector<HTMLElement>("[data-output-title]");
   const run = root.querySelector<HTMLButtonElement>("[data-run]")!;
   const stop = root.querySelector<HTMLButtonElement>("[data-stop]")!;
@@ -41,7 +41,7 @@ export function setupPlayground() {
       lang: "x2c", theme: "x2c-dark",
     });
   };
-  createHighlighterCore({
+  if (!source.hidden) createHighlighterCore({
     themes: [dark], langs: [{ ...grammar, name: "x2c" }],
     engine: createJavaScriptRegexEngine(),
   }).then((value) => {
@@ -99,8 +99,8 @@ export function setupPlayground() {
     }
     for (const note of notes) note.hidden = note.dataset.about !== example.id;
     if (outputTitle) {
-      outputTitle.textContent = example.output ? "Expected output" : "Output";
-      output.textContent = example.output ?? "";
+      outputTitle.textContent = comparison ? "Actual output" : example.output ? "Expected output" : "Output";
+      output.textContent = comparison ? "" : example.output ?? "";
       root.querySelector("[data-about-body]")!.scrollTop = 0;
     }
     if (!request && !worker) ready();
@@ -172,8 +172,9 @@ export function setupPlayground() {
   run.addEventListener("click", async () => {
     run.disabled = true;
     stop.hidden = false;
+    if (comparison) comparison.style.minHeight = `${comparison.getBoundingClientRect().height}px`;
     output.replaceChildren();
-    if (outputTitle) outputTitle.textContent = "Output";
+    if (outputTitle) outputTitle.textContent = comparison ? "Actual output" : "Output";
     outputSize = 0;
     const precompiled = Boolean(programs && example.program && !edited());
     status.textContent = precompiled ? "Loading..." : "Compiling...";

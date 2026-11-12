@@ -434,7 +434,7 @@ main:focus {
 
 .hero-prose {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
   gap: clamp(24px, 3vw, 44px);
   align-items: start;
 }
@@ -470,8 +470,7 @@ main:focus {
 
 .idea-list>li {
   display: grid;
-  grid-template-columns: 4.8rem minmax(0, 1fr);
-  column-gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
   padding: 12px clamp(10px, 1.5vw, 18px) 13px;
   border-bottom: 1px solid var(--line);
 }
@@ -480,14 +479,9 @@ main:focus {
   border-bottom: 0;
 }
 
-.idea-list>li::before {
-  content: attr(data-value);
-  grid-row: 1 / span 3;
+.idea-list .idea-label {
   color: var(--red-text);
-  font:
-    400 26px/1 "Instrument Serif",
-    Georgia,
-    serif;
+  font-weight: 600;
 }
 
 .idea-list .idea-title {
@@ -517,23 +511,24 @@ main:focus {
 }
 
 .idea-detail {
-  grid-column: 2;
+  grid-column: 1 / -1;
   margin-top: 10px;
 }
 
 .idea-code {
+  grid-column: 1 / -1;
   margin-top: 8px;
   min-width: 0;
 }
 
 .idea-code pre {
   margin: 0;
-  padding: 11px 13px;
+  padding: 11px 9px;
   background: var(--white) !important;
   overflow-x: auto;
   font-size: 11.5px;
   line-height: 1.6;
-  white-space: pre-wrap;
+  white-space: pre;
 }
 
 @media (max-width: 800px) {
@@ -542,14 +537,6 @@ main:focus {
     gap: 24px;
   }
 
-  .idea-list>li::before {
-    grid-row: 1;
-  }
-
-  .idea-code,
-  .idea-detail {
-    grid-column: 1 / -1;
-  }
 }
 
 .landing-hero>p strong,

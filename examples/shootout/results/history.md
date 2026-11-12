@@ -19,3 +19,4 @@ Compare trends only within the same profile, calibration and cohort. Early runs 
 | 20261101T154144Z | 8 | 53fdc5b1230c | 2.66 | 1.77 | 1.51 |
 | 20261101T161913Z | 8 | 53fdc5b1230c | 2.70 | 1.24 | 1.06 |
 | 20261101T204543Z | 8 | 53fdc5b1230c | 2.69 | 1.11 | 0.95 |
+| 20261112T054633Z | 8 | c19b66401dd2 | 2.82 | 1.20 | 1.02 |
