@@ -22,10 +22,8 @@ void page_actions(Ui ui, Gallery g) {
           "A main action with related actions one click away.");
   ui.row (gap: 12, wrap: true) {
     List items = %("Save as draft" "Save and publish" "Schedule\xe2\x80\xa6");
-    static const char *icons[] = { CUI_ICON_FILE_TEXT, CUI_ICON_SEND,
-                                   CUI_ICON_CLOCK };
-    int r = ui.split_button("Save", items, item_icons: icons,
-                                           icon: save);
+    int r = ui.split_button("Save", items, icon: save,
+                            item_icons: [file_text, send, clock]);
     if (r >= 0) split_choice = r;
     ui.split_button("Export", items, variant: outline,
                                      icon: download);
@@ -39,14 +37,10 @@ void page_actions(Ui ui, Gallery g) {
           "Independent toggles for toolbars, or exclusive like radio "
           "buttons.");
   ui.row (gap: 12, wrap: true) {
-    static const char *icons[] = { CUI_ICON_BOLD, CUI_ICON_ITALIC,
-                                   CUI_ICON_UNDERLINE, CUI_ICON_CODE };
     ui.toggle_group("format", %("Bold" "Italic" "Underline" "Code"), fmt,
-                    icons: icons, icon_only: true);
-    static const char *aicons[] = { CUI_ICON_ALIGN_LEFT, CUI_ICON_LIST,
-                                    CUI_ICON_MENU };
+                    icons: [bold, italic, underline, code], icon_only: true);
     ui.toggle_group("align", %("Left" "Center" "Right"), align,
-                    icons: aicons, exclusive: true);
+                    icons: [align_left, list, menu], exclusive: true);
   }
 
   section(ui, "Morphing buttons",
@@ -99,17 +93,14 @@ void page_actions(Ui ui, Gallery g) {
   section(ui, "Swipe actions",
           "Drag a row sideways or swipe with two fingers.");
   ui.card (pad: 6, gap: 6) {
-    static const cui_swipe_action left[] = {
-      { CUI_ICON_CHECK, "Done", CUI_TONE_SUCCESS } };
-    static const cui_swipe_action right[] = {
-      { CUI_ICON_ARCHIVE, "Archive", CUI_TONE_INFO },
-      { CUI_ICON_TRASH_2, "Delete", CUI_TONE_DANGER } };
     List titles = %("Review the design tokens"
                     "Reply to Jonas about the release"
                     "Book the offsite venue");
     ui.each (String title in titles) {
-      int action;
-      ui.swipe_item (action, "row", left, right) {
+      ui.swipe_item (action, "row",
+          [{icon: check, label: "Done", tone: success}],
+          [{icon: archive, label: "Archive", tone: info},
+           {icon: trash_2, label: "Delete", tone: danger}]) {
         ui.icon(circle, 16, text_muted);
         ui.text(title, width: fill, nowrap: true);
         ui.text("Today", size: 12, color: text_muted);

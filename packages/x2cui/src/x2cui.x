@@ -3,20 +3,27 @@
     CUI draws its own components. A program describes the screen with calls
     on every frame; CUI lays it out, handles the mouse and keyboard, and
     draws it in a window or into pixels. This package keeps CUI's C
-    implementation and its names for records, enums, and constants, and
-    replaces the C calling conventions:
+    implementation and gives each component an x2c form:
 
-      ui.button("Add", variant: primary)
-      ui.checkbox(task.title, task.done)
-      ui.row (gap: 8) { ... }
+      ui.button("Add", variant: primary, icon: plus)
+      ui.row (gap: 8, align: center) { ... }
+      ui.radial_gauge("cpu", 64, 0, 100, bands: [{to: 60, tone: success}])
+      ui.card_stack (swiped, "deck", 3) { ... }
+
+    A `name: value` row sets a field of the component's option record. A
+    lower-case name is a short name for a CUI constant, chosen by the C
+    type of its field or parameter: `primary`, `fill`, `plus`. An Array
+    literal is a constant array of CUI's records, with its count. A block
+    form runs its target between the begin and end calls, and a block that
+    reports a result declares the name it is given.
 
     `Ui` is CUI's `cui_ctx *` and `App` is its `cui_app *`, so every raw
     CUI call takes them as they are. `Offscreen` draws with the software
     renderer into pixels, with no window. `TextField` holds text that a
-    component edits in place.
-
-    Labels are Strings. A CUI function that takes a `printf` format is a
-    method that takes the format and x2c values: `ui.textf("%d items", n)`.
+    component edits in place, and `KeyValue` is one pair of the key-value
+    editor. Labels are Strings; a CUI function that takes a `printf`
+    format is a method that takes the format and x2c values:
+    `ui.textf("%d items", n)`.
 
     This unit is the `x2cui` package entry: `import "x2cui"` reaches every
     nonstatic name as `x2cui__*` and every method form. The vendored
@@ -63,6 +70,11 @@ App App.open(cui_app_desc desc) {
             (reason "CUI did not create a window"));
   return app;
 }
+
+/** Opens a window from `name: value` rows of `cui_app_desc`, as in
+    `App.open(title: "Mail", width: 420, height: 600)`. */
+macro Expression $App.open(Entry @options) =>
+  App.open($x2cui_record(%("cui_app_desc"), $options));
 
 /** Presents the last frame, waits for input or animation, and begins the
     next frame. Returns false once the window has closed. The window's
@@ -113,11 +125,11 @@ Offscreen Offscreen.open(int width, int height) {
 }
 
 /** Returns the surface's borrowed `Ui`, valid until the surface closes. */
-Ui Offscreen.ui(Offscreen screen) => screen.ui;
+Ui Offscreen.ui(Offscreen o) => o.ui;
 
 /** Begins a frame one sixtieth of a second after the last. */
-void Offscreen.begin(Offscreen screen) {
-  cui_begin_frame(screen.ui, 1.0f / 60);
+void Offscreen.begin(Offscreen o) {
+  cui_begin_frame(o.ui, 1.0f / 60);
 }
 
 /** Ends the frame and renders it into the surface's pixels. */
@@ -135,25 +147,25 @@ void Offscreen.end(Offscreen o) {
 }
 
 /** Returns how many draw commands the last frame produced. */
-int Offscreen.commands(Offscreen screen) => screen.commands;
+int Offscreen.commands(Offscreen o) => o.commands;
 
 /** Writes the last frame as a PNG. Raises `<io-fail>` when it cannot. */
-void Offscreen.write_png(Offscreen screen, String path) {
-  if (screen.pixels &&
+void Offscreen.write_png(Offscreen o, String path) {
+  if (o.pixels &&
       cui_write_png(
-        path, screen.pixels, screen.width, screen.height, screen.width * 4))
+        path, o.pixels, o.width, o.height, o.width * 4))
     return;
   raise %(io-fail (library "cui") (operation "cui_write_png")
           (path $path));
 }
 
 /** Releases the renderer, the `Ui`, and the pixels; returns NULL. */
-Offscreen Offscreen.close(Offscreen screen) {
-  if (!screen) return NULL;
-  if (screen.ui) cui_destroy(screen.ui);
-  if (screen.renderer) cui_sw_destroy(screen.renderer);
-  free(screen.pixels);
-  free(screen);
+Offscreen Offscreen.close(Offscreen o) {
+  if (!o) return NULL;
+  if (o.ui) cui_destroy(o.ui);
+  if (o.renderer) cui_sw_destroy(o.renderer);
+  free(o.pixels);
+  free(o);
   return NULL;
 }
 
@@ -198,12 +210,12 @@ cui_series cui_series.of(String name, ArrayFloat values) =>
 /** Draws text formatted from `format` and `values` by `String.format`.
     CUI's `cui_textf` takes C variadic arguments; this takes x2c values.
 */
-void Ui.textf(Ui ui, String format, List @values) =>
-  cui_textf(ui, "%s", format.format(@values));
+void Ui.textf(Ui u, String format, List @values) =>
+  cui_textf(u, "%s", format.format(@values));
 
 /// Formats `values` by `format` into the next slot of the current row.
-void Ui.table_cell_textf(Ui ui, String format, List @values) =>
-  cui_table_cell_textf(ui, "%s", format.format(@values));
+void Ui.table_cell_textf(Ui u, String format, List @values) =>
+  cui_table_cell_textf(u, "%s", format.format(@values));
 
 /// Writes text formatted as `Ui.textf` formats it to a terminal's buffer.
 void cui_terminal_buffer.printf(
@@ -216,16 +228,16 @@ void cui_log_buffer.append(
   cui_log_append(&log, level, "%s", format.format(@values));
 
 /// Edits the two numbers at `value` in an inspector row.
-bool Ui.prop_vec2(Ui ui, String label, float *value, cui_prop_opts opts) =>
-  cui_prop_vec_ex(ui, label, value, 2, &opts);
+bool Ui.prop_vec2(Ui u, String label, float *value, cui_prop_opts opts) =>
+  cui_prop_vec_ex(u, label, value, 2, &opts);
 
 /// Edits the three numbers at `value` in an inspector row.
-bool Ui.prop_vec3(Ui ui, String label, float *value, cui_prop_opts opts) =>
-  cui_prop_vec_ex(ui, label, value, 3, &opts);
+bool Ui.prop_vec3(Ui u, String label, float *value, cui_prop_opts opts) =>
+  cui_prop_vec_ex(u, label, value, 3, &opts);
 
 /// Edits the four numbers at `value` in an inspector row.
-bool Ui.prop_vec4(Ui ui, String label, float *value, cui_prop_opts opts) =>
-  cui_prop_vec_ex(ui, label, value, 4, &opts);
+bool Ui.prop_vec4(Ui u, String label, float *value, cui_prop_opts opts) =>
+  cui_prop_vec_ex(u, label, value, 4, &opts);
 
 // The x axis labels of a chart are a List in x2c and two option fields in C.
 static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
@@ -239,27 +251,27 @@ static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
 /** Begins a tree node and returns true while it is open. A leaf has no
     open flag: pass NULL for `open` and set `.leaf` in `opts`.
 */
-bool Ui.tree_begin(Ui ui, String label, bool &?open, cui_tree_opts opts) =>
-  open ? cui_tree_begin(ui, label, &open, &opts)
-       : cui_tree_begin(ui, label, NULL, &opts);
+bool Ui.tree_begin(Ui u, String label, bool &?open, cui_tree_opts opts) =>
+  open ? cui_tree_begin(u, label, &open, &opts)
+       : cui_tree_begin(u, label, NULL, &opts);
 
 /** Draws a table cell that holds a tree node, `depth` levels in. Returns
     true when the node is clicked. A leaf has no open flag: pass NULL for
     `open`.
 */
 bool Ui.tree_cell(
-  Ui ui, String label, int depth, bool has_children, bool &?open,
+  Ui u, String label, int depth, bool has_children, bool &?open,
   String icon) =>
-  open ? cui_tree_cell(ui, label, depth, has_children, &open, icon)
-       : cui_tree_cell(ui, label, depth, has_children, NULL, icon);
+  open ? cui_tree_cell(u, label, depth, has_children, &open, icon)
+       : cui_tree_cell(u, label, depth, has_children, NULL, icon);
 
 /** Draws a donut chart with one slice for each of `values`, named by the
     matching String of `labels`.
 */
 void Ui.donut_chart(
-  Ui ui, String id, ArrayFloat values, List labels, cui_chart_opts opts) {
+  Ui u, String id, ArrayFloat values, List labels, cui_chart_opts opts) {
   cui_donut_chart_ex(
-    ui, id, (const float *) values.bytes, x2cui_strings(labels),
+    u, id, (const float *) values.bytes, x2cui_strings(labels),
     (int) values.len(), &opts);
 }
 
@@ -274,34 +286,34 @@ void Ui.sparkline(
 /** Draws `length` one-character boxes that edit `code`, a field of at
     least `length + 1` bytes. Returns true when the code changes.
 */
-bool Ui.otp_input(Ui ui, String id, TextField code, int length) =>
-  cui_otp_input(ui, id, code.buffer, length);
+bool Ui.otp_input(Ui u, String id, TextField code, int length) =>
+  cui_otp_input(u, id, code.buffer, length);
 
 /** Begins a list whose items the user drags into a new order. `order`
     holds the item indices in display order, and CUI rewrites it.
 */
-void Ui.reorder_begin(Ui ui, String id, ArrayInt order) {
-  cui_reorder_begin(ui, id, (int *) order.bytes, (int) order.len());
+void Ui.reorder_begin(Ui u, String id, ArrayInt order) {
+  cui_reorder_begin(u, id, (int *) order.bytes, (int) order.len());
 }
 
 /** Draws a line chart of `count` series, with `labels` along the x axis,
     or NULL for none. The method form supplies the count of an array.
 */
 void Ui.line_chart(
-  Ui ui, String id, const cui_series *series, int count, List labels,
+  Ui u, String id, const cui_series *series, int count, List labels,
   cui_chart_opts opts) {
   opts = _labelled(opts, labels);
-  cui_line_chart_ex(ui, id, series, count, &opts);
+  cui_line_chart_ex(u, id, series, count, &opts);
 }
 
 /** Draws a bar chart of `count` series, with `labels` along the x axis,
     or NULL for none. The method form supplies the count of an array.
 */
 void Ui.bar_chart(
-  Ui ui, String id, const cui_series *series, int count, List labels,
+  Ui u, String id, const cui_series *series, int count, List labels,
   cui_chart_opts opts) {
   opts = _labelled(opts, labels);
-  cui_bar_chart_ex(ui, id, series, count, &opts);
+  cui_bar_chart_ex(u, id, series, count, &opts);
 }
 
 // lists and tables
@@ -313,24 +325,38 @@ static _Thread_local ItemTrail item_trail;
 /** Begins the passes of `ui.each` and returns the trail of the list it is
     in, which `Ui.each_end` restores.
 */
-ItemTrail Ui.each_begin(Ui ui) {
+ItemTrail Ui.each_begin(Ui u) {
   ItemTrail outer = item_trail;
   item_trail = (ItemTrail){ .listing = true };
   return outer;
 }
 
 /** Ends the passes of `ui.each`. */
-void Ui.each_end(Ui ui, ItemTrail outer) {
+void Ui.each_end(Ui u, ItemTrail outer) {
   item_trail = outer;
 }
 
-/* What an item's painter needs: its state and whether it draws the
-   hairline along its top edge. */
-typedef struct ItemPaint { bool hovered, selected, rule; } ItemPaint;
+/* What an item's painter needs: its id, its state, and whether it draws
+   the hairline along its top edge. */
+typedef struct ItemPaint {
+  cui_id id;
+  bool hovered, selected, rule;
+} ItemPaint;
 
-// A quiet fill when selected or hovered, otherwise the hairline.
+/* A quiet fill when selected or hovered, otherwise the hairline, and the
+   focus ring while the item has keyboard focus. The canvas clips its
+   painter, so the ring of CUI's color and width lies on the item's edge
+   rather than outside it. */
 static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
   ItemPaint *paint = user;
+  _paint_item_fill(ui, r, paint);
+  if (cui_focus_visible(ui, paint.id))
+    cui_draw_rect_border(
+      ui, r, CUI_CORNERS(10), (cui_color){},
+      cui_token_color(ui, CUI_TOKEN_FOCUS_RING), 2);
+}
+
+static void _paint_item_fill(cui_ctx *ui, cui_rect r, ItemPaint *paint) {
   if (paint.selected)
     cui_draw_rect(
       ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_ACTIVE));
@@ -344,21 +370,25 @@ static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
 }
 
 /** Begins an interactive row of a list, a stack box the width of its
-    parent, and returns what the pointer did to it. The row draws its own
-    fill when selected or hovered. Inside `ui.each`, it draws a hairline
-    along its top edge unless it is the first item, it is selected, or the
-    item before it is selected. `Ui.box_end` ends it.
+    parent, and returns what the pointer or the keyboard did to it. Tab
+    reaches the row, and Enter or Space clicks it, as a button. The row
+    draws its own fill when selected or hovered. Inside `ui.each`, it
+    draws a hairline along its top edge unless it is the first item, it
+    is selected, or the item before it is selected. A focused row draws
+    the focus ring. `Ui.box_end` ends it.
 */
-RowState Ui.item_begin(Ui ui, RowOptions opts) {
-  cui_box_begin(ui, &(cui_box){ .dir = CUI_STACK, .width = CUI_FILL });
+RowState Ui.item_begin(Ui u, RowOptions opts) {
+  cui_box_begin(u, &(cui_box){ .dir = CUI_STACK, .width = CUI_FILL });
   bool rule = item_trail.listing && item_trail.items && !item_trail.selected &&
               !opts.selected;
   item_trail.items++;
   item_trail.selected = opts.selected;
-  bool *hovered = cui_state(ui, cui_make_id(ui, "x2cui-item"), sizeof(bool));
-  ItemPaint paint = { *hovered, opts.selected, rule };
-  cui_canvas_result result = cui_canvas(
-    ui, "x2cui-item", CUI_FILL, CUI_FILL, _paint_item, &paint, sizeof paint);
+  cui_id id = cui_make_id(u, "x2cui-item");
+  bool *hovered = cui_state(u, id, sizeof(bool));
+  ItemPaint paint = { id, *hovered, opts.selected, rule };
+  cui_canvas_result result = cui_canvas_ex(
+    u, "x2cui-item", CUI_FILL, CUI_FILL, _paint_item, &paint, sizeof paint,
+    CUI_CANVAS_FOCUSABLE);
   *hovered = result.hovered;
   return (RowState){ result.hovered, result.pressed, result.clicked };
 }
@@ -366,20 +396,134 @@ RowState Ui.item_begin(Ui ui, RowOptions opts) {
 /** Begins a row of a table and returns what the pointer did to it: the
     hover and press its highlight shows, and its click.
 */
-RowState Ui.table_row_begin(Ui ui, RowOptions opts) {
-  bool clicked = cui_table_row(ui, opts.selected);
-  return (RowState){ cui_table_row_hovered(ui), cui_table_row_pressed(ui),
+RowState Ui.table_row_begin(Ui u, RowOptions opts) {
+  bool clicked = cui_table_row(u, opts.selected);
+  return (RowState){ cui_table_row_hovered(u), cui_table_row_pressed(u),
                      clicked };
 }
 
 /// Fills the next cell of the current row with one string.
-void Ui.cell_text(Ui ui, String text) => cui_table_cell_text(ui, text);
+void Ui.cell_text(Ui u, String text) => cui_table_cell_text(u, text);
 
 /// Draws the next cell of a data grid's or a tree table's row with one text.
 void Ui.grid_cell_text(Ui u, String text) => cui_data_grid_cell_text(u, text);
 
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
+
+// tones in data
+
+/* CUI's tones, in the order `cui_tone` declares them from 0;
+   tools/gen-arrays.py reads them from cui.h. */
+/* gen-arrays: begin generated tones */
+
+static SymbolSet tone_names =
+  %<neutral info success warning danger violet teal rose accent>;
+/* gen-arrays: end generated tones */
+
+/** Returns the tone `name` names, as `<violet>` names the violet tone, for
+    a tone kept in quoted data; a name that is not a tone is neutral. */
+cui_tone cui_tone.named(Symbol name) {
+  int at = tone_names.index(name);
+  return at < 0 ? CUI_TONE_NEUTRAL : (cui_tone) at;
+}
+
+// key-value pairs
+
+/** One pair of `ui.kv_editor`: a key, its value, whether the pair is on,
+    and whether its value shows as dots. */
+class KeyValue {
+  String key, value;
+  bool enabled, secret;
+} *;
+
+void KeyValue.init(
+  KeyValue kv, String key, String value, bool enabled, bool secret) {
+  kv.key = key;
+  kv.value = value;
+  kv.enabled = enabled;
+  kv.secret = secret;
+}
+
+/* The C pairs CUI edits for one editor, kept between frames: CUI types a
+   new pair into the slot after the last until it is complete. */
+typedef struct PairSlots {
+  cui_kv_pair *pairs;
+  int capacity;
+} PairSlots;
+
+static void _free_slots(cui_ctx *ui, void *data) {
+  PairSlots *slots = data;
+  free(slots.pairs);
+}
+
+/** Edits `pairs`, an `Array` of `KeyValue`, in place, and returns true when
+    anything changed. Typing in the empty row at the end adds a pair, and
+    the x removes one. CUI edits its own C records, kept for the editor
+    between frames; each frame copies the pairs into them, and a change is
+    copied back, so `pairs` holds what the editor shows.
+*/
+bool Ui.kv_editor(Ui u, String id, Array pairs, cui_kv_editor_opts opts) {
+  cui_id key = cui_make_id(u, id) ^ 0x6b76;
+  PairSlots *slots = cui_state(u, key, sizeof *slots);
+  int count = (int) pairs.len();
+  if (slots.capacity < count + 1) {
+    slots.capacity = count + 8;
+    slots.pairs = realloc(slots.pairs, slots.capacity * sizeof *slots.pairs);
+    size_t added = (slots.capacity - count) * sizeof *slots.pairs;
+    memset(slots.pairs + count, 0, added);
+    cui_state_on_free(u, key, _free_slots);
+  }
+  for (int i = 0; i < count; i++) _pair_to_c(pairs[i], slots.pairs[i]);
+  int edited = count;
+  bool changed = cui_kv_editor_ex(
+    u, id, slots.pairs, &edited, slots.capacity, &opts);
+  if (changed) _pairs_from_c(pairs, slots.pairs, edited);
+  return changed;
+}
+
+/** Returns the query parameters of `url`, up to 32, as an `Array` of
+    `KeyValue`, all on. */
+Array KeyValue.of_url(String url) {
+  cui_kv_pair found[32];
+  int count = cui_url_params(url, found, 32);
+  Array pairs = [];
+  _pairs_from_c(pairs, found, count);
+  return pairs;
+}
+
+/** Replaces the query of the URL in `url` with the pairs of `pairs` that
+    are on. */
+void TextField.set_url_params(TextField field, Array pairs) {
+  int count = (int) pairs.len();
+  cui_kv_pair *c = calloc(count ? count : 1, sizeof *c);
+  for (int i = 0; i < count; i++) _pair_to_c(pairs[i], c[i]);
+  cui_url_set_params(field.buffer, field.capacity, c, count);
+  free(c);
+}
+
+static void _pair_to_c(KeyValue kv, cui_kv_pair &pair) {
+  snprintf(pair.key, sizeof pair.key, "%s", kv.key);
+  snprintf(pair.value, sizeof pair.value, "%s", kv.value);
+  pair.enabled = kv.enabled;
+  pair.secret = kv.secret;
+}
+
+static void _pairs_from_c(Array pairs, cui_kv_pair *edited, int count) {
+  while ((int) pairs.len() > count) pairs.take_last();
+  for (int i = 0; i < count; i++) {
+    cui_kv_pair pair = edited[i];
+    KeyValue kv = i < (int) pairs.len() ? pairs[i] : NULL;
+    if (!kv) {
+      kv = KeyValue.new("", "", false, false);
+      pairs.push(kv);
+    }
+    kv.key = String.new(pair.key);
+    kv.value = String.new(pair.value);
+    kv.enabled = pair.enabled;
+    kv.secret = pair.secret;
+  }
+}
 
 /* One native array for each List of Strings a component has been given,
    keyed by the List. A List is canonical and lives as long as the pool
@@ -517,383 +661,377 @@ macro Unit(Name $target) { $x2cui.method($target); }
 
 /** Calls `cui_tour_ex`. */
 inline int Ui.tour(
-  Ui ui, String id, const cui_tour_step *steps, int count, int &step,
+  Ui u, String id, const cui_tour_step *steps, int count, int &step,
   cui_tour_opts opts) =>
-  cui_tour_ex(ui, id, steps, count, &step, &opts);
+  cui_tour_ex(u, id, steps, count, &step, &opts);
 
 /** Calls `cui_toggle_group_ex`. */
 inline bool Ui.toggle_group(
-  Ui ui, String id, List labels, bool *values, cui_toggle_group_opts opts) =>
+  Ui u, String id, List labels, bool *values, cui_toggle_group_opts opts) =>
   cui_toggle_group_ex(
-    ui, id, x2cui_strings(labels), labels.len(), values, &opts);
+    u, id, x2cui_strings(labels), labels.len(), values, &opts);
 
 /** Calls `cui_reactions`. */
-inline int Ui.reactions(Ui ui, String id, cui_reaction *items, int count) =>
-  cui_reactions(ui, id, items, count);
+inline int Ui.reactions(Ui u, String id, cui_reaction *items, int count) =>
+  cui_reactions(u, id, items, count);
 
 /** Calls `cui_speed_dial_ex`. */
 inline int Ui.speed_dial(
-  Ui ui, String id, const cui_speed_action *actions, int count,
+  Ui u, String id, const cui_speed_action *actions, int count,
   cui_speed_dial_opts opts) =>
-  cui_speed_dial_ex(ui, id, actions, count, &opts);
+  cui_speed_dial_ex(u, id, actions, count, &opts);
 
 /** Calls `cui_swipe_item_begin`. */
 inline void Ui.swipe_item_begin(
-  Ui ui, String id, const cui_swipe_action *left, int left_count,
+  Ui u, String id, const cui_swipe_action *left, int left_count,
   const cui_swipe_action *right, int right_count) =>
-  cui_swipe_item_begin(ui, id, left, left_count, right, right_count);
+  cui_swipe_item_begin(u, id, left, left_count, right, right_count);
 
 /** Calls `cui_filter_bar`. */
 inline bool Ui.filter_bar(
-  Ui ui, String id, const cui_filter_field *fields, int count,
+  Ui u, String id, const cui_filter_field *fields, int count,
   uint32_t *selected, TextField search) =>
   cui_filter_bar(
-    ui, id, fields, count, selected, x2cui_buffer(search), search.capacity);
+    u, id, fields, count, selected, x2cui_buffer(search), search.capacity);
 
 /** Calls `cui_tree_table_begin_ex`. */
 inline void Ui.tree_table_begin(
-  Ui ui, String id, const cui_grid_column *columns, int column_count,
+  Ui u, String id, const cui_grid_column *columns, int column_count,
   cui_tree_node *nodes, int node_count, cui_tree_table_opts opts) =>
   cui_tree_table_begin_ex(
-    ui, id, columns, column_count, nodes, node_count, &opts);
+    u, id, columns, column_count, nodes, node_count, &opts);
 
 /** Calls `cui_diff_view_rows`. */
 inline int Ui.diff_view_rows(
-  Ui ui, String id, cui_diff_row *rows, int first, int cap) =>
-  cui_diff_view_rows(ui, id, rows, first, cap);
+  Ui u, String id, cui_diff_row *rows, int first, int cap) =>
+  cui_diff_view_rows(u, id, rows, first, cap);
 
 /** Calls `cui_presence`. */
 inline void Ui.presence(
-  Ui ui, String id, const cui_presence_user *users, int count, int max_visible,
+  Ui u, String id, const cui_presence_user *users, int count, int max_visible,
   float size) =>
-  cui_presence(ui, id, users, count, max_visible, size);
+  cui_presence(u, id, users, count, max_visible, size);
 
 /** Calls `cui_ticker_ex`. */
 inline void Ui.ticker(
-  Ui ui, String id, const cui_ticker_item *items, int count,
+  Ui u, String id, const cui_ticker_item *items, int count,
   cui_ticker_opts opts) =>
-  cui_ticker_ex(ui, id, items, count, &opts);
+  cui_ticker_ex(u, id, items, count, &opts);
 
 /** Calls `cui_heatmap_ex`. */
 inline int Ui.heatmap(
-  Ui ui, String id, const float *values, int rows, int cols,
+  Ui u, String id, const float *values, int rows, int cols,
   cui_heatmap_opts opts) =>
-  cui_heatmap_ex(ui, id, values, rows, cols, &opts);
+  cui_heatmap_ex(u, id, values, rows, cols, &opts);
 
 /** Calls `cui_calendar_heatmap_ex`. */
 inline int Ui.calendar_heatmap(
-  Ui ui, String id, cui_date start, const float *values, int days,
+  Ui u, String id, cui_date start, const float *values, int days,
   cui_calendar_heatmap_opts opts) =>
-  cui_calendar_heatmap_ex(ui, id, start, values, days, &opts);
+  cui_calendar_heatmap_ex(u, id, start, values, days, &opts);
 
 /** Calls `cui_treemap_ex`. */
 inline int Ui.treemap(
-  Ui ui, String id, const cui_viz_item *items, int count,
+  Ui u, String id, const cui_viz_item *items, int count,
   cui_treemap_opts opts) =>
-  cui_treemap_ex(ui, id, items, count, &opts);
+  cui_treemap_ex(u, id, items, count, &opts);
 
 /** Calls `cui_radar_chart_ex`. */
 inline int Ui.radar_chart(
-  Ui ui, String id, const cui_series *series, int count, List axes,
+  Ui u, String id, const cui_series *series, int count, List axes,
   cui_radar_opts opts) =>
   cui_radar_chart_ex(
-    ui, id, series, count, x2cui_strings(axes), axes.len(), &opts);
+    u, id, series, count, x2cui_strings(axes), axes.len(), &opts);
 
 /** Calls `cui_funnel_ex`. */
 inline int Ui.funnel(
-  Ui ui, String id, const cui_viz_item *stages, int count,
+  Ui u, String id, const cui_viz_item *stages, int count,
   cui_funnel_opts opts) =>
-  cui_funnel_ex(ui, id, stages, count, &opts);
+  cui_funnel_ex(u, id, stages, count, &opts);
 
 /** Calls `cui_sankey_ex`. */
 inline int Ui.sankey(
-  Ui ui, String id, List nodes, const cui_sankey_link *links, int link_count,
+  Ui u, String id, List nodes, const cui_sankey_link *links, int link_count,
   cui_sankey_opts opts) =>
   cui_sankey_ex(
-    ui, id, x2cui_strings(nodes), nodes.len(), links, link_count, &opts);
+    u, id, x2cui_strings(nodes), nodes.len(), links, link_count, &opts);
 
 /** Calls `cui_waffle_ex`. */
 inline int Ui.waffle(
-  Ui ui, String id, const cui_viz_item *items, int count,
+  Ui u, String id, const cui_viz_item *items, int count,
   cui_waffle_opts opts) =>
-  cui_waffle_ex(ui, id, items, count, &opts);
+  cui_waffle_ex(u, id, items, count, &opts);
 
 /** Calls `cui_split_bar_ex`. */
 inline int Ui.split_bar(
-  Ui ui, String id, const cui_viz_item *items, int count,
+  Ui u, String id, const cui_viz_item *items, int count,
   cui_split_bar_opts opts) =>
-  cui_split_bar_ex(ui, id, items, count, &opts);
+  cui_split_bar_ex(u, id, items, count, &opts);
 
 /** Calls `cui_bar_list_ex`. */
 inline int Ui.bar_list(
-  Ui ui, String id, const cui_viz_item *items, int count,
+  Ui u, String id, const cui_viz_item *items, int count,
   cui_bar_list_opts opts) =>
-  cui_bar_list_ex(ui, id, items, count, &opts);
+  cui_bar_list_ex(u, id, items, count, &opts);
 
 /** Calls `cui_activity_rings_ex`. */
 inline int Ui.activity_rings(
-  Ui ui, String id, const cui_viz_item *rings, int count,
+  Ui u, String id, const cui_viz_item *rings, int count,
   cui_rings_opts opts) =>
-  cui_activity_rings_ex(ui, id, rings, count, &opts);
+  cui_activity_rings_ex(u, id, rings, count, &opts);
 
 /** Calls `cui_scatter_chart_ex`. */
 inline int Ui.scatter_chart(
-  Ui ui, String id, const cui_scatter_series *series, int count,
+  Ui u, String id, const cui_scatter_series *series, int count,
   cui_scatter_opts opts) =>
-  cui_scatter_chart_ex(ui, id, series, count, &opts);
+  cui_scatter_chart_ex(u, id, series, count, &opts);
 
 /** Calls `cui_candlestick_ex`. */
 inline int Ui.candlestick(
-  Ui ui, String id, const cui_candle *candles, int count,
+  Ui u, String id, const cui_candle *candles, int count,
   cui_candlestick_opts opts) =>
-  cui_candlestick_ex(ui, id, candles, count, &opts);
+  cui_candlestick_ex(u, id, candles, count, &opts);
 
 /** Calls `cui_tab_bar_ex`. */
 inline bool Ui.tab_bar(
-  Ui ui, String id, const cui_tab_bar_item *items, int count, int &selected,
+  Ui u, String id, const cui_tab_bar_item *items, int count, int &selected,
   cui_tab_bar_opts opts) =>
-  cui_tab_bar_ex(ui, id, items, count, &selected, &opts);
+  cui_tab_bar_ex(u, id, items, count, &selected, &opts);
 
 /** Calls `cui_waveform_ex`. */
 inline bool Ui.waveform(
-  Ui ui, String id, const float *peaks, int count, float &progress,
+  Ui u, String id, const float *peaks, int count, float &progress,
   cui_waveform_opts opts) =>
-  cui_waveform_ex(ui, id, peaks, count, &progress, &opts);
+  cui_waveform_ex(u, id, peaks, count, &progress, &opts);
 
 /** Calls `cui_agent_plan_ex`. */
 inline int Ui.agent_plan(
-  Ui ui, String id, const cui_plan_step *steps, int count,
+  Ui u, String id, const cui_plan_step *steps, int count,
   cui_agent_plan_opts opts) =>
-  cui_agent_plan_ex(ui, id, steps, count, &opts);
+  cui_agent_plan_ex(u, id, steps, count, &opts);
 
 /** Calls `cui_source_list`. */
 inline int Ui.source_list(
-  Ui ui, String id, const cui_source *sources, int count) =>
-  cui_source_list(ui, id, sources, count);
+  Ui u, String id, const cui_source *sources, int count) =>
+  cui_source_list(u, id, sources, count);
 
 /** Calls `cui_prompt_suggestions_ex`. */
 inline int Ui.prompt_suggestions(
-  Ui ui, String id, const cui_prompt_suggestion *items, int count,
+  Ui u, String id, const cui_prompt_suggestion *items, int count,
   cui_prompt_suggestions_opts opts) =>
-  cui_prompt_suggestions_ex(ui, id, items, count, &opts);
+  cui_prompt_suggestions_ex(u, id, items, count, &opts);
 
 /** Calls `cui_model_picker_ex`. */
 inline bool Ui.model_picker(
-  Ui ui, String id, const cui_model *models, int count, int &selected,
+  Ui u, String id, const cui_model *models, int count, int &selected,
   cui_model_picker_opts opts) =>
-  cui_model_picker_ex(ui, id, models, count, &selected, &opts);
+  cui_model_picker_ex(u, id, models, count, &selected, &opts);
 
 /** Calls `cui_week_calendar_ex`. */
 inline int Ui.week_calendar(
-  Ui ui, String id, cui_date week_start, cui_cal_event *events, int count,
+  Ui u, String id, cui_date week_start, cui_cal_event *events, int count,
   cui_week_opts opts) =>
-  cui_week_calendar_ex(ui, id, week_start, events, count, &opts);
+  cui_week_calendar_ex(u, id, week_start, events, count, &opts);
 
 /** Calls `cui_month_calendar_ex`. */
 inline cui_month_result Ui.month_calendar(
-  Ui ui, String id, cui_date &month, const cui_month_event *events, int count,
+  Ui u, String id, cui_date &month, const cui_month_event *events, int count,
   cui_month_opts opts) =>
-  cui_month_calendar_ex(ui, id, &month, events, count, &opts);
+  cui_month_calendar_ex(u, id, &month, events, count, &opts);
 
 /** Calls `cui_gantt_ex`. */
 inline int Ui.gantt(
-  Ui ui, String id, cui_gantt_task *tasks, int count, cui_date origin,
-  int days, cui_gantt_opts opts) =>
-  cui_gantt_ex(ui, id, tasks, count, origin, days, &opts);
+  Ui u, String id, cui_gantt_task *tasks, int count, cui_date origin, int days,
+  cui_gantt_opts opts) =>
+  cui_gantt_ex(u, id, tasks, count, origin, days, &opts);
 
 /** Calls `cui_toc`. */
 inline int Ui.toc(
-  Ui ui, String scroll_id, const cui_toc_item *items, int count) =>
-  cui_toc(ui, scroll_id, items, count);
+  Ui u, String scroll_id, const cui_toc_item *items, int count) =>
+  cui_toc(u, scroll_id, items, count);
 
 /** Calls `cui_checklist_ex`. */
 inline int Ui.checklist(
-  Ui ui, String id, cui_check_step *steps, int count,
+  Ui u, String id, cui_check_step *steps, int count,
   cui_checklist_opts opts) =>
-  cui_checklist_ex(ui, id, steps, count, &opts);
+  cui_checklist_ex(u, id, steps, count, &opts);
 
 /** Calls `cui_multi_select_ex`. */
 inline bool Ui.multi_select(
-  Ui ui, String id, List items, bool *selected, cui_multi_select_opts opts) =>
+  Ui u, String id, List items, bool *selected, cui_multi_select_opts opts) =>
   cui_multi_select_ex(
-    ui, id, x2cui_strings(items), items.len(), selected, &opts);
+    u, id, x2cui_strings(items), items.len(), selected, &opts);
 
 /** Calls `cui_histogram_slider_ex`. */
 inline bool Ui.histogram_slider(
-  Ui ui, String label, const float *bins, int bin_count, float &lo, float &hi,
+  Ui u, String label, const float *bins, int bin_count, float &lo, float &hi,
   float min, float max, cui_histogram_opts opts) =>
   cui_histogram_slider_ex(
-    ui, label, bins, bin_count, &lo, &hi, min, max, &opts);
+    u, label, bins, bin_count, &lo, &hi, min, max, &opts);
 
 /** Calls `cui_level_meter_ex`. */
 inline bool Ui.level_meter(
-  Ui ui, String id, const float *levels, int channels,
+  Ui u, String id, const float *levels, int channels,
   cui_level_meter_opts opts) =>
-  cui_level_meter_ex(ui, id, levels, channels, &opts);
+  cui_level_meter_ex(u, id, levels, channels, &opts);
 
 /** Calls `cui_doc_tabs_ex`. */
 inline cui_doc_tabs_result Ui.doc_tabs(
-  Ui ui, String id, const cui_doc_tab *tabs, int count, int &selected,
+  Ui u, String id, const cui_doc_tab *tabs, int count, int &selected,
   cui_doc_tabs_opts opts) =>
-  cui_doc_tabs_ex(ui, id, tabs, count, &selected, &opts);
+  cui_doc_tabs_ex(u, id, tabs, count, &selected, &opts);
 
 /** Calls `cui_prop_vec_ex`. */
 inline bool Ui.prop_vec(
-  Ui ui, String label, float *value, int components, cui_prop_opts opts) =>
-  cui_prop_vec_ex(ui, label, value, components, &opts);
+  Ui u, String label, float *value, int components, cui_prop_opts opts) =>
+  cui_prop_vec_ex(u, label, value, components, &opts);
 
 /** Calls `cui_hex_view_ex`. */
 inline cui_hex_result Ui.hex_view(
-  Ui ui, String id, const uint8_t *data, size_t size, cui_hex_selection &sel,
+  Ui u, String id, const uint8_t *data, size_t size, cui_hex_selection &sel,
   cui_hex_view_opts opts) =>
-  cui_hex_view_ex(ui, id, data, size, &sel, &opts);
+  cui_hex_view_ex(u, id, data, size, &sel, &opts);
 
 /** Calls `cui_flame_graph_ex`. */
 inline cui_flame_result Ui.flame_graph(
-  Ui ui, String id, const cui_flame_span *spans, int count,
+  Ui u, String id, const cui_flame_span *spans, int count,
   cui_flame_view &view, int &selected, cui_flame_opts opts) =>
-  cui_flame_graph_ex(ui, id, spans, count, &view, &selected, &opts);
+  cui_flame_graph_ex(u, id, spans, count, &view, &selected, &opts);
 
 /** Calls `cui_curve_editor_ex`. */
 inline cui_curve_result Ui.curve_editor(
-  Ui ui, String id, cui_curve_key *keys, int &count, int capacity,
+  Ui u, String id, cui_curve_key *keys, int &count, int capacity,
   cui_curve_opts opts) =>
-  cui_curve_editor_ex(ui, id, keys, &count, capacity, &opts);
+  cui_curve_editor_ex(u, id, keys, &count, capacity, &opts);
 
 /** Calls `cui_gradient_editor_ex`. */
 inline cui_gradient_result Ui.gradient_editor(
-  Ui ui, String id, cui_gradient_stop *stops, int &count, int capacity,
+  Ui u, String id, cui_gradient_stop *stops, int &count, int capacity,
   cui_gradient_opts opts) =>
-  cui_gradient_editor_ex(ui, id, stops, &count, capacity, &opts);
+  cui_gradient_editor_ex(u, id, stops, &count, capacity, &opts);
 
 /** Calls `cui_timeline_editor_ex`. */
 inline cui_timeline_editor_result Ui.timeline_editor(
-  Ui ui, String id, cui_timeline_track *tracks, int count, float &time,
+  Ui u, String id, cui_timeline_track *tracks, int count, float &time,
   cui_timeline_editor_opts opts) =>
-  cui_timeline_editor_ex(ui, id, tracks, count, &time, &opts);
-
-/** Calls `cui_kv_editor_ex`. */
-inline bool Ui.kv_editor(
-  Ui ui, String id, cui_kv_pair *pairs, int &count, int capacity,
-  cui_kv_editor_opts opts) =>
-  cui_kv_editor_ex(ui, id, pairs, &count, capacity, &opts);
+  cui_timeline_editor_ex(u, id, tracks, count, &time, &opts);
 
 /** Calls `cui_problems_ex`. */
 inline cui_problems_result Ui.problems(
-  Ui ui, String id, const cui_diagnostic *diags, int count,
+  Ui u, String id, const cui_diagnostic *diags, int count,
   cui_problems_opts opts) =>
-  cui_problems_ex(ui, id, diags, count, &opts);
+  cui_problems_ex(u, id, diags, count, &opts);
 
 /** Calls `cui_pipeline_ex`. */
 inline cui_pipeline_result Ui.pipeline(
-  Ui ui, String id, List stages, const cui_pipeline_job *jobs, int job_count,
+  Ui u, String id, List stages, const cui_pipeline_job *jobs, int job_count,
   cui_pipeline_opts opts) =>
   cui_pipeline_ex(
-    ui, id, x2cui_strings(stages), stages.len(), jobs, job_count, &opts);
+    u, id, x2cui_strings(stages), stages.len(), jobs, job_count, &opts);
 
 /** Calls `cui_query_builder_ex`. */
 inline bool Ui.query_builder(
-  Ui ui, String id, const cui_query_field *fields, int field_count,
+  Ui u, String id, const cui_query_field *fields, int field_count,
   cui_query_node *nodes, int &count, int capacity, cui_query_opts opts) =>
   cui_query_builder_ex(
-    ui, id, fields, field_count, nodes, &count, capacity, &opts);
+    u, id, fields, field_count, nodes, &count, capacity, &opts);
 
 /** Calls `cui_keymap_ex`. */
 inline cui_keymap_result Ui.keymap(
-  Ui ui, String id, const cui_keymap_binding *bindings, int count,
+  Ui u, String id, const cui_keymap_binding *bindings, int count,
   cui_keymap_opts opts) =>
-  cui_keymap_ex(ui, id, bindings, count, &opts);
+  cui_keymap_ex(u, id, bindings, count, &opts);
 
 /** Calls `cui_commit_graph_ex`. */
 inline cui_commit_graph_result Ui.commit_graph(
-  Ui ui, String id, const cui_commit *commits, int count,
+  Ui u, String id, const cui_commit *commits, int count,
   cui_commit_graph_opts opts) =>
-  cui_commit_graph_ex(ui, id, commits, count, &opts);
+  cui_commit_graph_ex(u, id, commits, count, &opts);
 
 /** Calls `cui_graph_view_ex`. */
 inline cui_graph_result Ui.graph_view(
-  Ui ui, String id, const cui_graph_node *nodes, int node_count,
+  Ui u, String id, const cui_graph_node *nodes, int node_count,
   const cui_graph_edge *edges, int edge_count, cui_graph_opts opts) =>
-  cui_graph_view_ex(ui, id, nodes, node_count, edges, edge_count, &opts);
+  cui_graph_view_ex(u, id, nodes, node_count, edges, edge_count, &opts);
 
 /** Calls `cui_waterfall_ex`. */
 inline cui_waterfall_result Ui.waterfall(
-  Ui ui, String id, const cui_net_request *requests, int count,
+  Ui u, String id, const cui_net_request *requests, int count,
   cui_waterfall_opts opts) =>
-  cui_waterfall_ex(ui, id, requests, count, &opts);
+  cui_waterfall_ex(u, id, requests, count, &opts);
 
 /** Calls `cui_trace_view_ex`. */
 inline cui_trace_result Ui.trace_view(
-  Ui ui, String id, cui_trace_track *tracks, int track_count,
+  Ui u, String id, cui_trace_track *tracks, int track_count,
   const cui_trace_span *spans, int span_count, cui_trace_view &view,
   int &selected, cui_trace_opts opts) =>
   cui_trace_view_ex(
-    ui, id, tracks, track_count, spans, span_count, &view, &selected, &opts);
+    u, id, tracks, track_count, spans, span_count, &view, &selected, &opts);
 
 /** Calls `cui_test_explorer_ex`. */
 inline cui_test_explorer_result Ui.test_explorer(
-  Ui ui, String id, const cui_test_item *items, int count,
+  Ui u, String id, const cui_test_item *items, int count,
   cui_test_explorer_opts opts) =>
-  cui_test_explorer_ex(ui, id, items, count, &opts);
+  cui_test_explorer_ex(u, id, items, count, &opts);
 
 /** Calls `cui_stack_trace_ex`. */
 inline cui_stack_trace_result Ui.stack_trace(
-  Ui ui, String id, const cui_stack_frame *frames, int count,
+  Ui u, String id, const cui_stack_frame *frames, int count,
   cui_stack_trace_opts opts) =>
-  cui_stack_trace_ex(ui, id, frames, count, &opts);
+  cui_stack_trace_ex(u, id, frames, count, &opts);
 
 /** Calls `cui_uptime_ex`. */
 inline cui_uptime_result Ui.uptime(
-  Ui ui, String id, const cui_uptime_service *services, int count,
+  Ui u, String id, const cui_uptime_service *services, int count,
   cui_uptime_opts opts) =>
-  cui_uptime_ex(ui, id, services, count, &opts);
+  cui_uptime_ex(u, id, services, count, &opts);
 
 /** Calls `cui_time_histogram_ex`. */
 inline cui_time_histogram_result Ui.time_histogram(
-  Ui ui, String id, double start, double bucket_seconds, int buckets,
+  Ui u, String id, double start, double bucket_seconds, int buckets,
   const cui_histogram_series *series, int series_count, double &sel_start,
   double &sel_end, cui_time_histogram_opts opts) =>
   cui_time_histogram_ex(
-    ui, id, start, bucket_seconds, buckets, series, series_count, &sel_start,
+    u, id, start, bucket_seconds, buckets, series, series_count, &sel_start,
     &sel_end, &opts);
 
 /** Calls `cui_coverage_ex`. */
 inline cui_coverage_result Ui.coverage(
-  Ui ui, String id, const cui_coverage_file *files, int count,
+  Ui u, String id, const cui_coverage_file *files, int count,
   cui_coverage_opts opts) =>
-  cui_coverage_ex(ui, id, files, count, &opts);
+  cui_coverage_ex(u, id, files, count, &opts);
 
 /** Calls `cui_blame_ex`. */
 inline cui_blame_result Ui.blame(
-  Ui ui, String id, List lines, const int *line_commit, int line_count,
+  Ui u, String id, List lines, const int *line_commit, int line_count,
   const cui_blame_commit *commits, int commit_count, cui_blame_opts opts) =>
   cui_blame_ex(
-    ui, id, x2cui_strings(lines), line_commit, line_count, commits,
+    u, id, x2cui_strings(lines), line_commit, line_count, commits,
     commit_count, &opts);
 
 /** Calls `cui_feature_flags_ex`. */
 inline cui_feature_flags_result Ui.feature_flags(
-  Ui ui, String id, cui_feature_flag *flags, int count, List envs,
+  Ui u, String id, cui_feature_flag *flags, int count, List envs,
   cui_feature_flags_opts opts) =>
   cui_feature_flags_ex(
-    ui, id, flags, count, x2cui_strings(envs), envs.len(), &opts);
+    u, id, flags, count, x2cui_strings(envs), envs.len(), &opts);
 
 /** Calls `cui_api_explorer_ex`. */
 inline cui_api_explorer_result Ui.api_explorer(
-  Ui ui, String id, const cui_api_endpoint *endpoints, int count,
+  Ui u, String id, const cui_api_endpoint *endpoints, int count,
   cui_api_explorer_opts opts) =>
-  cui_api_explorer_ex(ui, id, endpoints, count, &opts);
+  cui_api_explorer_ex(u, id, endpoints, count, &opts);
 
 /** Calls `cui_draw_polyline`. */
 inline void Ui.draw_polyline(
-  Ui ui, const cui_vec2 *points, int count, float thickness, cui_color color,
+  Ui u, const cui_vec2 *points, int count, float thickness, cui_color color,
   bool closed) =>
-  cui_draw_polyline(ui, points, count, thickness, color, closed);
+  cui_draw_polyline(u, points, count, thickness, color, closed);
 
 /** Calls `cui_draw_polygon`. */
 inline void Ui.draw_polygon(
-  Ui ui, const cui_vec2 *points, int count, cui_color color) =>
-  cui_draw_polygon(ui, points, count, color);
+  Ui u, const cui_vec2 *points, int count, cui_color color) =>
+  cui_draw_polygon(u, points, count, color);
 
 /* gen-arrays: end generated methods */
 
@@ -905,7 +1043,7 @@ expand %(
   prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell donut_chart
   sparkline otp_input reorder_begin (line_chart 1) (bar_chart 1)
   each_begin each_end item_begin table_row_begin cell_text grid_cell_text
-  (tour 1) toggle_group (reactions 1) (speed_dial 1)
+  kv_editor (tour 1) toggle_group (reactions 1) (speed_dial 1)
   (swipe_item_begin 1 3) (filter_bar 1) (tree_table_begin 1 3)
   diff_view_rows (presence 1) (ticker 1) heatmap (calendar_heatmap 2)
   (treemap 1) (radar_chart 1) (funnel 1) (sankey 2) (waffle 1)
@@ -915,10 +1053,10 @@ expand %(
   (month_calendar 2) (gantt 1) (toc 1) (checklist 1) multi_select
   (histogram_slider 1) (level_meter 1) (doc_tabs 1) (prop_vec 1)
   (hex_view 1) (flame_graph 1) (curve_editor 1) (gradient_editor 1)
-  (timeline_editor 1) (kv_editor 1) (problems 1) (pipeline 2)
-  (query_builder 1 3) (keymap 1) (commit_graph 1) (graph_view 1 3)
-  (waterfall 1) (trace_view 1 3) (test_explorer 1) (stack_trace 1)
-  (uptime 1) (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
+  (timeline_editor 1) (problems 1) (pipeline 2) (query_builder 1 3)
+  (keymap 1) (commit_graph 1) (graph_view 1 3) (waterfall 1)
+  (trace_view 1 3) (test_explorer 1) (stack_trace 1) (uptime 1)
+  (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
   (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
 macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)

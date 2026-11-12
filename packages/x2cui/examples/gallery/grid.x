@@ -72,20 +72,16 @@ void page_grid(Ui ui, Gallery g) {
     qsort(order_ix, PEOPLE, sizeof(int), cmp_people);
     last_sort = people_sort;
   }
-  static const char *const team_opts[] = {
-    "Engine", "Design", "Platform", "Docs", "Growth" };
-  static const char *const status_opts[] = { "Active", "Away", "Invited" };
-  static const char *const role_opts[] = { "Owner", "Admin", "Member" };
-  static const cui_filter_field fields[] = {
-    { "Team", CUI_ICON_USERS, team_opts, 5 },
-    { "Status", CUI_ICON_CIRCLE_DOT, status_opts, 3 },
-    { "Role", CUI_ICON_KEY_ROUND, role_opts, 3 },
-  };
   static uint32_t filters[3] = { 1u << 0 | 1u << 2, 0, 0 };
   section(ui, "Filter bar", "Chips for active filters, values in a list, "
                             "and a search.");
   // `filters` holds one mask for each field.
-  ui.filter_bar("filters", fields, filters, search);
+  ui.filter_bar("filters", [
+    {name: "Team", icon: users,
+     options: ["Engine", "Design", "Platform", "Docs", "Growth"]},
+    {name: "Status", icon: circle_dot, options: ["Active", "Away", "Invited"]},
+    {name: "Role", icon: key_round, options: ["Owner", "Admin", "Member"]}],
+    filters, search);
 
   section(ui, "Data grid", "2,000 rows, virtualized. Sort, resize columns, "
                            "select with Shift and Ctrl, edit names with a "

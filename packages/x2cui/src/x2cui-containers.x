@@ -40,13 +40,15 @@ macro Decorator $Ui.disabled(Stmt $body, Expr $ui, Expr $disabled) {
 }
 
 /* The template of a block whose end call reports a result, as a card
-   stack and a swipe item do. The end call's result is stored in
-   `$result`, an `int` variable of the caller's. `pairs` are as for
+   stack and a swipe item do. The form declares `$result`, of type
+   `$kind`, before the block, and stores the end call's result in it, so
+   the statements after the block read it. `pairs` are as for
    `x2cui_arguments`. */
 macro Unit $x2cui.result_block(
-  Name $block, Name $begin, Name $end, Literal @pairs) {
+  Name $block, Name $begin, Name $end, Type $kind, Literal @pairs) {
   macro Decorator $Ui.$block(
-    Stmt $body, Expr $ui, Expr $result, Expr @args, Entry @options) {
+    Stmt $body, Expr $ui, Name $result, Expr @args, Entry @options) {
+    $kind $result = 0;
     {
       typeof($ui) ui = $ui;
       ui.$begin(@x2cui_arguments(ui, $begin, $pairs, $options, @args));
@@ -56,27 +58,32 @@ macro Unit $x2cui.result_block(
   }
 }
 
-/* `ui.card_stack (swiped, "deck", 3) { ... }` stores in `swiped` the
+/* `ui.card_stack (swiped, "deck", 3) { ... }` declares `swiped`, the
    direction the top card was swiped this frame, or 0; its items are
    `ui.card_stack_item (depth) { ... }`. */
-$x2cui.result_block(card_stack, card_stack_begin, card_stack_end);
+$x2cui.result_block(card_stack, card_stack_begin, card_stack_end, int);
 
-/* `ui.swipe_item (action, "row", left, right) { ... }` stores in
-   `action` the swipe action taken this frame, or -1; it supplies the
-   counts of the arrays of actions. */
-$x2cui.result_block(swipe_item, swipe_item_begin, swipe_item_end, 1, 3);
+/* `ui.swipe_item (action, "row", left, right) { ... }` declares `action`,
+   the swipe action taken this frame, or -1; it supplies the counts of the
+   arrays of actions. */
+$x2cui.result_block(swipe_item, swipe_item_begin, swipe_item_end, int,
+                    1, 3);
 
-/* `ui.reorder (changed, "tasks", order) { ... }` stores in `changed`
+/* `ui.reorder (changed, "tasks", order) { ... }` declares `changed`,
    whether the user dropped an item in a new place this frame; its items
    are `ui.reorder_item (position) { ... }`. */
-$x2cui.result_block(reorder, reorder_begin, reorder_end);
+$x2cui.result_block(reorder, reorder_begin, reorder_end, bool);
 
 /* The template of a block whose begin call reports a result, as a kanban
-   column and card do. The result is stored in `$result`, an `int` or
-   `bool` variable of the caller's, before the block runs. */
-macro Unit $x2cui.begin_result_block(Name $block, Name $begin, Name $end) {
+   column and card do. The form declares `$result`, a `bool`, before the
+   block and stores the begin call's result in it before the block runs.
+   `$kind` is `bool`: a type the template is given, because a declaration
+   in a decorator spells its type through a hole. */
+macro Unit $x2cui.begin_result_block(
+  Name $block, Name $begin, Name $end, Type $kind) {
   macro Decorator $Ui.$block(
-    Stmt $body, Expr $ui, Expr $result, Expr @args, Entry @options) {
+    Stmt $body, Expr $ui, Name $result, Expr @args, Entry @options) {
+    $kind $result = false;
     {
       typeof($ui) ui = $ui;
       $result =
@@ -87,27 +94,35 @@ macro Unit $x2cui.begin_result_block(Name $block, Name $begin, Name $end) {
   }
 }
 
-/* `ui.kanban_column (add, "Backlog", count) { ... }` stores in `add`
+/* `ui.kanban_column (add, "Backlog", count) { ... }` declares `add`,
    whether its "+" was clicked; `ui.kanban_card (clicked, id) { ... }`
-   stores whether the card was clicked. */
+   declares whether the card was clicked. */
 $x2cui.begin_result_block(kanban_column, kanban_column_begin,
-                          kanban_column_end);
-$x2cui.begin_result_block(kanban_card, kanban_card_begin, kanban_card_end);
+                          kanban_column_end, bool);
+$x2cui.begin_result_block(kanban_card, kanban_card_begin, kanban_card_end,
+                          bool);
 
-/** Runs the block inside a kanban board, whose columns are
-    `ui.kanban_column` blocks. `$moved` is a `bool` and `$move` a
-    `cui_kanban_move` of the caller's: when a card was dropped in a new
-    place this frame, `$moved` is set and `$move` says where.
-*/
-macro Decorator $Ui.kanban(
-  Stmt $body, Expr $ui, Expr $moved, Expr $move, Expr $id) {
-  {
-    typeof($ui) ui = $ui;
-    ui.kanban_begin($id);
-    defer $moved = ui.kanban_end($move);
-    $body
+/* The template of `ui.kanban`, given the types it declares. */
+macro Unit $x2cui.kanban_block(Type $kind, Type $record) {
+  /** Runs the block inside a kanban board, whose columns are
+      `ui.kanban_column` blocks. The form declares `$moved`, a `bool`, and
+      `$move`, a `cui_kanban_move`: when a card was dropped in a new place
+      this frame, `$moved` is set and `$move` says where.
+  */
+  macro Decorator $Ui.kanban(
+    Stmt $body, Expr $ui, Name $moved, Name $move, Expr $id) {
+    $kind $moved = false;
+    $record $move = {};
+    {
+      typeof($ui) ui = $ui;
+      ui.kanban_begin($id);
+      defer $moved = ui.kanban_end($move);
+      $body
+    }
   }
 }
+
+$x2cui.kanban_block(bool, cui_kanban_move);
 
 /*  Lists and tables
 

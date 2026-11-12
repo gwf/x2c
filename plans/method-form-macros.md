@@ -8,8 +8,10 @@
 > Entry @options too." and then "Fix the foreach and computed macro name
 > limits too." and "Fix the computed parameter list limit too."; all five
 > are implemented on the same branch (PR 661). His later "Fix file-scope
-> method forms too." is implemented on `gwf/method-form-file-scope`, based
-> on `934888ffc`, for a follow-up PR. Decision
+> method forms too." is implemented on `gwf/method-form-file-scope` (PR
+> 662). PRs 661 and 662 are merged. The type-name form, `T.name(...)`,
+> approved on 2026-11-12, is on `gwf/method-form-static`, based on `dev` at
+> `43b158c28`. Decision
 > 5 and the x2cui macros are package work on the x2cui branch.
 > The prototype that preceded the implementation is on the local branch
 > `gwf/scratch-x2cui-method-ui` on top of `x2cui` at `b393dd58c`.
@@ -379,6 +381,46 @@ need each decorator's target parser before the decorator is known. The
 explicit spelling `$T.name(receiver, ...)` works in both cases. Verified in
 `macro-method-form-file-scope` and `import-method-form-file-scope`.
 
+### Type-name forms
+
+A call on a type name, `T.name(arguments)`, invokes `$T.name` when it is
+visible, with the arguments unchanged, as `$T.name(arguments)` takes them.
+There is no receiver argument. Before this change, the macro was not
+consulted: `Win.open(width: 3, height: 4)` called the function and reported
+"function takes 1 argument, not 2".
+
+`T.name` is parsed by `parse_complex_identifier`, which folds it into the
+function name `T_name`; a call on it never reaches `_parse_postfix_dot`.
+The hook is in `parse_variable`, after that fold, when `(` follows. The
+new `Compiler.try_parse_static_macro` recovers `T` and `name` from the
+folded spelling and the last tokens. It applies only when the token before
+`name` is `.` and `T` names a typedef. It then finds `$T.name` through the
+same lookup as the receiver form, now `_type_macro`, so package types use
+their source names. An Expression macro is invoked through
+`_expression_invocation`, as a `$T.name(...)` call is. A decorator at the
+start of a statement raises `<method-dec>`, and `_expression_statement`
+applies it as it applies the receiver form. Size: 38 lines added and 1
+removed.
+
+Rules and choices:
+
+- **Self-call.** A `T.name(...)` call written in `$T.name`'s own template
+  is the function. The check is the lexical `_own_definition` comparison
+  the receiver form uses.
+- **Shadowing.** Everywhere else, `$T.name` takes the call.
+- **Arguments unchanged.** A method `T.name` is a function that is
+  callable as `r.name(x)` and as `T.name(r, x)`; the folded call already
+  resolved to the same function. Both spellings now reach the same macro,
+  and `Ui.button(ui, "T")` is `$Ui.button(ui, "T")`. Verified.
+- **Templates.** A type name is known where a template is defined, so the
+  form is recognized then, with no deferral. Verified with a hole-free
+  template and a hole argument.
+- **File scope.** Only the receiver form applies a file-scope decorator. An
+  item that begins with a type name is a declaration, as before.
+
+Verified in `macro-method-form-static` and `import-method-form-static`,
+which calls `panels.Panel.label(panel, 3)` on an imported package type.
+
 ## Compatibility
 
 - Code without a `$T.NAME` macro is unaffected. Every existing compiler
@@ -492,7 +534,8 @@ What remains:
   Decl holes and computed names: `macro-decl-foreach` and
   `macro-computed-name`. Arguments before Entry rows:
   `macro-sequence-entry-rows`. File scope: `macro-method-form-file-scope`
-  and `import-method-form-file-scope`.
+  and `import-method-form-file-scope`. Type names: `macro-method-form-static`
+  and `import-method-form-static`.
 - The x2cui to-do `--shot` image stays byte-identical to the one drawn with
   `$cui.row`; it is, for every prototype commit.
 - `make stage-3`, `make verify-fixtures`, and `precommit`.

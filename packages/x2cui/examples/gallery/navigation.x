@@ -15,10 +15,8 @@ void page_navigation(Ui ui, Gallery g) {
       ui.secondary("Tabs switch between views of the same thing. Content "
                    "changes in place.");
     }
-    static const char *tab_icons[] = { CUI_ICON_USER, CUI_ICON_LOCK,
-                                       CUI_ICON_CREDIT_CARD };
     ui.tabs("tabs2", %("Account" "Password" "Billing"), g.tab2,
-            variant: pill, icons: tab_icons);
+            variant: pill, icons: [user, lock, credit_card]);
   }
   section(ui, "Breadcrumb and pagination", NULL);
   ui.card (gap: 18) {

@@ -113,22 +113,18 @@ void page_data(Ui ui, Gallery g) {
                                   "go.");
   // The rows carry their own edges: no card around them.
   ui.column (width: fill) {
-    List tasks = %("Write the release notes" "Record the demo video"
-                   "Update the screenshots" "Tag version 1.0"
-                   "Post the announcement");
-    // One tone per label, wherever it appears.
-    static const cui_tone tones[5] = {
-      CUI_TONE_INFO, CUI_TONE_NEUTRAL, CUI_TONE_INFO, CUI_TONE_WARNING,
-      CUI_TONE_TEAL };
-    List labels = %("Docs" "Video" "Docs" "Release" "Blog");
-    bool changed;
+    // A task is: title, label, and the label's tone.
+    List tasks = %(("Write the release notes" "Docs" info)
+                   ("Record the demo video" "Video" neutral)
+                   ("Update the screenshots" "Docs" info)
+                   ("Tag version 1.0" "Release" warning)
+                   ("Post the announcement" "Blog" teal));
     ui.reorder (changed, "tasks", g.task_order)
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < tasks.len(); i++) {
       ui.reorder_item (i) {
-        int t = g.task_order[i];
-        String task = tasks[t], label = labels[t];
+        (String task, String label, Symbol tone) = tasks[g.task_order[i]];
         ui.text(task, nowrap: true, width: fill);
-        ui.badge(label, tone: tones[t]);
+        ui.badge(label, tone: cui_tone.named(tone));
       }
     }
     if (changed) ui.toast("Order saved");

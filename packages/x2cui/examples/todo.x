@@ -2,7 +2,7 @@
 
     The program keeps its tasks in an ordinary Array and describes the
     whole screen on every frame. It adds a task from a text field, filters
-    the list, removes a task, confirms before clearing the finished ones,
+    the list, removes a task, confirms before clearing the done ones,
     and saves the list to a file after each change.
 
       todo [FILE]             open a window; FILE defaults to todo.txt
@@ -149,8 +149,8 @@ int main(int argc, char **argv) {
 
   todo.file = argc > 1 ? argv[1] : "todo.txt";
   load(todo);
-  App app = auto App.open({ .title = "To do", .width = 520, .height = 640,
-                            .min_width = 360, .min_height = 420 });
+  App app = auto App.open(title: "To do", width: 520, height: 640,
+                          min_width: 360, min_height: 420);
   while (app.frame()) draw(app.ui(), todo);
   return 0;
 }

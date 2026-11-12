@@ -7,12 +7,15 @@
 
       gallery              browse the pages in a window
       gallery --shots DIR  draw every page off screen to DIR/NN-NAME.png
+      gallery --time NAME N
+                           time N frames of the page NAME off screen
 
     The window follows CUI's: Ctrl or Command K opens the command palette,
     and J switches between light and dark.
 */
 
 #include "path.x"
+#include "time.x"
 #include "gallery/state.x"
 #include "gallery/overview.x"
 #include "gallery/buttons.x"
@@ -102,12 +105,13 @@ static void paint_swatch(Ui ui, cui_rect area, void *user) {
 }
 
 static void accent_row(Ui ui, Gallery g) {
-  static const unsigned colors[CUI_ACCENT_COUNT] = {
-    0x555555, 0x7747ff, 0x0562ef, 0x00864b, 0xf3ad20, 0xc25300, 0xd1403a,
-    0xd23286 };
+  // CUI's accents, in the order `cui_accent` declares them.
+  List colors = %(0x555555 0x7747ff 0x0562ef 0x00864b 0xf3ad20 0xc25300
+                  0xd1403a 0xd23286);
   ui.row (justify: between) {
-    for (int accent = 0; accent < CUI_ACCENT_COUNT; accent++) {
-      Swatch swatch = { CUI_RGB(colors[accent]), g.accent == accent };
+    for (int accent = 0; accent < colors.len(); accent++) {
+      unsigned hex = colors[accent];
+      Swatch swatch = { CUI_RGB(hex), g.accent == accent };
       // The canvas copies the swatch, because it paints when the frame ends.
       cui_canvas_result result = ui.canvas(
         %"accent-$accent", 22, 22, paint_swatch, &swatch,
@@ -124,9 +128,9 @@ static void accent_row(Ui ui, Gallery g) {
 // The page list: a column beside the page, or the body of a drawer.
 static void sidebar(Ui ui, Gallery g, bool drawer) {
   ui.column (
-      width: drawer ? fill : 240, height: fill,
-      bg: drawer ? CUI_TRANSPARENT : surface_muted,
-      pad: drawer ? 0 : 12, gap: 2) {
+    width: drawer ? fill : 240, height: fill,
+    bg: drawer ? CUI_TRANSPARENT : surface_muted,
+    pad: drawer ? 0 : 12, gap: 2) {
     if (!drawer) ui.row (gap: 10, pad_x: 8, pad_top: 6,
                          pad_bottom: 18) {
       ui.box (width: 28, height: 28, radius: 9,
@@ -155,10 +159,9 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
       }
     }
     ui.column (gap: 12, pad: 8) {
-      static const char *mode_icons[] = { CUI_ICON_SUN, CUI_ICON_MOON };
       int mode = g.dark;
       if (ui.segmented("theme", %("Light" "Dark"), mode,
-            full_width: true, icons: mode_icons, size: sm))
+            full_width: true, icons: [sun, moon], size: sm))
         set_theme(ui, g, mode == 1);
       accent_row(ui, g);
     }
@@ -207,18 +210,18 @@ static void dialogs(Ui ui, Gallery g) {
     ui.list_item("Priya invited you to Engines",
       avatar: "Priya Nair", subtitle: "1 hour ago");
   }
-  static const cui_command commands[] = {
-    { "Go to Overview", CUI_ICON_LAYOUT_DASHBOARD, "Navigation" },
-    { "Go to Buttons", CUI_ICON_ZAP, "Navigation" },
-    { "Go to Inputs", CUI_ICON_TYPE, "Navigation" },
-    { "Go to Charts", CUI_ICON_CHART_LINE, "Navigation" },
-    { "Toggle dark mode", CUI_ICON_MOON, "Preferences", "Ctrl J" },
-    { "Change accent color", CUI_ICON_PALETTE, "Preferences" },
-    { "New project", CUI_ICON_PLUS, "Actions", "Ctrl N" },
-    { "Invite teammate", CUI_ICON_USER_PLUS, "Actions" },
-    { "Open settings", CUI_ICON_SETTINGS, "Actions", "Ctrl ," },
-  };
-  switch (ui.command_palette(g.palette_open, commands)) {
+  switch (ui.command_palette(g.palette_open, [
+    {title: "Go to Overview", icon: layout_dashboard, group: "Navigation"},
+    {title: "Go to Buttons", icon: zap, group: "Navigation"},
+    {title: "Go to Inputs", icon: type, group: "Navigation"},
+    {title: "Go to Charts", icon: chart_line, group: "Navigation"},
+    {title: "Toggle dark mode", icon: moon, group: "Preferences",
+     shortcut: "Ctrl J"},
+    {title: "Change accent color", icon: palette, group: "Preferences"},
+    {title: "New project", icon: plus, group: "Actions", shortcut: "Ctrl N"},
+    {title: "Invite teammate", icon: user_plus, group: "Actions"},
+    {title: "Open settings", icon: settings, group: "Actions",
+     shortcut: "Ctrl ,"}])) {
     case 0: g.page = PAGE_OVERVIEW; break;
     case 1: g.page = PAGE_BUTTONS; break;
     case 2: g.page = PAGE_INPUTS; break;
@@ -300,13 +303,45 @@ static int shoot(Gallery g, Path directory) {
   return empty ? 1 : 0;
 }
 
+static double seconds(void) => Time.monotonic().total_seconds();
+
+/* Prints the mean time to describe a frame of the page `name`, as its
+   image is named, and the mean time of a whole frame, over `count` frames
+   off screen after 30 that settle layout and animations. */
+static int time_page(Gallery g, String name, int count) {
+  g.page = -1;
+  for (int page = 0; page < page_total(); page++)
+    if (pages[page].name.lower().replace(" ", "-") == name) g.page = page;
+  if (g.page < 0) return fprintf(stderr, "no page %s\n", name), 2;
+  Offscreen screen = auto Offscreen.open(1240, 4800);
+  for (int i = 0; i < 30; i++) {
+    screen.begin();
+    draw(screen.ui(), g);
+    screen.end();
+  }
+  double describing = 0, start = seconds();
+  for (int i = 0; i < count; i++) {
+    double before = seconds();
+    screen.begin();
+    draw(screen.ui(), g);
+    describing += seconds() - before;
+    screen.end();
+  }
+  double whole = seconds() - start;
+  printf("%s, %d frames\n", name, count);
+  printf("  describing a frame  %8.3f ms\n", describing * 1000 / count);
+  printf("  whole frame         %8.3f ms\n", whole * 1000 / count);
+  return 0;
+}
+
 int main(int argc, char **argv) {
   Gallery g = Gallery.new();
   if (argc == 3 && !strcmp(argv[1], "--shots")) return shoot(g, argv[2]);
+  if (argc == 4 && !strcmp(argv[1], "--time"))
+    return time_page(g, argv[2], atoi(argv[3]));
 
-  App app = auto App.open({ .title = "CUI Gallery", .width = 1240,
-                            .height = 820, .min_width = 720,
-                            .min_height = 480 });
+  App app = auto App.open(title: "CUI Gallery", width: 1240, height: 820,
+                          min_width: 720, min_height: 480);
   while (app.frame()) draw(app.ui(), g);
   return 0;
 }

@@ -39,17 +39,17 @@ void page_selection(Ui ui, Gallery g) {
   section(ui, "Radio cards",
           "For choices that need a sentence of explanation.");
   {
-    static const cui_choice places[] = {
-      { "This computer",
-        "Saved next to the project. Nothing leaves the machine.",
-        CUI_ICON_MONITOR, NULL },
-      { "Team server", "Synced to your company server every few minutes.",
-        CUI_ICON_SERVER, "Default" },
-      { "Both", "A local copy, uploaded to the server every night.",
-        CUI_ICON_LAYERS, NULL },
-    };
     // The page ignores the result, so the method stands in for the macro.
-    ui.radio_cards("places", places, g.plan_card);
+    ui.radio_cards("places", [
+      {title: "This computer",
+       description: "Saved next to the project. Nothing leaves the machine.",
+       icon: monitor},
+      {title: "Team server",
+       description: "Synced to your company server every few minutes.",
+       icon: server, badge: "Default"},
+      {title: "Both",
+       description: "A local copy, uploaded to the server every night.",
+       icon: layers}], g.plan_card);
   }
   section(ui, "Sliders",
           "Drag past either end: the track stretches like rubber.");

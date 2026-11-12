@@ -29,16 +29,14 @@ static void scene_empty_state(Ui ui) {
 static void scene_metric(Ui ui) {
   // cui_metric_opts takes the sparkline as a
   // `const float *spark, int spark_count` pair.
-  static const float installs[] = { 3, 5, 4, 7, 6, 9, 11 };
-  static const float frame_time[] = { 9, 7, 8, 6, 5, 6, 4, 4, 3 };
   ui.row (gap: 16, width: fill) {
     ui.metric("Weekly installs", "3,912",
       icon: download, delta: 8.1f,
-      delta_label: "+8.1% vs last week", spark: installs,
+      delta_label: "+8.1% vs last week", spark: [3, 5, 4, 7, 6, 9, 11],
       spark_count: 7, width: grow(1));
     ui.metric("Frame time", "0.4 ms",
       icon: zap, delta: -18.0f, delta_label: "-18% vs v0.9",
-      lower_is_better: true, spark: frame_time, spark_count: 9,
+      lower_is_better: true, spark: [9, 7, 8, 6, 5, 6, 4, 4, 3],
       width: grow(1));
   }
 }
@@ -77,19 +75,15 @@ static void scene_tree(Ui ui) {
 
 static void scene_list_item(Ui ui) {
   static int chosen = 1;
-  static const char *titles[] = { "Design review", "Release 1.0",
-                                  "Planning" };
-  static const char *people[] = { "Jonas Berg", "Priya Nair",
-                                  "Tomas Rivera" };
-  static const char *times[] = { "Tomorrow at 10:00", "Ship it",
-                                 "Q1 roadmap" };
-  static const char *lengths[] = { "45m", "2h", "1h" };
+  // A row is: title, person, when, and length.
+  List rows = %(("Design review" "Jonas Berg" "Tomorrow at 10:00" "45m")
+                ("Release 1.0" "Priya Nair" "Ship it" "2h")
+                ("Planning" "Tomas Rivera" "Q1 roadmap" "1h"));
   ui.card (width: 360, pad: 8, gap: 2) {
-    for (int i = 0; i < 3; i++) {
-      if (ui.list_item(titles[i], avatar: people[i],
-                                  subtitle: times[i],
-                                  trailing: lengths[i],
-                                  selected: i == chosen))
+    for (int i = 0; i < rows.len(); i++) {
+      (String title, String person, String when, String length) = rows[i];
+      if (ui.list_item(title, avatar: person, subtitle: when,
+                       trailing: length, selected: i == chosen))
         chosen = i;
     }
   }
@@ -167,24 +161,21 @@ static void scene_hold_button(Ui ui) {
 static void scene_reorder_item(Ui ui) {
   static ArrayInt order;
   if (!order) order = [0, 1, 2, 3, 4];
-  static const char *tasks[] = {
-    "Write the release notes", "Record the demo video",
-    "Update the screenshots", "Tag version 1.0", "Post the announcement" };
-  static const char *labels[] = { "Docs", "Video", "Docs", "Release",
-                                  "Blog" };
-  static const cui_tone tones[] = { CUI_TONE_INFO, CUI_TONE_NEUTRAL,
-                                    CUI_TONE_INFO, CUI_TONE_WARNING,
-                                    CUI_TONE_TEAL };
+  // A task is: title, label, and the label's tone.
+  List tasks = %(("Write the release notes" "Docs" info)
+                 ("Record the demo video" "Video" neutral)
+                 ("Update the screenshots" "Docs" info)
+                 ("Tag version 1.0" "Release" warning)
+                 ("Post the announcement" "Blog" teal));
   ui.text("Drag a row. The others make room as you go.",
           color: text_muted);
   ui.column (width: 440) {
-    bool changed;
     ui.reorder (changed, "tasks", order)
-    for (int i = 0; i < 5; i++) {
-      int task = order[i];
+    for (int i = 0; i < tasks.len(); i++) {
+      (String title, String label, Symbol tone) = tasks[order[i]];
       ui.reorder_item (i) {
-        ui.text(tasks[task], nowrap: true, width: fill);
-        ui.badge(labels[task], tone: tones[task]);
+        ui.text(title, nowrap: true, width: fill);
+        ui.badge(label, tone: cui_tone.named(tone));
       }
     }
     if (changed) ui.toast("Order saved");
@@ -208,30 +199,29 @@ static void scene_timeline_item(Ui ui) {
 }
 
 static void scene_kanban_column_begin(Ui ui) {
-  static const char *columns[] = { "Backlog", "In progress", "Done" };
-  static const char *cards[3][2] = {
-    { "Audit the color tokens", "Virtualize the feed" },
-    { "Keyboard nav in date ranges", NULL },
-    { "Spring presets", NULL } };
-  static const char *owners[3][2] = {
-    { "Maya Okafor", "Jonas Berg" }, { "Priya Nair", NULL },
-    { "Rosa Delgado", NULL } };
-  static const int counts[] = { 2, 1, 1 };
-  bool moved, added, clicked;
-  cui_kanban_move move;
+  // Each column is its title and its cards, a card a title and an owner.
+  List board = %(
+    ("Backlog" ("Audit the color tokens" "Maya Okafor")
+               ("Virtualize the feed" "Jonas Berg"))
+    ("In progress" ("Keyboard nav in date ranges" "Priya Nair"))
+    ("Done" ("Spring presets" "Rosa Delgado")));
   ui.kanban (moved, move, "board")
-  for (int c = 0; c < 3; c++)
-    ui.kanban_column (added, columns[c], counts[c],
+  for (int c = 0; c < board.len(); c++) {
+    List column = board[c], cards = column.cdr();
+    ui.kanban_column (added, column[0], cards.len(),
                       dot: CUI_COLOR_SERIES(c), limit: c == 1 ? 3 : 0,
                       width: 200)
-    for (int k = 0; k < counts[c]; k++)
+    for (int k = 0; k < cards.len(); k++) {
+      (String title, String owner) = cards[k];
       ui.kanban_card (clicked, c * 10 + k) {
-        ui.text(cards[c][k], font: medium, size: 13.5f);
+        ui.text(title, font: medium, size: 13.5f);
         ui.row (gap: 8, align: center) {
-          ui.avatar(owners[c][k], size: 22);
-          ui.text(owners[c][k], size: 12, color: text_muted);
+          ui.avatar(owner, size: 22);
+          ui.text(owner, size: 12, color: text_muted);
         }
       }
+    }
+  }
   if (moved) ui.toast("Card moved");
 }
 
@@ -274,11 +264,12 @@ static void scene_agent_status(Ui ui) {
 static void scene_context_meter(Ui ui) {
   // cui_context_opts takes the breakdown as a
   // `const cui_viz_item *parts, int part_count` pair.
-  static const cui_viz_item parts[] = {
-    { "System", 3200 }, { "Files", 41800 }, { "Messages", 68400 } };
   ui.row (gap: 10, align: center) {
     ui.context_meter("context", 113400, 200000,
-                     parts: parts, part_count: 3);
+                     parts: [
+                       {label: "System", value: 3200},
+                       {label: "Files", value: 41800},
+                       {label: "Messages", value: 68400}], part_count: 3);
     ui.text("113k of 200k tokens used. Hover the ring for a breakdown.",
             color: text_secondary);
   }
@@ -302,30 +293,31 @@ static void scene_chat_composer(Ui ui) {
   // cui_composer_opts takes `const char *const *attachments,
   // int attachment_count`, `const cui_model *models, int model_count`, and
   // the option field `int *model`, which needs `&`.
-  static const char *files[] = { "quarterly-report.pdf", "metrics.csv" };
-  static const cui_model models[] = {
-    { "Atlas", "Longer answers, reads files and code", "New",
-      CUI_ICON_LAYERS },
-    { "Atlas Fast", "Short answers in about a second", NULL, CUI_ICON_ZAP },
-    { "Atlas Mini", "Runs on your own machine", NULL, CUI_ICON_BOX } };
   static int model = 0;
   int events = ui.chat_composer("composer", draft,
-    placeholder: "Ask a follow up", attachments: files,
-    attachment_count: 2, models: models, model_count: 3,
+    placeholder: "Ask a follow up", attachments: [
+      "quarterly-report.pdf", "metrics.csv"],
+    attachment_count: 2, models: [
+      {name: "Atlas", detail: "Longer answers, reads files and code",
+       badge: "New", icon: layers},
+      {name: "Atlas Fast", detail: "Short answers in about a second",
+       icon: zap},
+      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}],
+      model_count: 3,
     model: &model, width: fill);
   if (events & CUI_COMPOSER_SEND) draft.set("");
 }
 
 static void scene_voice_orb(Ui ui) {
-  static const char *names[] = { "Idle", "Listening", "Thinking",
-                                 "Speaking" };
-  static const float levels[] = { 0.2f, 0.7f, 0.2f, 0.5f };
+  // An orb is its state's name and its input level, in state order.
+  List orbs = %(("Idle" 0.2) ("Listening" 0.7) ("Thinking" 0.2)
+                ("Speaking" 0.5));
   ui.row (gap: 18, align: center) {
-    for (int k = 0; k < 4; k++) {
-      ui.id (k) ui.column (align: center,
-                                      gap: 6) {
-        ui.voice_orb("orb", (cui_voice_state) k, levels[k], size: 130);
-        ui.text(names[k], size: 13, color: text_secondary);
+    for (int k = 0; k < orbs.len(); k++) {
+      (String name, float level) = orbs[k];
+      ui.id (k) ui.column (align: center, gap: 6) {
+        ui.voice_orb("orb", (cui_voice_state) k, level, size: 130);
+        ui.text(name, size: 13, color: text_secondary);
       }
     }
   }
@@ -376,34 +368,34 @@ static void scene_number_roll(Ui ui) {
 
 static void scene_gradient_text(Ui ui) {
   ui.gradient_text("Kiln 2.4", font: display, size: 44,
-                               from: CUI_RGB(0x6366f1),
-                               to: CUI_RGB(0xec4899), animate: true);
+                               from: 0x6366f1,
+                               to: 0xec4899, animate: true);
   ui.text("The build tool for screens that ship on time.",
           color: text_secondary);
 }
 
 static void scene_spotlight(Ui ui) {
-  static const char *titles[] = { "Software", "OpenGL 3.3", "Your own" };
-  static const char *blurbs[] = {
-    "Plain C into a pixel buffer. No GPU needed.",
-    "The default on desktop. Deploying now.",
-    "The core emits triangles; bring any GPU API." };
+  List renderers = %(
+    ("Software" "Plain C into a pixel buffer. No GPU needed.")
+    ("OpenGL 3.3" "The default on desktop. Deploying now.")
+    ("Your own" "The core emits triangles; bring any GPU API."));
   ui.row (gap: 14, align: stretch, width: fill) {
-    for (int k = 0; k < 3; k++) {
+    for (int k = 0; k < renderers.len(); k++) {
+      (String title, String blurb) = renderers[k];
       ui.id (k)
-      ui.spotlight ("renderer", width: grow(1),
-                                beam: k == 1) {
-        ui.text(titles[k], font: medium, size: 15);
-        ui.text(blurbs[k], size: 13, color: text_secondary);
+      ui.spotlight ("renderer", width: grow(1), beam: k == 1) {
+        ui.text(title, font: medium, size: 15);
+        ui.text(blurb, size: 13, color: text_secondary);
       }
     }
   }
 }
 
 static void scene_loader(Ui ui) {
-  static const char *names[] = { "Dots", "Bars", "Pulse", "Orbit", "Grid" };
+  // The loader styles, in the order `cui_loader_style` declares them.
+  List names = %("Dots" "Bars" "Pulse" "Orbit" "Grid");
   ui.row (gap: 36, align: center) {
-    for (int k = 0; k < 5; k++) {
+    for (int k = 0; k < names.len(); k++) {
       ui.column (gap: 10, align: center) {
         ui.loader(style: (cui_loader_style) k, size: 30);
         ui.text(names[k], size: 12, color: text_muted);
@@ -417,17 +409,17 @@ static void scene_dock(Ui ui) {
              justify: end, align: center)
   ui.dock ("dock") {
     if (ui.dock_item(folder, "Files",
-                     color: CUI_RGB(0x3b82f6), running: true))
+                     color: 0x3b82f6, running: true))
       ui.toast("Files");
-    ui.dock_item(mail, "Mail", color: CUI_RGB(0x0ea5e9),
+    ui.dock_item(mail, "Mail", color: 0x0ea5e9,
                                         badge: 3, running: true);
     ui.dock_item(calendar, "Calendar",
-                 color: CUI_RGB(0xef4444));
-    ui.dock_item(music, "Music", color: CUI_RGB(0xec4899),
+                 color: 0xef4444);
+    ui.dock_item(music, "Music", color: 0xec4899,
                                           running: true);
     ui.dock_item(square_terminal, "Terminal",
-                 color: CUI_RGB(0x27272a));
-    ui.dock_item(palette, "Design", color: CUI_RGB(0x8b5cf6));
+                 color: 0x27272a);
+    ui.dock_item(palette, "Design", color: 0x8b5cf6);
     ui.dock_separator();
     ui.dock_item(settings, "Settings");
     ui.dock_item(trash_2, "Trash");

@@ -30,8 +30,16 @@
                                      *_icon, or a parameter CUI names
                                      icon
       a number for a cui_size        pixels: 26 is CUI_PX(26)
+      a number for a cui_color       0xRRGGBB: 0x3b82f6 is
+                                     CUI_RGB(0x3b82f6)
       grow(w) for a cui_size         CUI_GROW(w)
       test ? a : b                   each arm lowered
+      an Array literal for a         a static array, with its count
+      pointer                        when the count is left out; a Map
+                                     literal element is one record:
+                                     [{to: 60, tone: success}] is a
+                                     cui_gauge_band array; in icons or
+                                     *_icons each element is an icon
 
     A short name is in lower case. A declared name keeps its own value,
     and so does a C macro such as CUI_FILL or NULL.
@@ -127,9 +135,12 @@ meta List x2cui_value(Type type, List value) {
       return _short(type, name, value);
     case %(expr () (call (expr () (ident (binding ? "grow"))) (args ?weight))):
       return _size(type) ? _cui_call("CUI_GROW", weight) : value;
+    case %(expr ? (array *elements)):
+      return _array(type, elements);
   }
-  return _size(type) && Type.numeric(Code.type(value))
-    ? _cui_call("CUI_PX", value) : value;
+  if (!Type.numeric(Code.type(value))) return value;
+  if (_size(type)) return _cui_call("CUI_PX", value);
+  return type ~= %("cui_color") ? _cui_call("CUI_RGB", value) : value;
 }
 
 /** Returns the designated initializer of the record `record` that sets
@@ -138,15 +149,7 @@ meta List x2cui_value(Type type, List value) {
     the count of the array when `options` leave the count out.
 */
 meta List x2cui_record(Type record, List options) {
-  List fields = Type.fields(record);
-  Array rows = [];
-  foreach (List row in options) {
-    rows.push(_field(fields, row));
-    String count = _count_field(fields, _key(row));
-    if (count && !_option(options, count))
-      rows.push(%(dotinit ($count) $(_count(row[2]))));
-  }
-  List initializers = rows.list_free();
+  List initializers = _initializers(record, options, NULL);
   return $!( ($record){ @initializers } );
 }
 
@@ -202,12 +205,13 @@ meta static Type _signature(List ui, String method) {
 
 /* `name: value` sets the field `name`. A name the record does not have
    keeps its value, so the C compiler reports the field. */
-meta static List _field(List fields, List row) {
+meta static List _field(List fields, List row, Array statics) {
   String name = _key(row);
   List field = fields.find(%!(List f) => f.car() == name);
   Type type = field ? field[1] : NULL;
   if (type && Type.is_text(type) && _icon_field(name)) type = _icon();
-  return %(dotinit ($name) $(x2cui_value(type, row[2])));
+  if (type && type.car() == <*> && _icons_field(name)) type = _icons();
+  return %(dotinit ($name) $(_lower(type, row[2], statics)));
 }
 
 /* The count field that follows the array field `name`: `part_count`
@@ -217,7 +221,9 @@ meta static String _count_field(List fields, String name) {
   for (int i = 0; i + 1 < fields.len(); i++) {
     if (fields[i].car() != name) continue;
     String count = fields[i + 1].car();
-    if (!count.endswith("_count") || fields[i][1].car() != <*>) return NULL;
+    if (fields[i][1].car() != <*>) return NULL;
+    if (count == "count") return count;
+    if (!count.endswith("_count")) return NULL;
     String stem = count[:count.len() - 6];
     if (name == stem || name == stem + "s" ||
         (stem.endswith("y") && name == stem[:stem.len() - 1] + "ies"))
@@ -249,6 +255,10 @@ meta static List _count(List array) {
     case %(expr ? (op ? ?test ?yes ?no)):
       return _choice(test, _count(yes), _count(no));
     case %(expr ? (ident (binding ? "NULL"))): return $!( 0 );
+    case %(expr ? (array *elements)): {
+      int n = elements.len();
+      return $!( $n );
+    }
   }
   Macro count = $x2cui.count;
   return Macro_apply(count, %($array));
@@ -260,6 +270,19 @@ meta static int _number(List literal) {
     case %(expr ? (literal ? ?(String digits))): return atoi(digits);
   }
   return -1;
+}
+
+// The designated initializers of `x2cui_record`, without the record type.
+meta static List _initializers(Type record, List options, Array statics) {
+  List fields = Type.fields(record);
+  Array rows = [];
+  foreach (List row in options) {
+    rows.push(_field(fields, row, statics));
+    String count = _count_field(fields, _key(row));
+    if (count && !_option(options, count))
+      rows.push(%(dotinit ($count) $(_count(row[2]))));
+  }
+  return rows.list_free();
 }
 
 // The name of a `name: value` row.
@@ -306,6 +329,103 @@ meta static List _column_of(
 
 // values
 
+/* The static array an Array literal of `elements` lowers to where a
+   pointer of type `type` is expected. A Map literal element is one record,
+   its rows lowered as option rows are; any other element is one value
+   lowered by the element type. An Array literal inside a record is a
+   static array declared before the array that points to it, and `[]` is
+   NULL with a count of 0. The arrays are constant, initialized once: a
+   pointer to elements that are not `const`, which CUI may write through,
+   refuses a literal, so a literal never keeps state between frames. */
+meta static List _array(Type type, List elements) {
+  if (!elements) return _free_name("NULL");
+  Array statics = [];
+  List array = _static(type, elements, statics);
+  List declarations = statics.list_free();
+  Type cast = type ~= %(icons) ? %(* const * const char) : type;
+  return $!( ($cast) ({ @declarations $array; }) );
+}
+
+/* Declares the static array of `elements` in `statics`, after the arrays
+   its records point to, and returns its name, a fresh one. */
+meta static List _static(Type type, List elements, Array statics) {
+  if (!elements) return _free_name("NULL");
+  int icons = type ~= %(icons);
+  // `(* const "cui_viz_item")` points to `(const "cui_viz_item")`.
+  Type element = icons ? _icon() : type.cdr();
+  if (!icons && element.car() != <const>)
+    raise %(bad-arg (operation "Array literal")
+            (reason "CUI may write through this array: name it instead"));
+  Type value = icons ? element : element.cdr();
+  List rows = elements.map(%!(List e) => _element(value, e, statics));
+  List name = x2c_binding_fresh("x2cui_array");
+  if (icons) statics.push($!{ static const char *const $name[] = { @rows }; });
+  else statics.push($!{ static $element $name[] = { @rows }; });
+  Type pointer = icons ? %(* const * const char) : type;
+  return $!( ($pointer) $name );
+}
+
+meta static List _element(Type element, List value, Array statics) {
+  match (value) {
+    case %(expr ? (map *rows)): {
+      List initializers = _initializers(element, rows, statics);
+      return $!( { @initializers } );
+    }
+  }
+  return _lower(element, value, statics);
+}
+
+/* `value` lowered by `type`, the type of a field: an Array literal is a
+   static array declared in `statics`, when there are any, or the braced
+   elements of a field that is a C array, and a Map literal is the braced
+   fields of a field that is a record. */
+meta static List _lower(Type type, List value, Array statics) {
+  if (!type) return value;
+  match (value) {
+    case %(expr ? (array *elements)): {
+      if (_dimension(type)) {
+        Type element = type.cdr();
+        List items = elements.map(%!(List e) => _lower(element, e, statics));
+        return $!( { @items } );
+      }
+      if (statics != NULL) return _static(type, elements, statics);
+    }
+    case %(expr ? (map *rows)): {
+      List initializers = _initializers(type, rows, statics);
+      return $!( { @initializers } );
+    }
+  }
+  if (statics != NULL && !_fixed(value))
+    raise %(bad-arg (operation "Array literal")
+            (reason "an element is not a constant: name the array instead"));
+  return x2cui_value(type, value);
+}
+
+/* Whether `value` is a constant a static array can hold: a literal, a
+   name x2c does not declare (a short name or a C macro such as
+   CUI_RGB), an enum constant, a static array, or an operator or a call
+   of a C macro on constants. A variable's value would be read once and
+   kept, so it is refused. */
+meta static int _fixed(List value) {
+  match (value) {
+    case %(expr ? (literal *)): return 1;
+    case %(expr () (ident *)): return 1;
+    case %(expr (enum *) (ident *)): return 1;
+    case %(expr ((dim *) *) (ident *)): return 1;
+    case %(expr ? (op ? *operands)):
+      return operands.all(%!(List v) => _fixed(v));
+    case %(expr ? (call (expr () (ident *)) (args *arguments))):
+      return arguments.all(%!(List v) => _fixed(v));
+  }
+  return 0;
+}
+
+// Whether `type` is a C array, as `int parent[2]` is: `((dim ("2")) int)`.
+meta static int _dimension(Type type) {
+  Var head = type.car();
+  return head is <list> && ((List) head).car() == <dim>;
+}
+
 meta static List _choice(List test, List yes, List no) =>
   $!( $test ? $yes : $no );
 
@@ -336,6 +456,11 @@ meta static Type _icon(void) => %(icon);
 
 meta static int _icon_field(String name) =>
   name == "icon" || name.startswith("icon_") || name.endswith("_icon");
+
+meta static Type _icons(void) => %(icons);
+
+meta static int _icons_field(String name) =>
+  name == "icons" || name.endswith("_icons");
 
 /* The parameters of the `Ui` methods that name an icon, as
    `("method" position)` rows counted after the receiver. CUI names

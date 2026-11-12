@@ -4,99 +4,114 @@
 
 #include "state.x"
 
-typedef struct kb_card {
+// One card of the board.
+class Card {
   int id;
   String title, tag, who;
   cui_tone tone;
   int comments, files;
   float progress;
-} kb_card;
+} *;
 
-static kb_card kb_cards[] = {
-  { 1, "Audit the color tokens for contrast", "Design", "Maya Okafor",
-    CUI_TONE_VIOLET, 3, 0, 0 },
-  { 2, "Virtualize the activity feed", "Perf", "Jonas Berg", CUI_TONE_TEAL,
-    1, 2, 0 },
-  { 3, "Dark mode screenshots for docs", "Docs", "Aiko Tanaka",
-    CUI_TONE_ROSE, 0, 4, 0 },
-  { 4, "Keyboard nav in the date range picker", "A11y", "Priya Nair",
-    CUI_TONE_INFO, 5, 0, 0.6f },
-  { 5, "IME composition on Windows", "Platform", "Daniel Mensah",
-    CUI_TONE_WARNING, 2, 1, 0.3f },
-  { 6, "Spring presets", "Motion", "Rosa Delgado", CUI_TONE_VIOLET, 4, 0,
-    1 },
-  { 7, "Glyph atlas eviction", "Perf", "Lena Fischer", CUI_TONE_TEAL, 0, 0,
-    1 },
-  { 8, "Retina screenshots", "Docs", "Aiko Tanaka", CUI_TONE_ROSE, 1, 3, 1 },
-};
-// The card ids in each column, in order, and how many each column holds.
-static int kb_cols[4][8] = { { 1, 2, 3 }, { 4, 5 }, { 6 }, { 7, 8 } };
-static int kb_len[4] = { 3, 2, 1, 2 };
-
-static kb_card *kb_find(int id) {
-  for (int k = 0; k < (int) (sizeof kb_cards / sizeof *kb_cards); k++)
-    if (kb_cards[k].id == id) return &kb_cards[k];
-  return NULL;
+// A row is: id, title, tag, who, tone, comments, files, progress.
+void Card.init(Card card, List row) {
+  card.id = row[0];
+  card.title = row[1];
+  card.tag = row[2];
+  card.who = row[3];
+  card.tone = cui_tone.named(row[4]);
+  card.comments = row[5];
+  card.files = row[6];
+  card.progress = (float) row[7];
 }
 
-static void kb_apply(const cui_kanban_move *m) {
-  int *from = kb_cols[m.from_column], *to = kb_cols[m.to_column];
-  int at = -1;
-  for (int k = 0; k < kb_len[m.from_column]; k++)
-    if (from[k] == m.card) at = k;
-  if (at < 0 || (m.to_column != m.from_column && kb_len[m.to_column] >= 8))
+// One column of the board: its title, dot, card limit, and cards in order.
+class Column {
+  String name;
+  unsigned dot;
+  int limit;
+  Array cards;
+} *;
+
+void Column.init(Column c, String name, unsigned dot, int limit, List rows) {
+  c.name = name;
+  c.dot = dot;
+  c.limit = limit;
+  c.cards = [];
+  foreach (List row in rows) c.cards.push(Card.new(row));
+}
+
+// The board's columns, in order.
+static Array board;
+
+static Array new_board(void) => [
+  Column.new("Backlog", 0x94a3b8, 0, %(
+    (1 "Audit the color tokens for contrast" "Design" "Maya Okafor" violet
+     3 0 0)
+    (2 "Virtualize the activity feed" "Perf" "Jonas Berg" teal 1 2 0)
+    (3 "Dark mode screenshots for docs" "Docs" "Aiko Tanaka" rose 0 4 0))),
+  Column.new("In progress", 0x3b82f6, 3, %(
+    (4 "Keyboard nav in the date range picker" "A11y" "Priya Nair" info
+     5 0 0.6)
+    (5 "IME composition on Windows" "Platform" "Daniel Mensah" warning
+     2 1 0.3))),
+  Column.new("Review", 0xf59e0b, 0, %(
+    (6 "Spring presets" "Motion" "Rosa Delgado" violet 4 0 1))),
+  Column.new("Done", 0x22c55e, 0, %(
+    (7 "Glyph atlas eviction" "Perf" "Lena Fischer" teal 0 0 1)
+    (8 "Retina screenshots" "Docs" "Aiko Tanaka" rose 1 3 1)))];
+
+// Moves the card CUI reports moved from its column to its new place.
+static void move_card(Array board, cui_kanban_move m) {
+  Column from = board[m.from_column], to = board[m.to_column];
+  for (int k = 0; k < (int) from.cards.len(); k++) {
+    Card card = from.cards[k];
+    if (card.id != m.card) continue;
+    from.cards.remove(k);
+    int at = m.to_index < 0 ? 0 : m.to_index;
+    to.cards.insert(at < (int) to.cards.len() ? at : (int) to.cards.len(),
+                    card);
     return;
-  for (int k = at; k < kb_len[m.from_column] - 1; k++) from[k] = from[k + 1];
-  kb_len[m.from_column]--;
-  int idx = m.to_index < 0 ? 0
-          : m.to_index > kb_len[m.to_column] ? kb_len[m.to_column]
-          : m.to_index;
-  for (int k = kb_len[m.to_column]; k > idx; k--) to[k] = to[k - 1];
-  to[idx] = m.card;
-  kb_len[m.to_column]++;
+  }
+}
+
+static void draw_card(Ui ui, Card card) {
+  ui.kanban_card (clicked, card.id) {
+    if (clicked) ui.toast(card.title);
+    ui.badge(card.tag, tone: card.tone, size: sm);
+    ui.text(card.title, font: medium, size: 13.5f, line_height: 1.35f);
+    if (card.progress > 0 && card.progress < 1)
+      ui.progress(card.progress, height: 4);
+    ui.row (gap: 10, align: center, width: fill) {
+      ui.avatar(card.who, size: 22);
+      ui.spacer();
+      if (card.files) {
+        ui.icon(paperclip, 12, text_muted);
+        ui.text(%"$(card.files)", size: 12, color: text_muted);
+      }
+      if (card.comments) {
+        ui.icon(message_square, 12, text_muted);
+        ui.text(%"$(card.comments)", size: 12, color: text_muted);
+      }
+      if (card.progress >= 1) ui.icon(circle_check, 14, success);
+    }
+  }
 }
 
 void page_planning(Ui ui, Gallery g) {
-  List col_names = %("Backlog" "In progress" "Review" "Done");
-  static const unsigned col_dots[4] = { 0x94a3b8, 0x3b82f6, 0xf59e0b,
-                                        0x22c55e };
+  if (!board) board = new_board();
   section(ui, "Kanban", "Drag cards within and between columns. Columns can "
                         "carry a work-in-progress limit.");
-  bool moved, added, clicked;
-  cui_kanban_move mv;
   ui.kanban (moved, mv, "board")
-  for (int c = 0; c < 4; c++) {
-    String col_name = col_names[c];
-    ui.kanban_column (added, col_name, kb_len[c], dot: CUI_RGB(col_dots[c]),
-                      limit: c == 1 ? 3 : 0, width: 264) {
-      if (added) ui.toast("New card", description: col_name);
-      for (int k = 0; k < kb_len[c]; k++) {
-        kb_card *cd = kb_find(kb_cols[c][k]);
-        if (!cd) continue;
-        ui.kanban_card (clicked, cd.id) {
-          if (clicked) ui.toast(cd.title);
-          ui.badge(cd.tag, tone: cd.tone, size: sm);
-          ui.text(cd.title, font: medium, size: 13.5f, line_height: 1.35f);
-          if (cd.progress > 0 && cd.progress < 1)
-            ui.progress(cd.progress, height: 4);
-          ui.row (gap: 10, align: center, width: fill) {
-            ui.avatar(cd.who, size: 22);
-            ui.spacer();
-            if (cd.files) {
-              ui.icon(paperclip, 12, text_muted);
-              ui.text(%"$(cd.files)", size: 12, color: text_muted);
-            }
-            if (cd.comments) {
-              ui.icon(message_square, 12, text_muted);
-              ui.text(%"$(cd.comments)", size: 12, color: text_muted);
-            }
-            if (cd.progress >= 1) ui.icon(circle_check, 14, success);
-          }
-        }
-      }
+  foreach (Column column in board) {
+    // The column declares `added`, so it is a block of its own.
+    ui.kanban_column (added, column.name, column.cards.len(), dot: column.dot,
+                      limit: column.limit, width: 264) {
+      if (added) ui.toast("New card", description: column.name);
+      foreach (Card card in column.cards) draw_card(ui, card);
     }
   }
-  if (moved) kb_apply(&mv);
+  if (moved) move_card(board, mv);
 
   section(ui, "Week calendar", "Drag events to move them in 15 minute "
                                "steps, or pull the bottom edge to resize.");

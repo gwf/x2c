@@ -100,7 +100,8 @@ static void message_list(Ui ui, Mail &a) {
                 ui.text(m.time, size: 12, color: text_muted, nowrap: true);
               }
               ui.text(m.subject, font: medium, size: 12.5, nowrap: true);
-              ui.text(m.preview, size: 12, color: text_secondary, nowrap: true);
+              ui.text(m.preview, size: 12, color: text_secondary,
+                      nowrap: true);
             }
           }
         }
@@ -147,8 +148,8 @@ static int shot(String image) {
 int main(int argc, char **argv) {
   if (argc == 3 && !strcmp(argv[1], "--shot")) return shot(argv[2]);
   Mail a = open_mail();
-  App app = auto App.open({ .title = "Mail", .width = 420, .height = 600,
-                            .min_width = 320, .min_height = 360 });
+  App app = auto App.open(title: "Mail", width: 420, height: 600,
+                          min_width: 320, min_height: 360);
   while (app.frame()) message_list(app.ui(), a);
   return 0;
 }

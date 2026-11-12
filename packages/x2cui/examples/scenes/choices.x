@@ -12,27 +12,26 @@
 #include "scene.x"
 
 static void scene_radio_cards(Ui ui) {
-  static const cui_choice places[] = {
-    { "This computer",
-      "Saved next to the project. Nothing leaves the machine.",
-      CUI_ICON_MONITOR, NULL },
-    { "Team server", "Synced to your company server every few minutes.",
-      CUI_ICON_SERVER, "Default" },
-    { "Both", "A local copy, uploaded to the server every night.",
-      CUI_ICON_LAYERS, NULL } };
   static int place = 1;
   ui.box (width: fill, max_width: 420)
-    ui.radio_cards("places", places, place);
+    ui.radio_cards("places", [
+      {title: "This computer",
+       description: "Saved next to the project. Nothing leaves the machine.",
+       icon: monitor},
+      {title: "Team server",
+       description: "Synced to your company server every few minutes.",
+       icon: server, badge: "Default"},
+      {title: "Both",
+       description: "A local copy, uploaded to the server every night.",
+       icon: layers}], place);
 }
 
 static void scene_toggle_group(Ui ui) {
-  static const char *format_icons[] = { CUI_ICON_BOLD, CUI_ICON_ITALIC,
-                                        CUI_ICON_UNDERLINE, CUI_ICON_CODE };
   static bool format[4] = { true, false, true, false };
   static bool align[3] = { true, false, false };
   ui.row (gap: 12, wrap: true) {
     ui.toggle_group("format", %("Bold" "Italic" "Underline" "Code"), format,
-                    icons: format_icons, icon_only: true);
+                    icons: [bold, italic, underline, code], icon_only: true);
     ui.toggle_group("align", %("Left" "Center" "Right"), align,
                     exclusive: true);
   }
@@ -47,9 +46,6 @@ static void scene_multi_select(Ui ui) {
 }
 
 static void scene_tab_bar(Ui ui) {
-  static const cui_tab_bar_item tabs[] = {
-    { CUI_ICON_HOUSE, "Home", 0 }, { CUI_ICON_SEARCH, "Search", 0 },
-    { CUI_ICON_INBOX, "Inbox", 4 }, { CUI_ICON_USER, "Profile", 0 } };
   static int tab = 2;
   ui.card (width: 360, pad: 1, gap: 0) {
     ui.column (pad: 20, gap: 8, width: fill) {
@@ -58,7 +54,10 @@ static void scene_tab_bar(Ui ui) {
               color: text_secondary);
     }
     ui.box (pad: 12, width: fill)
-      ui.tab_bar("tabs", tabs, tab, width: fill);
+      ui.tab_bar("tabs", [
+        {icon: house, label: "Home"}, {icon: search, label: "Search"},
+        {icon: inbox, label: "Inbox", badge: 4},
+        {icon: user, label: "Profile"}], tab, width: fill);
   }
 }
 
@@ -152,14 +151,14 @@ static void scene_tour(Ui ui) {
 }
 
 static void scene_agent_plan(Ui ui) {
-  static const cui_plan_step steps[] = {
-    { "Search for sources", "3 results", CUI_TASK_DONE },
-    { "Read the attached report", "Page 12 of 40", CUI_TASK_RUNNING },
-    { "Compare the numbers with last quarter", NULL, CUI_TASK_PENDING },
-    { "Draft the summary", NULL, CUI_TASK_PENDING },
-    { "Check the citations", NULL, CUI_TASK_PENDING } };
   ui.box (width: fill, max_width: 460)
-    ui.agent_plan("plan", steps,
+    ui.agent_plan("plan", [
+      {title: "Search for sources", detail: "3 results", status: done},
+      {title: "Read the attached report", detail: "Page 12 of 40",
+       status: running},
+      {title: "Compare the numbers with last quarter", status: pending},
+      {title: "Draft the summary", status: pending},
+      {title: "Check the citations", status: pending}],
       title: "Research plan");
 }
 
@@ -180,33 +179,40 @@ static void scene_prompt_suggestions(Ui ui) {
 }
 
 static void scene_model_picker(Ui ui) {
-  static const cui_model models[] = {
-    { "Atlas", "Longer answers, reads files and code", "New",
-      CUI_ICON_LAYERS },
-    { "Atlas Fast", "Short answers in about a second", NULL, CUI_ICON_ZAP },
-    { "Atlas Mini", "Runs on your own machine", NULL, CUI_ICON_BOX } };
   static int model = 1;
   ui.row (gap: 8, align: center) {
     ui.text("Answer with", color: text_secondary);
-    ui.model_picker("model", models, model,
+    ui.model_picker("model", [
+      {name: "Atlas", detail: "Longer answers, reads files and code",
+       badge: "New", icon: layers},
+      {name: "Atlas Fast", detail: "Short answers in about a second",
+       icon: zap},
+      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}],
+      model,
       placement: bottom_start);
   }
 }
 
 static void scene_month_calendar(Ui ui) {
-  static const cui_month_event events[] = {
-    { "Design sprint", { 2026, 11, 2 }, { 2026, 11, 4 }, 0, true,
-      CUI_TONE_VIOLET },
-    { "Standup", { 2026, 11, 9 }, { 0 }, 9.5f, false, CUI_TONE_INFO },
-    { "Customer call", { 2026, 11, 10 }, { 0 }, 11, false, CUI_TONE_DANGER },
-    { "Offsite, Lisbon", { 2026, 11, 12 }, { 2026, 11, 14 }, 0, true,
-      CUI_TONE_WARNING },
-    { "Demo day", { 2026, 11, 20 }, { 0 }, 16, false, CUI_TONE_VIOLET },
-    { "Holiday", { 2026, 11, 26 }, { 2026, 11, 27 }, 0, true,
-      CUI_TONE_SUCCESS },
-    { "Board meeting", { 2026, 11, 30 }, { 0 }, 10, false, CUI_TONE_DANGER } };
   static cui_date month = { 2026, 11, 1 }, picked = { 2026, 11, 10 };
-  ui.month_calendar("month", month, events,
+  ui.month_calendar("month", month, [
+    {title: "Design sprint", start: {year: 2026, month: 11, day: 2},
+     end: {year: 2026, month: 11, day: 4}, all_day: true,
+     tone: violet},
+    {title: "Standup", start: {year: 2026, month: 11, day: 9}, time: 9.5f,
+     tone: info},
+    {title: "Customer call", start: {year: 2026, month: 11, day: 10},
+     time: 11, tone: danger},
+    {title: "Offsite, Lisbon", start: {year: 2026, month: 11, day: 12},
+     end: {year: 2026, month: 11, day: 14}, all_day: true,
+     tone: warning},
+    {title: "Demo day", start: {year: 2026, month: 11, day: 20},
+     time: 16, tone: violet},
+    {title: "Holiday", start: {year: 2026, month: 11, day: 26},
+     end: {year: 2026, month: 11, day: 27}, all_day: true,
+     tone: success},
+    {title: "Board meeting", start: {year: 2026, month: 11, day: 30},
+     time: 10, tone: danger}],
     selected: &picked, today: { 2026, 11, 10 }, cell_height: 58);
 }
 

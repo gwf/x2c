@@ -4,12 +4,13 @@
 > To-Do, Mail, and Orders sources and images. Implemented on `x2cui`
 > (gwf/x2c#663 and #664), over `dev` with the compiler change for
 > [method-form macros](method-form-macros.md). On 2026-11-11 Gary decided
-> the package has one way to write each thing; the local branch
-> `gwf/x2cui-idiomatic` removes the `$cui.*` decorators. See
-> [One paradigm](#one-paradigm-2026-11-11). Not on `dev`.
+> the package has one way to write each thing; the `$cui.*` decorators
+> are gone. See [One paradigm](#one-paradigm-2026-11-11). Constant data
+> is Array literals, data the program owns is x2c values, and result
+> forms declare their names (branch `gwf/x2cui-ready`). Not on `dev`.
 > Every "verified" statement below was compiled and run on macOS arm64
-> with that branch's stage 0, built from its bootstrap seed. Statements
-> marked "not verified" were not.
+> by the package worker with the branch's stage 0. Statements marked
+> "not verified" were not.
 
 ## Result
 
@@ -172,6 +173,41 @@ is lowered by its parameter's type the same way, so
 `ui.icon_button(x, ...)` works. Upper-case names keep their value, which
 keeps `NULL` and `CUI_*` constants working.
 
+## Arrays of constants
+
+An Array literal where a component takes a pointer is the array, and the
+form passes its count: `bands: [{to: 60, tone: success}]`. A Map literal
+element is one record, its rows lowered by field type as option rows are.
+Any other element is one value lowered by the element type, and in an
+option named `icons` or `*_icons` each element is an icon. Inside a record,
+an Array literal is an array declared before the record's array and a Map
+literal is a record field; a C array field such as `int parent[2]` takes
+`[1, 4]`. A count field after an array (`band_count`, or `count` after
+`values`) is filled, and `[]` is NULL with a count of 0.
+
+`x2cui_value` lowers the literal at compile time to a statement expression
+that declares `static const` arrays under fresh names from
+`x2c_binding_fresh`, then casts the outer array to the parameter's pointer
+type. The arrays are initialized once; no frame builds an Array or a Map.
+
+Two kinds of literal are refused at compile time:
+
+- A pointer to elements that are not `const`, which CUI may write
+  through, such as `cui_reactions`, `cui_checklist_ex`, or
+  `cui_gantt_ex`. A literal must read as a value, and a static array CUI
+  edits would keep state between frames. That data is named program state.
+- An element that is not a constant: a variable, or a call of anything but
+  a C macro. x2c gives a block-scope static with such an initializer a
+  guarded one-time initialization, so the array would keep the variable's
+  first value. An automatic array is not used instead, because CUI may
+  read an array until the frame ends, as `x2cui_strings` documents.
+
+Tests read the lowered values through probe methods: enum and icon short
+names in records, a nested `values:` with its `count`, a `_count` option
+field, a `const` enum scalar array, `[]`, and a program name that a fresh
+name does not hide. `make refused-literal` checks both refusals.
+Verified.
+
 ## Generated method forms
 
 `src/x2cui-generate.x` gives every generated component whose last C
@@ -234,8 +270,22 @@ the ones Gary approved. Verified.
 5. A table row's hover and press come from a patch to CUI; see
    `PROFILE.md`. A new CUI version needs the patch remade.
 6. The mail and orders examples have no tests of their own beyond drawing
-   an image; the package test covers clicks, hover, and the column
-   lowering.
+   an image; the package test covers clicks, hover, the keyboard, the
+   column lowering, Array literals, the key-value editor, and a kanban
+   move.
+7. Data the program owns is x2c values. State CUI edits in place, such as
+   a calendar's events or a checklist's steps, stays a named array of
+   CUI's records, which the form takes without a count; the README lists
+   those parameters. The key-value editor is the one component that
+   copies an `Array` of `KeyValue` to CUI's records and back each frame.
+8. A form that declares a result name expands to a declaration and a
+   block, so an unbraced loop or `if` cannot take it as its one
+   statement. A decorator declares the name with a type that a `Type`
+   hole of an enclosing template supplies, because a type spelled in the
+   decorator before a `Name` hole does not parse, except `int`. Boxing a
+   field of a declared record into a `Var`, as `cards.push(move.card)`,
+   fails as an unresolved expression; reading it into a local first
+   works. Both are reported to the orchestrator with reproducers.
 
 ## One paradigm (2026-11-11)
 
@@ -262,8 +312,10 @@ component as a method form:
   form, so positional icons and enums take short names everywhere.
 - The node editor, its nodes, and the tree table are block forms; a tree
   leaf is `ui.tree (name, NULL, leaf: true) {}`; the inspector is always
-  a block. A card stack and a swipe item store their end call's result in
-  a variable the caller passes: `ui.card_stack (swiped, "deck", 3)`.
+  a block. A card stack, a swipe item, a reorder list, a kanban board,
+  and its columns and cards declare the result name they are given:
+  `ui.card_stack (swiped, "deck", 3)`. Such a form is a block of its own,
+  so an unbraced loop cannot take it as its body.
 - The gallery's people table uses `ui.each`, `ui.table_row`, `ui.cell`,
   and `List.sort_by` in place of an insertion sort, and the tree table's
   rows are `ui.table_row` blocks.
@@ -271,9 +323,7 @@ component as a method form:
 Every image stays byte-identical: the 229 images against `b393dd58c`,
 and the To-Do, Mail, and Orders images Gary approved.
 
-A form cannot declare a result name for the statements after it when it
-is itself inside another block form's block: the following reference is
-undeclared in the generated C. At function level it works. Reproducer:
-`repro-decorator-binder.x` in the worker's scratch directory. The card
-stack and swipe item forms therefore take a variable the caller declares.
+The compiler repair merged at `dffc0f662` makes a decorator's `Name`
+hole visible after the block, also inside another decorator's block, so
+the result forms now declare their names.
 

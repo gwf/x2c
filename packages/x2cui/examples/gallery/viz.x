@@ -59,18 +59,16 @@ void page_viz(Ui ui, Gallery g) {
     prepare();
     ready = true;
   }
-  static const char *wd[] = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat",
-                              "Sun" };
-  static const char *hours[24] = {
-    "0h", NULL, NULL, "3h", NULL, NULL, "6h", NULL, NULL, "9h", NULL, NULL,
-    "12h", NULL, NULL, "15h", NULL, NULL, "18h", NULL, NULL, "21h", NULL,
-    NULL };
-  ui.row (gap: 24, align: CUI_ALIGN_START, width: fill)
+  ui.row (gap: 24, align: start, width: fill)
   ui.column (width: grow(1), gap: 10) {
     section(ui, "Heatmap", "Requests by weekday and hour.");
     ui.card (pad: 18, width: fill)
       ui.heatmap("traffic", traffic, 7, 24,
-        row_labels: wd, col_labels: hours, format: "%.0f req");
+        row_labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        col_labels: ["0h", NULL, NULL, "3h", NULL, NULL, "6h", NULL, NULL,
+                     "9h", NULL, NULL, "12h", NULL, NULL, "15h", NULL, NULL,
+                     "18h", NULL, NULL, "21h", NULL, NULL],
+        format: "%.0f req");
   }
   section(ui, "Calendar heatmap", "A year of activity, one square a day.");
   ui.card (pad: 18) {
@@ -79,60 +77,59 @@ void page_viz(Ui ui, Gallery g) {
     ui.calendar_heatmap("activity", start, days,
                         unit: "contributions");
   }
-  ui.row (gap: 24, align: CUI_ALIGN_START, width: fill) {
+  ui.row (gap: 24, align: start, width: fill) {
     ui.column (width: grow(1.3f), gap: 10) {
       section(ui, "Treemap", "Bundle size by module.");
-      static const cui_viz_item mods[] = {
-        { "Layout", 55 }, { "Text", 42 }, { "Draw", 35 },
-        { "Controls", 31 }, { "Charts", 23 }, { "Overlays", 19 },
-        { "Platform", 16 }, { "Theme", 9 }, { "Icons", 7 }, { "Grid", 6 },
-      };
-      ui.treemap("bundle", mods,
-                 height: 280, format: "%.0f KB");
+      ui.treemap("bundle", [
+          {label: "Layout", value: 55}, {label: "Text", value: 42},
+          {label: "Draw", value: 35}, {label: "Controls", value: 31},
+          {label: "Charts", value: 23}, {label: "Overlays", value: 19},
+          {label: "Platform", value: 16}, {label: "Theme", value: 9},
+          {label: "Icons", value: 7}, {label: "Grid", value: 6}],
+        height: 280, format: "%.0f KB");
     }
     ui.column (width: grow(1), gap: 10,
                align: center) {
       section(ui, "Radar", "Two releases across six qualities.");
-      enum { QUALITIES = 6 };
-      static const float a[QUALITIES] = { 82, 64, 90, 58, 75, 88 };
-      static const float b[QUALITIES] = { 70, 85, 72, 80, 60, 79 };
-      cui_series rs[] = { { "1.0", a, QUALITIES }, { "1.1", b, QUALITIES } };
-      ui.radar_chart("radar", rs,
-                     %("Speed" "Size" "Polish" "Docs" "Platforms" "Tests"),
-                     size: 220, max: 100);
+      ui.radar_chart("radar", [
+          {name: "1.0", values: [82, 64, 90, 58, 75, 88]},
+          {name: "1.1", values: [70, 85, 72, 80, 60, 79]}],
+        %("Speed" "Size" "Polish" "Docs" "Platforms" "Tests"),
+        size: 220, max: 100);
     }
   }
-  ui.row (gap: 24, align: CUI_ALIGN_START, width: fill) {
+  ui.row (gap: 24, align: start, width: fill) {
     ui.column (width: grow(1), gap: 10) {
       section(ui, "Funnel", "Sign up conversion.");
-      static const cui_viz_item stages[] = {
-        { "Visited", 12840 }, { "Signed up", 4210 }, { "Activated", 2380 },
-        { "Subscribed", 860 } };
-      ui.funnel("funnel", stages);
+      ui.funnel("funnel", [
+        {label: "Visited", value: 12840}, {label: "Signed up", value: 4210},
+        {label: "Activated", value: 2380}, {label: "Subscribed", value: 860}]);
     }
     ui.column (width: grow(1), gap: 10) {
       section(ui, "Split bar", "Where the time goes.");
-      static const cui_viz_item parts[] = {
-        { "Layout", 38 }, { "Text", 24 }, { "Paint", 21 }, { "Input", 9 },
-        { "Other", 8 } };
-      ui.split_bar("split", parts, format: "%.0f ms");
+      ui.split_bar("split", [
+          {label: "Layout", value: 38}, {label: "Text", value: 24},
+          {label: "Paint", value: 21}, {label: "Input", value: 9},
+          {label: "Other", value: 8}],
+        format: "%.0f ms");
       ui.gap(18);
       section(ui, "Waffle", "Platforms of the last 100 installs.");
-      static const cui_viz_item plats[] = {
-        { "Windows", 46 }, { "macOS", 31 }, { "Linux", 23 } };
-      ui.waffle("waffle", plats, cell: 14);
+      ui.waffle("waffle", [
+          {label: "Windows", value: 46}, {label: "macOS", value: 31},
+          {label: "Linux", value: 23}],
+        cell: 14);
     }
   }
   section(ui, "Sankey", "Where sign ups come from and where they end up.");
-  static const cui_sankey_link links[] = {
-    { 0, 3, 420 }, { 1, 3, 260 }, { 2, 3, 180 }, { 0, 4, 300 },
-    { 1, 4, 220 }, { 3, 5, 860 }, { 5, 6, 580 }, { 5, 7, 280 },
-  };
   ui.card (pad: 18, width: fill)
     ui.sankey("flow", %("Search" "Social" "Referral" "Sign up" "Bounced"
-                        "Trial" "Paid" "Churned"),
-              links, height: 280);
-  ui.row (gap: 24, align: CUI_ALIGN_START, width: fill) {
+                        "Trial" "Paid" "Churned"), [
+        {from: 0, to: 3, value: 420}, {from: 1, to: 3, value: 260},
+        {from: 2, to: 3, value: 180}, {from: 0, to: 4, value: 300},
+        {from: 1, to: 4, value: 220}, {from: 3, to: 5, value: 860},
+        {from: 5, to: 6, value: 580}, {from: 5, to: 7, value: 280}],
+      height: 280);
+  ui.row (gap: 24, align: start, width: fill) {
     ui.column (width: grow(1.4f), gap: 10) {
       section(ui, "Bar list", "Ranked, keyed by label: press Shuffle and "
                               "the rows slide to their new rank.");
@@ -150,28 +147,26 @@ void page_viz(Ui ui, Gallery g) {
     ui.column (width: grow(1), gap: 10,
                align: center) {
       section(ui, "Activity rings", "Past one, a ring keeps winding.");
-      static const cui_viz_item rings[] = {
-        { "Move", 0.82f }, { "Exercise", 1.24f }, { "Stand", 0.58f } };
-      ui.activity_rings("rings", rings,
+      ui.activity_rings("rings", [
+          {label: "Move", value: 0.82f}, {label: "Exercise", value: 1.24f},
+          {label: "Stand", value: 0.58f}],
         size: 170, center: "82%", caption: "of goal");
     }
   }
   section(ui, "Scatter",
           "Frame time against node count, sized by draw calls.");
-  cui_scatter_series ss[] = {
-    { "Software", points_a, sizes_a, RUNS },
-    { "OpenGL", points_b, sizes_b, RUNS } };
   ui.card (pad: 18, width: fill)
-    ui.scatter_chart("scatter", ss,
+    ui.scatter_chart("scatter", [
+        {name: "Software", points: points_a, sizes: sizes_a},
+        {name: "OpenGL", points: points_b, sizes: sizes_b}],
       height: 300, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
-  static const cui_gauge_band bands[] = {
-    { 60, CUI_TONE_SUCCESS }, { 85, CUI_TONE_WARNING },
-    { 100, CUI_TONE_DANGER } };
   ui.card (pad: 18, width: fill, dir: row,
            wrap: true, gap: 24, align: center) {
     ui.radial_gauge("cpu", 64, 0, 100,
-      unit: "%", label: "CPU", bands: bands, size: 180);
+      unit: "%", label: "CPU", size: 180, bands: [
+        {to: 60, tone: success}, {to: 85, tone: warning},
+        {to: 100, tone: danger}]);
     ui.radial_gauge("temp", 71, 20, 100,
       unit: "C", label: "GPU temperature", show_target: true,
       target: 85, size: 180);

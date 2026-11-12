@@ -9,6 +9,9 @@ CUI_INCLUDE := $(CUI_PREFIX)/include
 PACKAGE_X_FLAGS += -I $(CUI_INCLUDE)
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CUI_INCLUDE) \
 	-I $(CUI_INCLUDE)
+# An Array literal outside a form compiles as a run-time Array; where a C
+# pointer is expected, cc only warns, so the warning is an error here.
+PACKAGE_C_FLAGS += -Xcc -Werror=incompatible-pointer-types
 # CUI's window layer is X11 on Linux, as dependency.json builds it, and
 # Cocoa over OpenGL on macOS.
 PACKAGE_LINK := $(CUI_PREFIX)/lib/libcui.a
@@ -22,9 +25,18 @@ endif
 # Each example with files of its own keeps them in a directory beside it.
 PACKAGE_X_FLAGS += --x-include-dir examples
 
-.PHONY: run run-interactive run-gallery run-stress web web-check web-serve
+.PHONY: run run-interactive run-gallery run-stress web web-check web-serve \
+	refused-literal
 
-check: test run
+check: test run refused-literal
+
+# The form refuses an Array literal where CUI may write through the array,
+# and one with a variable in an element.
+refused-literal: build | builds
+	! $(X2C) translate --out-dir builds/refused $(PACKAGE_X_FLAGS) \
+	  tests/refused-literal.x >builds/refused.log 2>&1
+	grep -q "CUI may write through this array" builds/refused.log
+	grep -q "an element is not a constant" builds/refused.log
 
 short-example: builds/todo
 

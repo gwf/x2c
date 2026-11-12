@@ -6,7 +6,7 @@
     static table, and exports one function that returns its Family.
 */
 
-import "x2cui" with Offscreen, TextField, Ui;
+import "x2cui" with KeyValue, Offscreen, TextField, Ui;
 
 /* One component shown in use. `draw` describes the scene's content;
    scenes.x supplies the page around it. */

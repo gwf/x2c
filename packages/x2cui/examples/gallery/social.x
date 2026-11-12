@@ -72,15 +72,6 @@ void page_social(Ui ui, Gallery g) {
   static float split = 0.45f;
   static int deck = 0;
   static double revenue = 48210;
-  static const cui_presence_user who[] = {
-    { "Maya Okafor", { 0x7c, 0x5c, 0xff, 255 }, 0, false },
-    { "Jonas Berg", { 0x22, 0xc5, 0x8b, 255 }, 0, false },
-    { "Priya Nair", { 0xf5, 0x9e, 0x0b, 255 }, 0, false },
-    { "Lena Fischer", { 0x38, 0xbd, 0xf8, 255 }, 0, true },
-    { "Aiko Tanaka", { 0xec, 0x48, 0x99, 255 }, 0, false },
-    { "Daniel Mensah", { 0x10, 0xb9, 0x81, 255 }, 0, false },
-    { "Rosa Delgado", { 0xa8, 0x55, 0xf7, 255 }, 0, false },
-  };
   /* Textures belong to one Ui, so they live in its state store; they are
      freed with the state, a few seconds after the page is left, and made
      again on the way back. */
@@ -134,7 +125,21 @@ void page_social(Ui ui, Gallery g) {
   }
   section(ui, "Presence", "Who is here now. Hover to spread them out.");
   ui.row (gap: 24, align: center) {
-    ui.presence("here", who, 5, 30);
+    ui.presence("here", [
+      {name: "Maya Okafor", color: {r: 0x7c, g: 0x5c, b: 0xff, a: 255},
+       avatar: 0},
+      {name: "Jonas Berg", color: {r: 0x22, g: 0xc5, b: 0x8b, a: 255},
+       avatar: 0},
+      {name: "Priya Nair", color: {r: 0xf5, g: 0x9e, b: 0x0b, a: 255},
+       avatar: 0},
+      {name: "Lena Fischer", color: {r: 0x38, g: 0xbd, b: 0xf8, a: 255},
+       avatar: 0, idle: true},
+      {name: "Aiko Tanaka", color: {r: 0xec, g: 0x48, b: 0x99, a: 255},
+       avatar: 0},
+      {name: "Daniel Mensah", color: {r: 0x10, g: 0xb9, b: 0x81, a: 255},
+       avatar: 0},
+      {name: "Rosa Delgado", color: {r: 0xa8, g: 0x55, b: 0xf7, a: 255},
+       avatar: 0}], 5, 30);
     ui.counter("rev", revenue, format: "$%.0f", size: 34,
                                group_thousands: true);
     if (ui.button("Add a sale", size: sm,
@@ -144,32 +149,37 @@ void page_social(Ui ui, Gallery g) {
 
   section(ui, "Ticker", "A continuous strip of figures. It pauses under the "
                         "pointer.");
-  static const cui_ticker_item tick[] = {
-    { "Revenue", "$48.2k", 6.9f }, { "Active users", "12,408", 3.1f },
-    { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
-    { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 },
-  };
-  ui.ticker("tick", tick);
+  ui.ticker("tick", [
+    {label: "Revenue", value: "$48.2k", delta: 6.9f},
+    {label: "Active users", value: "12,408", delta: 3.1f},
+    {label: "Churn", value: "1.7%", delta: -0.6f, lower_is_better: true},
+    {label: "Latency", value: "182 ms", delta: -8.4f, lower_is_better: true},
+    {label: "Builds", value: "1,204", delta: 12.0f},
+    {label: "Uptime", value: "99.98%", delta: 0}]);
 
   section(ui, "Carousel", "Drag, flick, scroll sideways or use the arrows "
                           "and dots.");
   ui.carousel ("tour", 4, slide, height: 200, auto_advance: 6) {
-    List titles = %("Faster exports" "ARM64 runners" "Shortcuts everywhere"
-                    "Smaller downloads");
-    List descs = %(
-      "A 900 file project now exports in 40 seconds, down from four minutes."
-      "Linux and macOS jobs can run on ARM64 machines in every plan."
-      "Every action in the editor has a key, listed under Help, Shortcuts."
-      "The desktop app is 38 MB lighter after dropping the bundled browser.");
-    static const unsigned tops[] = { 0x1f2a37, 0x0f3d3e, 0x3a2e22,
-                                     0x2b2f3a };
-    for (int k = 0; k < 4; k++) ui.carousel_slide () {
-      String title = titles[k], desc = descs[k];
-      ui.box (width: fill, height: fill,
-              bg: CUI_RGB(tops[k]), radius: 16, pad: 28,
+    // A slide is: title, description, and background color.
+    List slides = %(
+      ("Faster exports"
+       "A 900 file project now exports in 40 seconds, down from four minutes."
+       0x1f2a37)
+      ("ARM64 runners"
+       "Linux and macOS jobs can run on ARM64 machines in every plan."
+       0x0f3d3e)
+      ("Shortcuts everywhere"
+       "Every action in the editor has a key, listed under Help, Shortcuts."
+       0x3a2e22)
+      ("Smaller downloads"
+       "The desktop app is 38 MB lighter after dropping the bundled browser."
+       0x2b2f3a));
+    foreach (List slide in slides) ui.carousel_slide () {
+      (String title, String desc, unsigned top) = slide;
+      ui.box (width: fill, height: fill, bg: top, radius: 16, pad: 28,
               gap: 8, justify: end) {
         ui.text(title, font: display, size: 24,
-                       color: CUI_RGB(0xffffff));
+                       color: 0xffffff);
         ui.text(desc, color: CUI_RGBA(0xffffffc0));
       }
     }
@@ -201,20 +211,19 @@ void page_social(Ui ui, Gallery g) {
     ui.column (width: grow(1), gap: 10,
                align: center) {
       section(ui, "Card stack", "Flick the top card away, left or right.");
-      List names = %("Kyoto" "Lisbon" "Reykjavik" "Oaxaca" "Hanoi");
-      static const unsigned cols[] = { 0xc8553d, 0x2d3047, 0x5b8e7d,
-                                       0xb7791f, 0x1f3a5f };
-      int dir;
+      // A card is: city and background color.
+      List cities = %(("Kyoto" 0xc8553d) ("Lisbon" 0x2d3047)
+                      ("Reykjavik" 0x5b8e7d) ("Oaxaca" 0xb7791f)
+                      ("Hanoi" 0x1f3a5f));
       ui.card_stack (dir, "deck", 3, width: 260, height: 200)
       for (int k = 0; k < 3; k++) {
-        int idx = (deck + k) % 5;
-        String name = names[idx];
+        (String name, unsigned color) = cities[(deck + k) % cities.len()];
         ui.card_stack_item (k)
         ui.box (width: fill, height: fill,
-                bg: CUI_RGB(cols[idx]), radius: 25, pad: 20,
+                bg: color, radius: 25, pad: 20,
                 justify: end, gap: 4) {
           ui.text(name, font: display, size: 22,
-                        color: CUI_RGB(0xffffff));
+                        color: 0xffffff);
           ui.text("Swipe right to save",
             size: 13, font: medium,
             color: CUI_RGBA(0xfffffff0));

@@ -316,4 +316,26 @@ EOF
     fail "helper that did not start not reported: $(cat nofork.out)"
 fi
 
+# A group that does not compile leaves the symbols another group calls
+# undefined; the call reports that group's C failure, not only the link.
+cat >failing-meta.x <<'EOF'
+#pragma once
+#include "x2c.x"
+#include "meta.x"
+meta int failing_twice(int n) {
+  _Static_assert(0, "the failing group");
+  return n * 2;
+}
+EOF
+cat >failing-caller.x <<'EOF'
+#include "failing-meta.x"
+meta int quadruple(int n) => failing_twice(n) * 2;
+int value = $quadruple(3);
+EOF
+if "$X2C" translate --out-dir out failing-caller.x >failing.out 2>&1; then
+  fail "a group that does not compile translated"
+fi
+grep -q "static assertion failed: the failing group" failing.out ||
+  fail "group compile failure hidden behind the link: $(cat failing.out)"
+
 echo "meta helper probes passed"

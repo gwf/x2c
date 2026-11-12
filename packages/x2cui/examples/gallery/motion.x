@@ -86,17 +86,17 @@ void page_motion(Ui ui, Gallery g) {
           height: 110, align: end)
   ui.dock ("dock") {
     if (ui.dock_item(folder, "Files",
-                     color: CUI_RGB(0x3b82f6), running: true))
+                     color: 0x3b82f6, running: true))
       ui.toast("Files");
-    ui.dock_item(mail, "Mail", color: CUI_RGB(0x0ea5e9),
+    ui.dock_item(mail, "Mail", color: 0x0ea5e9,
                                         badge: 3, running: true);
     ui.dock_item(calendar, "Calendar",
-                 color: CUI_RGB(0xef4444));
-    ui.dock_item(music, "Music", color: CUI_RGB(0xec4899),
+                 color: 0xef4444);
+    ui.dock_item(music, "Music", color: 0xec4899,
                                           running: true);
     ui.dock_item(square_terminal, "Terminal",
-                 color: CUI_RGB(0x27272a));
-    ui.dock_item(palette, "Design", color: CUI_RGB(0x8b5cf6));
+                 color: 0x27272a);
+    ui.dock_item(palette, "Design", color: 0x8b5cf6);
     ui.dock_separator();
     ui.dock_item(settings, "Settings");
     ui.dock_item(trash_2, "Trash");
@@ -139,10 +139,11 @@ void page_motion(Ui ui, Gallery g) {
                         color: text_muted);
       }
       section(ui, "Tab bar", "For compact layouts.");
-      static const cui_tab_bar_item tabs[] = {
-        { CUI_ICON_HOUSE, "Home", 0 }, { CUI_ICON_SEARCH, "Search", 0 },
-        { CUI_ICON_INBOX, "Inbox", 4 }, { CUI_ICON_USER, "Profile", 0 } };
-      ui.tab_bar("tabs", tabs, tab,
+      ui.tab_bar("tabs", [
+        {icon: house, label: "Home", badge: 0},
+        {icon: search, label: "Search", badge: 0},
+        {icon: inbox, label: "Inbox", badge: 4},
+        {icon: user, label: "Profile", badge: 0}], tab,
                  width: 360);
     }
   }

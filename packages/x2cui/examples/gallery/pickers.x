@@ -30,8 +30,6 @@ void page_pickers(Ui ui, Gallery g) {
   static int dh = 7, dm = 25;
   static float height = 172, temp = 21.5f;
   static float lo = 40, hi = 160;
-  static const float bins[] = { 2, 4, 7, 12, 18, 26, 31, 29, 34, 40, 37, 30,
-                                24, 22, 18, 15, 11, 9, 7, 5, 4, 3, 2, 1 };
 
   section(ui, "Multi-select",
           "Chips for the chosen items, checkboxes in the list.");
@@ -91,7 +89,9 @@ void page_pickers(Ui ui, Gallery g) {
     }
     ui.card (width: fill, gap: 6) {
       // The page ignores the result, so the method stands in for the macro.
-      ui.histogram_slider("Price", bins, lo, hi, 0, 240,
+      ui.histogram_slider("Price", [
+        2, 4, 7, 12, 18, 26, 31, 29, 34, 40, 37, 30, 24, 22, 18, 15, 11, 9, 7,
+        5, 4, 3, 2, 1], lo, hi, 0, 240,
                           format: "$%.0f");
       ui.muted("1,204 listings in range");
     }

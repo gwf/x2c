@@ -17,37 +17,44 @@ drawn components, its own software and OpenGL renderers, and its own window
 layer. The package keeps CUI's C implementation and wraps it. It does not
 fork or rewrite CUI.
 
-A program written with x2cui contains no C plumbing at the call site:
+A program written with x2cui contains no C plumbing at the call site.
+From `packages/x2cui/examples/todo.x`:
 
 ```x2c
-import "x2cui" with App, Ui, TextField;
-
-static void draw(Ui ui, Array tasks, TextField draft) {
-  $cui.column(ui, { .pad = 24, .gap = 12, .width = CUI_FILL }) {
-    ui.heading("To do", 2);
-    $cui.row(ui, { .gap = 8 }) {
-      ui.input("new-task", draft, { .placeholder = "Add a task" });
-      if (ui.button("Add", { .variant = CUI_BUTTON_PRIMARY }) && !draft.empty())
-        tasks.push(Task.new(draft.take()));
+ui.column (width: fill, max_width: 560, height: fill, pad: 24, gap: 16) {
+  ui.row (gap: 8) {
+    int typed = ui.input("new-task", todo.draft,
+                         placeholder: "Add a task", width: fill);
+    bool add = ui.button("Add", variant: primary, icon: plus,
+                         disabled: todo.draft.empty());
+    if ((add || typed & CUI_SUBMITTED) && !todo.draft.empty()) {
+      todo.tasks.push(Task.new(todo.draft.take(), false));
+      changed = true;
     }
-    for (int i = 0; i < (int) tasks.len(); i++) {
-      Task task = tasks[i];
-      $cui.id(ui, i) ui.checkbox(task.title, task.done, {});
+  }
+  ui.scroll (id: "tasks", width: fill, height: fill, gap: 2) {
+    for (int i = 0; i < (int) todo.tasks.len(); i++) {
+      Task task = todo.tasks[i];
+      if (!shown(task, todo.filter)) continue;
+      // The index keeps two tasks with one title apart.
+      ui.id (i)
+      ui.row (gap: 8, align: center, width: fill) {
+        changed |= ui.checkbox(task.title, task.done);
+        ui.spacer();
+        if (ui.icon_button(x, tooltip: "Delete", variant: ghost, size: sm))
+          removed = i;
+      }
     }
   }
 }
-
-int main(void) {
-  Array tasks = [];
-  TextField draft = TextField.new(96);
-  App app = auto App.open({ .title = "To do", .width = 520, .height = 640 });
-  while (app.frame()) draw(app.ui(), tasks, draft);
-  return 0;
-}
 ```
 
-This program is a sketch. Each construct in it was verified separately; see
-[Evidence](#evidence). `TextField` and `App` do not exist yet.
+The excerpt is shortened; `typed & CUI_SUBMITTED` is a flag test, which
+keeps CUI's spelling.
+
+The sketch this plan began with used `$cui.*` decorators and C record
+literals; both are gone. See
+[One paradigm](x2cui-lists-and-tables.md#one-paradigm-2026-11-11).
 
 ## Settled choices
 
@@ -315,6 +322,7 @@ in those cases.
 
 ```x2c
 App App.open(cui_app_desc desc);          // raises when the window fails
+App.open(title: "Mail", width: 420);      // the form: rows of cui_app_desc
 bool App.frame(App app);
 Ui App.ui(App app);
 void App.close(App app);                  // idempotent
@@ -494,7 +502,7 @@ Not done at the time, with the current state:
 - Linux. `dependency.json` is unbuilt, so the package is not in
   `PACKAGES`. Still true.
 - Parameter names. Generated methods name their parameters `p1`, `p2`.
-  Still true.
+  Done 2026-11-11: `tools/gen-arrays.py` writes CUI's names from cui.h.
 - The completeness check arrived with Delivery 2 as `scenes --check`; see
   "Every component has a scene" below. Done.
 - Menus that open only on a click are drawn closed in `--shots`. Still
@@ -1009,7 +1017,11 @@ method-form macros, not on `x2cui`.
 - The gallery, scenes, stress example, and tests use the method forms for
   components. Their 229 images are byte-identical to the earlier ones.
 
-## Current status (2026-11-11)
+## Current status (2026-11-12)
+
+The package is a preview: macOS arm64 native, a browser build that needs
+Memory64, JavaScript Promise Integration, and WebGL 2, and an unbuilt
+Linux profile. The README states this scope under "Status".
 
 Verified by the orchestrator at `7a7129f20`:
 
@@ -1019,33 +1031,54 @@ Verified by the orchestrator at `7a7129f20`:
 - The gallery and `index.html?stress` ran in a Chromium-based browser
   pane with no console errors.
 
-The package has one way to write each component, its method form; the
-`$cui.*` decorators are deleted. See
-[One paradigm](x2cui-lists-and-tables.md#one-paradigm-2026-11-11).
+Verified by the package worker at the branch tip, on macOS arm64:
 
-All 229 images of the gallery, scenes, stress example, and to-do example
-stay byte-identical to `origin/x2cui` at `b393dd58c`.
+- `make -C packages/x2cui check`: 26 tests, 201 components with 201
+  scenes, and `refused-literal`.
+- The To-Do, Mail, and Orders images match their approved images, and
+  all 229 images of the gallery, scenes, stress example, and to-do example
+  are byte-identical to `origin/x2cui` at `b393dd58c`.
+- `x2c lint --all` over `src/` reports no violation. The examples and
+  tests keep 670 `wrapped-opening-line` violations, the aligned style
+  their calls use, and one false `comment-history` on the name `todo.x`.
 
-Not verified: Safari, Firefox, Linux, pasting, input method editors,
-touch, and the interactive native window beyond `make run-interactive`
-checked by hand.
+The package has one way to write each component, its method form:
+
+- `name: value` options and short names lowered by C type.
+- Array literals for constant data. A literal is refused where CUI
+  writes through the array and where an element is not a constant.
+- Block forms. A block that reports a result declares its name.
+- `ui.item` rows that take the keyboard, through
+  `patches/focusable-canvas.patch`.
+- Data the program owns as x2c values: the kanban board's `Column` and
+  `Card` classes, and the key-value editor's `Array` of `KeyValue`.
+  State CUI edits in place stays a named array of CUI's records; the
+  README lists those parameters.
 
 Review fixes (2026-11-11):
 
 - `x2cui_strings` keeps one native array for each distinct List in a
   `Map` keyed by the List. A Map lookup of an existing List allocates
   nothing: 0 bytes more in the default malloc zone after 100,000 lookups,
-  measured with `malloc_zone_statistics`. An empty List returns one
-  shared array and allocates nothing; a test checks 100,000 such
-  conversions. `stress --frames 300 components` takes 1.15 to 1.39 ms a
-  frame before and 1.18 to 1.24 ms after, three alternating runs each.
-- The table is shared by the process and not locked, so the README now
-  says to draw on one thread, rather than adding a lock.
+  measured with `malloc_zone_statistics`.
+- The string table is shared by the process and not locked, so the
+  README says to draw on one thread.
 - The Makefile links `-lX11 -ldl -lm -lpthread` on Linux and the Cocoa
-  frameworks on macOS. The Linux build was not run.
-- `ui.item` rows are not keyboard-focusable. CUI's `cui_canvas` interacts
-  with `CUI_IF_DRAG` only, and its public API has no way to make an id
-  focusable or to read Enter or Space activation for it. Doing it needs a
-  CUI patch, such as a canvas variant that takes interaction flags and
-  reports keyboard activation; not done.
+  frameworks on macOS.
 
+Remaining limits:
+
+- Not run: Safari, Firefox, Linux, pasting, input method editors, touch,
+  and the native window beyond `make run-interactive` checked by hand.
+- CUI has no accessibility tree, no inline input-method composition, and
+  no bidirectional text.
+- Two CUI patches, `table-row-state` and `focusable-canvas`, must be
+  remade for a CUI upgrade.
+- Constants in program logic, such as `status == CUI_STATUS_BUSY`, keep
+  CUI's spelling; short names need a parameter or field type.
+- Data that is both a component argument and read by the program, such
+  as the Reader page's table of contents, stays a named C array.
+- A form that declares a name is a block of its own, so an unbraced loop
+  cannot take it as its body.
+- An Array literal outside a form compiles as a run-time `Array`; the
+  package's builds make the resulting cc warning an error.

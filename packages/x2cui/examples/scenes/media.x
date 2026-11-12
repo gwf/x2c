@@ -12,16 +12,16 @@ static void scene_dock_item(Ui ui) {
   ui.row (width: fill, height: fill,
           justify: center, align: end)
   ui.dock ("dock") {
-    ui.dock_item(folder, "Files", color: CUI_RGB(0x3b82f6),
+    ui.dock_item(folder, "Files", color: 0x3b82f6,
                                            running: true);
-    ui.dock_item(mail, "Mail", color: CUI_RGB(0x0ea5e9),
+    ui.dock_item(mail, "Mail", color: 0x0ea5e9,
                                         badge: 3, running: true);
     ui.dock_item(calendar, "Calendar",
-                 color: CUI_RGB(0xef4444));
-    ui.dock_item(music, "Music", color: CUI_RGB(0xec4899),
+                 color: 0xef4444);
+    ui.dock_item(music, "Music", color: 0xec4899,
                                           running: true);
     ui.dock_item(square_terminal, "Terminal",
-                 color: CUI_RGB(0x27272a));
+                 color: 0x27272a);
     ui.dock_separator();
     ui.dock_item(settings, "Settings");
     ui.dock_item(trash_2, "Trash");
@@ -53,12 +53,13 @@ static void scene_now_playing(Ui ui) {
 }
 
 static void scene_radial_gauge(Ui ui) {
-  static const cui_gauge_band load[] = {
-    { 60, CUI_TONE_SUCCESS }, { 85, CUI_TONE_WARNING },
-    { 100, CUI_TONE_DANGER } };
   ui.row (gap: 28, align: center) {
     ui.radial_gauge("cpu", 72, 0, 100, unit: "%", label: "CPU load",
-                                       bands: load, band_count: 3);
+                                       bands: [
+                                         {to: 60, tone: success},
+                                         {to: 85, tone: warning},
+                                         {to: 100, tone: danger}],
+                                         band_count: 3);
     ui.radial_gauge("rps", 1840, 0, 2500,
       label: "Requests per second", show_target: true,
       target: 2000);
@@ -101,21 +102,25 @@ static void scene_comment(Ui ui) {
 
 static void scene_carousel(Ui ui) {
   static int slide = 1;
-  static String titles[] = { "Faster exports", "ARM64 runners",
-                             "Shortcuts everywhere" };
-  static String notes[] = {
-    "A 900 file project now exports in 40 seconds, down from four minutes.",
-    "Linux and macOS jobs can run on ARM64 machines in every plan.",
-    "Every action in the editor has a key, listed under Help, Shortcuts." };
-  static const unsigned colors[] = { 0x1f2a37, 0x0f3d3e, 0x3a2e22 };
-  ui.carousel ("tour", 3, slide, height: 200) {
-    for (int k = 0; k < 3; k++) ui.carousel_slide ()
-    ui.box (width: fill, height: fill,
-            bg: CUI_RGB(colors[k]), radius: 16, pad: 28,
-            gap: 8, justify: end) {
-      ui.text(titles[k], font: display, size: 24,
-                         color: CUI_RGB(0xffffff));
-      ui.text(notes[k], color: CUI_RGBA(0xffffffc0));
+  // A slide is: title, note, and background color.
+  List slides = %(
+    ("Faster exports"
+     "A 900 file project now exports in 40 seconds, down from four minutes."
+     0x1f2a37)
+    ("ARM64 runners"
+     "Linux and macOS jobs can run on ARM64 machines in every plan."
+     0x0f3d3e)
+    ("Shortcuts everywhere"
+     "Every action in the editor has a key, listed under Help, Shortcuts."
+     0x3a2e22));
+  ui.carousel ("tour", slides.len(), slide, height: 200) {
+    foreach (List slide in slides) ui.carousel_slide () {
+      (String title, String note, unsigned color) = slide;
+      ui.box (width: fill, height: fill, bg: color, radius: 16, pad: 28,
+              gap: 8, justify: end) {
+        ui.text(title, font: display, size: 24, color: 0xffffff);
+        ui.text(note, color: CUI_RGBA(0xffffffc0));
+      }
     }
   }
 }
@@ -164,18 +169,19 @@ static void scene_image_compare(Ui ui) {
 }
 
 static void scene_card_stack_item(Ui ui) {
-  static String cities[] = { "Kyoto", "Lisbon", "Reykjavik" };
-  static const unsigned colors[] = { 0xc8553d, 0x2d3047, 0x5b8e7d };
-  int swiped;
-  ui.card_stack (swiped, "deck", 3, width: 240, height: 200)
-  for (int k = 0; k < 3; k++) ui.card_stack_item (k)
-  ui.box (width: fill, height: fill,
-          bg: CUI_RGB(colors[k]), radius: 25, pad: 20,
-          gap: 4, justify: end) {
-    ui.text(cities[k], font: display, size: 22,
-                       color: CUI_RGB(0xffffff));
-    ui.text("Swipe right to save", size: 13, font: medium,
-                                   color: CUI_RGBA(0xfffffff0));
+  // A card is: city and background color.
+  List cards = %(("Kyoto" 0xc8553d) ("Lisbon" 0x2d3047)
+                 ("Reykjavik" 0x5b8e7d));
+  ui.card_stack (swiped, "deck", cards.len(), width: 240, height: 200)
+  for (int k = 0; k < cards.len(); k++) {
+    (String city, unsigned color) = cards[k];
+    ui.card_stack_item (k)
+    ui.box (width: fill, height: fill, bg: color, radius: 25, pad: 20,
+            gap: 4, justify: end) {
+      ui.text(city, font: display, size: 22, color: 0xffffff);
+      ui.text("Swipe right to save", size: 13, font: medium,
+              color: CUI_RGBA(0xfffffff0));
+    }
   }
   (void) swiped;
 }
@@ -353,12 +359,11 @@ static void scene_knob(Ui ui) {
 static void scene_fader(Ui ui) {
   static float gains[4] = { -6, 0, -12.5f, -3 };
   static String names[4] = { "Vocals", "Guitar", "Bass", "Drums" };
-  static const float marks[] = { 6, 0, -6, -12, -24, -48 };
   ui.row () ui.card (pad: 18, dir: row, gap: 10) {
     for (int k = 0; k < 4; k++) ui.id (k)
       ui.fader(names[k], gains[k], -48, 6,
-        unit: "dB", length: 170, ticks: k == 0 ? marks : NULL,
-        tick_count: k == 0 ? 6 : 0);
+        unit: "dB", length: 170,
+        ticks: k == 0 ? [6, 0, -6, -12, -24, -48] : NULL);
   }
 }
 

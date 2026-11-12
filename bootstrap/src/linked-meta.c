@@ -18646,7 +18646,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15573 = List_var(_15572);
   _15574 = String_new("src/expressions/identifiers.x");
   _15575 = String_var(_15574);
-  _15576 = String_new("fd6a1b51");
+  _15576 = String_new("f772f6b8");
   _15577 = String_var(_15576);
   _15578 = cons(_15577, NULL);
   _15579 = cons(_15575, _15578);
@@ -18665,7 +18665,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15592 = List_var(_15591);
   _15593 = String_new("src/expressions/operators.x");
   _15594 = String_var(_15593);
-  _15595 = String_new("f23a2ce0");
+  _15595 = String_new("53e2532e");
   _15596 = String_var(_15595);
   _15597 = cons(_15596, NULL);
   _15598 = cons(_15594, _15597);
@@ -18699,7 +18699,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15626 = List_var(_15625);
   _15627 = String_new("src/expressions/syntax.x");
   _15628 = String_var(_15627);
-  _15629 = String_new("5afda6b3");
+  _15629 = String_new("a16aee84");
   _15630 = String_var(_15629);
   _15631 = cons(_15630, NULL);
   _15632 = cons(_15628, _15631);
@@ -19513,7 +19513,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16434 = List_var(_16433);
   _16435 = String_new("src/macros/invocations/expressions.x");
   _16436 = String_var(_16435);
-  _16437 = String_new("bb2f3a2f");
+  _16437 = String_new("d21e4904");
   _16438 = String_var(_16437);
   _16439 = cons(_16438, NULL);
   _16440 = cons(_16436, _16439);
@@ -23298,7 +23298,7 @@ static List _delegate_fields(Type outer, String member){
   List paths = Array_list_free(found);
   if(List_truth(paths) && List_truth(List_cdr(paths))) _delegate_fail_ambiguous(outer, member, paths);
   if(! List_truth(paths) && List_truth(cycle)) _delegate_fail_cycle(outer, member, cycle);
-  return List_truth(paths) ? Var_list_payload(Var_car(List_car(paths))) : NULL;
+  return Var_list_payload(List_truth(paths) ? Var_car(List_car(paths)) : Var_null());
 }
 
 Code delegate_member(Code code){

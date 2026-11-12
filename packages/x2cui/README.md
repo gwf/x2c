@@ -13,7 +13,7 @@ public name compiles to `x2cui__*`.
 import "x2cui" with App, Ui;
 
 int main(void) {
-  App app = auto App.open({ .title = "Hello", .width = 420, .height = 300 });
+  App app = auto App.open(title: "Hello", width: 420, height: 300);
   bool notify = true;
   int clicks = 0;
   while (app.frame()) {
@@ -29,11 +29,22 @@ int main(void) {
 }
 ```
 
+## Status
+
+The package is a preview. Native builds are supported on macOS arm64
+only. The browser build needs Memory64, JavaScript Promise Integration,
+and WebGL 2; it was run in a Chromium-based browser and under Node. The
+Linux build is not run. CUI has no accessibility tree, no inline
+input-method composition, and no bidirectional text. The package
+applies two patches to CUI, `table-row-state` and `focusable-canvas`
+(see `PROFILE.md`), and an upgrade of CUI must remake them. A program
+draws from one thread.
+
 CUI's records, enums, constants, and icons, such as `cui_box`,
 `CUI_BUTTON_PRIMARY`, `CUI_FILL`, and `CUI_ICON_PLUS`, arrive under their
-own names through the published `src/cui-1.3.h`. The package's own types,
-`Ui`, `App`, `Offscreen`, and `TextField`, are `x2cui__*` names and need
-`with` or the alias.
+own names through the published `src/cui-1.3.h`, the raw API. The
+package's own types, `Ui`, `App`, `Offscreen`, `TextField`, and
+`KeyValue`, are `x2cui__*` names and need `with` or the alias.
 
 ## Build from a checkout
 
@@ -100,14 +111,16 @@ Each CUI component keeps its name. The C calling conventions change:
   `ui.id (key)` keeps the components drawn for different keys apart, with
   a text or an integer key, and `ui.disabled (condition)` disables the
   components in its block.
-- **A block that reports a result** stores it in a variable it is given,
-  declared before the block: `int swiped; ui.card_stack (swiped, "deck",
-  3) { ... }`, `ui.swipe_item (action, "row", left, right) { ... }`, and
-  `ui.reorder (changed, "tasks", order) { ... }` store what their end
-  reports; `ui.kanban_column (added, title, count) { ... }` and
+- **A block that reports a result** declares the name it is given, and
+  the statements after the block read it: `ui.card_stack (swiped,
+  "deck", 3) { ... }`, `ui.swipe_item (action, "row", left, right)
+  { ... }`, and `ui.reorder (changed, "tasks", order) { ... }` store what
+  their end reports; `ui.kanban_column (added, title, count) { ... }` and
   `ui.kanban_card (clicked, id) { ... }` store what their begin reports,
-  before the block runs; `ui.kanban (moved, move, "board") { ... }` sets
-  `moved` and the `cui_kanban_move` `move` when a card was dropped.
+  before the block runs; `ui.kanban (moved, move, "board") { ... }`
+  declares `moved` and the `cui_kanban_move` `move`, set when a card was
+  dropped. Because the form declares a name, it is a block of its own: an
+  unbraced loop or `if` cannot take it as its one statement.
 
 These forms are built at compile time from CUI's C signatures by
 `src/x2cui-generate.x`.
@@ -125,8 +138,9 @@ its field or parameter decides the constant:
 | another `cui_T`, such as `cui_color` or `cui_font` | `accent`, `medium` | `CUI_COLOR_ACCENT`, `CUI_FONT_MEDIUM` |
 | an icon: an option named `icon`, `icon_*`, or `*_icon`, or a parameter CUI names `icon` | `plus` | `CUI_ICON_PLUS` |
 
-A number for a `cui_size` is pixels: `width: 26` is `CUI_PX(26)`, and
-`grow(1.5)` is `CUI_GROW(1.5)`. In `font: m.unread ? medium : body`, each
+A number for a `cui_color` is `0xRRGGBB`: `color: 0x3b82f6` is
+`CUI_RGB(0x3b82f6)`. A number for a `cui_size` is pixels: `width: 26` is
+`CUI_PX(26)`, and `grow(1.5)` is `CUI_GROW(1.5)`. In `font: m.unread ? medium : body`, each
 arm is lowered. A declared name keeps its own value, and so does a C
 macro such as `CUI_FILL` or `NULL`.
 
@@ -139,7 +153,9 @@ so a row keeps its state when the list is filtered or reordered.
 `ui.item (row, selected: ...) { ... }` is an interactive row: it draws a
 quiet fill when selected or hovered, and inside `ui.each` a hairline
 along its top edge unless it is the first item or it or the item before
-it is selected. `row` is a `RowState` with `hovered`, `pressed`, and
+it is selected. Tab reaches each item in order, and Enter or Space clicks
+the focused item, as they click a button; the focused item draws CUI's
+focus ring. `row` is a `RowState` with `hovered`, `pressed`, and
 `clicked` for this frame:
 
 ```x2c
@@ -188,7 +204,9 @@ Each formatted text is a String, as an interpolated label is.
 
 ## Windows and frames
 
-`App.open` opens a window and raises `<init-fail>` when it cannot.
+`App.open` opens a window and raises `<init-fail>` when it cannot. Its
+`name: value` rows set the fields of CUI's `cui_app_desc`, as in
+`App.open(title: "Mail", width: 420, height: 600, min_width: 320)`.
 `app.frame()` presents the last frame, waits for input or animation, and
 begins the next; it returns false once the window has closed. On macOS it
 also gives the window's title bar the background color of the current
@@ -236,25 +254,70 @@ write. The package's tests drive components this way, with CUI's own
 ## Arrays of records
 
 A component such as a chart or a calendar reads an array of CUI's own
-records. In x2c that array is a C array of those records, written with
-designated initializers, and the component takes the array alone:
+records. Constant data is an Array literal, written where the component
+takes the array. Each element is a Map literal of the record's fields,
+lowered by the type of each field as options are, and the form passes
+the count:
 
 ```x2c
-static cui_tab_bar_item tabs[] = {
-  { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" } };
-ui.tab_bar("tabs", tabs, selected);
+ui.tab_bar("tabs", [{icon: house, label: "Home"},
+                    {icon: search, label: "Search"}], selected);
+ui.radial_gauge("cpu", 64, 0, 100, bands: [
+  {to: 60, tone: success}, {to: 85, tone: warning}, {to: 100, tone: danger}]);
 ```
 
-The form passes the array's count. An option that points to an array,
-such as `parts:` or `ticks:`, also gets its count, `part_count` or
-`tick_count`. A program that passes a pointer rather than an array, or
-uses fewer elements than the array holds, writes every count of the
-call itself: `ui.trace_view("trace", tracks, 5, spans, used, ...)`. An
-editor that grows its array takes the array and its live count and
-supplies the capacity: `ui.kv_editor("headers", pairs, count)`. An x2c
-`Array` or `List` of records is not converted; the array is a C array.
-CUI writes into the array of a component that edits its records, such
-as a calendar whose events are dragged.
+An element that is not a Map literal is one value: `["Mon", "Tue"]` for
+labels, and in an option named `icons` or `*_icons`, `[bold, italic]` is
+an array of icons. An Array literal inside a record is an array too, as
+in `{name: "1.0", values: [82, 64, 90]}`, and a record field is a Map
+literal, as in `{combo: {mods: 0, key: f5}}`. A count field after the
+array, as `band_count` follows `bands` and `count` follows `values`, is
+filled. `[]` is NULL with a count of 0.
+
+The literal is constant. It lowers to a `static const` C array that is
+initialized once, so it costs nothing per frame, and every element must
+be a constant: a literal, a short name, an enum constant, the name of a
+static array, or a C macro such as `CUI_RGBA(...)` on constants. The form
+refuses a variable or a function call in an element, because the static
+array would keep its first value. CUI reads some arrays until the frame
+ends, so the form does not build an array on the stack instead.
+
+Data the program owns is x2c values: `class` records in an `Array` or a
+`List`, as the Planning page's kanban board keeps its cards. State that
+CUI edits in place stays a named array of CUI's own records, which the
+form takes without a count, and the form refuses a literal there, so a
+literal never keeps state between frames. These parameters and fields
+are such state: `cui_reactions` items, `cui_query_builder_ex` nodes,
+`cui_curve_editor_ex` keys, `cui_gradient_editor_ex` stops,
+`cui_timeline_editor_ex` and `cui_trace_view_ex` tracks,
+`cui_tree_table_begin_ex` nodes, `cui_week_calendar_ex` events,
+`cui_gantt_ex` tasks, `cui_checklist_ex` steps, `cui_feature_flags_ex`
+flags, `cui_diff_view_rows` rows, `cui_reorder_begin` order,
+`cui_toggle_group_ex` values, `cui_multi_select_ex` selected, and the
+`keys`, `key_selected`, and `clips` of a `cui_timeline_track`. The
+key-value editor is the one exception: it edits x2c values.
+
+An option that points to an array, such as `parts:` or `ticks:`, also
+gets its count, `part_count` or `tick_count`, when it is given a named C
+array. A program that passes a pointer rather than an array, or uses
+fewer elements than the array holds, writes every count of the call
+itself: `ui.trace_view("trace", tracks, 5, spans, used, ...)`. An editor
+that grows its array takes the array and its live count and supplies the
+capacity: `ui.gradient_editor("stops", stops, count)`.
+
+The key-value editor edits x2c values: an `Array` of `KeyValue`, a class
+with `key`, `value`, `enabled`, and `secret`. It has no count or
+capacity; a pair typed into the empty row is pushed, and a removed pair
+leaves the Array. `KeyValue.of_url(url)` reads a URL's query parameters,
+and `field.set_url_params(pairs)` writes them back into a `TextField`:
+
+```x2c
+Array headers = [KeyValue.new("Accept", "text/html", true, false)];
+if (ui.kv_editor("headers", headers)) save(headers);
+```
+
+A tone kept in quoted data is a Symbol; `cui_tone.named(<violet>)` is the
+tone it names.
 
 The table and the data grid take their columns as a Map literal; see
 [Lists and tables](#lists-and-tables). The data grid draws only the
@@ -298,6 +361,10 @@ function. Where its type names `cui_ctx *`, declare that parameter as
 
 Functions that fill caller buffers without a `cui_ctx`, such as
 `cui_terminal_init`, `cui_log_init`, and `cui_fs_list`, are called as C.
+
+Short names apply only where a component's parameter or field gives the
+C type, so a comparison, a flag test, or an assignment on a variable of a
+CUI enum type spells the constant: `status == CUI_STATUS_BUSY`.
 
 ## No Lisp surface
 

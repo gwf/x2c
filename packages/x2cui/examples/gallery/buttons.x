@@ -70,11 +70,8 @@ void page_buttons(Ui ui, Gallery g) {
   section(ui, "Segmented control",
           "A highlight glides to the selected option.");
   ui.card (gap: 16) {
-    static const char *view_icons[] = { CUI_ICON_LIST,
-                                        CUI_ICON_LAYOUT_DASHBOARD,
-                                        CUI_ICON_HISTORY };
     ui.segmented("view", %("List" "Board" "Timeline"), g.seg_view,
-                 icons: view_icons);
+                 icons: [list, layout_dashboard, history]);
     ui.segmented("range", %("Day" "Week" "Month" "Year"), g.seg_size,
                  size: sm);
   }

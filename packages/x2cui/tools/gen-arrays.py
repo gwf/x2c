@@ -12,7 +12,8 @@ and its count, as CUI declares them; a call site passes a C array and
 changing the pinned CUI version and review the difference. Variadic
 functions get no form.
 
-It also writes the table of the methods in src/x2cui.x, generated here or
+It also writes CUI's parameter names for the methods `expand` defines,
+in src/x2cui-generate.x, and the table of the methods in src/x2cui.x, generated here or
 written by hand, that may have a method form, and the table in
 src/x2cui-options.x of the parameters that name an icon. A row names a method and
 the positions of its arrays whose count follows them, so the form
@@ -25,7 +26,9 @@ BEGIN = "/* gen-arrays: begin generated %s */"
 END = "/* gen-arrays: end generated %s */"
 
 # No method: these return through pointers to pointers, or are variadic.
-SKIP = {"cui_signature_points"}
+SKIP = {"cui_signature_points",
+        # patches/focusable-canvas.patch adds these for `ui.item` alone.
+        "cui_canvas_ex", "cui_focus_visible"}
 # The parameter after the array that holds its count, where it is not the
 # next one. diff_view_rows takes the first row, then the capacity.
 COUNT_AFTER = {("cui_diff_view_rows", "rows"): "cap"}
@@ -150,8 +153,8 @@ def forms(header, existing):
       result = "String"
     methods.append(
       f"/** Calls `{name}`. */\n"
-      + wrap(f"inline {result} Ui.{short}(", ["Ui ui"] + declared, ") =>")
-      + "\n" + wrap(f"  {name}(", ["ui"] + passed, ");", "    ") + "\n")
+      + wrap(f"inline {result} Ui.{short}(", ["Ui u"] + declared, ") =>")
+      + "\n" + wrap(f"  {name}(", ["u"] + passed, ");", "    ") + "\n")
   return methods, rows
 
 
@@ -202,6 +205,20 @@ def icon_parameters(header, hand):
   return list(dict.fromkeys(rows))
 
 
+def tone_names(header):
+  """The short names of `cui_tone`'s members, which count up from 0, so a
+  member's position is its value."""
+  body = re.search(r"typedef enum cui_tone \{(.*?)\}", header, re.S).group(1)
+  members = [m.strip() for m in body.split(",") if m.strip()]
+  names = []
+  for index, member in enumerate(members):
+    name, _, value = member.partition("=")
+    if value and int(value) != index:
+      sys.exit(f"cui_tone: {name.strip()} is not {index}")
+    names.append(name.strip()[len("CUI_TONE_"):].lower())
+  return names
+
+
 def replace(path, kind, items):
   source = open(path).read()
   begin, end = BEGIN % kind, END % kind
@@ -227,6 +244,21 @@ def main():
   replace("src/x2cui.x", "forms",
           [table + "\nmacro Unit(Name $method, Literal @pairs) {\n"
            "  @x2cui_form($method, $pairs)\n}"])
+  expanded = set(re.search(r"^expand %\((.*?)\)$", hand,
+                           flags=re.M | re.S).group(1).split())
+  # A parameter with no plain name, such as a callback, keeps `pI`.
+  params = [f'("{name}"' + "".join(
+                ' "%s"' % (re.match(r".*?(\w+)$", q).group(1)
+                           if re.match(r".*?\w+$", q) and "(" not in q
+                           else f"p{i}")
+                for i, q in enumerate(qs[1:], 1)) + ")"
+            for result, name, qs in prototypes(header) if name in expanded]
+  replace("src/x2cui-generate.x", "parameter names",
+          [wrap("meta static List _parameter_names = %(", params, ");", "  ")
+           .replace(", ", " ").replace(",\n", "\n")])
+  replace("src/x2cui.x", "tones",
+          ["static SymbolSet tone_names =\n  %<"
+           + " ".join(tone_names(header)) + ">;"])
   icons = icon_parameters(header, hand)
   replace("src/x2cui-options.x", "icons",
           [wrap("meta static List _icon_parameters = %(", icons, ");", "  ")
