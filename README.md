@@ -84,7 +84,7 @@ platforms and covers installing from source, a first project, and upgrades.
   networking, parsing, and other native libraries.
 - [Command-line reference](docs/src/reference/cli.md): compilation, projects,
   scripts, inspection, and build options. `./x2c --help` lists commands.
-- [Benchmarks Game](examples/shootout/README.md): official problems with
+- [Benchmarks Game suite](examples/shootout/README.md): official problems with
   idiomatic and tuned x2c, plus contributed C, Python, Rust, C++, Go, and
   Java references. See the
   [results and charts](examples/shootout/results/README.md).
@@ -112,7 +112,7 @@ entry file and implementation members.
 | --- | --- |
 | [src/](src/README.md) | Compiler, driver, compile-time operations, and syntax lowering. |
 | [lib/](docs/src/library/overview.md) | Runtime values, collections, memory, IO, concurrency, and Lisp. |
-| `commands/` | External commands such as project creation, packages, and the REPL. |
+| [commands/](commands/README.md) | External commands such as project creation, packages, and the REPL. |
 | [examples/](examples/README.md) | Executable language examples and applications. |
 | [packages/](packages/README.md) | Optional adapters for third-party C libraries. |
 | [unittest/](unittest/) | Runtime tests, compiler fixtures, and focused probes. |

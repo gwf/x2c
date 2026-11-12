@@ -186,7 +186,7 @@ packages, with links to every maintained adapter's build and run
 instructions. The [Greet example](power/greet-client.x) imports the small
 teaching package in [packages/greet](packages/greet/).
 
-The [language shootout](shootout/README.md) adopts ten Benchmarks Game
+The [Benchmarks Game suite](shootout/README.md) adopts ten Benchmarks Game
 problems, with two x2c variants and up to six contributed reference
 languages. See the [current results and charts](shootout/results/README.md).
 
