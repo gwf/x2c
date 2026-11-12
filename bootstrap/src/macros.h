@@ -136,6 +136,8 @@ List Compiler_try_parse_macro_expression(Compiler c);
 
 List Compiler_try_parse_method_macro(Compiler c, List receiver, Token start, Token dot);
 
+List Compiler_try_parse_static_macro(Compiler c, String spelling, Token start);
+
 List Compiler_parse_method_decorator(Compiler c, Token start, Symbol position);
 
 Token Compiler_method_decorator_target(Compiler c);
