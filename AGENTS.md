@@ -204,8 +204,8 @@ checks optional.
 
 ## Report delivery state
 
-Follow Clear communication in the user's global `AGENTS.md` for conversational
-style. Check worktree and remote state before saying a workspace is safe to
-delete. Identify repository requirements by their current file and distinguish
-recommendations from requirements. Supporting evidence can live in the plan,
-PR, or `.context/`.
+Follow Clear communication in the maintainer's personal agent settings (not in
+this repository) for conversational style. Check worktree and remote state
+before saying a workspace is safe to delete. Identify repository requirements
+by their current file and distinguish recommendations from requirements.
+Supporting evidence can live in the plan, PR, or `.context/`.
