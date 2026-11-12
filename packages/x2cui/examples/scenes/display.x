@@ -310,7 +310,8 @@ static void scene_chat_composer(Ui ui) {
        badge: "New", icon: layers},
       {name: "Atlas Fast", detail: "Short answers in about a second",
        icon: zap},
-      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}], model_count: 3,
+      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}],
+      model_count: 3,
     model: &model, width: fill);
   if (events & CUI_COMPOSER_SEND) draft.set("");
 }

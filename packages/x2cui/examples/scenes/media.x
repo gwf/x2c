@@ -58,7 +58,8 @@ static void scene_radial_gauge(Ui ui) {
                                        bands: [
                                          {to: 60, tone: success},
                                          {to: 85, tone: warning},
-                                         {to: 100, tone: danger}], band_count: 3);
+                                         {to: 100, tone: danger}],
+                                         band_count: 3);
     ui.radial_gauge("rps", 1840, 0, 2500,
       label: "Requests per second", show_target: true,
       target: 2000);

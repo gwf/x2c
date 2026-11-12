@@ -73,7 +73,8 @@ static void devtools_pipeline(Ui ui) {
       {name: "docker image", stage: 2, status: pending, duration: -1},
       {name: "release notes", stage: 2, status: skipped, duration: -1},
       {name: "staging", stage: 3, status: pending, duration: -1},
-      {name: "production", stage: 3, status: pending, duration: -1}], selected: &pl_sel);
+      {name: "production", stage: 3, status: pending, duration: -1}],
+      selected: &pl_sel);
 }
 
 static const char *const qb_status[] = { "Open", "In progress", "Closed" };
@@ -194,10 +195,12 @@ static void devtools_graph(Ui ui) {
       {label: "text", detail: "fonts, shaping", tone: info},
       {label: "tls", detail: "mbedtls", tone: warning},
       {label: "zlib", tone: neutral},
-      {label: "platform", detail: "X11, Win32, Cocoa", tone: info}], [
+      {label: "platform", detail: "X11, Win32, Cocoa", tone: info}],
+      [
         {from: 0, to: 1}, {from: 0, to: 2}, {from: 0, to: 3}, {from: 1, to: 4},
         {from: 1, to: 5}, {from: 1, to: 8}, {from: 2, to: 6}, {from: 2, to: 7},
-        {from: 3, to: 7}, {from: 5, to: 7}, {from: 4, to: 8}], selected: &gv_sel,
+        {from: 3, to: 7}, {from: 5, to: 7}, {from: 4, to: 8}],
+        selected: &gv_sel,
                                         height: 340);
 }
 
@@ -296,7 +299,8 @@ static void devtools_trace(Ui ui) {
                     {name: "vsync", time: 0.0, tone: neutral},
                     {name: "vsync", time: 0.0166, tone: neutral},
                     {name: "GC pause", time: 0.0273, tone: warning},
-                    {name: "vsync", time: 0.0332, tone: neutral}], height: 320);
+                    {name: "vsync", time: 0.0332, tone: neutral}],
+                    height: 320);
 }
 
 void page_devtools(Ui ui, Gallery g) {

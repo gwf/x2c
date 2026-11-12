@@ -80,7 +80,8 @@ void page_grid(Ui ui, Gallery g) {
     {name: "Team", icon: users,
      options: ["Engine", "Design", "Platform", "Docs", "Growth"]},
     {name: "Status", icon: circle_dot, options: ["Active", "Away", "Invited"]},
-    {name: "Role", icon: key_round, options: ["Owner", "Admin", "Member"]}], filters, search);
+    {name: "Role", icon: key_round, options: ["Owner", "Admin", "Member"]}],
+    filters, search);
 
   section(ui, "Data grid", "2,000 rows, virtualized. Sort, resize columns, "
                            "select with Shift and Ctrl, edit names with a "

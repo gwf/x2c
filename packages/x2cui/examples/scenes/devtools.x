@@ -86,18 +86,23 @@ static void prepare(void) {
 }
 
 static void scene_api_explorer(Ui ui) {
+  static const cui_api_param by_id[] = {
+    { "id", "path", "string", true, "The user's id" },
+    { "fields", "query", "string", false, "Comma separated fields" } };
+  static const cui_api_param paging[] = {
+    { "limit", "query", "integer", false, "At most this many, default 20" },
+    { "cursor", "query", "string", false, "From a previous page" } };
   static int selected = 2;
   ui.api_explorer("api", [
     {method: "GET", path: "/users", summary: "List users", tag: "Users",
-     params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+     params: paging},
     {method: "POST", path: "/users", summary: "Create a user", tag: "Users"},
     {method: "GET", path: "/users/{id}", summary: "Get a user", tag: "Users",
-     params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields"}]},
+     params: by_id},
     {method: "DELETE", path: "/users/{id}", summary: "Delete a user",
-     tag: "Users",
-     params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields"}]},
+     tag: "Users", params: by_id},
     {method: "GET", path: "/orders", summary: "List orders", tag: "Orders",
-     params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+     params: paging},
     {method: "GET", path: "/v1/orders", summary: "List orders (old)",
      tag: "Orders", deprecated: true}],
     width: fill, height: 320, selected: &selected);
@@ -111,7 +116,8 @@ static void scene_blame(Ui ui) {
     { "c3d4e5f6a7", "Priya Nair", "Gaps between children", 1790000000 },
     { "d4e5f6a7b8", "Leo Park", "Layout entry point", 1793000000 },
     { "e5f6a7b8c9", "Aiko Tanaka", "Measure every node", 1794100000 } };
-  ui.blame("blame", blame_lines, [0, 1, 2, 2, 1, 0, 0, 3, 3, 4, 3], blame_lines.len(), commits,
+  ui.blame("blame", blame_lines, [0, 1, 2, 2, 1, 0, 0, 3, 3, 4, 3],
+           blame_lines.len(), commits,
              width: fill, height: 220, lang: "c",
              now: 1794211200, first_line: 120);
 }
@@ -234,7 +240,8 @@ static void scene_keymap(Ui ui) {
      category: 2},
     {combo: {mods: 0, key: f5}, action: "Continue", category: 3},
     {combo: {mods: 0, key: f12}, action: "Definition", category: 1}],
-    width: 664, categories: ["File", "Navigate", "Edit", "Run and debug"], mods: &mods);
+    width: 664, categories: ["File", "Navigate", "Edit", "Run and debug"],
+    mods: &mods);
 }
 
 static void scene_kv_editor(Ui ui) {
@@ -288,13 +295,17 @@ static void scene_query_builder(Ui ui) {
   static int count = 5;
   ui.query_builder("filter", [
     {name: "Status", type: choice, choices: ["Open", "In progress", "Closed"]},
-    {name: "Assignee", type: text}, {name: "Priority", type: number}], nodes, count, width: 640);
+    {name: "Assignee", type: text}, {name: "Priority", type: number}],
+    nodes, count, width: 640);
 }
 
 static void scene_stack_trace(Ui ui) {
   ui.stack_trace("trace", [
     {function: "total", file: "src/cart.js", line: 3, column: 29,
-     source: ["function total(cart) {", "  let sum = 0;", "  for (const item of cart.items) {", "    sum += item.price * item.qty;", "  }", "  return sum;"],
+     source: [
+       "function total(cart) {", "  let sum = 0;",
+       "  for (const item of cart.items) {",
+       "    sum += item.price * item.qty;", "  }", "  return sum;"],
      source_first: 1},
     {function: "checkout", file: "src/checkout.js", line: 3, column: 18},
     {function: "handle", file: "node_modules/express/lib/router/layer.js",
@@ -382,7 +393,8 @@ static void scene_tree_table(Ui ui) {
   ui.tree_table ("files", [
     {title: "Name", width: 300, align: left, sortable: true},
     {title: "Size", width: 100, align: right, sortable: true, priority: 1},
-    {title: "Kind", width: 140, align: left, sortable: true, priority: 2}], nodes, width: 640, height: 340,
+    {title: "Kind", width: 140, align: left, sortable: true, priority: 2}],
+    nodes, width: 640, height: 340,
                  cursor: &cursor, guides: true)
     while ((node = ui.tree_table_row()) >= 0) {
       (String name, String size, String kind) = tree_files[node];

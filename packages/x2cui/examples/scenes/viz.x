@@ -142,7 +142,8 @@ static void scene_bar_list(Ui ui) {
 
 static void scene_calendar_heatmap(Ui ui) {
   ui.card (pad: 18)
-    ui.calendar_heatmap("activity", (cui_date){ 2026, 1, 1 }, commits, unit: "commits");
+    ui.calendar_heatmap("activity", (cui_date){ 2026, 1, 1 }, commits,
+                        unit: "commits");
 }
 
 static void scene_candlestick(Ui ui) {
@@ -162,7 +163,8 @@ static void scene_funnel(Ui ui) {
 static void scene_heatmap(Ui ui) {
   ui.card (pad: 18, width: fill, max_width: 660)
     ui.heatmap("traffic", traffic, 7, 24,
-      row_labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], col_labels: [
+      row_labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      col_labels: [
         "0h", NULL, NULL, "3h", NULL, NULL, "6h", NULL, NULL, "9h", NULL, NULL,
         "12h", NULL, NULL, "15h", NULL, NULL, "18h", NULL, NULL, "21h", NULL,
         NULL], format: "%.0f req");
@@ -186,7 +188,8 @@ static void scene_sankey(Ui ui) {
                 {from: 0, to: 3, value: 420}, {from: 1, to: 3, value: 260},
                 {from: 2, to: 3, value: 180}, {from: 0, to: 4, value: 300},
                 {from: 1, to: 4, value: 220}, {from: 3, to: 5, value: 860},
-                {from: 5, to: 6, value: 580}, {from: 5, to: 7, value: 280}], height: 260);
+                {from: 5, to: 6, value: 580}, {from: 5, to: 7, value: 280}],
+                height: 260);
 }
 
 static void scene_scatter_chart(Ui ui) {
@@ -256,7 +259,8 @@ static void scene_histogram_slider(Ui ui) {
   static float lo = 40, hi = 160;
   ui.card (width: 380, gap: 6) {
     ui.histogram_slider("Price", [
-      2, 4, 7, 12, 18, 26, 31, 29, 34, 40, 37, 30, 24, 19, 15, 11, 8, 6, 4, 3], lo, hi, 0, 240,
+      2, 4, 7, 12, 18, 26, 31, 29, 34, 40, 37, 30, 24, 19, 15, 11, 8, 6, 4, 3],
+      lo, hi, 0, 240,
                         format: "$%.0f");
     ui.muted("1,204 listings in range");
   }

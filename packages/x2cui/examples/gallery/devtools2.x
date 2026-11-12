@@ -54,11 +54,16 @@ static void devtools2_stack(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 760)
     ui.stack_trace("trace", [
       {function: "total", file: "src/cart.js", line: 3, column: 29,
-       source: ["function total(cart) {", "  let sum = 0;", "  for (const item of cart.items) {", "    sum += item.price * item.qty;", "  }", "  return sum;"],
+       source: [
+         "function total(cart) {", "  let sum = 0;",
+         "  for (const item of cart.items) {",
+         "    sum += item.price * item.qty;", "  }", "  return sum;"],
        source_first: 1},
       {function: "checkout", file: "src/checkout.js", line: 3, column: 18,
-       source: ["export function checkout(user) {", "  const cart = carts.get(user.id);", "  const amount = total(cart);", "  return charge(user, amount);"],
-       source_first: 1},
+       source: [
+         "export function checkout(user) {",
+         "  const cart = carts.get(user.id);", "  const amount = total(cart);",
+         "  return charge(user, amount);"], source_first: 1},
       {function: "handle", file: "node_modules/express/lib/router/layer.js",
        line: 95, column: 5, external: true},
       {function: "next", file: "node_modules/express/lib/router/route.js",
@@ -176,7 +181,8 @@ static void devtools2_blame(Ui ui) {
     "        measure(&ui->nodes[i]);"
     "    place(ui, 0);  /* the root */" "}");
   ui.column (gap: 10, width: fill, max_width: 900)
-    ui.blame("blame", lines, [0, 0, 1, 1, 2, 2, 2, 1, 1, 0, 3, 3, 4, 3, 3], 15, [
+    ui.blame("blame", lines,
+      [0, 0, 1, 1, 2, 2, 2, 1, 1, 0, 3, 3, 4, 3, 3], 15, [
       {hash: "a1b2c3d4e5", author: "Maya Okafor", summary: "First layout pass",
        time: 1730000000},
       {hash: "b2c3d4e5f6", author: "Jonas Berg",
@@ -208,24 +214,30 @@ static void devtools2_flags(Ui ui) {
                      %("Development" "Staging" "Production"));
 }
 
+static const cui_api_param ax_p1[] = {
+  { "id", "path", "string", true, "The user's id" },
+  { "fields", "query", "string", false, "Comma separated fields to return" },
+};
+static const cui_api_param ax_p2[] = {
+  { "limit", "query", "integer", false, "At most this many, default 20" },
+  { "cursor", "query", "string", false, "From a previous page" },
+};
 static int ax_sel = 2;
 
 static void devtools2_api(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 820)
     ui.api_explorer("api", [
       {method: "GET", path: "/users", summary: "List users", tag: "Users",
-       params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+       params: ax_p2},
       {method: "POST", path: "/users", summary: "Create a user", tag: "Users"},
       {method: "GET", path: "/users/{id}", summary: "Get a user", tag: "Users",
-       params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields to return"}]},
+       params: ax_p1},
       {method: "PATCH", path: "/users/{id}", summary: "Update a user",
-       tag: "Users",
-       params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields to return"}]},
+       tag: "Users", params: ax_p1},
       {method: "DELETE", path: "/users/{id}", summary: "Delete a user",
-       tag: "Users",
-       params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields to return"}]},
+       tag: "Users", params: ax_p1},
       {method: "GET", path: "/orders", summary: "List orders", tag: "Orders",
-       params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+       params: ax_p2},
       {method: "PUT", path: "/orders/{id}/status",
        summary: "Set an order's status", tag: "Orders"},
       {method: "GET", path: "/v1/orders", summary: "List orders (old)",

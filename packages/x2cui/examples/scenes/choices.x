@@ -187,7 +187,8 @@ static void scene_model_picker(Ui ui) {
        badge: "New", icon: layers},
       {name: "Atlas Fast", detail: "Short answers in about a second",
        icon: zap},
-      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}], model,
+      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}],
+      model,
       placement: bottom_start);
   }
 }

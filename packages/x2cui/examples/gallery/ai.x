@@ -104,7 +104,8 @@ void page_ai(Ui ui, Gallery g) {
            badge: "New", icon: layers},
           {name: "Atlas Fast", detail: "Short answers in about a second",
            icon: zap},
-          {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}], model: &model);
+          {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}],
+          model: &model);
       if (event & CUI_COMPOSER_SEND) {
         draft.set("");
         busy = true;
