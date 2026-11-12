@@ -8,10 +8,10 @@ title: Connect operations without collecting every step.
 ---
 
 ```x2c
-/*  iterators.x -- lazy selection, merging, and validation */
+~/*  iterators.x -- lazy selection, merging, and validation */
 
-int main(void) {
-  auto {
+~int main(void) {
+~  auto {
     List seen = %(3 1 3 2 1 4);
     printf("unique: %s\n", seen.iter().unique().list().repr());
 
@@ -19,7 +19,7 @@ int main(void) {
     printf("queue: %s\n", urgent.iter()
       .chain(routine.iter()).head(4).list().repr());
 
-    printf("first square over threshold: %d\n", range(1, 20, 1)
+    printf("first square over threshold: %d\n", range(1, 20)
       .map(%!(value) => value * value)
       .find(%!(value) => value > 70).int());
 
@@ -35,9 +35,9 @@ int main(void) {
 
     printf("numbered: %s\n", %(<parse> <compile> <link>).iter()
       .enumerate(1).list().repr());
-  }
-  return 0;
-}
+~  }
+~  return 0;
+~}
 ```
 
 Iterators select, merge, and enumerate values as they are consumed. Compose the operations around the task, then collect or reduce the result where you need it.

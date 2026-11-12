@@ -8,9 +8,9 @@ title: Equal contents. Distinct identities.
 ---
 
 ```x2c
-#include <assert.h>
+~#include <assert.h>
 
-int main(void) {
+~int main(void) {
   // Values: equal content is the same object, so == is a pointer compare.
   String greeting = "hel" + "lo", word = "hello";
   List pair = %(1 2), twin = cons(1, cons(2, NULL));
@@ -26,8 +26,8 @@ int main(void) {
   // Equal Strings and Lists find the same Map entry.
   Map seen = {(greeting): 1, (pair): 2, done: other.len()};
   printf("%s %s %s\n", seen["hello"], seen[%(1 2)], seen[<done>]);
-  return 0;
-}
+~  return 0;
+~}
 ```
 
 Strings, Lists, and Symbols share equal values. Arrays and Maps are mutable objects: two separate Arrays can have equal contents without being the same Array.

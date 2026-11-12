@@ -126,7 +126,21 @@ site palette in `shiki-x2c.mjs`. Do not hand-write `<span>` markup for code.
 Every ```` ```x2c ```` block on the site is compiled by
 `tools/check-doc-examples`, which runs in `make doc-examples`. A line
 starting with `~` is compiled but not shown, which is how a nine-line sample
-can still be a complete program. A sample that genuinely cannot compile must
+can still be a complete program. Home galleries show labeled source excerpts;
+Examples shows the complete source. Hide the `main` wrapper and test-only
+setup with `~`, retaining the feature declarations and operations. The excerpt
+renderer removes the hidden wrapper's indentation while preserving nested
+indentation. Keep `main` last in the complete example.
+
+`examples/gallery.json` maps each slide to its complete program. After editing
+a generated example's slide, run
+`builds/0/x2c script tools/check-gallery-examples --update`; do not edit the
+generated example separately. Source-owned package excerpts must stay faithful
+to their linked program. Gallery links use the same routes as the Examples
+index. The former `/playground/?example=...` interface redirects to those
+routes; `/playground/programs/` still holds the shared WebAssembly assets.
+
+A sample that genuinely cannot compile must
 be tagged ```` ```x2c,ignore ```` with an `<!-- ignore: reason -->` comment
 above it.
 

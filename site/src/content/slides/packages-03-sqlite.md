@@ -12,7 +12,7 @@ links:
 
 <!-- ignore: source excerpt; the complete example requires its optional package and setup. -->
 ```x2c,ignore
-#include "system-macros.x"
+~#include "system-macros.x"
 
 import "sqlite" with Database, Prepared;
 

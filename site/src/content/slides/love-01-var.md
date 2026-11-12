@@ -8,8 +8,8 @@ title: One value, many kinds.
 ---
 
 ```x2c
-#include <assert.h>
-#include <math.h>
+~#include <assert.h>
+~#include <math.h>
 
 ~int main(void) {
   // Var holds different kinds of values.
@@ -21,8 +21,8 @@ title: One value, many kinds.
   // Vars format themselves with %s.
   printf("%s %s %s\n", next, ratio, full);
 
-  // Test Var properties at runtime.
-  assert(count is int && ratio is double && name is String);
+~  // Test Var properties at runtime.
+~  assert(count is int && ratio is double && name is String);
 
   // Types are checked statically and dynamically as needed.
   int whole = count; double part = ratio;

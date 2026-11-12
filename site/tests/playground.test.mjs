@@ -11,7 +11,7 @@ const emcc =
   spawnSync(process.env.WASM_CC || "emcc", ["--version"]).status === 0;
 
 // Prepares the precompiled programs, builds the site without a compile
-// service, and returns the playground page and homepage.
+// service, and returns the redirect, complete examples, and homepage.
 function render(env) {
   const prepared = spawnSync(process.execPath, [
     "scripts/playground-programs.mjs", "compile",
@@ -28,6 +28,8 @@ function render(env) {
     assert.equal(result.status, 0, result.stdout + result.stderr);
     return {
       page: readFileSync(join(destination, "playground/index.html"), "utf8"),
+      love: readFileSync(join(destination, "examples/love/index.html"), "utf8"),
+      magic: readFileSync(join(destination, "examples/magic/index.html"), "utf8"),
       home: readFileSync(join(destination, "index.html"), "utf8"),
     };
   } finally {
@@ -35,35 +37,32 @@ function render(env) {
   }
 }
 
-test("without programs or a service, the playground is unlinked", () => {
-  const { page, home } = render({ WASM_CC: "x2c-missing-emcc" });
-  assert.match(page, /data-run hidden/);
-  assert.match(page, /Running programs is unavailable in this build/);
-  assert.match(page, /value="love\/maps"/);
-  assert.doesNotMatch(page, /value="power\/threads"/);
-  assert.doesNotMatch(page, /value="love\/files"/);
-  assert.doesNotMatch(page, /data-programs/);
-  assert.doesNotMatch(home, /playground\//);
+test("without WebAssembly, galleries still link to complete examples", () => {
+  const { page, home, love, magic } = render({ WASM_CC: "x2c-missing-emcc" });
+  assert.doesNotMatch(page, /textarea|data-run|<select/);
+  assert.match(page, /location.replace/);
+  assert.match(page, /"love\/values":"love\/#love-values"/);
+  assert.doesNotMatch(home, /Run in playground|playground\//);
+  assert.match(home, /examples\/love\/#love-values/);
+  assert.match(home, /examples\/magic\/#magic-autodiff/);
+  assert.match(love, /id="love-values"/);
+  assert.match(magic, /packages\/autodiff\/examples\/energy-gradient.x/);
 });
 
-test("precompiled programs run the examples without a compile service",
+test("complete examples retain precompiled programs and expected output",
   { skip: !emcc && "emcc is not on PATH" }, () => {
-    const { page, home } = render({});
-    assert.doesNotMatch(page, /data-run hidden/);
-    assert.match(page, /data-programs="[^"]*playground\/programs\/"/);
-    assert.match(page, /this build has no compile service/);
-    assert.doesNotMatch(page, /Source is sent to the compile service/);
-    assert.match(page, /value="love\/maps"/);
-    assert.doesNotMatch(page, /value="power\/threads"/);
-    // The editor shows the slide's code; the program keeps its hidden lines.
-    const examples = JSON.parse(page.match(
-      /<script type="application\/json" data-examples>([\s\S]*?)<\//)[1]);
-    const maps = examples.find((example) => example.id === "love/maps");
+    const { page, home, love } = render({});
+    assert.doesNotMatch(page, /data-playground/);
+    assert.match(love, /data-programs="[^"]*playground\/programs\/"/);
+    const examples = [...love.matchAll(
+      /<script type="application\/json" data-examples>([\s\S]*?)<\//g)]
+      .flatMap(match => JSON.parse(match[1]));
+    const maps = examples.find(example => example.id === "love/maps");
     assert.equal(maps.program, true);
+    assert.equal(maps.source, readFileSync(join(site, "../examples/love/maps.x"), "utf8"));
     assert.match(maps.source, /int main\(void\)/);
-    assert.doesNotMatch(maps.visible, /int main\(void\)/);
-    assert.match(home, /playground\/\?example=love%2Fcollections/);
-    assert.match(home, /href="[^"]*examples\/">examples</);
+    assert.match(love, /data-expected-output/);
+    assert.match(home, /examples\/love\/#love-collections/);
   });
 
 

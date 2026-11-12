@@ -42,8 +42,8 @@ String read_text(String path) {
 ~}
 
 ~int main(int argc, char **argv) {
-  String directory = argc > 1 ? argv[1]
-                             : example_data("power-exceptions");
+~  String directory = argc > 1 ? argv[1]
+~                             : example_data("power-exceptions");
 ~  assert(preview(%"$directory/document.txt") == "Meeting at noon.");
 ~  assert(fcntl(opened_fd, F_GETFD) == -1 && errno == EBADF);
   // document.bin contains a NUL byte, which String cannot hold.
