@@ -1029,3 +1029,23 @@ stay byte-identical to `origin/x2cui` at `b393dd58c`.
 Not verified: Safari, Firefox, Linux, pasting, input method editors,
 touch, and the interactive native window beyond `make run-interactive`
 checked by hand.
+
+Review fixes (2026-11-11):
+
+- `x2cui_strings` keeps one native array for each distinct List in a
+  `Map` keyed by the List. A Map lookup of an existing List allocates
+  nothing: 0 bytes more in the default malloc zone after 100,000 lookups,
+  measured with `malloc_zone_statistics`. An empty List returns one
+  shared array and allocates nothing; a test checks 100,000 such
+  conversions. `stress --frames 300 components` takes 1.15 to 1.39 ms a
+  frame before and 1.18 to 1.24 ms after, three alternating runs each.
+- The table is shared by the process and not locked, so the README now
+  says to draw on one thread, rather than adding a lock.
+- The Makefile links `-lX11 -ldl -lm -lpthread` on Linux and the Cocoa
+  frameworks on macOS. The Linux build was not run.
+- `ui.item` rows are not keyboard-focusable. CUI's `cui_canvas` interacts
+  with `CUI_IF_DRAG` only, and its public API has no way to make an id
+  focusable or to read Enter or Space activation for it. Doing it needs a
+  CUI patch, such as a canvas variant that takes interaction flags and
+  reports keyboard activation; not done.
+
