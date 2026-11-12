@@ -153,6 +153,13 @@ meta List x2cui_record(Type record, List options) {
   return $!( ($record){ @initializers } );
 }
 
+/** Returns the CUI record `record`, a type name such as `cui_reaction`,
+    built from the `name: value` rows of `fields` as `x2cui_record` builds
+    an option record: the expansion of `cui_reaction.of(icon: heart)`.
+*/
+meta List x2cui_of(String record, List fields) =>
+  x2cui_record(%($record), fields);
+
 /** Returns the call that pushes `key` on the id stack: `cui_push_id` for
     text and `cui_push_id_int` for anything else.
 */

@@ -428,6 +428,60 @@ cui_tone cui_tone.named(Symbol name) {
   return at < 0 ? CUI_TONE_NEUTRAL : (cui_tone) at;
 }
 
+// records
+
+/* `T.of(name: value ...)` builds the CUI record `T`, each field lowered as
+   an option is: `cui_reaction.of(icon: heart, count: 4)`. */
+macro Unit $x2cui.record(Name $record) {
+  macro Expression $$record.of(Entry @fields) => $x2cui_of($record, $fields);
+}
+
+/* gen-arrays: begin generated records */
+
+
+$x2cui.record(cui_vec2); $x2cui.record(cui_rect); $x2cui.record(cui_date);
+$x2cui.record(cui_tour_step); $x2cui.record(cui_table_column);
+$x2cui.record(cui_table_sort); $x2cui.record(cui_image_view);
+$x2cui.record(cui_command); $x2cui.record(cui_choice);
+$x2cui.record(cui_reaction); $x2cui.record(cui_speed_action);
+$x2cui.record(cui_swipe_action); $x2cui.record(cui_grid_column);
+$x2cui.record(cui_filter_field); $x2cui.record(cui_tree_node);
+$x2cui.record(cui_tree_table_events); $x2cui.record(cui_file_entry);
+$x2cui.record(cui_text_mark); $x2cui.record(cui_diff_row);
+$x2cui.record(cui_diff_hunk); $x2cui.record(cui_diff_stats);
+$x2cui.record(cui_diff_range); $x2cui.record(cui_presence_user);
+$x2cui.record(cui_ticker_item); $x2cui.record(cui_viz_item);
+$x2cui.record(cui_sankey_link); $x2cui.record(cui_scatter_series);
+$x2cui.record(cui_gauge_band); $x2cui.record(cui_candle);
+$x2cui.record(cui_tab_bar_item); $x2cui.record(cui_now_playing);
+$x2cui.record(cui_plan_step); $x2cui.record(cui_source);
+$x2cui.record(cui_prompt_suggestion); $x2cui.record(cui_model);
+$x2cui.record(cui_kanban_move); $x2cui.record(cui_cal_event);
+$x2cui.record(cui_month_event); $x2cui.record(cui_gantt_task);
+$x2cui.record(cui_toc_item); $x2cui.record(cui_check_step);
+$x2cui.record(cui_date_range); $x2cui.record(cui_key_combo);
+$x2cui.record(cui_node_view); $x2cui.record(cui_doc_tab);
+$x2cui.record(cui_log_line); $x2cui.record(cui_log_buffer);
+$x2cui.record(cui_terminal_line); $x2cui.record(cui_terminal_buffer);
+$x2cui.record(cui_hex_range); $x2cui.record(cui_hex_selection);
+$x2cui.record(cui_flame_span); $x2cui.record(cui_flame_view);
+$x2cui.record(cui_curve_key); $x2cui.record(cui_gradient_stop);
+$x2cui.record(cui_timeline_clip); $x2cui.record(cui_timeline_track);
+$x2cui.record(cui_timeline_view); $x2cui.record(cui_kv_pair);
+$x2cui.record(cui_diagnostic); $x2cui.record(cui_pipeline_job);
+$x2cui.record(cui_query_field); $x2cui.record(cui_query_node);
+$x2cui.record(cui_keymap_binding); $x2cui.record(cui_commit);
+$x2cui.record(cui_graph_node); $x2cui.record(cui_graph_edge);
+$x2cui.record(cui_net_request); $x2cui.record(cui_trace_track);
+$x2cui.record(cui_trace_span); $x2cui.record(cui_trace_marker);
+$x2cui.record(cui_trace_view); $x2cui.record(cui_regex_match);
+$x2cui.record(cui_test_item); $x2cui.record(cui_stack_frame);
+$x2cui.record(cui_uptime_service); $x2cui.record(cui_histogram_series);
+$x2cui.record(cui_coverage_file); $x2cui.record(cui_blame_commit);
+$x2cui.record(cui_feature_flag); $x2cui.record(cui_api_param);
+$x2cui.record(cui_api_endpoint);
+/* gen-arrays: end generated records */
+
 // key-value pairs
 
 /** One pair of `ui.kv_editor`: a key, its value, whether the pair is on,

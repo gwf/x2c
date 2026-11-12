@@ -219,6 +219,24 @@ def tone_names(header):
   return names
 
 
+# Records with no `T.of`: CUI's own plumbing, records an option already
+# builds, and `cui_series`, whose `of` is written by hand.
+NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
+               "cui_platform_iface", "cui_theme", "cui_strings",
+               "cui_text_metrics", "cui_size", "cui_box", "cui_color",
+               "cui_corners", "cui_shadow", "cui_vertex", "cui_draw_cmd",
+               "cui_draw_data", "cui_series"}
+
+def records(header):
+  """The CUI record types that `T.of` builds."""
+  text = re.sub(r"/\*.*?\*/", "", header, flags=re.S)
+  names = re.findall(
+    r"typedef struct\s*\w*\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\s*(cui_\w+)\s*;",
+    text)
+  return [n for n in names if not n.endswith(("_opts", "_result"))
+          and n not in NOT_RECORDS]
+
+
 def replace(path, kind, items):
   source = open(path).read()
   begin, end = BEGIN % kind, END % kind
@@ -259,6 +277,9 @@ def main():
   replace("src/x2cui.x", "tones",
           ["static SymbolSet tone_names =\n  %<"
            + " ".join(tone_names(header)) + ">;"])
+  rows = [wrap("", [f"$x2cui.record({r});" for r in records(header)], "",
+                "").replace(", ", " ").replace(",\n", "\n")]
+  replace("src/x2cui.x", "records", rows)
   icons = icon_parameters(header, hand)
   replace("src/x2cui-options.x", "icons",
           [wrap("meta static List _icon_parameters = %(", icons, ");", "  ")
