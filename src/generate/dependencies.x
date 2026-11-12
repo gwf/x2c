@@ -181,20 +181,23 @@ static void _dependencies(Forward &f, List value) {
 
 static void _visit(Forward &f, List node) {
   match (node) {
-    case %(!set ?binding (binding ? ?)): _binding(f, binding);
+    case %(ident (!set ?binding (binding ? ?))): _binding(f, binding, 1);
+    case %(!set ?binding (binding ? ?)): _binding(f, binding, 0);
     case %(call ?(String name) *): _declaration(f, %(native $name));
     case %((!or expr declare typedef function cast param) ?type *):
       if (type is <list>) _types(f, type);
   }
 }
 
-/* A binding needs its static declaration, found by binding or by native
-   spelling, or else the prototype of the global function it names. */
-static void _binding(Forward &f, List binding) {
+/* A binding needs its static declaration, or else the prototype of the
+   global function it names. Only an identifier, as `reference` tells,
+   also finds a static function by native spelling: a field or other
+   declared name merely shares that spelling. */
+static void _binding(Forward &f, List binding, int reference) {
   String spelling = Ast.binding_spelling(binding);
   List native = %(native $spelling);
   if (binding in f.statics) _declaration(f, binding);
-  else if (native in f.statics) _declaration(f, native);
+  else if (reference && native in f.statics) _declaration(f, native);
   else _global(f, binding, spelling);
 }
 
