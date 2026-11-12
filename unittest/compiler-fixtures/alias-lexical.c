@@ -16,8 +16,6 @@ typedef struct Box{
 }
 Box;
 
-static int with(int with);
-
 typedef struct Named{
   int with;
 }
