@@ -377,9 +377,9 @@ static void a_grid_with_a_map_of_columns(Ui ui) {
                 height: 200, sort: &sort)
     for (int row = first; row < last; row++) {
       ui.data_grid_row(row);
-      ui.data_grid_cell_text(%"name $row");
-      ui.data_grid_cell_text(row % 2 ? "yes" : "no");
-      ui.data_grid_cell_text(%"$(row * 3)");
+      ui.grid_cell_text(%"name $row");
+      ui.grid_cell_text(row % 2 ? "yes" : "no");
+      ui.grid_cell_text(%"$(row * 3)");
     }
 }
 

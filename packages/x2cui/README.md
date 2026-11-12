@@ -254,7 +254,10 @@ as a calendar whose events are dragged.
 The table and the data grid take their columns as a Map literal; see
 [Lists and tables](#lists-and-tables). The data grid draws only the
 rows on screen: its block builds rows `first` up to `last`, two `int`
-variables the form declares, and its widths are points:
+variables the form declares, and its widths are points. A grid's cells are
+`ui.grid_cell () { ... }` and `ui.grid_cell_text(text)`, as a table's are
+`ui.cell` and `ui.cell_text`; which a cell is in is known only while the
+frame runs, so the two kinds have their own names:
 
 ```x2c
 ui.data_grid ("people", people.len(), first, last,
@@ -262,8 +265,8 @@ ui.data_grid ("people", people.len(), first, last,
               height: 300, selected: selected, sort: &sort)
   for (int row = first; row < last; row++) {
     ui.data_grid_row(row);
-    ui.data_grid_cell_text(names[row]);
-    ui.data_grid_cell_text(%"$(commits[row])");
+    ui.grid_cell_text(names[row]);
+    ui.grid_cell_text(%"$(commits[row])");
   }
 ```
 

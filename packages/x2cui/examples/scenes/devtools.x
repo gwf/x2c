@@ -383,8 +383,8 @@ static void scene_tree_table(Ui ui) {
       (String name, String size, String kind) = tree_files[node];
       ui.tree_table_name(name, kind == "Folder" ? folder
                                                 : file);
-      ui.data_grid_cell_text(size);
-      ui.data_grid_cell_text(kind);
+      ui.grid_cell_text(size);
+      ui.grid_cell_text(kind);
     }
 }
 

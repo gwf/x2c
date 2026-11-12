@@ -378,6 +378,10 @@ RowState Ui.table_row_begin(Ui ui, RowOptions opts) {
 /// Draws the next cell of a table row with one text.
 void Ui.cell_text(Ui ui, String text) => cui_table_cell_text(ui, text);
 
+/// Draws the next cell of a data grid's or a tree table's row with one text.
+void Ui.grid_cell_text(Ui ui, String text) =>
+  cui_data_grid_cell_text(ui, text);
+
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
 
@@ -904,21 +908,22 @@ inline void Ui.draw_polygon(
 expand %(
   prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell donut_chart
   sparkline otp_input reorder_begin (line_chart 1) (bar_chart 1)
-  each_begin each_end item_begin table_row_begin cell_text (tour 1)
-  toggle_group (reactions 1) (speed_dial 1) (swipe_item_begin 1 3)
-  (filter_bar 1) (tree_table_begin 1 3) diff_view_rows (presence 1)
-  (ticker 1) heatmap (calendar_heatmap 2) (treemap 1) (radar_chart 1)
-  (funnel 1) (sankey 2) (waffle 1) (split_bar 1) (bar_list 1)
-  (activity_rings 1) (scatter_chart 1) (candlestick 1) (tab_bar 1)
-  (waveform 1) (agent_plan 1) (source_list 1) (prompt_suggestions 1)
-  (model_picker 1) (week_calendar 2) (month_calendar 2) (gantt 1) (toc 1)
-  (checklist 1) multi_select (histogram_slider 1) (level_meter 1)
-  (doc_tabs 1) (prop_vec 1) (hex_view 1) (flame_graph 1) (curve_editor 1)
-  (gradient_editor 1) (timeline_editor 1) (kv_editor 1) (problems 1)
-  (pipeline 2) (query_builder 1 3) (keymap 1) (commit_graph 1)
-  (graph_view 1 3) (waterfall 1) (trace_view 1 3) (test_explorer 1)
-  (stack_trace 1) (uptime 1) (time_histogram 4) (coverage 1) (blame 4)
-  (feature_flags 1) (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
+  each_begin each_end item_begin table_row_begin cell_text grid_cell_text
+  (tour 1) toggle_group (reactions 1) (speed_dial 1)
+  (swipe_item_begin 1 3) (filter_bar 1) (tree_table_begin 1 3)
+  diff_view_rows (presence 1) (ticker 1) heatmap (calendar_heatmap 2)
+  (treemap 1) (radar_chart 1) (funnel 1) (sankey 2) (waffle 1)
+  (split_bar 1) (bar_list 1) (activity_rings 1) (scatter_chart 1)
+  (candlestick 1) (tab_bar 1) (waveform 1) (agent_plan 1) (source_list 1)
+  (prompt_suggestions 1) (model_picker 1) (week_calendar 2)
+  (month_calendar 2) (gantt 1) (toc 1) (checklist 1) multi_select
+  (histogram_slider 1) (level_meter 1) (doc_tabs 1) (prop_vec 1)
+  (hex_view 1) (flame_graph 1) (curve_editor 1) (gradient_editor 1)
+  (timeline_editor 1) (kv_editor 1) (problems 1) (pipeline 2)
+  (query_builder 1 3) (keymap 1) (commit_graph 1) (graph_view 1 3)
+  (waterfall 1) (trace_view 1 3) (test_explorer 1) (stack_trace 1)
+  (uptime 1) (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
+  (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
 macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)
 }

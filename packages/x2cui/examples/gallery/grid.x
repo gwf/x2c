@@ -99,17 +99,18 @@ void page_grid(Ui ui, Gallery g) {
     for (int r = f0; r < l0; r++) {
       person *p = &people[order_ix[r]];
       ui.data_grid_row(r);
-      ui.data_grid_cell();
-      ui.avatar(p.name.text(), size: 24);
-      ui.data_grid_edit(p.name);
-      ui.data_grid_cell_text(p.email);
-      ui.data_grid_cell();
-      ui.badge(p.team);
-      ui.data_grid_cell_text(%"$(p.commits)");
-      ui.data_grid_cell();
-      ui.progress(p.score / 100, width: 70, height: 5);
-      ui.text(String.format("%.1f", (double) p.score),
-        tabular: true, size: 13, color: text_secondary);
+      ui.grid_cell () {
+        ui.avatar(p.name.text(), size: 24);
+        ui.data_grid_edit(p.name);
+      }
+      ui.grid_cell_text(p.email);
+      ui.grid_cell () ui.badge(p.team);
+      ui.grid_cell_text(%"$(p.commits)");
+      ui.grid_cell () {
+        ui.progress(p.score / 100, width: 70, height: 5);
+        ui.text(String.format("%.1f", (double) p.score),
+                tabular: true, size: 13, color: text_secondary);
+      }
     }
   }
   ui.muted(n_sel ? "Rows selected. Press Esc to clear."

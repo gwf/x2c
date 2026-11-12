@@ -83,13 +83,13 @@ static void scene_data_grid(Ui ui) {
     for (int row = first; row < last; row++) {
       (String name, String team, int commits, double score) = people[row];
       ui.data_grid_row(row);
-      ui.data_grid_cell();
-      ui.avatar(name, size: 24);
-      ui.text(name, size: 13.5f);
-      ui.data_grid_cell();
-      ui.badge(team);
-      ui.data_grid_cell_text(%"$commits");
-      ui.data_grid_cell_text(String.format("%.1f", score));
+      ui.grid_cell () {
+        ui.avatar(name, size: 24);
+        ui.text(name, size: 13.5f);
+      }
+      ui.grid_cell () ui.badge(team);
+      ui.grid_cell_text(%"$commits");
+      ui.grid_cell_text(String.format("%.1f", score));
     }
   }
 }

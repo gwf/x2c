@@ -243,3 +243,16 @@ macro Decorator $Ui.cell(Stmt $body, Expr $ui) {
     $body
   }
 }
+
+/** Runs the block in the next cell of a data grid's or a tree table's
+    row. CUI keeps a grid's cells apart from a table's, and which one a
+    call is in is known only while the frame runs, so the grid's cell has
+    a name of its own.
+*/
+macro Decorator $Ui.grid_cell(Stmt $body, Expr $ui) {
+  {
+    typeof($ui) ui = $ui;
+    cui_data_grid_cell(ui);
+    $body
+  }
+}
