@@ -4,63 +4,53 @@
 
 #include "state.x"
 
-class Person {
-  int index;             // the person's place in `people`
-  String name, email, role, status, amount;
+typedef struct Person {
+  const char *name, *email, *role, *status, *amount;
   cui_tone tone;
-} *;
+} Person;
 
-// A row is: name, email, role, status, revenue, and the status's tone.
-void Person.init(Person p, int index, List row) {
-  p.index = index;
-  p.name = row[0];
-  p.email = row[1];
-  p.role = row[2];
-  p.status = row[3];
-  p.amount = row[4];
-  p.tone = (int) row[5];
+typedef Block People;
+$x2cui.records(Person, People);
+$x2cui.collection(People, Person);
+
+static People people = People.of([
+  {name: "Jonas Berg", email: "jonas@northlight.io", role: "Owner",
+   status: "Active", amount: "$12,384", tone: success},
+  {name: "Priya Nair", email: "priya@harbor.dev", role: "Admin",
+   status: "Active", amount: "$9,846", tone: success},
+  {name: "Tomas Rivera", email: "tomas@kiln.app", role: "Editor",
+   status: "Invited", amount: "$7,215", tone: warning},
+  {name: "Lena Fischer", email: "lena@fischer.dev", role: "Viewer",
+   status: "Active", amount: "$3,127", tone: success},
+  {name: "Aiko Tanaka", email: "aiko@tanaka.design", role: "Editor",
+   status: "Suspended", amount: "$1,962", tone: danger}]);
+
+// The text the table sorts person `index` by in `column`.
+static String sort_key(int index, int column) {
+  Person *p = people[index];
+  return column == 0 ? p.name : column == 2 ? p.role : p.status;
 }
 
-// The text the table sorts by in `column`.
-String Person.sort_key(Person p, int column) =>
-  column == 0 ? p.name : column == 2 ? p.role : p.status;
-
-static List people;
-
-/* The people in the table's order: sorted by the clicked column, with
-   rows that tie keeping their order in either direction. */
+/* The indexes of `people` in the table's order: sorted by the clicked
+   column, with rows that tie keeping their order in either direction. */
 static List sorted_people(cui_table_sort sort) {
-  Func key = %!(Person p) => p.sort_key(sort.column);
-  return sort.descending ? people.reverse().sort_by(key).reverse()
-                         : people.sort_by(key);
+  List order = %(0 1 2 3 4);
+  Func key = %!(int index) => sort_key(index, sort.column);
+  return sort.descending ? order.reverse().sort_by(key).reverse()
+                         : order.sort_by(key);
 }
 
 void page_data(Ui ui, Gallery g) {
   section(ui, "Table", "Sortable columns, row selection and components in "
                        "cells.");
-  if (!people) {
-    List rows = %(
-      ("Jonas Berg" "jonas@northlight.io" "Owner" "Active" "\$12,384"
-       $(CUI_TONE_SUCCESS))
-      ("Priya Nair" "priya@harbor.dev" "Admin" "Active" "\$9,846"
-       $(CUI_TONE_SUCCESS))
-      ("Tomas Rivera" "tomas@kiln.app" "Editor" "Invited" "\$7,215"
-       $(CUI_TONE_WARNING))
-      ("Lena Fischer" "lena@fischer.dev" "Viewer" "Active" "\$3,127"
-       $(CUI_TONE_SUCCESS))
-      ("Aiko Tanaka" "aiko@tanaka.design" "Editor" "Suspended" "\$1,962"
-       $(CUI_TONE_DANGER)));
-    Array all = [];
-    foreach (List row in rows) all.push(Person.new(all.len(), row));
-    people = all;
-  }
   ui.table ("people", sort: &g.sort, selectable: true,
             columns: {"Name": fill, "Email": unsorted(grow(1.2)),
                       "Role": 110, "Status": 120,
                       "Revenue": right(unsorted(110))})
-  ui.each (Person p in sorted_people(g.sort), key: p.index)
-  ui.table_row (row, selected: g.selected_row == p.index) {
-    if (row.clicked) g.selected_row = p.index;
+  ui.each (int index in sorted_people(g.sort), key: index)
+  ui.table_row (row, selected: g.selected_row == index) {
+    if (row.clicked) g.selected_row = index;
+    Person *p = people[index];
     ui.cell () {
       ui.avatar(p.name, size: 26);
       ui.text(p.name, font: medium, nowrap: true);
