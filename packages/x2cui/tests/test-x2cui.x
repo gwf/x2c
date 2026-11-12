@@ -5,7 +5,7 @@
 */
 
 import "x2cui" with App, KvPairs, Offscreen, Reactions, RowState, TextField, Ui,
-  x2cui_arguments, x2cui_strings;
+  x2cui_arguments;
 
 #include <malloc/malloc.h>
 
@@ -240,16 +240,16 @@ static size_t bytes_in_use(void) {
    List's array holds its Strings. */
 static void string_lists_convert_once(void) {
   List labels = %("One" "Two");
-  const char *const *names = x2cui_strings(labels);
+  const char *const *names = labels.c_strings();
   EXPECT_STR_EQ(names[1], "Two");
-  x2cui_strings(%());
+  %().c_strings();
   size_t before = bytes_in_use();
   for (int i = 0; i < 100000; i++) {
-    x2cui_strings(%());
-    x2cui_strings(labels);
+    %().c_strings();
+    labels.c_strings();
   }
   EXPECT_INT_EQ(bytes_in_use() - before, 0);
-  EXPECT_TRUE(x2cui_strings(labels) == names);
+  EXPECT_TRUE(labels.c_strings() == names);
 }
 
 // method forms
@@ -704,7 +704,8 @@ static void board_frame(Offscreen screen, Board &b) {
 }
 
 /* A card dragged to the other column arrives as a move, which the program
-   applies to its own Arrays. A tone kept in data is named. */
+   applies to its own Arrays. A tone or a log level kept in data is
+   named. */
 static void a_kanban_move_reaches_the_arrays(void) {
   Board b = { .columns = [[1, 2], [3]] };
   Offscreen screen = auto Offscreen.open(400, 300);
@@ -729,6 +730,8 @@ static void a_kanban_move_reaches_the_arrays(void) {
   EXPECT_INT_EQ(cui_tone.named(<rose>), CUI_TONE_ROSE);
   EXPECT_INT_EQ(cui_tone.named(<accent>), CUI_TONE_ACCENT);
   EXPECT_INT_EQ(cui_tone.named(<unknown>), CUI_TONE_NEUTRAL);
+  EXPECT_INT_EQ(cui_log_level.named(<warn>), CUI_LOG_WARN);
+  EXPECT_INT_EQ(cui_log_level.named(<unknown>), CUI_LOG_TRACE);
 }
 
 // lists

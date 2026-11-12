@@ -8,8 +8,8 @@
 
 enum { NC = 2000 };
 
-static float traffic[7 * 24];
-static float days[364];
+static ArrayFloat traffic;
+static ArrayFloat days;
 enum { RUNS = 40 };
 // Two renderers' frame times: the scatter chart's series.
 static ScatterSeries scatter = ScatterSeries.of([]);
@@ -18,12 +18,14 @@ static ArrayFloat sizes_a, sizes_b;
 static Candles candles = Candles.of([]);
 
 static void prepare(void) {
+  traffic = [];
+  days = [];
   for (int d = 0; d < 7; d++)
     for (int h = 0; h < 24; h++) {
       float work = (d < 5) ? 1.0f : 0.45f;
       float day = expf(-powf((h - 13.5f) / 4.2f, 2)) * 90 * work +
                   expf(-powf((h - 20.5f) / 2.0f, 2)) * 35;
-      traffic[d * 24 + h] = day + (float) ((d * 31 + h * 17) % 11);
+      traffic.push(day + (float) ((d * 31 + h * 17) % 11));
     }
   unsigned s = 7;
   for (int k = 0; k < 364; k++) {
@@ -33,7 +35,7 @@ static void prepare(void) {
     float base = (wd >= 5 ? 0.6f : 3.2f) *
                  (0.6f + 0.4f * sinf(k / 40.0f) * sinf(k / 40.0f));
     float r = (float) ((s >> 16) % 1000) / 1000.0f;
-    days[k] = r < 0.18f ? 0 : floorf(base * r * 4);
+    days.push(r < 0.18f ? 0 : floorf(base * r * 4));
   }
   sizes_a = [];
   sizes_b = [];

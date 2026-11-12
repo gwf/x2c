@@ -362,8 +362,12 @@ editor writes only during its call.
 `field.set_url_params(pairs)` writes them back into a `TextField`, and
 `fields.text(nodes)` is the sentence a query builder's nodes say.
 
-A tone kept in quoted data is a Symbol; `cui_tone.named(<violet>)` is the
-tone it names.
+A tone or a log level kept in quoted data is a Symbol:
+`cui_tone.named(<violet>)` is the tone it names, and
+`cui_log_level.named(<warn>)` the log level. A list of labels is a
+`List`, as `attachments: files` takes one, and an array of numbers is an
+`ArrayFloat` or an `ArrayInt`, which a form passes as it passes a
+collection.
 
 The table and the data grid take their columns as a Map literal; see
 [Lists and tables](#lists-and-tables). The data grid draws only the

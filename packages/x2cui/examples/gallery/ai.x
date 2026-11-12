@@ -20,8 +20,7 @@ void page_ai(Ui ui, Gallery g) {
   static int model = 0, vote = 0, orb_state = 1, removed = -1;
   static bool busy = false;
   static double started = -1;
-  static const char *files[] = { "quarterly-report.pdf", "metrics.csv" };
-  static int file_count = 2;
+  static List files = %("quarterly-report.pdf" "metrics.csv");
   static Sources sources = Sources.of([
     {title: "Immediate mode GUIs and why they keep coming back",
      url: "https://fieldnotes.dev/immediate-mode",
@@ -95,7 +94,7 @@ void page_ai(Ui ui, Gallery g) {
       }
       int event = ui.chat_composer("composer", draft,
         placeholder: "Ask a follow up", busy: busy,
-        attachments: files, attachment_count: file_count,
+        attachments: files,
         removed: &removed, models: [
           {name: "Atlas", detail: "Longer answers, reads files and code",
            badge: "New", icon: layers},
@@ -109,10 +108,8 @@ void page_ai(Ui ui, Gallery g) {
       }
       if (event & CUI_COMPOSER_STOP) busy = false;
       if ((event & CUI_COMPOSER_REMOVE) && removed >= 0 &&
-          removed < file_count) {
-        for (int k = removed; k < file_count - 1; k++) files[k] = files[k + 1];
-        file_count--;
-      }
+          removed < files.len())
+        files = List.concat(files[:removed], files[removed + 1:]);
       if (event & CUI_COMPOSER_ATTACH)
         ui.toast("Attach files",
           description: "Drop files on the window, too.");

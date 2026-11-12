@@ -94,11 +94,11 @@ def classify(name, params):
       consumed = 2
     elif ctype == "const char *const *" and after[0] == "int":
       declared.append(f"List {pname}")
-      passed += [f"x2cui_strings({pname})", f"{pname}.len()"]
+      passed += [f"{pname}.c_strings()", f"{pname}.len()"]
       consumed = 2
     elif ctype == "const char *const *":
       declared.append(f"List {pname}")
-      passed.append(f"x2cui_strings({pname})")
+      passed.append(f"{pname}.c_strings()")
     elif "*" in ctype and (name, pname) in SHARED:
       declared.append(f"{ctype}{pname}")
       passed.append(pname)
@@ -222,18 +222,39 @@ def icon_parameters(header, hand):
   return list(dict.fromkeys(rows))
 
 
-def tone_names(header):
-  """The short names of `cui_tone`'s members, which count up from 0, so a
-  member's position is its value."""
-  body = re.search(r"typedef enum cui_tone \{(.*?)\}", header, re.S).group(1)
+# The enums whose members data names by Symbol, and the prefix of each.
+NAMED = [("cui_tone", "CUI_TONE_"), ("cui_log_level", "CUI_LOG_")]
+
+
+def member_names(header, enum, prefix):
+  """The short names of `enum`'s members, which count up from 0, so a
+  member's position is its value; a closing `*_COUNT` is not a member."""
+  body = re.search(r"typedef enum %s \{(.*?)\}" % enum, header, re.S).group(1)
   members = [m.strip() for m in body.split(",") if m.strip()]
   names = []
   for index, member in enumerate(members):
     name, _, value = member.partition("=")
+    name = name.strip()
+    if name.endswith("_COUNT"):
+      continue
     if value and int(value) != index:
-      sys.exit(f"cui_tone: {name.strip()} is not {index}")
-    names.append(name.strip()[len("CUI_TONE_"):].lower())
+      sys.exit(f"{enum}: {name} is not {index}")
+    names.append(name[len(prefix):].lower())
   return names
+
+
+def named(header, enum, prefix):
+  """`T.named(Symbol)`: the member of `enum` a Symbol names."""
+  names = member_names(header, enum, prefix)
+  short = enum[4:]
+  return (
+    f"static SymbolSet {short}_names =\n  %<" + " ".join(names) + ">;\n\n"
+    f"/** Returns the `{enum}` member `name` names, as `<{names[1]}>` names\n"
+    f"    `{prefix}{names[1].upper()}`, for one kept in quoted data; a name that is\n"
+    f"    not a member is `{prefix}{names[0].upper()}`. */\n"
+    f"{enum} {enum}.named(Symbol name) {{\n"
+    f"  int at = {short}_names.index(name);\n"
+    f"  return at < 0 ? {prefix}{names[0].upper()} : ({enum}) at;\n}}\n")
 
 
 # Records with no `T.of`: CUI's own plumbing, records an option already
@@ -322,9 +343,8 @@ def main():
   replace("src/x2cui-generate.x", "parameter names",
           [wrap("meta static List _parameter_names = %(", params, ");", "  ")
            .replace(", ", " ").replace(",\n", "\n")])
-  replace("src/x2cui.x", "tones",
-          ["static SymbolSet tone_names =\n  %<"
-           + " ".join(tone_names(header)) + ">;"])
+  replace("src/x2cui.x", "named enums",
+          [named(header, enum, prefix) for enum, prefix in NAMED])
   rows = [wrap("", [f"$x2cui.record({r});" for r in records(header)], "",
                 "").replace(", ", " ").replace(",\n", "\n").lstrip("\n")]
   for record in COLLECTIONS:

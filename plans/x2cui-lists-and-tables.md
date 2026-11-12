@@ -201,7 +201,7 @@ Two kinds of literal are refused at compile time:
   a C macro. x2c gives a block-scope static with such an initializer a
   guarded one-time initialization, so the array would keep the variable's
   first value. An automatic array is not used instead, because CUI may
-  read an array until the frame ends, as `x2cui_strings` documents.
+  read an array until the frame ends, as `List.c_strings` documents.
 
 Tests read the lowered values through probe methods: enum and icon short
 names in records, a nested `values:` with its `count`, a `_count` option

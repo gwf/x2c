@@ -1058,7 +1058,7 @@ The package has one way to write each component, its method form:
 
 Review fixes (2026-11-11):
 
-- `x2cui_strings` keeps one native array for each distinct List in a
+- `List.c_strings` keeps one native array for each distinct List in a
   `Map` keyed by the List. A Map lookup of an existing List allocates
   nothing: 0 bytes more in the default malloc zone after 100,000 lookups,
   measured with `malloc_zone_statistics`.

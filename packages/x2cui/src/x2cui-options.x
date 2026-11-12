@@ -142,6 +142,8 @@ meta List x2cui_value(Type type, List value) {
       return _array(type, elements);
   }
   if (type.car() == <*> && _collection(value)) return _records(type, value);
+  if (type ~= %(* const * const char) && Code.type(value) ~= %("List"))
+    return $!( $value.c_strings() );
   if (!Type.numeric(Code.type(value))) return value;
   if (_size(type)) return _cui_call("CUI_PX", value);
   return type ~= %("cui_color") ? _cui_call("CUI_RGB", value) : value;
@@ -282,6 +284,7 @@ meta static List _count(List array) {
     }
   }
   if (_collection(array)) return $!( (int) ((Block) $array).length );
+  if (Code.type(array) ~= %("List")) return $!( $array.len() );
   Macro count = $x2cui.count;
   return Macro_apply(count, %($array));
 }

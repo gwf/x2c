@@ -242,7 +242,7 @@ bool Ui.prop_vec4(Ui u, String label, float *value, cui_prop_opts opts) =>
 // The x axis labels of a chart are a List in x2c and two option fields in C.
 static cui_chart_opts _labelled(cui_chart_opts opts, List labels) {
   if (labels) {
-    opts.labels = x2cui_strings(labels);
+    opts.labels = labels.c_strings();
     opts.label_count = labels.len();
   }
   return opts;
@@ -271,7 +271,7 @@ bool Ui.tree_cell(
 void Ui.donut_chart(
   Ui u, String id, ArrayFloat values, List labels, cui_chart_opts opts) {
   cui_donut_chart_ex(
-    u, id, (const float *) values.bytes, x2cui_strings(labels),
+    u, id, (const float *) values.bytes, labels.c_strings(),
     (int) values.len(), &opts);
 }
 
@@ -411,22 +411,36 @@ void Ui.grid_cell_text(Ui u, String text) => cui_data_grid_cell_text(u, text);
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
 
-// tones in data
+// enums in data
 
-/* CUI's tones, in the order `cui_tone` declares them from 0;
-   tools/gen-arrays.py reads them from cui.h. */
-/* gen-arrays: begin generated tones */
+/* For each enum whose members data names by Symbol, the members in the
+   order the enum declares them from 0, and `T.named`; tools/gen-arrays.py
+   writes them from cui.h. */
+/* gen-arrays: begin generated named enums */
 
 static SymbolSet tone_names =
   %<neutral info success warning danger violet teal rose accent>;
-/* gen-arrays: end generated tones */
 
-/** Returns the tone `name` names, as `<violet>` names the violet tone, for
-    a tone kept in quoted data; a name that is not a tone is neutral. */
+/** Returns the `cui_tone` member `name` names, as `<info>` names
+    `CUI_TONE_INFO`, for one kept in quoted data; a name that is
+    not a member is `CUI_TONE_NEUTRAL`. */
 cui_tone cui_tone.named(Symbol name) {
   int at = tone_names.index(name);
   return at < 0 ? CUI_TONE_NEUTRAL : (cui_tone) at;
 }
+
+static SymbolSet log_level_names =
+  %<trace debug info warn error>;
+
+/** Returns the `cui_log_level` member `name` names, as `<debug>` names
+    `CUI_LOG_DEBUG`, for one kept in quoted data; a name that is
+    not a member is `CUI_LOG_TRACE`. */
+cui_log_level cui_log_level.named(Symbol name) {
+  int at = log_level_names.index(name);
+  return at < 0 ? CUI_LOG_TRACE : (cui_log_level) at;
+}
+
+/* gen-arrays: end generated named enums */
 
 // records and collections
 
@@ -681,7 +695,7 @@ static const char *no_strings[] = { NULL };
     `Pool.open` bracket loses its identity at `Pool.close`, and its entry is
     not used again.
 */
-const char *const *x2cui_strings(List items) {
+const char *const *List.c_strings(List items) {
   if (!items) return no_strings;
   Var found;
   if (string_arrays.try_get(items, found)) return found.pointer();
@@ -807,8 +821,7 @@ inline int Ui.tour(
 /** Calls `cui_toggle_group_ex`. */
 inline bool Ui.toggle_group(
   Ui u, String id, List labels, bool *values, cui_toggle_group_opts opts) =>
-  cui_toggle_group_ex(
-    u, id, x2cui_strings(labels), labels.len(), values, &opts);
+  cui_toggle_group_ex(u, id, labels.c_strings(), labels.len(), values, &opts);
 
 /** Calls `cui_reactions`. */
 inline int Ui.reactions(Ui u, String id, cui_reaction *items, int count) =>
@@ -880,7 +893,7 @@ inline int Ui.radar_chart(
   Ui u, String id, const cui_series *series, int count, List axes,
   cui_radar_opts opts) =>
   cui_radar_chart_ex(
-    u, id, series, count, x2cui_strings(axes), axes.len(), &opts);
+    u, id, series, count, axes.c_strings(), axes.len(), &opts);
 
 /** Calls `cui_funnel_ex`. */
 inline int Ui.funnel(
@@ -893,7 +906,7 @@ inline int Ui.sankey(
   Ui u, String id, List nodes, const cui_sankey_link *links, int link_count,
   cui_sankey_opts opts) =>
   cui_sankey_ex(
-    u, id, x2cui_strings(nodes), nodes.len(), links, link_count, &opts);
+    u, id, nodes.c_strings(), nodes.len(), links, link_count, &opts);
 
 /** Calls `cui_waffle_ex`. */
 inline int Ui.waffle(
@@ -998,8 +1011,7 @@ inline int Ui.checklist(
 /** Calls `cui_multi_select_ex`. */
 inline bool Ui.multi_select(
   Ui u, String id, List items, bool *selected, cui_multi_select_opts opts) =>
-  cui_multi_select_ex(
-    u, id, x2cui_strings(items), items.len(), selected, &opts);
+  cui_multi_select_ex(u, id, items.c_strings(), items.len(), selected, &opts);
 
 /** Calls `cui_histogram_slider_ex`. */
 inline bool Ui.histogram_slider(
@@ -1086,7 +1098,7 @@ inline cui_pipeline_result Ui.pipeline(
   Ui u, String id, List stages, const cui_pipeline_job *jobs, int job_count,
   cui_pipeline_opts opts) =>
   cui_pipeline_ex(
-    u, id, x2cui_strings(stages), stages.len(), jobs, job_count, &opts);
+    u, id, stages.c_strings(), stages.len(), jobs, job_count, &opts);
 
 /** Calls `cui_query_builder_ex` on the records of `nodes`,
     which grow in place. */
@@ -1171,15 +1183,15 @@ inline cui_blame_result Ui.blame(
   Ui u, String id, List lines, const int *line_commit, int line_count,
   const cui_blame_commit *commits, int commit_count, cui_blame_opts opts) =>
   cui_blame_ex(
-    u, id, x2cui_strings(lines), line_commit, line_count, commits,
-    commit_count, &opts);
+    u, id, lines.c_strings(), line_commit, line_count, commits, commit_count,
+    &opts);
 
 /** Calls `cui_feature_flags_ex`. */
 inline cui_feature_flags_result Ui.feature_flags(
   Ui u, String id, cui_feature_flag *flags, int count, List envs,
   cui_feature_flags_opts opts) =>
   cui_feature_flags_ex(
-    u, id, flags, count, x2cui_strings(envs), envs.len(), &opts);
+    u, id, flags, count, envs.c_strings(), envs.len(), &opts);
 
 /** Calls `cui_api_explorer_ex`. */
 inline cui_api_explorer_result Ui.api_explorer(
