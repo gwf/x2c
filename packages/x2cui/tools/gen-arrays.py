@@ -349,8 +349,8 @@ def main():
                 "").replace(", ", " ").replace(",\n", "\n").lstrip("\n")]
   for record in COLLECTIONS:
     name = collection_name(record)
-    rows.append(f"typedef Block {name};\n$x2cui.records({record}, {name});\n"
-                f"$x2cui.collection({name}, {record});")
+    rows.append(f"$x2cui.collection({name}, {record});\n"
+                f"$x2cui.records({record}, {name});")
   replace("src/x2cui.x", "records", rows)
   icons = icon_parameters(header, hand)
   replace("src/x2cui-options.x", "icons",

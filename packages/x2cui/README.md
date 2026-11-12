@@ -356,6 +356,33 @@ The collections:
 | `VizItems` | `cui_viz_item` |
 | `ScatterSeries` | `cui_scatter_series` |
 
+A program declares a collection of its own record with two lines.
+`$x2cui.collection(People, Person)` declares the type `People` and
+`People.of`. `$x2cui.records(Person, People)` declares the operations
+above. `$x2cui.record(Person)` adds `Person.of(name: value ...)`. A field
+of a CUI type takes the same short values as a component's option:
+
+```x2c
+typedef struct Person {
+  const char *name, *role;
+  cui_tone tone;
+} Person;
+
+$x2cui.collection(People, Person);
+$x2cui.records(Person, People);
+$x2cui.record(Person);
+
+static People people = People.of([
+  {name: "Jonas Berg", role: "Owner", tone: success},
+  {name: "Priya Nair", role: "Admin", tone: warning}]);
+...
+people.push(Person.of(name: "Aiko Tanaka", role: "Editor", tone: danger));
+people[0].role = "Founder";
+foreach (Person *p in people) printf("%s %s\n", p.name, p.role);
+```
+
+The gallery's Data display page keeps its table rows this way.
+
 A form refuses a C array of CUI's records, and an Array literal where
 CUI writes through the array, with a message that names a collection.
 Change a collection between frames, or after the call that passes it:

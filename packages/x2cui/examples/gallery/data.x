@@ -9,9 +9,8 @@ typedef struct Person {
   cui_tone tone;
 } Person;
 
-typedef Block People;
-$x2cui.records(Person, People);
 $x2cui.collection(People, Person);
+$x2cui.records(Person, People);
 
 static People people = People.of([
   {name: "Jonas Berg", email: "jonas@northlight.io", role: "Owner",
