@@ -4,26 +4,31 @@
 
 ![Runtime and source size](charts/runtime-source-size.png)
 
-## Latest published measurement
+## Latest local measurement
 
-Run **20261101T204543Z**, measured on **2026-11-01 UTC**, uses the local
+Run **20261112T054633Z**, measured on **2026-11-12 UTC**, uses the local
 Apple M4 Max profile. All twenty x2c programs were checked and measured with
-twelve fresh processes each after one warmup. The source revision is
-`fed582d496606c11eb09e4a817f7fa9ddf2a2464`. These results measure that revision.
+twelve fresh processes each after one warmup. The measured source revision is
+`ccc7e475869cf93f91637f283761a57dfd92715b`. The receipt records a documentation-only
+working-tree change to the suite README; all executable sources match that revision.
 
-Across the eight shared problems, tuned x2c takes **1.11x C elapsed time**
-and **0.95x Rust elapsed time**, using geometric means of matched workload
+Across the eight shared problems, tuned x2c takes **1.20x C elapsed time**
+and **1.02x Rust elapsed time**, using geometric means of matched workload
 ratios. Foreign measurements remain pinned to calibration
-`53fdc5b1230c52ce`; they were not rerun with x2c. These are comparisons of
+`c19b66401dd2c0c9`; they were not rerun with x2c. These are comparisons of
 selected programs, not general language rankings. Java includes fresh-JVM
-startup and JIT compilation. Canonical-size timings remain unrun.
+startup and JIT compilation. The full canonical-size suite remains unrun.
 
-The tuned regex-redux comparison improves local elapsed time from
-24.490 to 12.059 ms, with identical output. Typed scratch buffers remove
-repeated sizing scans and intermediate String interning. Pidigits removes its
-private Integer forwarding layer with flat elapsed time. Independent audits
-reproduce the source-size counts: tuned uses 0.953x C source lines but
-1.142x C normalized gzip bytes across the shared cohort.
+Tuned spectral-norm now uses 61 source lines instead of 104. It shares one
+row-range kernel between serial and threaded execution and uses ordinary
+`Thread.run` jobs. In this complete local run, spectral-norm takes 6.314 ms
+for tuned x2c and 17.737 ms for idiomatic x2c. This snapshot is not a paired
+before/after experiment; timing differences from older runs also reflect
+compiler and measurement-environment changes.
+
+Across the shared cohort, tuned uses **0.892x C source lines** and
+**1.105x C normalized gzip bytes**, using geometric means. Across all ten
+problems, tuned source totals 727 lines, down from 770 in the prior snapshot.
 
 ## Files in this snapshot
 
@@ -31,8 +36,7 @@ This directory holds the promoted snapshot: the report, all three charts in
 PNG/SVG/PDF, plotted measurements and summaries in CSV, and chart provenance.
 [Score history](history.md) retains compact headline ratios from published
 runs, with [structured history](history.json) for all language scores,
-cohorts and calibration identities. The provenance report path is relative,
-so the snapshot works in any checkout.
+cohorts and calibration identities. The provenance records the measured revision, run ID, and report hash.
 
 - [Summary PDF](charts/runtime-source-size.pdf)
 - [Measurements CSV](charts/measurements.csv) and [summary CSV](charts/summaries.csv)
