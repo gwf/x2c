@@ -123,8 +123,7 @@ Here `%` is modulo and `a+b` is an addition. `raise % (a+b)` also works because
 `%` is separated from `(`. For a comparison that could resemble an angle
 literal, write `(raise) < a`. Without that boundary, `raise %(a+b);` at statement
 start keeps the raise-payload interpretation even if `raise` is an ordinary
-binding. This exception preserves the existing literal and preprocessing
-rules without another tokenization pass.
+binding.
 
 `expand` is a predefined keyword alias with the same lexical treatment for
 following literals. It follows keyword-alias invocation precedence rather
@@ -263,8 +262,7 @@ member is an ordinary file.
 Diagnostics, `--source-map` line directives, dump locations, and editor
 positions report the member's file and line. A unit that includes the entry
 collects the public declarations of every member. A unit that includes a
-member directly collects only that member, as it would any file. A file
-without a block reads exactly as before.
+member directly collects only that member, as it would any file.
 
 ### Script units
 
@@ -573,8 +571,8 @@ List List.map(List values, Func fn);
 
 For a `ListInt` receiver, dotted lookup treats the first two signatures as
 `ListInt -> ListInt` and requires a `ListInt` second argument to `append`.
-Ordinary conversion still applies, so a plain `List` reaches the existing
-validating `ListInt` converter. `map` remains `List -> List`; x2c never infers
+Ordinary conversion still applies, so a plain `List` reaches the validating
+`List`-to-`ListInt` converter. `map` remains `List -> List`; x2c never infers
 covariance for an unmarked method.
 
 `Self` is contextual syntax, valid only in a dotted method declaration or
@@ -611,9 +609,10 @@ shorthand for a compound body containing one expression statement:
 static void Counter.step(Counter &self) => self.value++;
 ```
 
-An expression is required; `=>;` is invalid. The rules for writing `return` in
-a `void` function are unchanged. Use a compound body when a function needs
-declarations, several statements, or a comment inside the body.
+An expression is required; `=>;` is invalid. A `void` expression body follows
+the ordinary rules for `return` in a `void` function. Use a compound body when
+a function needs declarations, several statements, or a comment inside the
+body.
 
 ### Statement expressions
 
@@ -1449,9 +1448,9 @@ int main(void) {
 3
 ```
 
-For source compatibility, the compiler also accepts the former `=> { ... }`
-braced form and a complete parenthesized expression body written as
-`=> (expression)` without a semicolon. New code should use the forms above.
+The compiler also accepts a braced `=> { ... }` body and a complete
+parenthesized expression body written as `=> (expression)` without a
+semicolon.
 
 ```x2c
 macro Stmt $legacy.guard(Expr $condition) => {
@@ -2793,7 +2792,7 @@ int main(void) {
 
 Compile-time code is written in x2c, and the compiler does not evaluate Lisp.
 In code, `$(...)` is an [evaluated List](#evaluated-lists-and-maps), which is
-an expression, so a former Lisp form such as `$(import "file.xlisp")` at file
+an expression, so a Lisp form such as `$(import "file.xlisp")` at file
 scope reports `an evaluated collection is an expression, not a top-level
 form`. Ordinary `.x` modules
 containing macros and `meta` functions use `#include`, and `.xlisp` files are
@@ -3141,8 +3140,9 @@ the returned value for that position.
 
 Inside meta bodies, Unit and Stmt source macros used in expression
 positions construct deferred invocation Lists from computed arguments. Normal
-binding expands them when inserted into a program. Existing Expression macros
-still expand normally. See [source templates](../guide/generating-code.md#source-templates-from-meta-functions).
+binding expands them when inserted into a program. Expression macros expand
+normally. See
+[source templates](../guide/generating-code.md#source-templates-from-meta-functions).
 
 A `meta` body is ordinary x2c compiled as C, so every construct the unit
 can compile runs at compile time with its C meaning; see
@@ -3351,7 +3351,7 @@ allocation destination for the following statement or function body, and
 restores the previous destination on exit. It does not release the selected
 Scope. The argument is required: empty `auto()` is not accepted.
 
-These forms use the existing region operations and cleanup boundaries.
+These forms use the region operations and cleanup boundaries.
 `$scope()` and `$scope(pointer)` remain compatibility spellings. Variable
 declaration `auto` and initializer `auto` keep their distinct meanings below.
 
@@ -3534,8 +3534,8 @@ evaluated-item := assignment-expression | '@' identifier | '@(' expression ')'
 
 Each assignment expression is one element, converted to `Var` and consed in
 source order. A comma expression needs its own parentheses to be one element,
-as in `$((prepare(), value), other)`. `$()` is the existing empty `List`, and a
-trailing comma is accepted. Existing `Var` conversion, `List` canonicalization,
+as in `$((prepare(), value), other)`. `$()` is the empty `List`, and a
+trailing comma is accepted. Ordinary `Var` conversion, `List` canonicalization,
 caching, and lifetime rules apply, and a value that `List` construction
 rejects, such as a `void` call, is rejected here too. A `List`-valued element
 stays one element. An `@name` or `@(expression)` item splices a `List`'s
@@ -3981,8 +3981,8 @@ operand is evaluated exactly once. A `Symbol` expression on the right is also
 evaluated exactly once. A type selector is compile-time syntax and is not
 evaluated. `is not` has the same precedence and evaluation rules, then
 logically negates the exact-tag result. `is` and `not` remain ordinary
-identifiers in all other positions, so existing variables with either name
-and calls such as `value.is(<i32>)` are unchanged.
+identifiers in all other positions, so variables named `is` or `not` and
+calls such as `value.is(<i32>)` keep their meaning.
 
 The test compares exact `Var` tags. It does not test numeric convertibility,
 protocol ancestry, or C type identity. Qualifiers and aliases are resolved to
@@ -4311,8 +4311,7 @@ element the slice stops before, so -1 is the last element. The
 [collections guide](../guide/collections.md#indexing-and-slicing) shows the
 forward rule shared by `Array.setslice` and `Array.remslice`.
 
-`List` indexed updates and `String` character updates remain unsupported.
-`Array`-level and `Map`-level `+=` are also unsupported; update an element
+`Array`-level and `Map`-level `+=` are unsupported; update an element
 instead of the container binding.
 
 ## Iterator destination omission
@@ -4347,7 +4346,7 @@ An expression body parses through assignment precedence. An unparenthesized
 comma separates arguments of an enclosing call; write `(first, second)` when
 the comma expression itself is the lambda body.
 
-Current guarantees:
+Lambdas guarantee:
 
 - an expression body produces its value; a native C `void` expression runs
   once and produces `void`;
@@ -5022,7 +5021,7 @@ x2c accepts normal C type forms plus runtime types such as `Var`, `List`,
 
 Typedef declarations are supported at file scope and inside compound
 statements. Local aliases follow lexical scope and shadowing. Their uses are
-resolved while that scope is available, preserving the existing meaning of
+resolved while that scope is available, preserving the meaning of
 file-scope types, including their methods and converters. Local typedefs stay
 inside their C blocks and are not exported. A locally defined aggregate also
 stays in its block; it cannot supply a type to a lambda helper lifted outside
@@ -5040,7 +5039,7 @@ direction. An `Array` can therefore be used as a `Block`, and an `Ast` as a
 for each other this way: they may describe different contents despite sharing
 a C representation. Thus `ArrayInt counts = someArrayDbl;` is a type error
 whose message gives the required sibling converter, `ArrayDbl.arrayint`. The
-existing `Array.arrayint` instead converts from the common Array ancestor. A
+`Array.arrayint` converter instead converts from the common Array ancestor. A
 cast still permits reinterpretation.
 
 The compiler warns with code `conversion` when source spells a
@@ -5434,9 +5433,9 @@ cursor has no Lisp representation.
 
 The Lisp core keeps its own spellings for cons-cell and text work. `car`,
 `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`, `lower`,
-`str`, and `repr` are unchanged and reach the same code. Note that Lisp's
-`assoc` returns the matching pair while `List.assoc` returns its second
-value, as the library documents. Lisp `assoc` and `member` compare with
+`str`, and `repr` keep their Lisp names and call the same code. Note that
+Lisp's `assoc` returns the matching pair while `List.assoc` returns its
+second value, as the library documents. Lisp `assoc` and `member` compare with
 `Var.equal`; `List.assoc` and `List.contains` use `==`.
 
 An operation whose parameters or result have no `Var` representation is not
