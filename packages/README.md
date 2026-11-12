@@ -41,9 +41,9 @@ make packages
 The first build fetches and prepares pinned dependencies in the shared cache.
 It downloads large archives, including libtorch (about 77 MB on macOS
 arm64), and builds OpenSSL from source for libcurl.
-Existing dependency hash and profile verification remains part of preparing
-usable packages. The standard raylib examples use its headless profile;
-a desktop window remains an explicit `make -C packages/raylib run-interactive`.
+Preparation verifies dependency hashes and profiles. The standard raylib
+examples use the headless profile; `make -C packages/raylib run-interactive`
+opens a desktop window.
 
 To report prerequisites without building or downloading anything:
 

@@ -22,7 +22,8 @@ that needs only the macros can include their module by path:
 ## Install
 
 Install the source package, then build a program that imports it, such as
-[examples/energy-gradient.x](examples/energy-gradient.x):
+[examples/energy-gradient.x](examples/energy-gradient.x). Save that file from
+this directory as `energy-gradient.x`, then:
 
 ```sh
 x2c install autodiff
