@@ -4,12 +4,13 @@
 > To-Do, Mail, and Orders sources and images. Implemented on `x2cui`
 > (gwf/x2c#663 and #664), over `dev` with the compiler change for
 > [method-form macros](method-form-macros.md). On 2026-11-11 Gary decided
-> the package has one way to write each thing; the local branch
-> `gwf/x2cui-idiomatic` removes the `$cui.*` decorators. See
-> [One paradigm](#one-paradigm-2026-11-11). Not on `dev`.
+> the package has one way to write each thing; the `$cui.*` decorators
+> are gone. See [One paradigm](#one-paradigm-2026-11-11). Constant data
+> is Array literals, data the program owns is x2c values, and result
+> forms declare their names (branch `gwf/x2cui-ready`). Not on `dev`.
 > Every "verified" statement below was compiled and run on macOS arm64
-> with that branch's stage 0, built from its bootstrap seed. Statements
-> marked "not verified" were not.
+> by the package worker with the branch's stage 0. Statements marked
+> "not verified" were not.
 
 ## Result
 
@@ -192,7 +193,7 @@ type. The arrays are initialized once; no frame builds an Array or a Map.
 Two kinds of literal are refused at compile time:
 
 - A pointer to elements that are not `const`, which CUI may write
-  through, such as `cui_reactions`, `cui_kv_editor_ex`, or
+  through, such as `cui_reactions`, `cui_checklist_ex`, or
   `cui_gantt_ex`. A literal must read as a value, and a static array CUI
   edits would keep state between frames. That data is named program state.
 - An element that is not a constant: a variable, or a call of anything but
@@ -269,8 +270,22 @@ the ones Gary approved. Verified.
 5. A table row's hover and press come from a patch to CUI; see
    `PROFILE.md`. A new CUI version needs the patch remade.
 6. The mail and orders examples have no tests of their own beyond drawing
-   an image; the package test covers clicks, hover, and the column
-   lowering.
+   an image; the package test covers clicks, hover, the keyboard, the
+   column lowering, Array literals, the key-value editor, and a kanban
+   move.
+7. Data the program owns is x2c values. State CUI edits in place, such as
+   a calendar's events or a checklist's steps, stays a named array of
+   CUI's records, which the form takes without a count; the README lists
+   those parameters. The key-value editor is the one component that
+   copies an `Array` of `KeyValue` to CUI's records and back each frame.
+8. A form that declares a result name expands to a declaration and a
+   block, so an unbraced loop or `if` cannot take it as its one
+   statement. A decorator declares the name with a type that a `Type`
+   hole of an enclosing template supplies, because a type spelled in the
+   decorator before a `Name` hole does not parse, except `int`. Boxing a
+   field of a declared record into a `Var`, as `cards.push(move.card)`,
+   fails as an unresolved expression; reading it into a local first
+   works. Both are reported to the orchestrator with reproducers.
 
 ## One paradigm (2026-11-11)
 
@@ -308,9 +323,7 @@ component as a method form:
 Every image stays byte-identical: the 229 images against `b393dd58c`,
 and the To-Do, Mail, and Orders images Gary approved.
 
-A form cannot declare a result name for the statements after it when it
-is itself inside another block form's block: the following reference is
-undeclared in the generated C. At function level it works. Reproducer:
-`repro-decorator-binder.x` in the worker's scratch directory. The card
-stack and swipe item forms therefore take a variable the caller declares.
+The compiler repair merged at `dffc0f662` makes a decorator's `Name`
+hole visible after the block, also inside another decorator's block, so
+the result forms now declare their names.
 

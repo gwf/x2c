@@ -3,20 +3,27 @@
     CUI draws its own components. A program describes the screen with calls
     on every frame; CUI lays it out, handles the mouse and keyboard, and
     draws it in a window or into pixels. This package keeps CUI's C
-    implementation and its names for records, enums, and constants, and
-    replaces the C calling conventions:
+    implementation and gives each component an x2c form:
 
-      ui.button("Add", variant: primary)
-      ui.checkbox(task.title, task.done)
-      ui.row (gap: 8) { ... }
+      ui.button("Add", variant: primary, icon: plus)
+      ui.row (gap: 8, align: center) { ... }
+      ui.radial_gauge("cpu", 64, 0, 100, bands: [{to: 60, tone: success}])
+      ui.card_stack (swiped, "deck", 3) { ... }
+
+    A `name: value` row sets a field of the component's option record. A
+    lower-case name is a short name for a CUI constant, chosen by the C
+    type of its field or parameter: `primary`, `fill`, `plus`. An Array
+    literal is a constant array of CUI's records, with its count. A block
+    form runs its target between the begin and end calls, and a block that
+    reports a result declares the name it is given.
 
     `Ui` is CUI's `cui_ctx *` and `App` is its `cui_app *`, so every raw
     CUI call takes them as they are. `Offscreen` draws with the software
     renderer into pixels, with no window. `TextField` holds text that a
-    component edits in place.
-
-    Labels are Strings. A CUI function that takes a `printf` format is a
-    method that takes the format and x2c values: `ui.textf("%d items", n)`.
+    component edits in place, and `KeyValue` is one pair of the key-value
+    editor. Labels are Strings; a CUI function that takes a `printf`
+    format is a method that takes the format and x2c values:
+    `ui.textf("%d items", n)`.
 
     This unit is the `x2cui` package entry: `import "x2cui"` reaches every
     nonstatic name as `x2cui__*` and every method form. The vendored

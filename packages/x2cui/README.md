@@ -29,11 +29,22 @@ int main(void) {
 }
 ```
 
+## Status
+
+The package is a preview. Native builds are supported on macOS arm64
+only. The browser build needs Memory64, JavaScript Promise Integration,
+and WebGL 2; it was run in a Chromium-based browser and under Node. The
+Linux build is not run. CUI has no accessibility tree, no inline
+input-method composition, and no bidirectional text. The package
+applies two patches to CUI, `table-row-state` and `focusable-canvas`
+(see `PROFILE.md`), and an upgrade of CUI must remake them. A program
+draws from one thread.
+
 CUI's records, enums, constants, and icons, such as `cui_box`,
 `CUI_BUTTON_PRIMARY`, `CUI_FILL`, and `CUI_ICON_PLUS`, arrive under their
-own names through the published `src/cui-1.3.h`. The package's own types,
-`Ui`, `App`, `Offscreen`, and `TextField`, are `x2cui__*` names and need
-`with` or the alias.
+own names through the published `src/cui-1.3.h`, the raw API. The
+package's own types, `Ui`, `App`, `Offscreen`, `TextField`, and
+`KeyValue`, are `x2cui__*` names and need `with` or the alias.
 
 ## Build from a checkout
 
@@ -265,14 +276,26 @@ filled. `[]` is NULL with a count of 0.
 
 The literal is constant. It lowers to a `static const` C array that is
 initialized once, so it costs nothing per frame, and every element must
-be a constant: a literal, a constant name, or the address of a static
-array. A local variable or a function call in an element is a C error,
-"initializer element is not a compile-time constant". CUI reads some
-arrays until the frame ends, so the form does not build an array on the
-stack for such an element. A component that writes into its array, such
-as a calendar whose events are dragged or a key-value editor, refuses a
-literal: a literal never keeps state between frames. That data is a
-named C array the program keeps.
+be a constant: a literal, a short name, an enum constant, the name of a
+static array, or a C macro such as `CUI_RGBA(...)` on constants. The form
+refuses a variable or a function call in an element, because the static
+array would keep its first value. CUI reads some arrays until the frame
+ends, so the form does not build an array on the stack instead.
+
+Data the program owns is x2c values: `class` records in an `Array` or a
+`List`, as the Planning page's kanban board keeps its cards. State that
+CUI edits in place stays a named array of CUI's own records, which the
+form takes without a count, and the form refuses a literal there, so a
+literal never keeps state between frames. These parameters and fields
+are such state: `cui_reactions` items, `cui_query_builder_ex` nodes,
+`cui_curve_editor_ex` keys, `cui_gradient_editor_ex` stops,
+`cui_timeline_editor_ex` and `cui_trace_view_ex` tracks,
+`cui_tree_table_begin_ex` nodes, `cui_week_calendar_ex` events,
+`cui_gantt_ex` tasks, `cui_checklist_ex` steps, `cui_feature_flags_ex`
+flags, `cui_diff_view_rows` rows, `cui_reorder_begin` order,
+`cui_toggle_group_ex` values, `cui_multi_select_ex` selected, and the
+`keys`, `key_selected`, and `clips` of a `cui_timeline_track`. The
+key-value editor is the one exception: it edits x2c values.
 
 An option that points to an array, such as `parts:` or `ticks:`, also
 gets its count, `part_count` or `tick_count`, when it is given a named C
@@ -338,6 +361,10 @@ function. Where its type names `cui_ctx *`, declare that parameter as
 
 Functions that fill caller buffers without a `cui_ctx`, such as
 `cui_terminal_init`, `cui_log_init`, and `cui_fs_list`, are called as C.
+
+Short names apply only where a component's parameter or field gives the
+C type, so a comparison, a flag test, or an assignment on a variable of a
+CUI enum type spells the constant: `status == CUI_STATUS_BUSY`.
 
 ## No Lisp surface
 
