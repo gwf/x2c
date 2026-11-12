@@ -1,7 +1,7 @@
 # x2c Language Support extension support
 
-This preview extension is experimental and has no support commitment or
-service level agreement.
+This extension is experimental and has no support commitment or service
+level agreement.
 
 Report bugs and documentation problems in the
 [x2c issue tracker](https://github.com/gwf/x2c/issues). Include the extension
