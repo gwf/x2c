@@ -452,11 +452,13 @@ macro Unit $x2cui.record(Name $record) {
   macro Expression $$record.of(Entry @fields) => $x2cui_of($record, $fields);
 }
 
-/* `Collection.of([{...}, ...])` builds a collection of `$record` from an
-   Array literal of `name: value` rows. A macro's name takes a `Name`
-   hole and a declaration's type a `Type` hole, so the collection's form
-   and its methods are two templates. */
+/* `$x2cui.collection(List, Record)` declares the collection type `List`
+   and `List.of([{...}, ...])`, which builds one from an Array literal of
+   `name: value` rows. `$x2cui.records(Record, List)` then declares its
+   methods. A macro's name takes a `Name` hole and a declaration's type a
+   `Type` hole, so a collection takes the two templates. */
 macro Unit $x2cui.collection(Name $list, Name $record) {
+  typedef Block $list;
   macro Expression $$list.of(Expr $rows) using x2cui_collection =>
     x2cui_collection(
       sizeof($record), $x2cui_rows($record, $rows), $x2cui_row_count($rows));
@@ -470,8 +472,8 @@ Block x2cui_collection(size_t width, const void *rows, size_t count) {
   return records;
 }
 
-/* A collection of the CUI record `$record`: its records packed in a
-   `Block`, which a component reads and writes in place. `list[i]` is a
+/* The methods of `$list`, a collection of `$record`: its records packed
+   in a `Block`, which a component reads and writes in place. `list[i]` is a
    pointer to a record, so `list[i].count += 1` changes it, and `foreach`
    yields pointers. */
 macro Unit $x2cui.records(Type $record, Type $list) {
@@ -575,90 +577,62 @@ $x2cui.record(cui_uptime_service); $x2cui.record(cui_histogram_series);
 $x2cui.record(cui_coverage_file); $x2cui.record(cui_blame_commit);
 $x2cui.record(cui_feature_flag); $x2cui.record(cui_api_param);
 $x2cui.record(cui_api_endpoint);
-typedef Block CalEvents;
-$x2cui.records(cui_cal_event, CalEvents);
 $x2cui.collection(CalEvents, cui_cal_event);
-typedef Block Candles;
-$x2cui.records(cui_candle, Candles);
+$x2cui.records(cui_cal_event, CalEvents);
 $x2cui.collection(Candles, cui_candle);
-typedef Block CheckSteps;
-$x2cui.records(cui_check_step, CheckSteps);
+$x2cui.records(cui_candle, Candles);
 $x2cui.collection(CheckSteps, cui_check_step);
-typedef Block CurveKeys;
-$x2cui.records(cui_curve_key, CurveKeys);
+$x2cui.records(cui_check_step, CheckSteps);
 $x2cui.collection(CurveKeys, cui_curve_key);
-typedef Block DocTabs;
-$x2cui.records(cui_doc_tab, DocTabs);
+$x2cui.records(cui_curve_key, CurveKeys);
 $x2cui.collection(DocTabs, cui_doc_tab);
-typedef Block FeatureFlags;
-$x2cui.records(cui_feature_flag, FeatureFlags);
+$x2cui.records(cui_doc_tab, DocTabs);
 $x2cui.collection(FeatureFlags, cui_feature_flag);
-typedef Block FlameSpans;
-$x2cui.records(cui_flame_span, FlameSpans);
+$x2cui.records(cui_feature_flag, FeatureFlags);
 $x2cui.collection(FlameSpans, cui_flame_span);
-typedef Block GanttTasks;
-$x2cui.records(cui_gantt_task, GanttTasks);
+$x2cui.records(cui_flame_span, FlameSpans);
 $x2cui.collection(GanttTasks, cui_gantt_task);
-typedef Block GradientStops;
-$x2cui.records(cui_gradient_stop, GradientStops);
+$x2cui.records(cui_gantt_task, GanttTasks);
 $x2cui.collection(GradientStops, cui_gradient_stop);
-typedef Block KvPairs;
-$x2cui.records(cui_kv_pair, KvPairs);
+$x2cui.records(cui_gradient_stop, GradientStops);
 $x2cui.collection(KvPairs, cui_kv_pair);
-typedef Block MonthEvents;
-$x2cui.records(cui_month_event, MonthEvents);
+$x2cui.records(cui_kv_pair, KvPairs);
 $x2cui.collection(MonthEvents, cui_month_event);
-typedef Block PlanSteps;
-$x2cui.records(cui_plan_step, PlanSteps);
+$x2cui.records(cui_month_event, MonthEvents);
 $x2cui.collection(PlanSteps, cui_plan_step);
-typedef Block PromptSuggestions;
-$x2cui.records(cui_prompt_suggestion, PromptSuggestions);
+$x2cui.records(cui_plan_step, PlanSteps);
 $x2cui.collection(PromptSuggestions, cui_prompt_suggestion);
-typedef Block QueryFields;
-$x2cui.records(cui_query_field, QueryFields);
+$x2cui.records(cui_prompt_suggestion, PromptSuggestions);
 $x2cui.collection(QueryFields, cui_query_field);
-typedef Block QueryNodes;
-$x2cui.records(cui_query_node, QueryNodes);
+$x2cui.records(cui_query_field, QueryFields);
 $x2cui.collection(QueryNodes, cui_query_node);
-typedef Block Reactions;
-$x2cui.records(cui_reaction, Reactions);
+$x2cui.records(cui_query_node, QueryNodes);
 $x2cui.collection(Reactions, cui_reaction);
-typedef Block Series;
-$x2cui.records(cui_series, Series);
+$x2cui.records(cui_reaction, Reactions);
 $x2cui.collection(Series, cui_series);
-typedef Block Sources;
-$x2cui.records(cui_source, Sources);
+$x2cui.records(cui_series, Series);
 $x2cui.collection(Sources, cui_source);
-typedef Block SpeedActions;
-$x2cui.records(cui_speed_action, SpeedActions);
+$x2cui.records(cui_source, Sources);
 $x2cui.collection(SpeedActions, cui_speed_action);
-typedef Block TimelineTracks;
-$x2cui.records(cui_timeline_track, TimelineTracks);
+$x2cui.records(cui_speed_action, SpeedActions);
 $x2cui.collection(TimelineTracks, cui_timeline_track);
-typedef Block TocItems;
-$x2cui.records(cui_toc_item, TocItems);
+$x2cui.records(cui_timeline_track, TimelineTracks);
 $x2cui.collection(TocItems, cui_toc_item);
-typedef Block TourSteps;
-$x2cui.records(cui_tour_step, TourSteps);
+$x2cui.records(cui_toc_item, TocItems);
 $x2cui.collection(TourSteps, cui_tour_step);
-typedef Block TraceSpans;
-$x2cui.records(cui_trace_span, TraceSpans);
+$x2cui.records(cui_tour_step, TourSteps);
 $x2cui.collection(TraceSpans, cui_trace_span);
-typedef Block TraceTracks;
-$x2cui.records(cui_trace_track, TraceTracks);
+$x2cui.records(cui_trace_span, TraceSpans);
 $x2cui.collection(TraceTracks, cui_trace_track);
-typedef Block TreeNodes;
-$x2cui.records(cui_tree_node, TreeNodes);
+$x2cui.records(cui_trace_track, TraceTracks);
 $x2cui.collection(TreeNodes, cui_tree_node);
-typedef Block Vec2s;
-$x2cui.records(cui_vec2, Vec2s);
+$x2cui.records(cui_tree_node, TreeNodes);
 $x2cui.collection(Vec2s, cui_vec2);
-typedef Block VizItems;
-$x2cui.records(cui_viz_item, VizItems);
+$x2cui.records(cui_vec2, Vec2s);
 $x2cui.collection(VizItems, cui_viz_item);
-typedef Block ScatterSeries;
-$x2cui.records(cui_scatter_series, ScatterSeries);
+$x2cui.records(cui_viz_item, VizItems);
 $x2cui.collection(ScatterSeries, cui_scatter_series);
+$x2cui.records(cui_scatter_series, ScatterSeries);
 /* gen-arrays: end generated records */
 
 // helpers over raw calls

@@ -273,6 +273,35 @@ or shrink the collection; and `foreach` visits a pointer to each record.
 between frames, or after the call that passes it. The README lists all
 28 collections, from `CalEvents` to `VizItems`.
 
+A program declares a collection of its own record with two lines.
+`$x2cui.collection(People, Person)` declares the type `People` and
+`People.of`, and `$x2cui.records(Person, People)` declares the
+operations. `$x2cui.record(Person)` adds `Person.of(name: value ...)`. A
+field of a CUI type, such as `tone` here, takes the same short values as
+a component's option:
+
+<!-- ignore: an import needs the built x2cui package archive. -->
+```x2c,ignore
+typedef struct Person {
+  const char *name, *role;
+  cui_tone tone;
+} Person;
+
+$x2cui.collection(People, Person);
+$x2cui.records(Person, People);
+$x2cui.record(Person);
+
+static People people = People.of([
+  {name: "Jonas Berg", role: "Owner", tone: success},
+  {name: "Priya Nair", role: "Admin", tone: warning}]);
+
+static void promote(void) {
+  people.push(Person.of(name: "Aiko Tanaka", role: "Editor", tone: danger));
+  people[0].role = "Founder";
+  foreach (Person *p in people) printf("%s %s\n", p.name, p.role);
+}
+```
+
 ## Drawing without a window
 
 `Offscreen` draws frames with CUI's software renderer into pixels and
