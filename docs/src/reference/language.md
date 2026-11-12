@@ -83,7 +83,10 @@ uses the package `import` described below.
 
 ### Contextual keywords
 
-C keywords and x2c's `defer` remain reserved. The x2c words `associated`,
+C keywords are reserved. x2c's `defer` is reserved in expressions: an
+object or function named `defer` can be declared, but a read or call of it
+is rejected, and `defer(f());` at statement start schedules cleanup. A field
+named `defer` remains usable. The x2c words `associated`,
 `catch`, `delegate`, `finally`, `import`, `protocol`, `raise`, `threaded`, and
 `try` are contextual. They can name objects, functions, parameters, fields,
 typedefs, and labels outside their keyword forms. C's `thread_local` and
@@ -131,8 +134,7 @@ Therefore `expand` is reserved in expressions: an object or function named
 named `expand` remains usable.
 
 `in` and `match` retain their existing contextual rules, described under
-[Directives in the generated C](#directives-in-the-generated-c). `defer(f());` always schedules cleanup;
-it cannot call an ordinary function named `defer`.
+[Directives in the generated C](#directives-in-the-generated-c).
 
 ### Module blocks
 
@@ -3420,7 +3422,7 @@ expression helper or expression-exit cleanup.
 
 ### Checked foreign aliases
 
-The reserved target macro `$x2c.foreign.alias` binds one top-level X2C
+The reserved target macro `$x2c.foreign.alias` binds one top-level x2c
 function name directly to an ABI-compatible C function:
 
 ```x2c
@@ -3432,7 +3434,7 @@ The target must be one fixed-arity function declaration without a body or
 initializer, and the argument must be one direct C identifier. Static aliases
 remain private; non-static aliases are published in the generated header like
 any other declaration. The generated C uses `_Static_assert` and `_Generic` to
-check the exact function-pointer type before defining the lowered X2C name as
+check the exact function-pointer type before defining the lowered x2c name as
 the native name. Calls and address-taking therefore use the native function
 itself; no wrapper object, thunk, argument mapping, or initializer is emitted.
 Variadic aliases are rejected.
@@ -4514,12 +4516,6 @@ expansions.
 
 ### Temporary assignments with `with`
 
-> Migration: `$let(place, value)` became `with (place = value)`; give a
-> formerly unbraced body braces. The old expression alias
-> `with expression [as name] { ... }` became
-> `alias expression [as name] { ... }`, described in
-> [Expression aliases with `alias`](#expression-aliases-with-alias).
-
 `with (destination = value, ...) { body }` assigns temporary values to
 storage and restores the previous values when the body exits:
 
@@ -5001,8 +4997,9 @@ generated C calls an initializer that was compiled out.
 
 Other initialization statements and runtime-valued static assignments belong in
 the method body. Eligible file-static percent literals use the generated
-sequence described under [Values and literals](#values-and-literals). Top-level
-decorators are rejected.
+sequence described under
+[Percent literals, quote, and unquote](#percent-literals-quote-and-unquote).
+Top-level decorators are rejected.
 
 ### Type-owned shutdown
 
