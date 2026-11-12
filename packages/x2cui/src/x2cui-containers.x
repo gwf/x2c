@@ -130,7 +130,6 @@ macro Decorator $Ui.kanban(
       }
 */
 
-
 /** What a row of a list or a table did in this frame: `ui.item` and
     `ui.table_row` bind one to the name they are given.
 */
@@ -189,8 +188,9 @@ macro Decorator $Ui.table(Stmt $body, Expr $ui, Expr $id, Entry @options) {
     typeof($ui) ui = $ui;
     static cui_table_column columns[] = {
       @x2cui_columns("cui_table_column", $options) };
-    if (ui.table_begin($id, columns, $x2cui.count(columns),
-                       $x2cui_options(ui, "table_begin", $options))) {
+    if (ui.table_begin(
+      $id, columns, $x2cui.count(columns),
+      $x2cui_options(ui, "table_begin", $options))) {
       defer cui_table_end(ui);
       $body
     }
@@ -212,9 +212,9 @@ macro Decorator $Ui.data_grid(
     typeof($ui) ui = $ui;
     static cui_grid_column columns[] = {
       @x2cui_columns("cui_grid_column", $options) };
-    if (ui.data_grid_begin($id, columns, $x2cui.count(columns), $rows, $first,
-                           $last, $x2cui_options(ui, "data_grid_begin",
-                                               $options))) {
+    if (ui.data_grid_begin(
+      $id, columns, $x2cui.count(columns), $rows, $first, $last,
+      $x2cui_options(ui, "data_grid_begin", $options))) {
       defer cui_data_grid_end(ui);
       $body
     }

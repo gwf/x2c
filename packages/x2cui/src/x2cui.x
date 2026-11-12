@@ -47,12 +47,6 @@ typedef struct TextField {
 #include "x2cui-generate.x"
 #include "x2cui-containers.x"
 
-/** Closes the window; idempotent on NULL, and returns NULL. */
-App App.close(App app);
-
-/** Releases the renderer, the `Ui`, and the pixels; returns NULL. */
-Offscreen Offscreen.close(Offscreen screen);
-
 $cleanup.by(App, close);
 $cleanup.by(Offscreen, close);
 
@@ -64,10 +58,9 @@ $cleanup.by(Offscreen, close);
 /** Opens a window. Raises `<init-fail>` when CUI cannot create it. */
 App App.open(cui_app_desc desc) {
   App app = cui_app_create(&desc);
-  if (!app) {
+  if (!app)
     raise %(init-fail (library "cui") (operation "cui_app_create")
             (reason "CUI did not create a window"));
-  }
   return app;
 }
 
@@ -78,15 +71,16 @@ App App.open(cui_app_desc desc) {
 bool App.frame(App app) {
   Ui ui = cui_app_ui(app);
   cui_color color = cui_color_of(ui, CUI_COLOR_BACKGROUND);
-  x2cui_title_bar(cui_app_native_window(app),
-                  cui_get_theme_mode(ui) == CUI_THEME_DARK,
-                  (unsigned) color.r << 16 | color.g << 8 | color.b);
+  x2cui_title_bar(
+    cui_app_native_window(app), cui_get_theme_mode(ui) == CUI_THEME_DARK,
+    (unsigned) color.r << 16 | color.g << 8 | color.b);
   return cui_app_frame(app);
 }
 
 /** Returns the window's borrowed `Ui`, valid until the window closes. */
 inline Ui App.ui(App app) => cui_app_ui(app);
 
+/** Closes the window; idempotent on NULL, and returns NULL. */
 App App.close(App app) {
   if (app) cui_app_destroy(app);
   return NULL;
@@ -127,19 +121,17 @@ void Offscreen.begin(Offscreen screen) {
 }
 
 /** Ends the frame and renders it into the surface's pixels. */
-void Offscreen.end(Offscreen screen) {
-  cui_end_frame(screen.ui);
-  const cui_draw_data *data = cui_get_draw_data(screen.ui);
-  if (data.width_px != screen.width || data.height_px != screen.height) {
-    screen.width = data.width_px;
-    screen.height = data.height_px;
-    screen.pixels =
-      realloc(screen.pixels, (size_t) screen.width * screen.height * 4);
+void Offscreen.end(Offscreen o) {
+  cui_end_frame(o.ui);
+  const cui_draw_data *data = cui_get_draw_data(o.ui);
+  if (data.width_px != o.width || data.height_px != o.height) {
+    o.width = data.width_px;
+    o.height = data.height_px;
+    o.pixels = realloc(o.pixels, (size_t) o.width * o.height * 4);
   }
-  screen.commands = data.command_count;
+  o.commands = data.command_count;
   cui_sw_render(
-    screen.renderer, data, screen.pixels, screen.width, screen.height,
-    screen.width * 4, CUI_SW_RGBA);
+    o.renderer, data, o.pixels, o.width, o.height, o.width * 4, CUI_SW_RGBA);
 }
 
 /** Returns how many draw commands the last frame produced. */
@@ -148,13 +140,14 @@ int Offscreen.commands(Offscreen screen) => screen.commands;
 /** Writes the last frame as a PNG. Raises `<io-fail>` when it cannot. */
 void Offscreen.write_png(Offscreen screen, String path) {
   if (screen.pixels &&
-      cui_write_png(path, screen.pixels, screen.width, screen.height,
-                    screen.width * 4))
+      cui_write_png(
+        path, screen.pixels, screen.width, screen.height, screen.width * 4))
     return;
   raise %(io-fail (library "cui") (operation "cui_write_png")
           (path $path));
 }
 
+/** Releases the renderer, the `Ui`, and the pixels; returns NULL. */
 Offscreen Offscreen.close(Offscreen screen) {
   if (!screen) return NULL;
   if (screen.ui) cui_destroy(screen.ui);
@@ -208,18 +201,18 @@ cui_series cui_series.of(String name, ArrayFloat values) =>
 void Ui.textf(Ui ui, String format, List @values) =>
   cui_textf(ui, "%s", format.format(@values));
 
-/// Draws a table cell's text formatted as `Ui.textf` formats it.
+/// Formats `values` by `format` into the next slot of the current row.
 void Ui.table_cell_textf(Ui ui, String format, List @values) =>
   cui_table_cell_textf(ui, "%s", format.format(@values));
 
 /// Writes text formatted as `Ui.textf` formats it to a terminal's buffer.
-void cui_terminal_buffer.printf(cui_terminal_buffer &terminal, String format,
-                                List @values) =>
+void cui_terminal_buffer.printf(
+  cui_terminal_buffer &terminal, String format, List @values) =>
   cui_terminal_printf(&terminal, "%s", format.format(@values));
 
 /// Appends a line formatted as `Ui.textf` formats it to a log's buffer.
-void cui_log_buffer.append(cui_log_buffer &log, cui_log_level level,
-                           String format, List @values) =>
+void cui_log_buffer.append(
+  cui_log_buffer &log, cui_log_level level, String format, List @values) =>
   cui_log_append(&log, level, "%s", format.format(@values));
 
 /// Edits the two numbers at `value` in an inspector row.
@@ -265,15 +258,17 @@ bool Ui.tree_cell(
 */
 void Ui.donut_chart(
   Ui ui, String id, ArrayFloat values, List labels, cui_chart_opts opts) {
-  cui_donut_chart_ex(ui, id, (const float *) values.bytes,
-                     x2cui_strings(labels), (int) values.len(), &opts);
+  cui_donut_chart_ex(
+    ui, id, (const float *) values.bytes, x2cui_strings(labels),
+    (int) values.len(), &opts);
 }
 
 /** Draws `values` as a small line with no axes. */
 void Ui.sparkline(
-  Ui ui, ArrayFloat values, cui_size width, float height, cui_color color) {
-  cui_sparkline(ui, (const float *) values.bytes, (int) values.len(), width,
-                height, color);
+  Ui u, ArrayFloat values, cui_size width, float height, cui_color color) {
+  cui_sparkline(
+    u, (const float *) values.bytes, (int) values.len(), width, height,
+    color);
 }
 
 /** Draws `length` one-character boxes that edit `code`, a field of at
@@ -337,13 +332,15 @@ typedef struct ItemPaint { bool hovered, selected, rule; } ItemPaint;
 static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
   ItemPaint *paint = user;
   if (paint.selected)
-    cui_draw_rect(ui, r, CUI_CORNERS(10),
-                  cui_token_color(ui, CUI_TOKEN_ACTIVE));
+    cui_draw_rect(
+      ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_ACTIVE));
   else if (paint.hovered)
-    cui_draw_rect(ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_HOVER));
+    cui_draw_rect(
+      ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_HOVER));
   else if (paint.rule)
-    cui_draw_rect(ui, (cui_rect){ r.x + 12, r.y, r.w - 24, 1 }, CUI_CORNERS(0),
-                  cui_token_color(ui, CUI_TOKEN_BORDER_SUBTLE));
+    cui_draw_rect(
+      ui, (cui_rect){ r.x + 12, r.y, r.w - 24, 1 }, CUI_CORNERS(0),
+      cui_token_color(ui, CUI_TOKEN_BORDER_SUBTLE));
 }
 
 /** Begins an interactive row of a list, a stack box the width of its
@@ -375,12 +372,11 @@ RowState Ui.table_row_begin(Ui ui, RowOptions opts) {
                      clicked };
 }
 
-/// Draws the next cell of a table row with one text.
+/// Fills the next cell of the current row with one string.
 void Ui.cell_text(Ui ui, String text) => cui_table_cell_text(ui, text);
 
 /// Draws the next cell of a data grid's or a tree table's row with one text.
-void Ui.grid_cell_text(Ui ui, String text) =>
-  cui_data_grid_cell_text(ui, text);
+void Ui.grid_cell_text(Ui u, String text) => cui_data_grid_cell_text(u, text);
 
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;

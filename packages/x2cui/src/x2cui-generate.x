@@ -221,8 +221,8 @@ meta static String _end_method(String block) =>
 meta static List _method_form(String method, int lowered, List pairs) {
   String block = method.endswith("_begin") ? method[:method.len() - 6] : NULL;
   if (block && (block in _scopes || block in _openings))
-    return Macro_apply($x2cui.block,
-                       %($block $(_end_method(block)) @pairs));
+    return Macro_apply(
+      $x2cui.block, %($block $(_end_method(block)) @pairs));
   return (lowered || pairs) && !block
     ? Macro_apply($x2cui.widget, %($method @pairs)) : NULL;
 }

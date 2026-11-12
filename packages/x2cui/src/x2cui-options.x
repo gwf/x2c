@@ -278,7 +278,7 @@ meta static List _option(List options, String name) {
 
 // columns
 
-// The entries of the Map literal of `columns:`.
+// The `key: value` rows of the Map literal a table is given.
 meta static List _columns(List options) {
   match (_option(options, "columns")) {
     case %(expr ? (map *entries)): return entries;
@@ -353,7 +353,7 @@ meta static int _icon_parameter(String method, int position) {
   return 0;
 }
 
-/* The CUI constant that the short name `name` spells for a `type`. */
+/* What the short name `name` spells for a `type`, or NULL. */
 meta static String _constant(Type type, String name) {
   String upper = name.upper();
   if (type ~= %(icon)) return %"CUI_ICON_$upper";
@@ -368,7 +368,8 @@ meta static String _constant(Type type, String name) {
   return %"CUI_$(spelled[4:].upper())_$upper";
 }
 
-/* The member spelled with the prefix every member of an enum shares. */
+/* `CUI_ALIGN_CENTER` for `CENTER` among the `cui_align` members, by the
+   prefix they all share; NULL when no member has that name. */
 meta static String _member(List members, String upper) {
   String prefix = _prefix(members), wanted = prefix + upper;
   foreach (List member in members)
