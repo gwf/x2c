@@ -1,14 +1,22 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import test from "node:test";
+import test, { after } from "node:test";
 
 const site = fileURLToPath(new URL("..", import.meta.url));
 const emcc =
   spawnSync(process.env.WASM_CC || "emcc", ["--version"]).status === 0;
+
+// These tests rerun compile, which removes the shared program list when it
+// cannot build; restore the list the developer's tree had.
+const manifest = join(site, "../builds/wasm/playground/programs.json");
+const saved = existsSync(manifest) ? readFileSync(manifest) : undefined;
+after(() => { if (saved) writeFileSync(manifest, saved); });
 
 // Prepares the precompiled programs, builds the site without a compile
 // service, and returns the redirect, complete examples, and homepage.

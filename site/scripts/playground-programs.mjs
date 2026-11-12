@@ -6,12 +6,12 @@
 // compile writes <id>.js and <id>.wasm under builds/wasm/playground and lists
 // the programs in programs.json, which the site pages read. It rebuilds a
 // program only when its source, data, compiler, runtime, or emcc changes.
-// Without emcc, the compiler, or the wasm runtime it removes programs.json,
-// and the site builds without precompiled programs.
+// Without emcc, the compiler, or a current wasm runtime it removes
+// programs.json, and the site builds without precompiled programs.
 // install copies the listed programs to dist/playground/programs.
 import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import {
   copyFile, mkdir, readFile, readdir, rm, writeFile
 } from "node:fs/promises";
@@ -100,6 +100,13 @@ function missingTool() {
   if (!existsSync(compiler)) return "builds/0/x2c is missing; run make build";
   if (!existsSync(runtime))
     return "builds/wasm/libx2c.a is missing; run make wasm-runtime";
+  // An archive older than the runtime C links into programs that trap.
+  const built = statSync(runtime).mtimeMs;
+  const sources = path.join(root, "builds/0/lib");
+  if (readdirSync(sources).some((name) => name.endsWith(".c") &&
+      statSync(path.join(sources, name)).mtimeMs > built))
+    return "builds/wasm/libx2c.a is older than builds/0/lib; " +
+      "run make wasm-runtime";
   return undefined;
 }
 

@@ -8,12 +8,22 @@ const needsHostFiles = /^(love\/files|power\/counting)$/;
 const needsHostRuntime =
   /\b(Thread|Channel|Dispatch|Job)\b|Pool\.start|File\.popen/;
 
+// The reason a gallery program cannot run in the browser, if any.
+export function nativeReason(entry, source) {
+  if (!entry.example || entry.optional)
+    return "This program needs a package, so it runs only with the native toolchain.";
+  if (needsHostFiles.test(entry.example))
+    return "This program reads files from disk, so it runs only with the native toolchain.";
+  if (needsHostRuntime.test(source))
+    return "This program uses threads, so it runs only with the native toolchain.";
+  return undefined;
+}
+
 export function selectPlaygroundExamples(gallery, sourceFor) {
   return gallery.flatMap((entry) => {
-    if (!entry.example || entry.optional || entry.language) return [];
-    const source = sourceFor(entry.example);
-    if (!source || needsHostFiles.test(entry.example) ||
-        needsHostRuntime.test(source)) return [];
+    if (entry.language) return [];
+    const source = entry.example && sourceFor(entry.example);
+    if (!source || nativeReason(entry, source)) return [];
     return [{ id: entry.example, slide: entry.slide, source }];
   });
 }
