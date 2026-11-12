@@ -117,7 +117,8 @@ void page_data(Ui ui, Gallery g) {
       CUI_TONE_INFO, CUI_TONE_NEUTRAL, CUI_TONE_INFO, CUI_TONE_WARNING,
       CUI_TONE_TEAL };
     List labels = %("Docs" "Video" "Docs" "Release" "Blog");
-    ui.reorder_begin("tasks", g.task_order);
+    bool changed;
+    ui.reorder (changed, "tasks", g.task_order)
     for (int i = 0; i < 5; i++) {
       ui.reorder_item (i) {
         int t = g.task_order[i];
@@ -126,7 +127,7 @@ void page_data(Ui ui, Gallery g) {
         ui.badge(label, tone: tones[t]);
       }
     }
-    if (ui.reorder_end()) ui.toast("Order saved");
+    if (changed) ui.toast("Order saved");
   }
   section(ui, "Accordion", NULL);
   ui.card (pad_y: 4, gap: 0) {

@@ -5,9 +5,10 @@
     The generator gives every one of CUI's own block macros a method form,
     `ui.row (gap: 8) { ... }`. The forms here are those it cannot
     generate: the id and disabled scopes, which CUI writes as push and pop
-    calls; a card stack and a swipe item, whose end calls report a result;
-    and the lists and tables below. Each evaluates its receiver once, and its end call
-    is deferred, so it also runs when the block leaves early.
+    calls; the blocks whose begin or end call reports a result, which CUI
+    gives no block macro; and the lists and tables below. Each evaluates
+    its receiver once, and its end call is deferred, so it also runs when
+    the block leaves early.
 */
 
 #include <stdbool.h>
@@ -64,6 +65,49 @@ $x2cui.result_block(card_stack, card_stack_begin, card_stack_end);
    `action` the swipe action taken this frame, or -1; it supplies the
    counts of the arrays of actions. */
 $x2cui.result_block(swipe_item, swipe_item_begin, swipe_item_end, 1, 3);
+
+/* `ui.reorder (changed, "tasks", order) { ... }` stores in `changed`
+   whether the user dropped an item in a new place this frame; its items
+   are `ui.reorder_item (position) { ... }`. */
+$x2cui.result_block(reorder, reorder_begin, reorder_end);
+
+/* The template of a block whose begin call reports a result, as a kanban
+   column and card do. The result is stored in `$result`, an `int` or
+   `bool` variable of the caller's, before the block runs. */
+macro Unit $x2cui.begin_result_block(Name $block, Name $begin, Name $end) {
+  macro Decorator $Ui.$block(
+    Stmt $body, Expr $ui, Expr $result, Expr @args, Entry @options) {
+    {
+      typeof($ui) ui = $ui;
+      $result =
+        ui.$begin(@x2cui_arguments(ui, $begin, %(), $options, @args));
+      defer ui.$end();
+      $body
+    }
+  }
+}
+
+/* `ui.kanban_column (add, "Backlog", count) { ... }` stores in `add`
+   whether its "+" was clicked; `ui.kanban_card (clicked, id) { ... }`
+   stores whether the card was clicked. */
+$x2cui.begin_result_block(kanban_column, kanban_column_begin,
+                          kanban_column_end);
+$x2cui.begin_result_block(kanban_card, kanban_card_begin, kanban_card_end);
+
+/** Runs the block inside a kanban board, whose columns are
+    `ui.kanban_column` blocks. `$moved` is a `bool` and `$move` a
+    `cui_kanban_move` of the caller's: when a card was dropped in a new
+    place this frame, `$moved` is set and `$move` says where.
+*/
+macro Decorator $Ui.kanban(
+  Stmt $body, Expr $ui, Expr $moved, Expr $move, Expr $id) {
+  {
+    typeof($ui) ui = $ui;
+    ui.kanban_begin($id);
+    defer $moved = ui.kanban_end($move);
+    $body
+  }
+}
 
 /*  Lists and tables
 

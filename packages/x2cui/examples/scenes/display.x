@@ -165,7 +165,8 @@ static void scene_hold_button(Ui ui) {
 }
 
 static void scene_reorder_item(Ui ui) {
-  static int order[] = { 0, 1, 2, 3, 4 };
+  static ArrayInt order;
+  if (!order) order = [0, 1, 2, 3, 4];
   static const char *tasks[] = {
     "Write the release notes", "Record the demo video",
     "Update the screenshots", "Tag version 1.0", "Post the announcement" };
@@ -177,9 +178,8 @@ static void scene_reorder_item(Ui ui) {
   ui.text("Drag a row. The others make room as you go.",
           color: text_muted);
   ui.column (width: 440) {
-    // cui_reorder_begin(cui_ctx *, const char *id,
-    // int *order, int count) has no method for its array and count.
-    cui_reorder_begin(ui, "tasks", order, 5);
+    bool changed;
+    ui.reorder (changed, "tasks", order)
     for (int i = 0; i < 5; i++) {
       int task = order[i];
       ui.reorder_item (i) {
@@ -187,7 +187,7 @@ static void scene_reorder_item(Ui ui) {
         ui.badge(labels[task], tone: tones[task]);
       }
     }
-    if (ui.reorder_end()) ui.toast("Order saved");
+    if (changed) ui.toast("Order saved");
   }
 }
 
@@ -217,23 +217,22 @@ static void scene_kanban_column_begin(Ui ui) {
     { "Maya Okafor", "Jonas Berg" }, { "Priya Nair", NULL },
     { "Rosa Delgado", NULL } };
   static const int counts[] = { 2, 1, 1 };
+  bool moved, added, clicked;
   cui_kanban_move move;
-  ui.kanban_begin("board");
-  for (int c = 0; c < 3; c++) {
-    ui.kanban_column_begin(columns[c], counts[c], {
-      .dot = CUI_COLOR_SERIES(c), .limit = c == 1 ? 3 : 0, .width = 200 });
-    for (int k = 0; k < counts[c]; k++) {
-      ui.kanban_card_begin(c * 10 + k);
-      ui.text(cards[c][k], font: medium, size: 13.5f);
-      ui.row (gap: 8, align: center) {
-        ui.avatar(owners[c][k], size: 22);
-        ui.text(owners[c][k], size: 12, color: text_muted);
+  ui.kanban (moved, move, "board")
+  for (int c = 0; c < 3; c++)
+    ui.kanban_column (added, columns[c], counts[c],
+                      dot: CUI_COLOR_SERIES(c), limit: c == 1 ? 3 : 0,
+                      width: 200)
+    for (int k = 0; k < counts[c]; k++)
+      ui.kanban_card (clicked, c * 10 + k) {
+        ui.text(cards[c][k], font: medium, size: 13.5f);
+        ui.row (gap: 8, align: center) {
+          ui.avatar(owners[c][k], size: 22);
+          ui.text(owners[c][k], size: 12, color: text_muted);
+        }
       }
-      ui.kanban_card_end();
-    }
-    ui.kanban_column_end();
-  }
-  if (ui.kanban_end(move)) ui.toast("Card moved");
+  if (moved) ui.toast("Card moved");
 }
 
 static void scene_reasoning(Ui ui) {

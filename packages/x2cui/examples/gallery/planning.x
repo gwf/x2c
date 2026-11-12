@@ -62,45 +62,41 @@ void page_planning(Ui ui, Gallery g) {
                                         0x22c55e };
   section(ui, "Kanban", "Drag cards within and between columns. Columns can "
                         "carry a work-in-progress limit.");
-  ui.kanban_begin("board");
+  bool moved, added, clicked;
+  cui_kanban_move mv;
+  ui.kanban (moved, mv, "board")
   for (int c = 0; c < 4; c++) {
     String col_name = col_names[c];
-    if (ui.kanban_column_begin(col_name, kb_len[c], {
-          .dot = CUI_RGB(col_dots[c]), .limit = c == 1 ? 3 : 0,
-          .width = 264 }))
-      ui.toast("New card", description: col_name);
-    for (int k = 0; k < kb_len[c]; k++) {
-      kb_card *cd = kb_find(kb_cols[c][k]);
-      if (!cd) continue;
-      if (ui.kanban_card_begin(cd.id)) ui.toast(cd.title);
-      ui.badge(cd.tag, tone: cd.tone, size: sm);
-      ui.text(cd.title, font: medium, size: 13.5f,
-                        line_height: 1.35f);
-      if (cd.progress > 0 && cd.progress < 1)
-        ui.progress(cd.progress, height: 4);
-      ui.row (gap: 10, align: center,
-              width: fill) {
-        ui.avatar(cd.who, size: 22);
-        ui.spacer();
-        if (cd.files) {
-          ui.icon(paperclip, 12, text_muted);
-          ui.text(%"$(cd.files)", size: 12,
-                                  color: text_muted);
+    ui.kanban_column (added, col_name, kb_len[c], dot: CUI_RGB(col_dots[c]),
+                      limit: c == 1 ? 3 : 0, width: 264) {
+      if (added) ui.toast("New card", description: col_name);
+      for (int k = 0; k < kb_len[c]; k++) {
+        kb_card *cd = kb_find(kb_cols[c][k]);
+        if (!cd) continue;
+        ui.kanban_card (clicked, cd.id) {
+          if (clicked) ui.toast(cd.title);
+          ui.badge(cd.tag, tone: cd.tone, size: sm);
+          ui.text(cd.title, font: medium, size: 13.5f, line_height: 1.35f);
+          if (cd.progress > 0 && cd.progress < 1)
+            ui.progress(cd.progress, height: 4);
+          ui.row (gap: 10, align: center, width: fill) {
+            ui.avatar(cd.who, size: 22);
+            ui.spacer();
+            if (cd.files) {
+              ui.icon(paperclip, 12, text_muted);
+              ui.text(%"$(cd.files)", size: 12, color: text_muted);
+            }
+            if (cd.comments) {
+              ui.icon(message_square, 12, text_muted);
+              ui.text(%"$(cd.comments)", size: 12, color: text_muted);
+            }
+            if (cd.progress >= 1) ui.icon(circle_check, 14, success);
+          }
         }
-        if (cd.comments) {
-          ui.icon(message_square, 12, text_muted);
-          ui.text(%"$(cd.comments)", size: 12,
-                                     color: text_muted);
-        }
-        if (cd.progress >= 1)
-          ui.icon(circle_check, 14, success);
       }
-      ui.kanban_card_end();
     }
-    ui.kanban_column_end();
   }
-  cui_kanban_move mv;
-  if (ui.kanban_end(mv)) kb_apply(&mv);
+  if (moved) kb_apply(&mv);
 
   section(ui, "Week calendar", "Drag events to move them in 15 minute "
                                "steps, or pull the bottom edge to resize.");
