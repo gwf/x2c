@@ -12,7 +12,8 @@ and its count, as CUI declares them; a call site passes a C array and
 changing the pinned CUI version and review the difference. Variadic
 functions get no form.
 
-It also writes the table of the methods in src/x2cui.x, generated here or
+It also writes CUI's parameter names for the methods `expand` defines,
+in src/x2cui-generate.x, and the table of the methods in src/x2cui.x, generated here or
 written by hand, that may have a method form, and the table in
 src/x2cui-options.x of the parameters that name an icon. A row names a method and
 the positions of its arrays whose count follows them, so the form
@@ -152,8 +153,8 @@ def forms(header, existing):
       result = "String"
     methods.append(
       f"/** Calls `{name}`. */\n"
-      + wrap(f"inline {result} Ui.{short}(", ["Ui ui"] + declared, ") =>")
-      + "\n" + wrap(f"  {name}(", ["ui"] + passed, ");", "    ") + "\n")
+      + wrap(f"inline {result} Ui.{short}(", ["Ui u"] + declared, ") =>")
+      + "\n" + wrap(f"  {name}(", ["u"] + passed, ");", "    ") + "\n")
   return methods, rows
 
 
@@ -229,6 +230,18 @@ def main():
   replace("src/x2cui.x", "forms",
           [table + "\nmacro Unit(Name $method, Literal @pairs) {\n"
            "  @x2cui_form($method, $pairs)\n}"])
+  expanded = set(re.search(r"^expand %\((.*?)\)$", hand,
+                           flags=re.M | re.S).group(1).split())
+  # A parameter with no plain name, such as a callback, keeps `pI`.
+  params = [f'("{name}"' + "".join(
+                ' "%s"' % (re.match(r".*?(\w+)$", q).group(1)
+                           if re.match(r".*?\w+$", q) and "(" not in q
+                           else f"p{i}")
+                for i, q in enumerate(qs[1:], 1)) + ")"
+            for result, name, qs in prototypes(header) if name in expanded]
+  replace("src/x2cui-generate.x", "parameter names",
+          [wrap("meta static List _parameter_names = %(", params, ");", "  ")
+           .replace(", ", " ").replace(",\n", "\n")])
   icons = icon_parameters(header, hand)
   replace("src/x2cui-options.x", "icons",
           [wrap("meta static List _icon_parameters = %(", icons, ");", "  ")

@@ -457,7 +457,6 @@ meta static Type _icon(void) => %(icon);
 meta static int _icon_field(String name) =>
   name == "icon" || name.startswith("icon_") || name.endswith("_icon");
 
-/* The type of an array field of icons, named `icons` or `*_icons`. */
 meta static Type _icons(void) => %(icons);
 
 meta static int _icons_field(String name) =>
