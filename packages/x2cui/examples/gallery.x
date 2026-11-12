@@ -128,9 +128,9 @@ static void accent_row(Ui ui, Gallery g) {
 // The page list: a column beside the page, or the body of a drawer.
 static void sidebar(Ui ui, Gallery g, bool drawer) {
   ui.column (
-      width: drawer ? fill : 240, height: fill,
-      bg: drawer ? CUI_TRANSPARENT : surface_muted,
-      pad: drawer ? 0 : 12, gap: 2) {
+    width: drawer ? fill : 240, height: fill,
+    bg: drawer ? CUI_TRANSPARENT : surface_muted,
+    pad: drawer ? 0 : 12, gap: 2) {
     if (!drawer) ui.row (gap: 10, pad_x: 8, pad_top: 6,
                          pad_bottom: 18) {
       ui.box (width: 28, height: 28, radius: 9,

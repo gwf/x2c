@@ -229,7 +229,7 @@ static void formatted_text_takes_x2c_values(void) {
   EXPECT_TRUE(screen.commands() > 0);
 }
 
-// Bytes the default malloc zone holds in use.
+// What the default malloc zone has allocated and not freed.
 static size_t bytes_in_use(void) {
   malloc_statistics_t stats;
   malloc_zone_statistics(NULL, &stats);
@@ -265,7 +265,7 @@ static void shoot(String path, void (*draw)(Ui ui)) {
   screen.write_png(path);
 }
 
-// Whether `draw` and `expected` draw the same pixels.
+// Whether two draw functions produce identical images.
 static bool same_pixels(void (*draw)(Ui ui), void (*expected)(Ui ui)) {
   Path directory = Path.temp_dir();
   defer directory.remove_tree();
@@ -275,7 +275,7 @@ static bool same_pixels(void (*draw)(Ui ui), void (*expected)(Ui ui)) {
   return same_files(one, two);
 }
 
-// Whether the files `one` and `two` hold the same bytes.
+// Whether two files hold identical bytes.
 static bool same_files(String one, String two) {
   FILE *a = fopen(one, "rb"), *b = fopen(two, "rb");
   defer { fclose(a); fclose(b); }
@@ -724,7 +724,7 @@ static void an_item_reports_what_the_pointer_did(void) {
   EXPECT_INT_EQ(p.clicked, 2);
 }
 
-// Presses `key` and draws the list for the frame that reads it.
+// Sends `key` down and up, with the frames that read each.
 static void key_frame(Offscreen screen, Picks &p, cui_key key) {
   Ui ui = screen.ui();
   ui.input_key(key, true, 0);

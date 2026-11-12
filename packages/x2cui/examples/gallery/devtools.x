@@ -27,7 +27,6 @@ static void devtools_kv(Ui ui) {
   }
 }
 
-
 static void devtools_problems(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 760)
     ui.problems("problems", [
@@ -281,7 +280,6 @@ static void tr_build(void) {
   }
   cui_trace_sort(tr_spans, tr_n);
 }
-
 
 static void devtools_trace(Ui ui) {
   if (!tr_n) tr_build();

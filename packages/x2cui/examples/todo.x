@@ -2,7 +2,7 @@
 
     The program keeps its tasks in an ordinary Array and describes the
     whole screen on every frame. It adds a task from a text field, filters
-    the list, removes a task, confirms before clearing the finished ones,
+    the list, removes a task, confirms before clearing the done ones,
     and saves the list to a file after each change.
 
       todo [FILE]             open a window; FILE defaults to todo.txt

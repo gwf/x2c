@@ -36,7 +36,7 @@ static void scene_metric(Ui ui) {
       spark_count: 7, width: grow(1));
     ui.metric("Frame time", "0.4 ms",
       icon: zap, delta: -18.0f, delta_label: "-18% vs v0.9",
-      lower_is_better: true, spark: [9, 7, 8, 6, 5, 6, 4, 4, 3], spark_count: 9,
+      lower_is_better: true, spark: [9, 7, 8, 6, 5, 6, 4, 4, 3],
       width: grow(1));
   }
 }

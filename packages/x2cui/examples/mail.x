@@ -100,7 +100,8 @@ static void message_list(Ui ui, Mail &a) {
                 ui.text(m.time, size: 12, color: text_muted, nowrap: true);
               }
               ui.text(m.subject, font: medium, size: 12.5, nowrap: true);
-              ui.text(m.preview, size: 12, color: text_secondary, nowrap: true);
+              ui.text(m.preview, size: 12, color: text_secondary,
+                      nowrap: true);
             }
           }
         }

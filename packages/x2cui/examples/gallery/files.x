@@ -55,19 +55,22 @@ static void run_command(String c) {
     if (n < 0)
       cui_terminal_write(&term, "\x1b[31mls: cannot read this folder"
                          "\x1b[0m\n", -1);
-  } else if (c == "colors") {
+  }
+  else if (c == "colors") {
     for (int k = 0; k < 16; k++)
       term.printf("\x1b[%dm\xe2\x96\x88\xe2\x96\x88\x1b[0m%s",
                           k < 8 ? 30 + k : 82 + k,
                           k == 7 || k == 15 ? "\n" : " ");
-  } else if (c == "build") {
+  }
+  else if (c == "build") {
     String full = "\xe2\x96\x88", empty = "\xe2\x96\x91";
     for (int k = 0; k <= 20; k++) {
       String bar = %"$(full.repeat(k))$(empty.repeat(20 - k))";
       term.printf("\r\x1b[32m%s\x1b[0m %3d%%", bar, k * 5);
     }
     cui_terminal_write(&term, "\n\x1b[32mdone\x1b[0m\n", -1);
-  } else if (c == "echo" || c.startswith("echo "))
+  }
+  else if (c == "echo" || c.startswith("echo "))
     term.printf("%s\n",
                         c == "echo" ? "" : c.remove_prefix("echo "));
   else if (c == "clear") cui_terminal_clear(&term);

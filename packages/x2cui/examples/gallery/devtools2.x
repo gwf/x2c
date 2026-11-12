@@ -23,7 +23,6 @@ static void devtools2_regex(Ui ui) {
     ui.regex_tester("rx", rx_pat, rx_text, height: 110);
 }
 
-
 static void devtools2_tests(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 760)
     ui.test_explorer("tests", [
@@ -48,7 +47,6 @@ static void devtools2_tests(Ui ui) {
       {name: "slow gradient path", depth: 2, status: passed, duration: 1.42f}],
                      height: 500);
 }
-
 
 static void devtools2_stack(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 760)
@@ -138,7 +136,6 @@ static void devtools2_histogram(Ui ui) {
       th_s0, th_s1, utc: true, height: 150);
 }
 
-
 static void devtools2_coverage(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 820)
     ui.coverage("cov", [
@@ -159,7 +156,6 @@ static void devtools2_coverage(Ui ui) {
       {path: "src/main.c", lines: 120, lines_hit: 120, branches: 10,
        branches_hit: 10, functions: 4, functions_hit: 4}], height: 372);
 }
-
 
 static void devtools2_blame(Ui ui) {
   List lines = %(

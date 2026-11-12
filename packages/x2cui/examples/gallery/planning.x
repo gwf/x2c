@@ -33,13 +33,12 @@ class Column {
   Array cards;
 } *;
 
-void Column.init(Column column, String name, unsigned dot, int limit,
-                 List rows) {
-  column.name = name;
-  column.dot = dot;
-  column.limit = limit;
-  column.cards = [];
-  foreach (List row in rows) column.cards.push(Card.new(row));
+void Column.init(Column c, String name, unsigned dot, int limit, List rows) {
+  c.name = name;
+  c.dot = dot;
+  c.limit = limit;
+  c.cards = [];
+  foreach (List row in rows) c.cards.push(Card.new(row));
 }
 
 // The board's columns, in order.

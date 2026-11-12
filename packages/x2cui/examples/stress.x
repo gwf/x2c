@@ -245,7 +245,7 @@ static Stress chosen(int argc, char **argv) {
   return stress_new(load, items);
 }
 
-/* Draws one frame and returns the seconds spent describing it. */
+/* Draws the screen once and returns the seconds spent describing it. */
 static double frame(Offscreen screen, Stress &stress) {
   double before = seconds();
   screen.begin();
