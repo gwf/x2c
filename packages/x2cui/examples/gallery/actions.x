@@ -121,6 +121,6 @@ void page_actions(Ui ui, Gallery g) {
     int c = ui.speed_dial("dial", acts,
                           tooltip: "Create");
     if (c >= 0) dial_choice = c;
-    if (dial_choice >= 0) ui.muted(acts.at(dial_choice).label);
+    if (dial_choice >= 0) ui.muted(acts[dial_choice].label);
   }
 }

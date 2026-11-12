@@ -22,8 +22,8 @@ void page_reader(Ui ui, Gallery g) {
     ui.scroll (id: "reader", height: 560,
                width: fill, gap: 14, fade_edges: true) {
       for (int k = 0; k < toc.len(); k++) {
-        ui.toc_anchor(toc.at(k).anchor);
-        ui.heading(toc.at(k).title, toc.at(k).level ? 4 : 3);
+        ui.toc_anchor(toc[k].anchor);
+        ui.heading(toc[k].title, toc[k].level ? 4 : 3);
         for (int p = 0; p < 3; p++) {
           ui.push_id_int(k * 10 + p);
           ui.text(para, color: text_secondary);

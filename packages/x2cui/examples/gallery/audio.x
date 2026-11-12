@@ -38,7 +38,7 @@ void page_audio(Ui ui, Gallery g) {
       ui.row (gap: 14, wrap: true) {
         ui.knob("Cutoff", cutoff, 20, 20000,
           unit: "Hz", log_scale: true, reset: 1000);
-        steps.at(0).target = ui.last_id();
+        steps[0].target = ui.last_id();
         ui.knob("Resonance", res, 0, 1, format: "%.2f");
         ui.knob("Attack", attack, 1, 2000,
           unit: "ms", log_scale: true, reset: 10);
@@ -49,7 +49,7 @@ void page_audio(Ui ui, Gallery g) {
       ui.level_meter("master", master,
         horizontal: true, length: 240, scale: true,
         segmented: true);
-      steps.at(1).target = ui.last_id();
+      steps[1].target = ui.last_id();
     }
     ui.card (dir: row, gap: 8, wrap: true) {
       for (int k = 0; k < 6; k++) ui.id (k) {
@@ -59,7 +59,7 @@ void page_audio(Ui ui, Gallery g) {
           ticks: k == 0 ? [6, 0, -6, -12, -24, -48] : NULL,
           meter: lv[k],
           meter_channels: 2);
-        if (k == 2) steps.at(2).target = ui.last_id();
+        if (k == 2) steps[2].target = ui.last_id();
       }
     }
   }

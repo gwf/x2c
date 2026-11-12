@@ -274,7 +274,7 @@ static void devtools_trace(Ui ui) {
   if (!tr_spans.len()) tr_build();
   if (tr_sel < 0)
     for (int i = 0; i < tr_spans.len(); i++) {
-      cui_trace_span *span = tr_spans.at(i);
+      cui_trace_span *span = tr_spans[i];
       if (!strcmp(span.name, "Update") && span.start > 0.016 &&
           span.start < 0.03)
         tr_sel = i;

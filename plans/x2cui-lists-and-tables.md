@@ -220,10 +220,10 @@ data a program both reads and passes to a component, are x2c values:
    `cui_series`, whose `of(name, values)` is written by hand.
 2. `$x2cui.records(T, Ts)` declares a collection: CUI's records packed in
    a `Block`. `Ts.of([{...}])` copies a static Array literal once and
-   works as a file-static initializer; `at(i)` returns a pointer, so
-   `c.at(i).count += 1` changes the record in place; `len`, `push`,
-   `insert`, `remove`, `data`, and a by-value `foreach` cursor complete
-   it. `gen-arrays.py` writes 28 collections, listed in the README.
+   works as a file-static initializer; `c[i]` is a pointer, through
+   `getindex`, so `c[i].count += 1` changes the record in place, and
+   `foreach (T *r in c)` yields pointers; `len`, `push`, `insert`,
+   `remove`, and `data` complete it. `gen-arrays.py` writes 28 collections, listed in the README.
 3. `x2cui_arguments` passes a collection's records and length where a
    component takes an array. The generated method of an editor that grows
    its array (key-value, query builder, curve, gradient) takes the
@@ -240,11 +240,11 @@ The `of` form calls only `Block.new` and `Block.append`: a function of
 the package named in a macro's `using` list reaches an importing unit
 under its bare spelling, not its `x2cui__` one, so the C does not link.
 
-`collection.at(i).field` stands in for `collection[i].field`, which needs
-x2c to honor a pointer-returning `getindex` on a pointer typedef, and
-`foreach` yields copies until x2c accepts a cursor that yields a pointer.
-When it does, `at` becomes `getindex` in the template and each `.at(` in
-the programs becomes `[`; the README lists the operations.
+Brackets and the pointer cursor use the compiler repairs merged at
+`dded0cbcd`: x2c honors a pointer-returning `getindex` on a pointer
+typedef and a `try_next` cursor that yields a pointer. The cursor yields
+pointers only: a loop changes records in place, and no program needs a
+copy.
 
 Verified on macOS arm64 by the package worker:
 

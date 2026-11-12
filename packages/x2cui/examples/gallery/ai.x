@@ -78,7 +78,7 @@ void page_ai(Ui ui, Gallery g) {
       ui.row (gap: 6, align: center) {
         ui.text("Sources", size: 12, color: text_muted);
         for (int k = 0; k < sources.len(); k++)
-          ui.citation(k + 1, *sources.at(k));
+          ui.citation(k + 1, *sources[k]);
       }
       ui.source_list("sources", sources);
       ui.row (gap: 8, align: center,
@@ -126,13 +126,13 @@ void page_ai(Ui ui, Gallery g) {
         {title: "Draft the summary"},
         {title: "Check the citations", status: pending}]);
       // The middle steps follow the assistant's progress.
-      *steps.at(1) = cui_plan_step.of(title: "Read the attached report",
+      *steps[1] = cui_plan_step.of(title: "Read the attached report",
         detail: busy ? "Page 12 of 40" : "40 pages",
         status: busy ? running : done);
-      *steps.at(2) = cui_plan_step.of(
+      *steps[2] = cui_plan_step.of(
         title: "Compare the numbers with last quarter",
         status: busy ? pending : done);
-      *steps.at(3) = cui_plan_step.of(title: "Draft the summary",
+      *steps[3] = cui_plan_step.of(title: "Draft the summary",
                                       status: busy ? pending : running);
       // The page ignores the result, so the method stands in for the macro.
       ui.agent_plan("plan", steps,
@@ -159,7 +159,7 @@ void page_ai(Ui ui, Gallery g) {
         {icon: bug, title: "Debug an error", detail: "Paste the stack trace"}]);
       int picked = ui.prompt_suggestions(
         "sugg", suggestions, columns: 1);
-      if (picked >= 0) draft.set(%"$(suggestions.at(picked).title): ");
+      if (picked >= 0) draft.set(%"$(suggestions[picked].title): ");
     }
   }
 }

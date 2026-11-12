@@ -187,7 +187,7 @@ static void scene_flame_graph(Ui ui) {
   static int selected = 6;
   ui.column (width: 640, gap: 10) {
     if (selected >= 0) {
-      cui_flame_span span = *flame_spans.at(selected);
+      cui_flame_span span = *flame_spans[selected];
       double ms = (span.end - span.start) * 1e3;
       ui.text(String.format("%s, %.2f ms", span.name, ms),
               size: 13, color: text_secondary);
@@ -352,7 +352,7 @@ static void scene_trace_view(Ui ui) {
   static int selected = -1;
   if (selected < 0)
     for (int i = 0; i < trace_spans.len(); i++)
-      if (trace_spans.at(i).start == 0.0187) selected = i;
+      if (trace_spans[i].start == 0.0187) selected = i;
   ui.trace_view("trace", tracks, trace_spans, view, selected,
                   width: 640, height: 170, markers: [
                     {name: "vsync", time: 0.0, tone: neutral},

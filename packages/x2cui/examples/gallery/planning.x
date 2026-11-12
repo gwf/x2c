@@ -143,7 +143,7 @@ void page_planning(Ui ui, Gallery g) {
     "week", cui_date_from_days(monday), events,
     start_hour: 8, end_hour: 19, height: 420);
   if (ev >= 0)
-    ui.toast(events.at(ev).title, description: events.at(ev).detail);
+    ui.toast(events[ev].title, description: events[ev].detail);
 
   section(ui, "Gantt", "Drag bars to reschedule, pull either end to change "
                        "the length. Arrows follow dependencies.");
@@ -166,10 +166,10 @@ void page_planning(Ui ui, Gallery g) {
   int tk = ui.gantt("plan", tasks, origin, 42,
                     today: 7 + (td - monday));
   if (tk >= 0) {
-    int days = tasks.at(tk).end - tasks.at(tk).start;
+    int days = tasks[tk].end - tasks[tk].start;
     String dur = %"$days days";
-    ui.toast(tasks.at(tk).name,
-      description: tasks.at(tk).milestone ? "Milestone" : dur);
+    ui.toast(tasks[tk].name,
+      description: tasks[tk].milestone ? "Milestone" : dur);
   }
   section(ui, "Month calendar", "Bars for days off and trips, timed events "
                                 "in time order, +N more when a day is "
@@ -194,6 +194,6 @@ void page_planning(Ui ui, Gallery g) {
   cui_month_result mr = ui.month_calendar(
     "month", month, month_events, selected: &picked);
   if (mr.event >= 0)
-    ui.toast(month_events.at(mr.event).title,
+    ui.toast(month_events[mr.event].title,
       description: "Opened from the month calendar");
 }

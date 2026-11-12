@@ -601,14 +601,14 @@ static void a_kv_editor_grows_its_collection(void) {
   Offscreen screen = auto Offscreen.open(480, 240);
   for (int i = 0; i < 3; i++) kv_frame(screen, pairs);
   kv_click(screen, pairs, kv_rect.x + 9, kv_rect.y + 9);
-  EXPECT_FALSE(pairs.at(0).enabled);
+  EXPECT_FALSE(pairs[0].enabled);
   EXPECT_INT_EQ(pairs.len(), 2);
   float fresh = kv_rect.y + kv_rect.h - 50;   // the empty key
   kv_click(screen, pairs, kv_rect.x + 120, fresh);
   screen.ui().input_text("Host");
   for (int i = 0; i < 3; i++) kv_frame(screen, pairs);
   EXPECT_INT_EQ(pairs.len(), 3);
-  EXPECT_TRUE(String.new(pairs.at(2).key) == "Host");
+  EXPECT_TRUE(String.new(pairs[2].key) == "Host");
 }
 
 // collections
@@ -617,11 +617,11 @@ static void a_kv_editor_grows_its_collection(void) {
 static Reactions shared = Reactions.of([
   {icon: thumbs_up, count: 12, active: true}, {icon: heart, count: 4}]);
 
-static void add_one(int index) { shared.at(index).count += 1; }
+static void add_one(int index) { shared[index].count += 1; }
 
 static int total(Reactions reactions) {
   int sum = 0;
-  foreach (cui_reaction r in reactions) sum += r.count;
+  foreach (cui_reaction *r in reactions) sum += r.count;
   return sum;
 }
 
@@ -629,18 +629,18 @@ static int total(Reactions reactions) {
    `push`, `insert`, and `remove` change the length. */
 static void a_collection_holds_records(void) {
   EXPECT_INT_EQ(shared.len(), 2);
-  EXPECT_TRUE(!strcmp(shared.at(0).icon, CUI_ICON_THUMBS_UP));
-  EXPECT_TRUE(shared.at(0).active);
+  EXPECT_TRUE(!strcmp(shared[0].icon, CUI_ICON_THUMBS_UP));
+  EXPECT_TRUE(shared[0].active);
   add_one(1);
-  EXPECT_INT_EQ(shared.at(1).count, 5);
+  EXPECT_INT_EQ(shared[1].count, 5);
   Reactions local = Reactions.of([]);
   EXPECT_INT_EQ(local.len(), 0);
   local.push(cui_reaction.of(icon: rocket, count: 7));
   local.push(cui_reaction.of(icon: smile, count: 2));
   local.insert(0, cui_reaction.of(icon: star, count: 1));
   EXPECT_INT_EQ(local.len(), 3);
-  EXPECT_INT_EQ(local.at(0).count, 1);
-  EXPECT_INT_EQ(local.at(2).count, 2);
+  EXPECT_INT_EQ(local[0].count, 1);
+  EXPECT_INT_EQ(local[2].count, 2);
   local.remove(1);
   EXPECT_INT_EQ(local.len(), 2);
   EXPECT_INT_EQ(total(local), 3);

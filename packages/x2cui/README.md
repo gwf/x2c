@@ -298,9 +298,9 @@ static Reactions reactions = Reactions.of([
   {icon: thumbs_up, count: 12, active: true}, {icon: heart, count: 4}]);
 ...
 ui.reactions("reactions", reactions);
-reactions.at(1).count += 1;
+reactions[1].count += 1;
 reactions.push(cui_reaction.of(icon: rocket, count: 7));
-foreach (cui_reaction r in reactions) total += r.count;
+foreach (cui_reaction *r in reactions) total += r.count;
 ```
 
 A form takes a collection where its component takes an array, and passes
@@ -312,7 +312,7 @@ CUI types a new record into, and stores CUI's count back as the length.
 | Operation | What it does |
 | --- | --- |
 | `T.of([...])` | a collection of the rows of an Array literal |
-| `c.at(i)` | a pointer to record `i`, so `c.at(i).field = v` changes it |
+| `c[i]` | a pointer to record `i`, so `c[i].field = v` changes it |
 | `c.len()` | how many records it holds |
 | `c.push(r)`, `c.insert(i, r)`, `c.remove(i)` | grow or shrink it |
 | `foreach (T r in c)` | each record, by value |
@@ -354,7 +354,7 @@ The collections:
 A form refuses a C array of CUI's records, and an Array literal where
 CUI writes through the array, with a message that names a collection.
 Change a collection between frames, or after the call that passes it:
-`at` and `data` are valid until the collection grows. CUI copies what it
+`c[i]` and `data` are valid until the collection grows. CUI copies what it
 paints during the call, as `ui.line_chart` and `ui.bar_list` do, and an
 editor writes only during its call.
 

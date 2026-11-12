@@ -124,8 +124,8 @@ void page_disclosure(Ui ui, Gallery g) {
     int a = ui.checklist("onboarding", steps,
       title: "Set up your workspace");
     if (a >= 0) {
-      steps.at(a).done = true;
-      ui.toast(steps.at(a).title, tone: success);
+      steps[a].done = true;
+      ui.toast(steps[a].title, tone: success);
     }
   }
 

@@ -449,12 +449,13 @@ macro Unit $x2cui.collection(Name $list, Name $record) {
 }
 
 /* A collection of the CUI record `$record`: its records packed in a
-   `Block`, which a component reads and writes in place. `at` returns a
-   pointer, so `list.at(i).count += 1` changes the record; `foreach`
-   yields copies. */
+   `Block`, which a component reads and writes in place. `list[i]` is a
+   pointer to a record, so `list[i].count += 1` changes it, and `foreach`
+   yields pointers. */
 macro Unit $x2cui.records(Type $record, Type $list) {
-  /** Returns a pointer to record `index`, valid until the collection grows. */
-  inline $record *$list.at($list list, int index) =>
+  /** Returns a pointer to record `index`, valid until the collection
+      grows: `list[i].count += 1` changes the record in place. */
+  inline $record *$list.getindex($list list, int index) =>
     &(($record *) ((Block) list).bytes)[index];
 
   /** Returns the records, for a raw CUI call, valid until it grows. */
@@ -487,10 +488,11 @@ macro Unit $x2cui.records(Type $record, Type $list) {
     block.length--;
   }
 
-  /** The cursor `foreach` uses: it yields each record by value. */
-  int $list.try_next($list list, int &cursor, $record &out) {
+  /** The cursor `foreach (T *r in list)` uses: it yields a pointer to
+      each record, so the loop changes records in place. */
+  int $list.try_next($list list, int &cursor, $record *&out) {
     if (cursor >= (int) ((Block) list).length) return 0;
-    out = (($record *) ((Block) list).bytes)[cursor++];
+    out = &(($record *) ((Block) list).bytes)[cursor++];
     return 1;
   }
 }

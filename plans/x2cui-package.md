@@ -1077,8 +1077,6 @@ Remaining limits:
   remade for a CUI upgrade.
 - Constants in program logic, such as `status == CUI_STATUS_BUSY`, keep
   CUI's spelling; short names need a parameter or field type.
-- A collection's record is reached with `c.at(i)`, not `c[i]`, until x2c
-  honors a pointer-returning `getindex`; `foreach` yields copies.
 - A form that declares a name is a block of its own, so an unbraced loop
   cannot take it as its body.
 - An Array literal outside a form compiles as a run-time `Array`; the

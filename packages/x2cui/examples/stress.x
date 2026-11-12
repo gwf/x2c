@@ -176,7 +176,7 @@ static void paint_history(cui_ctx *context, cui_rect area, void *user) {
   static Vec2s points = Vec2s.of([]);
   while (points.len() < HISTORY) points.push(cui_vec2.of());
   for (int i = 0; i < HISTORY; i++)
-    *points.at(i) = cui_vec2.of(
+    *points[i] = cui_vec2.of(
       x: area.x + area.w * i / (HISTORY - 1),
       y: area.y + area.h * (1 - history.times[i] / limit));
   ui.draw_polyline(points, 1.5f, history.line, false);

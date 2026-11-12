@@ -152,7 +152,7 @@ void page_viz(Ui ui, Gallery g) {
                                icon: shuffle,
                                variant: outline))
         for (int k = 0; k < 6; k++)
-          pages.at(k).value = (float) (500 + rand() % 5000);
+          pages[k].value = (float) (500 + rand() % 5000);
     }
     ui.column (width: grow(1), gap: 10,
                align: center) {

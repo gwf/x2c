@@ -69,19 +69,18 @@ static void scene_doc_tabs(Ui ui) {
     {title: "tile_cache.h", icon: code, tooltip: "src/tile_cache.h"},
     {title: "CHANGELOG.md", icon: file_text, tooltip: "CHANGELOG.md",
      dirty: true}]);
-  static int open = 4, selected = 1;
+  static int selected = 1;
   ui.card (width: fill, max_width: 620, pad: 1,
            gap: 0) {
-    cui_doc_tabs_result result = ui.doc_tabs("docs", tabs, open, selected,
+    cui_doc_tabs_result result = ui.doc_tabs("docs", tabs, selected,
       no_reorder: true);
     if (result.close >= 0) {
-      for (int k = result.close; k < open - 1; k++) tabs[k] = tabs[k + 1];
-      open--;
-      if (selected >= open) selected = open - 1;
+      tabs.remove(result.close);
+      if (selected >= tabs.len()) selected = tabs.len() - 1;
     }
-    if (open > 0) ui.column (pad: 16, gap: 6, width: fill) {
-      ui.text(tabs.at(selected).tooltip, font: medium);
-      ui.text(tabs.at(selected).dirty ? "Unsaved changes" : "Saved",
+    if (tabs.len() > 0) ui.column (pad: 16, gap: 6, width: fill) {
+      ui.text(tabs[selected].tooltip, font: medium);
+      ui.text(tabs[selected].dirty ? "Unsaved changes" : "Saved",
               size: 13, color: text_muted);
     }
   }
@@ -96,7 +95,7 @@ static void scene_speed_dial(Ui ui) {
     int picked = ui.speed_dial("create", actions,
                                tooltip: "Create");
     if (picked >= 0) chosen = picked;
-    ui.text(%"Last created: $(actions.at(chosen).label)",
+    ui.text(%"Last created: $(actions[chosen].label)",
             color: text_secondary);
   }
 }
@@ -117,7 +116,7 @@ static void scene_checklist(Ui ui) {
   ui.box (width: 460) {
     int done = ui.checklist("onboarding", steps_1,
       title: "Set up your workspace");
-    if (done >= 0) steps_1.at(done).done = true;
+    if (done >= 0) steps_1[done].done = true;
   }
 }
 
@@ -141,10 +140,10 @@ static void scene_tour(Ui ui) {
       ui.spacer();
       ui.button("Share", icon: users,
                          variant: outline);
-      steps_2.at(1).target = ui.last_id();
+      steps_2[1].target = ui.last_id();
       ui.button("Export", icon: download,
                           variant: primary);
-      steps_2.at(2).target = ui.last_id();
+      steps_2[2].target = ui.last_id();
     }
     ui.separator();
     ui.column (pad: 20, gap: 10, width: fill)
@@ -181,7 +180,7 @@ static void scene_prompt_suggestions(Ui ui) {
     int chosen = ui.prompt_suggestions(
       "starters", suggestions, columns: 2);
     if (chosen >= 0) picked = chosen;
-    if (picked >= 0) ui.muted(suggestions.at(picked).title);
+    if (picked >= 0) ui.muted(suggestions[picked].title);
   }
 }
 
