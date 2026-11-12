@@ -19,7 +19,7 @@
     method that takes the format and x2c values: `ui.textf("%d items", n)`.
 
     This unit is the `x2cui` package entry: `import "x2cui"` reaches every
-    nonstatic name as `x2cui__*` and every `$cui.` macro. The vendored
+    nonstatic name as `x2cui__*` and every method form. The vendored
     `cui-1.3.h` stays public because these methods take CUI's own types,
     and it is the raw API for everything below.
  */
@@ -46,13 +46,6 @@ typedef struct TextField {
 // The generator names Ui and TextField in the methods it builds.
 #include "x2cui-generate.x"
 #include "x2cui-containers.x"
-#include "x2cui-arrays.x"
-
-/** Closes the window; idempotent on NULL, and returns NULL. */
-App App.close(App app);
-
-/** Releases the renderer, the `Ui`, and the pixels; returns NULL. */
-Offscreen Offscreen.close(Offscreen screen);
 
 $cleanup.by(App, close);
 $cleanup.by(Offscreen, close);
@@ -65,10 +58,9 @@ $cleanup.by(Offscreen, close);
 /** Opens a window. Raises `<init-fail>` when CUI cannot create it. */
 App App.open(cui_app_desc desc) {
   App app = cui_app_create(&desc);
-  if (!app) {
+  if (!app)
     raise %(init-fail (library "cui") (operation "cui_app_create")
             (reason "CUI did not create a window"));
-  }
   return app;
 }
 
@@ -79,15 +71,16 @@ App App.open(cui_app_desc desc) {
 bool App.frame(App app) {
   Ui ui = cui_app_ui(app);
   cui_color color = cui_color_of(ui, CUI_COLOR_BACKGROUND);
-  x2cui_title_bar(cui_app_native_window(app),
-                  cui_get_theme_mode(ui) == CUI_THEME_DARK,
-                  (unsigned) color.r << 16 | color.g << 8 | color.b);
+  x2cui_title_bar(
+    cui_app_native_window(app), cui_get_theme_mode(ui) == CUI_THEME_DARK,
+    (unsigned) color.r << 16 | color.g << 8 | color.b);
   return cui_app_frame(app);
 }
 
 /** Returns the window's borrowed `Ui`, valid until the window closes. */
 inline Ui App.ui(App app) => cui_app_ui(app);
 
+/** Closes the window; idempotent on NULL, and returns NULL. */
 App App.close(App app) {
   if (app) cui_app_destroy(app);
   return NULL;
@@ -128,19 +121,17 @@ void Offscreen.begin(Offscreen screen) {
 }
 
 /** Ends the frame and renders it into the surface's pixels. */
-void Offscreen.end(Offscreen screen) {
-  cui_end_frame(screen.ui);
-  const cui_draw_data *data = cui_get_draw_data(screen.ui);
-  if (data.width_px != screen.width || data.height_px != screen.height) {
-    screen.width = data.width_px;
-    screen.height = data.height_px;
-    screen.pixels =
-      realloc(screen.pixels, (size_t) screen.width * screen.height * 4);
+void Offscreen.end(Offscreen o) {
+  cui_end_frame(o.ui);
+  const cui_draw_data *data = cui_get_draw_data(o.ui);
+  if (data.width_px != o.width || data.height_px != o.height) {
+    o.width = data.width_px;
+    o.height = data.height_px;
+    o.pixels = realloc(o.pixels, (size_t) o.width * o.height * 4);
   }
-  screen.commands = data.command_count;
+  o.commands = data.command_count;
   cui_sw_render(
-    screen.renderer, data, screen.pixels, screen.width, screen.height,
-    screen.width * 4, CUI_SW_RGBA);
+    o.renderer, data, o.pixels, o.width, o.height, o.width * 4, CUI_SW_RGBA);
 }
 
 /** Returns how many draw commands the last frame produced. */
@@ -149,13 +140,14 @@ int Offscreen.commands(Offscreen screen) => screen.commands;
 /** Writes the last frame as a PNG. Raises `<io-fail>` when it cannot. */
 void Offscreen.write_png(Offscreen screen, String path) {
   if (screen.pixels &&
-      cui_write_png(path, screen.pixels, screen.width, screen.height,
-                    screen.width * 4))
+      cui_write_png(
+        path, screen.pixels, screen.width, screen.height, screen.width * 4))
     return;
   raise %(io-fail (library "cui") (operation "cui_write_png")
           (path $path));
 }
 
+/** Releases the renderer, the `Ui`, and the pixels; returns NULL. */
 Offscreen Offscreen.close(Offscreen screen) {
   if (!screen) return NULL;
   if (screen.ui) cui_destroy(screen.ui);
@@ -209,18 +201,18 @@ cui_series cui_series.of(String name, ArrayFloat values) =>
 void Ui.textf(Ui ui, String format, List @values) =>
   cui_textf(ui, "%s", format.format(@values));
 
-/// Draws a table cell's text formatted as `Ui.textf` formats it.
+/// Formats `values` by `format` into the next slot of the current row.
 void Ui.table_cell_textf(Ui ui, String format, List @values) =>
   cui_table_cell_textf(ui, "%s", format.format(@values));
 
 /// Writes text formatted as `Ui.textf` formats it to a terminal's buffer.
-void cui_terminal_buffer.printf(cui_terminal_buffer &terminal, String format,
-                                List @values) =>
+void cui_terminal_buffer.printf(
+  cui_terminal_buffer &terminal, String format, List @values) =>
   cui_terminal_printf(&terminal, "%s", format.format(@values));
 
 /// Appends a line formatted as `Ui.textf` formats it to a log's buffer.
-void cui_log_buffer.append(cui_log_buffer &log, cui_log_level level,
-                           String format, List @values) =>
+void cui_log_buffer.append(
+  cui_log_buffer &log, cui_log_level level, String format, List @values) =>
   cui_log_append(&log, level, "%s", format.format(@values));
 
 /// Edits the two numbers at `value` in an inspector row.
@@ -266,15 +258,17 @@ bool Ui.tree_cell(
 */
 void Ui.donut_chart(
   Ui ui, String id, ArrayFloat values, List labels, cui_chart_opts opts) {
-  cui_donut_chart_ex(ui, id, (const float *) values.bytes,
-                     x2cui_strings(labels), (int) values.len(), &opts);
+  cui_donut_chart_ex(
+    ui, id, (const float *) values.bytes, x2cui_strings(labels),
+    (int) values.len(), &opts);
 }
 
 /** Draws `values` as a small line with no axes. */
 void Ui.sparkline(
-  Ui ui, ArrayFloat values, cui_size width, float height, cui_color color) {
-  cui_sparkline(ui, (const float *) values.bytes, (int) values.len(), width,
-                height, color);
+  Ui u, ArrayFloat values, cui_size width, float height, cui_color color) {
+  cui_sparkline(
+    u, (const float *) values.bytes, (int) values.len(), width, height,
+    color);
 }
 
 /** Draws `length` one-character boxes that edit `code`, a field of at
@@ -291,7 +285,7 @@ void Ui.reorder_begin(Ui ui, String id, ArrayInt order) {
 }
 
 /** Draws a line chart of `count` series, with `labels` along the x axis,
-    or NULL for none. `$cui.line_chart` supplies the count of an array.
+    or NULL for none. The method form supplies the count of an array.
 */
 void Ui.line_chart(
   Ui ui, String id, const cui_series *series, int count, List labels,
@@ -301,7 +295,7 @@ void Ui.line_chart(
 }
 
 /** Draws a bar chart of `count` series, with `labels` along the x axis,
-    or NULL for none. `$cui.bar_chart` supplies the count of an array.
+    or NULL for none. The method form supplies the count of an array.
 */
 void Ui.bar_chart(
   Ui ui, String id, const cui_series *series, int count, List labels,
@@ -338,13 +332,15 @@ typedef struct ItemPaint { bool hovered, selected, rule; } ItemPaint;
 static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
   ItemPaint *paint = user;
   if (paint.selected)
-    cui_draw_rect(ui, r, CUI_CORNERS(10),
-                  cui_token_color(ui, CUI_TOKEN_ACTIVE));
+    cui_draw_rect(
+      ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_ACTIVE));
   else if (paint.hovered)
-    cui_draw_rect(ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_HOVER));
+    cui_draw_rect(
+      ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_HOVER));
   else if (paint.rule)
-    cui_draw_rect(ui, (cui_rect){ r.x + 12, r.y, r.w - 24, 1 }, CUI_CORNERS(0),
-                  cui_token_color(ui, CUI_TOKEN_BORDER_SUBTLE));
+    cui_draw_rect(
+      ui, (cui_rect){ r.x + 12, r.y, r.w - 24, 1 }, CUI_CORNERS(0),
+      cui_token_color(ui, CUI_TOKEN_BORDER_SUBTLE));
 }
 
 /** Begins an interactive row of a list, a stack box the width of its
@@ -376,59 +372,41 @@ RowState Ui.table_row_begin(Ui ui, RowOptions opts) {
                      clicked };
 }
 
-/// Draws the next cell of a table row with one text.
+/// Fills the next cell of the current row with one string.
 void Ui.cell_text(Ui ui, String text) => cui_table_cell_text(ui, text);
+
+/// Draws the next cell of a data grid's or a tree table's row with one text.
+void Ui.grid_cell_text(Ui u, String text) => cui_data_grid_cell_text(u, text);
 
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
 
-/* One native array for each List of Strings a component has been given.
-   A List is canonical, so equal Lists are one List and one entry. The
-   table is keyed by the List's address and is open-addressed. A Map would
-   box each address it looks up, which allocates on every call. */
-typedef struct StringArray {
-  List items;
-  const char **names;
-} StringArray;
+/* One native array for each List of Strings a component has been given,
+   keyed by the List. A List is canonical and lives as long as the pool
+   that interned it, so equal Lists share one entry and an entry never goes
+   stale; the array adds a constant factor to what the pool already holds.
+   Looking up an existing List allocates nothing. The table is shared by
+   the process and is not locked, so one thread draws; see the README. */
+static Map string_arrays = {};
 
-static StringArray *string_arrays;
-static size_t string_array_slots, string_array_count;
-
-// Returns the slot that holds `items`, or the empty slot where it belongs.
-static StringArray *_string_slot(
-  StringArray *table, size_t slots, List items) {
-  size_t at = ((uintptr_t) items >> 4) * 0x9E3779B97F4A7C15ull;
-  for (at &= slots - 1; table[at].items && table[at].items != items;)
-    at = (at + 1) & (slots - 1);
-  return &table[at];
-}
-
-// Keeps the table at most half full, so a probe always ends.
-static void _reserve_string_slot(void) {
-  if (2 * (string_array_count + 1) <= string_array_slots) return;
-  size_t slots = string_array_slots ? 2 * string_array_slots : 64;
-  StringArray *table = calloc(slots, sizeof *table);
-  for (size_t i = 0; i < string_array_slots; i++)
-    if (string_arrays[i].items)
-      *_string_slot(table, slots, string_arrays[i].items) = string_arrays[i];
-  free(string_arrays);
-  string_arrays = table;
-  string_array_slots = slots;
-}
+// The array of an empty List, which is NULL; it allocates nothing.
+static const char *no_strings[] = { NULL };
 
 /** Returns the Strings of `items` as the array a component reads. CUI may
     read the array until the frame ends, so the array is kept and is built
-    once for each distinct List.
+    once for each distinct List. A List interned inside a caller's
+    `Pool.open` bracket loses its identity at `Pool.close`, and its entry is
+    not used again.
 */
 const char *const *x2cui_strings(List items) {
-  _reserve_string_slot();
-  StringArray *slot = _string_slot(string_arrays, string_array_slots, items);
-  if (slot.items) return slot.names;
+  if (!items) return no_strings;
+  Var found;
+  if (string_arrays.try_get(items, found)) return found.pointer();
   const char **names = malloc((items.len() + 1) * sizeof *names);
   int index = 0;
   foreach (String item in items) names[index++] = item;
-  *slot = (StringArray){ items, names };
-  string_array_count++;
+  names[index] = NULL;
+  string_arrays[items] = Var.new(<p48>, names);
   return names;
 }
 
@@ -531,7 +509,7 @@ expand %(
   cui_draw_arc cui_draw_text cui_draw_icon cui_draw_image cui_push_clip
   cui_pop_clip cui_canvas cui_state cui_state_on_free cui_animate
   cui_animate_spring cui_get_draw_data)
-macro Unit(Name $target) { $cui.method($target); }
+macro Unit(Name $target) { $x2cui.method($target); }
 
 // Components that take arrays. Rerun tools/gen-arrays.py to refresh these.
 
@@ -924,15 +902,25 @@ inline void Ui.draw_polygon(
 /* gen-arrays: begin generated forms */
 
 expand %(
-  prop_vec2 prop_vec3 prop_vec4 tree_begin donut_chart line_chart
-  bar_chart tour toggle_group speed_dial tree_table_begin ticker heatmap
-  calendar_heatmap treemap radar_chart funnel sankey waffle split_bar
-  bar_list activity_rings scatter_chart candlestick tab_bar waveform
-  agent_plan prompt_suggestions model_picker week_calendar month_calendar
-  gantt checklist multi_select histogram_slider level_meter doc_tabs
-  prop_vec hex_view flame_graph curve_editor gradient_editor
-  timeline_editor kv_editor problems pipeline query_builder keymap
-  commit_graph graph_view waterfall trace_view test_explorer stack_trace
-  uptime time_histogram coverage blame feature_flags api_explorer)
-macro Unit(Name $method) { $cui.form($method); }
+  prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell donut_chart
+  sparkline otp_input reorder_begin (line_chart 1) (bar_chart 1)
+  each_begin each_end item_begin table_row_begin cell_text grid_cell_text
+  (tour 1) toggle_group (reactions 1) (speed_dial 1)
+  (swipe_item_begin 1 3) (filter_bar 1) (tree_table_begin 1 3)
+  diff_view_rows (presence 1) (ticker 1) heatmap (calendar_heatmap 2)
+  (treemap 1) (radar_chart 1) (funnel 1) (sankey 2) (waffle 1)
+  (split_bar 1) (bar_list 1) (activity_rings 1) (scatter_chart 1)
+  (candlestick 1) (tab_bar 1) (waveform 1) (agent_plan 1) (source_list 1)
+  (prompt_suggestions 1) (model_picker 1) (week_calendar 2)
+  (month_calendar 2) (gantt 1) (toc 1) (checklist 1) multi_select
+  (histogram_slider 1) (level_meter 1) (doc_tabs 1) (prop_vec 1)
+  (hex_view 1) (flame_graph 1) (curve_editor 1) (gradient_editor 1)
+  (timeline_editor 1) (kv_editor 1) (problems 1) (pipeline 2)
+  (query_builder 1 3) (keymap 1) (commit_graph 1) (graph_view 1 3)
+  (waterfall 1) (trace_view 1 3) (test_explorer 1) (stack_trace 1)
+  (uptime 1) (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
+  (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
+macro Unit(Name $method, Literal @pairs) {
+  @x2cui_form($method, $pairs)
+}
 /* gen-arrays: end generated forms */

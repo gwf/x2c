@@ -21,8 +21,8 @@ void page_code(Ui ui, Gallery g) {
     "}\n",
     lang: "c", title: "counter.c", line_numbers: true,
     highlight_from: 7);
-  ui.row (gap: 16, align: CUI_ALIGN_START, width: CUI_FILL) {
-    ui.box (width: CUI_GROW(1))
+  ui.row (gap: 16, align: start, width: fill) {
+    ui.box (width: grow(1))
       ui.code_block("py",
         "def fib(n: int) -> int:\n"
         "    # the slow way, on purpose\n"
@@ -32,7 +32,7 @@ void page_code(Ui ui, Gallery g) {
         "\n"
         "print([fib(k) for k in range(10)])\n",
         lang: "python", title: "fib.py");
-    ui.box (width: CUI_GROW(1))
+    ui.box (width: grow(1))
       ui.code_block("sh",
         "git clone https://github.com/yappologistic/CUI.git\n"
         "cmake -S CUI -B build\n"

@@ -6,7 +6,7 @@
 
 /*  x2cui-generate.x -- Ui methods built from CUI's C signatures
 
-    `$cui.method(cui_button_ex)` defines `Ui.button` from the type of
+    `$x2cui.method(cui_button_ex)` defines `Ui.button` from the type of
     `cui_button_ex` as the compiler read it from `cui.h`. The method keeps
     the C function's result and replaces each C parameter convention with
     its x2c form:
@@ -45,24 +45,18 @@ meta static String _method_name(String function) {
   return name.endswith("_ex") ? name[:name.len() - 3] : name;
 }
 
-/* CUI names its option records `*_opts`, and its layout record `cui_box`. */
-meta static int _option_record(Type type) {
-  Var name = type.car();
-  return name is <string> &&
-         (((String) name).endswith("_opts") || name == "cui_box");
-}
-
 /** Returns the `Ui` method that forwards to the C function `target`, and
     its method form when it has one.
 */
-meta List cui_method(String function) {
+meta List x2cui_method(String function) {
   List target = x2c_ident(function);
   Type signature = Code.type(target);
   List types = Type.parameters(signature);
   Type result = Type.return_type(signature);
   // Returned text lives in CUI's frame memory; a String outlives the frame.
   if (_spelled(result, "(* const char)")) result = $!Type{ String };
-  Array params = [], args = [];
+  Array params = [], args = [], pairs = [];
+  int lowers = 0;
   List ui = x2c_ident("ui");
   params.push($!Param{ cui_ctx *$ui });
   args.push($!( $ui ));
@@ -71,6 +65,7 @@ meta List cui_method(String function) {
     Type type = types[i];
     List p = x2c_ident(%"p$i");
     Type next = i + 1 < count ? types[i + 1] : NULL;
+    lowers |= _lowers(type);
     if (_spelled(type, "(* const char)")) {
       params.push($!Param{ String $p });
       args.push($!( $p ));
@@ -96,7 +91,9 @@ meta List cui_method(String function) {
       args.push($!( $p ));
     }
     else if (_const_pointer(type) && next && _spelled(next, "(int)")) {
-      // An array of records and its count pass as C; see $cui.count.
+      // An array of records and its count pass as C; the method form
+      // supplies the count.
+      pairs.push(params.len() - 1);
       params.push($!Param{ $type $p });
       args.push($!( $p ));
     }
@@ -124,13 +121,21 @@ meta List cui_method(String function) {
                 $target(@passed); };
   Type last = types[count - 1];
   int options = count > 1 && _const_pointer(last) &&
-                _option_record(Type.element(last));
-  List form = _method_form(name, options);
+                x2cui_option_record(Type.element(last));
+  List form = _method_form(name, options || lowers, pairs.list_free());
   return form ? %($unit $form) : $(unit);
 }
 
+/* Whether `cui_value` lowers a value of the C type `type`: text, an enum,
+   or another of CUI's types by value. */
+meta static int _lowers(Type type) {
+  if (Type.is_text(type) || Type.resolve(type) ~= %(enum *)) return 1;
+  Var name = type.car();
+  return name is <string> && ((String) name).startswith("cui_");
+}
+
 /** Defines the `Ui` method for the CUI function `$target`. */
-macro Unit $cui.method(Name $target) { @cui_method($target) }
+macro Unit $x2cui.method(Name $target) { @x2cui_method($target) }
 
 /*  Method forms
 
@@ -146,8 +151,8 @@ macro Unit $cui.method(Name $target) { @cui_method($target) }
     `ui.NAME(...)` is the method the form wraps. Each form is one of the two
     templates below, which takes its name from the method; its ordinary
     arguments are those before the first `name: value`. A component's
-    form calls its method with the arguments `cui_arguments` returns, and
-    a block's form calls its begin method through `cui_begin`; both read
+    form calls its method with the arguments `x2cui_arguments` returns, and
+    a block's form calls its begin method through `x2cui_begin`; both read
     the method's parameter types and lower each value by its type; see
     x2cui-options.x.
 */
@@ -155,41 +160,48 @@ macro Unit $cui.method(Name $target) { @cui_method($target) }
 /* CUI's own block macros, `cui_NAME(ui, ...) { ... }`, which run their
    block between `cui_NAME_begin` and `cui_NAME_end`. Each has a block
    form. Those that CUI writes with `CUI__SCOPE_IF` run the block only
-   while the begin call reports the block open. A table has its own form,
-   with a template of columns. */
+   while the begin call reports the block open. The node editor, its
+   nodes, and the tree table are begin and end pairs that CUI gives no
+   macro; they join the lists as CUI would write them. A table, a data
+   grid, and a card stack have forms of their own in
+   x2cui-containers.x. */
 meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
   "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
   "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
-  "menu_bar" "toolbar" "status_bar" "virtual_list");
+  "menu_bar" "toolbar" "status_bar" "virtual_list" "node" "tree_table");
 meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
   "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
-  "user_menu" "menu_bar_menu" "inspector" "tree");
+  "user_menu" "menu_bar_menu" "inspector" "tree" "node_editor");
 
 /** Returns the begin call of a block, `ui.NAME_begin(...)` with the
-    arguments `cui_arguments` returns, as a test that is true while the
+    arguments `x2cui_arguments` returns, as a test that is true while the
     block is open.
 */
-meta List cui_begin(List ui, String block, List options, List @args) {
-  List call = cui_call(ui, %"$(block)_begin", options, @args);
+meta List x2cui_begin(
+  List ui, String block, List pairs, List options, List @args) {
+  List begin = x2c_ident(%"$(block)_begin");
+  List passed = x2cui_arguments(ui, %"$(block)_begin", pairs, options, @args);
+  List call = $!( $ui.$begin(@passed) );
   return block in _openings ? call : $!( ($call, 1) );
 }
 
-/* The template of a component's form. */
-macro Unit $cui.widget(Name $method) {
+/* The template of a component's form. `pairs` are the positions of its
+   arrays whose count follows them; see `x2cui_arguments`. */
+macro Unit $x2cui.widget(Name $method, Literal @pairs) {
   macro Expression $Ui.$method(Expr $ui, Expr @args, Entry @options) =>
-    $ui.$method(@cui_arguments($ui, $method, $options, @args));
+    $ui.$method(@x2cui_arguments($ui, $method, $pairs, $options, @args));
 }
 
 /* The template of a block's form. The receiver is evaluated once; the end
    call is deferred, so it also runs when the block leaves early; a block
    whose begin call reports whether it is open runs only while it is
    open. */
-macro Unit $cui.block(Name $block, Name $end) {
+macro Unit $x2cui.block(Name $block, Name $end, Literal @pairs) {
   macro Decorator $Ui.$block(
     Stmt $body, Expr $ui, Expr @args, Entry @options) {
     {
       typeof($ui) ui = $ui;
-      if ($cui_begin(ui, $block, $options, @args)) {
+      if ($x2cui_begin(ui, $block, $pairs, $options, @args)) {
         defer ui.$end();
         $body
       }
@@ -201,24 +213,30 @@ macro Unit $cui.block(Name $block, Name $end) {
 meta static String _end_method(String block) =>
   block == "row" || block == "column" ? "box_end" : %"$(block)_end";
 
-/* The method form of `method`, which takes an option record last when
-   `options` is set; NULL when it has none. */
-meta static List _method_form(String method, int options) {
+/* The method form of `method`, whose arrays at `pairs` are followed by
+   their counts. A block's begin method has a block form; another method
+   has a component form when `lowered` is set, as it is when the method
+   takes an option record, a value `x2cui_value` lowers, or an array.
+   NULL when it has none. */
+meta static List _method_form(String method, int lowered, List pairs) {
   String block = method.endswith("_begin") ? method[:method.len() - 6] : NULL;
   if (block && (block in _scopes || block in _openings))
-    return Macro_apply($cui.block, %($block $(_end_method(block))));
-  return options && !block ? Macro_apply($cui.widget, %($method)) : NULL;
+    return Macro_apply(
+      $x2cui.block, %($block $(_end_method(block)) @pairs));
+  return (lowered || pairs) && !block
+    ? Macro_apply($x2cui.widget, %($method @pairs)) : NULL;
 }
 
 /** Returns the method form of `method`, a `Ui` method written in x2c
-    rather than generated, when it takes an option record last.
+    rather than generated, whose arrays at `pairs` are followed by their
+    counts.
 */
-meta List cui_form(String method) {
+meta List x2cui_form(String method, List pairs) {
   Type ui = $!Type{ Ui };
-  List types = Type.parameters(Type.resolve_member(ui, method, 1)[2]);
-  List form = _method_form(method, _option_record(types[types.len() - 1]));
+  List types = Type.parameters(Type.resolve_member(ui, method, 1)[2]).cdr();
+  int lowered = 0;
+  for (int i = 0; i < types.len(); i++) lowered |= _lowers(types[i]);
+  List form = _method_form(method, lowered, pairs);
   return form ? $(form) : %();
 }
 
-/** Defines the method form of the `Ui` method `$method`. */
-macro Unit $cui.form(Name $method) { @cui_form($method) }

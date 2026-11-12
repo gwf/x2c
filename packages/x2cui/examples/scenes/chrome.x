@@ -67,69 +67,69 @@ static void prepare(void) {
 static void scene_split_button(Ui ui) {
   ui.row (gap: 12, wrap: true) {
     ui.split_button("Save", %("Save as draft" "Save and publish" "Schedule"),
-                    icon: CUI_ICON_SAVE);
+                    icon: save);
     ui.split_button("Export", %("PDF" "PNG" "SVG"),
-                    variant: CUI_BUTTON_OUTLINE,
-                    icon: CUI_ICON_DOWNLOAD);
+                    variant: outline,
+                    icon: download);
     ui.split_button("Run", %("Run tests" "Run with coverage"),
-                    variant: CUI_BUTTON_SECONDARY,
-                    icon: CUI_ICON_PLAY);
+                    variant: secondary,
+                    icon: play);
   }
   ui.text("The main part runs the action; the chevron opens the others.",
-          color: CUI_COLOR_TEXT_MUTED);
+          color: text_muted);
 }
 
 static void scene_confirm_button(Ui ui) {
   ui.row (gap: 12, wrap: true) {
-    ui.confirm_button("Delete project", icon: CUI_ICON_TRASH_2);
-    ui.confirm_button("Remove member", icon: CUI_ICON_USER,
+    ui.confirm_button("Delete project", icon: trash_2);
+    ui.confirm_button("Remove member", icon: user,
                                        confirm_label: "Remove Maya?",
                                        timeout: 5);
   }
   ui.text("The first click arms the button; a second click confirms.",
-          color: CUI_COLOR_TEXT_MUTED);
+          color: text_muted);
 }
 
 static void scene_status_button(Ui ui) {
   ui.row (gap: 12, wrap: true) {
-    ui.status_button("Deploy", CUI_STATUS_IDLE, icon: CUI_ICON_PLAY);
-    ui.status_button("Save changes", CUI_STATUS_BUSY,
-                     icon: CUI_ICON_SAVE);
-    ui.status_button("Publish", CUI_STATUS_SUCCESS,
+    ui.status_button("Deploy", idle, icon: play);
+    ui.status_button("Save changes", busy,
+                     icon: save);
+    ui.status_button("Publish", success,
                      success_label: "Published");
-    ui.status_button("Sync", CUI_STATUS_ERROR,
+    ui.status_button("Sync", error,
                      error_label: "Sync failed",
-                     variant: CUI_BUTTON_OUTLINE);
+                     variant: outline);
   }
 }
 
 static void scene_user_menu(Ui ui) {
-  ui.box (width: CUI_PX(270))
+  ui.box (width: 270)
   ui.user_menu ("Maya Okafor", detail: "maya@fieldwork.studio",
                                status: "online",
-                               placement: CUI_PLACE_BOTTOM_START) {
-    ui.menu_item("Profile", icon: CUI_ICON_USER, shortcut: "Ctrl P");
-    ui.menu_item("Billing", icon: CUI_ICON_CREDIT_CARD);
-    ui.menu_item("Settings", icon: CUI_ICON_SETTINGS,
+                               placement: bottom_start) {
+    ui.menu_item("Profile", icon: user, shortcut: "Ctrl P");
+    ui.menu_item("Billing", icon: credit_card);
+    ui.menu_item("Settings", icon: settings,
                              shortcut: "Ctrl ,");
     ui.menu_separator();
-    ui.menu_item("Log out", icon: CUI_ICON_LOG_OUT);
+    ui.menu_item("Log out", icon: log_out);
   }
 }
 
 // A muted caption in a fixed column, so the values beside it line up.
 static void caption(Ui ui, String text) {
-  ui.box (width: CUI_PX(64)) ui.muted(text);
+  ui.box (width: 64) ui.muted(text);
 }
 
 static void scene_inline_edit(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL) {
-    ui.inline_edit("title", title, font: CUI_FONT_DISPLAY, size: 26);
-    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
+  ui.column (gap: 10, width: fill) {
+    ui.inline_edit("title", title, font: display, size: 26);
+    ui.row (gap: 12, align: center) {
       caption(ui, "Owner");
       ui.inline_edit("owner", owner);
     }
-    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
+    ui.row (gap: 12, align: center) {
       caption(ui, "Due");
       ui.inline_edit("due", due);
     }
@@ -143,15 +143,15 @@ static void scene_scrub(Ui ui) {
     ui.scrub("Radius", radius, 0, 48, step: 0.5f, format: "%.1f",
                                       suffix: "px");
     ui.scrub("Blur", blur, 0, 80, suffix: "px",
-                                  width: CUI_PX(140));
+                                  width: 140);
   }
   ui.text("Drag sideways to change a value, or click to type one.",
-          color: CUI_COLOR_TEXT_MUTED);
+          color: text_muted);
 }
 
 static void scene_money_input(Ui ui) {
   static double budget = 1249.5, rate = 86;
-  ui.column (gap: 12, width: CUI_PX(260)) {
+  ui.column (gap: 12, width: 260) {
     ui.money_input("budget", budget, label: "Monthly budget",
                                      code: "USD",
                                      hint: "Billed on the first");
@@ -164,12 +164,12 @@ static void scene_shortcut_recorder(Ui ui) {
   static cui_key_combo palette = { CUI_MOD_CTRL | CUI_MOD_SHIFT, CUI_KEY_P };
   static cui_key_combo search = { 0, CUI_KEY_NONE };
   ui.column (gap: 10) {
-    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
-      ui.box (width: CUI_PX(140)) ui.label("Command palette");
+    ui.row (gap: 12, align: center) {
+      ui.box (width: 140) ui.label("Command palette");
       ui.shortcut_recorder("palette", palette);
     }
-    ui.row (gap: 12, align: CUI_ALIGN_CENTER) {
-      ui.box (width: CUI_PX(140)) ui.label("Search files");
+    ui.row (gap: 12, align: center) {
+      ui.box (width: 140) ui.label("Search files");
       ui.shortcut_recorder("search", search,
                            placeholder: "Record shortcut");
     }
@@ -178,7 +178,7 @@ static void scene_shortcut_recorder(Ui ui) {
 
 static void scene_menu_bar(Ui ui) {
   static bool sidebar = true, minimap = false, wrap = true;
-  ui.card (width: CUI_FILL, pad: 0, gap: 0) {
+  ui.card (width: fill, pad: 0, gap: 0) {
     ui.menu_bar ("menubar") {
       ui.menu_bar_menu ("File") {
         ui.menu_item("New file", shortcut: "Ctrl N");
@@ -203,79 +203,79 @@ static void scene_menu_bar(Ui ui) {
         ui.menu_item("Release notes");
       }
     }
-    ui.box (pad: 16, width: CUI_FILL)
+    ui.box (pad: 16, width: fill)
       ui.text("Click a menu to open it. Alt or F10 focuses the bar, and "
               "the arrows move between menus.",
-              color: CUI_COLOR_TEXT_MUTED);
+              color: text_muted);
   }
 }
 
 static void scene_toolbar(Ui ui) {
   static bool bold = true, italic = false, underline = false, list = true;
-  ui.card (width: CUI_FILL, pad: 0, gap: 0) {
+  ui.card (width: fill, pad: 0, gap: 0) {
     ui.toolbar ("tools") {
-      ui.toolbar_button(CUI_ICON_PLUS, tooltip: "New file",
+      ui.toolbar_button(plus, tooltip: "New file",
                                        shortcut: "Ctrl N");
-      ui.toolbar_button(CUI_ICON_FOLDER_OPEN, tooltip: "Open");
-      ui.toolbar_button(CUI_ICON_SAVE, tooltip: "Save",
+      ui.toolbar_button(folder_open, tooltip: "Open");
+      ui.toolbar_button(save, tooltip: "Save",
                                        shortcut: "Ctrl S");
       ui.toolbar_separator();
-      ui.toolbar_button(CUI_ICON_UNDO_2, tooltip: "Undo");
-      ui.toolbar_button(CUI_ICON_REDO_2, tooltip: "Redo",
+      ui.toolbar_button(undo_2, tooltip: "Undo");
+      ui.toolbar_button(redo_2, tooltip: "Redo",
                                          disabled: true);
       ui.toolbar_separator();
-      // .toggle is a bool pointer inside an options record.
+      // `toggle:` takes a bool pointer. These icons keep their full names
+      // because the toggles they flip have the same short names.
       ui.toolbar_button(CUI_ICON_BOLD, tooltip: "Bold", toggle: &bold);
-      ui.toolbar_button(CUI_ICON_ITALIC, tooltip: "Italic",
-                                         toggle: &italic);
+      ui.toolbar_button(CUI_ICON_ITALIC, tooltip: "Italic", toggle: &italic);
       ui.toolbar_button(CUI_ICON_UNDERLINE, tooltip: "Underline",
-                                            toggle: &underline);
+                        toggle: &underline);
       ui.toolbar_button(CUI_ICON_LIST, tooltip: "Bulleted list",
-                                       toggle: &list);
+                        toggle: &list);
       ui.toolbar_spacer();
-      ui.toolbar_button(CUI_ICON_PLAY, label: "Preview");
-      ui.toolbar_button(CUI_ICON_SHARE_2, label: "Share");
+      ui.toolbar_button(play, label: "Preview");
+      ui.toolbar_button(share_2, label: "Share");
     }
-    ui.box (pad: 16, width: CUI_FILL)
+    ui.box (pad: 16, width: fill)
       ui.text("Bold and the bulleted list are on. Items that do not fit "
               "collapse into a menu at the end.",
-              color: CUI_COLOR_TEXT_MUTED);
+              color: text_muted);
   }
 }
 
 static void scene_status_bar(Ui ui) {
   static int spaces = 4;
-  ui.card (width: CUI_FILL, pad: 0, gap: 0) {
-    ui.box (pad: 16, width: CUI_FILL, height: CUI_PX(120))
+  ui.card (width: fill, pad: 0, gap: 0) {
+    ui.box (pad: 16, width: fill, height: 120)
       ui.text("The status bar runs along the bottom of a window.",
-              color: CUI_COLOR_TEXT_MUTED);
+              color: text_muted);
     // The bar has no fill of its own; this box gives it one.
-    ui.box (width: CUI_FILL, bg: CUI_COLOR_SURFACE_MUTED)
+    ui.box (width: fill, bg: surface_muted)
     ui.status_bar ("status") {
-      ui.status_bar_item("main", icon: CUI_ICON_GIT_BRANCH,
+      ui.status_bar_item("main", icon: git_branch,
                                  tooltip: "Switch branch");
-      ui.status_bar_text("Saved", icon: CUI_ICON_CHECK,
-                                  tone: CUI_TONE_SUCCESS);
+      ui.status_bar_text("Saved", icon: check,
+                                  tone: success);
       ui.status_bar_progress(0.62f, label: "Indexing 62%");
       ui.status_bar_spacer();
       ui.status_bar_item("Ln 48, Col 17###pos", tooltip: "Go to line");
       if (ui.status_bar_item(%"Spaces: $(spaces)###spaces"))
         spaces = spaces == 4 ? 2 : 4;
       ui.status_bar_item("UTF-8");
-      ui.status_bar_item(NULL, icon: CUI_ICON_BELL,
+      ui.status_bar_item(NULL, icon: bell,
                                tooltip: "Notifications");
     }
   }
 }
 
-// Calls begin and end directly, with no block.
+// The block form of the inspector, as a program writes it.
 static void scene_inspector_begin(Ui ui) {
   static bool output_open = true;
   static int width = 1920, height = 1080, samples = 64;
   static bool denoise = true, cast = true;
-  ui.card (width: CUI_FILL, max_width: 460, pad_x: 16,
+  ui.card (width: fill, max_width: 460, pad_x: 16,
            pad_y: 6, gap: 0) {
-    if (ui.inspector_begin("render", {})) {
+    ui.inspector ("render") {
       if (ui.inspector_group("Output", output_open)) {
         ui.prop_int("Width", width, min: 16, max: 8192,
                                     suffix: "px");
@@ -286,7 +286,6 @@ static void scene_inspector_begin(Ui ui) {
         ui.prop_bool("Cast shadows", cast, checkbox: true);
         ui.prop_text("Path", output_path);
       }
-      ui.inspector_end();
     }
   }
 }
@@ -297,7 +296,7 @@ static void scene_inspector(Ui ui) {
   static cui_color base = { 0xC2, 0x6A, 0x3D, 255 };
   static int shader = 0;
   static bool double_sided = false;
-  ui.card (width: CUI_FILL, max_width: 460, pad_x: 16,
+  ui.card (width: fill, max_width: 460, pad_x: 16,
            pad_y: 6, gap: 0)
   ui.inspector ("props") {
     if (ui.inspector_group("Material", material_open)) {
@@ -319,7 +318,7 @@ static void scene_log_view(Ui ui) {
 }
 
 static void scene_schedule_picker(Ui ui) {
-  ui.column (gap: 10, width: CUI_FILL, max_width: 560)
+  ui.column (gap: 10, width: fill, max_width: 560)
     ui.schedule_picker("backup", cron, now: 1794211200, utc: true,
                                        next_count: 3);
 }
@@ -331,7 +330,7 @@ static void scene_regex_tester(Ui ui) {
 static void scene_request_bar(Ui ui) {
   static int method = CUI_HTTP_POST;
   static bool sending = false;
-  ui.column (gap: 12, width: CUI_FILL) {
+  ui.column (gap: 12, width: fill) {
     cui_request_bar_result result =
       ui.request_bar("request", method, url, loading: sending);
     if (result.send) sending = true;

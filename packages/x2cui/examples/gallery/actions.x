@@ -25,10 +25,10 @@ void page_actions(Ui ui, Gallery g) {
     static const char *icons[] = { CUI_ICON_FILE_TEXT, CUI_ICON_SEND,
                                    CUI_ICON_CLOCK };
     int r = ui.split_button("Save", items, item_icons: icons,
-                                           icon: CUI_ICON_SAVE);
+                                           icon: save);
     if (r >= 0) split_choice = r;
-    ui.split_button("Export", items, variant: CUI_BUTTON_OUTLINE,
-                                     icon: CUI_ICON_DOWNLOAD);
+    ui.split_button("Export", items, variant: outline,
+                                     icon: download);
     if (split_choice >= 0) {
       String choice = split_choice == 0 ? "Saved" : items[split_choice - 1];
       ui.muted(choice);
@@ -53,10 +53,10 @@ void page_actions(Ui ui, Gallery g) {
           "Confirm before destroying, and show the result of work in "
           "place.");
   ui.row (gap: 12, wrap: true) {
-    if (ui.confirm_button("Delete project", icon: CUI_ICON_TRASH_2))
+    if (ui.confirm_button("Delete project", icon: trash_2))
       deleted++;
     if (ui.status_button("Save changes", save_status,
-          icon: CUI_ICON_SAVE, success_label: "Saved")) {
+          icon: save, success_label: "Saved")) {
       save_status = CUI_STATUS_BUSY;
       status_at = ui.time();
     }
@@ -73,7 +73,7 @@ void page_actions(Ui ui, Gallery g) {
 
   section(ui, "Reactions", "Counts roll when they change.");
   // The page ignores the result, so the method stands in for the macro.
-  ui.reactions("reactions", reactions, $cui.count(reactions));
+  ui.reactions("reactions", reactions);
 
   section(ui, "Theme",
           "A compact switcher and a single toggle that morphs between sun "
@@ -84,16 +84,16 @@ void page_actions(Ui ui, Gallery g) {
   }
 
   section(ui, "User menu", "Account trigger for sidebars and headers.");
-  ui.box (width: CUI_PX(260))
+  ui.box (width: 260)
   ui.user_menu ("Maya Okafor",
       detail: "maya@fieldwork.studio", status: "online",
-      placement: CUI_PLACE_BOTTOM_START) {
-    ui.menu_item("Profile", icon: CUI_ICON_USER, shortcut: "Ctrl P");
-    ui.menu_item("Billing", icon: CUI_ICON_CREDIT_CARD);
-    ui.menu_item("Settings", icon: CUI_ICON_SETTINGS,
+      placement: bottom_start) {
+    ui.menu_item("Profile", icon: user, shortcut: "Ctrl P");
+    ui.menu_item("Billing", icon: credit_card);
+    ui.menu_item("Settings", icon: settings,
                              shortcut: "Ctrl ,");
     ui.menu_separator();
-    ui.menu_item("Log out", icon: CUI_ICON_LOG_OUT);
+    ui.menu_item("Log out", icon: log_out);
   }
 
   section(ui, "Swipe actions",
@@ -107,29 +107,28 @@ void page_actions(Ui ui, Gallery g) {
     List titles = %("Review the design tokens"
                     "Reply to Jonas about the release"
                     "Book the offsite venue");
-    for (int i = 0; i < titles.len(); i++) $cui.id_index(ui, i) {
-      String title = titles[i];
-      ui.swipe_item_begin("row", left, $cui.count(left), right,
-                          $cui.count(right));
-      ui.icon(CUI_ICON_CIRCLE, 16, CUI_COLOR_TEXT_MUTED);
-      ui.text(title, width: CUI_FILL, nowrap: true);
-      ui.text("Today", size: 12, color: CUI_COLOR_TEXT_MUTED);
-      int a = ui.swipe_item_end();
-      if (a >= 0)
-        ui.toast(a == 0 ? "Marked as done" : a == 100 ? "Archived"
-                                                      : "Deleted",
-                 tone: a == 101 ? CUI_TONE_DANGER : CUI_TONE_SUCCESS);
+    ui.each (String title in titles) {
+      int action;
+      ui.swipe_item (action, "row", left, right) {
+        ui.icon(circle, 16, text_muted);
+        ui.text(title, width: fill, nowrap: true);
+        ui.text("Today", size: 12, color: text_muted);
+      }
+      if (action >= 0)
+        ui.toast(action == 0 ? "Marked as done"
+                 : action == 100 ? "Archived" : "Deleted",
+                 tone: action == 101 ? danger : success);
     }
   }
 
   section(ui, "Speed dial",
           "A floating action button that fans out related actions.");
-  ui.row (gap: 16, align: CUI_ALIGN_CENTER,
-          height: CUI_PX(80)) {
+  ui.row (gap: 16, align: center,
+          height: 80) {
     static const cui_speed_action acts[] = {
       { CUI_ICON_FILE_TEXT, "New note" }, { CUI_ICON_IMAGE, "Upload image" },
       { CUI_ICON_MIC, "Record memo" } };
-    int c = ui.speed_dial("dial", acts, $cui.count(acts),
+    int c = ui.speed_dial("dial", acts,
                           tooltip: "Create");
     if (c >= 0) dial_choice = c;
     if (dial_choice >= 0) ui.muted(acts[dial_choice].label);

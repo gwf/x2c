@@ -5,7 +5,7 @@
 #include "state.x"
 
 void page_selection(Ui ui, Gallery g) {
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.column (gap: 12) {
       section(ui, "Checkbox", NULL);
@@ -49,7 +49,7 @@ void page_selection(Ui ui, Gallery g) {
         CUI_ICON_LAYERS, NULL },
     };
     // The page ignores the result, so the method stands in for the macro.
-    ui.radio_cards("places", places, $cui.count(places), g.plan_card);
+    ui.radio_cards("places", places, g.plan_card);
   }
   section(ui, "Sliders",
           "Drag past either end: the track stretches like rubber.");

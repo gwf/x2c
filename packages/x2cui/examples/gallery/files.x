@@ -85,12 +85,12 @@ void page_files(Ui ui, Gallery g) {
   section(ui, "File browser", "Double-click to open; type to jump; "
                               "Backspace goes up.");
   cui_file_browser_result r = ui.file_browser("files", folder,
-    list: files_list, height: CUI_PX(380));
+    list: files_list, height: 380);
   if (r.picked) chosen.set(r.picked);
-  ui.row (gap: 8, align: CUI_ALIGN_CENTER, wrap: true) {
-    if (ui.button("Open\xe2\x80\xa6", icon: CUI_ICON_FOLDER_OPEN))
+  ui.row (gap: 8, align: center, wrap: true) {
+    if (ui.button("Open\xe2\x80\xa6", icon: folder_open))
       open_dlg = true;
-    if (ui.button("Save as\xe2\x80\xa6", icon: CUI_ICON_DOWNLOAD))
+    if (ui.button("Save as\xe2\x80\xa6", icon: download))
       save_dlg = true;
     if (!chosen.empty()) ui.muted(chosen.text());
   }

@@ -34,7 +34,7 @@ static int kb_cols[4][8] = { { 1, 2, 3 }, { 4, 5 }, { 6 }, { 7, 8 } };
 static int kb_len[4] = { 3, 2, 1, 2 };
 
 static kb_card *kb_find(int id) {
-  for (int k = 0; k < $cui.count(kb_cards); k++)
+  for (int k = 0; k < (int) (sizeof kb_cards / sizeof *kb_cards); k++)
     if (kb_cards[k].id == id) return &kb_cards[k];
   return NULL;
 }
@@ -62,45 +62,41 @@ void page_planning(Ui ui, Gallery g) {
                                         0x22c55e };
   section(ui, "Kanban", "Drag cards within and between columns. Columns can "
                         "carry a work-in-progress limit.");
-  ui.kanban_begin("board");
+  bool moved, added, clicked;
+  cui_kanban_move mv;
+  ui.kanban (moved, mv, "board")
   for (int c = 0; c < 4; c++) {
     String col_name = col_names[c];
-    if (ui.kanban_column_begin(col_name, kb_len[c], {
-          .dot = CUI_RGB(col_dots[c]), .limit = c == 1 ? 3 : 0,
-          .width = 264 }))
-      ui.toast("New card", description: col_name);
-    for (int k = 0; k < kb_len[c]; k++) {
-      kb_card *cd = kb_find(kb_cols[c][k]);
-      if (!cd) continue;
-      if (ui.kanban_card_begin(cd.id)) ui.toast(cd.title);
-      ui.badge(cd.tag, tone: cd.tone, size: CUI_SIZE_SM);
-      ui.text(cd.title, font: CUI_FONT_MEDIUM, size: 13.5f,
-                        line_height: 1.35f);
-      if (cd.progress > 0 && cd.progress < 1)
-        ui.progress(cd.progress, height: 4);
-      ui.row (gap: 10, align: CUI_ALIGN_CENTER,
-              width: CUI_FILL) {
-        ui.avatar(cd.who, size: 22);
-        ui.spacer();
-        if (cd.files) {
-          ui.icon(CUI_ICON_PAPERCLIP, 12, CUI_COLOR_TEXT_MUTED);
-          ui.text(%"$(cd.files)", size: 12,
-                                  color: CUI_COLOR_TEXT_MUTED);
+    ui.kanban_column (added, col_name, kb_len[c], dot: CUI_RGB(col_dots[c]),
+                      limit: c == 1 ? 3 : 0, width: 264) {
+      if (added) ui.toast("New card", description: col_name);
+      for (int k = 0; k < kb_len[c]; k++) {
+        kb_card *cd = kb_find(kb_cols[c][k]);
+        if (!cd) continue;
+        ui.kanban_card (clicked, cd.id) {
+          if (clicked) ui.toast(cd.title);
+          ui.badge(cd.tag, tone: cd.tone, size: sm);
+          ui.text(cd.title, font: medium, size: 13.5f, line_height: 1.35f);
+          if (cd.progress > 0 && cd.progress < 1)
+            ui.progress(cd.progress, height: 4);
+          ui.row (gap: 10, align: center, width: fill) {
+            ui.avatar(cd.who, size: 22);
+            ui.spacer();
+            if (cd.files) {
+              ui.icon(paperclip, 12, text_muted);
+              ui.text(%"$(cd.files)", size: 12, color: text_muted);
+            }
+            if (cd.comments) {
+              ui.icon(message_square, 12, text_muted);
+              ui.text(%"$(cd.comments)", size: 12, color: text_muted);
+            }
+            if (cd.progress >= 1) ui.icon(circle_check, 14, success);
+          }
         }
-        if (cd.comments) {
-          ui.icon(CUI_ICON_MESSAGE_SQUARE, 12, CUI_COLOR_TEXT_MUTED);
-          ui.text(%"$(cd.comments)", size: 12,
-                                     color: CUI_COLOR_TEXT_MUTED);
-        }
-        if (cd.progress >= 1)
-          ui.icon(CUI_ICON_CIRCLE_CHECK, 14, CUI_COLOR_SUCCESS);
       }
-      ui.kanban_card_end();
     }
-    ui.kanban_column_end();
   }
-  cui_kanban_move mv;
-  if (ui.kanban_end(mv)) kb_apply(&mv);
+  if (moved) kb_apply(&mv);
 
   section(ui, "Week calendar", "Drag events to move them in 15 minute "
                                "steps, or pull the bottom edge to resize.");
@@ -121,8 +117,8 @@ void page_planning(Ui ui, Gallery g) {
   int td = cui_date_to_days(today);
   int monday = td - ((td + 3) % 7 + 7) % 7;
   int ev = ui.week_calendar(
-    "week", cui_date_from_days(monday), events, $cui.count(events),
-    start_hour: 8, end_hour: 19, height: CUI_PX(420));
+    "week", cui_date_from_days(monday), events,
+    start_hour: 8, end_hour: 19, height: 420);
   if (ev >= 0)
     ui.toast(events[ev].title, description: events[ev].detail);
 
@@ -141,7 +137,7 @@ void page_planning(Ui ui, Gallery g) {
       false },
   };
   cui_date origin = cui_date_from_days(monday - 7);
-  int tk = ui.gantt("plan", tasks, $cui.count(tasks), origin, 42,
+  int tk = ui.gantt("plan", tasks, origin, 42,
                     today: 7 + (td - monday));
   if (tk >= 0) {
     int days = tasks[tk].end - tasks[tk].start;
@@ -168,7 +164,7 @@ void page_planning(Ui ui, Gallery g) {
       9.0f + (float) (k % 8), span || k == 4, (cui_tone) (1 + k % 8) };
   }
   cui_month_result mr = ui.month_calendar(
-    "month", month, mev, $cui.count(mev), selected: &picked);
+    "month", month, mev, selected: &picked);
   if (mr.event >= 0)
     ui.toast(mev[mr.event].title,
       description: "Opened from the month calendar");

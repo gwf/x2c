@@ -56,7 +56,10 @@ Gary decided these on 2026-11-10:
 - Wrap CUI; do not rewrite it in x2c. The rewrite study estimated a 5 to 20
   percent line reduction and the loss of CUI's native Windows build, its
   small binary, and its C distribution.
-- Containers use the qualified `$cui.` macro form. The package declares no
+- Containers use the qualified `$cui.` macro form. *Superseded on
+  2026-11-11*: method forms replaced the `$cui.` decorators, which are
+  deleted; see [x2cui lists and tables](x2cui-lists-and-tables.md). The
+  package declares no
   `keyword` aliases.
 - Labels are ordinary Strings in the process pool. No per-frame pool.
 - No Lisp surface in this plan.
@@ -1016,18 +1019,9 @@ Verified by the orchestrator at `7a7129f20`:
 - The gallery and `index.html?stress` ran in a Chromium-based browser
   pane with no console errors.
 
-The package's own programs use the method forms: the gallery, scenes,
-stress example, tests, and README samples write blocks as
-`ui.row (gap: 8) { ... }` and tables and the data grid with a Map literal
-of columns. The `$cui.*` decorators remain in the package source beside
-the method forms. The remaining uses in its programs are:
-
-- `$cui.id_index`, `$cui.id_scope`, and `$cui.disabled_scope`, which are
-  not CUI block macros and have no method form;
-- one test that draws inside `$cui.column`, `$cui.row`, and `$cui.box`, and
-  two that draw with `$cui.table` and `$cui.data_grid`, to show that the
-  earlier decorators still draw what the method forms draw;
-- the README's statements of the earlier spellings.
+The package has one way to write each component, its method form; the
+`$cui.*` decorators are deleted. See
+[One paradigm](x2cui-lists-and-tables.md#one-paradigm-2026-11-11).
 
 All 229 images of the gallery, scenes, stress example, and to-do example
 stay byte-identical to `origin/x2cui` at `b393dd58c`.
@@ -1035,3 +1029,23 @@ stay byte-identical to `origin/x2cui` at `b393dd58c`.
 Not verified: Safari, Firefox, Linux, pasting, input method editors,
 touch, and the interactive native window beyond `make run-interactive`
 checked by hand.
+
+Review fixes (2026-11-11):
+
+- `x2cui_strings` keeps one native array for each distinct List in a
+  `Map` keyed by the List. A Map lookup of an existing List allocates
+  nothing: 0 bytes more in the default malloc zone after 100,000 lookups,
+  measured with `malloc_zone_statistics`. An empty List returns one
+  shared array and allocates nothing; a test checks 100,000 such
+  conversions. `stress --frames 300 components` takes 1.15 to 1.39 ms a
+  frame before and 1.18 to 1.24 ms after, three alternating runs each.
+- The table is shared by the process and not locked, so the README now
+  says to draw on one thread, rather than adding a lock.
+- The Makefile links `-lX11 -ldl -lm -lpthread` on Linux and the Cocoa
+  frameworks on macOS. The Linux build was not run.
+- `ui.item` rows are not keyboard-focusable. CUI's `cui_canvas` interacts
+  with `CUI_IF_DRAG` only, and its public API has no way to make an id
+  focusable or to read Enter or Space activation for it. Doing it needs a
+  CUI patch, such as a canvas variant that takes interaction flags and
+  reports keyboard activation; not done.
+

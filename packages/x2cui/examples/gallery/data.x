@@ -4,85 +4,94 @@
 
 #include "state.x"
 
-typedef struct person_row {
-  String name, email, role, status;
-  cui_tone status_tone;
-  String amount;
-} person_row;
+class Person {
+  int index;             // the person's place in `people`
+  String name, email, role, status, amount;
+  cui_tone tone;
+} *;
 
-// The text of a row that the table sorts by in `column`.
-static String sort_key(person_row *row, int column) =>
-  column == 0 ? row.name : column == 2 ? row.role : row.status;
+// A row is: name, email, role, status, revenue, and the status's tone.
+void Person.init(Person p, int index, List row) {
+  p.index = index;
+  p.name = row[0];
+  p.email = row[1];
+  p.role = row[2];
+  p.status = row[3];
+  p.amount = row[4];
+  p.tone = (int) row[5];
+}
+
+// The text the table sorts by in `column`.
+String Person.sort_key(Person p, int column) =>
+  column == 0 ? p.name : column == 2 ? p.role : p.status;
+
+static List people;
+
+/* The people in the table's order: sorted by the clicked column, with
+   rows that tie keeping their order in either direction. */
+static List sorted_people(cui_table_sort sort) {
+  Func key = %!(Person p) => p.sort_key(sort.column);
+  return sort.descending ? people.reverse().sort_by(key).reverse()
+                         : people.sort_by(key);
+}
 
 void page_data(Ui ui, Gallery g) {
   section(ui, "Table", "Sortable columns, row selection and components in "
                        "cells.");
-  static person_row rows[] = {
-    { "Jonas Berg", "jonas@northlight.io", "Owner", "Active",
-      CUI_TONE_SUCCESS, "$12,384" },
-    { "Priya Nair", "priya@harbor.dev", "Admin", "Active",
-      CUI_TONE_SUCCESS, "$9,846" },
-    { "Tomas Rivera", "tomas@kiln.app", "Editor", "Invited",
-      CUI_TONE_WARNING, "$7,215" },
-    { "Lena Fischer", "lena@fischer.dev", "Viewer", "Active",
-      CUI_TONE_SUCCESS, "$3,127" },
-    { "Aiko Tanaka", "aiko@tanaka.design", "Editor", "Suspended",
-      CUI_TONE_DANGER, "$1,962" },
-  };
-  int order[5] = { 0, 1, 2, 3, 4 };
-  for (int i = 1; i < 5; i++) {
-    int v = order[i], j = i - 1;
-    while (j >= 0) {
-      int c = String.compare(sort_key(&rows[order[j]], g.sort.column),
-                             sort_key(&rows[v], g.sort.column));
-      if (g.sort.descending ? c < 0 : c > 0) {
-        order[j + 1] = order[j];
-        j--;
-      }
-      else break;
-    }
-    order[j + 1] = v;
+  if (!people) {
+    List rows = %(
+      ("Jonas Berg" "jonas@northlight.io" "Owner" "Active" "\$12,384"
+       $(CUI_TONE_SUCCESS))
+      ("Priya Nair" "priya@harbor.dev" "Admin" "Active" "\$9,846"
+       $(CUI_TONE_SUCCESS))
+      ("Tomas Rivera" "tomas@kiln.app" "Editor" "Invited" "\$7,215"
+       $(CUI_TONE_WARNING))
+      ("Lena Fischer" "lena@fischer.dev" "Viewer" "Active" "\$3,127"
+       $(CUI_TONE_SUCCESS))
+      ("Aiko Tanaka" "aiko@tanaka.design" "Editor" "Suspended" "\$1,962"
+       $(CUI_TONE_DANGER)));
+    Array all = [];
+    foreach (List row in rows) all.push(Person.new(all.len(), row));
+    people = all;
   }
   ui.table ("people", sort: &g.sort, selectable: true,
             columns: {"Name": fill, "Email": unsorted(grow(1.2)),
                       "Role": 110, "Status": 120,
-                      "Revenue": right(unsorted(110))}) {
-    for (int k = 0; k < 5; k++) {
-      person_row *r = &rows[order[k]];
-      if (ui.table_row(g.selected_row == order[k])) g.selected_row = order[k];
-      ui.table_cell();
-      ui.avatar(r.name, size: 26);
-      ui.text(r.name, font: CUI_FONT_MEDIUM, nowrap: true);
-      ui.table_cell();
-      ui.text(r.email, color: CUI_COLOR_TEXT_SECONDARY, nowrap: true);
-      ui.table_cell_text(r.role);
-      ui.table_cell();
-      ui.badge(r.status, tone: r.status_tone, dot: true);
-      ui.table_cell_text(r.amount);
+                      "Revenue": right(unsorted(110))})
+  ui.each (Person p in sorted_people(g.sort), key: p.index)
+  ui.table_row (row, selected: g.selected_row == p.index) {
+    if (row.clicked) g.selected_row = p.index;
+    ui.cell () {
+      ui.avatar(p.name, size: 26);
+      ui.text(p.name, font: medium, nowrap: true);
     }
+    ui.cell () ui.text(p.email, color: text_secondary, nowrap: true);
+    ui.cell_text(p.role);
+    ui.cell () ui.badge(p.status, tone: p.tone, dot: true);
+    ui.cell_text(p.amount);
   }
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.column (gap: 12) {
       section(ui, "Tree view", NULL);
       ui.card (pad: 10, gap: 1)
       ui.tree ("src", g.tree_src) {
-        // A leaf has no open state, so it passes NULL for the flag.
+        // A leaf has no open state, so it passes NULL for the flag, and
+        // never opens, so its block is empty.
         ui.tree ("components", g.tree_ui) {
           int i = 0;
           foreach (String file in %("button.c" "dialog.c" "slider.c"
                                     "table.c")) {
-            ui.tree_begin(file, NULL, {
-              .leaf = true, .selected = g.selected_file == i });
+            ui.tree (file, NULL, leaf: true,
+                     selected: g.selected_file == i) {}
             if (ui.tree_clicked()) g.selected_file = i;
             i++;
           }
         }
         ui.tree ("assets", g.tree_assets) {
-          ui.tree_begin("logo.png", NULL, {
-            .leaf = true, .icon = CUI_ICON_IMAGE });
+          ui.tree ("logo.png", NULL, leaf: true, icon: image) {}
         }
-        ui.tree_begin("main.c", NULL, { .leaf = true });
+        ui.tree ("main.c", NULL, leaf: true) {}
       }
     }
     ui.column (gap: 12) {
@@ -103,7 +112,7 @@ void page_data(Ui ui, Gallery g) {
   section(ui, "Reorderable list", "Drag a row. The others make room as you "
                                   "go.");
   // The rows carry their own edges: no card around them.
-  ui.column (width: CUI_FILL) {
+  ui.column (width: fill) {
     List tasks = %("Write the release notes" "Record the demo video"
                    "Update the screenshots" "Tag version 1.0"
                    "Post the announcement");
@@ -112,16 +121,17 @@ void page_data(Ui ui, Gallery g) {
       CUI_TONE_INFO, CUI_TONE_NEUTRAL, CUI_TONE_INFO, CUI_TONE_WARNING,
       CUI_TONE_TEAL };
     List labels = %("Docs" "Video" "Docs" "Release" "Blog");
-    ui.reorder_begin("tasks", g.task_order);
+    bool changed;
+    ui.reorder (changed, "tasks", g.task_order)
     for (int i = 0; i < 5; i++) {
       ui.reorder_item (i) {
         int t = g.task_order[i];
         String task = tasks[t], label = labels[t];
-        ui.text(task, nowrap: true, width: CUI_FILL);
+        ui.text(task, nowrap: true, width: fill);
         ui.badge(label, tone: tones[t]);
       }
     }
-    if (ui.reorder_end()) ui.toast("Order saved");
+    if (changed) ui.toast("Order saved");
   }
   section(ui, "Accordion", NULL);
   ui.card (pad_y: 4, gap: 0) {
@@ -141,20 +151,20 @@ void page_data(Ui ui, Gallery g) {
                               "built.");
   ui.card (pad: 6) {
     int first = 0, last = 0;
-    ui.virtual_list ("big", 10000, 36, CUI_PX(220), first, last) {
+    ui.virtual_list ("big", 10000, 36, 220, first, last) {
       for (int i = first; i < last; i++) {
         unsigned h = (unsigned) (i + 1) * 2654435761u;
         String invoice = String.format("Invoice 2026-%05d", 10000 - i);
         String amount = String.format("$%u.%02u", 40 + (h >> 8) % 2400,
                                       (h >> 4) % 100);
-        ui.row (height: CUI_PX(36), pad_x: 12, gap: 12) {
-          ui.icon(CUI_ICON_FILE_TEXT, 16, CUI_COLOR_TEXT_MUTED);
-          ui.text(invoice, nowrap: true, width: CUI_FILL,
+        ui.row (height: 36, pad_x: 12, gap: 12) {
+          ui.icon(file_text, 16, text_muted);
+          ui.text(invoice, nowrap: true, width: fill,
                            tabular: true);
           ui.text(amount, size: 13, tabular: true, nowrap: true);
           ui.text((h >> 20) % 5 == 0 ? "Due" : "Paid",
-            size: 12, color: CUI_COLOR_TEXT_MUTED, nowrap: true,
-            width: CUI_PX(32));
+            size: 12, color: text_muted, nowrap: true,
+            width: 32);
         }
       }
     }

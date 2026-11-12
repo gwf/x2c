@@ -18,7 +18,7 @@ void page_navigation(Ui ui, Gallery g) {
     static const char *tab_icons[] = { CUI_ICON_USER, CUI_ICON_LOCK,
                                        CUI_ICON_CREDIT_CARD };
     ui.tabs("tabs2", %("Account" "Password" "Billing"), g.tab2,
-            variant: CUI_TABS_PILL, icons: tab_icons);
+            variant: pill, icons: tab_icons);
   }
   section(ui, "Breadcrumb and pagination", NULL);
   ui.card (gap: 18) {
@@ -36,10 +36,10 @@ void page_navigation(Ui ui, Gallery g) {
     ui.row (gap: 8, wrap: true) {
       if (ui.button("Back", disabled: g.step == 0)) g.step--;
       if (ui.button(g.step >= 3 ? "Finish" : "Next",
-            variant: CUI_BUTTON_PRIMARY,
-            icon_right: CUI_ICON_ARROW_RIGHT)) {
+            variant: primary,
+            icon_right: arrow_right)) {
         if (g.step < 3) g.step++;
-        else ui.toast("All set", tone: CUI_TONE_SUCCESS);
+        else ui.toast("All set", tone: success);
       }
     }
   }

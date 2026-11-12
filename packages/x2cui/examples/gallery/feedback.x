@@ -12,15 +12,15 @@ void page_feedback(Ui ui, Gallery g) {
       description: "Restart to update to 1.1.");
     ui.alert("Payment received",
       description: "Your invoice was paid on November 5.",
-      tone: CUI_TONE_SUCCESS);
+      tone: success);
     ui.alert("Storage almost full",
       description: "You have used 92% of your plan.",
-      tone: CUI_TONE_WARNING, dismissible: true);
+      tone: warning, dismissible: true);
     ui.alert("Build failed",
       description: "Missing symbol cui_frame in main.c line 42.",
-      tone: CUI_TONE_DANGER);
+      tone: danger);
   }
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.card (gap: 18) {
       ui.heading("Progress", 4);
@@ -37,36 +37,36 @@ void page_feedback(Ui ui, Gallery g) {
     ui.card (gap: 14) {
       ui.heading("Loading", 4);
       ui.row (gap: 12, wrap: true) {
-        ui.skeleton(CUI_PX(40), 40);
-        ui.column (gap: 8, width: CUI_FILL) {
+        ui.skeleton(40, 40);
+        ui.column (gap: 8, width: fill) {
           ui.skeleton(CUI_PCT(70), 12);
           ui.skeleton(CUI_PCT(45), 12);
         }
       }
-      ui.skeleton(CUI_FILL, 88);
+      ui.skeleton(fill, 88);
       ui.skeleton(CUI_PCT(90), 12);
       ui.skeleton(CUI_PCT(60), 12);
     }
   }
-  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+  ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.card (gap: 14) {
       ui.heading("Activity", 4);
       ui.timeline_item("Deployed to production",
         time: "2m ago",
         description: "Release 1.0.3 is live in all regions.",
-        icon: CUI_ICON_ROCKET, tone: CUI_TONE_SUCCESS);
+        icon: rocket, tone: success);
       ui.timeline_item("Review requested",
         time: "1h ago",
         description: "Jonas asked you to review the theming changes.",
-        icon: CUI_ICON_MESSAGE_SQUARE, tone: CUI_TONE_INFO);
+        icon: message_square, tone: info);
       ui.timeline_item("Build failed",
-        time: "3h ago", icon: CUI_ICON_CIRCLE_ALERT,
-        tone: CUI_TONE_DANGER, last: true);
+        time: "3h ago", icon: circle_alert,
+        tone: danger, last: true);
     }
     ui.card (gap: 14) {
       ui.heading("Goals", 4);
-      ui.row (gap: 24, justify: CUI_JUSTIFY_AROUND) {
+      ui.row (gap: 24, justify: around) {
         ui.progress_ring("Onboarding", 0.72f, 104);
         ui.progress_ring("Quota", 0.35f, 104);
       }
@@ -76,12 +76,12 @@ void page_feedback(Ui ui, Gallery g) {
   ui.card (gap: 16) {
     ui.row (gap: 8, wrap: true) {
       ui.badge("Draft");
-      ui.badge("Recommended", tone: CUI_TONE_ACCENT);
-      ui.badge("Active", tone: CUI_TONE_SUCCESS, dot: true);
-      ui.badge("Pending", tone: CUI_TONE_WARNING, dot: true);
-      ui.badge("Overdue", tone: CUI_TONE_DANGER, dot: true);
-      ui.badge("Beta", tone: CUI_TONE_VIOLET);
-      ui.badge("New", tone: CUI_TONE_INFO, solid: true);
+      ui.badge("Recommended", tone: accent);
+      ui.badge("Active", tone: success, dot: true);
+      ui.badge("Pending", tone: warning, dot: true);
+      ui.badge("Overdue", tone: danger, dot: true);
+      ui.badge("Beta", tone: violet);
+      ui.badge("New", tone: info, solid: true);
     }
     ui.row (gap: 16, wrap: true) {
       ui.avatar("Sam Whitfield", size: 40, status: "online");
@@ -94,10 +94,10 @@ void page_feedback(Ui ui, Gallery g) {
   }
   ui.card (pad: 0) {
     if (ui.empty_state("No projects yet",
-          icon: CUI_ICON_FOLDER_OPEN,
+          icon: folder_open,
           description: "A project holds your screens, their builds and "
                          "who can see them.",
           action: "New project"))
-      ui.toast("Project created", tone: CUI_TONE_SUCCESS);
+      ui.toast("Project created", tone: success);
   }
 }

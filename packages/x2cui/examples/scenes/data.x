@@ -2,10 +2,9 @@
 
 /*  data.x -- scenes for charts, tables, and the data grid
 
-    These components read arrays of CUI's records. The arrays are C arrays
-    written with designated initializers, and each `$cui.` macro takes the
-    array itself and supplies its count. The numbers and rows come from x2c
-    collections.
+    These components read arrays of CUI's records. A table and a data grid
+    take their columns as a Map literal, and a chart takes a C array of
+    series alone. The numbers and rows come from x2c collections.
 */
 
 #include "scene.x"
@@ -34,23 +33,23 @@ static void scene_line_chart(Ui ui) {
                           cui_series.of("Cloud spend", cloud_spend) };
   List months = %("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep"
                   "Oct" "Nov" "Dec");
-  ui.card (width: CUI_FILL, max_width: 660)
-    ui.line_chart("revenue", series, $cui.count(series), months,
+  ui.card (width: fill, max_width: 660)
+    ui.line_chart("revenue", series, months,
       area: true, smooth: true, height: 200, format: "$%.0fk");
 }
 
 static void scene_bar_chart(Ui ui) {
   cui_series series[] = { cui_series.of("Desktop", desktop),
                           cui_series.of("Mobile", mobile) };
-  ui.card (width: CUI_FILL, max_width: 520)
-    ui.bar_chart("visits", series, $cui.count(series),
+  ui.card (width: fill, max_width: 520)
+    ui.bar_chart("visits", series,
                  %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), height: 200);
 }
 
 static void scene_table(Ui ui) {
   static cui_table_sort sort = { 0, false };
   static int chosen = 1;
-  ui.box (width: CUI_FILL, max_width: 620)
+  ui.box (width: fill, max_width: 620)
   ui.table ("people", sort: &sort, selectable: true,
             columns: {"Name": fill, "Team": unsorted(110),
                       "Commits": right(unsorted(100)),
@@ -58,15 +57,17 @@ static void scene_table(Ui ui) {
     int index = 0;
     foreach (List person in people) {
       (String name, String team, int commits, double score) = person;
-      if (ui.table_row(index == chosen)) chosen = index;
+      ui.table_row (row, selected: index == chosen) {
+        if (row.clicked) chosen = index;
+        ui.cell () {
+          ui.avatar(name, size: 24);
+          ui.text(name, font: medium, nowrap: true);
+        }
+        ui.cell () ui.badge(team);
+        ui.cell_text(%"$commits");
+        ui.cell_text(String.format("%.1f", score));
+      }
       index++;
-      ui.table_cell();
-      ui.avatar(name, size: 24);
-      ui.text(name, font: CUI_FONT_MEDIUM, nowrap: true);
-      ui.table_cell();
-      ui.badge(team);
-      ui.table_cell_text(%"$commits");
-      ui.table_cell_text(String.format("%.1f", score));
     }
   }
 }
@@ -82,13 +83,13 @@ static void scene_data_grid(Ui ui) {
     for (int row = first; row < last; row++) {
       (String name, String team, int commits, double score) = people[row];
       ui.data_grid_row(row);
-      ui.data_grid_cell();
-      ui.avatar(name, size: 24);
-      ui.text(name, size: 13.5f);
-      ui.data_grid_cell();
-      ui.badge(team);
-      ui.data_grid_cell_text(%"$commits");
-      ui.data_grid_cell_text(String.format("%.1f", score));
+      ui.grid_cell () {
+        ui.avatar(name, size: 24);
+        ui.text(name, size: 13.5f);
+      }
+      ui.grid_cell () ui.badge(team);
+      ui.grid_cell_text(%"$commits");
+      ui.grid_cell_text(String.format("%.1f", score));
     }
   }
 }

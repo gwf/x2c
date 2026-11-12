@@ -7,12 +7,12 @@
 void page_inputs(Ui ui, Gallery g) {
   section(ui, "Text fields", "Labels above, hints and errors below.");
   ui.card (gap: 16) {
-    ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+    ui.box (dir: grid, columns: 2, min_column_width: 260,
             gap: 16) {
       ui.input("name", g.name, label: "Full name",
                                placeholder: "Maya Okafor");
       ui.input("email", g.email, label: "Email",
-                                 icon: CUI_ICON_AT_SIGN,
+                                 icon: at_sign,
                                  hint: "We never share your email.");
       bool short_password =
         !g.password.empty() && g.password.text().len() < 8;
@@ -33,7 +33,7 @@ void page_inputs(Ui ui, Gallery g) {
     ui.column (gap: 8) {
       ui.label("Verification code");
       if (ui.otp_input("otp", g.otp, 6))
-        ui.toast("Code entered", tone: CUI_TONE_SUCCESS);
+        ui.toast("Code entered", tone: success);
     }
     ui.column (gap: 8) {
       ui.input("new-pw", g.password,
@@ -44,7 +44,7 @@ void page_inputs(Ui ui, Gallery g) {
   }
   section(ui, "Pickers", NULL);
   ui.card (gap: 16) {
-    ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+    ui.box (dir: grid, columns: 2, min_column_width: 260,
             gap: 16) {
       ui.select("country", %("Canada" "Denmark" "Germany" "Iran" "Japan"
                              "Kenya" "Netherlands" "Portugal"
@@ -56,7 +56,7 @@ void page_inputs(Ui ui, Gallery g) {
                              placeholder: "Pick a language");
       ui.date_picker("due", g.date, label: "Due date");
       ui.number("qty", g.quantity, 0, 99, label: "Seats",
-                                          width: CUI_FILL);
+                                          width: fill);
     }
     ui.column (gap: 6) {
       ui.label("Brand color");

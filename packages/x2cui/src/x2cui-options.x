@@ -6,7 +6,7 @@
 /*  x2cui-options.x -- `name: value` arguments as CUI option records
 
     A method form such as `ui.button("Add", variant: primary)` calls its
-    method with the arguments `cui_arguments` returns. Each `name: value`
+    method with the arguments `x2cui_arguments` returns. Each `name: value`
     argument becomes the field `name` of the option record the method
     takes last, so a call builds no Map: the generated C holds only a
     designated initializer. A misspelled name is a C error that names the
@@ -25,7 +25,10 @@
         another cui_T                accent is CUI_COLOR_ACCENT for a
                                      cui_color, medium is CUI_FONT_MEDIUM
                                      for a cui_font
-        text                         an icon: plus is CUI_ICON_PLUS
+        an icon                      plus is CUI_ICON_PLUS, in a text
+                                     option named icon, icon_*, or
+                                     *_icon, or a parameter CUI names
+                                     icon
       a number for a cui_size        pixels: 26 is CUI_PX(26)
       grow(w) for a cui_size         CUI_GROW(w)
       test ? a : b                   each arm lowered
@@ -37,38 +40,89 @@
     form, so they are public.
 */
 
+/** Returns how many elements the C array `$array` holds, the count the
+    method forms pass beside an array. A pointer is refused: its type
+    equals the type of a pointer to its first element.
+*/
+macro Expression $x2cui.count(Expr $array) =>
+  ((int) (sizeof($array) / sizeof(($array)[0])) +
+   0 * (int) sizeof(char[1 - 2 * __builtin_types_compatible_p(
+     __typeof__($array), __typeof__(&($array)[0]))]));
+
 /** Returns the arguments of the `Ui` method `method` on `ui`: `args`,
     and `options` as the record of the option parameter that follows them.
+    `pairs` are the positions, among the method's parameters after the
+    receiver, of the arrays whose size is a later parameter: the first
+    `int` or `size_t` after the array, its count or, after a live count
+    passed by reference, its capacity. When `args` leave out every one of
+    those sizes, each is the count of its array.
 */
-meta List cui_arguments(List ui, String method, List options, List @args) {
-  List types = Type.parameters(_signature(ui, method));
-  int count = args.len();
-  Array passed = [];
-  for (int i = 0; i < count; i++)
-    passed.push(cui_value(types[i + 1], args[i]));
-  if (types.len() > count + 1)
-    passed.push(cui_record(types[count + 1], options));
+meta List x2cui_arguments(
+  List ui, String method, List pairs, List options, List @args) {
+  List types = Type.parameters(_signature(ui, method)).cdr();
+  int record = types && x2cui_option_record(types[types.len() - 1]);
+  int ordinary = types.len() - record;
+  int filled = ordinary - args.len() == pairs.len();
+  Array arrays = [], sizes = [], passed = [];
+  if (filled) foreach (List pair in pairs) {
+    int array = _number(pair);
+    arrays.push(array);
+    sizes.push(_size_after(types, array));
+  }
+  // `values` holds the argument at each parameter, NULL at a size.
+  Array values = [];
+  int at = 0;
+  for (int i = 0; i < ordinary; i++) {
+    int k = _position(sizes, i);
+    if (k >= 0) {
+      passed.push(_count(values[(int) arrays[k]]));
+      values.push(NULL);
+      continue;
+    }
+    if (at == args.len()) break;
+    List value = args[at++];
+    values.push(value);
+    Type type = types[i];
+    if (_icon_parameter(method, i)) type = _icon();
+    passed.push(x2cui_value(type, value));
+  }
+  while (at < args.len()) passed.push(args[at++]);
+  if (record) passed.push(x2cui_record(types[ordinary], options));
+  // A row a method has no record for stays, and the call reports it.
+  else foreach (List row in options) passed.push(row);
   return passed.list_free();
 }
 
 /** Returns the call of the `Ui` method `method` on `ui` with the
-    arguments `cui_arguments` returns. A method with a method form is
+    arguments `x2cui_arguments` returns. A method with a method form is
     called from that form's template instead, where the call is the method.
 */
-meta List cui_call(List ui, String method, List options, List @args) {
+meta List x2cui_call(List ui, String method, List options, List @args) {
   List m = x2c_ident(method);
-  List passed = cui_arguments(ui, method, options, @args);
+  List passed = x2cui_arguments(ui, method, %(), options, @args);
   return $!( $ui.$m(@passed) );
+}
+
+/** Tests whether `type` is an option record: CUI names its records
+    `*_opts`, and its layout record `cui_box`; this package names its own
+    `*Options`.
+*/
+meta int x2cui_option_record(Type type) {
+  Var name = type.car();
+  if (name is not <string>) return 0;
+  String spelled = name;
+  return spelled.endswith("_opts") || spelled.endswith("Options") ||
+         spelled == "cui_box";
 }
 
 /** Returns `value`, the value of a field or argument of type `type`, with
     the short names, numbers, and `grow` of the table above lowered.
 */
-meta List cui_value(Type type, List value) {
+meta List x2cui_value(Type type, List value) {
   if (!type) return value;
   match (value) {
     case %(expr ? (op ? ?test ?yes ?no)):
-      return _choice(test, cui_value(type, yes), cui_value(type, no));
+      return _choice(test, x2cui_value(type, yes), x2cui_value(type, no));
     case %(expr () (ident (binding ? ?(String name)))):
       return _short(type, name, value);
     case %(expr () (call (expr () (ident (binding ? "grow"))) (args ?weight))):
@@ -79,34 +133,48 @@ meta List cui_value(Type type, List value) {
 }
 
 /** Returns the designated initializer of the record `record` that sets
-    each `name: value` row of `options`.
+    each `name: value` row of `options`. A field that points to an array
+    and is followed by its count, as `parts` and `part_count` are, gets
+    the count of the array when `options` leave the count out.
 */
-meta List cui_record(Type record, List options) {
+meta List x2cui_record(Type record, List options) {
   List fields = Type.fields(record);
-  List rows = options.map(%!(List row) => _field(fields, row));
-  return $!( ($record){ @rows } );
+  Array rows = [];
+  foreach (List row in options) {
+    rows.push(_field(fields, row));
+    String count = _count_field(fields, _key(row));
+    if (count && !_option(options, count))
+      rows.push(%(dotinit ($count) $(_count(row[2]))));
+  }
+  List initializers = rows.list_free();
+  return $!( ($record){ @initializers } );
 }
 
-/** Returns the call that pushes the id of one pass of `ui.each`: the
-    `key:` row of `options`, a text or an integer, or else `position`.
+/** Returns the call that pushes `key` on the id stack: `cui_push_id` for
+    text and `cui_push_id_int` for anything else.
 */
-meta List cui_push_key(List ui, List position, List options) {
+meta List x2cui_push_id(List ui, List key) =>
+  Type.is_text(Code.type(key)) ? $!( $ui.push_id($key) )
+                               : $!( $ui.push_id_int($key) );
+
+/** Returns the call that pushes the id of one pass of `ui.each`: the
+    `key:` row of `options`, or else `position`.
+*/
+meta List x2cui_push_key(List ui, List position, List options) {
   List key = _option(options, "key");
-  if (!key) return $!( $ui.push_id_int($position) );
-  return Type.is_text(Code.type(key)) ? $!( $ui.push_id($key) )
-                                      : $!( $ui.push_id_int($key) );
+  return x2cui_push_id(ui, key ? key : position);
 }
 
 /** Returns the initializers of an array of the column record `record`,
     such as `cui_table_column`, from the `columns:` row of `options`: a Map
     literal of titles and widths. A width is lowered by the type of the
-    record's `width` field, as `cui_value` lowers it: pixels, `fill`,
+    record's `width` field, as `x2cui_value` lowers it: pixels, `fill`,
     `fit`, or `grow(w)` for a `cui_size`, and a number of points for a
     `float`. `right(w)` and `center(w)` align the column, and
     `unsorted(w)` keeps it from being sorted; every other column is
     sortable.
 */
-meta List cui_columns(String record, List options) {
+meta List x2cui_columns(String record, List options) {
   List width = Type.fields(%($record)).find(%!(List f) => f.car() == "width");
   return _columns(options).map(
     %!(List entry) => _column_of(entry[1], entry[2], width[1], "LEFT", 1));
@@ -116,10 +184,10 @@ meta List cui_columns(String record, List options) {
     record its last parameter takes, built from the rows of `options`
     other than `columns:`.
 */
-meta List cui_options(List ui, String method, List options) {
+meta List x2cui_options(List ui, String method, List options) {
   List types = Type.parameters(_signature(ui, method));
   List rest = options.filter(%!(List row) => _key(row) != "columns");
-  return cui_record(types[types.len() - 1], rest);
+  return x2cui_record(types[types.len() - 1], rest);
 }
 
 // calls
@@ -137,7 +205,61 @@ meta static Type _signature(List ui, String method) {
 meta static List _field(List fields, List row) {
   String name = _key(row);
   List field = fields.find(%!(List f) => f.car() == name);
-  return %(dotinit ($name) $(cui_value(field ? field[1] : NULL, row[2])));
+  Type type = field ? field[1] : NULL;
+  if (type && Type.is_text(type) && _icon_field(name)) type = _icon();
+  return %(dotinit ($name) $(x2cui_value(type, row[2])));
+}
+
+/* The count field that follows the array field `name`: `part_count`
+   after `parts`, `category_count` after `categories`, `spark_count`
+   after `spark`. NULL when `name` is not such an array. */
+meta static String _count_field(List fields, String name) {
+  for (int i = 0; i + 1 < fields.len(); i++) {
+    if (fields[i].car() != name) continue;
+    String count = fields[i + 1].car();
+    if (!count.endswith("_count") || fields[i][1].car() != <*>) return NULL;
+    String stem = count[:count.len() - 6];
+    if (name == stem || name == stem + "s" ||
+        (stem.endswith("y") && name == stem[:stem.len() - 1] + "ies"))
+      return count;
+    return NULL;
+  }
+  return NULL;
+}
+
+// Where `value` is in `items`, or -1.
+meta static int _position(Array items, int value) {
+  for (int i = 0; i < items.len(); i++)
+    if ((int) items[i] == value) return i;
+  return -1;
+}
+
+/* The position of the first `int` or `size_t` parameter after the array
+   at `array`. */
+meta static int _size_after(List types, int array) {
+  for (int i = array + 1; i < types.len(); i++)
+    if (types[i] ~= %(int) || types[i] ~= %("size_t")) return i;
+  return -1;
+}
+
+/* The count of the C array `array`, as `$x2cui.count` gives it. A choice
+   counts the array it chooses, and NULL holds none. */
+meta static List _count(List array) {
+  match (array) {
+    case %(expr ? (op ? ?test ?yes ?no)):
+      return _choice(test, _count(yes), _count(no));
+    case %(expr ? (ident (binding ? "NULL"))): return $!( 0 );
+  }
+  Macro count = $x2cui.count;
+  return Macro_apply(count, %($array));
+}
+
+// The integer a literal holds.
+meta static int _number(List literal) {
+  match (literal) {
+    case %(expr ? (literal ? ?(String digits))): return atoi(digits);
+  }
+  return -1;
 }
 
 // The name of a `name: value` row.
@@ -156,7 +278,7 @@ meta static List _option(List options, String name) {
 
 // columns
 
-// The entries of the Map literal of `columns:`.
+// The `key: value` rows of the Map literal a table is given.
 meta static List _columns(List options) {
   match (_option(options, "columns")) {
     case %(expr ? (map *entries)): return entries;
@@ -177,7 +299,7 @@ meta static List _column_of(
     case %(expr ? (call (expr ? (ident (binding ? "unsorted"))) (args ?w))):
       return _column_of(title, w, size, align, 0);
   }
-  List lowered = cui_value(size, width);
+  List lowered = x2cui_value(size, width);
   List aligned = _free_name(%"CUI_TEXT_$align");
   return $!( { $title, $lowered, $aligned, $sortable } );
 }
@@ -205,10 +327,37 @@ meta static List _short(Type type, String name, List value) {
   return constant ? _free_name(constant) : value;
 }
 
-/* The CUI constant that the short name `name` spells for a `type`. */
+/* The type of a parameter or field that names an icon: a text field
+   named `icon`, `icon_*`, or `*_icon`, or a parameter `_icon_parameters`
+   lists.
+   Other text takes no short names, so an undeclared name there stays an
+   undeclared name. */
+meta static Type _icon(void) => %(icon);
+
+meta static int _icon_field(String name) =>
+  name == "icon" || name.startswith("icon_") || name.endswith("_icon");
+
+/* The parameters of the `Ui` methods that name an icon, as
+   `("method" position)` rows counted after the receiver. CUI names
+   them `icon`; tools/gen-arrays.py reads them from cui.h. */
+/* gen-arrays: begin generated icons */
+
+meta static List _icon_parameters = %(
+  ("icon" 0) ("icon_button" 0) ("tree_cell" 4) ("tree_table_name" 1)
+  ("dock_item" 0) ("toolbar_button" 0) ("draw_icon" 0));
+/* gen-arrays: end generated icons */
+
+meta static int _icon_parameter(String method, int position) {
+  foreach (List row in _icon_parameters)
+    if (row[0] == method && (int) row[1] == position) return 1;
+  return 0;
+}
+
+/* What the short name `name` spells for a `type`, or NULL. */
 meta static String _constant(Type type, String name) {
   String upper = name.upper();
-  if (Type.is_text(type)) return %"CUI_ICON_$upper";
+  if (type ~= %(icon)) return %"CUI_ICON_$upper";
+  if (Type.is_text(type)) return NULL;
   Type resolved = Type.resolve(type);
   if (resolved ~= %(enum *)) return _member(Type.members(resolved), upper);
   Var head = type.car();
@@ -219,7 +368,8 @@ meta static String _constant(Type type, String name) {
   return %"CUI_$(spelled[4:].upper())_$upper";
 }
 
-/* The member spelled with the prefix every member of an enum shares. */
+/* `CUI_ALIGN_CENTER` for `CENTER` among the `cui_align` members, by the
+   prefix they all share; NULL when no member has that name. */
 meta static String _member(List members, String upper) {
   String prefix = _prefix(members), wanted = prefix + upper;
   foreach (List member in members)

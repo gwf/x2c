@@ -85,7 +85,7 @@ void page_grid(Ui ui, Gallery g) {
   section(ui, "Filter bar", "Chips for active filters, values in a list, "
                             "and a search.");
   // `filters` holds one mask for each field.
-  ui.filter_bar("filters", fields, $cui.count(fields), filters, search);
+  ui.filter_bar("filters", fields, filters, search);
 
   section(ui, "Data grid", "2,000 rows, virtualized. Sort, resize columns, "
                            "select with Shift and Ctrl, edit names with a "
@@ -99,17 +99,18 @@ void page_grid(Ui ui, Gallery g) {
     for (int r = f0; r < l0; r++) {
       person *p = &people[order_ix[r]];
       ui.data_grid_row(r);
-      ui.data_grid_cell();
-      ui.avatar(p.name.text(), size: 24);
-      ui.data_grid_edit(p.name);
-      ui.data_grid_cell_text(p.email);
-      ui.data_grid_cell();
-      ui.badge(p.team);
-      ui.data_grid_cell_text(%"$(p.commits)");
-      ui.data_grid_cell();
-      ui.progress(p.score / 100, width: CUI_PX(70), height: 5);
-      ui.text(String.format("%.1f", (double) p.score),
-        tabular: true, size: 13, color: CUI_COLOR_TEXT_SECONDARY);
+      ui.grid_cell () {
+        ui.avatar(p.name.text(), size: 24);
+        ui.data_grid_edit(p.name);
+      }
+      ui.grid_cell_text(p.email);
+      ui.grid_cell () ui.badge(p.team);
+      ui.grid_cell_text(%"$(p.commits)");
+      ui.grid_cell () {
+        ui.progress(p.score / 100, width: 70, height: 5);
+        ui.text(String.format("%.1f", (double) p.score),
+                tabular: true, size: 13, color: text_secondary);
+      }
     }
   }
   ui.muted(n_sel ? "Rows selected. Press Esc to clear."
@@ -124,35 +125,33 @@ void page_grid(Ui ui, Gallery g) {
     ui.table ("tree", columns: {"Name": unsorted(fill),
                                 "Files": right(unsorted(80)),
                                 "Size": right(unsorted(100))}) {
-      ui.table_row(false);
-      ui.table_cell();
-      ui.tree_cell("src", 0, true, open_src, CUI_ICON_FOLDER);
-      ui.table_cell_text("42");
-      ui.table_cell_text("1.2 MB");
-      if (open_src) {
-        ui.table_row(false);
-        ui.table_cell();
-        ui.tree_cell("ui", 1, true, open_ui, CUI_ICON_FOLDER);
-        ui.table_cell_text("18");
-        ui.table_cell_text("640 KB");
-        if (open_ui) {
-          ui.table_row(false);
-          ui.table_cell();
-          ui.tree_cell("button.c", 2, false, NULL, CUI_ICON_FILE);
-          ui.table_cell_text("1");
-          ui.table_cell_text("24 KB");
-        }
-        ui.table_row(false);
-        ui.table_cell();
-        ui.tree_cell("main.c", 1, false, NULL, CUI_ICON_FILE);
-        ui.table_cell_text("1");
-        ui.table_cell_text("8 KB");
+      ui.table_row (row) {
+        ui.cell () ui.tree_cell("src", 0, true, open_src, folder);
+        ui.cell_text("42");
+        ui.cell_text("1.2 MB");
       }
-      ui.table_row(false);
-      ui.table_cell();
-      ui.tree_cell("README.md", 0, false, NULL, CUI_ICON_FILE_TEXT);
-      ui.table_cell_text("1");
-      ui.table_cell_text("12 KB");
+      if (open_src) {
+        ui.table_row (row) {
+          ui.cell () ui.tree_cell("ui", 1, true, open_ui, folder);
+          ui.cell_text("18");
+          ui.cell_text("640 KB");
+        }
+        if (open_ui) ui.table_row (row) {
+          ui.cell () ui.tree_cell("button.c", 2, false, NULL, file);
+          ui.cell_text("1");
+          ui.cell_text("24 KB");
+        }
+        ui.table_row (row) {
+          ui.cell () ui.tree_cell("main.c", 1, false, NULL, file);
+          ui.cell_text("1");
+          ui.cell_text("8 KB");
+        }
+      }
+      ui.table_row (row) {
+        ui.cell () ui.tree_cell("README.md", 0, false, NULL, file_text);
+        ui.cell_text("1");
+        ui.cell_text("12 KB");
+      }
     }
   }
 }

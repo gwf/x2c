@@ -17,12 +17,12 @@ static void prepare(void) {
 }
 
 static void scene_empty_state(Ui ui) {
-  ui.card (width: CUI_PX(480), pad: 0) {
+  ui.card (width: 480, pad: 0) {
     if (ui.empty_state("No projects yet",
-          icon: CUI_ICON_FOLDER_OPEN, action: "New project",
+          icon: folder_open, action: "New project",
           description: "A project holds your screens, their builds and "
                          "who can see them."))
-      ui.toast("Project created", tone: CUI_TONE_SUCCESS);
+      ui.toast("Project created", tone: success);
   }
 }
 
@@ -31,21 +31,21 @@ static void scene_metric(Ui ui) {
   // `const float *spark, int spark_count` pair.
   static const float installs[] = { 3, 5, 4, 7, 6, 9, 11 };
   static const float frame_time[] = { 9, 7, 8, 6, 5, 6, 4, 4, 3 };
-  ui.row (gap: 16, width: CUI_FILL) {
+  ui.row (gap: 16, width: fill) {
     ui.metric("Weekly installs", "3,912",
-      icon: CUI_ICON_DOWNLOAD, delta: 8.1f,
+      icon: download, delta: 8.1f,
       delta_label: "+8.1% vs last week", spark: installs,
-      spark_count: 7, width: CUI_GROW(1));
+      spark_count: 7, width: grow(1));
     ui.metric("Frame time", "0.4 ms",
-      icon: CUI_ICON_ZAP, delta: -18.0f, delta_label: "-18% vs v0.9",
+      icon: zap, delta: -18.0f, delta_label: "-18% vs v0.9",
       lower_is_better: true, spark: frame_time, spark_count: 9,
-      width: CUI_GROW(1));
+      width: grow(1));
   }
 }
 
 static void scene_accordion(Ui ui) {
   static bool first = true, second = false, third = false;
-  ui.card (width: CUI_PX(520), pad_y: 4, gap: 0) {
+  ui.card (width: 520, pad_y: 4, gap: 0) {
     ui.accordion ("Is it really dependency free?", first)
       ui.secondary("Yes. The core is plain C99, and fonts and icons are "
                    "embedded.");
@@ -56,14 +56,14 @@ static void scene_accordion(Ui ui) {
   }
 }
 
-// A file in the tree; a leaf never opens, so it has no children to end.
+// A file in the tree; a leaf never opens, so its block is empty.
 static void tree_file(Ui ui, String name, bool selected) {
-  ui.tree_begin(name, NULL, { .leaf = true, .selected = selected });
+  ui.tree (name, NULL, leaf: true, selected: selected) {}
 }
 
 static void scene_tree(Ui ui) {
   static bool src = true, widgets = true, assets = false;
-  ui.card (width: CUI_PX(280), pad: 10, gap: 1) {
+  ui.card (width: 280, pad: 10, gap: 1) {
     ui.tree ("src", src) {
       ui.tree ("widgets", widgets) {
         tree_file(ui, "button.c", false);
@@ -84,7 +84,7 @@ static void scene_list_item(Ui ui) {
   static const char *times[] = { "Tomorrow at 10:00", "Ship it",
                                  "Q1 roadmap" };
   static const char *lengths[] = { "45m", "2h", "1h" };
-  ui.card (width: CUI_PX(360), pad: 8, gap: 2) {
+  ui.card (width: 360, pad: 8, gap: 2) {
     for (int i = 0; i < 3; i++) {
       if (ui.list_item(titles[i], avatar: people[i],
                                   subtitle: times[i],
@@ -98,17 +98,17 @@ static void scene_list_item(Ui ui) {
 static void scene_virtual_list(Ui ui) {
   int first = 0, last = 0;
   ui.text("Ten thousand rows. Only the visible ones are built.",
-          color: CUI_COLOR_TEXT_MUTED);
-  ui.card (width: CUI_PX(420), pad: 6)
-  ui.virtual_list ("invoices", 10000, 36, CUI_PX(288), first, last) {
+          color: text_muted);
+  ui.card (width: 420, pad: 6)
+  ui.virtual_list ("invoices", 10000, 36, 288, first, last) {
     for (int i = first; i < last; i++) {
-      ui.row (height: CUI_PX(36), pad_x: 12, gap: 12,
-              align: CUI_ALIGN_CENTER) {
-        ui.icon(CUI_ICON_FILE_TEXT, 16, CUI_COLOR_TEXT_MUTED);
+      ui.row (height: 36, pad_x: 12, gap: 12,
+              align: center) {
+        ui.icon(file_text, 16, text_muted);
         ui.text(%"Invoice 2026-$(20000 - i)",
-                nowrap: true, tabular: true, width: CUI_FILL);
+                nowrap: true, tabular: true, width: fill);
         ui.text(i % 5 == 0 ? "Due" : "Paid",
-                size: 12, color: CUI_COLOR_TEXT_MUTED);
+                size: 12, color: text_muted);
       }
     }
   }
@@ -137,35 +137,36 @@ static void scene_image(Ui ui) {
     paint_landscape(pixels, 320, 200);
     landscape = ui.image_create(320, 200, pixels);
   }
-  ui.image(landscape, width: CUI_PX(320), height: CUI_PX(200),
+  ui.image(landscape, width: 320, height: 200,
                       radius: 12);
   ui.text("Evening over the hills, 320 by 200 pixels.",
-          size: 12, color: CUI_COLOR_TEXT_MUTED);
+          size: 12, color: text_muted);
 }
 
 static void scene_tag_input(Ui ui) {
-  ui.column (width: CUI_PX(420))
+  ui.column (width: 420)
     ui.tag_input("topics", topics, label: "Topics",
                                    placeholder: "Add a topic");
 }
 
 static void scene_button_group(Ui ui) {
   ui.button_group () {
-    ui.button("Bold", icon: CUI_ICON_BOLD);
-    ui.button("Italic", icon: CUI_ICON_ITALIC);
-    ui.button("Underline", icon: CUI_ICON_UNDERLINE);
+    ui.button("Bold", icon: bold);
+    ui.button("Italic", icon: italic);
+    ui.button("Underline", icon: underline);
   }
 }
 
 static void scene_hold_button(Ui ui) {
   ui.text("Hold the button until it fills to delete the project.",
-          color: CUI_COLOR_TEXT_MUTED);
-  if (ui.hold_button("Hold to delete", icon: CUI_ICON_TRASH_2))
-    ui.toast("Project deleted", tone: CUI_TONE_DANGER);
+          color: text_muted);
+  if (ui.hold_button("Hold to delete", icon: trash_2))
+    ui.toast("Project deleted", tone: danger);
 }
 
 static void scene_reorder_item(Ui ui) {
-  static int order[] = { 0, 1, 2, 3, 4 };
+  static ArrayInt order;
+  if (!order) order = [0, 1, 2, 3, 4];
   static const char *tasks[] = {
     "Write the release notes", "Record the demo video",
     "Update the screenshots", "Tag version 1.0", "Post the announcement" };
@@ -175,35 +176,34 @@ static void scene_reorder_item(Ui ui) {
                                     CUI_TONE_INFO, CUI_TONE_WARNING,
                                     CUI_TONE_TEAL };
   ui.text("Drag a row. The others make room as you go.",
-          color: CUI_COLOR_TEXT_MUTED);
-  ui.column (width: CUI_PX(440)) {
-    // cui_reorder_begin(cui_ctx *, const char *id,
-    // int *order, int count) has no method for its array and count.
-    cui_reorder_begin(ui, "tasks", order, 5);
+          color: text_muted);
+  ui.column (width: 440) {
+    bool changed;
+    ui.reorder (changed, "tasks", order)
     for (int i = 0; i < 5; i++) {
       int task = order[i];
       ui.reorder_item (i) {
-        ui.text(tasks[task], nowrap: true, width: CUI_FILL);
+        ui.text(tasks[task], nowrap: true, width: fill);
         ui.badge(labels[task], tone: tones[task]);
       }
     }
-    if (ui.reorder_end()) ui.toast("Order saved");
+    if (changed) ui.toast("Order saved");
   }
 }
 
 static void scene_timeline_item(Ui ui) {
-  ui.column (width: CUI_PX(380), gap: 0) {
+  ui.column (width: 380, gap: 0) {
     ui.timeline_item("Deployed to production",
       time: "2m ago", description: "Release 1.0.3 is live in all "
                                        "regions.",
-      icon: CUI_ICON_ROCKET, tone: CUI_TONE_SUCCESS);
+      icon: rocket, tone: success);
     ui.timeline_item("Review requested",
       time: "1h ago",
       description: "Jonas asked you to review the theming changes.",
-      icon: CUI_ICON_MESSAGE_SQUARE, tone: CUI_TONE_INFO);
+      icon: message_square, tone: info);
     ui.timeline_item("Build failed",
-      time: "3h ago", icon: CUI_ICON_CIRCLE_ALERT,
-      tone: CUI_TONE_DANGER, last: true);
+      time: "3h ago", icon: circle_alert,
+      tone: danger, last: true);
   }
 }
 
@@ -217,59 +217,58 @@ static void scene_kanban_column_begin(Ui ui) {
     { "Maya Okafor", "Jonas Berg" }, { "Priya Nair", NULL },
     { "Rosa Delgado", NULL } };
   static const int counts[] = { 2, 1, 1 };
+  bool moved, added, clicked;
   cui_kanban_move move;
-  ui.kanban_begin("board");
-  for (int c = 0; c < 3; c++) {
-    ui.kanban_column_begin(columns[c], counts[c], {
-      .dot = CUI_COLOR_SERIES(c), .limit = c == 1 ? 3 : 0, .width = 200 });
-    for (int k = 0; k < counts[c]; k++) {
-      ui.kanban_card_begin(c * 10 + k);
-      ui.text(cards[c][k], font: CUI_FONT_MEDIUM, size: 13.5f);
-      ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
-        ui.avatar(owners[c][k], size: 22);
-        ui.text(owners[c][k], size: 12, color: CUI_COLOR_TEXT_MUTED);
+  ui.kanban (moved, move, "board")
+  for (int c = 0; c < 3; c++)
+    ui.kanban_column (added, columns[c], counts[c],
+                      dot: CUI_COLOR_SERIES(c), limit: c == 1 ? 3 : 0,
+                      width: 200)
+    for (int k = 0; k < counts[c]; k++)
+      ui.kanban_card (clicked, c * 10 + k) {
+        ui.text(cards[c][k], font: medium, size: 13.5f);
+        ui.row (gap: 8, align: center) {
+          ui.avatar(owners[c][k], size: 22);
+          ui.text(owners[c][k], size: 12, color: text_muted);
+        }
       }
-      ui.kanban_card_end();
-    }
-    ui.kanban_column_end();
-  }
-  if (ui.kanban_end(move)) ui.toast("Card moved");
+  if (moved) ui.toast("Card moved");
 }
 
 static void scene_reasoning(Ui ui) {
-  ui.column (width: CUI_PX(520), gap: 10)
+  ui.column (width: 520, gap: 10)
   ui.reasoning ("think", thinking: true, seconds: 6) {
     ui.text("The question is about perceived speed: how little work a "
             "frame does, and how fast input reaches the screen.",
-            size: 13.5f, color: CUI_COLOR_TEXT_SECONDARY);
+            size: 13.5f, color: text_secondary);
     ui.text("Look for sources on retained and immediate mode, text "
             "rendering and motion.",
-            size: 13.5f, color: CUI_COLOR_TEXT_SECONDARY);
+            size: 13.5f, color: text_secondary);
   }
 }
 
 static void scene_tool_call(Ui ui) {
-  ui.column (width: CUI_PX(560), gap: 10) {
+  ui.column (width: 560, gap: 10) {
     ui.tool_call("search", "web_search",
-      icon: CUI_ICON_GLOBE, detail: "immediate mode gui performance",
-      status: CUI_TASK_DONE, seconds: 1.4f,
+      icon: globe, detail: "immediate mode gui performance",
+      status: done, seconds: 1.4f,
       input: "{\"query\": \"immediate mode gui performance\"}",
       output: "{\"results\": 5, \"took_ms\": 1380}");
     ui.tool_call("read", "read_file",
-      icon: CUI_ICON_FILE_TEXT, detail: "quarterly-report.pdf",
-      status: CUI_TASK_RUNNING, seconds: 3.2f);
+      icon: file_text, detail: "quarterly-report.pdf",
+      status: running, seconds: 3.2f);
     ui.tool_call("run", "run_tests",
-      icon: CUI_ICON_SQUARE_TERMINAL, detail: "ctest --output-on-failure",
-      status: CUI_TASK_FAILED, seconds: 12.0f);
+      icon: square_terminal, detail: "ctest --output-on-failure",
+      status: failed, seconds: 12.0f);
   }
 }
 
 static void scene_agent_status(Ui ui) {
   ui.agent_status("Reading quarterly-report.pdf",
-                  status: CUI_TASK_RUNNING, seconds: 14);
-  ui.agent_status("Searched 12 sites", status: CUI_TASK_DONE,
+                  status: running, seconds: 14);
+  ui.agent_status("Searched 12 sites", status: done,
                                        seconds: 9);
-  ui.agent_status("Could not reach the API", status: CUI_TASK_FAILED);
+  ui.agent_status("Could not reach the API", status: failed);
 }
 
 static void scene_context_meter(Ui ui) {
@@ -277,11 +276,11 @@ static void scene_context_meter(Ui ui) {
   // `const cui_viz_item *parts, int part_count` pair.
   static const cui_viz_item parts[] = {
     { "System", 3200 }, { "Files", 41800 }, { "Messages", 68400 } };
-  ui.row (gap: 10, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 10, align: center) {
     ui.context_meter("context", 113400, 200000,
                      parts: parts, part_count: 3);
     ui.text("113k of 200k tokens used. Hover the ring for a breakdown.",
-            color: CUI_COLOR_TEXT_SECONDARY);
+            color: text_secondary);
   }
 }
 
@@ -289,7 +288,7 @@ static void scene_response_actions(Ui ui) {
   // cui_response_actions_opts takes the vote as `int *vote`,
   // an option field that needs `&`.
   static int vote = 1;
-  ui.column (width: CUI_PX(520), gap: 8) {
+  ui.column (width: 520, gap: 8) {
     ui.text("They do very little work per frame: the interface is rebuilt "
             "from your data, laid out once and drawn in a handful of "
             "batches.");
@@ -313,7 +312,7 @@ static void scene_chat_composer(Ui ui) {
   int events = ui.chat_composer("composer", draft,
     placeholder: "Ask a follow up", attachments: files,
     attachment_count: 2, models: models, model_count: 3,
-    model: &model, width: CUI_FILL);
+    model: &model, width: fill);
   if (events & CUI_COMPOSER_SEND) draft.set("");
 }
 
@@ -321,26 +320,26 @@ static void scene_voice_orb(Ui ui) {
   static const char *names[] = { "Idle", "Listening", "Thinking",
                                  "Speaking" };
   static const float levels[] = { 0.2f, 0.7f, 0.2f, 0.5f };
-  ui.row (gap: 18, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 18, align: center) {
     for (int k = 0; k < 4; k++) {
-      $cui.id_index(ui, k) ui.column (align: CUI_ALIGN_CENTER,
+      ui.id (k) ui.column (align: center,
                                       gap: 6) {
         ui.voice_orb("orb", (cui_voice_state) k, levels[k], size: 130);
-        ui.text(names[k], size: 13, color: CUI_COLOR_TEXT_SECONDARY);
+        ui.text(names[k], size: 13, color: text_secondary);
       }
     }
   }
 }
 
 static void scene_shimmer_text(Ui ui) {
-  ui.row (gap: 10, align: CUI_ALIGN_CENTER) {
-    ui.loader(style: CUI_LOADER_DOTS, size: 22);
+  ui.row (gap: 10, align: center) {
+    ui.loader(style: dots, size: 22);
     ui.shimmer_text("Thinking about your question...", size: 15);
   }
 }
 
 static void scene_typewriter(Ui ui) {
-  ui.column (width: CUI_PX(520))
+  ui.column (width: 520)
     ui.typewriter("answer", "CUI draws a full frame in a fraction of a "
                   "millisecond, so text can stream in as fast as it "
                   "arrives.", size: 15, caret: true, speed: 400);
@@ -350,37 +349,37 @@ static void scene_text_reveal(Ui ui) {
   // A negative delay starts the reveal part way in, so the first words
   // are already in place on the first frames.
   ui.text_reveal("build", "The release build finished in 3 minutes "
-                 "42 seconds.", font: CUI_FONT_DISPLAY, size: 24,
-                                width: CUI_PX(600), delay: -0.4f);
+                 "42 seconds.", font: display, size: 24,
+                                width: 600, delay: -0.4f);
 }
 
 static void scene_word_rotate(Ui ui) {
-  ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
-    ui.text("Deploying to", font: CUI_FONT_DISPLAY, size: 26);
+  ui.row (gap: 8, align: center) {
+    ui.text("Deploying to", font: display, size: 26);
     ui.word_rotate("regions", %("staging." "eu-west." "all regions."), 2.2f,
-                   font: CUI_FONT_DISPLAY, size: 26);
+                   font: display, size: 26);
   }
 }
 
 static void scene_number_roll(Ui ui) {
   static int visits = 642;
-  ui.text("Visitors this week", color: CUI_COLOR_TEXT_MUTED);
+  ui.text("Visitors this week", color: text_muted);
   ui.number_roll("visits", %"$(visits / 10).$(visits % 10)k",
-                 font: CUI_FONT_DISPLAY, size: 40);
+                 font: display, size: 40);
   ui.row (gap: 8) {
-    if (ui.button("Add 100", icon: CUI_ICON_PLUS)) visits++;
-    if (ui.button("Remove 100", variant: CUI_BUTTON_GHOST) &&
+    if (ui.button("Add 100", icon: plus)) visits++;
+    if (ui.button("Remove 100", variant: ghost) &&
         visits > 0)
       visits--;
   }
 }
 
 static void scene_gradient_text(Ui ui) {
-  ui.gradient_text("Kiln 2.4", font: CUI_FONT_DISPLAY, size: 44,
+  ui.gradient_text("Kiln 2.4", font: display, size: 44,
                                from: CUI_RGB(0x6366f1),
                                to: CUI_RGB(0xec4899), animate: true);
   ui.text("The build tool for screens that ship on time.",
-          color: CUI_COLOR_TEXT_SECONDARY);
+          color: text_secondary);
 }
 
 static void scene_spotlight(Ui ui) {
@@ -389,13 +388,13 @@ static void scene_spotlight(Ui ui) {
     "Plain C into a pixel buffer. No GPU needed.",
     "The default on desktop. Deploying now.",
     "The core emits triangles; bring any GPU API." };
-  ui.row (gap: 14, align: CUI_ALIGN_STRETCH, width: CUI_FILL) {
+  ui.row (gap: 14, align: stretch, width: fill) {
     for (int k = 0; k < 3; k++) {
-      $cui.id_index(ui, k)
-      ui.spotlight ("renderer", width: CUI_GROW(1),
+      ui.id (k)
+      ui.spotlight ("renderer", width: grow(1),
                                 beam: k == 1) {
-        ui.text(titles[k], font: CUI_FONT_MEDIUM, size: 15);
-        ui.text(blurbs[k], size: 13, color: CUI_COLOR_TEXT_SECONDARY);
+        ui.text(titles[k], font: medium, size: 15);
+        ui.text(blurbs[k], size: 13, color: text_secondary);
       }
     }
   }
@@ -403,35 +402,35 @@ static void scene_spotlight(Ui ui) {
 
 static void scene_loader(Ui ui) {
   static const char *names[] = { "Dots", "Bars", "Pulse", "Orbit", "Grid" };
-  ui.row (gap: 36, align: CUI_ALIGN_CENTER) {
+  ui.row (gap: 36, align: center) {
     for (int k = 0; k < 5; k++) {
-      ui.column (gap: 10, align: CUI_ALIGN_CENTER) {
+      ui.column (gap: 10, align: center) {
         ui.loader(style: (cui_loader_style) k, size: 30);
-        ui.text(names[k], size: 12, color: CUI_COLOR_TEXT_MUTED);
+        ui.text(names[k], size: 12, color: text_muted);
       }
     }
   }
 }
 
 static void scene_dock(Ui ui) {
-  ui.column (width: CUI_FILL, height: CUI_FILL,
-             justify: CUI_JUSTIFY_END, align: CUI_ALIGN_CENTER)
+  ui.column (width: fill, height: fill,
+             justify: end, align: center)
   ui.dock ("dock") {
-    if (ui.dock_item(CUI_ICON_FOLDER, "Files",
+    if (ui.dock_item(folder, "Files",
                      color: CUI_RGB(0x3b82f6), running: true))
       ui.toast("Files");
-    ui.dock_item(CUI_ICON_MAIL, "Mail", color: CUI_RGB(0x0ea5e9),
+    ui.dock_item(mail, "Mail", color: CUI_RGB(0x0ea5e9),
                                         badge: 3, running: true);
-    ui.dock_item(CUI_ICON_CALENDAR, "Calendar",
+    ui.dock_item(calendar, "Calendar",
                  color: CUI_RGB(0xef4444));
-    ui.dock_item(CUI_ICON_MUSIC, "Music", color: CUI_RGB(0xec4899),
+    ui.dock_item(music, "Music", color: CUI_RGB(0xec4899),
                                           running: true);
-    ui.dock_item(CUI_ICON_SQUARE_TERMINAL, "Terminal",
+    ui.dock_item(square_terminal, "Terminal",
                  color: CUI_RGB(0x27272a));
-    ui.dock_item(CUI_ICON_PALETTE, "Design", color: CUI_RGB(0x8b5cf6));
+    ui.dock_item(palette, "Design", color: CUI_RGB(0x8b5cf6));
     ui.dock_separator();
-    ui.dock_item(CUI_ICON_SETTINGS, "Settings");
-    ui.dock_item(CUI_ICON_TRASH_2, "Trash");
+    ui.dock_item(settings, "Settings");
+    ui.dock_item(trash_2, "Trash");
   }
 }
 

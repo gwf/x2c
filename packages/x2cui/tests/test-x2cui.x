@@ -4,7 +4,9 @@
     components through CUI's own input functions, so none needs a window.
 */
 
-import "x2cui" with App, Offscreen, RowState, TextField, Ui;
+import "x2cui" with App, Offscreen, RowState, TextField, Ui, x2cui_strings;
+
+#include <malloc/malloc.h>
 
 #include "path.x"
 #include "test-support.x"
@@ -24,12 +26,12 @@ typedef struct Form {
 } Form;
 
 static void draw_form(Ui ui, Form &form) {
-  ui.column (pad: 16, gap: 12, width: CUI_FILL) {
-    form.clicks += ui.button("Save", variant: CUI_BUTTON_PRIMARY);
+  ui.column (pad: 16, gap: 12, width: fill) {
+    form.clicks += ui.button("Save", variant: primary);
     form.button = ui.last_rect();
     ui.checkbox("I agree", form.agree);
     form.box = ui.last_rect();
-    form.typed |= ui.input("name", form.name, width: CUI_FILL);
+    form.typed |= ui.input("name", form.name, width: fill);
     form.field = ui.last_rect();
     ui.segmented("tab", %("One" "Two" "Three"), form.tab);
   }
@@ -46,9 +48,9 @@ static void click(Offscreen screen, Form &form, cui_rect target) {
   Ui ui = screen.ui();
   ui.input_mouse_move(target.x + target.w / 2, target.y + target.h / 2);
   frame(screen, form);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  ui.input_mouse_button(left, true);
   frame(screen, form);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  ui.input_mouse_button(left, false);
   frame(screen, form);
   frame(screen, form);
 }
@@ -141,7 +143,7 @@ static void a_text_field_sets_and_takes_text(void) {
 // A block left early must still end, or CUI's layout stack is unbalanced.
 static int draw_rows(Ui ui, int stop_at) {
   for (int i = 0; i < 4; i++) {
-    $cui.id_index(ui, i) ui.row (gap: 4) {
+    ui.id (i) ui.row (gap: 4) {
       if (i == 1) continue;
       if (i == stop_at) return i;
       ui.label(%"row $i");
@@ -226,6 +228,29 @@ static void formatted_text_takes_x2c_values(void) {
   EXPECT_TRUE(screen.commands() > 0);
 }
 
+// Bytes the default malloc zone holds in use.
+static size_t bytes_in_use(void) {
+  malloc_statistics_t stats;
+  malloc_zone_statistics(NULL, &stats);
+  return stats.size_in_use;
+}
+
+/* The empty List and a List converted before allocate nothing, and a
+   List's array holds its Strings. */
+static void string_lists_convert_once(void) {
+  List labels = %("One" "Two");
+  const char *const *names = x2cui_strings(labels);
+  EXPECT_STR_EQ(names[1], "Two");
+  x2cui_strings(%());
+  size_t before = bytes_in_use();
+  for (int i = 0; i < 100000; i++) {
+    x2cui_strings(%());
+    x2cui_strings(labels);
+  }
+  EXPECT_INT_EQ(bytes_in_use() - before, 0);
+  EXPECT_TRUE(x2cui_strings(labels) == names);
+}
+
 // method forms
 
 // Draws three frames of `draw` and writes the last to `path`.
@@ -274,25 +299,27 @@ static void short_forms(Ui ui) {
   }
 }
 
-// The C calls, inside the earlier `$cui.*` decorators, which still work.
+// The same screen in CUI's own C calls, which the method forms wrap.
 static void c_forms(Ui ui) {
-  $cui.column(ui, { .width = CUI_FILL, .pad = 12, .gap = 8,
-                    .bg = CUI_COLOR_SURFACE_MUTED }) {
-    $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
-      cui_button_ex(ui, "Add", &(cui_button_opts){
-        .variant = CUI_BUTTON_PRIMARY, .icon = CUI_ICON_PLUS });
-      cui_icon_button_ex(ui, CUI_ICON_X, &(cui_button_opts){
-        .variant = CUI_BUTTON_GHOST, .size = CUI_SIZE_SM });
-      $cui.box(ui, { .width = CUI_GROW(2) })
-        cui_text_ex(ui, "wide", &(cui_text_opts){
-          .font = CUI_FONT_MEDIUM, .color = CUI_COLOR_ACCENT });
-      $cui.box(ui, { .width = CUI_PX(30), .height = CUI_PX(10),
-                     .bg = CUI_COLOR_BORDER }) {}
-    }
-    cui_button_ex(ui, "Declared", &(cui_button_opts){
-      .variant = CUI_BUTTON_DANGER });
-    cui_text_ex(ui, "plain", &(cui_text_opts){ 0 });
-  }
+  cui_column_begin(ui, &(cui_box){ .width = CUI_FILL, .pad = 12, .gap = 8,
+                                   .bg = CUI_COLOR_SURFACE_MUTED });
+  cui_row_begin(ui, &(cui_box){ .gap = 8, .align = CUI_ALIGN_CENTER });
+  cui_button_ex(ui, "Add", &(cui_button_opts){
+    .variant = CUI_BUTTON_PRIMARY, .icon = CUI_ICON_PLUS });
+  cui_icon_button_ex(ui, CUI_ICON_X, &(cui_button_opts){
+    .variant = CUI_BUTTON_GHOST, .size = CUI_SIZE_SM });
+  cui_box_begin(ui, &(cui_box){ .width = CUI_GROW(2) });
+  cui_text_ex(ui, "wide", &(cui_text_opts){
+    .font = CUI_FONT_MEDIUM, .color = CUI_COLOR_ACCENT });
+  cui_box_end(ui);
+  cui_box_begin(ui, &(cui_box){ .width = CUI_PX(30), .height = CUI_PX(10),
+                                .bg = CUI_COLOR_BORDER });
+  cui_box_end(ui);
+  cui_box_end(ui);
+  cui_button_ex(ui, "Declared", &(cui_button_opts){
+    .variant = CUI_BUTTON_DANGER });
+  cui_text_ex(ui, "plain", &(cui_text_opts){ 0 });
+  cui_box_end(ui);
 }
 
 static void method_forms_draw_what_the_c_calls_draw(void) {
@@ -322,18 +349,20 @@ static void an_array_of_columns(Ui ui) {
     { "Score", CUI_GROW(0.5), CUI_TEXT_RIGHT, true },
     { "Seen", CUI_PX(70), CUI_TEXT_CENTER, true },
   };
-  $cui.table(ui, "people", columns, { .sort = &sort }) {
-    foreach (String name in %("Ada" "Grace")) {
-      cui_push_id_int(ui, name == "Ada" ? 0 : 1);
-      cui_table_row(ui, false);
-      cui_table_cell_text(ui, name);
-      cui_table_cell(ui);
-      cui_badge_ex(ui, "Admin", &(cui_badge_opts){ .tone = CUI_TONE_INFO });
-      cui_table_cell_text(ui, "12");
-      cui_table_cell_text(ui, "Mon");
-      cui_pop_id(ui);
-    }
+  if (!cui_table_begin_ex(ui, "people", columns, 4,
+                          &(cui_table_opts){ .sort = &sort }))
+    return;
+  foreach (String name in %("Ada" "Grace")) {
+    cui_push_id_int(ui, name == "Ada" ? 0 : 1);
+    cui_table_row(ui, false);
+    cui_table_cell_text(ui, name);
+    cui_table_cell(ui);
+    cui_badge_ex(ui, "Admin", &(cui_badge_opts){ .tone = CUI_TONE_INFO });
+    cui_table_cell_text(ui, "12");
+    cui_table_cell_text(ui, "Mon");
+    cui_pop_id(ui);
   }
+  cui_table_end(ui);
 }
 
 static void a_table_takes_its_columns_from_a_map(void) {
@@ -348,9 +377,9 @@ static void a_grid_with_a_map_of_columns(Ui ui) {
                 height: 200, sort: &sort)
     for (int row = first; row < last; row++) {
       ui.data_grid_row(row);
-      ui.data_grid_cell_text(%"name $row");
-      ui.data_grid_cell_text(row % 2 ? "yes" : "no");
-      ui.data_grid_cell_text(%"$(row * 3)");
+      ui.grid_cell_text(%"name $row");
+      ui.grid_cell_text(row % 2 ? "yes" : "no");
+      ui.grid_cell_text(%"$(row * 3)");
     }
 }
 
@@ -361,21 +390,77 @@ static void a_grid_with_an_array_of_columns(Ui ui) {
     { "Done", 60, CUI_TEXT_LEFT, false },
     { "Score", 80, CUI_TEXT_RIGHT, true },
   };
-  $cui.data_grid(ui, "grid", columns, 30, first, last,
-                 { .height = CUI_PX(200), .sort = &sort })
-    for (int row = first; row < last; row++) {
-      ui.data_grid_row(row);
-      ui.data_grid_cell_text(%"name $row");
-      ui.data_grid_cell_text(row % 2 ? "yes" : "no");
-      ui.data_grid_cell_text(%"$(row * 3)");
-    }
+  int first = 0, last = 0;
+  if (!cui_data_grid_begin_ex(ui, "grid", columns, 3, 30, &first, &last,
+                              &(cui_grid_opts){ .height = CUI_PX(200),
+                                                .sort = &sort }))
+    return;
+  for (int row = first; row < last; row++) {
+    cui_data_grid_row(ui, row);
+    cui_data_grid_cell_text(ui, %"name $row");
+    cui_data_grid_cell_text(ui, row % 2 ? "yes" : "no");
+    cui_data_grid_cell_text(ui, %"$(row * 3)");
+  }
+  cui_data_grid_end(ui);
 }
 
-/* The data grid's method form draws what `$cui.data_grid` draws with the
-   same columns as a C array. */
+/* The data grid's method form draws what CUI's C calls draw with the same
+   columns as a C array. */
 static void a_data_grid_takes_its_columns_from_a_map(void) {
   EXPECT_TRUE(same_pixels(a_grid_with_a_map_of_columns,
                           a_grid_with_an_array_of_columns));
+}
+
+// id scopes and arrays
+
+/* Components under different keys have different ids, and the same key
+   gives the same id in the next frame; a text key and an integer key
+   both work. */
+static void an_id_scope_keeps_state_per_key(void) {
+  Offscreen screen = auto Offscreen.open(200, 120);
+  cui_id ids[2][3];
+  for (int pass = 0; pass < 2; pass++) {
+    screen.begin();
+    Ui ui = screen.ui();
+    for (int k = 0; k < 2; k++) ui.id (k) {
+      ui.button("Same");
+      ids[pass][k] = ui.last_id();
+    }
+    ui.id ("named") {
+      ui.button("Same");
+      ids[pass][2] = ui.last_id();
+    }
+    screen.end();
+  }
+  EXPECT_TRUE(ids[0][0] != ids[0][1]);
+  EXPECT_TRUE(ids[0][2] != ids[0][0] && ids[0][2] != ids[0][1]);
+  for (int k = 0; k < 3; k++) EXPECT_TRUE(ids[0][k] == ids[1][k]);
+}
+
+static const cui_tab_bar_item tab_items[] = {
+  { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" },
+  { CUI_ICON_USER, "Profile" } };
+
+static void tabs_by_form(Ui ui) {
+  static int selected = 0;
+  ui.tab_bar("tabs", tab_items, selected);
+}
+
+static void tabs_in_c(Ui ui) {
+  static int selected = 0;
+  cui_tab_bar_ex(ui, "tabs", tab_items, 3, &selected, NULL);
+}
+
+static void two_tabs_by_form(Ui ui) {
+  static int selected = 0;
+  ui.tab_bar("tabs", tab_items, 2, selected);
+}
+
+/* An array form passes the count of its C array; a count written out is
+   passed as it is. */
+static void an_array_form_passes_the_count(void) {
+  EXPECT_TRUE(same_pixels(tabs_by_form, tabs_in_c));
+  EXPECT_FALSE(same_pixels(tabs_by_form, two_tabs_by_form));
 }
 
 // lists
@@ -419,9 +504,9 @@ static void an_item_reports_what_the_pointer_did(void) {
   list_frame(screen, p);
   list_frame(screen, p);
   EXPECT_TRUE(p.hovered);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  ui.input_mouse_button(left, true);
   list_frame(screen, p);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  ui.input_mouse_button(left, false);
   list_frame(screen, p);
   EXPECT_INT_EQ(p.clicked, 2);
 }
@@ -449,7 +534,7 @@ typedef struct TableRows {
 } TableRows;
 
 static void draw_table(Ui ui, TableRows &t) {
-  $cui.disabled_scope(ui, t.disabled)
+  ui.disabled (t.disabled)
   ui.table ("rows", selectable: true, columns: {"Name": fill})
   ui.each (String name in %("one" "two" "three"))
   ui.table_row (row) {
@@ -482,12 +567,12 @@ static void a_table_row_reports_what_the_pointer_did(void) {
   EXPECT_TRUE(t.rows[1].hovered);
   EXPECT_FALSE(t.rows[0].hovered);
   EXPECT_FALSE(t.rows[2].hovered);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, true);
+  ui.input_mouse_button(left, true);
   table_frame(screen, t);
   EXPECT_TRUE(t.rows[1].pressed);
   EXPECT_FALSE(t.rows[0].pressed);
   EXPECT_FALSE(t.rows[1].clicked);
-  ui.input_mouse_button(CUI_MOUSE_LEFT, false);
+  ui.input_mouse_button(left, false);
   table_frame(screen, t);
   EXPECT_TRUE(t.rows[1].clicked);
   EXPECT_FALSE(t.rows[2].clicked);
@@ -515,6 +600,9 @@ void x2cui_suite(void) {
   $test.run(a_table_takes_its_columns_from_a_map);
   $test.run(a_data_grid_takes_its_columns_from_a_map);
   $test.run(an_item_reports_what_the_pointer_did);
+  $test.run(an_id_scope_keeps_state_per_key);
+  $test.run(an_array_form_passes_the_count);
+  $test.run(string_lists_convert_once);
   $test.run(a_virtual_list_draws_the_rows_in_view);
   $test.run(a_table_row_reports_what_the_pointer_did);
 }

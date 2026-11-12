@@ -2,7 +2,7 @@
 
     Each scene draws one component the way a program would use it. A scene
     is named for its CUI component: the scene `button` shows `ui.button`,
-    and the scene `row` shows `$cui.row`. The files under scenes/ group
+    and the scene `row` shows `ui.row`. The files under scenes/ group
     the scenes into families. The package's check draws them all, which
     shows that every component has an x2c form and draws.
 
@@ -51,8 +51,8 @@ static void add_families(void) {
 
 // The page every scene is drawn on.
 static void draw_page(Ui ui, Scene *scene) {
-  ui.column (width: CUI_FILL, height: CUI_FILL, pad: 28,
-             gap: 16, bg: CUI_COLOR_BACKGROUND)
+  ui.column (width: fill, height: fill, pad: 28,
+             gap: 16, bg: background)
     scene.draw(ui);
 }
 

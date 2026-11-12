@@ -73,10 +73,7 @@ Each CUI component keeps its name. The C calling conventions change:
   of the fields of CUI's option record, and may be left out. A call builds
   no Map: each becomes a field of the record in a C designated
   initializer, and a misspelled name is a C error that names the field.
-  This is a component's method form, a macro of the method's name; see
-  [Short values](#short-values). Written in the macro's own template,
-  `ui.NAME(...)` is the method, which takes the record itself as its last
-  argument; `Ui.NAME(ui, ..., record)` calls the method anywhere.
+  Values may be short names; see [Short values](#short-values).
 - **Labels and ids** are Strings: a literal, a variable, or an
   interpolation such as `%"Row $i"`.
 - **State** that a component changes is passed by reference, with no `&`:
@@ -87,26 +84,33 @@ Each CUI component keeps its name. The C calling conventions change:
   `field.empty()` tests it.
 - **A list of strings** is a `List`.
 - **A text result** is a String, or NULL where CUI returns none.
-- **A block component** is a statement decorator written as a method,
+- **A block component** is written as a method with a block,
   `ui.row (gap: 8) { ... }`, with a space before its arguments by
   convention. Its end call is deferred, so it also runs when the block
   leaves through `return`, `break`, or `continue`. CUI's own C macros skip
   the end call there. A component that reports whether it is open, such as
-  `ui.dialog` or `ui.menu`, runs its block only while open. Decorators
-  stack:
+  `ui.dialog` or `ui.menu`, runs its block only while open. Blocks stack:
 
   ```x2c
-  $cui.id_index(ui, i) ui.row (gap: 8, align: center) {
+  ui.id (i) ui.row (gap: 8, align: center) {
     ui.checkbox(task.title, task.done);
   }
   ```
 
-  Each block component also keeps its earlier spelling with a record,
-  `$cui.row(ui, { .gap = 8 }) { ... }`.
+  `ui.id (key)` keeps the components drawn for different keys apart, with
+  a text or an integer key, and `ui.disabled (condition)` disables the
+  components in its block.
+- **A block that reports a result** stores it in a variable it is given,
+  declared before the block: `int swiped; ui.card_stack (swiped, "deck",
+  3) { ... }`, `ui.swipe_item (action, "row", left, right) { ... }`, and
+  `ui.reorder (changed, "tasks", order) { ... }` store what their end
+  reports; `ui.kanban_column (added, title, count) { ... }` and
+  `ui.kanban_card (clicked, id) { ... }` store what their begin reports,
+  before the block runs; `ui.kanban (moved, move, "board") { ... }` sets
+  `moved` and the `cui_kanban_move` `move` when a card was dropped.
 
-The methods and their method forms are built at compile time from CUI's
-C signatures by `src/x2cui-generate.x`. To read a method's exact
-signature, find `x2cui__Ui_NAME` in `builds/x2cui.h` after `make build`.
+These forms are built at compile time from CUI's C signatures by
+`src/x2cui-generate.x`.
 
 ### Short values
 
@@ -119,7 +123,7 @@ its field or parameter decides the constant:
 | an enum, such as `cui_align` or `cui_button_variant` | `center`, `primary` | the member with the enum's prefix: `CUI_ALIGN_CENTER`, `CUI_BUTTON_PRIMARY` |
 | `cui_size` | `fill`, `fit` | `CUI_FILL`, `CUI_FIT` |
 | another `cui_T`, such as `cui_color` or `cui_font` | `accent`, `medium` | `CUI_COLOR_ACCENT`, `CUI_FONT_MEDIUM` |
-| text | `plus` | the icon `CUI_ICON_PLUS` |
+| an icon: an option named `icon`, `icon_*`, or `*_icon`, or a parameter CUI names `icon` | `plus` | `CUI_ICON_PLUS` |
 
 A number for a `cui_size` is pixels: `width: 26` is `CUI_PX(26)`, and
 `grow(1.5)` is `CUI_GROW(1.5)`. In `font: m.unread ? medium : body`, each
@@ -204,8 +208,10 @@ free those objects when the frame ends. Drawing itself leaves nothing
 behind to free: the to-do example holds 8.4 MB of resident memory after
 500 frames and after 16,000.
 
-A `Ui` belongs to one thread. Several windows each on their own thread are
-allowed by CUI; this package does not test that.
+Draw on one thread. CUI allows several windows each on their own thread,
+but this package keeps one unlocked table of the arrays it builds for
+Lists of Strings, shared by every `Ui` in the process, so it supports
+drawing on one thread only.
 
 ## Drawing without a window
 
@@ -229,26 +235,34 @@ write. The package's tests drive components this way, with CUI's own
 
 ## Arrays of records
 
-A component such as a table, a chart, or a calendar reads an array of
-CUI's own records. In x2c that array is a C array of those records,
-written with designated initializers, and `$cui.count` supplies its count:
+A component such as a chart or a calendar reads an array of CUI's own
+records. In x2c that array is a C array of those records, written with
+designated initializers, and the component takes the array alone:
 
 ```x2c
 static cui_tab_bar_item tabs[] = {
   { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" } };
-ui.tab_bar("tabs", tabs, $cui.count(tabs), selected);
+ui.tab_bar("tabs", tabs, selected);
 ```
 
-The array may be static, a local, or a variable-length array filled from
-a collection. CUI writes into the array of a component that edits its
-records, such as a calendar whose events are dragged. `$cui.count` of a
-pointer does not compile; a program that holds a pointer passes its own
-count.
+The form passes the array's count. An option that points to an array,
+such as `parts:` or `ticks:`, also gets its count, `part_count` or
+`tick_count`. A program that passes a pointer rather than an array, or
+uses fewer elements than the array holds, writes every count of the
+call itself: `ui.trace_view("trace", tracks, 5, spans, used, ...)`. An
+editor that grows its array takes the array and its live count and
+supplies the capacity: `ui.kv_editor("headers", pairs, count)`. An x2c
+`Array` or `List` of records is not converted; the array is a C array.
+CUI writes into the array of a component that edits its records, such
+as a calendar whose events are dragged.
 
-The table and the data grid take their columns as a Map literal instead;
-see [Lists and tables](#lists-and-tables). The data grid draws only the
+The table and the data grid take their columns as a Map literal; see
+[Lists and tables](#lists-and-tables). The data grid draws only the
 rows on screen: its block builds rows `first` up to `last`, two `int`
-variables the form declares, and its widths are points:
+variables the form declares, and its widths are points. A grid's cells are
+`ui.grid_cell () { ... }` and `ui.grid_cell_text(text)`, as a table's are
+`ui.cell` and `ui.cell_text`; which a cell is in is known only while the
+frame runs, so the two kinds have their own names:
 
 ```x2c
 ui.data_grid ("people", people.len(), first, last,
@@ -256,14 +270,10 @@ ui.data_grid ("people", people.len(), first, last,
               height: 300, selected: selected, sort: &sort)
   for (int row = first; row < last; row++) {
     ui.data_grid_row(row);
-    ui.data_grid_cell_text(names[row]);
-    ui.data_grid_cell_text(%"$(commits[row])");
+    ui.grid_cell_text(names[row]);
+    ui.grid_cell_text(%"$(commits[row])");
   }
 ```
-
-Their earlier spellings with a C array of columns remain:
-`$cui.table(ui, id, columns, opts) { ... }` and
-`$cui.data_grid(ui, id, columns, rows, first, last, opts) { ... }`.
 
 Chart numbers may also be a packed `ArrayFloat`:
 `cui_series.of(name, values)` builds a series over one, and
@@ -277,8 +287,8 @@ An option keeps its C field type. A field that is a pointer to caller
 state takes an address, as in `toggle: &bold`, and a field that is an
 array takes a C array.
 
-A tree leaf has no open flag: `ui.tree_begin(name, NULL, { .leaf = true })`,
-the method, which a leaf calls directly.
+A tree leaf has no open flag and never opens, so its block is empty:
+`ui.tree (name, NULL, leaf: true) {}`.
 
 A callback that CUI calls, such as a canvas paint function, is an ordinary
 function. Where its type names `cui_ctx *`, declare that parameter as
