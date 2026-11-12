@@ -4,7 +4,9 @@ This package provides an x2c interface to [CUI](https://github.com/yappologistic
 1.3.1, an immediate-mode UI library that draws its own components. A program
 describes the screen with calls on every frame. CUI lays it out, handles the
 mouse and keyboard, and draws it in a window or into pixels. `PROFILE.md`
-records the build.
+records the build. The book's
+[Building Interfaces with x2cui](../../docs/src/guide/x2cui.md) chapter
+teaches the package from a first program.
 
 It is an importable package: `src/x2cui.x` is its entry unit and every
 public name compiles to `x2cui__*`.

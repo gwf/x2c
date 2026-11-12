@@ -376,7 +376,8 @@ without requiring public services:
   CUI's own gallery, and `stress.x` animates a chosen number of items
   beside a displayed frame rate. The standard run draws off screen; use
   `run-interactive`, `run-gallery`, or `run-stress` for a window. The
-  package builds from a checkout on macOS and Linux.
+  package builds from a checkout on macOS and Linux;
+  [Building Interfaces with x2cui](x2cui.md) teaches it.
 - `packages/torch/examples/fit-line.x` fits a line by gradient descent
   through libtorch autograd: `x.matmul(w) + b`, `backward`, and an in-place update
   under `Torch.no_grad`, with every operator temporary reclaimed by the
@@ -567,8 +568,8 @@ file. Definitions do not change the preceding x2c source preprocessing.
 bundles for PCRE2, yyjson, libcurl, termbox2, libuv, and BLIS on macOS
 (arm64, x86_64) and Linux (arm64, x86_64), and for torch on macOS arm64 and
 Linux x86_64; [the package index](https://x2c-lang.dev/packages/index.txt)
-lists them. Build any other package's bundle, including raylib's and
-SQLite's, from a checkout.
+lists them. Build any other package's bundle, including raylib's,
+SQLite's, and x2cui's, from a checkout.
 Pure and mixed C/x2c packages with no external native inputs need no dependency
 manifest; their bundle carries an empty native response file. Distribute any
 other x2c package imports alongside them under the registered package root.
