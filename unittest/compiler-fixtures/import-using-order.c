@@ -11,7 +11,9 @@ int usingorder__twice(int);
 
 int main(void){
   x2c_initialize();
-  printf("%d %d %d\n", usingorder__thrice(2), usingorder__twice(2), USINGORDER_MAX(1, 4));
+  int _x2c_gensym_macro_scratch_0[USINGORDER_SIZE];
+  int slots =(int)(sizeof _x2c_gensym_macro_scratch_0 / sizeof _x2c_gensym_macro_scratch_0[0]);
+  printf("%d %d %d %d\n", usingorder__thrice(2), usingorder__twice(2), USINGORDER_MAX(1, 4), slots);
   return 0;
 }
 
