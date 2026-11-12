@@ -33,9 +33,9 @@ int main(void) {
 
 ## Status
 
-The package is a preview. Native builds are supported on macOS arm64
-and on Linux arm64 and x86_64. On Linux the package check passes, which
-draws off screen; no window has been opened there. The browser build
+The package is experimental. Native builds run on macOS arm64. On Linux
+arm64 and x86_64 the package builds and passes its off-screen checks; the
+windowed path has not been tested there. The browser build
 needs Memory64, JavaScript Promise Integration, and WebGL 2; it was run
 in a Chromium-based browser and under Node. CUI has no accessibility tree, no inline
 input-method composition, and no bidirectional text. The package
@@ -62,9 +62,9 @@ make -C packages/x2cui build
 ./hello
 ```
 
-Platforms: source only. macOS and Linux are built and tested, and the
-gallery runs in a browser; see [In a browser](#in-a-browser). Linux needs
-the X11 development headers; see `PROFILE.md`.
+Platforms: source only; see [Status](#status). The gallery also runs in a
+browser; see [In a browser](#in-a-browser). Linux needs the X11
+development headers; see `PROFILE.md`.
 
 The driver adds the package's `builds` and `src` directories and links
 `builds/libx2cui.a` with CUI and the system frameworks. The `-I` lets x2c's
@@ -513,7 +513,7 @@ support 64-bit WebAssembly memory and JavaScript Promise Integration;
 1.0 MB compressed with gzip.
 
 `make web-check` draws every gallery page off screen under Node. Of the
-26 images, 22 match the native build's to within one step of one colour
+26 images, 22 match the native build's to within one step of one color
 channel in fewer than 1,200 bytes of 23.8 million. The four others
 differ where the platform differs: two table rows with equal sort keys
 change places, the keymap shows Ctrl for Cmd, and the file pages list
@@ -536,7 +536,8 @@ minor version. Importing the package is enough to reach them:
 directly. `Ui` is CUI's `cui_ctx *` and `App` is its `cui_app *`, so raw
 calls and methods mix on the same object.
 
-Use the raw API for the components listed above, for the custom renderer
+Use the raw API for the functions in
+[What has no x2c form](#what-has-no-x2c-form), for the custom renderer
 interface (`cui_renderer_iface`), and for a custom platform layer.
 
 ## Build and test
@@ -556,3 +557,10 @@ make check
 `make run` draws the to-do application and every scene off screen, then
 checks that every component of the pinned header has a scene.
 No check opens a window, because a window needs a display.
+
+The client, tests, and examples are licensed under
+[Apache-2.0](../../LICENSE). CUI and the fonts, icons, and SDL2 code it
+builds in retain the MIT, SIL Open Font License 1.1, ISC, zlib, and Unicode
+License V3 terms reproduced under `LICENSES/`. `PROFILE.md` lists each
+component and its notice. See `../LICENSE-POLICY.md` for the project intake
+policy.

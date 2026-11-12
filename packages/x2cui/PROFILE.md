@@ -113,9 +113,9 @@ All of this is compiled into `libcui.a` from the pinned archive:
 | stb_truetype, stb_image, stb_image_write, stb_rect_pack | public domain or MIT | in the upstream sources |
 
 The fonts are embedded as data and are not distributed as separate font
-files. Gary admitted the SIL Open Font License 1.1 and the Unicode License
-V3 for this profile on 2026-11-10; `packages/LICENSE-POLICY.md` does not
-list either by name.
+files. The project admitted the SIL Open Font License 1.1 and the Unicode
+License V3 for this profile on 2026-11-10; `packages/LICENSE-POLICY.md` does
+not list either by name.
 
 ## Foreign-declaration limits
 
