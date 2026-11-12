@@ -1,5 +1,7 @@
 # plans/
 
+Internal design and execution records for maintainers; not user documentation.
+
 Active plans live here while their work needs a design or execution record.
 Each opens with a `> Status:` block stating its actual state. Durable plans
 follow the review below; workspace notes belong in `.context/`.
@@ -25,7 +27,8 @@ website work belongs to a separate session.
 [x2cui](x2cui-package.md) is the plan, specification, and running record of
 the package over the CUI user-interface library. Gary accepted its
 decisions on 2026-11-10. The package is implemented on macOS and in a
-browser; its Linux profile is written and has not been built.
+browser; on Linux arm64 and x86_64 it builds and passes its off-screen
+checks.
 
 [x2cui lists and tables](x2cui-lists-and-tables.md) records `ui.each`,
 `ui.item`, `ui.table` with a Map of columns, `ui.table_row`, and `ui.cell`,

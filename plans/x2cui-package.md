@@ -4,7 +4,7 @@
 > Gary accepted the plan's decisions and the to-do example; decision 3 is
 > superseded by method forms. Delivery 0 is published on `dev`
 > (gwf/x2c#653). Deliveries 1 to 3 and the method forms are on `x2cui`;
-> see [Current status](#current-status-2026-11-11). Nothing in this plan
+> see [Current status](#current-status-2026-11-12). Nothing in this plan
 > is on `dev` except Delivery 0.
 > Baseline: x2c `239408687`, CUI `v1.3.1`.
 > Every "verified" statement below was compiled and run on macOS arm64.
@@ -111,7 +111,7 @@ Verified:
 
 Not verified when this was planned: an open window on any platform, a
 real browser, frame time, Linux, and the `TextField` type. All but Linux
-have since been checked; see [Current status](#current-status-2026-11-11).
+have since been checked; see [Current status](#current-status-2026-11-12).
 
 Census of the pinned `cui.h` (script in Appendix A):
 
@@ -500,7 +500,8 @@ Done and verified:
 Not done at the time, with the current state:
 
 - Linux. `dependency.json` is unbuilt, so the package is not in
-  `PACKAGES`. Still true.
+  `PACKAGES`. Done 2026-11-12: `make check` passes on Ubuntu 24.04 arm64
+  and x86_64, and the package is in `PACKAGES`.
 - Parameter names. Generated methods name their parameters `p1`, `p2`.
   Done 2026-11-11: `tools/gen-arrays.py` writes CUI's names from cui.h.
 - The completeness check arrived with Delivery 2 as `scenes --check`; see
@@ -534,7 +535,8 @@ Facts that differ from the specification above:
   crash it caused on 2026-11-10. The cause was confirmed from the crash
   report and reproduced off screen; the corrected example was then driven
   through add, toggle, delete, filter, and clear with simulated input.
-- **`dependency.json` is the Linux X11 profile and is untested.**
+- **`dependency.json` is the Linux X11 profile.** On 2026-11-12 it was
+  built and checked off screen; no window has been opened on Linux.
   `package.mk` requires a file of that name; `dependency-darwin.json` is
   the tested macOS profile.
 
@@ -724,7 +726,7 @@ State on 2026-11-10: the gallery runs in a browser from the same source.
 Not done or not verified:
 
 - Safari and Firefox were not run. Still true; see
-  [Current status](#current-status-2026-11-11).
+  [Current status](#current-status-2026-11-12).
 - Pasting, an input method editor, and touch input were not tested.
   Still true.
 - The to-do example has no browser build; it saves to a file, which a
@@ -764,7 +766,7 @@ Gary accepted these on 2026-11-10:
   check, which names added and removed components.
 - No package has shipped an interactive window. The window path cannot be
   gated; it is checked by hand with `make run-interactive`.
-- Linux is not verified at all.
+- Linux is verified off screen only; no window has been opened there.
 - The x2c runtime adds about 385 KB stripped to a native executable in the
   probe build (422 KB for the C program, 807 KB for the x2c one), and about
   860 KB to a browser build.
@@ -1019,9 +1021,11 @@ method-form macros, not on `x2cui`.
 
 ## Current status (2026-11-12)
 
-The package is a preview: macOS arm64 native, a browser build that needs
-Memory64, JavaScript Promise Integration, and WebGL 2, and an unbuilt
-Linux profile. The README states this scope under "Status".
+The package is experimental: macOS arm64 native, a browser build that
+needs Memory64, JavaScript Promise Integration, and WebGL 2, and Linux
+arm64 and x86_64 builds that pass `make check` off screen on Ubuntu 24.04.
+No window has been opened on Linux. The README states this scope under
+"Status".
 
 Verified by the orchestrator at `7a7129f20`:
 
@@ -1069,8 +1073,9 @@ Review fixes (2026-11-11):
 
 Remaining limits:
 
-- Not run: Safari, Firefox, Linux, pasting, input method editors, touch,
-  and the native window beyond `make run-interactive` checked by hand.
+- Not run: Safari, Firefox, a window on Linux, pasting, input method
+  editors, touch, and the native window beyond `make run-interactive`
+  checked by hand.
 - CUI has no accessibility tree, no inline input-method composition, and
   no bidirectional text.
 - Two CUI patches, `table-row-state` and `focusable-canvas`, must be
