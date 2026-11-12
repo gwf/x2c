@@ -19,7 +19,7 @@
     method that takes the format and x2c values: `ui.textf("%d items", n)`.
 
     This unit is the `x2cui` package entry: `import "x2cui"` reaches every
-    nonstatic name as `x2cui__*` and every `$cui.` macro. The vendored
+    nonstatic name as `x2cui__*` and every method form. The vendored
     `cui-1.3.h` stays public because these methods take CUI's own types,
     and it is the raw API for everything below.
  */
@@ -290,7 +290,7 @@ void Ui.reorder_begin(Ui ui, String id, ArrayInt order) {
 }
 
 /** Draws a line chart of `count` series, with `labels` along the x axis,
-    or NULL for none. `$cui.line_chart` supplies the count of an array.
+    or NULL for none. The method form supplies the count of an array.
 */
 void Ui.line_chart(
   Ui ui, String id, const cui_series *series, int count, List labels,
@@ -300,7 +300,7 @@ void Ui.line_chart(
 }
 
 /** Draws a bar chart of `count` series, with `labels` along the x axis,
-    or NULL for none. `$cui.bar_chart` supplies the count of an array.
+    or NULL for none. The method form supplies the count of an array.
 */
 void Ui.bar_chart(
   Ui ui, String id, const cui_series *series, int count, List labels,
