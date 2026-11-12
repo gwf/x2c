@@ -9,6 +9,10 @@ void page_actions(Ui ui, Gallery g) {
   static bool align[3] = { true, false, false };
   static cui_status save_status = CUI_STATUS_IDLE;
   static double status_at;
+  static cui_reaction reactions[4] = {
+    { CUI_ICON_THUMBS_UP, 12, true }, { CUI_ICON_HEART, 4, false },
+    { CUI_ICON_ROCKET, 7, false }, { CUI_ICON_SMILE, 2, false },
+  };
   static int dial_choice = -1;
   static int theme_mode = -1;
   static int deleted;
@@ -62,10 +66,8 @@ void page_actions(Ui ui, Gallery g) {
   }
 
   section(ui, "Reactions", "Counts roll when they change.");
-  // CUI counts the clicks in the array, which keeps them between frames.
-  ui.reactions("reactions", [
-    {icon: thumbs_up, count: 12, active: true}, {icon: heart, count: 4},
-    {icon: rocket, count: 7}, {icon: smile, count: 2}]);
+  // The page ignores the result, so the method stands in for the macro.
+  ui.reactions("reactions", reactions);
 
   section(ui, "Theme",
           "A compact switcher and a single toggle that morphs between sun "

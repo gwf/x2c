@@ -4,7 +4,8 @@
     components through CUI's own input functions, so none needs a window.
 */
 
-import "x2cui" with App, Offscreen, RowState, TextField, Ui, x2cui_strings;
+import "x2cui" with App, Offscreen, RowState, TextField, Ui, x2cui_arguments,
+  x2cui_strings;
 
 #include <malloc/malloc.h>
 
@@ -468,6 +469,102 @@ static void an_array_form_passes_the_count(void) {
   EXPECT_FALSE(same_pixels(tabs_by_form, two_tabs_by_form));
 }
 
+// Array literals
+
+/* What the probes below received: each takes the arrays a component takes
+   and keeps them, so a test reads the lowered values. A probe's form
+   lowers its arguments as a component's form does. */
+typedef struct Probe { int count; } *Probe;
+
+static const cui_swipe_action *got_actions;
+static const cui_series *got_series;
+static const cui_tone *got_tones;
+static const int *got_ints;
+static cui_radial_gauge_opts got_gauge;
+
+static void Probe.actions(Probe p, const cui_swipe_action *a, int count) {
+  got_actions = a;
+  p.count = count;
+}
+static void Probe.series(Probe p, const cui_series *series, int count) {
+  got_series = series;
+  p.count = count;
+}
+static void Probe.tones(Probe p, const cui_tone *tones, int count) {
+  got_tones = tones;
+  p.count = count;
+}
+static void Probe.ints(Probe p, const int *ints, int count) {
+  got_ints = ints;
+  p.count = count;
+}
+static void Probe.gauge(Probe p, cui_radial_gauge_opts opts) {
+  got_gauge = opts;
+}
+
+macro Unit $probe.form(Name $method, Literal @pairs) {
+  macro Expression $Probe.$method(Expr $p, Expr @args, Entry @options) =>
+    $p.$method(@x2cui_arguments($p, $method, $pairs, $options, @args));
+}
+
+$probe.form(actions, 0);
+$probe.form(series, 0);
+$probe.form(tones, 0);
+$probe.form(ints, 0);
+$probe.form(gauge);
+
+// A name the program declares, beside the names the lowering declares.
+enum { x2cui_array_0 = 7 };
+
+/* Records take enum and icon short names, a nested array fills the count
+   field after it, and the count of the outer array is filled. */
+static void a_record_array_lowers_by_field_type(void) {
+  Probe p = &(struct Probe){};
+  p.actions([{icon: check, label: "Done", tone: success},
+            {icon: trash_2, label: "Delete", tone: danger}]);
+  EXPECT_INT_EQ(p.count, 2);
+  EXPECT_TRUE(!strcmp(got_actions[0].icon, CUI_ICON_CHECK));
+  EXPECT_TRUE(!strcmp(got_actions[1].icon, CUI_ICON_TRASH_2));
+  EXPECT_INT_EQ(got_actions[1].tone, CUI_TONE_DANGER);
+  EXPECT_TRUE(!strcmp(got_actions[1].label, "Delete"));
+  p.series([{name: "a", values: [1, 2]}, {name: "b", values: [3, 4, 7]}]);
+  EXPECT_INT_EQ(p.count, 2);
+  EXPECT_INT_EQ(got_series[0].count, 2);
+  EXPECT_INT_EQ(got_series[1].count, 3);
+  EXPECT_TRUE(got_series[1].values[2] == 7);
+}
+
+/* A `_count` field after an option's array is filled, and a scalar array
+   of a `const` enum takes short names. */
+static void an_option_array_fills_its_count(void) {
+  Probe p = &(struct Probe){};
+  p.gauge(bands: [{to: 60, tone: success}, {to: 85, tone: warning},
+              {to: 100, tone: danger}]);
+  EXPECT_INT_EQ(got_gauge.band_count, 3);
+  EXPECT_INT_EQ(got_gauge.bands[2].tone, CUI_TONE_DANGER);
+  EXPECT_TRUE(got_gauge.bands[1].to == 85);
+  p.tones([info, warning]);
+  EXPECT_INT_EQ(p.count, 2);
+  EXPECT_INT_EQ(got_tones[1], CUI_TONE_WARNING);
+}
+
+/* `[]` is NULL with a count of 0, and a lowered array's own name does not
+   hide a name of the program. The array is the same one every frame. */
+static void a_literal_is_one_constant_array(void) {
+  Probe p = &(struct Probe){};
+  p.tones([]);
+  EXPECT_TRUE(got_tones == NULL);
+  EXPECT_INT_EQ(p.count, 0);
+  const int *first = NULL;
+  for (int pass = 0; pass < 2; pass++) {
+    p.ints([x2cui_array_0, 8]);
+    if (!first) first = got_ints;
+  }
+  EXPECT_TRUE(got_ints == first);
+  EXPECT_INT_EQ(got_ints[0], 7);
+  EXPECT_INT_EQ(p.count, 2);
+}
+
 // lists
 
 typedef struct Picks {
@@ -639,6 +736,9 @@ void x2cui_suite(void) {
   $test.run(an_item_takes_the_keyboard);
   $test.run(an_id_scope_keeps_state_per_key);
   $test.run(an_array_form_passes_the_count);
+  $test.run(a_record_array_lowers_by_field_type);
+  $test.run(an_option_array_fills_its_count);
+  $test.run(a_literal_is_one_constant_array);
   $test.run(string_lists_convert_once);
   $test.run(a_virtual_list_draws_the_rows_in_view);
   $test.run(a_table_row_reports_what_the_pointer_did);

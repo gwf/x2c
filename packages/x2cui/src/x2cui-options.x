@@ -330,27 +330,36 @@ meta static List _column_of(
    pointer of type `type` is expected. A Map literal element is one record,
    its rows lowered as option rows are; any other element is one value
    lowered by the element type. An Array literal inside a record is a
-   static array declared before the array that points to it. Each array
-   is initialized once, so a component that edits one keeps its edits from
-   frame to frame. */
+   static array declared before the array that points to it, and `[]` is
+   NULL with a count of 0. The arrays are constant, initialized once: a
+   pointer to elements that are not `const`, which CUI may write through,
+   refuses a literal, so a literal never keeps state between frames. */
 meta static List _array(Type type, List elements) {
+  if (!elements) return _free_name("NULL");
   Array statics = [];
   List array = _static(type, elements, statics);
   List declarations = statics.list_free();
-  return $!( ({ @declarations $array; }) );
+  Type cast = type ~= %(icons) ? %(* const * const char) : type;
+  return $!( ($cast) ({ @declarations $array; }) );
 }
 
 /* Declares the static array of `elements` in `statics`, after the arrays
-   its records point to, and returns its name. */
+   its records point to, and returns its name, a fresh one. */
 meta static List _static(Type type, List elements, Array statics) {
+  if (!elements) return _free_name("NULL");
   int icons = type ~= %(icons);
   // `(* const "cui_viz_item")` points to `(const "cui_viz_item")`.
   Type element = icons ? _icon() : type.cdr();
-  List rows = elements.map(%!(List e) => _element(element, e, statics));
-  List name = x2c_ident(%"x2cui_array_$(statics.len())");
-  if (icons) statics.push($!{ static const char *$name[] = { @rows }; });
+  if (!icons && element.car() != <const>)
+    raise %(bad-arg (operation "Array literal")
+            (reason "CUI may write through this array: name it instead"));
+  Type value = icons ? element : element.cdr();
+  List rows = elements.map(%!(List e) => _element(value, e, statics));
+  List name = x2c_binding_fresh("x2cui_array");
+  if (icons) statics.push($!{ static const char *const $name[] = { @rows }; });
   else statics.push($!{ static $element $name[] = { @rows }; });
-  return $!( $name );
+  Type pointer = icons ? %(* const * const char) : type;
+  return $!( ($pointer) $name );
 }
 
 meta static List _element(Type element, List value, Array statics) {
