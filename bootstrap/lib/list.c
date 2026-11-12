@@ -6,10 +6,6 @@ typedef struct List * List;
 
 #include "common.h"
 #include "var/var.h"
-static inline Var car(List x);
-
-static inline List cdr(List x);
-
 typedef struct List{
   Var car;
   struct List * cdr;
@@ -37,6 +33,8 @@ static void f5_cells____promote_node(Var node);
 
 static int f5_cells____try_own_node(Var node);
 
+static inline Var car(List x);
+
 #include "exception.h"
 
 
@@ -45,6 +43,8 @@ static int f5_cells____try_own_node(Var node);
 static inline Var List_caar(List lst){
   return car(Var_list_payload(car(lst)));
 }
+
+static inline List cdr(List x);
 
 static inline Var List_cadr(List lst){
   return car(cdr(lst));
