@@ -22,7 +22,7 @@ static List _full_text(void) => %(
 
 static int _optional_section(String heading) =>
   heading == "Compiler API (provisional)" ||
-  heading == "Compiler and contributor internals"
+  heading == "Compiler internals"
 
 /* Each section is `(heading rows)`, where rows is an Array of
    `(depth title path)` forms. */

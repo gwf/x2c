@@ -44,7 +44,7 @@
 - [Command-Line Interface](reference/cli.md)
 - [Release Notes](reference/release-notes.md)
 
-# Libraries and Packages
+# Libraries and packages
 
 - [Standard Library](library/index.md)
   - [Overview](library/overview.md)
@@ -181,7 +181,7 @@
   - [src/symtab/symtab.x](internals/compiler-api/symtab.md)
   - [src/transform/transform.x](internals/compiler-api/transform.md)
 
-# Compiler and contributor internals
+# Compiler internals
 
 - [Compiler Architecture](internals/architecture.md)
 - [AST Grammar](internals/ast-grammar.md)
