@@ -74,16 +74,13 @@ static void scene_table(Ui ui) {
 }
 
 static void scene_data_grid(Ui ui) {
-  static cui_grid_column columns[] = {
-    { "Name", .width = 240, .sortable = true },
-    { "Team", .width = 140, .sortable = true },
-    { "Commits", .width = 100, .align = CUI_TEXT_RIGHT, .sortable = true },
-    { "Score", .width = 120, .align = CUI_TEXT_RIGHT, .sortable = true } };
   static bool selected[6] = { false, true, true };
   static cui_table_sort sort = { 2, true };
   // The grid draws only the rows on screen, from `first` up to `last`.
-  $cui.data_grid(ui, "people", columns, people.len(), first, last, {
-      .height = CUI_PX(300), .selected = selected, .sort = &sort }) {
+  ui.data_grid ("people", people.len(), first, last,
+                columns: {"Name": 240, "Team": 140, "Commits": right(100),
+                          "Score": right(120)},
+                height: 300, selected: selected, sort: &sort) {
     for (int row = first; row < last; row++) {
       (String name, String team, int commits, double score) = people[row];
       ui.data_grid_row(row);

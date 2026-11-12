@@ -986,6 +986,8 @@ method-form macros, not on `x2cui`.
   always written: `{}` is gone from method calls.
 - One template makes every component's form and one every block's form;
   a form takes any count of ordinary arguments before its options.
+- `ui.data_grid` is the data grid's method form, with a Map literal of
+  columns like `ui.table`'s; `$cui.data_grid` remains beside it.
 - `ui.each`, `ui.item`, `ui.table`, `ui.table_row`, `ui.cell`, and
   `ui.cell_text` are new. `examples/mail.x` and `examples/orders.x` use
   them, and `make run` draws both.

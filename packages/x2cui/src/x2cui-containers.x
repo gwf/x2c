@@ -436,6 +436,7 @@ macro Decorator $cui.id_index(Stmt $body, Expr $ui, Expr $index) {
 
 #include <stdbool.h>
 #include "x2cui-options.x"
+#include "x2cui-arrays.x"
 
 /** What a row of a list or a table did in this frame: `ui.item` and
     `ui.table_row` bind one to the name they are given.
@@ -493,9 +494,35 @@ macro Decorator $Ui.item(Stmt $body, Expr $ui, Name $row, Entry @options) {
 macro Decorator $Ui.table(Stmt $body, Expr $ui, Expr $id, Entry @options) {
   {
     typeof($ui) ui = $ui;
-    static cui_table_column columns[] = { @cui_columns($options) };
-    if ($cui_table_begin(ui, $id, columns, $options)) {
+    static cui_table_column columns[] = {
+      @cui_columns("cui_table_column", $options) };
+    if (ui.table_begin($id, columns, $cui.count(columns),
+                       $cui_options(ui, "table_begin", $options))) {
       defer cui_table_end(ui);
+      $body
+    }
+  }
+}
+
+/** Runs the block while the data grid `$id` of `$rows` rows is open.
+    `columns:` is a Map literal of titles and widths in points, lowered as
+    for `ui.table` to a static `cui_grid_column` array. The grid draws only
+    the rows on screen: the block builds rows `$first` up to `$last`, two
+    `int` variables this macro declares, and begins each with
+    `ui.data_grid_row`. The other options are those of `cui_grid_opts`.
+*/
+macro Decorator $Ui.data_grid(
+  Stmt $body, Expr $ui, Expr $id, Expr $rows, Name $first, Name $last,
+  Entry @options) {
+  {
+    int $first = 0, $last = 0;
+    typeof($ui) ui = $ui;
+    static cui_grid_column columns[] = {
+      @cui_columns("cui_grid_column", $options) };
+    if (ui.data_grid_begin($id, columns, $cui.count(columns), $rows, $first,
+                           $last, $cui_options(ui, "data_grid_begin",
+                                               $options))) {
+      defer cui_data_grid_end(ui);
       $body
     }
   }

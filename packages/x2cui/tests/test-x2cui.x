@@ -339,6 +339,44 @@ static void a_table_takes_its_columns_from_a_map(void) {
   EXPECT_TRUE(same_pixels(a_map_of_columns, an_array_of_columns));
 }
 
+static void a_grid_with_a_map_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 0 };
+  ui.data_grid ("grid", 30, first, last,
+                columns: {"Name": 120, "Done": unsorted(60),
+                          "Score": right(80)},
+                height: 200, sort: &sort)
+    for (int row = first; row < last; row++) {
+      ui.data_grid_row(row);
+      ui.data_grid_cell_text(%"name $row");
+      ui.data_grid_cell_text(row % 2 ? "yes" : "no");
+      ui.data_grid_cell_text(%"$(row * 3)");
+    }
+}
+
+static void a_grid_with_an_array_of_columns(Ui ui) {
+  static cui_table_sort sort = { .column = 0 };
+  static cui_grid_column columns[] = {
+    { "Name", 120, CUI_TEXT_LEFT, true },
+    { "Done", 60, CUI_TEXT_LEFT, false },
+    { "Score", 80, CUI_TEXT_RIGHT, true },
+  };
+  $cui.data_grid(ui, "grid", columns, 30, first, last,
+                 { .height = CUI_PX(200), .sort = &sort })
+    for (int row = first; row < last; row++) {
+      ui.data_grid_row(row);
+      ui.data_grid_cell_text(%"name $row");
+      ui.data_grid_cell_text(row % 2 ? "yes" : "no");
+      ui.data_grid_cell_text(%"$(row * 3)");
+    }
+}
+
+/* The data grid's method form draws what `$cui.data_grid` draws with the
+   same columns as a C array. */
+static void a_data_grid_takes_its_columns_from_a_map(void) {
+  EXPECT_TRUE(same_pixels(a_grid_with_a_map_of_columns,
+                          a_grid_with_an_array_of_columns));
+}
+
 // lists
 
 typedef struct Picks {
@@ -474,6 +512,7 @@ void x2cui_suite(void) {
   $test.run(formatted_text_takes_x2c_values);
   $test.run(method_forms_draw_what_the_c_calls_draw);
   $test.run(a_table_takes_its_columns_from_a_map);
+  $test.run(a_data_grid_takes_its_columns_from_a_map);
   $test.run(an_item_reports_what_the_pointer_did);
   $test.run(a_virtual_list_draws_the_rows_in_view);
   $test.run(a_table_row_reports_what_the_pointer_did);

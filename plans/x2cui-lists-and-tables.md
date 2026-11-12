@@ -104,6 +104,23 @@ the generated C.
 - Undeclared calls such as `right(110)` survive capture as calls of an
   unbound name. Verified; the `%(right 110)` fallback is not needed.
 
+### `ui.data_grid (id, rows, first, last, options) ROWS`
+
+CUI has no block macro for its data grid, so the form is written by hand
+beside `ui.table`, on the same helpers. `columns:` is a Map literal lowered
+by `cui_columns` to a static `cui_grid_column` array; a width is lowered by
+the type of the record's `width` field, so a grid's widths are points
+where a table's are sizes. `first` and `last` are `int` variables the form
+declares, as `$cui.data_grid` declares them. The other options are those
+of `cui_grid_opts`, through `cui_options`. The gallery's data grid page
+and the data grid scene use it, and their images are byte-identical. A
+test draws the same pixels with the form and with `$cui.data_grid`.
+Verified.
+
+The form writes its begin call itself and asks `cui_options` only for
+the record, because `first` and `last` are `Name` holes, which reach a
+meta function as their spellings rather than as expressions.
+
 ### `ui.table_row (row, options) { }` and `ui.cell () { }`
 
 `ui.table_row` begins a row and binds `row` as `ui.item` does.
@@ -179,12 +196,12 @@ the ones Gary approved. Verified.
 2. Adopt `ui.item` and `ui.table_row` binding a row-state name, with
    `hovered`, `pressed`, and `clicked`. Done, through a CUI patch for a
    table row.
-3. Adopt a Map literal of titles and widths as the column template, with
+2. Adopt a Map literal of titles and widths as the column template, with
    `right(...)`, `center(...)`, and `unsorted(...)` as width wrappers.
    Done.
-4. The hairline rule for `ui.item`: top edge, skipped when it or the
+3. The hairline rule for `ui.item`: top edge, skipped when it or the
    previous item is selected. Done.
-5. Per-frame collections: allowed for now. Measurement: `stress --frames
+4. Per-frame collections: allowed for now. Measurement: `stress --frames
    300` gives the same frame time before and after this work (shapes 1.06
    and 1.05 ms, components 1.19 to 1.43 ms and 1.18 to 1.26 ms, three
    alternating runs each, load average about 5). The stress example builds
@@ -194,28 +211,26 @@ the ones Gary approved. Verified.
 
 ## Limits
 
-1. The data grid has no block form; it keeps `$cui.data_grid`, because
-   CUI has no `cui_data_grid` block macro. The table has its own form.
-2. Short values need a meta function, so `Entry @options` rows are
+1. Short values need a meta function, so `Entry @options` rows are
    lowered by `cui_arguments`, `cui_call`, `cui_begin`, and
-   `cui_table_begin`, not forwarded. Forwarding passes rows to a
+   `cui_options`, not forwarded. Forwarding passes rows to a
    `Map @rest` parameter or another `Entry` hole; CUI's methods take an
    option record. These helpers run in the importing file's compiler, so
    they are public.
-3. A component's form writes its method call in its own template,
+2. A component's form writes its method call in its own template,
    `$ui.$method(@cui_arguments(...))`, because the self-call rule is
    lexical: a call built by a meta function is not in the template, so it
    would be the form again and recurse. A block's begin method and the
    list constructs' methods have no forms, so `cui_begin` and `cui_call`
    still build those calls.
-4. A call that passes an option record value, rather than `name: value`
+3. A call that passes an option record value, rather than `name: value`
    rows, must call the method as `Ui.NAME(ui, ..., record)`; the method
    form takes the call. The earlier `$cui.NAME(ui, ..., { ... })`
    decorators remain.
-5. Method forms work in statement and expression positions only, not at
+4. Method forms work in statement and expression positions only, not at
    file scope.
-6. A table row's hover and press come from a patch to CUI; see
+5. A table row's hover and press come from a patch to CUI; see
    `PROFILE.md`. A new CUI version needs the patch remade.
-7. The mail and orders examples have no tests of their own beyond drawing
+6. The mail and orders examples have no tests of their own beyond drawing
    an image; the package test covers clicks, hover, and the column
    lowering.
