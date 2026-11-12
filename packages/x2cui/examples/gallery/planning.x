@@ -115,19 +115,27 @@ void page_planning(Ui ui, Gallery g) {
 
   section(ui, "Week calendar", "Drag events to move them in 15 minute "
                                "steps, or pull the bottom edge to resize.");
-  static cui_cal_event events[] = {
-    { "Standup", "Zoom", 0, 9.5f, 9.75f, CUI_TONE_INFO },
-    { "Design review", "Room 2", 0, 11, 12.5f, CUI_TONE_VIOLET },
-    { "Lunch with Maya", NULL, 1, 12.5f, 13.5f, CUI_TONE_SUCCESS },
-    { "Standup", "Zoom", 1, 9.5f, 9.75f, CUI_TONE_INFO },
-    { "Release planning", "Room 1", 2, 10, 11.5f, CUI_TONE_WARNING },
-    { "1:1 Jonas", NULL, 2, 10.5f, 11, CUI_TONE_ROSE },
-    { "Focus time", "No meetings", 2, 14, 17, CUI_TONE_TEAL },
-    { "Standup", "Zoom", 3, 9.5f, 9.75f, CUI_TONE_INFO },
-    { "Customer call", "Northlight", 3, 15, 16, CUI_TONE_DANGER },
-    { "Demo day", "All hands", 4, 16, 17.5f, CUI_TONE_VIOLET },
-    { "Gym", NULL, 5, 10, 11.5f, CUI_TONE_SUCCESS },
-  };
+  static CalEvents events = CalEvents.of([
+    {title: "Standup", detail: "Zoom", day: 0, start: 9.5f, end: 9.75f,
+     tone: info},
+    {title: "Design review", detail: "Room 2", day: 0, start: 11, end: 12.5f,
+     tone: violet},
+    {title: "Lunch with Maya", day: 1, start: 12.5f, end: 13.5f,
+     tone: success},
+    {title: "Standup", detail: "Zoom", day: 1, start: 9.5f, end: 9.75f,
+     tone: info},
+    {title: "Release planning", detail: "Room 1", day: 2, start: 10,
+     end: 11.5f, tone: warning},
+    {title: "1:1 Jonas", day: 2, start: 10.5f, end: 11, tone: rose},
+    {title: "Focus time", detail: "No meetings", day: 2, start: 14, end: 17,
+     tone: teal},
+    {title: "Standup", detail: "Zoom", day: 3, start: 9.5f, end: 9.75f,
+     tone: info},
+    {title: "Customer call", detail: "Northlight", day: 3, start: 15, end: 16,
+     tone: danger},
+    {title: "Demo day", detail: "All hands", day: 4, start: 16, end: 17.5f,
+     tone: violet},
+    {title: "Gym", day: 5, start: 10, end: 11.5f, tone: success}]);
   cui_date today = cui_date_today();
   int td = cui_date_to_days(today);
   int monday = td - ((td + 3) % 7 + 7) % 7;
@@ -135,30 +143,33 @@ void page_planning(Ui ui, Gallery g) {
     "week", cui_date_from_days(monday), events,
     start_hour: 8, end_hour: 19, height: 420);
   if (ev >= 0)
-    ui.toast(events[ev].title, description: events[ev].detail);
+    ui.toast(events.at(ev).title, description: events.at(ev).detail);
 
   section(ui, "Gantt", "Drag bars to reschedule, pull either end to change "
                        "the length. Arrows follow dependencies.");
-  static cui_gantt_task tasks[] = {
-    { "Research", "Maya Okafor", 0, 5, 1, CUI_TONE_TEAL, -1, false },
-    { "Wireframes", "Aiko Tanaka", 4, 10, 1, CUI_TONE_TEAL, 0, false },
-    { "Design system", "Rosa Delgado", 8, 17, 0.7f, CUI_TONE_TEAL, 1,
-      false },
-    { "Core engine", "Jonas Berg", 6, 20, 0.55f, CUI_TONE_INFO, 0, false },
-    { "Platform backends", "Daniel Mensah", 14, 26, 0.2f, CUI_TONE_TEAL, 3,
-      false },
-    { "Beta", NULL, 27, 27, 0, CUI_TONE_WARNING, 4, true },
-    { "Docs and launch", "Priya Nair", 28, 36, 0, CUI_TONE_SUCCESS, 5,
-      false },
-  };
+  static GanttTasks tasks = GanttTasks.of([
+    {name: "Research", owner: "Maya Okafor", start: 0, end: 5, progress: 1,
+     tone: teal, depends_on: -1},
+    {name: "Wireframes", owner: "Aiko Tanaka", start: 4, end: 10, progress: 1,
+     tone: teal, depends_on: 0},
+    {name: "Design system", owner: "Rosa Delgado", start: 8, end: 17,
+     progress: 0.7f, tone: teal, depends_on: 1},
+    {name: "Core engine", owner: "Jonas Berg", start: 6, end: 20,
+     progress: 0.55f, tone: info, depends_on: 0},
+    {name: "Platform backends", owner: "Daniel Mensah", start: 14, end: 26,
+     progress: 0.2f, tone: teal, depends_on: 3},
+    {name: "Beta", start: 27, end: 27, progress: 0, tone: warning,
+     depends_on: 4, milestone: true},
+    {name: "Docs and launch", owner: "Priya Nair", start: 28, end: 36,
+     progress: 0, tone: success, depends_on: 5}]);
   cui_date origin = cui_date_from_days(monday - 7);
   int tk = ui.gantt("plan", tasks, origin, 42,
                     today: 7 + (td - monday));
   if (tk >= 0) {
-    int days = tasks[tk].end - tasks[tk].start;
+    int days = tasks.at(tk).end - tasks.at(tk).start;
     String dur = %"$days days";
-    ui.toast(tasks[tk].name,
-      description: tasks[tk].milestone ? "Milestone" : dur);
+    ui.toast(tasks.at(tk).name,
+      description: tasks.at(tk).milestone ? "Milestone" : dur);
   }
   section(ui, "Month calendar", "Bars for days off and trips, timed events "
                                 "in time order, +N more when a day is "
@@ -166,21 +177,23 @@ void page_planning(Ui ui, Gallery g) {
   static cui_date month, picked;
   cui_date now = cui_date_today();
   int base = cui_date_to_days((cui_date){ now.year, now.month, 1 });
-  static cui_month_event mev[12];
-  static const char *const titles[12] = {
-    "Standup", "Design review", "Offsite", "1:1", "Release", "Planning",
-    "Customer call", "Lunch", "Retro", "Holiday", "Demo", "Board meeting" };
-  for (int k = 0; k < 12; k++) {
+  // Twelve events spread over this month, built on the first frame.
+  static MonthEvents month_events = MonthEvents.of([]);
+  List titles = %("Standup" "Design review" "Offsite" "1:1" "Release"
+                  "Planning" "Customer call" "Lunch" "Retro" "Holiday" "Demo"
+                  "Board meeting");
+  for (int k = month_events.len(); k < titles.len(); k++) {
     bool span = k == 2 || k == 9;
     int day = base + (k * 5) % 27;
-    mev[k] = (cui_month_event){
-      titles[k], cui_date_from_days(day),
-      span ? cui_date_from_days(day + 2) : (cui_date){ 0 },
-      9.0f + (float) (k % 8), span || k == 4, (cui_tone) (1 + k % 8) };
+    month_events.push(cui_month_event.of(
+      title: titles[k], start: cui_date_from_days(day),
+      end: span ? cui_date_from_days(day + 2) : cui_date.of(),
+      time: 9.0f + (float) (k % 8), all_day: span || k == 4,
+      tone: (cui_tone) (1 + k % 8)));
   }
   cui_month_result mr = ui.month_calendar(
-    "month", month, mev, selected: &picked);
+    "month", month, month_events, selected: &picked);
   if (mr.event >= 0)
-    ui.toast(mev[mr.event].title,
+    ui.toast(month_events.at(mr.event).title,
       description: "Opened from the month calendar");
 }

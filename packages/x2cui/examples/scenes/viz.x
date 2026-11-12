@@ -25,11 +25,12 @@ enum { HALF_YEAR = 182, TRADING_DAYS = 60, RUNS = 24, PEAKS = 80,
 static float commits[HALF_YEAR];
 
 // One price candle a trading day.
-static cui_candle candles[TRADING_DAYS];
+static Candles candles = Candles.of([]);
 
 // Frame time against node count, sized by draw calls.
-static cui_vec2 software_points[RUNS], opengl_points[RUNS];
-static float software_sizes[RUNS], opengl_sizes[RUNS];
+static ScatterSeries frames = ScatterSeries.of([]);
+static Vec2s software_points = Vec2s.of([]), opengl_points = Vec2s.of([]);
+static ArrayFloat software_sizes, opengl_sizes;
 
 // Audio peaks of a track, 0 to 1.
 static float peaks[PEAKS];
@@ -70,24 +71,32 @@ static void prepare_candles(void) {
     float open = price;
     float close = open * (1 + sinf(k * 0.37f) * 0.018f +
                           cosf(k * 0.11f) * 0.01f);
-    candles[k] = (cui_candle){ open, fmaxf(open, close) * 1.006f,
-                               fminf(open, close) * 0.994f, close,
-                               2000 + (float) ((k * 7919) % 900) * 10 };
+    candles.push(cui_candle.of(
+      open: open, high: fmaxf(open, close) * 1.006f,
+      low: fminf(open, close) * 0.994f, close: close,
+      volume: 2000 + (float) ((k * 7919) % 900) * 10));
     price = close;
   }
 }
 
 static void prepare_scatter(void) {
+  software_sizes = [];
+  opengl_sizes = [];
   for (int k = 0; k < RUNS; k++) {
     float nodes = 200 + k * 160.0f;
-    software_points[k] = (cui_vec2){
-      nodes, 0.08f + nodes * 0.00006f + (float) ((k * 37) % 13) * 0.004f };
-    opengl_points[k] = (cui_vec2){
-      nodes * 0.9f + 150,
-      0.15f + nodes * 0.00011f + (float) ((k * 53) % 17) * 0.006f };
-    software_sizes[k] = (float) (10 + (k * 7) % 40);
-    opengl_sizes[k] = (float) (20 + (k * 11) % 50);
+    software_points.push(cui_vec2.of(
+      x: nodes,
+      y: 0.08f + nodes * 0.00006f + (float) ((k * 37) % 13) * 0.004f));
+    opengl_points.push(cui_vec2.of(
+      x: nodes * 0.9f + 150,
+      y: 0.15f + nodes * 0.00011f + (float) ((k * 53) % 17) * 0.006f));
+    software_sizes.push((float) (10 + (k * 7) % 40));
+    opengl_sizes.push((float) (20 + (k * 11) % 50));
   }
+  frames.push(cui_scatter_series.of(name: "Software", points: software_points,
+                                    sizes: software_sizes));
+  frames.push(cui_scatter_series.of(name: "OpenGL", points: opengl_points,
+                                    sizes: opengl_sizes));
 }
 
 static void prepare_signals(void) {
@@ -194,10 +203,7 @@ static void scene_sankey(Ui ui) {
 
 static void scene_scatter_chart(Ui ui) {
   ui.card (pad: 18, width: fill, max_width: 660)
-    ui.scatter_chart("frames", [
-      {name: "Software", points: software_points, sizes: software_sizes},
-      {name: "OpenGL", points: opengl_points, sizes: opengl_sizes}],
-      height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
+    ui.scatter_chart("frames", frames, height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
 }
 

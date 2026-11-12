@@ -11,6 +11,8 @@
 
 // Monthly figures in thousands of dollars.
 static ArrayFloat subscriptions, cloud_spend, desktop, mobile;
+// The series the two charts draw over them.
+static Series revenue, visits;
 
 // One row for each person: name, team, commits, and review score.
 static List people;
@@ -20,6 +22,12 @@ static void prepare(void) {
   cloud_spend = [12, 13, 15, 14, 18, 19, 21, 22, 24, 25, 27, 29];
   desktop = [42, 51, 38, 64, 58, 71];
   mobile = [28, 33, 30, 41, 46, 49];
+  revenue = Series.of([]);
+  revenue.push(cui_series.of("Subscriptions", subscriptions));
+  revenue.push(cui_series.of("Cloud spend", cloud_spend));
+  visits = Series.of([]);
+  visits.push(cui_series.of("Desktop", desktop));
+  visits.push(cui_series.of("Mobile", mobile));
   people = %(("Jonas Berg" "Engine" 884 97.2)
              ("Lena Fischer" "Platform" 640 88.1)
              ("Sam Whitfield" "Engine" 597 84.0)
@@ -29,20 +37,16 @@ static void prepare(void) {
 }
 
 static void scene_line_chart(Ui ui) {
-  cui_series series[] = { cui_series.of("Subscriptions", subscriptions),
-                          cui_series.of("Cloud spend", cloud_spend) };
   List months = %("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep"
                   "Oct" "Nov" "Dec");
   ui.card (width: fill, max_width: 660)
-    ui.line_chart("revenue", series, months,
+    ui.line_chart("revenue", revenue, months,
       area: true, smooth: true, height: 200, format: "$%.0fk");
 }
 
 static void scene_bar_chart(Ui ui) {
-  cui_series series[] = { cui_series.of("Desktop", desktop),
-                          cui_series.of("Mobile", mobile) };
   ui.card (width: fill, max_width: 520)
-    ui.bar_chart("visits", series,
+    ui.bar_chart("visits", visits,
                  %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), height: 200);
 }
 

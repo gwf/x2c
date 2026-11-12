@@ -19,15 +19,16 @@ void page_audio(Ui ui, Gallery g) {
       lv[k][c] = (0.3f + 0.1f * k) * (0.2f + 0.8f * expf(-beat * (2.5f + k)));
     }
   static int tour = -1;
-  static cui_tour_step steps[3] = {
-    { 0, "Turn a knob", "Drag up and down. Hold Shift for fine steps, "
-                        "double-click to reset.", CUI_PLACE_BOTTOM_START },
-    { 0, "Watch the levels", "Bars fall back after each peak; the mark "
-                             "above them holds the peak a moment.",
-      CUI_PLACE_TOP_START },
-    { 0, "Ride the faders", "Click a fader, then use the wheel or the "
-                            "arrow keys.", CUI_PLACE_LEFT_START },
-  };
+  static TourSteps steps = TourSteps.of([
+    {target: 0, title: "Turn a knob",
+     body: "Drag up and down. Hold Shift for fine steps, " "double-click to reset.",
+     placement: bottom_start},
+    {target: 0, title: "Watch the levels",
+     body: "Bars fall back after each peak; the mark " "above them holds the peak a moment.",
+     placement: top_start},
+    {target: 0, title: "Ride the faders",
+     body: "Click a fader, then use the wheel or the " "arrow keys.",
+     placement: left_start}]);
   if (ui.button("Take the tour", icon: sparkles,
                                  variant: outline))
     tour = 0;
@@ -37,7 +38,7 @@ void page_audio(Ui ui, Gallery g) {
       ui.row (gap: 14, wrap: true) {
         ui.knob("Cutoff", cutoff, 20, 20000,
           unit: "Hz", log_scale: true, reset: 1000);
-        steps[0].target = ui.last_id();
+        steps.at(0).target = ui.last_id();
         ui.knob("Resonance", res, 0, 1, format: "%.2f");
         ui.knob("Attack", attack, 1, 2000,
           unit: "ms", log_scale: true, reset: 10);
@@ -48,7 +49,7 @@ void page_audio(Ui ui, Gallery g) {
       ui.level_meter("master", master,
         horizontal: true, length: 240, scale: true,
         segmented: true);
-      steps[1].target = ui.last_id();
+      steps.at(1).target = ui.last_id();
     }
     ui.card (dir: row, gap: 8, wrap: true) {
       for (int k = 0; k < 6; k++) ui.id (k) {
@@ -58,7 +59,7 @@ void page_audio(Ui ui, Gallery g) {
           ticks: k == 0 ? [6, 0, -6, -12, -24, -48] : NULL,
           meter: lv[k],
           meter_channels: 2);
-        if (k == 2) steps[2].target = ui.last_id();
+        if (k == 2) steps.at(2).target = ui.last_id();
       }
     }
   }

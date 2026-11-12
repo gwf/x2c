@@ -11,9 +11,11 @@ enum { NC = 2000 };
 static float traffic[7 * 24];
 static float days[364];
 enum { RUNS = 40 };
-static cui_vec2 points_a[RUNS], points_b[RUNS];
-static float sizes_a[RUNS], sizes_b[RUNS];
-static cui_candle candles[NC];
+// Two renderers' frame times: the scatter chart's series.
+static ScatterSeries scatter = ScatterSeries.of([]);
+static Vec2s points_a = Vec2s.of([]), points_b = Vec2s.of([]);
+static ArrayFloat sizes_a, sizes_b;
+static Candles candles = Candles.of([]);
 
 static void prepare(void) {
   for (int d = 0; d < 7; d++)
@@ -33,22 +35,29 @@ static void prepare(void) {
     float r = (float) ((s >> 16) % 1000) / 1000.0f;
     days[k] = r < 0.18f ? 0 : floorf(base * r * 4);
   }
+  sizes_a = [];
+  sizes_b = [];
   for (int k = 0; k < RUNS; k++) {
     float n = 200 + k * 95.0f;
-    points_a[k] = (cui_vec2){
-      n, 0.08f + n * 0.00006f + (float) ((k * 37) % 13) * 0.004f };
-    points_b[k] = (cui_vec2){
-      n * 0.9f + 150,
-      0.15f + n * 0.00011f + (float) ((k * 53) % 17) * 0.006f };
-    sizes_a[k] = (float) (10 + (k * 7) % 40);
-    sizes_b[k] = (float) (20 + (k * 11) % 50);
+    points_a.push(cui_vec2.of(
+      x: n, y: 0.08f + n * 0.00006f + (float) ((k * 37) % 13) * 0.004f));
+    points_b.push(cui_vec2.of(
+      x: n * 0.9f + 150,
+      y: 0.15f + n * 0.00011f + (float) ((k * 53) % 17) * 0.006f));
+    sizes_a.push((float) (10 + (k * 7) % 40));
+    sizes_b.push((float) (20 + (k * 11) % 50));
   }
+  scatter.push(cui_scatter_series.of(name: "Software", points: points_a,
+                                     sizes: sizes_a));
+  scatter.push(cui_scatter_series.of(name: "OpenGL", points: points_b,
+                                     sizes: sizes_b));
   float price = 64;
   for (int k = 0; k < NC; k++) {
     float o = price;
     float c = o * (1 + sinf(k * 0.37f) * 0.012f + cosf(k * 0.043f) * 0.008f);
-    candles[k] = (cui_candle){ o, fmaxf(o, c) * 1.006f, fminf(o, c) * 0.994f,
-                               c, 2000 + (float) ((k * 7919) % 900) * 10 };
+    candles.push(cui_candle.of(
+      open: o, high: fmaxf(o, c) * 1.006f, low: fminf(o, c) * 0.994f,
+      close: c, volume: 2000 + (float) ((k * 7919) % 900) * 10));
     price = c;
   }
 }
@@ -133,16 +142,17 @@ void page_viz(Ui ui, Gallery g) {
     ui.column (width: grow(1.4f), gap: 10) {
       section(ui, "Bar list", "Ranked, keyed by label: press Shuffle and "
                               "the rows slide to their new rank.");
-      static cui_viz_item pages[] = {
-        { "/docs", 4820 }, { "/", 3920 }, { "/gallery", 2410 },
-        { "/blog/fast-ui-in-c", 1830 }, { "/download", 1210 },
-        { "/pricing", 640 } };
+      static VizItems pages = VizItems.of([
+        {label: "/docs", value: 4820}, {label: "/", value: 3920},
+        {label: "/gallery", value: 2410},
+        {label: "/blog/fast-ui-in-c", value: 1830},
+        {label: "/download", value: 1210}, {label: "/pricing", value: 640}]);
       ui.bar_list("pages", pages);
       if (ui.button("Shuffle", size: sm,
                                icon: shuffle,
                                variant: outline))
         for (int k = 0; k < 6; k++)
-          pages[k].value = (float) (500 + rand() % 5000);
+          pages.at(k).value = (float) (500 + rand() % 5000);
     }
     ui.column (width: grow(1), gap: 10,
                align: center) {
@@ -156,10 +166,7 @@ void page_viz(Ui ui, Gallery g) {
   section(ui, "Scatter",
           "Frame time against node count, sized by draw calls.");
   ui.card (pad: 18, width: fill)
-    ui.scatter_chart("scatter", [
-        {name: "Software", points: points_a, sizes: sizes_a},
-        {name: "OpenGL", points: points_b, sizes: sizes_b}],
-      height: 300, x_label: "Nodes", y_label: "Frame time (ms)",
+    ui.scatter_chart("scatter", scatter, height: 300, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
   ui.card (pad: 18, width: fill, dir: row,
            wrap: true, gap: 24, align: center) {

@@ -9,10 +9,9 @@ void page_actions(Ui ui, Gallery g) {
   static bool align[3] = { true, false, false };
   static cui_status save_status = CUI_STATUS_IDLE;
   static double status_at;
-  static cui_reaction reactions[4] = {
-    { CUI_ICON_THUMBS_UP, 12, true }, { CUI_ICON_HEART, 4, false },
-    { CUI_ICON_ROCKET, 7, false }, { CUI_ICON_SMILE, 2, false },
-  };
+  static Reactions reactions = Reactions.of([
+    {icon: thumbs_up, count: 12, active: true}, {icon: heart, count: 4},
+    {icon: rocket, count: 7}, {icon: smile, count: 2}]);
   static int dial_choice = -1;
   static int theme_mode = -1;
   static int deleted;
@@ -116,12 +115,12 @@ void page_actions(Ui ui, Gallery g) {
           "A floating action button that fans out related actions.");
   ui.row (gap: 16, align: center,
           height: 80) {
-    static const cui_speed_action acts[] = {
-      { CUI_ICON_FILE_TEXT, "New note" }, { CUI_ICON_IMAGE, "Upload image" },
-      { CUI_ICON_MIC, "Record memo" } };
+    static SpeedActions acts = SpeedActions.of([
+      {icon: file_text, label: "New note"},
+      {icon: image, label: "Upload image"}, {icon: mic, label: "Record memo"}]);
     int c = ui.speed_dial("dial", acts,
                           tooltip: "Create");
     if (c >= 0) dial_choice = c;
-    if (dial_choice >= 0) ui.muted(acts[dial_choice].label);
+    if (dial_choice >= 0) ui.muted(acts.at(dial_choice).label);
   }
 }

@@ -20,47 +20,45 @@ static List blame_lines;
 static List tree_files;
 
 // Spans of one game frame in seconds, sorted by prepare.
-static cui_flame_span flame_spans[] = {
-  { "Frame 4812", 0.0000, 0.0164, 0 },
-  { "Update", 0.0002, 0.0072, 1 },
-  { "Render", 0.0074, 0.0150, 1 },
-  { "Present", 0.0152, 0.0163, 1 },
-  { "Input", 0.0003, 0.0007, 2 },
-  { "Animation", 0.0008, 0.0023, 2 },
-  { "Physics", 0.0024, 0.0056, 2 },
-  { "Scripts", 0.0057, 0.0071, 2 },
-  { "Cull", 0.0075, 0.0083, 2 },
-  { "Shadow pass", 0.0084, 0.0103, 2 },
-  { "GBuffer", 0.0104, 0.0130, 2 },
-  { "Lighting", 0.0131, 0.0149, 2 },
-  { "Swap buffers", 0.0153, 0.0162, 2 },
-  { "Skinning", 0.0010, 0.0022, 3 },
-  { "Broadphase", 0.0025, 0.0032, 3 },
-  { "Narrowphase", 0.0033, 0.0042, 3 },
-  { "Solver", 0.0043, 0.0055, 3 },
-  { "Cascade 0", 0.0085, 0.0094, 3 },
-  { "Cascade 1", 0.0095, 0.0102, 3 },
-  { "Opaque", 0.0105, 0.0125, 3 },
-  { "Wait for GPU", 0.0154, 0.0161, 3 },
-};
+static FlameSpans flame_spans = FlameSpans.of([
+  {name: "Frame 4812", start: 0.0000, end: 0.0164, depth: 0},
+  {name: "Update", start: 0.0002, end: 0.0072, depth: 1},
+  {name: "Render", start: 0.0074, end: 0.0150, depth: 1},
+  {name: "Present", start: 0.0152, end: 0.0163, depth: 1},
+  {name: "Input", start: 0.0003, end: 0.0007, depth: 2},
+  {name: "Animation", start: 0.0008, end: 0.0023, depth: 2},
+  {name: "Physics", start: 0.0024, end: 0.0056, depth: 2},
+  {name: "Scripts", start: 0.0057, end: 0.0071, depth: 2},
+  {name: "Cull", start: 0.0075, end: 0.0083, depth: 2},
+  {name: "Shadow pass", start: 0.0084, end: 0.0103, depth: 2},
+  {name: "GBuffer", start: 0.0104, end: 0.0130, depth: 2},
+  {name: "Lighting", start: 0.0131, end: 0.0149, depth: 2},
+  {name: "Swap buffers", start: 0.0153, end: 0.0162, depth: 2},
+  {name: "Skinning", start: 0.0010, end: 0.0022, depth: 3},
+  {name: "Broadphase", start: 0.0025, end: 0.0032, depth: 3},
+  {name: "Narrowphase", start: 0.0033, end: 0.0042, depth: 3},
+  {name: "Solver", start: 0.0043, end: 0.0055, depth: 3},
+  {name: "Cascade 0", start: 0.0085, end: 0.0094, depth: 3},
+  {name: "Cascade 1", start: 0.0095, end: 0.0102, depth: 3},
+  {name: "Opaque", start: 0.0105, end: 0.0125, depth: 3},
+  {name: "Wait for GPU", start: 0.0154, end: 0.0161, depth: 3}]);
 
 // Two frames on the main thread and the render thread, sorted by prepare.
-static cui_trace_span trace_spans[] = {
-  { "Frame", 0.0004, 0.0151, 0, 0 },
-  { "Update", 0.0021, 0.0092, 0, 1 },
-  { "Physics", 0.0023, 0.0051, 0, 2 },
-  { "Scripts", 0.0070, 0.0090, 0, 2 },
-  { "Layout", 0.0094, 0.0121, 0, 1 },
-  { "Paint", 0.0123, 0.0149, 0, 1 },
-  { "Submit", 0.0152, 0.0163, 1, 0 },
-  { "Frame", 0.0170, 0.0317, 0, 0 },
-  { "Update", 0.0187, 0.0258, 0, 1 },
-  { "Physics", 0.0189, 0.0217, 0, 2 },
-  { "Scripts", 0.0236, 0.0256, 0, 2 },
-  { "Layout", 0.0260, 0.0287, 0, 1 },
-  { "Paint", 0.0289, 0.0315, 0, 1 },
-  { "Submit", 0.0318, 0.0329, 1, 0 },
-};
+static TraceSpans trace_spans = TraceSpans.of([
+  {name: "Frame", start: 0.0004, end: 0.0151, track: 0, depth: 0},
+  {name: "Update", start: 0.0021, end: 0.0092, track: 0, depth: 1},
+  {name: "Physics", start: 0.0023, end: 0.0051, track: 0, depth: 2},
+  {name: "Scripts", start: 0.0070, end: 0.0090, track: 0, depth: 2},
+  {name: "Layout", start: 0.0094, end: 0.0121, track: 0, depth: 1},
+  {name: "Paint", start: 0.0123, end: 0.0149, track: 0, depth: 1},
+  {name: "Submit", start: 0.0152, end: 0.0163, track: 1, depth: 0},
+  {name: "Frame", start: 0.0170, end: 0.0317, track: 0, depth: 0},
+  {name: "Update", start: 0.0187, end: 0.0258, track: 0, depth: 1},
+  {name: "Physics", start: 0.0189, end: 0.0217, track: 0, depth: 2},
+  {name: "Scripts", start: 0.0236, end: 0.0256, track: 0, depth: 2},
+  {name: "Layout", start: 0.0260, end: 0.0287, track: 0, depth: 1},
+  {name: "Paint", start: 0.0289, end: 0.0315, track: 0, depth: 1},
+  {name: "Submit", start: 0.0318, end: 0.0329, track: 1, depth: 0}]);
 
 static void prepare(void) {
   blame_lines = %(
@@ -79,30 +77,35 @@ static void prepare(void) {
                  ("x2cui-arrays.x" "4 KB" "x2c source")
                  ("README.md" "21 KB" "Markdown"));
   // CUI's sorts take no context, so they are raw C calls.
-  cui_flame_sort(flame_spans,
-                 (int) (sizeof flame_spans / sizeof *flame_spans));
-  cui_trace_sort(trace_spans,
-                 (int) (sizeof trace_spans / sizeof *trace_spans));
+  cui_flame_sort(flame_spans.data(), flame_spans.len());
+  cui_trace_sort(trace_spans.data(), trace_spans.len());
 }
 
 static void scene_api_explorer(Ui ui) {
-  static const cui_api_param by_id[] = {
-    { "id", "path", "string", true, "The user's id" },
-    { "fields", "query", "string", false, "Comma separated fields" } };
-  static const cui_api_param paging[] = {
-    { "limit", "query", "integer", false, "At most this many, default 20" },
-    { "cursor", "query", "string", false, "From a previous page" } };
   static int selected = 2;
   ui.api_explorer("api", [
     {method: "GET", path: "/users", summary: "List users", tag: "Users",
-     params: paging},
+     params: [{name: "limit", in: "query", type: "integer",
+               description: "At most this many, default 20"},
+              {name: "cursor", in: "query", type: "string",
+               description: "From a previous page"}]},
     {method: "POST", path: "/users", summary: "Create a user", tag: "Users"},
     {method: "GET", path: "/users/{id}", summary: "Get a user", tag: "Users",
-     params: by_id},
+     params: [{name: "id", in: "path", type: "string", required: true,
+               description: "The user's id"},
+              {name: "fields", in: "query", type: "string",
+               description: "Comma separated fields"}]},
     {method: "DELETE", path: "/users/{id}", summary: "Delete a user",
-     tag: "Users", params: by_id},
+     tag: "Users",
+     params: [{name: "id", in: "path", type: "string", required: true,
+               description: "The user's id"},
+              {name: "fields", in: "query", type: "string",
+               description: "Comma separated fields"}]},
     {method: "GET", path: "/orders", summary: "List orders", tag: "Orders",
-     params: paging},
+     params: [{name: "limit", in: "query", type: "integer",
+               description: "At most this many, default 20"},
+              {name: "cursor", in: "query", type: "string",
+               description: "From a previous page"}]},
     {method: "GET", path: "/v1/orders", summary: "List orders (old)",
      tag: "Orders", deprecated: true}],
     width: fill, height: 320, selected: &selected);
@@ -165,14 +168,15 @@ static void scene_coverage(Ui ui) {
 
 static void scene_feature_flags(Ui ui) {
   // CUI changes the switches and shares in place.
-  static cui_feature_flag flags[] = {
-    { "new-checkout", "Single-page checkout with saved cards",
-      { true, true, false }, { 0, 25, 0 } },
-    { "dark-mode-default", "Start new accounts in dark mode",
-      { true, false, false } },
-    { "search-v2", "Ranked search with typo tolerance",
-      { true, true, true }, { 0, 100, 5 } },
-    { "export-pdf", "Export reports as PDF", { false, false, false } } };
+  static FeatureFlags flags = FeatureFlags.of([
+    {key: "new-checkout", description: "Single-page checkout with saved cards",
+     on: [true, true, false], rollout: [0, 25, 0]},
+    {key: "dark-mode-default", description: "Start new accounts in dark mode",
+     on: [true, false, false]},
+    {key: "search-v2", description: "Ranked search with typo tolerance",
+     on: [true, true, true], rollout: [0, 100, 5]},
+    {key: "export-pdf", description: "Export reports as PDF",
+     on: [false, false, false]}]);
   ui.feature_flags("flags", flags,
                    %("Development" "Staging" "Production"),
                    width: 640);
@@ -183,7 +187,7 @@ static void scene_flame_graph(Ui ui) {
   static int selected = 6;
   ui.column (width: 640, gap: 10) {
     if (selected >= 0) {
-      cui_flame_span span = flame_spans[selected];
+      cui_flame_span span = *flame_spans.at(selected);
       double ms = (span.end - span.start) * 1e3;
       ui.text(String.format("%s, %.2f ms", span.name, ms),
               size: 13, color: text_secondary);
@@ -249,11 +253,11 @@ static void scene_keymap(Ui ui) {
 }
 
 static void scene_kv_editor(Ui ui) {
-  static Array headers;
-  if (!headers) headers = [
-    KeyValue.new("Authorization", "Bearer 4f9c2e81d0b7a6", true, true),
-    KeyValue.new("Accept", "application/json", true, false),
-    KeyValue.new("X-Request-Id", "7d1c0a", false, false)];
+  static KvPairs headers = KvPairs.of([
+    {key: "Authorization", value: "Bearer 4f9c2e81d0b7a6", enabled: true,
+     secret: true},
+    {key: "Accept", value: "application/json", enabled: true},
+    {key: "X-Request-Id", value: "7d1c0a"}]);
   ui.column (width: 600, gap: 10) {
     ui.text("Headers", font: medium);
     ui.kv_editor("headers", headers);
@@ -292,15 +296,15 @@ static void scene_problems(Ui ui) {
 
 static void scene_query_builder(Ui ui) {
   // All of: Status is Open, and any of: Assignee is me, Priority > 2.
-  static cui_query_node nodes[12] = {
-    { 0, true, false }, { 1, false, false, 0, 0, "Open" },
-    { 1, true, true }, { 2, false, false, 1, 0, "me" },
-    { 2, false, false, 2, 2, "2" } };
-  static int count = 5;
+  static QueryNodes nodes = QueryNodes.of([
+    {depth: 0, group: true}, {depth: 1, field: 0, op: 0, value: "Open"},
+    {depth: 1, group: true, any: true},
+    {depth: 2, field: 1, op: 0, value: "me"},
+    {depth: 2, field: 2, op: 2, value: "2"}]);
   ui.query_builder("filter", [
     {name: "Status", type: choice, choices: ["Open", "In progress", "Closed"]},
     {name: "Assignee", type: text}, {name: "Priority", type: number}],
-    nodes, count, width: 640);
+    nodes, width: 640);
 }
 
 static void scene_stack_trace(Ui ui) {
@@ -342,12 +346,13 @@ static void scene_test_explorer(Ui ui) {
 }
 
 static void scene_trace_view(Ui ui) {
-  static cui_trace_track tracks[] = { { "Main thread" }, { "Render" } };
+  static TraceTracks tracks = TraceTracks.of([
+    {name: "Main thread"}, {name: "Render"}]);
   static cui_trace_view view = { 0, 0.0335, 0, 0.0187, 0.0258 };
   static int selected = -1;
   if (selected < 0)
-    for (int i = 0; i < (int) (sizeof trace_spans / sizeof *trace_spans); i++)
-      if (trace_spans[i].start == 0.0187) selected = i;
+    for (int i = 0; i < trace_spans.len(); i++)
+      if (trace_spans.at(i).start == 0.0187) selected = i;
   ui.trace_view("trace", tracks, trace_spans, view, selected,
                   width: 640, height: 170, markers: [
                     {name: "vsync", time: 0.0, tone: neutral},
@@ -382,16 +387,21 @@ static void scene_waterfall(Ui ui) {
 
 static void scene_tree_table(Ui ui) {
   // Each node links to its parent, first child, and next sibling.
-  static cui_tree_node nodes[] = {
-    { -1, 1, -1, CUI_TREE_HAS_CHILDREN | CUI_TREE_OPEN },
-    { 0, 2, 5, CUI_TREE_HAS_CHILDREN | CUI_TREE_OPEN },
-    { 1, -1, 3, CUI_TREE_HAS_CHILDREN },
-    { 1, -1, 4, CUI_TREE_HAS_CHILDREN },
-    { 1, -1, -1, 0 },
-    { 0, 6, 8, CUI_TREE_HAS_CHILDREN | CUI_TREE_OPEN },
-    { 5, -1, 7, CUI_TREE_SELECTED },
-    { 5, -1, -1, 0 },
-    { 0, -1, -1, 0 } };
+  static TreeNodes nodes = TreeNodes.of([
+    {parent: -1, first_child: 1, next_sibling: -1,
+     flags: CUI_TREE_HAS_CHILDREN | CUI_TREE_OPEN},
+    {parent: 0, first_child: 2, next_sibling: 5,
+     flags: CUI_TREE_HAS_CHILDREN | CUI_TREE_OPEN},
+    {parent: 1, first_child: -1, next_sibling: 3,
+     flags: CUI_TREE_HAS_CHILDREN},
+    {parent: 1, first_child: -1, next_sibling: 4,
+     flags: CUI_TREE_HAS_CHILDREN},
+    {parent: 1, first_child: -1, next_sibling: -1, flags: 0},
+    {parent: 0, first_child: 6, next_sibling: 8,
+     flags: CUI_TREE_HAS_CHILDREN | CUI_TREE_OPEN},
+    {parent: 5, first_child: -1, next_sibling: 7, flags: CUI_TREE_SELECTED},
+    {parent: 5, first_child: -1, next_sibling: -1, flags: 0},
+    {parent: 0, first_child: -1, next_sibling: -1, flags: 0}]);
   static int cursor = 6;
   int node;
   ui.tree_table ("files", [

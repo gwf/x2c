@@ -62,11 +62,13 @@ static void scene_tab_bar(Ui ui) {
 }
 
 static void scene_doc_tabs(Ui ui) {
-  static cui_doc_tab tabs[] = {
-    { "README.md", CUI_ICON_FILE_TEXT, "docs/README.md", false },
-    { "tile_cache.c", CUI_ICON_CODE, "src/tile_cache.c", true },
-    { "tile_cache.h", CUI_ICON_CODE, "src/tile_cache.h", false },
-    { "CHANGELOG.md", CUI_ICON_FILE_TEXT, "CHANGELOG.md", true } };
+  static DocTabs tabs = DocTabs.of([
+    {title: "README.md", icon: file_text, tooltip: "docs/README.md"},
+    {title: "tile_cache.c", icon: code, tooltip: "src/tile_cache.c",
+     dirty: true},
+    {title: "tile_cache.h", icon: code, tooltip: "src/tile_cache.h"},
+    {title: "CHANGELOG.md", icon: file_text, tooltip: "CHANGELOG.md",
+     dirty: true}]);
   static int open = 4, selected = 1;
   ui.card (width: fill, max_width: 620, pad: 1,
            gap: 0) {
@@ -78,55 +80,58 @@ static void scene_doc_tabs(Ui ui) {
       if (selected >= open) selected = open - 1;
     }
     if (open > 0) ui.column (pad: 16, gap: 6, width: fill) {
-      ui.text(tabs[selected].tooltip, font: medium);
-      ui.text(tabs[selected].dirty ? "Unsaved changes" : "Saved",
+      ui.text(tabs.at(selected).tooltip, font: medium);
+      ui.text(tabs.at(selected).dirty ? "Unsaved changes" : "Saved",
               size: 13, color: text_muted);
     }
   }
 }
 
 static void scene_speed_dial(Ui ui) {
-  static const cui_speed_action actions[] = {
-    { CUI_ICON_FILE_TEXT, "New note" }, { CUI_ICON_IMAGE, "Upload image" },
-    { CUI_ICON_MIC, "Record memo" } };
+  static SpeedActions actions = SpeedActions.of([
+    {icon: file_text, label: "New note"}, {icon: image, label: "Upload image"},
+    {icon: mic, label: "Record memo"}]);
   static int chosen = 1;
   ui.row (gap: 16, align: center) {
     int picked = ui.speed_dial("create", actions,
                                tooltip: "Create");
     if (picked >= 0) chosen = picked;
-    ui.text(%"Last created: $(actions[chosen].label)",
+    ui.text(%"Last created: $(actions.at(chosen).label)",
             color: text_secondary);
   }
 }
 
 static void scene_checklist(Ui ui) {
-  static cui_check_step steps[] = {
-    { "Create your workspace", "Pick a name and invite your team.", "Create",
-      true },
-    { "Connect a repository",
-      "Link GitHub or GitLab to sync issues and pull requests.", "Connect",
-      false },
-    { "Import your data", "Bring tasks over from a CSV or another tool.",
-      "Import", false },
-    { "Turn on notifications", "Get pinged when something needs you.",
-      "Enable", false } };
+  static CheckSteps steps_1 = CheckSteps.of([
+    {title: "Create your workspace",
+     description: "Pick a name and invite your team.", action: "Create",
+     done: true},
+    {title: "Connect a repository",
+     description: "Link GitHub or GitLab to sync issues and pull requests.",
+     action: "Connect"},
+    {title: "Import your data",
+     description: "Bring tasks over from a CSV or another tool.",
+     action: "Import"},
+    {title: "Turn on notifications",
+     description: "Get pinged when something needs you.", action: "Enable"}]);
   ui.box (width: 460) {
-    int done = ui.checklist("onboarding", steps,
+    int done = ui.checklist("onboarding", steps_1,
       title: "Set up your workspace");
-    if (done >= 0) steps[done].done = true;
+    if (done >= 0) steps_1.at(done).done = true;
   }
 }
 
 // The tour opens on its second step, which points at the Share button.
 static void scene_tour(Ui ui) {
-  static cui_tour_step steps[] = {
-    { 0, "Welcome to Fieldnotes",
-      "A quick look at the things you will use every day.", 0 },
-    { 0, "Share with your team",
-      "People you invite can comment without an account.",
-      CUI_PLACE_BOTTOM_END },
-    { 0, "Export anywhere", "Send a report to PDF, Markdown, or a drive.",
-      CUI_PLACE_BOTTOM_END } };
+  static TourSteps steps_2 = TourSteps.of([
+    {target: 0, title: "Welcome to Fieldnotes",
+     body: "A quick look at the things you will use every day.", placement: 0},
+    {target: 0, title: "Share with your team",
+     body: "People you invite can comment without an account.",
+     placement: bottom_end},
+    {target: 0, title: "Export anywhere",
+     body: "Send a report to PDF, Markdown, or a drive.",
+     placement: bottom_end}]);
   static int step = 1;
   ui.card (width: fill, max_width: 620, pad: 1,
            gap: 0) {
@@ -136,10 +141,10 @@ static void scene_tour(Ui ui) {
       ui.spacer();
       ui.button("Share", icon: users,
                          variant: outline);
-      steps[1].target = ui.last_id();
+      steps_2.at(1).target = ui.last_id();
       ui.button("Export", icon: download,
                           variant: primary);
-      steps[2].target = ui.last_id();
+      steps_2.at(2).target = ui.last_id();
     }
     ui.separator();
     ui.column (pad: 20, gap: 10, width: fill)
@@ -147,7 +152,7 @@ static void scene_tour(Ui ui) {
               "soil samples sent to the lab.",
               color: text_secondary);
   }
-  if (step >= 0) ui.tour("intro", steps, step);
+  if (step >= 0) ui.tour("intro", steps_2, step);
 }
 
 static void scene_agent_plan(Ui ui) {
@@ -163,18 +168,20 @@ static void scene_agent_plan(Ui ui) {
 }
 
 static void scene_prompt_suggestions(Ui ui) {
-  static const cui_prompt_suggestion suggestions[] = {
-    { CUI_ICON_CODE, "Explain this code", "Walk through what it does" },
-    { CUI_ICON_CHART_BAR, "Analyze a dataset", "Find trends and outliers" },
-    { CUI_ICON_PENCIL, "Draft an email", "Clear and friendly" },
-    { CUI_ICON_BUG, "Debug an error", "Paste the stack trace" } };
+  static PromptSuggestions suggestions = PromptSuggestions.of([
+    {icon: code, title: "Explain this code",
+     detail: "Walk through what it does"},
+    {icon: chart_bar, title: "Analyze a dataset",
+     detail: "Find trends and outliers"},
+    {icon: pencil, title: "Draft an email", detail: "Clear and friendly"},
+    {icon: bug, title: "Debug an error", detail: "Paste the stack trace"}]);
   static int picked = -1;
   ui.column (gap: 12, width: fill, max_width: 560) {
     ui.heading("What can I help with?", 3);
     int chosen = ui.prompt_suggestions(
       "starters", suggestions, columns: 2);
     if (chosen >= 0) picked = chosen;
-    if (picked >= 0) ui.muted(suggestions[picked].title);
+    if (picked >= 0) ui.muted(suggestions.at(picked).title);
   }
 }
 
@@ -217,13 +224,19 @@ static void scene_month_calendar(Ui ui) {
 }
 
 static void scene_week_calendar(Ui ui) {
-  static cui_cal_event events[] = {
-    { "Standup", "Zoom", 0, 9.5f, 9.75f, CUI_TONE_INFO },
-    { "Design review", "Room 2", 0, 13, 14.5f, CUI_TONE_VIOLET },
-    { "Release planning", "Room 1", 1, 10, 11.5f, CUI_TONE_WARNING },
-    { "Focus time", "No meetings", 2, 14, 17, CUI_TONE_TEAL },
-    { "Customer call", "Northlight", 3, 15, 16, CUI_TONE_DANGER },
-    { "Demo day", "All hands", 4, 11, 12.5f, CUI_TONE_SUCCESS } };
+  static CalEvents events = CalEvents.of([
+    {title: "Standup", detail: "Zoom", day: 0, start: 9.5f, end: 9.75f,
+     tone: info},
+    {title: "Design review", detail: "Room 2", day: 0, start: 13, end: 14.5f,
+     tone: violet},
+    {title: "Release planning", detail: "Room 1", day: 1, start: 10,
+     end: 11.5f, tone: warning},
+    {title: "Focus time", detail: "No meetings", day: 2, start: 14, end: 17,
+     tone: teal},
+    {title: "Customer call", detail: "Northlight", day: 3, start: 15, end: 16,
+     tone: danger},
+    {title: "Demo day", detail: "All hands", day: 4, start: 11, end: 12.5f,
+     tone: success}]);
   cui_date monday = { 2026, 11, 9 };
   ui.week_calendar("week", monday, events,
     start_hour: 8, end_hour: 18, hour_height: 34,
@@ -231,15 +244,19 @@ static void scene_week_calendar(Ui ui) {
 }
 
 static void scene_gantt(Ui ui) {
-  static cui_gantt_task tasks[] = {
-    { "Research", "Maya Okafor", 0, 3, 1, CUI_TONE_TEAL, -1, false },
-    { "Wireframes", "Aiko Tanaka", 3, 7, 1, CUI_TONE_TEAL, 0, false },
-    { "Core engine", "Jonas Berg", 5, 13, 0.55f, CUI_TONE_INFO, 0, false },
-    { "Platform backends", "Daniel Mensah", 10, 16, 0.2f, CUI_TONE_TEAL, 2,
-      false },
-    { "Beta", NULL, 17, 17, 0, CUI_TONE_WARNING, 3, true },
-    { "Docs and launch", "Priya Nair", 18, 20, 0, CUI_TONE_SUCCESS, 4,
-      false } };
+  static GanttTasks tasks = GanttTasks.of([
+    {name: "Research", owner: "Maya Okafor", start: 0, end: 3, progress: 1,
+     tone: teal, depends_on: -1},
+    {name: "Wireframes", owner: "Aiko Tanaka", start: 3, end: 7, progress: 1,
+     tone: teal, depends_on: 0},
+    {name: "Core engine", owner: "Jonas Berg", start: 5, end: 13,
+     progress: 0.55f, tone: info, depends_on: 0},
+    {name: "Platform backends", owner: "Daniel Mensah", start: 10, end: 16,
+     progress: 0.2f, tone: teal, depends_on: 2},
+    {name: "Beta", start: 17, end: 17, progress: 0, tone: warning,
+     depends_on: 3, milestone: true},
+    {name: "Docs and launch", owner: "Priya Nair", start: 18, end: 20,
+     progress: 0, tone: success, depends_on: 4}]);
   cui_date origin = { 2026, 11, 2 };
   ui.gantt("plan", tasks, origin, 21,
     day_width: 20, today: 8);
@@ -249,47 +266,54 @@ static void scene_gantt(Ui ui) {
 static void scene_timeline_editor(Ui ui) {
   enum { KEYS = 8 };
   static cui_curve_key slide[KEYS] = {
-    { 0, 0 }, { 1.5f, 320 }, { 3, 360 }, { 5, 360 } };
+    cui_curve_key.of(x: 0, y: 0), cui_curve_key.of(x: 1.5f, y: 320),
+    cui_curve_key.of(x: 3, y: 360), cui_curve_key.of(x: 5, y: 360) };
   static cui_curve_key fade[KEYS] = {
-    { 0, 0, 0, 0, 0, 0, CUI_CURVE_LINEAR }, { 1, 1 }, { 4.5f, 1 },
-    { 5, 0, 0, 0, 0, 0, CUI_CURVE_LINEAR } };
+    cui_curve_key.of(x: 0, y: 0, mode: CUI_CURVE_LINEAR),
+    cui_curve_key.of(x: 1, y: 1), cui_curve_key.of(x: 4.5f, y: 1),
+    cui_curve_key.of(x: 5, y: 0, mode: CUI_CURVE_LINEAR) };
   static cui_timeline_clip sounds[2] = {
-    { 0.5f, 2.5f, 0, "Whoosh", false },
-    { 3, 4.75f, 0.5f, "Street ambience", false } };
-  static cui_timeline_track tracks[] = {
-    { "Logo", CUI_ICON_IMAGE, 0 },
-    { "Position X", NULL, 1, .keys = slide, .key_count = 4,
-      .key_capacity = KEYS },
-    { "Opacity", NULL, 1, .keys = fade, .key_count = 4,
-      .key_capacity = KEYS },
-    { "Sound", CUI_ICON_AUDIO_LINES, 0, .color = 3, .clips = sounds,
-      .clip_count = 2 } };
+    cui_timeline_clip.of(start: 0.5f, end: 2.5f, name: "Whoosh"),
+    cui_timeline_clip.of(start: 3, end: 4.75f, offset: 0.5f,
+                         name: "Street ambience") };
+  // A track's keys and clips are buffers CUI grows through the track's
+  // own count and capacity, so they stay C arrays the tracks point to.
+  static TimelineTracks tracks = TimelineTracks.of([
+    {name: "Logo", icon: image},
+    {name: "Position X", depth: 1, keys: slide, key_count: 4,
+     key_capacity: KEYS},
+    {name: "Opacity", depth: 1, keys: fade, key_count: 4, key_capacity: KEYS},
+    {name: "Sound", icon: audio_lines, color: 3, clips: sounds,
+     clip_count: 2}]);
   static float time = 1.5f;
   ui.timeline_editor("shot", tracks, time,
     end: 5, fps: 24, toggles: true);
 }
 
 static void scene_curve_editor(Ui ui) {
-  static cui_curve_key keys[16] = {
-    { 0, 0 }, { 0.55f, 0.66f, -0.22f, -0.42f, 0.24f, 0.46f, CUI_CURVE_FREE },
-    { 1.2f, 1.08f }, { 2, 1 } };
-  static int count = 4, selected = 1;
+  static CurveKeys keys = CurveKeys.of([
+    {x: 0, y: 0},
+    {x: 0.55f, y: 0.66f, in_dx: -0.22f, in_dy: -0.42f, out_dx: 0.24f,
+     out_dy: 0.46f, mode: CUI_CURVE_FREE},
+    {x: 1.2f, y: 1.08f}, {x: 2, y: 1}]);
+  static int selected = 1;
   ui.box (width: fill, max_width: 620)
-    ui.curve_editor("ease", keys, count,
+    ui.curve_editor("ease", keys,
       x_max: 2, y_max: 1.2f, x_label: "Time", y_label: "Value",
       selected: &selected);
 }
 
 static void scene_gradient_editor(Ui ui) {
-  static cui_gradient_stop stops[12] = {
-    { 0, { 0xFF, 0xF1, 0xC1, 0xFF } }, { 0.24f, { 0xFF, 0xB1, 0x4A, 0xFF } },
-    { 0.58f, { 0xE2, 0x55, 0x2B, 0xFF } },
-    { 1, { 0x5C, 0x1F, 0x16, 0x00 } } };
-  static int count = 4, selected = 2;
+  static GradientStops stops = GradientStops.of([
+    {pos: 0, color: {r: 0xFF, g: 0xF1, b: 0xC1, a: 0xFF}},
+    {pos: 0.24f, color: {r: 0xFF, g: 0xB1, b: 0x4A, a: 0xFF}},
+    {pos: 0.58f, color: {r: 0xE2, g: 0x55, b: 0x2B, a: 0xFF}},
+    {pos: 1, color: {r: 0x5C, g: 0x1F, b: 0x16, a: 0x00}}]);
+  static int selected = 2;
   ui.column (width: fill, max_width: 560, gap: 10) {
     ui.text("Flame color over lifetime", font: medium,
                                          size: 13);
-    ui.gradient_editor("flame", stops, count,
+    ui.gradient_editor("flame", stops,
       selected: &selected);
   }
 }
