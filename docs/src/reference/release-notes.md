@@ -5,12 +5,44 @@ commands, and packages since the previous release.
 
 ## 0.16.0 (unreleased)
 
+Compile-time code is ordinary x2c: the compiler no longer evaluates Lisp,
+and `$(...)` builds an evaluated List. The release adds temporary
+assignments with `with`, expression aliases, rest parameters, pattern
+conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
+`x2c test` commands.
+
+### Upgrading from 0.15.1
+
+- `$let(place, value) body` becomes `with (place = value) { body }`; a body
+  without braces needs them.
+- `with expression as name { ... }` becomes
+  `alias expression as name { ... }`, and `with expression { ... }` becomes
+  `alias expression { ... }`.
+- A compile-time Lisp form such as `$(import "file.xlisp")` becomes a
+  `meta` function called with `$helper(...)`; `$(...)` in code now builds
+  an evaluated List.
+- An object or function named `expand` can be declared but not read or
+  called; rename it.
+- `%<<a b c>>` becomes `%<a b c>`.
+- `array.find(value)` and `array.indexof(value)` become `array.index(value)`.
+- `Scope.retain()` and `Scope.release()` become `Scope.open()` and
+  `Scope.close()`. The `Scope.up` field, which linked a region to the region
+  opened after it, is removed and has no replacement.
+- `text.try_long(&value)` becomes `text.try_long(value)`, and likewise for
+  `String.try_double` and `Symbol.try_new`.
+- A `List` passed as the values of `String.format`, `Logger.log`, or the
+  `log_*` functions becomes `@values`, or separate arguments.
+- `$switch` becomes an ordinary `switch` with a block and `break` per case.
+- `x2c editor` becomes `x2c lsp`.
+- `x2c repl` is not installed by releases; build it in a checkout with
+  `make commands`.
+
 ### Language
 
 - The compiler no longer evaluates Lisp. The compile-time `$(...)` and
   `@(...)` Lisp forms, including `$(import "file.xlisp")`, are removed.
-  `$(...)` now builds an evaluated List, so a former form at file scope
-  reports `an evaluated collection is an expression, not a top-level form`.
+  Such a form at file scope reports
+  `an evaluated collection is an expression, not a top-level form`.
   Write the computation as a `meta` function and call it with
   `$helper(...)` or `@helper(...)`, and use the operations in `meta.x` by
   their x2c names, such as `x2c_ident` and `Code.binding_spelling`, in place
@@ -96,7 +128,6 @@ commands, and packages since the previous release.
 - String slicing with a zero step now raises `<bad-arg>`, including on an
   empty String. It previously returned the empty String. Array, typed Array,
   List, and String now reject zero steps consistently.
-
 - Array value search is now `index(value)`, including on typed Arrays. It
   returns the first equal element's position, or `-1`. `find` now takes a
   predicate and returns the first accepted element as a `Var`, or `void`.
@@ -113,7 +144,7 @@ commands, and packages since the previous release.
   | none | `Var Array_find(Array, Func)` |
 
 - `Task.run` runs zero-argument jobs cooperatively on the calling native
-  thread, using existing Channels. Results keep ordinary ownership, and every
+  thread, using Channels. Results keep ordinary ownership, and every
   exit finishes all job cleanup. Blocking native calls block the batch. The
   guarded-stack backend supports macOS and Linux on arm64 and x86_64. See
   [Task.run](../library/modules/task.md#Task.run) and
@@ -167,6 +198,9 @@ commands, and packages since the previous release.
   [Time, Random Values, and Encodings](../guide/time-random-encodings.md).
 - `Code.native_signature` returns the `Func` signature of a function for
   compile-time code.
+- `Type.spelling` returns a type as a declaration spells it without a name,
+  such as `int *` or `int (*)(int, char *)`. See
+  [Type.spelling](../library/modules/type.md#Type.spelling).
 - A C string passed through a `Func` is boxed as a `String`, so `String`,
   native pointer, and `Var` parameters all accept it.
 - `Thread.finish_all` no longer prints a cleanup diagnostic during an error
@@ -199,6 +233,11 @@ commands, and packages since the previous release.
   cache root whose recorded program source no longer exists, as script
   builds do under `scripts/` and `runs/`. `Compiler.prune_cache` in the
   compiler API holds that rule.
+- `x2c lint` and `x2c graph` are experimental: a checkout builds them with
+  `make commands`, and installations do not include them.
+- A warning prints as `file:line:column: warning: code: message`, so it is
+  distinct from an error. See
+  [Compiler diagnostics](cli.md#compiler-diagnostics).
 - The sqlite package joins the checked packages.
 
 ### Fixed defects
@@ -213,7 +252,6 @@ commands, and packages since the previous release.
   and generated calls. A const result cannot become a mutable pointer result.
 - Region diagnostics now follow receiver returns from `Array.update_n`,
   `Map.update_n`, and `Map.merge_with`, including compile-time definitions.
-
 - A `~=` pattern condition whose false branch continues with `else if` now
   places that continuation inside a block, so the generated C keeps the
   branch and compiles without a dangling-else warning.
