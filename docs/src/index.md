@@ -35,8 +35,8 @@ x2c adds these features to C:
   `Mutex` coordinates access to shared mutable data.
 - `Error` carries structured failures. `try`, `catch`, and `raise` handle
   them; `finally` and `defer` run cleanup when control leaves a block.
-- `macro` expands to parsed source at compile time, and names a template
-  declares stay private to each expansion. `Type`
+- `macro` expands to parsed source at compile time. Names that a macro
+  template declares stay private to each expansion. `Type`
   holes specialize code for concrete types, including typed collections.
   `Decorator` macros transform the expression or source item that follows.
   The optional [autodiff package](guide/autodiff.md) uses them to

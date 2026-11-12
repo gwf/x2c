@@ -179,21 +179,20 @@ Hello, world!
 Hello, Ada!
 ```
 
-Direct source and `x2c.toml` project builds use the same compiler.
-For source debugging, opt into native debug information and original source
-locations:
+You can also build a single source file directly. For source debugging, add
+native debug information and disable optimization:
 
 ```sh
-x2c build -g --source-map -O0 src/main.x -o hello
+x2c build -g -O0 src/main.x -o hello
 lldb ./hello
 ```
 
-On macOS this also produces `hello.dSYM`; move that directory with the
-executable. The build removes generated objects; pass `--build-dir` to keep
-and reuse them. Bare `--save-temps` uses `.x2c-build` for retained files.
-`--debug` enables compiler logging, not native debug information.
-[Source mapping](../reference/cli.md#source-mapping) gives the
-location rules. To use a C library through a package, see
+Source mapping is on by default. On macOS the build also produces `hello.dSYM`;
+move that directory with the executable. The build removes generated objects;
+pass `--build-dir` to keep and reuse them. Bare `--save-temps` uses
+`.x2c-build` for retained files. `--debug` enables compiler logging, not native
+debug information. [Source mapping](../reference/cli.md#source-mapping) gives
+the location rules. To use a C library through a package, see
 [packages](packages.md).
 
 ## Compile C against the x2c runtime
@@ -244,8 +243,8 @@ supported.
 
 ## Developer workflow
 
-The `dev` branch is the everyday integration branch; `main` is reserved for
-releases. A source checkout is the development install. After
+Clone the default branch for released source; release tags mark published
+versions. A source checkout is the development install. After
 `make build-safe` and `make commands`, the checkout is a complete home with
 its own `packages/` directory, and `./x2c` runs the checkout's compiler with
 its commands. `bin/x2c` starts as the bootstrap compiler, so run

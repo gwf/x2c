@@ -161,7 +161,15 @@ in memory.
 Core networking supplies plain TCP, and `HttpServer` has no TLS hook. Put a
 TLS reverse proxy in front of an HTTP service for deployment.
 
-The [notes service](https://github.com/gwf/x2c/tree/dev/examples/apps/notes)
+The [notes service](https://github.com/gwf/x2c/tree/main/examples/apps/notes)
 serves a page and a JSON API for creating, editing, tagging, and searching
-notes. SQLite preserves its data across restarts. Its README explains setup,
-API requests, and the external HTTP checks.
+notes. SQLite preserves its data across restarts. It builds from a source
+checkout. Its README explains setup, API requests, and the external HTTP
+checks.
+
+## Where to go next
+
+- [Errors and Cleanup](exceptions.md) covers catching `<io-fail>` and other
+  raised causes.
+- [Library Playground](repl.md) calls library functions in a persistent
+  session.

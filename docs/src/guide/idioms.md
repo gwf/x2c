@@ -65,10 +65,7 @@ resources, including when the record itself is a value.
 An active transaction or builder has one owner even when its record is a
 value. Copying it shares the saved maps or backing arrays; the copy is not a
 second transaction or an independently owned builder. Borrow the original
-through reference methods. `SymTxn` and `MachineBuilder` use this pattern;
-use their begin or `new` operation to prepare active storage. A `Job` keeps a
-shared handle because its recorded run and Scope finalizer must reach the
-same job, while its launch options live directly inside that job.
+through reference methods.
 
 ## Borrow required and optional outputs
 
@@ -149,7 +146,7 @@ maintenance cost.
 
 A `meta` function that returns code should show that code. A quotation
 shows the C that will land; a `%(...)` List of node tags hides it. Choose the
-first row that fits. [Meta Functions](generating-code.md#quoting-code-with-)
+first row that fits. [Generating Code](generating-code.md#quoting-code-with-)
 explains each form with examples.
 
 | To build | Write |

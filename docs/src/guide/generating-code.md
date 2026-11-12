@@ -428,7 +428,8 @@ code runs. Inside that insertion the code position returns, so
 $!( %(answer $(calculate())) )      // calculate() runs in the built code
 $!( %(answer $($(amount + 1))) )    // amount + 1 runs while building
 ```
- A template Array splices a computed sequence through the same
+
+A template Array splices a computed sequence through the same
 code boundary: `%[$(@(items))]`. This constructs template slots; ordinary
 Arrays and Maps do not support runtime splicing. A List's `@(expression)`
 still runs when the generated program constructs that List.

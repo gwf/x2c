@@ -1,5 +1,9 @@
 # The Region Model
 
+The compiler checks that values allocated in a region do not remain reachable
+after the region ends. This chapter states the invariant behind that check,
+its exemptions and limits, and how it works.
+
 ## The invariant
 
 A value allocated inside a region must not be reachable after that region
@@ -199,14 +203,14 @@ x2c has no lifetime annotations, so the check derives the same information,
 and derived facts are weaker than a declared contract. As a result, existing
 C-shaped code compiles unchanged, and ordinary code gets only warnings.
 
-## Where to go next
-
-- [Lifetime warnings](memory.md#lifetime-warnings) shows the warnings in
-  ordinary code.
-
 Go's escape analysis and Infer use the most similar methods. Go computes
 per-function escape facts and uses them to choose between stack and heap
 allocation. Infer computes per-procedure summaries and propagates them
 across a program to report memory and lifetime defects. x2c's pass applies
 Infer's method to Go's kind of fact: it computes summaries per function
 within one unit and uses them for warnings.
+
+## Where to go next
+
+- [Lifetime warnings](memory.md#lifetime-warnings) shows the warnings in
+  ordinary code.

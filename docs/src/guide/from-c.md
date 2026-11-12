@@ -321,6 +321,7 @@ build disables. A macro such a branch defines stays for the C compiler. See
 
 ## Where to go next
 
-- [What x2c Adds to C Syntax](x2c-syntax-map.md) lists every addition.
+- [What x2c Adds to C Syntax](x2c-syntax-map.md) groups the additions into
+  twelve families.
 - [Values and Var](values.md) introduces the dynamic value type.
 - The [language reference](../reference/language.md) states the exact rules.

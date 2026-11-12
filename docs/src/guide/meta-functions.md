@@ -95,11 +95,11 @@ call. Here it inserts the integer 71 before the program is built.
 
 These are the two forms of a `meta` function: one runs in your program,
 and one runs in the compiler. Both come from the same body. A
-[rewrite rule](generating-code.md#what-the-compiler-answers) in your program changes only the
-program's copy; the copy the compiler runs is compiled as written.
-Functions that call a compiler query or build a source template,
-directly or through another meta function, are exceptions: they only run
-during translation. We will reach those after ordinary calculations.
+[rewrite rule](generating-code.md#rewriting-a-function-definition) in your
+program changes only the program's copy; the copy the compiler runs is
+compiled as written. Functions that call a compiler query or build a source
+template, directly or through another meta function, are exceptions: they
+only run during translation. We will reach those after ordinary calculations.
 
 ## Compute the arguments too
 
@@ -537,8 +537,8 @@ declare none fails to build.
 
 A module can call the runtime functions that the compiler links. They are
 the whole runtime except Lisp, so a module that calls `Lisp.new` fails to
-link. This holds for a compiler built from a checkout and for one
-`make install` installs. A loaded module stays loaded until the compiler
+link. This holds for every compiler, whether built from a checkout or
+installed. A loaded module stays loaded until the compiler
 exits. Native modules work on macOS, Linux and WSL. On other platforms,
 loading one reports that native modules are not supported.
 
@@ -934,18 +934,12 @@ nonfinite values use the native compiler's infinity/NaN expressions.
 A pointer into the compiler is never a valid address to embed in the future
 program.
 
-## Compile-time arithmetic and evidence
+## Compile-time arithmetic
 
 Compile-time code uses the x2c backend and the host C compiler selected by
 `--meta-cc`, which defaults to `cc`. The target `--cc` does not select that
 compiler. Arithmetic, conversions and casts follow the host build's native
 semantics.
-The `meta-differential` compiler fixture checks narrow and unsigned
-arithmetic, wide intermediate values, floating operations and conversions
-against runtime calls. The `comptime-lowering`, `meta-native-constructs`,
-`meta-import` and `meta-cursors` fixtures cover collections, callable
-values, local addresses, C constructs, method chaining and iteration; the
-`meta-records` and `meta-heap-objects` fixtures cover structs and the heap.
 
 ## Generating code
 

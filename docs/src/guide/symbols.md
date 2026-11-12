@@ -51,7 +51,7 @@ static const char *explain(Symbol outcome) {
 Zero is the empty symbol. `Symbol.new` returns it for an empty string, and
 `Symbol.new_len` also returns it for a null pointer. `Symbol.new` requires a
 nonnull pointer. Zero is falsy in a condition, and its representation is
-`<>`.
+`<>`; write it in source as `<"">`.
 
 ## How a Symbol is encoded
 

@@ -2,8 +2,8 @@
 
 A `match` statement takes a `List` apart by its shape. You write a pattern
 that looks like the data and name the pieces you need. The names become
-ordinary local variables. One pattern replaces a chain of `List_car`,
-`List_cdr`, length checks, and tag tests.
+ordinary local variables. One pattern replaces a chain of `car` and
+`cdr` calls, length checks, and tag tests.
 
 The `match` statement and the runtime matcher share one pattern language. The
 exhaustive rules are in [the language reference](../reference/language.md).
@@ -212,10 +212,9 @@ match (%(tag (a b))) {
 
 Runtime-built patterns may put an interned operator `Symbol` in the head
 position. `List.match(input, %($op ...))` applies the same operator semantics
-as its literal spelling, and the runtime operator suite checks `!or`, `!not`,
-`!quote`, `!is`, and nested dynamic forms. Source `match` arms should spell
-operators literally so the compiler can determine which named binders are
-available to the arm body.
+as its literal spelling. Source `match` arms should spell operators literally
+so the compiler can determine which named binders are available to the arm
+body.
 
 The `?binder?`, `*binder?`, and `!op?` spellings are reserved in `!is`
 operand positions. They are not named binders and do not execute a predicate.

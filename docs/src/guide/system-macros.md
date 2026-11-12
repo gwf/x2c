@@ -139,7 +139,7 @@ constructor obtains zeroed storage, passes it to `init` with the
 constructor's arguments, and returns it. A heap class obtains that storage
 from `alloc`, whose default is a zeroed Scope allocation. A heap class's
 `init` receives its bare handle. Prefer a reference receiver for a value
-class's `init`; the existing pointer receiver is also accepted. `new` takes
+class's `init`; a pointer receiver is also accepted. `new` takes
 the parameters after that receiver in the same order:
 
 ```x2c
@@ -462,8 +462,7 @@ $lock(mutex) { printf("held\n"); }
 ```
 
 This preserves Mutex's error behavior. It does not replace descriptor locks,
-file-stream locks, or a project's conditional-acquisition policy. Logger's
-private synchronized decorator keeps its own policy.
+file-stream locks, or a project's conditional-acquisition policy.
 
 ## Clean up an initialized local
 

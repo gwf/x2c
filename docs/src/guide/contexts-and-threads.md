@@ -369,7 +369,7 @@ bytes. Keep those bytes under an owner that survives actual borrower
 completion, including failure cleanup. Services shared outside the batch need
 an explicit failure-reply or dependency protocol.
 
-### Parallel mapping and explicit ownership
+## Parallel mapping and explicit ownership
 
 `source.parallel_map(callback, workers).foldl(seed, reducer)` reuses bounded
 workers and invokes the reducer on the caller in completion order. Each worker

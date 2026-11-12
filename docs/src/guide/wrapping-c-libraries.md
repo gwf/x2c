@@ -28,11 +28,11 @@ int          feed_scan(feed_parser *parser, feed_visitor visit, void *user);
 const char  *feed_strerror(int code);
 ```
 
-A real package includes a pinned header here. The examples declare these six
+A real package includes a pinned header here. The examples declare these
 names in hidden lines, visible through the eye icon, so each example compiles
 on its own.
 
-These six functions leave five things for the caller to manage:
+These five functions leave five things for the caller to manage:
 
 | Concern | Here |
 | --- | --- |
@@ -387,7 +387,7 @@ static void _feed_error(String operation, int code) {
 ```
 
 Pick the cause from the shared codes described in
-[Exceptions and Cleanup](exceptions.md): `<malformed>` for bad external input,
+[Errors and Cleanup](exceptions.md): `<malformed>` for bad external input,
 `<bad-state>` for a stale or released handle, `<alloc-fail>` for a failed
 native allocation. When the library reports only a message and no code, raise
 one documented cause with the text under `(message ...)` and no `code`.

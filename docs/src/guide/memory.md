@@ -353,7 +353,7 @@ through the raw `Bytes` pointer, use the forms that return the pointer,
 `Bytes.append` and `Bytes.reserve`, or recover the handle with `Bytes.block`.
 `Block.append` and `Block.reserve` raise `<bad-arg>` on a bad argument and
 leave the storage unchanged. Capacity and allocation failures raise
-`<size-limit>` and `<alloc-fail>`. None of these raises returns to the
+`<size-limit>` and `<alloc-fail>`. None of these errors returns to the
 call. `Array` is a `Block` whose element width is
 `sizeof(Var)`; see [Strings, Lists, Arrays, and Maps](collections.md).
 

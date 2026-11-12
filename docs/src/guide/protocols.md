@@ -173,8 +173,8 @@ protocol Iter(Domain);
 ```
 
 `Domain` already iterates through its inherited `List` adoption. The
-explicit adoption selects `List.iter`, so iteration calls `List_iter`
-directly, with no `Domain.iter` forwarding method.
+explicit adoption selects `List.iter`, so iteration calls it directly, with
+no `Domain.iter` forwarding method.
 
 `associated Name = Default;` declares a type that each participant binds from
 its own signatures. `Array` binds an index `Key` to `int`, while `Map` binds

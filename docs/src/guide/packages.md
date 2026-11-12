@@ -51,8 +51,9 @@ second package may publish its own `Greeting` in the same program.
 
 ## Building one
 
-`packages/package.mk` holds the recipe. A package directly under `packages/`,
-such as `packages/yyjson`, needs a two-line Makefile:
+These recipes need a source checkout. `packages/package.mk` holds the
+recipe. A package directly under `packages/`, such as `packages/yyjson`,
+needs a two-line Makefile:
 
 ```make
 PACKAGE := yyjson
@@ -544,8 +545,8 @@ spaces.
 
 A bundle is specific to its host platform, architecture, native profile, and
 matching x2c compiler/runtime. `BUNDLE.json` records those build identities.
-Native dependency toolchain information comes from its existing cache receipt
-when available; an explicit external prefix may have no receipt. A bundle
+Native dependency toolchain information comes from its cache receipt when
+available; an explicit external prefix may have no receipt. A bundle
 provides no stable ABI across compiler releases, no cross-platform execution,
 and no automatic dependency resolution. Native system libraries and frameworks
 remain supplied by the host.
@@ -578,7 +579,7 @@ Libcurl bundles include its pinned OpenSSL static inputs in link order. Host
 libcurl uses the host's system certificate bundle.
 
 Raylib also requires its native type declarations during x2c source discovery.
-Use the existing source include option for its bundled headers:
+Use the source include option for its bundled headers:
 
 ```sh
 x2c build --package-dir native-packages \
@@ -594,14 +595,14 @@ make -C packages/raylib bundle DEPENDENCY_MANIFEST=dependency-desktop.json
 ```
 
 Prepare and validate the selected native profile before distributing it. The
-bundle target preserves existing dependency checksum, header, and license
-checks through the ordinary package build; consumer builds do not download
+bundle target runs the dependency checksum, header, and license checks
+through the ordinary package build; consumer builds do not download
 missing inputs.
 
 ### Declare a package's native distribution
 
 The optional `distribution` object in `dependency.json` lists selected files
-and directories with the existing `copies` shape and ordered native arguments:
+and directories with the `copies` shape and ordered native arguments:
 
 ```json
 "distribution": {

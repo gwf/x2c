@@ -106,7 +106,7 @@ yields no empty words. The cursor and each view allocate nothing; keep the
 source String and its owning pool alive through every use of a view.
 
 `text.substring(offset, length)` constructs a checked view. Negative or
-out-of-range spans raise `bad-arg`; an empty span at the end is valid.
+out-of-range spans raise `<bad-arg>`; an empty span at the end is valid.
 `len()`, `hash()`, `equal()`, and `compare()` operate on the borrowed bytes.
 Equal contents have equal hashes even when their sources or offsets differ.
 `.str()` and `.string()` materialize the same canonical String in the active
@@ -380,12 +380,6 @@ before that failure; a seedless fold consumes its seed and the next element.
 Consumed inputs are not restored, just as when a callback itself raises.
 Empty inputs and seedless singleton folds need no invocation, so empty
 `find`, `any`, and `all` calls return `void`, 0, and 1.
-
-This replaces the earlier null-callback identity behavior of `map`, immediate
-exhaustion of `filter`, drain-without-combining behavior of `foldl`, NULL
-iterators from `scan` and `map2`, and fixed `find`, `any`, and `all` results.
-The corresponding String identity and List accumulator-preservation defaults
-also end; Lisp nil callbacks use the same native contract.
 
 - `range(end)`, `range(start, end)`, or `range(start, end, step)`:
   each `int` in the inclusive range.

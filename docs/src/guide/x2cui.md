@@ -12,9 +12,9 @@ out, handles the mouse and keyboard, and draws it in a window or into
 pixels. The entry unit is `packages/x2cui/src/x2cui.x`, and every public
 name compiles to `x2cui__*`.
 
-The package is a preview. Native builds are supported on macOS arm64 and
-on Linux arm64 and x86_64. On Linux the package check passes, but that
-check draws off screen; no window has been opened there. The package has
+The package is experimental. Native builds are supported on macOS arm64 and
+on Linux arm64 and x86_64. On Linux the package passes its off-screen
+checks; the windowed path has not been tested there. The package has
 no release bundle, so a program builds it from a checkout. A browser build
 of the gallery also exists. CUI has no accessibility tree, no inline
 input-method composition, and no bidirectional text, and a program draws
@@ -393,8 +393,9 @@ lasts across frames.
 
 ## Limits
 
-- The package is a preview. Native builds are supported on macOS arm64 and
-  Linux arm64 and x86_64; no window has been opened on Linux.
+- The package is experimental. Native builds are supported on macOS arm64
+  and Linux arm64 and x86_64. On Linux the package passes its off-screen
+  checks; the windowed path has not been tested there.
 - There is no release bundle; build the package from a checkout.
 - The browser build needs Memory64, JavaScript Promise Integration, and
   WebGL 2.
@@ -405,3 +406,8 @@ lasts across frames.
 - The package applies two patches to CUI, `table-row-state` and
   `focusable-canvas`, and an upgrade of CUI must remake them.
   `PROFILE.md` describes both.
+
+## Where to go next
+
+- [Packages](packages.md) covers building, installing, and importing
+  packages.

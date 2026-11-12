@@ -56,7 +56,7 @@ Request each kind once per type.
 `to_map` writes each field under its name. A nested struct becomes a nested
 Map. `from_map` reads every field, raising `<bad-arg>` with
 `(operation "from_map") (field NAME) (reason "missing")` for an absent key.
-Wrong value types raise the existing conversion's `<no-convert>` error.
+Wrong value types raise the conversion's `<no-convert>` error.
 Extra Map keys are ignored.
 
 `json` writes the Map with `Var.json`; `from_json` reads an object with

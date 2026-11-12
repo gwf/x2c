@@ -1,6 +1,6 @@
 # Automatic Differentiation
 
-`autodiff-macros.x` differentiates ordinary `double` code four ways:
+The `autodiff` package differentiates ordinary `double` code four ways:
 
 - Dual numbers carry a derivative through operators at runtime.
 - `$ad.forward()` generates a tangent function beside a decorated function,
@@ -11,14 +11,15 @@
 - `autodiff.x` records a runtime tape for code that the decorators cannot
   transform.
 
-All four are ordinary x2c: a macro file, a runtime unit, and the existing
-protocol and decorator machinery. The compiler has no derivative support
-of its own. Both files belong to the optional `autodiff` package in
-`packages/autodiff`, which has no native dependency. `import "autodiff";`
-gives a unit the macros and the runtime tape, because the package's
-`autodiff.x` includes its macro module. A unit can also include that module
-directly by its path, as `#include "../src/autodiff-macros.x"` does in the
-package's fixtures; the listings below write the short name. The
+All four are ordinary x2c: a macro file, a runtime unit, and the protocol
+and decorator features. The compiler has no derivative support
+of its own. The macros are in `autodiff-macros.x` and the runtime tape is in
+`autodiff.x`. Both files belong to the optional `autodiff` package in
+`packages/autodiff`, which has no native dependency. Install it with
+`x2c install autodiff`. `import "autodiff";` gives a unit the macros and the
+runtime tape, because the package's `autodiff.x` includes its macro module.
+A unit can also include that module directly by its path; the listings below
+write the short name. The
 package's [README](https://github.com/gwf/x2c/blob/main/packages/autodiff/README.md)
 lists its files and checks.
 For other specialized capabilities, see [Advanced Topics](../library/advanced-topics.md).
@@ -298,10 +299,10 @@ operation therefore does not contaminate the requested gradient. Repeating
 Values box through `Var` and each operation allocates a node in
 the active `Scope`, so this is the slow path.
 
-Use one tape for a computation, creating constants with that tape's `input`
-as well. Binary arithmetic operations reject nodes from different tapes with
-`bad-arg` before recording anything. `backward` rejects a result from another tape
-before clearing or seeding adjoints. Keep the tape and its nodes alive
+Use one tape for a computation, creating constants with that tape's `input` as
+well. Binary arithmetic operations reject nodes from different tapes with
+`<bad-arg>` before recording anything. `backward` rejects a result from another
+tape before clearing or seeding adjoints. Keep the tape and its nodes alive
 together; do not change a recorded node's `tape` field.
 
 ## Choosing

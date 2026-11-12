@@ -169,8 +169,8 @@ puts(%"output: ($key: $val) = $answer");
 ```
 
 A numeric segment of an interpolated `String` renders through its nearest
-declared `T_str` converter when it has one and through `Var.str` otherwise.
-Converter lookup follows the source's typedef chain, and an exact converter
+declared `T.str` method when it has one and through `Var.str` otherwise.
+The lookup follows the source's typedef chain, and a method on the exact type
 wins. A segment already typed `Var` renders through `Var.str` whatever tag it
 holds:
 

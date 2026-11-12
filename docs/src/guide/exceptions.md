@@ -58,7 +58,7 @@ output.
 
 `try` requires a following `catch`, `finally`, or both. A bare `catch:`
 handles every cause. Filtered `catch` arms select the newest `Error` by
-matching `%(CODE @DETAIL)`:
+matching `%(code *details)`:
 
 <!-- ignore: illustrative `Block` and reporting callbacks are omitted -->
 ```x2c,ignore

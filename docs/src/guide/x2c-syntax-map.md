@@ -40,18 +40,13 @@ Grammar changes need not introduce tokens. Bare `[a, b]` Arrays and
 Conversely, percent literals change how their contents are tokenized.
 `=>` is a grammar spelling composed of two tokens, not a new lexer token.
 
-## What was subtracted
+## What the list leaves out
 
 The comparison baseline is C11, using its lexical clauses and syntax
 summary: [WG14 N1570, sections 6.4 and Annex A](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf).
 Ordinary C declarations, pointer declarators, expressions, control flow,
 designated initializers, compound literals, `_Static_assert`, `_Generic`,
 and `_Thread_local` are therefore absent from the short list.
-
-The short list is a guide, not a proven difference between the languages
-that two complete parsers accept. Contextual binding, macro signatures, and
-lexical modes prevent a simple subtraction of production names from giving
-that result.
 
 Three boundaries keep the map useful:
 
@@ -77,8 +72,7 @@ Names such as `String`, `Var`, and `List` use ordinary type-name syntax.
 Boxing, conversion, lifetime, truthiness, pointer-dot access, method-call
 resolution, and operators backed by protocols add behavior without always
 adding syntax. `(a, b) = values` also needs its assignment interpretation to
-explain destructuring. A grammar-only diagram must not imply these behaviors
-follow from punctuation alone.
+explain destructuring.
 
 `class` and `foreach` are shipped aliases built on x2c's macro system.
 User macros can add further source forms through the same typed positions.
