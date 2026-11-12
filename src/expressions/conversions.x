@@ -724,9 +724,14 @@ static int _unrelated_pointers(Compiler c, Type source, Type target) {
     target = c.sym.resolve_key(target.cdr());
     if (source == target) return 0;
     if (!source.is_pointer() || !target.is_pointer())
-      return _known_pointee(source) && _known_pointee(target);
+      return _known_level(source) && _known_level(target);
   }
 }
+
+/* A pointer pointee differs from any known non-pointer pointee, as an
+   Array, a `struct Array *`, differs from a `const char *const *`. */
+static int _known_level(Type type) =>
+  type.is_pointer() || _known_pointee(type);
 
 /* Pointee types that establish a pointer-type difference: a named struct,
    union, or enum, or a builtin scalar.  void is excluded because C converts
