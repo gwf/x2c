@@ -227,6 +227,20 @@ NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
                "cui_corners", "cui_shadow", "cui_vertex", "cui_draw_cmd",
                "cui_draw_data", "cui_series"}
 
+# The records a program keeps by name: the arrays a component edits in
+# place, and the arrays a program both reads and passes to a component.
+COLLECTIONS = ["cui_api_param", "cui_cal_event", "cui_candle",
+               "cui_check_step", "cui_curve_key", "cui_doc_tab",
+               "cui_feature_flag", "cui_file_entry", "cui_flame_span",
+               "cui_gantt_task", "cui_gradient_stop", "cui_kv_pair",
+               "cui_log_line", "cui_month_event", "cui_plan_step",
+               "cui_prompt_suggestion", "cui_query_field", "cui_query_node",
+               "cui_reaction", "cui_series", "cui_source", "cui_speed_action",
+               "cui_terminal_line", "cui_timeline_clip", "cui_timeline_track",
+               "cui_toc_item", "cui_tour_step", "cui_trace_span",
+               "cui_trace_track", "cui_tree_node", "cui_viz_item"]
+
+
 def records(header):
   """The CUI record types that `T.of` builds."""
   text = re.sub(r"/\*.*?\*/", "", header, flags=re.S)
@@ -235,6 +249,22 @@ def records(header):
     text)
   return [n for n in names if not n.endswith(("_opts", "_result"))
           and n not in NOT_RECORDS]
+
+
+def collection_name(record):
+  """`cui_kv_pair` is `KvPairs`, `cui_file_entry` is `FileEntries`."""
+  words = record[4:].split("_")
+  last = words[-1]
+  if last.endswith("s"):
+    pass
+  elif last.endswith("y") and last[-2] not in "aeiou":
+    last = last[:-1] + "ies"
+  elif last.endswith(("x", "ch", "sh")):
+    last += "es"
+  else:
+    last += "s"
+  words[-1] = last
+  return "".join(w[:1].upper() + w[1:] for w in words)
 
 
 def replace(path, kind, items):
@@ -279,6 +309,10 @@ def main():
            + " ".join(tone_names(header)) + ">;"])
   rows = [wrap("", [f"$x2cui.record({r});" for r in records(header)], "",
                 "").replace(", ", " ").replace(",\n", "\n")]
+  for record in COLLECTIONS:
+    name = collection_name(record)
+    rows.append(f"typedef Block {name};\n$x2cui.records({record}, {name});\n"
+                f"$x2cui.collection({name}, {record});")
   replace("src/x2cui.x", "records", rows)
   icons = icon_parameters(header, hand)
   replace("src/x2cui-options.x", "icons",

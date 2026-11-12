@@ -160,6 +160,16 @@ meta List x2cui_record(Type record, List options) {
 meta List x2cui_of(String record, List fields) =>
   x2cui_record(%($record), fields);
 
+/** Returns the static array of the CUI record `record` that `rows`, an
+    Array literal of `name: value` rows, lowers to, as a form argument
+    does: what `Reactions.of([{icon: heart, count: 4}])` copies.
+*/
+meta List x2cui_rows(String record, List rows) =>
+  x2cui_value(%(* const $record), rows);
+
+/** Returns how many rows the Array literal `rows` holds. */
+meta List x2cui_row_count(List rows) => _count(rows);
+
 /** Returns the call that pushes `key` on the id stack: `cui_push_id` for
     text and `cui_push_id_int` for anything else.
 */
