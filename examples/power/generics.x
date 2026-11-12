@@ -5,21 +5,21 @@
 #include "typed-list.x"
 
 int main(void) {
-// Store native ints and count each response code.
-ArrayInt responses = [200, 200, 404, 200, 500, 404];
-MapIntInt counts = {};
-for (int i = 0, n = responses.len(); i < n; i++)
-  counts[responses[i]] += 1;
+  // Store native ints and count each response code.
+  ArrayInt responses = [200, 200, 404, 200, 500, 404];
+  MapIntInt counts = {};
+  for (int i = 0, n = responses.len(); i < n; i++)
+    counts[responses[i]] += 1;
 
-// A typed List fixes the report order, including absent codes.
-ListInt codes = %(200 403 404 500);
-for (ListInt rest = codes; rest; rest = rest.cdr()) {
-  int code = rest.car();
-  printf("%d: %d\n", code, counts.getdefault(code, 0));
-}
-assert(counts[200] == 3 && counts[404] == 2);
-assert(counts[500] == 1 && counts.getdefault(403, 0) == 0);
-assert(counts.len() == 3 && responses.len() == 6);
-assert(codes.car() == 200 && codes.last() == 500);
-return 0;
+  // A typed List fixes the report order, including absent codes.
+  ListInt codes = %(200 403 404 500);
+  for (ListInt rest = codes; rest; rest = rest.cdr()) {
+    int code = rest.car();
+    printf("%d: %d\n", code, counts.getdefault(code, 0));
+  }
+  assert(counts[200] == 3 && counts[404] == 2);
+  assert(counts[500] == 1 && counts.getdefault(403, 0) == 0);
+  assert(counts.len() == 3 && responses.len() == 6);
+  assert(codes.car() == 200 && codes.last() == 500);
+  return 0;
 }

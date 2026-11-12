@@ -262,6 +262,8 @@ static void f11_identifiers____unshadow_visible(Compiler c, List visible, String
 
 static int _identifier_needs_resolution(Compiler c, List binding);
 
+static String f11_identifiers____kept_spelling(Compiler c, String name);
+
 static List _resolve_identifier(Compiler c, Var value, Type type, Token origin);
 
 static List f11_identifiers____capture_lambda_value(Compiler c, List result, List * binding, Type * type, int * read_reference);
@@ -2563,7 +2565,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1944 = cons(_1943, NULL);
   _1945 = cons(_250, _1944);
   _1946 = List_var(_1945);
-  _1947 = int_var(89071);
+  _1947 = int_var(89789);
   _1948 = cons(_1947, NULL);
   _1949 = cons(_255, _1948);
   _1950 = List_var(_1949);
@@ -2762,7 +2764,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2140 = cons(_2139, NULL);
   _2141 = cons(_242, _2140);
   _2142 = List_var(_2141);
-  _2143 = int_var(89433);
+  _2143 = int_var(90151);
   _2144 = cons(_2143, NULL);
   _2145 = cons(_255, _2144);
   _2146 = List_var(_2145);
@@ -2879,7 +2881,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2257 = cons(_2256, NULL);
   _2258 = cons(_242, _2257);
   _2259 = List_var(_2258);
-  _2260 = int_var(90195);
+  _2260 = int_var(90913);
   _2261 = cons(_2260, NULL);
   _2262 = cons(_255, _2261);
   _2263 = List_var(_2262);
@@ -2977,7 +2979,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2355 = cons(_2354, NULL);
   _2356 = cons(_242, _2355);
   _2357 = List_var(_2356);
-  _2358 = int_var(90279);
+  _2358 = int_var(90997);
   _2359 = cons(_2358, NULL);
   _2360 = cons(_255, _2359);
   _2361 = List_var(_2360);
@@ -3102,7 +3104,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2480 = cons(_2479, NULL);
   _2481 = cons(_242, _2480);
   _2482 = List_var(_2481);
-  _2483 = int_var(90016);
+  _2483 = int_var(90734);
   _2484 = cons(_2483, NULL);
   _2485 = cons(_255, _2484);
   _2486 = List_var(_2485);
@@ -3203,7 +3205,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2578 = cons(_2577, NULL);
   _2579 = cons(_242, _2578);
   _2580 = List_var(_2579);
-  _2581 = int_var(89845);
+  _2581 = int_var(90563);
   _2582 = cons(_2581, NULL);
   _2583 = cons(_255, _2582);
   _2584 = List_var(_2583);
@@ -3425,7 +3427,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2800 = cons(_2799, NULL);
   _2801 = cons(_242, _2800);
   _2802 = List_var(_2801);
-  _2803 = int_var(90486);
+  _2803 = int_var(91204);
   _2804 = cons(_2803, NULL);
   _2805 = cons(_255, _2804);
   _2806 = List_var(_2805);
@@ -3633,7 +3635,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3008 = List_var(_3007);
   _3009 = cons(_202, _84);
   _3010 = List_var(_3009);
-  _3011 = int_var(92888);
+  _3011 = int_var(93606);
   _3012 = cons(_3011, NULL);
   _3013 = cons(_255, _3012);
   _3014 = List_var(_3013);
@@ -5834,6 +5836,12 @@ static int _identifier_needs_resolution(Compiler c, List binding){
   String spelling = Ast_binding_spelling(binding);  Map facts = Compiler_semantic_binding_facts(c);  int retained_parameter = Map_contains(facts, List_var(cons(_1500, cons(List_var(binding), NULL))));  int retained_capture = Map_contains(facts, List_var(cons(_879, cons(List_var(binding), NULL))));  if(Compiler_lambda_capture_required(c, binding)) return 1;  if(retained_parameter && c -> local_macro_captures != NULL) return 1;  Var type;  if(Map_contains(facts, List_var(cons(_1499, cons(List_var(binding), NULL)))) && Map_try_get(facts, List_var(cons(_2, cons(List_var(binding), NULL))), &(type)) && Var_is_row(type, 9, 7, 4) && Var_list(type) != _401) return List_contains(Var_list(type), Symbol_var(109854)) && ! List_truth(Type_list(Type_base_type(List_type(Var_list(type)))));  return ! String_truth(spelling) ||(! List_equal(Sym_lookup(c -> sym, cons(String_var(spelling), NULL), NULL), binding) && ! retained_parameter && ! retained_capture);
 }
 
+List Sym_resolve_global(Sym, List, Type *);
+String Compiler_package_spelling(Compiler, String);
+static String f11_identifiers____kept_spelling(Compiler c, String name){
+  Type declared = NULL; (void) Sym_resolve_global(c -> sym, cons(String_var(name), NULL), &(declared));  return String_truth(c -> package) && ! List_truth(Type_list(declared)) ? Compiler_package_spelling(c, name) : name;
+}
+
 static List _resolve_identifier(Compiler c, Var value, Type type, Token origin){
   if(! Map_truth(c -> macro_holes)){
     Var _x2c_gensym_match_var_3 = value;  int _x2c_gensym_match_none_3 = ! Var_is(_x2c_gensym_match_var_3, 806120);  List _x2c_gensym_match_expr_46 = Var_list_payload(_x2c_gensym_match_var_3);  if(! _x2c_gensym_match_none_3){List _x2c_gensym_match_at_347, _x2c_gensym_match_at_348; Var x2c_match_value_0; if(_x2c_gensym_match_expr_46 && Var_equal(_x2c_gensym_match_expr_46 -> car, _1507 -> car) &&(_x2c_gensym_match_at_347 = _x2c_gensym_match_expr_46 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_347 ->car, 1) && Var_is(_x2c_gensym_match_at_347 -> car, 1318210446) && !(_x2c_gensym_match_at_348 = _x2c_gensym_match_at_347 ->cdr)){
@@ -5850,7 +5858,7 @@ static List _resolve_identifier(Compiler c, Var value, Type type, Token origin){
 
 }
 if(type == _401) type = NULL;  int read_reference = ! List_truth(Type_list(type));  int require_type = 0;  List binding = f11_identifiers____identifier_binding(c, value, &(type), origin, &(require_type));  if(Map_truth(c -> macro_holes) && List_truth(binding)){
-  String name = Ast_binding_spelling(binding);  int free = f11_identifiers____template_free_name(c, binding);  if(Var_is_row(Map_getindex(c -> macro_holes, List_var(cons(_1508, cons(String_var(name), NULL)))), 9, 7, 4)) return cons(_41, cons(_660, cons(List_var(cons(_58, cons(List_var(cons(_1509, cons(String_var(name), NULL))), NULL))), NULL)));  if(free) return cons(_41, cons(_660, cons(List_var(cons(_58, cons(List_var(cons(_1501, cons(String_var(name), NULL))), NULL))), NULL)));
+  String name = Ast_binding_spelling(binding);  int free = f11_identifiers____template_free_name(c, binding);  if(Var_is_row(Map_getindex(c -> macro_holes, List_var(cons(_1508, cons(String_var(name), NULL)))), 9, 7, 4)) return cons(_41, cons(_660, cons(List_var(cons(_58, cons(List_var(cons(_1509, cons(String_var(f11_identifiers____kept_spelling(c, name)), NULL))), NULL))), NULL)));  if(free) return cons(_41, cons(_660, cons(List_var(cons(_58, cons(List_var(cons(_1501, cons(String_var(name), NULL))), NULL))), NULL)));
 }
 int macro_binder = Var_is_binder(value) ||(Var_is_row(value, 9, 7, 4) && ! Var_is_nil(value) && x2c_var_equal_lane(Var_car(value), Symbol_var(917238582496136)));  if(! List_truth(binding) && macro_binder) return cons(_41, cons(_660, cons(List_var(cons(_58, cons(value, NULL))), NULL)));  if(! List_truth(binding)) Compiler_report_error(c, 1362954, _1510, origin, cons(String_var(String_join(NULL, cons(String_var(_1511), cons(String_var(Var_repr(value)), NULL)))), NULL));  Map binding_facts = Compiler_semantic_binding_facts(c);  String spelling = Ast_binding_spelling(binding);  f11_identifiers____capture_identifier(c, binding);  int kept = 0; {
   Var _x2c_gensym_match_var_4 = value;  int _x2c_gensym_match_none_4 = ! Var_is(_x2c_gensym_match_var_4, 806120);  List _x2c_gensym_match_expr_47 = Var_list_payload(_x2c_gensym_match_var_4);  if(! _x2c_gensym_match_none_4){if(_x2c_gensym_match_expr_47 && Var_equal(_x2c_gensym_match_expr_47 -> car, _1512 -> car)){
@@ -5882,7 +5890,7 @@ return result;
 }
 
 List Sym_reference(Sym, List, Type *);
-List Sym_resolve_global(Sym, List, Type *);
+String Compiler_package_source_name(Compiler, String);
 List Sym_reference_global(Sym, List);
 static List f11_identifiers____identifier_binding(Compiler c, Var value, Type * type, Token origin, int * require_type){
   (* require_type) = Var_is_row(value, 11, 7, 1);  if(Var_is_row(value, 11, 7, 1)) return Sym_reference(c -> sym, cons(value, NULL), &((* type)));  if(! Var_is_row(value, 9, 7, 4)) return NULL;  List name = Var_list_payload(value);  int identity = 0;  String spelling = NULL;  if(Ast_try_binding(name, &(identity), &(spelling))){
@@ -5915,7 +5923,7 @@ static List f11_identifiers____identifier_binding(Compiler c, Var value, Type * 
         Var spelling;  spelling = x2c_match_value_0; {
           Var _x2c_gensym_match_value_11 = spelling; {
             String spelling = Var_as_string(_x2c_gensym_match_value_11); {
-              List global = Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), &((* type)));  return List_truth(global) ? global : Sym_reference_global(c -> sym, cons(String_var(spelling), NULL));
+              List global = Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), &((* type)));  if(List_truth(global)) return global;  String source = Compiler_package_source_name(c, spelling);  global = Sym_resolve_global(c -> sym, cons(String_var(source), NULL), &((* type)));  return List_truth(global) ? global : Sym_reference_global(c -> sym, cons(String_var(source), NULL));
             }
 
           }

@@ -6,30 +6,31 @@ tab: maps
 ---
 
 ```x2c
+
 ~int main(void) {
-// Start with named items and their stock quantities.
-Map stock = {"tea": 12, "coffee": 8, "milk": 6, "sugar": 0};
+  // Start with named items and their stock quantities.
+  Map stock = {"tea": 12, "coffee": 8, "milk": 6, "sugar": 0};
 
-// Update existing entries or add new ones with the same syntax.
-stock["tea"] -= 2;
-stock["coffee"] += 5;
-stock["cocoa"] = 4;
+  // Update existing entries or add new ones with the same syntax.
+  stock["tea"] -= 2;
+  stock["coffee"] += 5;
+  stock["cocoa"] = 4;
 
-// Fetch a value directly, or supply a fallback without inserting.
-printf("tea: %s; biscuits: %s\n",
-  stock["tea"],
-  stock.getdefault("biscuits", 0));
+  // Fetch a value directly, or supply a fallback without inserting.
+  printf("tea: %s; biscuits: %s\n",
+    stock["tea"],
+    stock.getdefault("biscuits", 0));
 
-// A stored zero is different from an absent key.
-Var sugar;
-if (stock.try_get("sugar", sugar))
-  puts(%"sugar is stocked: $sugar remaining");
+  // A stored zero is different from an absent key.
+  Var sugar;
+  if (stock.try_get("sugar", sugar))
+    puts(%"sugar is stocked: $sugar remaining");
 
-// Sort the keys to visit each value in a predictable order.
-Array items = auto stock.keys().array().sort();
-foreach (String item in items)
-  puts(%"$item: $(stock[item])");
-~return 0;
+  // Sort the keys to visit each value in a predictable order.
+  Array items = auto stock.keys().array().sort();
+  foreach (String item in items)
+    puts(%"$item: $(stock[item])");
+~  return 0;
 ~}
 ```
 

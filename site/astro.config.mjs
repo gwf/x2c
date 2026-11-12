@@ -9,6 +9,7 @@ import {
   x2cLispLang
 } from "./shiki-x2c.mjs";
 import { wordmark } from "./wordmark.mjs";
+import { x2cExcerpt } from "./x2c-excerpt.mjs";
 
 // docs/book.toml hides "~" lines from the reader while
 // tools/check-doc-examples still compiles them. Markdown pages moved from
@@ -19,11 +20,7 @@ const hiddenLines = {
   preprocess(code) {
     if (this.options.lang !== "x2c" &&
         this.options.lang !== "x2c,ignore") return code;
-    return code
-      .split("\n")
-      .filter((line) => !line.trimStart().startsWith("~"))
-      .join("\n")
-      .trim();
+    return x2cExcerpt(code);
   }
 };
 

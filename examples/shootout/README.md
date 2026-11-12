@@ -43,7 +43,7 @@ idiomatic program and N>=500 in the tuned program.
 Workers read a fixed input Array and write disjoint existing output slots.
 Every matrix product joins its workers before the next product reads results;
 each row preserves its original summation order. Smaller inputs run serially.
-Tuned spectral-norm retains typed Arrays and its original small-input kernels.
+Tuned spectral-norm uses typed Arrays and one row-range kernel for both paths.
 The threshold avoids worker overhead at smaller sizes. K-nucleotide uses
 ordinary numeric Map values.
 

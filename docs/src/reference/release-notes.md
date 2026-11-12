@@ -1,13 +1,9 @@
 # Release Notes
 
 Each section summarizes what changed for a user of the compiler, runtime,
-commands, and packages since the previous release. The
-[installation chapter](../guide/installation.md) carries the upgrade steps.
+commands, and packages since the previous release.
 
 ## 0.16.0 (unreleased)
-
-[Upgrading from 0.15.x](../guide/installation.md#upgrading-from-015x) gives
-the source changes that the breaking entries below require.
 
 ### Language
 
@@ -121,19 +117,17 @@ the source changes that the breaking entries below require.
   exit finishes all job cleanup. Blocking native calls block the batch. The
   guarded-stack backend supports macOS and Linux on arm64 and x86_64. See
   [Task.run](../library/modules/task.md#Task.run) and
-  [Using cooperative task batches](../guide/installation.md#using-cooperative-task-batches).
+  [Run Channel jobs on one native thread](../guide/contexts-and-threads.md#run-channel-jobs-on-one-native-thread).
 - `Scope.retain` and `Scope.release` are renamed to `Scope.open` and
   `Scope.close`; both still return `void`. `Scope.up` is removed without a
   replacement. The native function names and public Scope layout change, so
   regenerate C and rebuild native code that uses Scope. Pool's retain/release
-  operations and `Pool.up` are unchanged. See
-  [Upgrading from 0.15.x](../guide/installation.md#upgrading-from-015x).
+  operations and `Pool.up` are unchanged.
 - Boxed `long double` identity, content hashes, and total ordering exclude
   x87's six ABI padding bytes. The ten value bytes still preserve precision,
   signed zero, and NaN payload distinctions. Hash values change on x87
   targets; recompute stored or precomputed hashes when upgrading. Other
-  long-double formats keep their existing payload widths. See
-  [Long-double hashes](../guide/installation.md#long-double-hashes).
+  long-double formats keep their existing payload widths.
 - `Map`, the typed Maps, and `Pool` tables share one grouped hash storage:
   sixteen one-byte controls per group, compared at once, with full hashes
   kept beside them for `Map` and `Pool`. Public methods, container layouts,
@@ -265,9 +259,7 @@ packages need rebuilding.
 ## 0.15.0 (2026-10-17)
 
 Releases ship for macOS arm64 and x86_64 and Linux aarch64 and x86_64, with
-the book as a PDF beside the archives. Read
-[Upgrading from 0.14.0](../guide/installation.md#upgrading-from-0140)
-before replacing an existing prefix.
+the book as a PDF beside the archives.
 
 ### Language
 

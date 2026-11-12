@@ -7,23 +7,6 @@ tab: threads
 
 ```x2c
 ~#include <assert.h>
-~int main(void) {
-// Split the data; launch both workers before waiting for either.
-int values[2][3] = {{1, 2, 3}, {4, 5, 6}};
-Thread first = Thread.start_raw(sum_squares,
-  values[0], sizeof(values[0]));
-Thread second = Thread.start_raw(sum_squares,
-  values[1], sizeof(values[1]));
-~values[0][0] = 100;
-~values[1][0] = 100;
-
-// Combine the partial sums after both workers finish.
-double left = first.join(), right = second.join();
-first.free(); second.free();
-printf("sum of squares: %g\n", left + right);
-~assert(left == 14 && right == 77 && left + right == 91);
-~return 0;
-~}
 
 // Each worker squares its values and reduces them to one sum.
 static Var sum_squares(const void *input, size_t bytes) {
@@ -33,6 +16,24 @@ static Var sum_squares(const void *input, size_t bytes) {
     sum += (double) values[i] * values[i];
   return sum;
 }
+
+~int main(void) {
+  // Split the data; launch both workers before waiting for either.
+  int values[2][3] = {{1, 2, 3}, {4, 5, 6}};
+  Thread first = Thread.start_raw(sum_squares,
+    values[0], sizeof(values[0]));
+  Thread second = Thread.start_raw(sum_squares,
+    values[1], sizeof(values[1]));
+~  values[0][0] = 100;
+~  values[1][0] = 100;
+
+  // Combine the partial sums after both workers finish.
+  double left = first.join(), right = second.join();
+  first.free(); second.free();
+  printf("sum of squares: %g\n", left + right);
+~  assert(left == 14 && right == 77 && left + right == 91);
+~  return 0;
+~}
 ```
 
 `Thread.start_raw` copies each batch's bytes and launches a native worker.

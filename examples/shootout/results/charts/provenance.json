@@ -1,17 +1,15 @@
 {
-  "report_path": "../current.json",
-  "report_sha256": "2417942f249f86aedbb33bdc0a1b2d06e5f5e0b9c1abf884978b4eaec2b587e0",
-  "run_id": "20261101T204543Z",
+  "report_path": "/Users/gary/.codex/worktrees/a893/x2c/examples/shootout/results/current.json",
+  "report_sha256": "8d1b2dda4ad2d10fc6a7bd815ea75c05fa30456a848f4987a3fa6e0544c22f6e",
+  "run_id": "20261112T054633Z",
   "profile": "local",
-  "measured_revision": "fed582d496606c11eb09e4a817f7fa9ddf2a2464",
+  "measured_revision": "ccc7e475869cf93f91637f283761a57dfd92715b",
   "quiet_window": null,
   "java_process_model": "Fresh JVM per sample; startup and JIT compilation included",
-  "execution_modes": "Both x2c columns parallelize binarytrees, fannkuch N>=9, Mandelbrot N>=256, regex counts >=65536 bytes and seven k-nucleotide widths. Spectral uses six workers at N>=256 idiomatic and N>=500 tuned. Other programs are serial.",
-  "foreign_measurements": "Pinned calibration; not remeasured in this x2c update",
   "samples": 12,
-  "baseline_sha256": "53fdc5b1230c52ce309e5b60c397f2a349b815b2fe285edd6ab5d66af3f6b730",
-  "normalization": "Per-problem minima among available columns; all eight for shared problems",
-  "summary": "Geometric mean of the eight shared normalized problem values",
+  "baseline_sha256": "c19b66401dd2c0c96cd83bc523ece35d8fc0c42f55c2700a277aa1a1c8d7ad00",
+  "normalization": "Per-problem C elapsed time; Python LOC and gzip bytes. Missing Python yields null source ratios.",
+  "summary": "Geometric mean of the report's shared normalized problem values",
   "profile_centres": "Arithmetic means, following the historical star-plot form",
   "runtime": "Median wall-clock elapsed time from the existing report",
   "loc": "Nonblank source lines after language-aware comment removal",
@@ -37,7 +35,5 @@
       "java": "All six archived Java contributions fail required behavior on legal inputs: base/#8 misorder lexical ties; #6 drops tied keys; #4/#5 throw NullPointerException for missing target fragments; #3 returns zero for uppercase present target fragments. Sources were not patched.",
       "rust": "All eight Rust contributions in the pinned archive fail the specification requiring ascending lexical keys for equal frequency counts. They remain excluded without source edits."
     }
-  },
-  "restored_from_revision": "a9aeff5b843878fd102b31402a522d2f0a1d2d6c",
-  "restored_from_path": "examples/shootout/results/runs/20261101T204543Z"
+  }
 }

@@ -1,9 +1,10 @@
 ---
 interface Props {
   home?: boolean;
+  examples?: boolean;
 }
 
-const { home = false } = Astro.props;
+const { home = false, examples = false } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
 const section = (name: string) => (home ? `#${name}` : `${local("")}#${name}`);
@@ -17,13 +18,15 @@ const taglines = [
 ];
 ---
 
-<header class="landing-header">
+<header class:list={["landing-header", {"examples-header": examples}]}>
+  {examples && <label id="mdbook-sidebar-toggle" class="examples-toggle" for="mdbook-sidebar-toggle-anchor" tabindex="0" role="button" aria-label="Toggle example index" aria-controls="mdbook-sidebar" aria-expanded="true"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M1 3h14M1 8h14M1 13h14" fill="none" stroke="currentColor" /></svg></label>}
   <div class="landing-header-inner">
     <div
       class="landing-branding"
       data-tagline-rotator
       data-taglines={JSON.stringify(taglines)}
     >
+
       <a class="landing-brand" href={local("")} aria-label="x2c home">
         <svg viewBox="0 0 100 100" width="22" height="22" aria-hidden="true"
           ><g

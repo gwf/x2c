@@ -9,23 +9,6 @@ title: Recognize a shape. Rebuild it.
 
 ```x2c
 ~#include <assert.h>
-~int main(void) {
-List code = %(block
-  (if (not ready) (call wait) (call start))
-  (if true (call save) (call discard)));
-puts(simplify(code).repr());
-// (block (if ready (call start) (call wait)) (call save))
-~assert(simplify(code) ==
-~       %(block (if ready (call start) (call wait)) (call save)));
-~assert(simplify(%(if false (call wrong) (call right))) == %(call right));
-~assert(simplify(%(if (not true) (call wrong) (call right))) == %(call right));
-~assert(simplify(%(if ready (if true (call yes) (call wrong))
-~                          (if false (call wrong) (call no)))) ==
-~       %(if ready (call yes) (call no)));
-~assert(simplify(%(block)) == %(block));
-~assert(simplify(%(call untouched)) == %(call untouched));
-~return 0;
-~}
 
 // Recognize a nested condition and exchange its branches.
 List simplify(List node) {
@@ -42,6 +25,24 @@ List simplify(List node) {
     default: return node;
   }
 }
+
+~int main(void) {
+  List code = %(block
+    (if (not ready) (call wait) (call start))
+    (if true (call save) (call discard)));
+  puts(simplify(code).repr());
+  // (block (if ready (call start) (call wait)) (call save))
+~  assert(simplify(code) ==
+~         %(block (if ready (call start) (call wait)) (call save)));
+~  assert(simplify(%(if false (call wrong) (call right))) == %(call right));
+~  assert(simplify(%(if (not true) (call wrong) (call right))) == %(call right));
+~  assert(simplify(%(if ready (if true (call yes) (call wrong))
+~                            (if false (call wrong) (call no)))) ==
+~         %(if ready (call yes) (call no)));
+~  assert(simplify(%(block)) == %(block));
+~  assert(simplify(%(call untouched)) == %(call untouched));
+~  return 0;
+~}
 ```
 
 `match` selects nested List structures and binds their parts. Templates rebuild the result: `$` inserts a value and `@` splices a sequence.

@@ -74,6 +74,8 @@ examples/shootout/results/*
 !examples/shootout/results/charts/
 examples/shootout/results/charts/*
 !examples/shootout/results/charts/runtime-source-size.*
+!examples/shootout/results/charts/runtime-source-size-log.*
+!examples/shootout/results/charts/runtime-source-size-linear.*
 !examples/shootout/results/charts/runtime-loc-distributions.*
 !examples/shootout/results/charts/implementation-profiles.*
 !examples/shootout/results/charts/measurements.csv

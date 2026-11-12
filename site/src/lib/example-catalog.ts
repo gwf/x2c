@@ -62,27 +62,11 @@ const programEntries = articles.map((article) => {
   };
 });
 
-const tours = [
-  { name: "language", label: "Language tour",
-    description: "A fifteen-minute tour of the language in one program you can run." },
-  { name: "hello-worlds", label: "Hello, worlds",
-    description: "Twelve idiomatic ways to say Hello, World, from Lists and Maps to runtime Lisp and macros." },
-];
-const tourEntries = tours.map(({ name, label, description }) => {
-  const path = `examples/tours/${name}.x`;
-  const source = read(path);
-  return {
-    id: `tours/${name}`, section: "programs", path, source, label,
-    runnable: false, visible: source, program: false, output: outputFor(path),
-    description,
-  };
-});
-
 // Every program on the examples page, in list order.
 export const exampleEntries: {
   id: string; section: string; path: string; source: string; label: string;
   runnable: boolean; visible: string; program: boolean; output?: string; slide?: ExampleMarkdown;
   article?: ExampleMarkdown; recipe?: string; description?: string;
-}[] = [...galleryEntries, ...programEntries, ...tourEntries];
+}[] = [...galleryEntries, ...programEntries];
 export const exampleSections = ["love", "power", "magic", "programs"];
 
