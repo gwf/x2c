@@ -108,7 +108,7 @@ Gallery Gallery.new(void) {
 */
 void section(Ui ui, String title, String description) {
   // More room above a heading than below it, so it starts what follows.
-  $cui.column(ui, { .gap = 4, .pad_top = 18 }) {
+  ui.column (gap: 4, pad_top: 18) {
     ui.heading(title, 4);
     if (description) ui.secondary(description);
   }

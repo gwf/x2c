@@ -29,17 +29,17 @@ void page_charts(Ui ui, Gallery g) {
                   "Oct" "Nov" "Dec");
   section(ui, "Line chart", "Hover to inspect values. The crosshair glides "
                             "between points.");
-  $cui.card(ui, {}) {
+  ui.card () {
     cui_series s[] = { cui_series.of("Revenue", revenue),
                        cui_series.of("Costs", costs) };
     ui.line_chart("revenue", s, $cui.count(s), months,
       area: true, smooth: true, height: 240, format: "$%.0fk");
   }
-  $cui.box(ui, { .dir = CUI_GRID, .columns = 2, .min_column_width = 260,
-                 .gap = 16 }) {
-    $cui.column(ui, { .gap = 12 }) {
+  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+          gap: 16) {
+    ui.column (gap: 12) {
       section(ui, "Bar chart", NULL);
-      $cui.card(ui, {}) {
+      ui.card () {
         cui_series s[] = { cui_series.of("Desktop", desktop),
                            cui_series.of("Mobile", mobile) };
         ui.bar_chart("visits", s, $cui.count(s),
@@ -47,18 +47,18 @@ void page_charts(Ui ui, Gallery g) {
                      height: 200);
       }
     }
-    $cui.column(ui, { .gap = 12 }) {
+    ui.column (gap: 12) {
       section(ui, "Donut chart", NULL);
-      $cui.card(ui, { .align = CUI_ALIGN_CENTER })
+      ui.card (align: CUI_ALIGN_CENTER)
         ui.donut_chart("platforms", shares,
                        %("Windows" "macOS" "Linux" "Other"),
                        height: 180, format: "%.0f%%");
     }
   }
   section(ui, "Stacked bars and gauges", NULL);
-  $cui.box(ui, { .dir = CUI_GRID, .columns = 2, .min_column_width = 260,
-                 .gap = 16 }) {
-    $cui.card(ui, {}) {
+  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+          gap: 16) {
+    ui.card () {
       cui_series s[] = { cui_series.of("Passed", passed),
                          cui_series.of("Retried", retried),
                          cui_series.of("Failed", failed) };
@@ -66,7 +66,7 @@ void page_charts(Ui ui, Gallery g) {
                    %("W1" "W2" "W3" "W4" "W5" "W6" "W7" "W8"),
                    stacked: true, height: 200);
     }
-    $cui.card(ui, { .dir = CUI_ROW, .gap = 24, .align = CUI_ALIGN_CENTER }) {
+    ui.card (dir: CUI_ROW, gap: 24, align: CUI_ALIGN_CENTER) {
       ui.gauge("CPU", 0.42f, 130);
       ui.gauge("Memory", 0.81f, 130);
     }

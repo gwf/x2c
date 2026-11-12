@@ -30,8 +30,8 @@ void page_motion(Ui ui, Gallery g) {
   section(ui, "Text effects", "A shimmer for pending work, a typewriter for "
                               "streamed text, words that settle into "
                               "place.");
-  $cui.card(ui, { .gap = 18, .pad = 20, .width = CUI_FILL }) {
-    $cui.row(ui, { .gap = 10, .align = CUI_ALIGN_CENTER }) {
+  ui.card (gap: 18, pad: 20, width: CUI_FILL) {
+    ui.row (gap: 10, align: CUI_ALIGN_CENTER) {
       ui.loader(style: CUI_LOADER_DOTS, size: 22);
       ui.shimmer_text("Thinking about your question\xe2\x80\xa6",
                       size: 15);
@@ -44,7 +44,7 @@ void page_motion(Ui ui, Gallery g) {
                            "seconds.",
                      size: 20, font: CUI_FONT_DISPLAY);
     }
-    $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
+    ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
       ui.text("Deploying to", font: CUI_FONT_DISPLAY, size: 26);
       ui.word_rotate("rot", %("staging." "eu-west." "us-east."
                               "all regions."),
@@ -60,7 +60,7 @@ void page_motion(Ui ui, Gallery g) {
           "A beam marks the one card that is live.");
   ui.gradient_text("Kiln 2.4", font: CUI_FONT_DISPLAY, size: 34,
                                animate: true);
-  $cui.row(ui, { .gap = 14, .align = CUI_ALIGN_STRETCH, .width = CUI_FILL }) {
+  ui.row (gap: 14, align: CUI_ALIGN_STRETCH, width: CUI_FILL) {
     List cards = %(("Software" "Plain C into a pixel buffer. No GPU needed.")
                    ("OpenGL 3.3" "The default on desktop. Deploying now.")
                    ("Your own"
@@ -69,7 +69,7 @@ void page_motion(Ui ui, Gallery g) {
     foreach (List card in cards) {
       (String title, String blurb) = card;
       $cui.id_index(ui, k)
-      $cui.spotlight(ui, "spot", { .width = CUI_GROW(1), .beam = k == 1 }) {
+      ui.spotlight ("spot", width: CUI_GROW(1), beam: k == 1) {
         ui.text(title, font: CUI_FONT_MEDIUM, size: 15);
         ui.text(blurb, size: 13, color: CUI_COLOR_TEXT_SECONDARY);
       }
@@ -77,14 +77,14 @@ void page_motion(Ui ui, Gallery g) {
     }
   }
   section(ui, "Loaders", "Dots, bars, pulse, orbit and grid.");
-  $cui.row(ui, { .gap = 36, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 36, align: CUI_ALIGN_CENTER) {
     for (int k = 0; k < 5; k++)
       ui.loader(style: (cui_loader_style) k, size: 28);
   }
   section(ui, "Dock", "Icons grow as the pointer passes.");
-  $cui.row(ui, { .width = CUI_FILL, .justify = CUI_JUSTIFY_CENTER,
-                 .height = CUI_PX(110), .align = CUI_ALIGN_END })
-  $cui.dock(ui, "dock", {}) {
+  ui.row (width: CUI_FILL, justify: CUI_JUSTIFY_CENTER,
+          height: CUI_PX(110), align: CUI_ALIGN_END)
+  ui.dock ("dock") {
     if (ui.dock_item(CUI_ICON_FOLDER, "Files",
                      color: CUI_RGB(0x3b82f6), running: true))
       ui.toast("Files");
@@ -101,11 +101,11 @@ void page_motion(Ui ui, Gallery g) {
     ui.dock_item(CUI_ICON_SETTINGS, "Settings");
     ui.dock_item(CUI_ICON_TRASH_2, "Trash");
   }
-  $cui.row(ui, { .gap = 28, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+  ui.row (gap: 28, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Control tiles", "Big toggles for quick settings.");
-      $cui.box(ui, { .dir = CUI_GRID, .columns = 2, .gap = 10,
-                     .width = CUI_PX(300) }) {
+      ui.box (dir: CUI_GRID, columns: 2, gap: 10,
+              width: CUI_PX(300)) {
         ui.control_tile("Wi-Fi", wifi, icon: CUI_ICON_WIFI,
                                        detail: wifi ? "Home" : "Off");
         ui.control_tile("Hotspot", bt, icon: CUI_ICON_RADIO);
@@ -118,7 +118,7 @@ void page_motion(Ui ui, Gallery g) {
       ui.control_tile("Dark appearance", dark_tile,
         icon: CUI_ICON_SUN, wide: true, width: CUI_PX(300));
     }
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+    ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Now playing", "Artwork, a scrubber and transport.");
       int ev = ui.now_playing("np", np);
       if (ev & CUI_PLAYER_NEXT) ui.toast("Next track");
@@ -127,12 +127,12 @@ void page_motion(Ui ui, Gallery g) {
         if (np.position > np.duration) np.position = 0;
       }
       section(ui, "Waveform", "Click or drag to seek.");
-      $cui.card(ui, { .pad = 14, .gap = 8, .width = CUI_PX(360) })
-      $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_CENTER,
-                     .width = CUI_FILL }) {
+      ui.card (pad: 14, gap: 8, width: CUI_PX(360))
+      ui.row (gap: 12, align: CUI_ALIGN_CENTER,
+              width: CUI_FILL) {
         ui.icon_button(CUI_ICON_PLAY, size: CUI_SIZE_SM,
                                       variant: CUI_BUTTON_SECONDARY);
-        $cui.box(ui, { .width = CUI_FILL })
+        ui.box (width: CUI_FILL)
           ui.waveform("wave", peaks, $cui.count(peaks), progress,
                       height: 34);
         ui.text("0:42", size: 12, tabular: true,

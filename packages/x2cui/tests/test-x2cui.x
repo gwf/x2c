@@ -24,7 +24,7 @@ typedef struct Form {
 } Form;
 
 static void draw_form(Ui ui, Form &form) {
-  $cui.column(ui, { .pad = 16, .gap = 12, .width = CUI_FILL }) {
+  ui.column (pad: 16, gap: 12, width: CUI_FILL) {
     form.clicks += ui.button("Save", variant: CUI_BUTTON_PRIMARY);
     form.button = ui.last_rect();
     ui.checkbox("I agree", form.agree);
@@ -141,7 +141,7 @@ static void a_text_field_sets_and_takes_text(void) {
 // A block left early must still end, or CUI's layout stack is unbalanced.
 static int draw_rows(Ui ui, int stop_at) {
   for (int i = 0; i < 4; i++) {
-    $cui.id_index(ui, i) $cui.row(ui, { .gap = 4 }) {
+    $cui.id_index(ui, i) ui.row (gap: 4) {
       if (i == 1) continue;
       if (i == stop_at) return i;
       ui.label(%"row $i");
@@ -155,7 +155,7 @@ static void a_block_left_early_still_ends(void) {
   int stopped = 0;
   for (int pass = 0; pass < 3; pass++) {
     screen.begin();
-    $cui.column(screen.ui(), { .gap = 4 }) {
+    screen.ui().column (gap: 4) {
       stopped = draw_rows(screen.ui(), 2);
       screen.ui().label("after the rows");
     }
@@ -274,6 +274,7 @@ static void short_forms(Ui ui) {
   }
 }
 
+// The C calls, inside the earlier `$cui.*` decorators, which still work.
 static void c_forms(Ui ui) {
   $cui.column(ui, { .width = CUI_FILL, .pad = 12, .gap = 8,
                     .bg = CUI_COLOR_SURFACE_MUTED }) {

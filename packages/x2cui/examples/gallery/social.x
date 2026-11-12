@@ -96,11 +96,11 @@ void page_social(Ui ui, Gallery g) {
   }
   // This frame's textures, from the state above.
   cui_texture before = tx.before, after = tx.after;
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Chat", "Grouped bubbles, read receipts and a typing "
                           "indicator.");
-      $cui.card(ui, { .gap = 0, .pad = 16 }) {
+      ui.card (gap: 0, pad: 16) {
         ui.chat_divider("Today");
         ui.chat_message("Did the data grid make it into 1.1?",
           author: "Jonas Berg", time: "9:41", last_in_group: false);
@@ -114,9 +114,9 @@ void page_social(Ui ui, Gallery g) {
         ui.typing_indicator("Jonas");
       }
     }
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+    ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Comments", "Threads with replies, likes and badges.");
-      $cui.card(ui, { .gap = 4, .pad = 14 }) {
+      ui.card (gap: 4, pad: 14) {
         ui.comment("c1", "Tomas Rivera", "The new numbers match the staging "
                    "run. I would still test the import on a large file "
                    "before Friday.",
@@ -133,7 +133,7 @@ void page_social(Ui ui, Gallery g) {
     }
   }
   section(ui, "Presence", "Who is here now. Hover to spread them out.");
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 24, align: CUI_ALIGN_CENTER) {
     ui.presence("here", who, $cui.count(who), 5, 30);
     ui.counter("rev", revenue, format: "$%.0f", size: 34,
                                group_thousands: true);
@@ -153,7 +153,7 @@ void page_social(Ui ui, Gallery g) {
 
   section(ui, "Carousel", "Drag, flick, scroll sideways or use the arrows "
                           "and dots.");
-  $cui.carousel(ui, "tour", 4, slide, { .height = 200, .auto_advance = 6 }) {
+  ui.carousel ("tour", 4, slide, height: 200, auto_advance: 6) {
     List titles = %("Faster exports" "ARM64 runners" "Shortcuts everywhere"
                     "Smaller downloads");
     List descs = %(
@@ -163,11 +163,11 @@ void page_social(Ui ui, Gallery g) {
       "The desktop app is 38 MB lighter after dropping the bundled browser.");
     static const unsigned tops[] = { 0x1f2a37, 0x0f3d3e, 0x3a2e22,
                                      0x2b2f3a };
-    for (int k = 0; k < 4; k++) $cui.carousel_slide(ui) {
+    for (int k = 0; k < 4; k++) ui.carousel_slide () {
       String title = titles[k], desc = descs[k];
-      $cui.box(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                     .bg = CUI_RGB(tops[k]), .radius = 16, .pad = 28,
-                     .gap = 8, .justify = CUI_JUSTIFY_END }) {
+      ui.box (width: CUI_FILL, height: CUI_FILL,
+              bg: CUI_RGB(tops[k]), radius: 16, pad: 28,
+              gap: 8, justify: CUI_JUSTIFY_END) {
         ui.text(title, font: CUI_FONT_DISPLAY, size: 24,
                        color: CUI_RGB(0xffffff));
         ui.text(desc, color: CUI_RGBA(0xffffffc0));
@@ -177,29 +177,29 @@ void page_social(Ui ui, Gallery g) {
 
   static cui_image_view view;
   static cui_rect crop;
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL,
-                 .wrap = true }) {
-    $cui.column(ui, { .width = CUI_GROW(3), .min_width = 280, .gap = 10 }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL,
+          wrap: true) {
+    ui.column (width: CUI_GROW(3), min_width: 280, gap: 10) {
       section(ui, "Image viewer", "Wheel to zoom around the pointer, drag "
                                   "to pan, double-click for 100%.");
       ui.image_viewer("viewer", after, 640, 400, view,
                       height: CUI_PX(260));
     }
-    $cui.column(ui, { .width = CUI_GROW(2), .min_width = 240, .gap = 10 }) {
+    ui.column (width: CUI_GROW(2), min_width: 240, gap: 10) {
       section(ui, "Cropper", "Drag the corners; the square keeps its "
                              "shape.");
       ui.cropper("cropper", after, 640, 400, crop,
         aspect: 1, height: CUI_PX(260));
     }
   }
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10 }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Before and after", "Drag the divider.");
       ui.image_compare("cmp", before, after, split,
         height: 230, aspect: 640.0f / 400.0f);
     }
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 10,
-                      .align = CUI_ALIGN_CENTER }) {
+    ui.column (width: CUI_GROW(1), gap: 10,
+               align: CUI_ALIGN_CENTER) {
       section(ui, "Card stack", "Flick the top card away, left or right.");
       List names = %("Kyoto" "Lisbon" "Reykjavik" "Oaxaca" "Hanoi");
       static const unsigned cols[] = { 0xc8553d, 0x2d3047, 0x5b8e7d,
@@ -209,10 +209,10 @@ void page_social(Ui ui, Gallery g) {
       for (int k = 0; k < 3; k++) {
         int idx = (deck + k) % 5;
         String name = names[idx];
-        $cui.card_stack_item(ui, k)
-        $cui.box(ui, { .width = CUI_FILL, .height = CUI_FILL,
-                       .bg = CUI_RGB(cols[idx]), .radius = 25, .pad = 20,
-                       .justify = CUI_JUSTIFY_END, .gap = 4 }) {
+        ui.card_stack_item (k)
+        ui.box (width: CUI_FILL, height: CUI_FILL,
+                bg: CUI_RGB(cols[idx]), radius: 25, pad: 20,
+                justify: CUI_JUSTIFY_END, gap: 4) {
           ui.text(name, font: CUI_FONT_DISPLAY, size: 22,
                         color: CUI_RGB(0xffffff));
           ui.text("Swipe right to save",

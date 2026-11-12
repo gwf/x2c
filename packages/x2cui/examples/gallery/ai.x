@@ -46,14 +46,14 @@ void page_ai(Ui ui, Gallery g) {
   if (!busy) started = -1;
   float elapsed = busy ? (float) (now - started) : 0;
   if (busy && elapsed > 9) busy = false;
-  $cui.row(ui, { .gap = 28, .align = CUI_ALIGN_START, .width = CUI_FILL }) {
-    $cui.column(ui, { .width = CUI_GROW(1.6f), .gap = 14 }) {
+  ui.row (gap: 28, align: CUI_ALIGN_START, width: CUI_FILL) {
+    ui.column (width: CUI_GROW(1.6f), gap: 14) {
       section(ui, "Conversation", "Reasoning, tool calls, an answer with "
                                   "sources, and the composer.");
       ui.chat_message("Why do immediate mode toolkits feel so fast? Cite a "
                       "few sources.", mine: true);
-      $cui.reasoning(ui, "think", { .thinking = busy,
-                                    .seconds = busy ? elapsed : 8 }) {
+      ui.reasoning ("think", thinking: busy,
+                             seconds: busy ? elapsed : 8) {
         ui.text("The question is about perceived speed. Two parts: how "
                 "little work a frame does, and how quickly input shows up "
                 "on screen.",
@@ -84,14 +84,14 @@ void page_ai(Ui ui, Gallery g) {
                     "expensive part, which is why glyphs are cached in an "
                     "atlas, and motion feels quick when it is driven by "
                     "springs instead of fixed curves.", size: 15);
-      $cui.row(ui, { .gap = 6, .align = CUI_ALIGN_CENTER }) {
+      ui.row (gap: 6, align: CUI_ALIGN_CENTER) {
         ui.text("Sources", size: 12, color: CUI_COLOR_TEXT_MUTED);
         for (int k = 0; k < $cui.count(sources); k++)
           ui.citation(k + 1, sources[k]);
       }
       ui.source_list("sources", sources, $cui.count(sources));
-      $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER,
-                     .width = CUI_FILL }) {
+      ui.row (gap: 8, align: CUI_ALIGN_CENTER,
+              width: CUI_FILL) {
         int actions = ui.response_actions("actions",
           copy_text: "They do very little work per frame.",
           vote: &vote);
@@ -121,7 +121,7 @@ void page_ai(Ui ui, Gallery g) {
         ui.toast("Attach files",
           description: "Drop files on the window, too.");
     }
-    $cui.column(ui, { .width = CUI_GROW(1), .gap = 14 }) {
+    ui.column (width: CUI_GROW(1), gap: 14) {
       section(ui, "Agent plan", "Steps and their status.");
       cui_plan_step steps[] = {
         { "Search for sources", "3 results", CUI_TASK_DONE },
@@ -137,8 +137,8 @@ void page_ai(Ui ui, Gallery g) {
       ui.agent_plan("plan", steps, $cui.count(steps),
         title: "Research plan");
       section(ui, "Voice", "Idle, listening, thinking and speaking.");
-      $cui.column(ui, { .align = CUI_ALIGN_CENTER, .gap = 12,
-                        .width = CUI_FILL }) {
+      ui.column (align: CUI_ALIGN_CENTER, gap: 12,
+                 width: CUI_FILL) {
         float level = 0.35f + 0.35f * sinf((float) now * 5.1f) *
                                       sinf((float) now * 1.7f);
         if (ui.voice_orb("orb", (cui_voice_state) orb_state, level,

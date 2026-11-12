@@ -5,11 +5,11 @@
 #include "state.x"
 
 void page_selection(Ui ui, Gallery g) {
-  $cui.box(ui, { .dir = CUI_GRID, .columns = 2, .min_column_width = 260,
-                 .gap = 16 }) {
-    $cui.column(ui, { .gap = 12 }) {
+  ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,
+          gap: 16) {
+    ui.column (gap: 12) {
       section(ui, "Checkbox", NULL);
-      $cui.card(ui, { .gap = 14 }) {
+      ui.card (gap: 14) {
         ui.checkbox("Email notifications", g.newsletter,
           description: "Product news, at most once a month.");
         ui.checkbox("Marketing", g.marketing,
@@ -17,9 +17,9 @@ void page_selection(Ui ui, Gallery g) {
         ui.checkbox("Disabled option", g.terms, disabled: true);
       }
     }
-    $cui.column(ui, { .gap = 12 }) {
+    ui.column (gap: 12) {
       section(ui, "Switch", NULL);
-      $cui.card(ui, { .gap = 14 }) {
+      ui.card (gap: 14) {
         ui.switch("Wi-Fi", g.wifi);
         ui.switch("Bluetooth", g.bluetooth);
         ui.switch("Airplane mode", g.airplane,
@@ -28,7 +28,7 @@ void page_selection(Ui ui, Gallery g) {
     }
   }
   section(ui, "Radio group", NULL);
-  $cui.card(ui, { .gap = 12 }) {
+  ui.card (gap: 12) {
     ui.radio("Every change", g.plan, 0,
       description: "Save as you type. Uses the most disk.");
     ui.radio("Every 5 minutes", g.plan, 1,
@@ -53,15 +53,15 @@ void page_selection(Ui ui, Gallery g) {
   }
   section(ui, "Sliders",
           "Drag past either end: the track stretches like rubber.");
-  $cui.card(ui, { .gap = 20 }) {
+  ui.card (gap: 20) {
     ui.slider("Volume", g.volume, 0, 100, show_value: true);
     ui.slider("Brightness", g.brightness, 0, 100,
       step: 10, show_value: true, format: "%.0f%%");
     ui.range_slider("Price range", g.lo, g.hi, 0, 100);
   }
   section(ui, "Chips and rating", NULL);
-  $cui.card(ui, { .gap = 16 }) {
-    $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.card (gap: 16) {
+    ui.row (gap: 8, wrap: true) {
       List chips = %("Design" "Engineering" "Marketing" "Sales" "Support"
                      "Finance");
       int i = 0;

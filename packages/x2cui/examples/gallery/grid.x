@@ -120,12 +120,10 @@ void page_grid(Ui ui, Gallery g) {
                             "indentation, totals.");
   {
     static bool open_src = true, open_ui = false;
-    cui_table_column tc[] = {
-      { "Name", CUI_FILL, CUI_TEXT_LEFT, false },
-      { "Files", CUI_PX(80), CUI_TEXT_RIGHT, false },
-      { "Size", CUI_PX(100), CUI_TEXT_RIGHT, false } };
     // A leaf has no open state, so it passes NULL for the flag.
-    $cui.table(ui, "tree", tc, {}) {
+    ui.table ("tree", columns: {"Name": unsorted(fill),
+                                "Files": right(unsorted(80)),
+                                "Size": right(unsorted(100))}) {
       ui.table_row(false);
       ui.table_cell();
       ui.tree_cell("src", 0, true, open_src, CUI_ICON_FOLDER);

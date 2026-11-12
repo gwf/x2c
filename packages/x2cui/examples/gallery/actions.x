@@ -20,7 +20,7 @@ void page_actions(Ui ui, Gallery g) {
 
   section(ui, "Split button",
           "A main action with related actions one click away.");
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     List items = %("Save as draft" "Save and publish" "Schedule\xe2\x80\xa6");
     static const char *icons[] = { CUI_ICON_FILE_TEXT, CUI_ICON_SEND,
                                    CUI_ICON_CLOCK };
@@ -38,7 +38,7 @@ void page_actions(Ui ui, Gallery g) {
   section(ui, "Toggle group",
           "Independent toggles for toolbars, or exclusive like radio "
           "buttons.");
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     static const char *icons[] = { CUI_ICON_BOLD, CUI_ICON_ITALIC,
                                    CUI_ICON_UNDERLINE, CUI_ICON_CODE };
     ui.toggle_group("format", %("Bold" "Italic" "Underline" "Code"), fmt,
@@ -52,7 +52,7 @@ void page_actions(Ui ui, Gallery g) {
   section(ui, "Morphing buttons",
           "Confirm before destroying, and show the result of work in "
           "place.");
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     if (ui.confirm_button("Delete project", icon: CUI_ICON_TRASH_2))
       deleted++;
     if (ui.status_button("Save changes", save_status,
@@ -78,16 +78,16 @@ void page_actions(Ui ui, Gallery g) {
   section(ui, "Theme",
           "A compact switcher and a single toggle that morphs between sun "
           "and moon.");
-  $cui.row(ui, { .gap = 16, .wrap = true }) {
+  ui.row (gap: 16, wrap: true) {
     ui.theme_switcher(theme_mode, true);
     ui.theme_toggle();
   }
 
   section(ui, "User menu", "Account trigger for sidebars and headers.");
-  $cui.box(ui, { .width = CUI_PX(260) })
-  $cui.user_menu(ui, "Maya Okafor", {
-      .detail = "maya@fieldwork.studio", .status = "online",
-      .placement = CUI_PLACE_BOTTOM_START }) {
+  ui.box (width: CUI_PX(260))
+  ui.user_menu ("Maya Okafor",
+      detail: "maya@fieldwork.studio", status: "online",
+      placement: CUI_PLACE_BOTTOM_START) {
     ui.menu_item("Profile", icon: CUI_ICON_USER, shortcut: "Ctrl P");
     ui.menu_item("Billing", icon: CUI_ICON_CREDIT_CARD);
     ui.menu_item("Settings", icon: CUI_ICON_SETTINGS,
@@ -98,7 +98,7 @@ void page_actions(Ui ui, Gallery g) {
 
   section(ui, "Swipe actions",
           "Drag a row sideways or swipe with two fingers.");
-  $cui.card(ui, { .pad = 6, .gap = 6 }) {
+  ui.card (pad: 6, gap: 6) {
     static const cui_swipe_action left[] = {
       { CUI_ICON_CHECK, "Done", CUI_TONE_SUCCESS } };
     static const cui_swipe_action right[] = {
@@ -124,8 +124,8 @@ void page_actions(Ui ui, Gallery g) {
 
   section(ui, "Speed dial",
           "A floating action button that fans out related actions.");
-  $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER,
-                 .height = CUI_PX(80) }) {
+  ui.row (gap: 16, align: CUI_ALIGN_CENTER,
+          height: CUI_PX(80)) {
     static const cui_speed_action acts[] = {
       { CUI_ICON_FILE_TEXT, "New note" }, { CUI_ICON_IMAGE, "Upload image" },
       { CUI_ICON_MIC, "Record memo" } };

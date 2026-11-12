@@ -103,7 +103,7 @@ static void scene_checkbox(Ui ui) {
 
 static void scene_switch(Ui ui) {
   static bool wifi = true, sync = false, airplane = false;
-  $cui.column(ui, { .gap = 14, .width = CUI_PX(320) }) {
+  ui.column (gap: 14, width: CUI_PX(320)) {
     ui.switch("Wi-Fi", wifi, description: "Join known networks.");
     ui.switch("Sync over cellular", sync);
     ui.switch("Airplane mode", airplane, disabled: true);
@@ -121,7 +121,7 @@ static void scene_radio(Ui ui) {
 
 static void scene_slider(Ui ui) {
   static float volume = 64, brightness = 40, zoom = 1.5f;
-  $cui.column(ui, { .gap = 20, .width = CUI_PX(420) }) {
+  ui.column (gap: 20, width: CUI_PX(420)) {
     ui.slider("Volume", volume, 0, 100, show_value: true);
     ui.slider("Brightness", brightness, 0, 100,
               step: 10, show_value: true, format: "%.0f%%");
@@ -134,7 +134,7 @@ static void scene_chip(Ui ui) {
   static bool picked[] = { true, false, true, false, false };
   List teams = %("Design" "Engineering" "Marketing" "Sales" "Support");
   ui.label("Teams");
-  $cui.row(ui, { .gap = 8, .wrap = true, .width = CUI_PX(420) }) {
+  ui.row (gap: 8, wrap: true, width: CUI_PX(420)) {
     int i = 0;
     foreach (String team in teams) {
       ui.chip(team, picked[i]);
@@ -145,7 +145,7 @@ static void scene_chip(Ui ui) {
 }
 
 static void scene_input(Ui ui) {
-  $cui.column(ui, { .gap = 14, .width = CUI_PX(360) }) {
+  ui.column (gap: 14, width: CUI_PX(360)) {
     ui.input("name", full_name, label: "Name");
     ui.input("email", email, label: "Email", icon: CUI_ICON_MAIL,
                              placeholder: "you@company.com",
@@ -156,7 +156,7 @@ static void scene_input(Ui ui) {
 }
 
 static void scene_textarea(Ui ui) {
-  $cui.column(ui, { .width = CUI_PX(440) })
+  ui.column (width: CUI_PX(440))
     ui.textarea("bio", bio, label: "Bio", height: 90,
                             hint: "Shown on your profile.");
 }
@@ -164,7 +164,7 @@ static void scene_textarea(Ui ui) {
 static void scene_search(Ui ui) {
   List invoices = %("Invoice 1042, Northwind" "Invoice 1043, Contoso"
                     "Receipt 88, Fabrikam" "Invoice 1044, Litware");
-  $cui.column(ui, { .gap = 10, .width = CUI_PX(360) }) {
+  ui.column (gap: 10, width: CUI_PX(360)) {
     ui.search("q", query, placeholder: "Search documents");
     String term = query.text();
     foreach (String name in invoices)
@@ -174,7 +174,7 @@ static void scene_search(Ui ui) {
 
 static void scene_number(Ui ui) {
   static double seats = 5, price = 12.5, weight = 2.4;
-  $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_END }) {
+  ui.row (gap: 16, align: CUI_ALIGN_END) {
     ui.number("seats", seats, 1, 50, label: "Seats",
                                      width: CUI_PX(140));
     ui.number("price", price, 0, 1000, label: "Price", step: 0.5,
@@ -188,7 +188,7 @@ static void scene_number(Ui ui) {
 
 static void scene_select(Ui ui) {
   static int country = 1, zone = -1;
-  $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_END }) {
+  ui.row (gap: 16, align: CUI_ALIGN_END) {
     ui.select("country", %("Canada" "Denmark" "Germany" "Japan" "Kenya"),
               country, label: "Country", width: CUI_PX(200));
     ui.select("zone", %("Pacific" "Eastern" "Central Europe" "Tokyo"),
@@ -199,7 +199,7 @@ static void scene_select(Ui ui) {
 
 static void scene_date_picker(Ui ui) {
   static cui_date due = { 2026, 11, 20 }, start = { 0, 0, 0 };
-  $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_END }) {
+  ui.row (gap: 16, align: CUI_ALIGN_END) {
     ui.date_picker("due", due, label: "Due date", width: CUI_PX(200));
     ui.date_picker("start", start, label: "Start date",
                                    placeholder: "Pick a date",
@@ -211,7 +211,7 @@ static void scene_tabs(Ui ui) {
   static int section = 0, settings = 1;
   static const char *icons[] = { CUI_ICON_USER, CUI_ICON_LOCK,
                                  CUI_ICON_CREDIT_CARD };
-  $cui.column(ui, { .gap = 20, .width = CUI_PX(520) }) {
+  ui.column (gap: 20, width: CUI_PX(520)) {
     ui.tabs("sections", %("Overview" "Analytics" "Reports" "Settings"),
             section);
     ui.tabs("settings", %("Account" "Password" "Billing"), settings,
@@ -221,8 +221,8 @@ static void scene_tabs(Ui ui) {
 
 static void scene_nav_item(Ui ui) {
   static int chosen = 0;
-  $cui.column(ui, { .width = CUI_PX(240), .pad = 12, .gap = 2, .radius = 12,
-                    .bg = CUI_COLOR_SURFACE_MUTED }) {
+  ui.column (width: CUI_PX(240), pad: 12, gap: 2, radius: 12,
+             bg: CUI_COLOR_SURFACE_MUTED) {
     ui.nav_section("Workspace");
     if (ui.nav_item("Inbox", icon: CUI_ICON_INBOX, badge: "12",
                              selected: chosen == 0))
@@ -244,7 +244,7 @@ static void scene_popover(Ui ui) {
   if (first_frame(ui, "share-shown")) ui.popover_open("share");
   if (ui.button("Share", icon: CUI_ICON_SHARE_2))
     ui.popover_toggle("share");
-  $cui.popover(ui, "share", { .width = 300 }) {
+  ui.popover ("share", width: 300) {
     ui.label("Share this document");
     ui.text("Anyone with the link can view it.",
             color: CUI_COLOR_TEXT_MUTED, size: 12);
@@ -273,7 +273,7 @@ static void scene_cropper(Ui ui) {
    trigger is clicked. */
 static void scene_menu(Ui ui) {
   static bool pinned = true;
-  $cui.menu(ui, "Options", { .icon = CUI_ICON_SETTINGS }) {
+  ui.menu ("Options", icon: CUI_ICON_SETTINGS) {
     ui.menu_label("Project");
     ui.menu_item("Rename", icon: CUI_ICON_PENCIL, shortcut: "F2");
     ui.menu_item("Duplicate", icon: CUI_ICON_COPY,
@@ -290,7 +290,7 @@ static void scene_menu_item(Ui ui) {
   if (first_frame(ui, "sort-shown")) ui.popover_open("sort");
   if (ui.button("Sort", icon: CUI_ICON_LIST))
     ui.popover_toggle("sort");
-  $cui.popover(ui, "sort", { .width = 220, .pad = 6, .gap = 1 }) {
+  ui.popover ("sort", width: 220, pad: 6, gap: 1) {
     ui.menu_label("Sort by");
     List orders = %("Name" "Date modified" "Size");
     int i = 0;
@@ -306,13 +306,13 @@ static void scene_menu_item(Ui ui) {
 
 // A context menu opens on a right click over the component before it.
 static void scene_context_menu(Ui ui) {
-  $cui.card(ui, { .id = "report", .hoverable = true,
-                  .width = CUI_PX(320), .pad = 16, .gap = 4 }) {
+  ui.card (id: "report", hoverable: true,
+           width: CUI_PX(320), pad: 16, gap: 4) {
     ui.label("Quarterly report.pdf");
     ui.text("Right-click the card for actions.",
             color: CUI_COLOR_TEXT_MUTED, size: 12);
   }
-  $cui.context_menu(ui, "file") {
+  ui.context_menu ("file") {
     ui.menu_item("Open", icon: CUI_ICON_FILE_TEXT);
     ui.menu_item("Download", icon: CUI_ICON_DOWNLOAD);
     ui.menu_separator();
@@ -329,11 +329,11 @@ static void scene_dialog(Ui ui) {
   ui.skeleton(CUI_PCT(60), 14);
   ui.skeleton(CUI_PCT(70), 14);
   if (ui.button("Delete", variant: CUI_BUTTON_OUTLINE)) open = true;
-  $cui.dialog(ui, "Delete project?", open, {
-      .description = "This removes the project for everyone. "
+  ui.dialog ("Delete project?", open,
+      description: "This removes the project for everyone. "
                      "You cannot undo this.",
-      .width = 380 })
-  $cui.dialog_footer(ui) {
+      width: 380)
+  ui.dialog_footer () {
     if (ui.button("Cancel")) open = false;
     if (ui.button("Delete project", variant: CUI_BUTTON_DANGER))
       open = false;
@@ -343,8 +343,8 @@ static void scene_dialog(Ui ui) {
 static void scene_sheet(Ui ui) {
   static bool open = true, digest = true, mentions = false;
   if (ui.button("Notification settings")) open = true;
-  $cui.sheet(ui, "Notifications", open, {
-      .size = 320, .description = "Choose what reaches your inbox." }) {
+  ui.sheet ("Notifications", open,
+      size: 320, description: "Choose what reaches your inbox.") {
     ui.switch("Daily digest", digest);
     ui.switch("Mentions only", mentions);
     if (ui.button("Done", variant: CUI_BUTTON_PRIMARY)) open = false;
@@ -359,7 +359,7 @@ static void scene_toast(Ui ui) {
 }
 
 static void scene_alert(Ui ui) {
-  $cui.column(ui, { .gap = 10, .width = CUI_PX(560) }) {
+  ui.column (gap: 10, width: CUI_PX(560)) {
     ui.alert("Payment received",
       description: "Your invoice was paid on November 5.",
       tone: CUI_TONE_SUCCESS);
@@ -372,7 +372,7 @@ static void scene_alert(Ui ui) {
 }
 
 static void scene_progress(Ui ui) {
-  $cui.column(ui, { .gap = 18, .width = CUI_PX(420) }) {
+  ui.column (gap: 18, width: CUI_PX(420)) {
     ui.progress(0.68f, label: "Uploading", show_value: true);
     ui.progress(0.92f, label: "Storage", tone: CUI_TONE_WARNING,
                        show_value: true);
@@ -382,7 +382,7 @@ static void scene_progress(Ui ui) {
 }
 
 static void scene_badge(Ui ui) {
-  $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.row (gap: 8, wrap: true) {
     ui.badge("Draft");
     ui.badge("New", tone: CUI_TONE_ACCENT);
     ui.badge("Active", tone: CUI_TONE_SUCCESS, dot: true);
@@ -394,7 +394,7 @@ static void scene_badge(Ui ui) {
 }
 
 static void scene_avatar(Ui ui) {
-  $cui.row(ui, { .gap = 14, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 14, align: CUI_ALIGN_CENTER) {
     ui.avatar("Jonas Berg", size: 40, status: "online");
     ui.avatar("Priya Nair", size: 40, status: "away");
     ui.avatar("Kwame Asante", size: 40);

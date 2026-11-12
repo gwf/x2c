@@ -121,7 +121,7 @@ static void scene_code_editor(Ui ui) {
   cui_code_editor_result result = ui.code_editor(
     "editor", source, lang: "c", height: 300,
                       placeholder: "Write some C");
-  $cui.row(ui, { .gap = 16, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 16, align: CUI_ALIGN_CENTER) {
     ui.textf("Ln %d, Col %d", result.line, result.column);
     ui.textf("%d lines", result.line_count);
     ui.text("Spaces: 4", size: 12.5f, color: CUI_COLOR_TEXT_MUTED);
@@ -185,7 +185,7 @@ static void scene_node_editor(Ui ui) {
   ui.node_input(PIN_MIX_B, "Color B", type: TYPE_COLOR);
   // An input without a link shows a control for its value.
   if (!ui.node_input(PIN_MIX_FAC, "Factor", type: TYPE_FLOAT))
-    $cui.node_content(ui) ui.slider("##factor", factor, 0, 1);
+    ui.node_content () ui.slider("##factor", factor, 0, 1);
   ui.node_output(PIN_MIX_OUT, "Color", type: TYPE_COLOR);
   ui.node_end();
   ui.node_begin(3, x[3], y[3], "Material output", { .width = 150 });
@@ -193,7 +193,7 @@ static void scene_node_editor(Ui ui) {
   ui.node_input(PIN_OUT_ROUGH, "Roughness", type: TYPE_FLOAT);
   ui.node_end();
   ui.node_begin(4, x[4], y[4], "Roughness", { .width = 160 });
-  $cui.node_content(ui)
+  ui.node_content ()
     ui.slider("Value", roughness, 0, 1,
               show_value: true, format: "%.2f");
   ui.node_output(PIN_ROUGH, "Value", type: TYPE_FLOAT);
@@ -207,22 +207,22 @@ static void scene_node_editor(Ui ui) {
 
 static void scene_dockspace(Ui ui) {
   static bool files = true, editor = true, outline = true, shell = true;
-  $cui.dockspace(ui, "workspace", {
-    .layout = "dock1 h0.26([*Files],v0.6([*main.x,Outline],[*Terminal]))",
-    .height = CUI_FILL }) {
-    $cui.dock_panel(ui, "Files", files, { .icon = CUI_ICON_FOLDER })
-      $cui.column(ui, { .pad = 8, .gap = 6 }) {
+  ui.dockspace ("workspace",
+    layout: "dock1 h0.26([*Files],v0.6([*main.x,Outline],[*Terminal]))",
+    height: CUI_FILL) {
+    ui.dock_panel ("Files", files, icon: CUI_ICON_FOLDER)
+      ui.column (pad: 8, gap: 6) {
         ui.label("examples");
         ui.text("gallery.x");
         ui.text("todo.x");
         ui.text("gallery/tools.x");
       }
-    $cui.dock_panel(ui, "main.x", editor, { .icon = CUI_ICON_CODE,
-                                             .dirty = true })
+    ui.dock_panel ("main.x", editor, icon: CUI_ICON_CODE,
+                                      dirty: true)
       ui.code_editor("dock-editor", source, lang: "c", height: -1);
-    $cui.dock_panel(ui, "Outline", outline, { .icon = CUI_ICON_LIST })
+    ui.dock_panel ("Outline", outline, icon: CUI_ICON_LIST)
       ui.text("tile_cache_find");
-    $cui.dock_panel(ui, "Terminal", shell, { .icon = CUI_ICON_TERMINAL })
+    ui.dock_panel ("Terminal", shell, icon: CUI_ICON_TERMINAL)
       ui.terminal("dock-term", term, height: -1, size: 12,
                                      no_input: true);
   }
@@ -230,7 +230,7 @@ static void scene_dockspace(Ui ui) {
 
 static void scene_emoji_picker(Ui ui) {
   static int tone = 0;
-  $cui.row(ui, { .gap = 24, .align = CUI_ALIGN_START }) {
+  ui.row (gap: 24, align: CUI_ALIGN_START) {
     /* The options take the skin tone as an `int *` and the
        recent emoji as a `char *recent, size_t recent_cap` pair. CUI draws
        12 new emoji a frame, so a short grid fills in the gallery's three
@@ -238,7 +238,7 @@ static void scene_emoji_picker(Ui ui) {
     String picked = ui.emoji_picker("emoji", tone: &tone,
                                              height: 106);
     if (picked) status.set(%"$(status.text())$picked");
-    $cui.column(ui, { .gap = 10, .width = CUI_FILL }) {
+    ui.column (gap: 10, width: CUI_FILL) {
       ui.label("Status");
       ui.input("note", status, width: CUI_FILL);
       ui.text("Pick an emoji to add it to the status.",

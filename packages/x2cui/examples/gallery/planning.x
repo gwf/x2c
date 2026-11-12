@@ -78,8 +78,8 @@ void page_planning(Ui ui, Gallery g) {
                         line_height: 1.35f);
       if (cd.progress > 0 && cd.progress < 1)
         ui.progress(cd.progress, height: 4);
-      $cui.row(ui, { .gap = 10, .align = CUI_ALIGN_CENTER,
-                     .width = CUI_FILL }) {
+      ui.row (gap: 10, align: CUI_ALIGN_CENTER,
+              width: CUI_FILL) {
         ui.avatar(cd.who, size: 22);
         ui.spacer();
         if (cd.files) {

@@ -33,7 +33,7 @@ void page_smart_inputs(Ui ui, Gallery g) {
 
   section(ui, "Inline edit",
           "Click the text to edit it in place. Enter saves, Esc cancels.");
-  $cui.column(ui, { .gap = 6 }) {
+  ui.column (gap: 6) {
     ui.inline_edit("title", title, font: CUI_FONT_DISPLAY, size: 26);
     ui.inline_edit("owner", owner, placeholder: "Add an owner");
   }
@@ -41,7 +41,7 @@ void page_smart_inputs(Ui ui, Gallery g) {
   section(ui, "Scrub fields",
           "Drag sideways to change the value, Shift for fine steps, click "
           "to type.");
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     ui.scrub("Opacity", opacity, 0, 100, suffix: "%");
     ui.scrub("Radius", radius, 0, 48, step: 0.5f, format: "%.1f",
                                       suffix: "px");
@@ -50,10 +50,10 @@ void page_smart_inputs(Ui ui, Gallery g) {
   }
 
   section(ui, "Money", "Grouped digits at rest, plain digits while typing.");
-  $cui.row(ui, { .gap = 12, .align = CUI_ALIGN_START }) {
-    $cui.box(ui, { .width = CUI_PX(240) })
+  ui.row (gap: 12, align: CUI_ALIGN_START) {
+    ui.box (width: CUI_PX(240))
       ui.money_input("amount", amount, label: "Amount", code: "USD");
-    $cui.box(ui, { .width = CUI_PX(240) })
+    ui.box (width: CUI_PX(240))
       ui.money_input("salary", salary,
         label: "Salary", symbol: "\xe2\x82\xac", code: "EUR",
         decimals: -1, hint: "Gross per year");
@@ -62,14 +62,14 @@ void page_smart_inputs(Ui ui, Gallery g) {
   section(ui, "Prefix and suffix",
           "Any text field can carry muted text before and after the "
           "value.");
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     ui.input("url", url, prefix: "https://", width: CUI_PX(260));
     ui.input("weight", weight, suffix: "kg", width: CUI_PX(120));
   }
 
   section(ui, "Shortcut recorder",
           "Click, then press a combination. Backspace clears.");
-  $cui.row(ui, { .gap = 12, .wrap = true }) {
+  ui.row (gap: 12, wrap: true) {
     ui.shortcut_recorder("palette-key", combo);
     ui.shortcut_recorder("search-key", combo2,
       placeholder: "Record shortcut");
@@ -80,13 +80,13 @@ void page_smart_inputs(Ui ui, Gallery g) {
   section(ui, "Emoji picker",
           "Search by name, jump by group, pick a skin tone. Recent emoji "
           "come first.");
-  $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER, .width = CUI_FILL,
-                 .max_width = 480 }) {
+  ui.row (gap: 8, align: CUI_ALIGN_CENTER, width: CUI_FILL,
+          max_width: 480) {
     ui.input("message", message, width: CUI_FILL);
     if (ui.icon_button(CUI_ICON_SMILE, tooltip: "Emoji"))
       ui.popover_toggle("emoji-pop");
-    $cui.popover(ui, "emoji-pop", { .placement = CUI_PLACE_BOTTOM_END,
-                                    .width = 340, .pad = 0 }) {
+    ui.popover ("emoji-pop", placement: CUI_PLACE_BOTTOM_END,
+                             width: 340, pad: 0) {
       String e = ui.emoji_picker("emoji",
         recent: recent, recent_cap: sizeof recent, tone: &tone,
         height: 260);

@@ -8,13 +8,13 @@
 
 // A labelled tile, so a layout scene shows where each child lands.
 static void tile(Ui ui, String label) {
-  $cui.box(ui, { .pad = 12, .bg = CUI_COLOR_SURFACE_MUTED, .radius = 8 })
+  ui.box (pad: 12, bg: CUI_COLOR_SURFACE_MUTED, radius: 8)
     ui.label(label);
 }
 
 static void scene_box(Ui ui) {
-  $cui.box(ui, { .width = CUI_PX(280), .pad = 20, .gap = 8, .radius = 12,
-                 .bg = CUI_COLOR_SURFACE_MUTED }) {
+  ui.box (width: CUI_PX(280), pad: 20, gap: 8, radius: 12,
+          bg: CUI_COLOR_SURFACE_MUTED) {
     ui.label("A box");
     ui.text("A box holds children and has padding, a gap between "
             "children, a background, and a corner radius.");
@@ -22,7 +22,7 @@ static void scene_box(Ui ui) {
 }
 
 static void scene_row(Ui ui) {
-  $cui.row(ui, { .gap = 8, .align = CUI_ALIGN_CENTER }) {
+  ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
     tile(ui, "First");
     tile(ui, "Second");
     ui.spacer();
@@ -31,7 +31,7 @@ static void scene_row(Ui ui) {
 }
 
 static void scene_column(Ui ui) {
-  $cui.column(ui, { .gap = 8, .width = CUI_PX(240) }) {
+  ui.column (gap: 8, width: CUI_PX(240)) {
     tile(ui, "Top");
     tile(ui, "Middle");
     tile(ui, "Bottom");
@@ -39,7 +39,7 @@ static void scene_column(Ui ui) {
 }
 
 static void scene_card(Ui ui) {
-  $cui.card(ui, { .width = CUI_PX(320), .pad = 20, .gap = 8 }) {
+  ui.card (width: CUI_PX(320), pad: 20, gap: 8) {
     ui.heading("Quarterly report", 4);
     ui.text("A card is a surface with a border. This one holds a heading, "
             "a paragraph, and an action.", color: CUI_COLOR_TEXT_MUTED);
@@ -48,16 +48,16 @@ static void scene_card(Ui ui) {
 }
 
 static void scene_scroll(Ui ui) {
-  $cui.scroll(ui, { .id = "rows", .width = CUI_PX(280), .height = CUI_PX(220),
-                    .gap = 6 }) {
+  ui.scroll (id: "rows", width: CUI_PX(280), height: CUI_PX(220),
+             gap: 6) {
     for (int i = 1; i <= 24; i++) tile(ui, %"Row $i");
   }
 }
 
 static void scene_split(Ui ui) {
   static float ratio = 0.35f;
-  $cui.split(ui, "panes", ratio, { .width = CUI_FILL,
-                                   .height = CUI_PX(240) }) {
+  ui.split ("panes", ratio, width: CUI_FILL,
+                            height: CUI_PX(240)) {
     tile(ui, "Navigation");
     ui.split_next();
     tile(ui, "Content. Drag the divider.");
@@ -67,11 +67,11 @@ static void scene_split(Ui ui) {
 static void scene_id_scope(Ui ui) {
   static bool first = true, second = false;
   // Both rows hold a switch labelled "Enabled"; the scope keeps them apart.
-  $cui.id_scope(ui, "wifi") $cui.row(ui, { .gap = 12 }) {
+  $cui.id_scope(ui, "wifi") ui.row (gap: 12) {
     ui.label("Wi-Fi");
     ui.switch("Enabled", first);
   }
-  $cui.id_scope(ui, "bluetooth") $cui.row(ui, { .gap = 12 }) {
+  $cui.id_scope(ui, "bluetooth") ui.row (gap: 12) {
     ui.label("Bluetooth");
     ui.switch("Enabled", second);
   }
@@ -80,7 +80,7 @@ static void scene_id_scope(Ui ui) {
 static void scene_disabled_scope(Ui ui) {
   static bool locked = true, notify = true;
   ui.switch("Lock the form", locked);
-  $cui.disabled_scope(ui, locked) $cui.column(ui, { .gap = 8 }) {
+  $cui.disabled_scope(ui, locked) ui.column (gap: 8) {
     ui.checkbox("Send notifications", notify);
     ui.button("Save", variant: CUI_BUTTON_PRIMARY);
   }
@@ -97,7 +97,7 @@ static void scene_text(Ui ui) {
 
 static void scene_button(Ui ui) {
   static int clicks = 0;
-  $cui.row(ui, { .gap = 8, .wrap = true }) {
+  ui.row (gap: 8, wrap: true) {
     if (ui.button("Primary", variant: CUI_BUTTON_PRIMARY,
                              icon: CUI_ICON_PLUS))
       clicks++;
@@ -111,7 +111,7 @@ static void scene_button(Ui ui) {
 }
 
 static void scene_icon_button(Ui ui) {
-  $cui.row(ui, { .gap = 8 }) {
+  ui.row (gap: 8) {
     ui.icon_button(CUI_ICON_SETTINGS, tooltip: "Settings");
     ui.icon_button(CUI_ICON_SEARCH, variant: CUI_BUTTON_OUTLINE);
     ui.icon_button(CUI_ICON_X, variant: CUI_BUTTON_GHOST,
