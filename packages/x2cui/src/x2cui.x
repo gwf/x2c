@@ -457,11 +457,17 @@ macro Unit $x2cui.record(Name $record) {
    hole and a declaration's type a `Type` hole, so the collection's form
    and its methods are two templates. */
 macro Unit $x2cui.collection(Name $list, Name $record) {
-  macro Expression $$list.of(Expr $rows) using $copy => ({
-    Block $copy = Block.new(sizeof($record));
-    Block.append($copy, $x2cui_rows($record, $rows), $x2cui_row_count($rows));
-    $copy;
-  });
+  macro Expression $$list.of(Expr $rows) using x2cui_collection =>
+    x2cui_collection(
+      sizeof($record), $x2cui_rows($record, $rows), $x2cui_row_count($rows));
+}
+
+/** Returns a collection of records `width` bytes wide that holds a copy
+    of the `count` records at `rows`. */
+Block x2cui_collection(size_t width, const void *rows, size_t count) {
+  Block records = Block.new(width);
+  Block.append(records, rows, count);
+  return records;
 }
 
 /* A collection of the CUI record `$record`: its records packed in a
