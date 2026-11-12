@@ -406,9 +406,13 @@ char *x2cui_buffer(TextField field) => field.buffer;
 
 // tones in data
 
-// CUI's tones, in the order `cui_tone` declares them.
+/* CUI's tones, in the order `cui_tone` declares them from 0;
+   tools/gen-arrays.py reads them from cui.h. */
+/* gen-arrays: begin generated tones */
+
 static SymbolSet tone_names =
   %<neutral info success warning danger violet teal rose accent>;
+/* gen-arrays: end generated tones */
 
 /** Returns the tone `name` names, as `<violet>` names the violet tone, for
     a tone kept in quoted data; a name that is not a tone is neutral. */

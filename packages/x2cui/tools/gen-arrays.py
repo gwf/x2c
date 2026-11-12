@@ -205,6 +205,20 @@ def icon_parameters(header, hand):
   return list(dict.fromkeys(rows))
 
 
+def tone_names(header):
+  """The short names of `cui_tone`'s members, which count up from 0, so a
+  member's position is its value."""
+  body = re.search(r"typedef enum cui_tone \{(.*?)\}", header, re.S).group(1)
+  members = [m.strip() for m in body.split(",") if m.strip()]
+  names = []
+  for index, member in enumerate(members):
+    name, _, value = member.partition("=")
+    if value and int(value) != index:
+      sys.exit(f"cui_tone: {name.strip()} is not {index}")
+    names.append(name.strip()[len("CUI_TONE_"):].lower())
+  return names
+
+
 def replace(path, kind, items):
   source = open(path).read()
   begin, end = BEGIN % kind, END % kind
@@ -242,6 +256,9 @@ def main():
   replace("src/x2cui-generate.x", "parameter names",
           [wrap("meta static List _parameter_names = %(", params, ");", "  ")
            .replace(", ", " ").replace(",\n", "\n")])
+  replace("src/x2cui.x", "tones",
+          ["static SymbolSet tone_names =\n  %<"
+           + " ".join(tone_names(header)) + ">;"])
   icons = icon_parameters(header, hand)
   replace("src/x2cui-options.x", "icons",
           [wrap("meta static List _icon_parameters = %(", icons, ");", "  ")

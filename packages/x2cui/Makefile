@@ -9,6 +9,9 @@ CUI_INCLUDE := $(CUI_PREFIX)/include
 PACKAGE_X_FLAGS += -I $(CUI_INCLUDE)
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CUI_INCLUDE) \
 	-I $(CUI_INCLUDE)
+# An Array literal outside a form compiles as a run-time Array; where a C
+# pointer is expected, cc only warns, so the warning is an error here.
+PACKAGE_C_FLAGS += -Xcc -Werror=incompatible-pointer-types
 # CUI's window layer is X11 on Linux, as dependency.json builds it, and
 # Cocoa over OpenGL on macOS.
 PACKAGE_LINK := $(CUI_PREFIX)/lib/libcui.a
