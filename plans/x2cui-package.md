@@ -1,10 +1,11 @@
 # x2cui: a first-class x2c package over CUI
 
-> Status: in progress on the long-lived branch `x2cui`, 2026-11-10.
-> Gary accepted the plan's decisions and the to-do example. Delivery 0 is
-> published on `dev` (gwf/x2c#653). Delivery 1 is on `x2cui`; see
-> [Delivery 1 progress](#delivery-1-progress). Nothing in this plan is on
-> `dev` except Delivery 0.
+> Status: in progress on the long-lived branch `x2cui`, 2026-11-11.
+> Gary accepted the plan's decisions and the to-do example; decision 3 is
+> superseded by method forms. Delivery 0 is published on `dev`
+> (gwf/x2c#653). Deliveries 1 to 3 and the method forms are on `x2cui`;
+> see [Current status](#current-status-2026-11-11). Nothing in this plan
+> is on `dev` except Delivery 0.
 > Baseline: x2c `239408687`, CUI `v1.3.1`.
 > Every "verified" statement below was compiled and run on macOS arm64.
 > Statements marked "not verified" were not.
@@ -98,8 +99,9 @@ Verified:
    native PNG. An interactive build with CUI's SDL2 window layer links and
    runs under Node with a stub page; a synthetic click updated the label.
 
-Not verified: an open window on any platform, a real browser, frame time,
-Linux, and the `TextField` type.
+Not verified when this was planned: an open window on any platform, a
+real browser, frame time, Linux, and the `TextField` type. All but Linux
+have since been checked; see [Current status](#current-status-2026-11-11).
 
 Census of the pinned `cui.h` (script in Appendix A):
 
@@ -484,14 +486,16 @@ Done and verified:
   up; their contents were not inspected in a window.
 - README, PROFILE, the package index, and the book's package guide.
 
-Not done:
+Not done at the time, with the current state:
 
 - Linux. `dependency.json` is unbuilt, so the package is not in
-  `PACKAGES`.
+  `PACKAGES`. Still true.
 - Parameter names. Generated methods name their parameters `p1`, `p2`.
-- The completeness check, which arrived with Delivery 2 as
-  `scenes --check`; see "Every component has a scene" below.
-- Menus that open only on a click are drawn closed in `--shots`.
+  Still true.
+- The completeness check arrived with Delivery 2 as `scenes --check`; see
+  "Every component has a scene" below. Done.
+- Menus that open only on a click are drawn closed in `--shots`. Still
+  true.
 
 Facts that differ from the specification above:
 
@@ -708,8 +712,10 @@ State on 2026-11-10: the gallery runs in a browser from the same source.
 
 Not done or not verified:
 
-- Safari and Firefox were not run.
+- Safari and Firefox were not run. Still true; see
+  [Current status](#current-status-2026-11-11).
 - Pasting, an input method editor, and touch input were not tested.
+  Still true.
 - The to-do example has no browser build; it saves to a file, which a
   browser page does not keep.
 - The software fallback draws at quarter size on a high-density display.
@@ -733,7 +739,12 @@ Gary accepted these on 2026-11-10:
    `examples/todo.x` is still shown running before the package claims
    completion.
 3. **Options argument.** Every widget call ends with an options argument,
-   `{}` when empty. There is one method per widget.
+   `{}` when empty. There is one method per widget. *Superseded on
+   2026-11-11* by method forms with `name: value` options, which may be
+   left out: `ui.button("Add", variant: primary)`. One method per widget
+   remains, and the method still takes the record. See
+   [method-form macros](method-form-macros.md) and
+   [x2cui lists and tables](x2cui-lists-and-tables.md).
 
 ## Risks
 
@@ -748,8 +759,9 @@ Gary accepted these on 2026-11-10:
   860 KB to a browser build.
 - The browser build needs Memory64 and JSPI in the browser, or the larger
   Asyncify build.
-- Frame time through the wrappers is not measured. The wrappers are inline
-  forwarders that copy one option struct per call.
+- The wrappers are inline forwarders that copy one option struct per
+  call. Frame time is measured by `examples/stress.x`; see "Stress
+  example" below. Its overhead against CUI's C was not measured.
 
 ## Browser probe results
 
@@ -994,3 +1006,32 @@ method-form macros, not on `x2cui`.
 - The gallery, scenes, stress example, and tests use the method forms for
   components. Their 229 images are byte-identical to the earlier ones.
 
+## Current status (2026-11-11)
+
+Verified by the orchestrator at `7a7129f20`:
+
+- `make wasm-runtime`, `make -C packages/x2cui web`, and
+  `make -C packages/x2cui web-check` exit 0; `web-check` draws the 26
+  gallery pages under Node, none empty.
+- The gallery and `index.html?stress` ran in a Chromium-based browser
+  pane with no console errors.
+
+The package's own programs use the method forms: the gallery, scenes,
+stress example, tests, and README samples write blocks as
+`ui.row (gap: 8) { ... }` and tables and the data grid with a Map literal
+of columns. The `$cui.*` decorators remain in the package source beside
+the method forms. The remaining uses in its programs are:
+
+- `$cui.id_index`, `$cui.id_scope`, and `$cui.disabled_scope`, which are
+  not CUI block macros and have no method form;
+- one test that draws inside `$cui.column`, `$cui.row`, and `$cui.box`, and
+  two that draw with `$cui.table` and `$cui.data_grid`, to show that the
+  earlier decorators still draw what the method forms draw;
+- the README's statements of the earlier spellings.
+
+All 229 images of the gallery, scenes, stress example, and to-do example
+stay byte-identical to `origin/x2cui` at `b393dd58c`.
+
+Not verified: Safari, Firefox, Linux, pasting, input method editors,
+touch, and the interactive native window beyond `make run-interactive`
+checked by hand.

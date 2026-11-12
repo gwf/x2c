@@ -1,13 +1,14 @@
 # x2cui lists and tables
 
 > Status: Gary accepted decisions 1 to 5 on 2026-11-11, and approved the
-> To-Do, Mail, and Orders sources and images. Implemented on the local
-> branch `gwf/x2cui-method-simplify`, over `x2cui` merged with `dev` and
-> the compiler change for [method-form macros](method-form-macros.md),
-> including method forms in templates, `Entry` forwarding, `Decl` holes
-> in `foreach`, and computed macro names. Not on `x2cui` or `dev`.
+> To-Do, Mail, and Orders sources and images. Implemented on `x2cui`
+> (gwf/x2c#663, `7a7129f20`), over `dev` with the compiler change for
+> [method-form macros](method-form-macros.md). The data grid's form and
+> the migration of the package's programs are on the local branch
+> `gwf/x2cui-data-grid`. Not on `dev`.
 > Every "verified" statement below was compiled and run on macOS arm64
-> with stage 1 of that branch. Statements marked "not verified" were not.
+> with that branch's stage 0, built from its bootstrap seed. Statements
+> marked "not verified" were not.
 
 ## Result
 
