@@ -43,6 +43,7 @@ fi
 if [ "$core_missing" -ne 0 ]; then
   cat >&2 <<'HELP'
 Core build tools on Fedora: sudo dnf install gcc binutils make bash
+On Debian or Ubuntu: sudo apt-get install build-essential
 On macOS: xcode-select --install
 Package preparation also needs Python 3 (Fedora: python3; Homebrew: python).
 For custom CC/AR/X2C_CC values, install the selected tool or correct its path.

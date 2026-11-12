@@ -118,21 +118,6 @@ debug/meta-generated.stamp: $(META_INPUTS)
 	  tools/gen-meta-queries.sh etc/meta-queries.x "$$dump"; \
 	  cksum $(META_OUTPUTS) >$@
 
-# Reuse stage zero's runtime C without adding another target to its build.
-WASM_CC ?= emcc
-WASM_AR ?= emar
-WASM_CFLAGS ?= -fsigned-char -Os -m64 -sSUPPORT_LONGJMP=emscripten
-wasm-runtime: build					## Build the optional Memory64 runtime
-	@mkdir -p builds/wasm/lib
-	@set -e; for c in builds/0/lib/*.c; do \
-	  $(WASM_CC) $(WASM_CFLAGS) -iquote builds/0/lib -iquote include/x2c \
-	    -c "$$c" -o "builds/wasm/lib/$$(basename "$$c" .c).o"; \
-	done
-	@rm -f builds/wasm/libx2c.a
-	$(WASM_AR) rcs builds/wasm/libx2c.a \
-	  $(patsubst builds/0/lib/%.c,builds/wasm/lib/%.o,\
-	    $(wildcard builds/0/lib/*.c))
-
 build-safe: configure					## Conservatively rebuild the compiler
 	$(MAKE) -C bootstrap clean
 	$(MAKE) bootstrap-build
@@ -168,18 +153,6 @@ commands-check: commands				## Run external command smoke tests
 	    parallel_start "$$name" sh "commands/$$name/tests/run.sh"; \
 	  done; \
 	  parallel_wait
-
-# The CLI probe runs x2c-package and x2c-new, whose embedded identity must
-# match the current compiler.
-verify: commands					## Build the compiler and commands, then run unit suites, compiler fixtures, and probes; build rewrites stale generated sources
-	$(STAGE0_X2C) script unittest/probes/run-suite-coverage
-	$(MAKE) -C unittest clean
-	$(PARALLEL_MAKE) -C unittest test-all
-	$(PARALLEL_MAKE) -C unittest compiler-fixtures scope-probes \
-		error-probes varops-probes
-	# thread_suite alone proves suites do not rely on earlier registration.
-	(cd ./unittest && X2C_SCOPE_ACCOUNTING=1 ./test-all thread_suite)
-	(cd ./unittest && X2C_SCOPE_ACCOUNTING=1 ./test-all)
 
 examples: build						## Check curated examples
 	$(MAKE) -C examples check
@@ -289,7 +262,34 @@ stage-2: build						## Build through compiler stage 2
 stage-3: bootstrap-ready				## Clean builds/ and build stages 0 to 3; rewrites no tracked file
 	time $(PARALLEL_MAKE) -C builds stresstest
 
+# Reuse stage zero's runtime C without adding another target to its build.
+WASM_CC ?= emcc
+WASM_AR ?= emar
+WASM_CFLAGS ?= -fsigned-char -Os -m64 -sSUPPORT_LONGJMP=emscripten
+wasm-runtime: build					## Build the optional Memory64 runtime
+	@mkdir -p builds/wasm/lib
+	@set -e; for c in builds/0/lib/*.c; do \
+	  $(WASM_CC) $(WASM_CFLAGS) -iquote builds/0/lib -iquote include/x2c \
+	    -c "$$c" -o "builds/wasm/lib/$$(basename "$$c" .c).o"; \
+	done
+	@rm -f builds/wasm/libx2c.a
+	$(WASM_AR) rcs builds/wasm/libx2c.a \
+	  $(patsubst builds/0/lib/%.c,builds/wasm/lib/%.o,\
+	    $(wildcard builds/0/lib/*.c))
+
 ##@ Verification and proofs
+# The CLI probe runs x2c-package and x2c-new, whose embedded identity must
+# match the current compiler.
+verify: commands					## Build the compiler and commands, then run unit suites, compiler fixtures, and probes; build rewrites stale generated sources
+	$(STAGE0_X2C) script unittest/probes/run-suite-coverage
+	$(MAKE) -C unittest clean
+	$(PARALLEL_MAKE) -C unittest test-all
+	$(PARALLEL_MAKE) -C unittest compiler-fixtures scope-probes \
+		error-probes varops-probes
+	# thread_suite alone proves suites do not rely on earlier registration.
+	(cd ./unittest && X2C_SCOPE_ACCOUNTING=1 ./test-all thread_suite)
+	(cd ./unittest && X2C_SCOPE_ACCOUNTING=1 ./test-all)
+
 verify-sanitize: build					## Run tests under ASan and UBSan
 	$(PARALLEL_MAKE) -C unittest sanitizer
 
@@ -542,7 +542,7 @@ bm-build-scaling: stage-2				## Measure size-normalized build cost
 bm-match-cache: stage-1					## Run Match cache acceptance gates
 	./unittest/benchmarks/run-match-cache-benchmark.sh
 
-##@ Shootout and portable builds
+##@ Shootout
 shoot-check: build				## Check official Benchmarks Game outputs
 	python3 examples/shootout/tools/shootout.py check --profile quick
 

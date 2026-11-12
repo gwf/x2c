@@ -55,8 +55,8 @@ To report prerequisites without building or downloading anything:
 before building x2c or native dependencies. To check only Game of Life's
 package, use `./configure --packages termbox2`.
 
-The report lists missing commands together and gives Fedora installation
-commands. Core compilation needs a C compiler, `ar`, Make, and Bash.
+The report lists missing commands together and gives Fedora, Debian or
+Ubuntu, and macOS installation commands. Core compilation needs a C compiler, `ar`, Make, and Bash.
 Package builds also need Python 3 and check their own profile tools, such as
 `shasum` and BLIS's `jq`. Preparation tools are required only when the selected native
 dependency is not already cached and no native prefix override was supplied.
