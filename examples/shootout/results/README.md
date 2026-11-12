@@ -1,8 +1,17 @@
 # Current benchmark results
 
-[Score history](history.md) | [Full results table](current.md) | [Structured data](current.json) | [Summary chart](charts/runtime-source-size.svg) | [Per-problem profiles](charts/implementation-profiles.svg) | [Runtime and source-size distributions](charts/runtime-loc-distributions.svg)
+[Score history](history.md) | [Full results table](current.md) | [Structured data](current.json) | [Log-scale summary](charts/runtime-source-size.svg) | [Linear summary](charts/runtime-source-size-linear.svg) | [Per-problem profiles](charts/implementation-profiles.svg) | [Runtime and source-size distributions](charts/runtime-loc-distributions.svg)
 
 ![Runtime and source size](charts/runtime-source-size.png)
+
+Chart labels use **x2c** for the idiomatic implementation and **x2c*** for
+the tuned implementation. The default summary uses logarithmic axes.
+
+All chart ratios use each problem's C runtime and Python source size as
+baselines, matching the tables. Dashed lines mark 1x. Compressed source uses
+Python gzip bytes. Source ratios are unavailable where Python is absent.
+The summary uses geometric means; table medians and arithmetic means remain
+explicitly labeled. Profiles and distributions retain logarithmic scales.
 
 ## Latest local measurement
 
@@ -32,7 +41,7 @@ problems, tuned source totals 727 lines, down from 770 in the prior snapshot.
 
 ## Files in this snapshot
 
-This directory holds the promoted snapshot: the report, all three charts in
+This directory holds the promoted snapshot: the report, four chart views in
 PNG/SVG/PDF, plotted measurements and summaries in CSV, and chart provenance.
 [Score history](history.md) retains compact headline ratios from published
 runs, with [structured history](history.json) for all language scores,
