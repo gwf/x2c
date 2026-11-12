@@ -25,13 +25,6 @@ void Person.init(Person p, int index, List row) {
 String Person.sort_key(Person p, int column) =>
   column == 0 ? p.name : column == 2 ? p.role : p.status;
 
-static List people_rows = %(
-  ("Jonas Berg" "jonas@northlight.io" "Owner" "Active" "\$12,384" 2)
-  ("Priya Nair" "priya@harbor.dev" "Admin" "Active" "\$9,846" 2)
-  ("Tomas Rivera" "tomas@kiln.app" "Editor" "Invited" "\$7,215" 3)
-  ("Lena Fischer" "lena@fischer.dev" "Viewer" "Active" "\$3,127" 2)
-  ("Aiko Tanaka" "aiko@tanaka.design" "Editor" "Suspended" "\$1,962" 4));
-
 static List people;
 
 /* The people in the table's order: sorted by the clicked column, with
@@ -46,8 +39,19 @@ void page_data(Ui ui, Gallery g) {
   section(ui, "Table", "Sortable columns, row selection and components in "
                        "cells.");
   if (!people) {
+    List rows = %(
+      ("Jonas Berg" "jonas@northlight.io" "Owner" "Active" "\$12,384"
+       $(CUI_TONE_SUCCESS))
+      ("Priya Nair" "priya@harbor.dev" "Admin" "Active" "\$9,846"
+       $(CUI_TONE_SUCCESS))
+      ("Tomas Rivera" "tomas@kiln.app" "Editor" "Invited" "\$7,215"
+       $(CUI_TONE_WARNING))
+      ("Lena Fischer" "lena@fischer.dev" "Viewer" "Active" "\$3,127"
+       $(CUI_TONE_SUCCESS))
+      ("Aiko Tanaka" "aiko@tanaka.design" "Editor" "Suspended" "\$1,962"
+       $(CUI_TONE_DANGER)));
     Array all = [];
-    foreach (List row in people_rows) all.push(Person.new(all.len(), row));
+    foreach (List row in rows) all.push(Person.new(all.len(), row));
     people = all;
   }
   ui.table ("people", sort: &g.sort, selectable: true,
