@@ -138,13 +138,17 @@ static void scene_commit_graph(Ui ui) {
 }
 
 static void scene_coverage(Ui ui) {
-  static const cui_coverage_file files[] = {
-    { "src/core/layout.c", 1840, 1702, 620, 541, 88, 86 },
-    { "src/core/draw.c", 960, 610, 300, 160, 54, 40 },
-    { "src/text/shape.c", 2210, 1490, 802, 411, 120, 88 },
-    { "src/render/gl.c", 1300, 410, 260, 60, 70, 22 },
-    { "src/main.c", 120, 120, 10, 10, 4, 4 } };
-  ui.coverage("cov", files,
+  ui.coverage("cov", [
+    {path: "src/core/layout.c", lines: 1840, lines_hit: 1702, branches: 620,
+     branches_hit: 541, functions: 88, functions_hit: 86},
+    {path: "src/core/draw.c", lines: 960, lines_hit: 610, branches: 300,
+     branches_hit: 160, functions: 54, functions_hit: 40},
+    {path: "src/text/shape.c", lines: 2210, lines_hit: 1490, branches: 802,
+     branches_hit: 411, functions: 120, functions_hit: 88},
+    {path: "src/render/gl.c", lines: 1300, lines_hit: 410, branches: 260,
+     branches_hit: 60, functions: 70, functions_hit: 22},
+    {path: "src/main.c", lines: 120, lines_hit: 120, branches: 10,
+     branches_hit: 10, functions: 4, functions_hit: 4}],
     width: 640, height: 340);
 }
 
@@ -214,8 +218,6 @@ static void scene_hex_view(Ui ui) {
 }
 
 static void scene_keymap(Ui ui) {
-  static const char *categories[] = { "File", "Navigate", "Edit",
-                                      "Run and debug" };
   static int mods = CUI_MOD_PRIMARY;
   ui.keymap("keys", [
     {combo: {mods: CUI_MOD_PRIMARY, key: s}, action: "Save", category: 0},
@@ -232,7 +234,7 @@ static void scene_keymap(Ui ui) {
      category: 2},
     {combo: {mods: 0, key: f5}, action: "Continue", category: 3},
     {combo: {mods: 0, key: f12}, action: "Definition", category: 1}],
-    width: 664, categories: categories, mods: &mods);
+    width: 664, categories: ["File", "Navigate", "Edit", "Run and debug"], mods: &mods);
 }
 
 static void scene_kv_editor(Ui ui) {
@@ -278,67 +280,64 @@ static void scene_problems(Ui ui) {
 }
 
 static void scene_query_builder(Ui ui) {
-  static const char *const statuses[] = { "Open", "In progress", "Closed" };
-  static const cui_query_field fields[] = {
-    { "Status", CUI_QUERY_CHOICE, statuses, 3 },
-    { "Assignee", CUI_QUERY_TEXT },
-    { "Priority", CUI_QUERY_NUMBER } };
   // All of: Status is Open, and any of: Assignee is me, Priority > 2.
   static cui_query_node nodes[12] = {
     { 0, true, false }, { 1, false, false, 0, 0, "Open" },
     { 1, true, true }, { 2, false, false, 1, 0, "me" },
     { 2, false, false, 2, 2, "2" } };
   static int count = 5;
-  ui.query_builder("filter", fields, nodes, count, width: 640);
+  ui.query_builder("filter", [
+    {name: "Status", type: choice, choices: ["Open", "In progress", "Closed"]},
+    {name: "Assignee", type: text}, {name: "Priority", type: number}], nodes, count, width: 640);
 }
 
 static void scene_stack_trace(Ui ui) {
-  static const char *const cart[] = {
-    "function total(cart) {", "  let sum = 0;",
-    "  for (const item of cart.items) {",
-    "    sum += item.price * item.qty;", "  }", "  return sum;" };
-  static const cui_stack_frame frames[] = {
-    { "total", "src/cart.js", 3, 29, false, cart, 6, 1 },
-    { "checkout", "src/checkout.js", 3, 18 },
-    { "handle", "node_modules/express/lib/router/layer.js", 95, 5, true },
-    { "next", "node_modules/express/lib/router/route.js", 149, 13, true },
-    { "onRequest", "src/server.js", 41, 9 } };
-  ui.stack_trace("trace", frames,
+  ui.stack_trace("trace", [
+    {function: "total", file: "src/cart.js", line: 3, column: 29,
+     source: ["function total(cart) {", "  let sum = 0;", "  for (const item of cart.items) {", "    sum += item.price * item.qty;", "  }", "  return sum;"],
+     source_first: 1},
+    {function: "checkout", file: "src/checkout.js", line: 3, column: 18},
+    {function: "handle", file: "node_modules/express/lib/router/layer.js",
+     line: 95, column: 5, external: true},
+    {function: "next", file: "node_modules/express/lib/router/route.js",
+     line: 149, column: 13, external: true},
+    {function: "onRequest", file: "src/server.js", line: 41, column: 9}],
     width: 640, title: "TypeError",
     message: "Cannot read properties of undefined (reading 'items')",
     lang: "js");
 }
 
 static void scene_test_explorer(Ui ui) {
-  static const cui_test_item tests[] = {
-    { "layout", 0 },
-    { "row distributes extra space", 1, CUI_JOB_PASSED, 0.004f },
-    { "wraps to the next line", 1, CUI_JOB_PASSED, 0.006f },
-    { "mirrors under right to left", 1, CUI_JOB_FAILED, 0.012f,
-      "expected x = 412, got 388 (padding not mirrored)" },
-    { "text", 0 },
-    { "shapes Persian", 1, CUI_JOB_PASSED, 0.210f },
-    { "bidi brackets", 1, CUI_JOB_SKIPPED, -1 },
-    { "renderer", 0 },
-    { "soft shadows", 1, CUI_JOB_RUNNING, -1 },
-    { "atlas growth", 1, CUI_JOB_PENDING, -1 } };
-  ui.test_explorer("tests", tests,
+  ui.test_explorer("tests", [
+    {name: "layout", depth: 0},
+    {name: "row distributes extra space", depth: 1, status: passed,
+     duration: 0.004f},
+    {name: "wraps to the next line", depth: 1, status: passed,
+     duration: 0.006f},
+    {name: "mirrors under right to left", depth: 1, status: failed,
+     duration: 0.012f,
+     message: "expected x = 412, got 388 (padding not mirrored)"},
+    {name: "text", depth: 0},
+    {name: "shapes Persian", depth: 1, status: passed, duration: 0.210f},
+    {name: "bidi brackets", depth: 1, status: skipped, duration: -1},
+    {name: "renderer", depth: 0},
+    {name: "soft shadows", depth: 1, status: running, duration: -1},
+    {name: "atlas growth", depth: 1, status: pending, duration: -1}],
     width: 640, height: 370);
 }
 
 static void scene_trace_view(Ui ui) {
   static cui_trace_track tracks[] = { { "Main thread" }, { "Render" } };
-  static const cui_trace_marker markers[] = {
-    { "vsync", 0.0, CUI_TONE_NEUTRAL },
-    { "vsync", 0.0166, CUI_TONE_NEUTRAL },
-    { "GC pause", 0.0273, CUI_TONE_WARNING } };
   static cui_trace_view view = { 0, 0.0335, 0, 0.0187, 0.0258 };
   static int selected = -1;
   if (selected < 0)
     for (int i = 0; i < (int) (sizeof trace_spans / sizeof *trace_spans); i++)
       if (trace_spans[i].start == 0.0187) selected = i;
   ui.trace_view("trace", tracks, trace_spans, view, selected,
-                  width: 640, height: 170, markers: markers);
+                  width: 640, height: 170, markers: [
+                    {name: "vsync", time: 0.0, tone: neutral},
+                    {name: "vsync", time: 0.0166, tone: neutral},
+                    {name: "GC pause", time: 0.0273, tone: warning}]);
 }
 
 static void scene_waterfall(Ui ui) {

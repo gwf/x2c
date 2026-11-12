@@ -206,18 +206,18 @@ static void dialogs(Ui ui, Gallery g) {
     ui.list_item("Priya invited you to Engines",
       avatar: "Priya Nair", subtitle: "1 hour ago");
   }
-  static const cui_command commands[] = {
-    { "Go to Overview", CUI_ICON_LAYOUT_DASHBOARD, "Navigation" },
-    { "Go to Buttons", CUI_ICON_ZAP, "Navigation" },
-    { "Go to Inputs", CUI_ICON_TYPE, "Navigation" },
-    { "Go to Charts", CUI_ICON_CHART_LINE, "Navigation" },
-    { "Toggle dark mode", CUI_ICON_MOON, "Preferences", "Ctrl J" },
-    { "Change accent color", CUI_ICON_PALETTE, "Preferences" },
-    { "New project", CUI_ICON_PLUS, "Actions", "Ctrl N" },
-    { "Invite teammate", CUI_ICON_USER_PLUS, "Actions" },
-    { "Open settings", CUI_ICON_SETTINGS, "Actions", "Ctrl ," },
-  };
-  switch (ui.command_palette(g.palette_open, commands)) {
+  switch (ui.command_palette(g.palette_open, [
+    {title: "Go to Overview", icon: layout_dashboard, group: "Navigation"},
+    {title: "Go to Buttons", icon: zap, group: "Navigation"},
+    {title: "Go to Inputs", icon: type, group: "Navigation"},
+    {title: "Go to Charts", icon: chart_line, group: "Navigation"},
+    {title: "Toggle dark mode", icon: moon, group: "Preferences",
+     shortcut: "Ctrl J"},
+    {title: "Change accent color", icon: palette, group: "Preferences"},
+    {title: "New project", icon: plus, group: "Actions", shortcut: "Ctrl N"},
+    {title: "Invite teammate", icon: user_plus, group: "Actions"},
+    {title: "Open settings", icon: settings, group: "Actions",
+     shortcut: "Ctrl ,"}])) {
     case 0: g.page = PAGE_OVERVIEW; break;
     case 1: g.page = PAGE_BUTTONS; break;
     case 2: g.page = PAGE_INPUTS; break;

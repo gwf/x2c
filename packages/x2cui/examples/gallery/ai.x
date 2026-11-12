@@ -22,12 +22,6 @@ void page_ai(Ui ui, Gallery g) {
   static double started = -1;
   static const char *files[] = { "quarterly-report.pdf", "metrics.csv" };
   static int file_count = 2;
-  static const cui_model models[] = {
-    { "Atlas", "Longer answers, reads files and code", "New",
-      CUI_ICON_LAYERS },
-    { "Atlas Fast", "Short answers in about a second", NULL, CUI_ICON_ZAP },
-    { "Atlas Mini", "Runs on your own machine", NULL, CUI_ICON_BOX },
-  };
   static const cui_source sources[] = {
     { "Immediate mode GUIs and why they keep coming back",
       "https://fieldnotes.dev/immediate-mode",
@@ -97,15 +91,20 @@ void page_ai(Ui ui, Gallery g) {
           vote: &vote);
         if (actions & CUI_RESPONSE_REGENERATE) busy = true;
         ui.spacer();
-        static const cui_viz_item parts[] = {
-          { "System", 3200 }, { "Files", 41800 }, { "Messages", 68400 } };
         ui.context_meter("ctx", 113400, 200000,
-          parts: parts);
+          parts: [
+            {label: "System", value: 3200}, {label: "Files", value: 41800},
+            {label: "Messages", value: 68400}]);
       }
       int event = ui.chat_composer("composer", draft,
         placeholder: "Ask a follow up", busy: busy,
         attachments: files, attachment_count: file_count,
-        removed: &removed, models: models, model: &model);
+        removed: &removed, models: [
+          {name: "Atlas", detail: "Longer answers, reads files and code",
+           badge: "New", icon: layers},
+          {name: "Atlas Fast", detail: "Short answers in about a second",
+           icon: zap},
+          {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}], model: &model);
       if (event & CUI_COMPOSER_SEND) {
         draft.set("");
         busy = true;

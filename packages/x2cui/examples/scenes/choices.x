@@ -12,17 +12,18 @@
 #include "scene.x"
 
 static void scene_radio_cards(Ui ui) {
-  static const cui_choice places[] = {
-    { "This computer",
-      "Saved next to the project. Nothing leaves the machine.",
-      CUI_ICON_MONITOR, NULL },
-    { "Team server", "Synced to your company server every few minutes.",
-      CUI_ICON_SERVER, "Default" },
-    { "Both", "A local copy, uploaded to the server every night.",
-      CUI_ICON_LAYERS, NULL } };
   static int place = 1;
   ui.box (width: fill, max_width: 420)
-    ui.radio_cards("places", places, place);
+    ui.radio_cards("places", [
+      {title: "This computer",
+       description: "Saved next to the project. Nothing leaves the machine.",
+       icon: monitor},
+      {title: "Team server",
+       description: "Synced to your company server every few minutes.",
+       icon: server, badge: "Default"},
+      {title: "Both",
+       description: "A local copy, uploaded to the server every night.",
+       icon: layers}], place);
 }
 
 static void scene_toggle_group(Ui ui) {

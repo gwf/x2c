@@ -139,10 +139,11 @@ void page_motion(Ui ui, Gallery g) {
                         color: text_muted);
       }
       section(ui, "Tab bar", "For compact layouts.");
-      static const cui_tab_bar_item tabs[] = {
-        { CUI_ICON_HOUSE, "Home", 0 }, { CUI_ICON_SEARCH, "Search", 0 },
-        { CUI_ICON_INBOX, "Inbox", 4 }, { CUI_ICON_USER, "Profile", 0 } };
-      ui.tab_bar("tabs", tabs, tab,
+      ui.tab_bar("tabs", [
+        {icon: house, label: "Home", badge: 0},
+        {icon: search, label: "Search", badge: 0},
+        {icon: inbox, label: "Inbox", badge: 4},
+        {icon: user, label: "Profile", badge: 0}], tab,
                  width: 360);
     }
   }

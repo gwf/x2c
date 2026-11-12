@@ -122,21 +122,21 @@ static void scene_donut_chart(Ui ui) {
 }
 
 static void scene_activity_rings(Ui ui) {
-  static const cui_viz_item rings[] = {
-    { "Move", 0.82f }, { "Exercise", 1.24f }, { "Stand", 0.58f } };
   ui.card (pad: 18)
-    ui.activity_rings("rings", rings,
+    ui.activity_rings("rings", [
+      {label: "Move", value: 0.82f}, {label: "Exercise", value: 1.24f},
+      {label: "Stand", value: 0.58f}],
       size: 170, center: "82%", caption: "of goal", legend: true);
 }
 
 static void scene_bar_list(Ui ui) {
-  static const cui_viz_item pages[] = {
-    { "/docs", 4820 }, { "/", 3920 }, { "/gallery", 2410 },
-    { "/blog/fast-ui-in-c", 1830 }, { "/download", 1210 },
-    { "/pricing", 640 } };
   ui.card (width: fill, max_width: 480, gap: 10) {
     ui.label("Top pages this week");
-    ui.bar_list("pages", pages);
+    ui.bar_list("pages", [
+      {label: "/docs", value: 4820}, {label: "/", value: 3920},
+      {label: "/gallery", value: 2410},
+      {label: "/blog/fast-ui-in-c", value: 1830},
+      {label: "/download", value: 1210}, {label: "/pricing", value: 640}]);
   }
 }
 
@@ -190,11 +190,10 @@ static void scene_sankey(Ui ui) {
 }
 
 static void scene_scatter_chart(Ui ui) {
-  static const cui_scatter_series series[] = {
-    { "Software", software_points, software_sizes, RUNS },
-    { "OpenGL", opengl_points, opengl_sizes, RUNS } };
   ui.card (pad: 18, width: fill, max_width: 660)
-    ui.scatter_chart("frames", series,
+    ui.scatter_chart("frames", [
+      {name: "Software", points: software_points, sizes: software_sizes},
+      {name: "OpenGL", points: opengl_points, sizes: opengl_sizes}],
       height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
 }
@@ -221,11 +220,11 @@ static void scene_treemap(Ui ui) {
 }
 
 static void scene_waffle(Ui ui) {
-  static const cui_viz_item platforms[] = {
-    { "Windows", 46 }, { "macOS", 31 }, { "Linux", 23 } };
   ui.card (pad: 18, gap: 10) {
     ui.label("Platforms of the last 100 installs");
-    ui.waffle("installs", platforms, cell: 16);
+    ui.waffle("installs", [
+      {label: "Windows", value: 46}, {label: "macOS", value: 31},
+      {label: "Linux", value: 23}], cell: 16);
   }
 }
 
@@ -285,12 +284,14 @@ static void scene_uptime(Ui ui) {
 }
 
 static void scene_ticker(Ui ui) {
-  static const cui_ticker_item figures[] = {
-    { "Revenue", "$48.2k", 6.9f }, { "Active users", "12,408", 3.1f },
-    { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
-    { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 } };
   ui.box (width: fill)
-    ui.ticker("figures", figures);
+    ui.ticker("figures", [
+      {label: "Revenue", value: "$48.2k", delta: 6.9f},
+      {label: "Active users", value: "12,408", delta: 3.1f},
+      {label: "Churn", value: "1.7%", delta: -0.6f, lower_is_better: true},
+      {label: "Latency", value: "182 ms", delta: -8.4f, lower_is_better: true},
+      {label: "Builds", value: "1,204", delta: 12.0f},
+      {label: "Uptime", value: "99.98%", delta: 0}]);
 }
 
 static Scene viz_scenes[] = {

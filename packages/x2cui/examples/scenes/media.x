@@ -53,12 +53,12 @@ static void scene_now_playing(Ui ui) {
 }
 
 static void scene_radial_gauge(Ui ui) {
-  static const cui_gauge_band load[] = {
-    { 60, CUI_TONE_SUCCESS }, { 85, CUI_TONE_WARNING },
-    { 100, CUI_TONE_DANGER } };
   ui.row (gap: 28, align: center) {
     ui.radial_gauge("cpu", 72, 0, 100, unit: "%", label: "CPU load",
-                                       bands: load, band_count: 3);
+                                       bands: [
+                                         {to: 60, tone: success},
+                                         {to: 85, tone: warning},
+                                         {to: 100, tone: danger}], band_count: 3);
     ui.radial_gauge("rps", 1840, 0, 2500,
       label: "Requests per second", show_target: true,
       target: 2000);

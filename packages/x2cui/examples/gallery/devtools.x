@@ -61,20 +61,19 @@ static void devtools_problems(Ui ui) {
 static int pl_sel = 3;
 
 static void devtools_pipeline(Ui ui) {
-  static const cui_pipeline_job jobs[] = {
-    { "linux-x64", 0, CUI_JOB_PASSED, 142 },
-    { "macos-arm64", 0, CUI_JOB_PASSED, 201 },
-    { "windows-x64", 0, CUI_JOB_PASSED, 236 },
-    { "unit", 1, CUI_JOB_PASSED, 64 },
-    { "integration", 1, CUI_JOB_RUNNING, 95 },
-    { "lint", 1, CUI_JOB_FAILED, 12, true },
-    { "docker image", 2, CUI_JOB_PENDING, -1 },
-    { "release notes", 2, CUI_JOB_SKIPPED, -1 },
-    { "staging", 3, CUI_JOB_PENDING, -1 },
-    { "production", 3, CUI_JOB_PENDING, -1 },
-  };
   ui.column (gap: 10, width: fill, max_width: 920)
-    ui.pipeline("run", %("Build" "Test" "Package" "Deploy"), jobs, selected: &pl_sel);
+    ui.pipeline("run", %("Build" "Test" "Package" "Deploy"), [
+      {name: "linux-x64", stage: 0, status: passed, duration: 142},
+      {name: "macos-arm64", stage: 0, status: passed, duration: 201},
+      {name: "windows-x64", stage: 0, status: passed, duration: 236},
+      {name: "unit", stage: 1, status: passed, duration: 64},
+      {name: "integration", stage: 1, status: running, duration: 95},
+      {name: "lint", stage: 1, status: failed, duration: 12,
+       allow_failure: true},
+      {name: "docker image", stage: 2, status: pending, duration: -1},
+      {name: "release notes", stage: 2, status: skipped, duration: -1},
+      {name: "staging", stage: 3, status: pending, duration: -1},
+      {name: "production", stage: 3, status: pending, duration: -1}], selected: &pl_sel);
 }
 
 static const char *const qb_status[] = { "Open", "In progress", "Closed" };

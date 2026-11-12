@@ -29,11 +29,10 @@ static void scene_empty_state(Ui ui) {
 static void scene_metric(Ui ui) {
   // cui_metric_opts takes the sparkline as a
   // `const float *spark, int spark_count` pair.
-  static const float installs[] = { 3, 5, 4, 7, 6, 9, 11 };
   ui.row (gap: 16, width: fill) {
     ui.metric("Weekly installs", "3,912",
       icon: download, delta: 8.1f,
-      delta_label: "+8.1% vs last week", spark: installs,
+      delta_label: "+8.1% vs last week", spark: [3, 5, 4, 7, 6, 9, 11],
       spark_count: 7, width: grow(1));
     ui.metric("Frame time", "0.4 ms",
       icon: zap, delta: -18.0f, delta_label: "-18% vs v0.9",
@@ -273,11 +272,12 @@ static void scene_agent_status(Ui ui) {
 static void scene_context_meter(Ui ui) {
   // cui_context_opts takes the breakdown as a
   // `const cui_viz_item *parts, int part_count` pair.
-  static const cui_viz_item parts[] = {
-    { "System", 3200 }, { "Files", 41800 }, { "Messages", 68400 } };
   ui.row (gap: 10, align: center) {
     ui.context_meter("context", 113400, 200000,
-                     parts: parts, part_count: 3);
+                     parts: [
+                       {label: "System", value: 3200},
+                       {label: "Files", value: 41800},
+                       {label: "Messages", value: 68400}], part_count: 3);
     ui.text("113k of 200k tokens used. Hover the ring for a breakdown.",
             color: text_secondary);
   }
@@ -301,16 +301,16 @@ static void scene_chat_composer(Ui ui) {
   // cui_composer_opts takes `const char *const *attachments,
   // int attachment_count`, `const cui_model *models, int model_count`, and
   // the option field `int *model`, which needs `&`.
-  static const char *files[] = { "quarterly-report.pdf", "metrics.csv" };
-  static const cui_model models[] = {
-    { "Atlas", "Longer answers, reads files and code", "New",
-      CUI_ICON_LAYERS },
-    { "Atlas Fast", "Short answers in about a second", NULL, CUI_ICON_ZAP },
-    { "Atlas Mini", "Runs on your own machine", NULL, CUI_ICON_BOX } };
   static int model = 0;
   int events = ui.chat_composer("composer", draft,
-    placeholder: "Ask a follow up", attachments: files,
-    attachment_count: 2, models: models, model_count: 3,
+    placeholder: "Ask a follow up", attachments: [
+      "quarterly-report.pdf", "metrics.csv"],
+    attachment_count: 2, models: [
+      {name: "Atlas", detail: "Longer answers, reads files and code",
+       badge: "New", icon: layers},
+      {name: "Atlas Fast", detail: "Short answers in about a second",
+       icon: zap},
+      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}], model_count: 3,
     model: &model, width: fill);
   if (events & CUI_COMPOSER_SEND) draft.set("");
 }

@@ -149,12 +149,13 @@ void page_social(Ui ui, Gallery g) {
 
   section(ui, "Ticker", "A continuous strip of figures. It pauses under the "
                         "pointer.");
-  static const cui_ticker_item tick[] = {
-    { "Revenue", "$48.2k", 6.9f }, { "Active users", "12,408", 3.1f },
-    { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
-    { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 },
-  };
-  ui.ticker("tick", tick);
+  ui.ticker("tick", [
+    {label: "Revenue", value: "$48.2k", delta: 6.9f},
+    {label: "Active users", value: "12,408", delta: 3.1f},
+    {label: "Churn", value: "1.7%", delta: -0.6f, lower_is_better: true},
+    {label: "Latency", value: "182 ms", delta: -8.4f, lower_is_better: true},
+    {label: "Builds", value: "1,204", delta: 12.0f},
+    {label: "Uptime", value: "99.98%", delta: 0}]);
 
   section(ui, "Carousel", "Drag, flick, scroll sideways or use the arrows "
                           "and dots.");
