@@ -558,7 +558,16 @@ static String _link(Helper &h, int count) {
     _link_arguments(h, output, tables, support), NULL);
   if (!failure) Path.move_to(output, helper);
   else if (Path.exists(helper)) Path.remove_file(helper);
-  return failure;
+  return failure ? _link_failure(h, failure) : NULL;
+}
+
+/* A group that did not compile leaves the symbols the other groups call
+   undefined, so a link failure names those groups' failures first. */
+static String _link_failure(Helper &h, String failure) {
+  Array reasons = [];
+  foreach (List row in h.failures) reasons.push(row.cadr());
+  reasons.push(%"the helper did not link: $failure");
+  return "; ".join(reasons.list_free());
 }
 
 /* The object of the helper's protocol loop, which this compiler translates

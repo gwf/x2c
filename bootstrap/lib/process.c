@@ -778,13 +778,13 @@ static void _set(JobLaunch * l, Symbol name, Var value){
 
 static void _route_output(JobLaunch * l, Var value){
   (* l).capture_output = _is(value, 6544469130);
-  (* l).stdout_path =(* l).capture_output || _is(value, 20284019304) ? NULL : Var_as_string(value);
+  (* l).stdout_path = Var_as_string((* l).capture_output || _is(value, 20284019304) ? Var_null() : value);
 }
 
 static void _route_errors(JobLaunch * l, Var value){
   (* l).capture_errors = _is(value, 6544469130);
   (* l).errors_to_output = _is(value, 1317305704);
-  (* l).stderr_path =(* l).capture_errors ||(* l).errors_to_output || _is(value, 20284019304) ? NULL : Var_as_string(value);
+  (* l).stderr_path = Var_as_string((* l).capture_errors ||(* l).errors_to_output || _is(value, 20284019304) ? Var_null() : value);
 }
 
 static int _is(Var value, Symbol name){

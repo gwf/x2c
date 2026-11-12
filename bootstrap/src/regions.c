@@ -1784,7 +1784,7 @@ static Fact _fact_of(Walk * w, Var expression, List * named){
         {
           if(named)(* named) = Var_list_payload(binding);
           Var found = Map_getindex((* w).facts, binding);
-          return Var_is_void(found) ? NULL : Var_fact(found);
+          return Var_fact(Var_is_void(found) ? Var_null() : found);
         }
 
       }

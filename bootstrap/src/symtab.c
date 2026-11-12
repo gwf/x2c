@@ -716,7 +716,7 @@ List Sym_current_binding(Sym s, List key){
   if(! _init_guard_) _file_init_();
   SymScope * scope = _scope_at(s, - 1);
   Var binding;
-  return scope && Map_try_get(scope -> bindings, List_var(key), &(binding)) ? Var_list_payload(binding) : NULL;
+  return Var_list_payload(scope && Map_try_get(scope -> bindings, List_var(key), &(binding)) ? binding : Var_null());
 }
 
 Symbol Sym_enumerator_owner(Sym s, List key){
@@ -760,7 +760,7 @@ Map Compiler_semantic_binding_facts(Compiler c){
 List Compiler_fact(Compiler c, Var key){
   if(! _init_guard_) _file_init_();
   Var stored;
-  return Map_try_get(c -> sym -> binding_facts, key, &(stored)) ? Var_list_payload(stored) : NULL;
+  return Var_list_payload(Map_try_get(c -> sym -> binding_facts, key, &(stored)) ? stored : Var_null());
 }
 
 void Compiler_set_fact(Compiler c, Var key, Var value){
@@ -1666,7 +1666,7 @@ static int f10_namespaces____derived_spelling(Sym s, String name){
 static void f10_namespaces____check_package_binding(Compiler c, String kind, String local, Token token){
   Var alias = Map_getindex(c -> package_aliases, String_var(local));
   Var member = Map_getindex(c -> package_members, String_var(local));
-  String bound = Var_is_void(alias) ? NULL : Var_as_string(alias);
+  String bound = Var_as_string(Var_is_void(alias) ? Var_null() : alias);
   if(! String_truth(bound) && ! Var_is_void(member)){
     List pair = Var_list_payload(member);
     List _x2c_gensym_destructure_5 = pair;

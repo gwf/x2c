@@ -1472,7 +1472,7 @@ static ParallelMap _parallel_map(Iter i, Pool pool, ThreadValueFn function, int 
 static Thread _parallel_wait(ParallelRun run){
   x2c_thread_wait_lock();
   while(! Array_len(run -> ready) && ! x2c_thread_stopping()) x2c_thread_wait(& thread_completion_condition);
-  Thread ready = x2c_thread_stopping() ? NULL : Var_pointer(Array_remove(run -> ready, 0));
+  Thread ready = Var_pointer(x2c_thread_stopping() ? Var_null() : Array_remove(run -> ready, 0));
   x2c_thread_wait_unlock();
   if(! ready) x2c_thread_cancel();
   return ready;

@@ -18646,7 +18646,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15573 = List_var(_15572);
   _15574 = String_new("src/expressions/identifiers.x");
   _15575 = String_var(_15574);
-  _15576 = String_new("fd6a1b51");
+  _15576 = String_new("f772f6b8");
   _15577 = String_var(_15576);
   _15578 = cons(_15577, NULL);
   _15579 = cons(_15575, _15578);
@@ -18665,7 +18665,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_30(void
   _15592 = List_var(_15591);
   _15593 = String_new("src/expressions/operators.x");
   _15594 = String_var(_15593);
-  _15595 = String_new("f23a2ce0");
+  _15595 = String_new("53e2532e");
   _15596 = String_var(_15595);
   _15597 = cons(_15596, NULL);
   _15598 = cons(_15594, _15597);
@@ -23298,7 +23298,7 @@ static List _delegate_fields(Type outer, String member){
   List paths = Array_list_free(found);
   if(List_truth(paths) && List_truth(List_cdr(paths))) _delegate_fail_ambiguous(outer, member, paths);
   if(! List_truth(paths) && List_truth(cycle)) _delegate_fail_cycle(outer, member, cycle);
-  return List_truth(paths) ? Var_list_payload(Var_car(List_car(paths))) : NULL;
+  return Var_list_payload(List_truth(paths) ? Var_car(List_car(paths)) : Var_null());
 }
 
 Code delegate_member(Code code){

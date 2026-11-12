@@ -428,7 +428,7 @@ static int f9_operators____conditional_null(List expression);
 
 static Type f9_operators____conditional_pointer(Compiler c, List lhs, List rhs);
 
-static int f9_operators____conditional_joins(Compiler c, Type type, Type other);
+static int f9_operators____conditional_joins(Compiler c, List var_arm, List other);
 
 static List _binary(Resolve * r, Var operator, List left, List right);
 
@@ -2561,7 +2561,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1944 = cons(_1943, NULL);
   _1945 = cons(_250, _1944);
   _1946 = List_var(_1945);
-  _1947 = int_var(88975);
+  _1947 = int_var(89386);
   _1948 = cons(_1947, NULL);
   _1949 = cons(_255, _1948);
   _1950 = List_var(_1949);
@@ -2760,7 +2760,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2140 = cons(_2139, NULL);
   _2141 = cons(_242, _2140);
   _2142 = List_var(_2141);
-  _2143 = int_var(89337);
+  _2143 = int_var(89748);
   _2144 = cons(_2143, NULL);
   _2145 = cons(_255, _2144);
   _2146 = List_var(_2145);
@@ -2877,7 +2877,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2257 = cons(_2256, NULL);
   _2258 = cons(_242, _2257);
   _2259 = List_var(_2258);
-  _2260 = int_var(90099);
+  _2260 = int_var(90510);
   _2261 = cons(_2260, NULL);
   _2262 = cons(_255, _2261);
   _2263 = List_var(_2262);
@@ -2975,7 +2975,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2355 = cons(_2354, NULL);
   _2356 = cons(_242, _2355);
   _2357 = List_var(_2356);
-  _2358 = int_var(90183);
+  _2358 = int_var(90594);
   _2359 = cons(_2358, NULL);
   _2360 = cons(_255, _2359);
   _2361 = List_var(_2360);
@@ -3100,7 +3100,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2480 = cons(_2479, NULL);
   _2481 = cons(_242, _2480);
   _2482 = List_var(_2481);
-  _2483 = int_var(89920);
+  _2483 = int_var(90331);
   _2484 = cons(_2483, NULL);
   _2485 = cons(_255, _2484);
   _2486 = List_var(_2485);
@@ -3201,7 +3201,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2578 = cons(_2577, NULL);
   _2579 = cons(_242, _2578);
   _2580 = List_var(_2579);
-  _2581 = int_var(89749);
+  _2581 = int_var(90160);
   _2582 = cons(_2581, NULL);
   _2583 = cons(_255, _2582);
   _2584 = List_var(_2583);
@@ -3423,7 +3423,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2800 = cons(_2799, NULL);
   _2801 = cons(_242, _2800);
   _2802 = List_var(_2801);
-  _2803 = int_var(90390);
+  _2803 = int_var(90801);
   _2804 = cons(_2803, NULL);
   _2805 = cons(_255, _2804);
   _2806 = List_var(_2805);
@@ -3631,7 +3631,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3008 = List_var(_3007);
   _3009 = cons(_202, _84);
   _3010 = List_var(_3009);
-  _3011 = int_var(92792);
+  _3011 = int_var(93203);
   _3012 = cons(_3011, NULL);
   _3013 = cons(_255, _3012);
   _3014 = List_var(_3013);
@@ -5943,7 +5943,7 @@ static void f11_identifiers____capture_identifier(Compiler c, List binding){
 }
 
 static int f11_identifiers____shadow_identifier(Compiler c, List * binding, Type type, String spelling, Map binding_facts, int kept){
-  if(! String_truth(spelling)) return 0;  Type visible_type = NULL;  List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(visible_type));  if(! List_truth(visible) || List_equal(visible, (* binding))) return 0;  if((Sym_binding_is_local(c -> sym, (* binding)) && !(Map_contains(binding_facts, List_var(cons(_1497, cons(List_var((* binding)), NULL))))) && !(Map_contains(binding_facts, List_var(cons(_879, cons(List_var((* binding)), NULL)))))) ||(! kept && List_truth(Type_list(visible_type)) && f11_identifiers____expansion_introduced(c, visible))){
+  if(! String_truth(spelling)) return 0;  Type visible_type = NULL;  List visible = Sym_lookup(c -> sym, cons(String_var(spelling), NULL), &(visible_type));  if(! List_truth(visible) || List_equal(visible, (* binding))) return 0;  int forward = ! Sym_binding_is_local(c -> sym, (* binding)) && !(Map_contains(binding_facts, List_var(cons(_2, cons(List_var((* binding)), NULL))))) && !(Map_contains(binding_facts, List_var(cons(_879, cons(List_var((* binding)), NULL))))) && ! List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL));  if((Sym_binding_is_local(c -> sym, (* binding)) && !(Map_contains(binding_facts, List_var(cons(_1497, cons(List_var((* binding)), NULL))))) && !(Map_contains(binding_facts, List_var(cons(_879, cons(List_var((* binding)), NULL)))))) ||(! kept && List_truth(Type_list(visible_type)) &&(forward || f11_identifiers____expansion_introduced(c, visible)))){
     (* binding) = visible;  return 1;
   }
   if(! List_truth(Type_list(visible_type)) || !(Map_contains(binding_facts, List_var(cons(_1499, cons(List_var(visible), NULL))))) ||(List_truth(Type_list(type)) && ! List_truth(Sym_resolve_global(c -> sym, cons(String_var(spelling), NULL), NULL)))) return 0;  f11_identifiers____unshadow_visible(c, visible, spelling);  return 0;
@@ -6406,7 +6406,7 @@ static List f6_access____postfix_index_expression(Compiler c, List expr, List in
 }
 
 static List f6_access____typedef_index(Compiler c, List expr, List index, Type type){
-  int collection = f6_access____collection_index_type(c, type);  List resolved = _x2c_nominal_getindex(c, type);  if(! List_truth(resolved) && collection) resolved = Compiler_resolve_protocol_member(c, type, _1566);  Type signature = List_truth(resolved) ? Var_type(List_cadr(resolved)) : NULL; {
+  int collection = f6_access____collection_index_type(c, type);  List resolved = _x2c_nominal_getindex(c, type);  if(! List_truth(resolved) && collection) resolved = Compiler_resolve_protocol_member(c, type, _1566);  Type signature = Var_type(List_truth(resolved) ? List_cadr(resolved) : Var_null()); {
     List _x2c_gensym_match_expr_60 = Type_list(signature); {List _x2c_gensym_match_at_400, _x2c_gensym_match_at_401, _x2c_gensym_match_at_402, _x2c_gensym_match_at_403, _x2c_gensym_match_at_404, _x2c_gensym_match_at_405, _x2c_gensym_match_at_406, _x2c_gensym_match_at_407; Var x2c_match_value_0, x2c_match_value_1, x2c_match_value_2; if(_x2c_gensym_match_expr_60 &&(Var_is(_x2c_gensym_match_expr_60 -> car, 806120) &&(_x2c_gensym_match_at_400 = Var_list_payload(_x2c_gensym_match_expr_60 -> car), 1)) && _x2c_gensym_match_at_400 && _x2c_gensym_match_at_400 ->car.u64 == 9224497936762055558ULL &&(_x2c_gensym_match_at_401 = _x2c_gensym_match_at_400 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_401 ->car, 1) &&((Var_is(_x2c_gensym_match_at_401 -> car, 806120) &&(_x2c_gensym_match_at_402 = Var_list_payload(_x2c_gensym_match_at_401 -> car), 1)) && _x2c_gensym_match_at_402 &&(x2c_match_value_1 = _x2c_gensym_match_at_402 ->car, 1) &&(_x2c_gensym_match_at_403 = _x2c_gensym_match_at_402 ->cdr) && !(_x2c_gensym_match_at_404 = _x2c_gensym_match_at_403 ->cdr)) && !(_x2c_gensym_match_at_405 = _x2c_gensym_match_at_401 ->cdr) &&(_x2c_gensym_match_at_406 = _x2c_gensym_match_expr_60 ->cdr) &&(x2c_match_value_2 = _x2c_gensym_match_at_406 ->car, 1) && !(_x2c_gensym_match_at_407 = _x2c_gensym_match_at_406 ->cdr)){
       Var params;
       params = x2c_match_value_0;
@@ -7098,10 +7098,10 @@ static List _conditional(Resolve * r, Var operator, List condition, List ontrue,
     Type widest = Type_widest(left, right);  if(! same || ! List_equal(Type_list(widest), Type_list(left))) type = widest;
   }
   else if(! same){
-    Type pointer = f9_operators____conditional_pointer((* r).c, ontrue, onfalse);  if(List_truth(Type_list(pointer))) type = pointer;  else if(f9_operators____conditional_joins((* r).c, false_type, true_type)){
+    Type pointer = f9_operators____conditional_pointer((* r).c, ontrue, onfalse);  if(List_truth(Type_list(pointer))) type = pointer;  else if(f9_operators____conditional_joins((* r).c, onfalse, ontrue)){
       type = false_type;  ontrue = Compiler_convert_expression((* r).c, ontrue, type);
     }
-    else if(f9_operators____conditional_joins((* r).c, true_type, false_type)) onfalse = Compiler_convert_expression((* r).c, onfalse, type);
+    else if(f9_operators____conditional_joins((* r).c, ontrue, onfalse)) onfalse = Compiler_convert_expression((* r).c, onfalse, type);
   }
   return({
     Var _x2c_gensym_literal_part_178 = List_var(type);  Var _x2c_gensym_literal_part_179 = List_var(cons(_64, cons(operator, cons(List_var(condition), cons(List_var(ontrue), cons(List_var(onfalse), NULL))))));  cons(_41, cons(_x2c_gensym_literal_part_178, cons(_x2c_gensym_literal_part_179, NULL)));
@@ -7147,8 +7147,8 @@ static Type f9_operators____conditional_pointer(Compiler c, List lhs, List rhs){
   ));  Type lhs_type = _x2c_type_unqualified(Type_declared(Var_type(List_cadr(lhs))));  if(Type_is_bare_typedef_name(lhs_type) && List_equal(Type_list(left), Type_list(joined))) return lhs_type;  return joined;
 }
 
-static int f9_operators____conditional_joins(Compiler c, Type type, Type other){
-  return List_truth(Type_list(type)) && List_truth(Type_list(other)) && Sym_is_var_type(c -> sym, type) && ! Sym_is_var_type(c -> sym, other);
+static int f9_operators____conditional_joins(Compiler c, List var_arm, List other){
+  Type type = Var_type(List_cadr(var_arm)), other_type = Var_type(List_cadr(other));  return List_truth(Type_list(type)) && Sym_is_var_type(c -> sym, type) &&(List_truth(Type_list(other_type)) ? ! Sym_is_var_type(c -> sym, other_type) : f9_operators____conditional_null(other));
 }
 
 static List _binary(Resolve * r, Var operator, List left, List right){
@@ -7678,7 +7678,7 @@ static void f11_conversions____check_noted_converter(Compiler c, List noted, Lis
     }
 
   }
-  Type source = List_truth(receiver) ? Var_type(List_cadr(receiver)) : NULL;
+  Type source = Var_type(List_truth(receiver) ? List_cadr(receiver) : Var_null());
   if(! List_truth(Type_list(source))) return;
   int source_is_var = Sym_is_var_type(c -> sym, source);
   if(source_is_var && context != 0 && ! String_equal(method, _3076)) return;

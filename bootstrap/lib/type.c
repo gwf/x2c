@@ -866,11 +866,11 @@ int Type_is_number(Type type){
 }
 
 String Type_var_numeric_extractor(Type type){
-  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return _146;  List row = _scalar_row(type);  return List_truth(row) ? Var_as_string(List_cadr(row)) : NULL;
+  if(! _init_guard_) _file_init_();  if(Type_is_enum(type)) return _146;  List row = _scalar_row(type);  return Var_as_string(List_truth(row) ? List_cadr(row) : Var_null());
 }
 
 String Type_var_numeric_update_helper(Type type){
-  if(! _init_guard_) _file_init_();  List row = _scalar_row(type);  return List_truth(row) ? Var_as_string(List_caddr(row)) : NULL;
+  if(! _init_guard_) _file_init_();  List row = _scalar_row(type);  return Var_as_string(List_truth(row) ? List_caddr(row) : Var_null());
 }
 
 Type Type_promote(Type type);
@@ -1155,7 +1155,7 @@ static List _scalar_row(Type type){
   Type scalar = Type_scalar(type);
   if(! List_truth(Type_list(scalar))) return NULL;
   Var row = Map_getindex(scalartypes, List_var(scalar));
-  return Var_is_row(row, 9, 7, 4) ? Var_list_payload(row) : NULL;
+  return Var_list_payload(Var_is_row(row, 9, 7, 4) ? row : Var_null());
 }
 
 List Var_list(Var);

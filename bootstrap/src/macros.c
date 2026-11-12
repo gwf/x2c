@@ -3025,7 +3025,7 @@ static List _hole(Atom binder, Symbol kind, int sequence){
 
 static List _hole_record(Compiler c, Atom name){
   Map owner = _hole_owner(c, name);
-  return owner != NULL ? Var_list_payload(Map_getindex(owner, name)) : NULL;
+  return Var_list_payload(owner != NULL ? Map_getindex(owner, name) : Var_null());
 }
 
 static Map _hole_owner(Compiler c, Atom name){
@@ -5116,7 +5116,7 @@ List Compiler_lower_rewrite(Compiler c, Symbol point, Var kind, List source, Sym
 }
 
 int Compiler_applying_shipped(Compiler c){
-  if(! _init_guard_) _file_init_();  RewriteRule applying = List_truth(c -> applying) ? Var_pointer(List_car(c -> applying)) : NULL;  return applying && applying -> builtin;
+  if(! _init_guard_) _file_init_();  RewriteRule applying = Var_pointer(List_truth(c -> applying) ? List_car(c -> applying) : Var_null());  return applying && applying -> builtin;
 }
 
 void Compiler_rebound(Compiler c, Var source, List bound){
@@ -5585,7 +5585,7 @@ List Ast_written_definitions(List);
 
 static List _written_support(Compiler c, List bound){
   List writers = List_truth(c -> applying) && List_cdr(c -> applying) == c -> active_rewrites ? c -> applying : c -> active_rewrites;
-  RewriteRule writer = List_truth(writers) ? Var_pointer(List_car(writers)) : NULL;
+  RewriteRule writer = Var_pointer(List_truth(writers) ? List_car(writers) : Var_null());
   return writer && writer -> builtin ? Ast_written_definitions(bound) : bound;
 }
 
@@ -7673,7 +7673,7 @@ static List _literal_decorator(List definition){
   {
     List _x2c_gensym_match_expr_46 = f19_invocations_targets____producer_body(definition);  switch(_x2c_gensym_match_expr_46 ? _x2c_gensym_match_expr_46 -> car.u64 : 0){
       case 9224497936761996324ULL :{List _x2c_gensym_match_at_166, _x2c_gensym_match_at_167, _x2c_gensym_match_at_168, _x2c_gensym_match_at_169, _x2c_gensym_match_at_170, _x2c_gensym_match_at_171; Var x2c_match_value_0; if(_x2c_gensym_match_expr_46 && _x2c_gensym_match_expr_46 ->car.u64 == 9224497936761996324ULL &&(_x2c_gensym_match_at_166 = _x2c_gensym_match_expr_46 ->cdr) &&(_x2c_gensym_match_at_167 = _x2c_gensym_match_at_166 ->cdr) &&(Var_is(_x2c_gensym_match_at_167 -> car, 806120) &&(_x2c_gensym_match_at_168 = Var_list_payload(_x2c_gensym_match_at_167 -> car), 1)) && _x2c_gensym_match_at_168 && Var_equal(_x2c_gensym_match_at_168 -> car, Var_list_payload(_587 -> cdr -> cdr -> car) -> car) &&(_x2c_gensym_match_at_169 = _x2c_gensym_match_at_168 ->cdr) &&(x2c_match_value_0 = _x2c_gensym_match_at_169 ->car, 1) && !(_x2c_gensym_match_at_170 = _x2c_gensym_match_at_169 ->cdr) && !(_x2c_gensym_match_at_171 = _x2c_gensym_match_at_167 ->cdr)){{
-        Var macro;  macro = x2c_match_value_0;  return x2c_var_equal_lane(List_assoc(Var_list(macro), Symbol_var(740232)), Symbol_var(9147177346020)) ? Var_list_payload(macro) : NULL;
+        Var macro;  macro = x2c_match_value_0;  return Var_list_payload(x2c_var_equal_lane(List_assoc(Var_list(macro), Symbol_var(740232)), Symbol_var(9147177346020)) ? macro : Var_null());
       }
       break;}} default:{return NULL;  break;}
     }
@@ -8325,7 +8325,7 @@ Type Type_rest_container(Type);
 int Sym_is_var_type(Sym, Type);
 static Array f23_invocations_expressions____meta_arguments(Compiler c, List parameters, Symbol head){
   Array arguments = Array_new();  Compiler_expect(c, 81);  if(Compiler_peek(c, 0) != 83) while(1){
-    Type parameter = List_truth(parameters) ? Var_type(List_car(parameters)) : NULL;  Type rest = Type_rest_container(parameter);  List argument = List_truth(Type_list(rest)) && ! List_truth(Compiler_peek_macro_hole(c)) ? Compiler_parse_call_splice(c) : NULL;  if(! List_truth(argument) && List_equal(Type_list(rest), _633) && ! List_truth(Compiler_peek_macro_hole(c))) argument = Compiler_parse_call_entry(c);  if(! List_truth(argument)) argument = f23_invocations_expressions____meta_argument(c);  if(List_truth(parameters) && ! List_truth(Type_list(rest)) && ! Map_truth(c -> macro_holes) && !(head == 28973981698840 && Sym_is_var_type(c -> sym, parameter))) argument = Compiler_convert_expression(c, argument, parameter);  if(! List_truth(Type_list(rest))) parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
+    Type parameter = Var_type(List_truth(parameters) ? List_car(parameters) : Var_null());  Type rest = Type_rest_container(parameter);  List argument = List_truth(Type_list(rest)) && ! List_truth(Compiler_peek_macro_hole(c)) ? Compiler_parse_call_splice(c) : NULL;  if(! List_truth(argument) && List_equal(Type_list(rest), _633) && ! List_truth(Compiler_peek_macro_hole(c))) argument = Compiler_parse_call_entry(c);  if(! List_truth(argument)) argument = f23_invocations_expressions____meta_argument(c);  if(List_truth(parameters) && ! List_truth(Type_list(rest)) && ! Map_truth(c -> macro_holes) && !(head == 28973981698840 && Sym_is_var_type(c -> sym, parameter))) argument = Compiler_convert_expression(c, argument, parameter);  if(! List_truth(Type_list(rest))) parameters = List_cdr(parameters);  Array_push(arguments, List_var(argument));  if(! Compiler_test(c, 89)) break;
   }
   Compiler_expect(c, 83);  return arguments;
 }
@@ -8429,8 +8429,8 @@ Var Compiler_evaluate_macro_slot(Compiler c, Var value){
 
 Var Compiler_evaluate_meta_value(Compiler c, List expression, Token site, int slot){
   if(! _init_guard_) _file_init_();
-  List active = List_truth(c -> macro_stack) ? Var_list_payload(List_car(c -> macro_stack)) : NULL;
-  List bindings = List_truth(active) ? Var_list_payload(List_caddr(active)) : NULL;
+  List active = Var_list_payload(List_truth(c -> macro_stack) ? List_car(c -> macro_stack) : Var_null());
+  List bindings = Var_list_payload(List_truth(active) ? List_caddr(active) : Var_null());
   String source_file = List_truth(active) ? _definition_file(Var_list_payload(List_car(active))) : c -> filename;
   MetaContext * context = MetaContext_current();
   {
@@ -9432,7 +9432,7 @@ return NULL;
 static Map f9_templates____private_names(Compiler c, List fresh){
   if(! List_truth(fresh)) return NULL;
   Map names = Map_new();
-  Token root = List_truth(c -> macro_stack) ? Var_token(List_getindex(Var_list(List_last(c -> macro_stack)), 3)) : NULL;
+  Token root = Var_token(List_truth(c -> macro_stack) ? List_getindex(Var_list(List_last(c -> macro_stack)), 3) : Var_null());
   int file_scope = Sym_at_file_scope(c -> sym);
   {
     List row;
@@ -10296,7 +10296,7 @@ static List f7_aliases____entry(Compiler c, String name, Var * key){
     }
     if(key)(* key) = own;  return Var_list_payload(entry);
   }
-  if(key)(* key) = String_var(name);  return Map_try_get(table, String_var(name), &(entry)) ? Var_list_payload(entry) : NULL;
+  if(key)(* key) = String_var(name);  return Var_list_payload(Map_try_get(table, String_var(name), &(entry)) ? entry : Var_null());
 }
 
 String Compiler_file_prefix(Compiler);
@@ -10308,7 +10308,7 @@ static List f7_aliases____private_key(Compiler c, String name){
 }
 
 static Map f7_aliases____table(Compiler c){
-  Var stored;  return Map_try_get(c -> macros, Symbol_var(2902118), &(stored)) ? Var_map_payload(stored) : NULL;
+  Var stored;  return Var_map_payload(Map_try_get(c -> macros, Symbol_var(2902118), &(stored)) ? stored : Var_null());
 }
 
 static int f7_aliases____inner_entry(List inner, List outer){
