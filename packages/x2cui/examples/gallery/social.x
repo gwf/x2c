@@ -72,15 +72,6 @@ void page_social(Ui ui, Gallery g) {
   static float split = 0.45f;
   static int deck = 0;
   static double revenue = 48210;
-  static const cui_presence_user who[] = {
-    { "Maya Okafor", { 0x7c, 0x5c, 0xff, 255 }, 0, false },
-    { "Jonas Berg", { 0x22, 0xc5, 0x8b, 255 }, 0, false },
-    { "Priya Nair", { 0xf5, 0x9e, 0x0b, 255 }, 0, false },
-    { "Lena Fischer", { 0x38, 0xbd, 0xf8, 255 }, 0, true },
-    { "Aiko Tanaka", { 0xec, 0x48, 0x99, 255 }, 0, false },
-    { "Daniel Mensah", { 0x10, 0xb9, 0x81, 255 }, 0, false },
-    { "Rosa Delgado", { 0xa8, 0x55, 0xf7, 255 }, 0, false },
-  };
   /* Textures belong to one Ui, so they live in its state store; they are
      freed with the state, a few seconds after the page is left, and made
      again on the way back. */
@@ -134,7 +125,21 @@ void page_social(Ui ui, Gallery g) {
   }
   section(ui, "Presence", "Who is here now. Hover to spread them out.");
   ui.row (gap: 24, align: center) {
-    ui.presence("here", who, 5, 30);
+    ui.presence("here", [
+      {name: "Maya Okafor", color: {r: 0x7c, g: 0x5c, b: 0xff, a: 255},
+       avatar: 0},
+      {name: "Jonas Berg", color: {r: 0x22, g: 0xc5, b: 0x8b, a: 255},
+       avatar: 0},
+      {name: "Priya Nair", color: {r: 0xf5, g: 0x9e, b: 0x0b, a: 255},
+       avatar: 0},
+      {name: "Lena Fischer", color: {r: 0x38, g: 0xbd, b: 0xf8, a: 255},
+       avatar: 0, idle: true},
+      {name: "Aiko Tanaka", color: {r: 0xec, g: 0x48, b: 0x99, a: 255},
+       avatar: 0},
+      {name: "Daniel Mensah", color: {r: 0x10, g: 0xb9, b: 0x81, a: 255},
+       avatar: 0},
+      {name: "Rosa Delgado", color: {r: 0xa8, g: 0x55, b: 0xf7, a: 255},
+       avatar: 0}], 5, 30);
     ui.counter("rev", revenue, format: "$%.0f", size: 34,
                                group_thousands: true);
     if (ui.button("Add a sale", size: sm,

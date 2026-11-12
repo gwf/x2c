@@ -372,14 +372,33 @@ meta static List _element(Type element, List value, Array statics) {
   return _lower(element, value, statics);
 }
 
-/* `value` lowered by `type`, with an Array literal declared in `statics`
-   when there are any. */
+/* `value` lowered by `type`, the type of a field: an Array literal is a
+   static array declared in `statics`, when there are any, or the braced
+   elements of a field that is a C array, and a Map literal is the braced
+   fields of a field that is a record. */
 meta static List _lower(Type type, List value, Array statics) {
+  if (!type) return value;
   match (value) {
-    case %(expr ? (array *elements)):
-      if (statics != NULL && type) return _static(type, elements, statics);
+    case %(expr ? (array *elements)): {
+      if (_dimension(type)) {
+        Type element = type.cdr();
+        List items = elements.map(%!(List e) => _lower(element, e, statics));
+        return $!( { @items } );
+      }
+      if (statics != NULL) return _static(type, elements, statics);
+    }
+    case %(expr ? (map *rows)): {
+      List initializers = _initializers(type, rows, statics);
+      return $!( { @initializers } );
+    }
   }
   return x2cui_value(type, value);
+}
+
+// Whether `type` is a C array, as `int parent[2]` is: `((dim ("2")) int)`.
+meta static int _dimension(Type type) {
+  Var head = type.car();
+  return head is <list> && ((List) head).car() == <dim>;
 }
 
 meta static List _choice(List test, List yes, List no) =>

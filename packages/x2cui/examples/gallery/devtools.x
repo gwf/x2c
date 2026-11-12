@@ -27,29 +27,34 @@ static void devtools_kv(Ui ui) {
   }
 }
 
-static const cui_diagnostic pbm_diags[] = {
-  { CUI_SEVERITY_ERROR, "use of undeclared identifier 'frame_time'",
-    "src/render/timing.c", 42, 17, "clang", "undeclared-var" },
-  { CUI_SEVERITY_WARNING, "unused variable 'scale'", "src/render/timing.c",
-    88, 11, "clang", "-Wunused-variable" },
-  { CUI_SEVERITY_ERROR,
-    "incompatible pointer types passing 'float *' to 'double *'",
-    "src/core/layout.c", 210, 33, "clang", "-Wincompatible-pointer-types" },
-  { CUI_SEVERITY_WARNING,
-    "implicit conversion loses floating-point precision",
-    "src/core/layout.c", 318, 22, "clang", "-Wfloat-conversion" },
-  { CUI_SEVERITY_INFO, "function 'measure' could be declared static",
-    "src/core/layout.c", 402, 6, "clang-tidy", "misc-use-internal-linkage" },
-  { CUI_SEVERITY_HINT,
-    "loop variable copied on each iteration; consider a pointer",
-    "src/app/main.c", 51, 9, "clang-tidy", "performance-for-range-copy" },
-  { CUI_SEVERITY_WARNING, "comparison of integers of different signs",
-    "src/app/main.c", 77, 18, "gcc", "-Wsign-compare" },
-};
 
 static void devtools_problems(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 760)
-    ui.problems("problems", pbm_diags,
+    ui.problems("problems", [
+      {severity: error, message: "use of undeclared identifier 'frame_time'",
+       file: "src/render/timing.c", line: 42, column: 17, source: "clang",
+       code: "undeclared-var"},
+      {severity: warning, message: "unused variable 'scale'",
+       file: "src/render/timing.c", line: 88, column: 11, source: "clang",
+       code: "-Wunused-variable"},
+      {severity: error,
+       message: "incompatible pointer types passing 'float *' to 'double *'",
+       file: "src/core/layout.c", line: 210, column: 33, source: "clang",
+       code: "-Wincompatible-pointer-types"},
+      {severity: warning,
+       message: "implicit conversion loses floating-point precision",
+       file: "src/core/layout.c", line: 318, column: 22, source: "clang",
+       code: "-Wfloat-conversion"},
+      {severity: info, message: "function 'measure' could be declared static",
+       file: "src/core/layout.c", line: 402, column: 6, source: "clang-tidy",
+       code: "misc-use-internal-linkage"},
+      {severity: hint,
+       message: "loop variable copied on each iteration; consider a pointer",
+       file: "src/app/main.c", line: 51, column: 9, source: "clang-tidy",
+       code: "performance-for-range-copy"},
+      {severity: warning, message: "comparison of integers of different signs",
+       file: "src/app/main.c", line: 77, column: 18, source: "gcc",
+       code: "-Wsign-compare"}],
                 height: 300);
 }
 
@@ -106,120 +111,132 @@ static void devtools_schedule(Ui ui) {
 static int km_mods = CUI_MOD_PRIMARY;
 
 static void devtools_keymap(Ui ui) {
-  static const cui_keymap_binding binds[] = {
-    { { CUI_MOD_PRIMARY, CUI_KEY_S }, "Save", 0 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_O }, "Open", 0 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_N }, "New file", 0 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_W }, "Close tab", 0 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_P }, "Go to file", 1 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_G }, "Go to line", 1 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_F }, "Find", 2 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_H }, "Replace", 2 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_Z }, "Undo", 2 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_Y }, "Redo", 2 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_B }, "Build", 3 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_R }, "Run", 3 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_D }, "Debug", 3 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_SLASH }, "Comment", 2 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_E }, "Recent files", 1 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_R }, "Rename symbol", 2 },
-    { { 0, CUI_KEY_F5 }, "Continue", 3 },
-    { { 0, CUI_KEY_F9 }, "Breakpoint", 3 },
-    { { 0, CUI_KEY_F10 }, "Step over", 3 },
-    { { 0, CUI_KEY_F11 }, "Step into", 3 },
-    { { 0, CUI_KEY_F2 }, "Rename", 2 },
-    { { 0, CUI_KEY_F12 }, "Definition", 1 },
-    { { CUI_MOD_PRIMARY | CUI_MOD_SHIFT, CUI_KEY_P }, "Commands", 1 },
-    { { CUI_MOD_PRIMARY | CUI_MOD_SHIFT, CUI_KEY_F }, "Find in files", 2 },
-  };
-  static const char *cats_en[] = { "File", "Navigate", "Edit",
-                                   "Run and debug" };
   ui.column (gap: 10, width: fill, max_width: 900)
-    ui.keymap("keys", binds,
-      categories: cats_en,
+    ui.keymap("keys", [
+      {combo: {mods: CUI_MOD_PRIMARY, key: s}, action: "Save", category: 0},
+      {combo: {mods: CUI_MOD_PRIMARY, key: o}, action: "Open", category: 0},
+      {combo: {mods: CUI_MOD_PRIMARY, key: n}, action: "New file",
+       category: 0},
+      {combo: {mods: CUI_MOD_PRIMARY, key: w}, action: "Close tab",
+       category: 0},
+      {combo: {mods: CUI_MOD_PRIMARY, key: p}, action: "Go to file",
+       category: 1},
+      {combo: {mods: CUI_MOD_PRIMARY, key: g}, action: "Go to line",
+       category: 1},
+      {combo: {mods: CUI_MOD_PRIMARY, key: f}, action: "Find", category: 2},
+      {combo: {mods: CUI_MOD_PRIMARY, key: h}, action: "Replace", category: 2},
+      {combo: {mods: CUI_MOD_PRIMARY, key: z}, action: "Undo", category: 2},
+      {combo: {mods: CUI_MOD_PRIMARY, key: y}, action: "Redo", category: 2},
+      {combo: {mods: CUI_MOD_PRIMARY, key: b}, action: "Build", category: 3},
+      {combo: {mods: CUI_MOD_PRIMARY, key: r}, action: "Run", category: 3},
+      {combo: {mods: CUI_MOD_PRIMARY, key: d}, action: "Debug", category: 3},
+      {combo: {mods: CUI_MOD_PRIMARY, key: slash}, action: "Comment",
+       category: 2},
+      {combo: {mods: CUI_MOD_PRIMARY, key: e}, action: "Recent files",
+       category: 1},
+      {combo: {mods: CUI_MOD_PRIMARY, key: r}, action: "Rename symbol",
+       category: 2},
+      {combo: {mods: 0, key: f5}, action: "Continue", category: 3},
+      {combo: {mods: 0, key: f9}, action: "Breakpoint", category: 3},
+      {combo: {mods: 0, key: f10}, action: "Step over", category: 3},
+      {combo: {mods: 0, key: f11}, action: "Step into", category: 3},
+      {combo: {mods: 0, key: f2}, action: "Rename", category: 2},
+      {combo: {mods: 0, key: f12}, action: "Definition", category: 1},
+      {combo: {mods: CUI_MOD_PRIMARY | CUI_MOD_SHIFT, key: p},
+       action: "Commands", category: 1},
+      {combo: {mods: CUI_MOD_PRIMARY | CUI_MOD_SHIFT, key: f},
+       action: "Find in files", category: 2}],
+      categories: ["File", "Navigate", "Edit", "Run and debug"],
       mods: &km_mods);
 }
 
-static const cui_commit cg_commits[] = {
-  { "a91f3c2e", "Merge branch 'feature/trace-viewer'", "Maya Okafor",
-    "2 hours ago", "main, origin/main", { 1, 4 } },
-  { "7be04d19", "Docs: the trace viewer and the waterfall", "Maya Okafor",
-    "3 hours ago", NULL, { 2, -1 } },
-  { "c3d8a7f0", "Fix the ruler's last tick on narrow panels", "Jonas Berg",
-    "5 hours ago", NULL, { 3, -1 } },
-  { "1f22b9e4", "Release 1.2", "Jonas Berg", "yesterday", "tag: v1.2.0",
-    { 6, -1 } },
-  { "e8a0c55b", "Trace viewer: measure a range with Shift+drag",
-    "Priya Nair", "yesterday", "feature/trace-viewer", { 5, -1 } },
-  { "4d9e1a77", "Trace viewer: lanes, spans and markers", "Priya Nair",
-    "2 days ago", NULL, { 6, -1 } },
-  { "90b7f3c1", "Merge pull request #21 from fix/atlas", "Maya Okafor",
-    "3 days ago", NULL, { 7, 8 } },
-  { "52ce8d0a", "Faster soft shadows in software", "Lena Fischer",
-    "3 days ago", NULL, { 9, -1 } },
-  { "b6f1e2d3", "Glyph atlas: compact after a zoom", "Aiko Tanaka",
-    "4 days ago", "fix/atlas", { 9, -1 } },
-  { "0aa4c9e8", "Right to left layout", "Omid Saadat", "5 days ago", NULL,
-    { -1, -1 } },
-};
 static int cg_sel = 1;
 
 static void devtools_commits(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 920)
-    ui.commit_graph("history", cg_commits,
+    ui.commit_graph("history", [
+      {hash: "a91f3c2e", message: "Merge branch 'feature/trace-viewer'",
+       author: "Maya Okafor", date: "2 hours ago", refs: "main, origin/main",
+       parent: [1, 4]},
+      {hash: "7be04d19", message: "Docs: the trace viewer and the waterfall",
+       author: "Maya Okafor", date: "3 hours ago", parent: [2, -1]},
+      {hash: "c3d8a7f0", message: "Fix the ruler's last tick on narrow panels",
+       author: "Jonas Berg", date: "5 hours ago", parent: [3, -1]},
+      {hash: "1f22b9e4", message: "Release 1.2", author: "Jonas Berg",
+       date: "yesterday", refs: "tag: v1.2.0", parent: [6, -1]},
+      {hash: "e8a0c55b",
+       message: "Trace viewer: measure a range with Shift+drag",
+       author: "Priya Nair", date: "yesterday", refs: "feature/trace-viewer",
+       parent: [5, -1]},
+      {hash: "4d9e1a77", message: "Trace viewer: lanes, spans and markers",
+       author: "Priya Nair", date: "2 days ago", parent: [6, -1]},
+      {hash: "90b7f3c1", message: "Merge pull request #21 from fix/atlas",
+       author: "Maya Okafor", date: "3 days ago", parent: [7, 8]},
+      {hash: "52ce8d0a", message: "Faster soft shadows in software",
+       author: "Lena Fischer", date: "3 days ago", parent: [9, -1]},
+      {hash: "b6f1e2d3", message: "Glyph atlas: compact after a zoom",
+       author: "Aiko Tanaka", date: "4 days ago", refs: "fix/atlas",
+       parent: [9, -1]},
+      {hash: "0aa4c9e8", message: "Right to left layout",
+       author: "Omid Saadat", date: "5 days ago", parent: [-1, -1]}],
                     selected: &cg_sel, height: 320);
 }
 
-static const cui_graph_node gv_nodes[] = {
-  { "app", "executable", CUI_TONE_VIOLET },
-  { "ui", "libcui.a", CUI_TONE_INFO },
-  { "net", "http client", CUI_TONE_INFO },
-  { "storage", "sqlite", CUI_TONE_TEAL },
-  { "render", "software, OpenGL", CUI_TONE_INFO },
-  { "text", "fonts, shaping", CUI_TONE_INFO },
-  { "tls", "mbedtls", CUI_TONE_WARNING },
-  { "zlib", NULL, CUI_TONE_NEUTRAL },
-  { "platform", "X11, Win32, Cocoa", CUI_TONE_INFO },
-};
-static const cui_graph_edge gv_edges[] = {
-  { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 4 }, { 1, 5 }, { 1, 8 },
-  { 2, 6 }, { 2, 7 }, { 3, 7 }, { 5, 7 }, { 4, 8 },
-};
 static int gv_sel = 1;
 
 static void devtools_graph(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 1000)
-    ui.graph_view("deps", gv_nodes, gv_edges, selected: &gv_sel,
+    ui.graph_view("deps", [
+      {label: "app", detail: "executable", tone: violet},
+      {label: "ui", detail: "libcui.a", tone: info},
+      {label: "net", detail: "http client", tone: info},
+      {label: "storage", detail: "sqlite", tone: teal},
+      {label: "render", detail: "software, OpenGL", tone: info},
+      {label: "text", detail: "fonts, shaping", tone: info},
+      {label: "tls", detail: "mbedtls", tone: warning},
+      {label: "zlib", tone: neutral},
+      {label: "platform", detail: "X11, Win32, Cocoa", tone: info}], [
+        {from: 0, to: 1}, {from: 0, to: 2}, {from: 0, to: 3}, {from: 1, to: 4},
+        {from: 1, to: 5}, {from: 1, to: 8}, {from: 2, to: 6}, {from: 2, to: 7},
+        {from: 3, to: 7}, {from: 5, to: 7}, {from: 4, to: 8}], selected: &gv_sel,
                                         height: 340);
 }
 
-static const cui_net_request wf_reqs[] = {
-  { "https://shop.example.com/", "GET", 200, "document", 18400, 0.000,
-    { 0.002, 0.018, 0.024, 0.031, 0.142, 0.012 } },
-  { "https://shop.example.com/assets/app.css", "GET", 200, "stylesheet",
-    42100, 0.232, { 0.004, 0, 0, 0, 0.061, 0.022 } },
-  { "https://shop.example.com/assets/app.js", "GET", 200, "script", 186000,
-    0.233, { 0.005, 0, 0, 0, 0.068, 0.094 } },
-  { "https://cdn.example.net/fonts/inter.woff2", "GET", 200, "font", 48200,
-    0.241, { 0.003, 0.021, 0.019, 0.028, 0.044, 0.018 } },
-  { "https://shop.example.com/api/session", "POST", 401, "fetch", 312,
-    0.402, { 0.002, 0, 0, 0, 0.083, 0.001 } },
-  { "https://shop.example.com/api/products?page=1", "GET", 200, "fetch",
-    9600, 0.404, { 0.002, 0, 0, 0, 0.121, 0.006 } },
-  { "https://shop.example.com/img/hero.avif", "GET", 200, "image", 212000,
-    0.410, { 0.012, 0, 0, 0, 0.052, 0.188 } },
-  { "https://shop.example.com/img/p/1042.webp", "GET", 304, "image", 0,
-    0.538, { 0.006, 0, 0, 0, 0.038, 0 } },
-  { "https://shop.example.com/img/p/1043.webp", "GET", 200, "image", 31200,
-    0.540, { 0.008, 0, 0, 0, 0.041, 0.024 } },
-  { "https://analytics.example.org/collect", "POST", 0, "ping", 0, 0.702,
-    { 0.004, 0.026, 0.031, 0.036, 0.12, 0 } },
-};
 static int wf_sel = 2;
 
 static void devtools_waterfall(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 1000)
-    ui.waterfall("net", wf_reqs,
+    ui.waterfall("net", [
+      {name: "https://shop.example.com/", method: "GET", status: 200,
+       type: "document", size: 18400, start: 0.000,
+       timing: [0.002, 0.018, 0.024, 0.031, 0.142, 0.012]},
+      {name: "https://shop.example.com/assets/app.css", method: "GET",
+       status: 200, type: "stylesheet", size: 42100, start: 0.232,
+       timing: [0.004, 0, 0, 0, 0.061, 0.022]},
+      {name: "https://shop.example.com/assets/app.js", method: "GET",
+       status: 200, type: "script", size: 186000, start: 0.233,
+       timing: [0.005, 0, 0, 0, 0.068, 0.094]},
+      {name: "https://cdn.example.net/fonts/inter.woff2", method: "GET",
+       status: 200, type: "font", size: 48200, start: 0.241,
+       timing: [0.003, 0.021, 0.019, 0.028, 0.044, 0.018]},
+      {name: "https://shop.example.com/api/session", method: "POST",
+       status: 401, type: "fetch", size: 312, start: 0.402,
+       timing: [0.002, 0, 0, 0, 0.083, 0.001]},
+      {name: "https://shop.example.com/api/products?page=1", method: "GET",
+       status: 200, type: "fetch", size: 9600, start: 0.404,
+       timing: [0.002, 0, 0, 0, 0.121, 0.006]},
+      {name: "https://shop.example.com/img/hero.avif", method: "GET",
+       status: 200, type: "image", size: 212000, start: 0.410,
+       timing: [0.012, 0, 0, 0, 0.052, 0.188]},
+      {name: "https://shop.example.com/img/p/1042.webp", method: "GET",
+       status: 304, type: "image", size: 0, start: 0.538,
+       timing: [0.006, 0, 0, 0, 0.038, 0]},
+      {name: "https://shop.example.com/img/p/1043.webp", method: "GET",
+       status: 200, type: "image", size: 31200, start: 0.540,
+       timing: [0.008, 0, 0, 0, 0.041, 0.024]},
+      {name: "https://analytics.example.org/collect", method: "POST",
+       status: 0, type: "ping", size: 0, start: 0.702,
+       timing: [0.004, 0.026, 0.031, 0.036, 0.12, 0]}],
       selected: &wf_sel, height: 340, dom_loaded: 0.395,
       loaded: 0.68);
 }
@@ -263,11 +280,6 @@ static void tr_build(void) {
   cui_trace_sort(tr_spans, tr_n);
 }
 
-static const cui_trace_marker tr_marks[] = {
-  { "vsync", 0.0, CUI_TONE_NEUTRAL }, { "vsync", 0.0166, CUI_TONE_NEUTRAL },
-  { "GC pause", 0.0273, CUI_TONE_WARNING },
-  { "vsync", 0.0332, CUI_TONE_NEUTRAL },
-};
 
 static void devtools_trace(Ui ui) {
   if (!tr_n) tr_build();
@@ -281,7 +293,11 @@ static void devtools_trace(Ui ui) {
     // are written.
     ui.trace_view("trace", tr_tracks,
                   (int) (sizeof tr_tracks / sizeof *tr_tracks), tr_spans,
-                  tr_n, tr_view, tr_sel, markers: tr_marks, height: 320);
+                  tr_n, tr_view, tr_sel, markers: [
+                    {name: "vsync", time: 0.0, tone: neutral},
+                    {name: "vsync", time: 0.0166, tone: neutral},
+                    {name: "GC pause", time: 0.0273, tone: warning},
+                    {name: "vsync", time: 0.0332, tone: neutral}], height: 320);
 }
 
 void page_devtools(Ui ui, Gallery g) {

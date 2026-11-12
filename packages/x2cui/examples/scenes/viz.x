@@ -153,45 +153,40 @@ static void scene_candlestick(Ui ui) {
 }
 
 static void scene_funnel(Ui ui) {
-  static const cui_viz_item stages[] = {
-    { "Visited", 12840 }, { "Signed up", 4210 }, { "Activated", 2380 },
-    { "Subscribed", 860 } };
   ui.card (width: fill, max_width: 520)
-    ui.funnel("signups", stages);
+    ui.funnel("signups", [
+      {label: "Visited", value: 12840}, {label: "Signed up", value: 4210},
+      {label: "Activated", value: 2380}, {label: "Subscribed", value: 860}]);
 }
 
 static void scene_heatmap(Ui ui) {
-  static const char *weekdays[] = { "Mon", "Tue", "Wed", "Thu", "Fri",
-                                    "Sat", "Sun" };
-  static const char *hours[24] = {
-    "0h", NULL, NULL, "3h", NULL, NULL, "6h", NULL, NULL, "9h", NULL, NULL,
-    "12h", NULL, NULL, "15h", NULL, NULL, "18h", NULL, NULL, "21h", NULL,
-    NULL };
   ui.card (pad: 18, width: fill, max_width: 660)
     ui.heatmap("traffic", traffic, 7, 24,
-      row_labels: weekdays, col_labels: hours, format: "%.0f req");
+      row_labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"], col_labels: [
+        "0h", NULL, NULL, "3h", NULL, NULL, "6h", NULL, NULL, "9h", NULL, NULL,
+        "12h", NULL, NULL, "15h", NULL, NULL, "18h", NULL, NULL, "21h", NULL,
+        NULL], format: "%.0f req");
 }
 
 static void scene_radar_chart(Ui ui) {
   enum { QUALITIES = 6 };
-  static const float stable[QUALITIES] = { 82, 64, 90, 58, 75, 88 };
-  static const float next[QUALITIES] = { 70, 85, 72, 80, 60, 79 };
-  static const cui_series releases[] = {
-    { "1.0", stable, QUALITIES }, { "1.1", next, QUALITIES } };
   ui.card (pad: 18)
-    ui.radar_chart("qualities", releases,
+    ui.radar_chart("qualities", [
+      {name: "1.0", values: [82, 64, 90, 58, 75, 88]},
+      {name: "1.1", values: [70, 85, 72, 80, 60, 79]}],
                    %("Speed" "Size" "Polish" "Docs" "Platforms" "Tests"),
                    size: 240, max: 100);
 }
 
 static void scene_sankey(Ui ui) {
-  static const cui_sankey_link links[] = {
-    { 0, 3, 420 }, { 1, 3, 260 }, { 2, 3, 180 }, { 0, 4, 300 },
-    { 1, 4, 220 }, { 3, 5, 860 }, { 5, 6, 580 }, { 5, 7, 280 } };
   ui.card (pad: 18, width: fill, max_width: 660)
     ui.sankey("signups", %("Search" "Social" "Referral" "Sign up" "Bounced"
                            "Trial" "Paid" "Churned"),
-              links, height: 260);
+              [
+                {from: 0, to: 3, value: 420}, {from: 1, to: 3, value: 260},
+                {from: 2, to: 3, value: 180}, {from: 0, to: 4, value: 300},
+                {from: 1, to: 4, value: 220}, {from: 3, to: 5, value: 860},
+                {from: 5, to: 6, value: 580}, {from: 5, to: 7, value: 280}], height: 260);
 }
 
 static void scene_scatter_chart(Ui ui) {
@@ -205,22 +200,23 @@ static void scene_scatter_chart(Ui ui) {
 }
 
 static void scene_split_bar(Ui ui) {
-  static const cui_viz_item parts[] = {
-    { "Layout", 38 }, { "Text", 24 }, { "Paint", 21 }, { "Input", 9 },
-    { "Other", 8 } };
   ui.card (width: fill, max_width: 520, gap: 10) {
     ui.label("Frame time by stage");
-    ui.split_bar("frame", parts, format: "%.0f ms");
+    ui.split_bar("frame", [
+      {label: "Layout", value: 38}, {label: "Text", value: 24},
+      {label: "Paint", value: 21}, {label: "Input", value: 9},
+      {label: "Other", value: 8}], format: "%.0f ms");
   }
 }
 
 static void scene_treemap(Ui ui) {
-  static const cui_viz_item modules[] = {
-    { "Layout", 55 }, { "Text", 42 }, { "Draw", 35 }, { "Controls", 31 },
-    { "Charts", 23 }, { "Overlays", 19 }, { "Platform", 16 },
-    { "Theme", 9 }, { "Icons", 7 }, { "Grid", 6 } };
   ui.box (width: fill, max_width: 620)
-    ui.treemap("bundle", modules,
+    ui.treemap("bundle", [
+      {label: "Layout", value: 55}, {label: "Text", value: 42},
+      {label: "Draw", value: 35}, {label: "Controls", value: 31},
+      {label: "Charts", value: 23}, {label: "Overlays", value: 19},
+      {label: "Platform", value: 16}, {label: "Theme", value: 9},
+      {label: "Icons", value: 7}, {label: "Grid", value: 6}],
                height: 280, format: "%.0f KB");
 }
 
@@ -258,11 +254,10 @@ static void scene_level_meter(Ui ui) {
 }
 
 static void scene_histogram_slider(Ui ui) {
-  static const float bins[] = { 2, 4, 7, 12, 18, 26, 31, 29, 34, 40, 37,
-                                30, 24, 19, 15, 11, 8, 6, 4, 3 };
   static float lo = 40, hi = 160;
   ui.card (width: 380, gap: 6) {
-    ui.histogram_slider("Price", bins, lo, hi, 0, 240,
+    ui.histogram_slider("Price", [
+      2, 4, 7, 12, 18, 26, 31, 29, 34, 40, 37, 30, 24, 19, 15, 11, 8, 6, 4, 3], lo, hi, 0, 240,
                         format: "$%.0f");
     ui.muted("1,204 listings in range");
   }
@@ -282,12 +277,10 @@ static void scene_time_histogram(Ui ui) {
 }
 
 static void scene_uptime(Ui ui) {
-  static const cui_uptime_service services[] = {
-    { "API", api_days, UPTIME_DAYS },
-    { "Website", web_days, UPTIME_DAYS },
-    { "CDN", cdn_days, UPTIME_DAYS } };
   ui.box (width: fill, max_width: 660)
-    ui.uptime("status", services,
+    ui.uptime("status", [
+      {name: "API", days: api_days}, {name: "Website", days: web_days},
+      {name: "CDN", days: cdn_days}],
       last_day: (cui_date){ 2026, 11, 9 });
 }
 

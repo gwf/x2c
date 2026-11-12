@@ -155,10 +155,9 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
       }
     }
     ui.column (gap: 12, pad: 8) {
-      static const char *mode_icons[] = { CUI_ICON_SUN, CUI_ICON_MOON };
       int mode = g.dark;
       if (ui.segmented("theme", %("Light" "Dark"), mode,
-            full_width: true, icons: mode_icons, size: sm))
+            full_width: true, icons: [sun, moon], size: sm))
         set_theme(ui, g, mode == 1);
       accent_row(ui, g);
     }

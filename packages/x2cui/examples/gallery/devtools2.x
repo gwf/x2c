@@ -23,50 +23,49 @@ static void devtools2_regex(Ui ui) {
     ui.regex_tester("rx", rx_pat, rx_text, height: 110);
 }
 
-static const cui_test_item tx_items[] = {
-  { "layout", 0 },
-  { "row distributes extra space", 1, CUI_JOB_PASSED, 0.004f },
-  { "wraps to the next line", 1, CUI_JOB_PASSED, 0.006f },
-  { "mirrors under right to left", 1, CUI_JOB_FAILED, 0.012f,
-    "expected x = 412, got 388 (padding not mirrored)" },
-  { "text", 0 },
-  { "shapes Persian", 1, CUI_JOB_PASSED, 0.210f },
-  { "ellipsis keeps whole characters", 1, CUI_JOB_PASSED, 0.003f },
-  { "bidi brackets", 1, CUI_JOB_SKIPPED, -1 },
-  { "renderer", 0 },
-  { "software", 1 },
-  { "rounded corners", 2, CUI_JOB_PASSED, 0.031f },
-  { "soft shadows", 2, CUI_JOB_RUNNING, -1 },
-  { "OpenGL", 1 },
-  { "atlas growth", 2, CUI_JOB_PENDING, -1 },
-  { "slow gradient path", 2, CUI_JOB_PASSED, 1.42f },
-};
 
 static void devtools2_tests(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 760)
-    ui.test_explorer("tests", tx_items,
+    ui.test_explorer("tests", [
+      {name: "layout", depth: 0},
+      {name: "row distributes extra space", depth: 1, status: passed,
+       duration: 0.004f},
+      {name: "wraps to the next line", depth: 1, status: passed,
+       duration: 0.006f},
+      {name: "mirrors under right to left", depth: 1, status: failed,
+       duration: 0.012f,
+       message: "expected x = 412, got 388 (padding not mirrored)"},
+      {name: "text", depth: 0},
+      {name: "shapes Persian", depth: 1, status: passed, duration: 0.210f},
+      {name: "ellipsis keeps whole characters", depth: 1, status: passed,
+       duration: 0.003f},
+      {name: "bidi brackets", depth: 1, status: skipped, duration: -1},
+      {name: "renderer", depth: 0}, {name: "software", depth: 1},
+      {name: "rounded corners", depth: 2, status: passed, duration: 0.031f},
+      {name: "soft shadows", depth: 2, status: running, duration: -1},
+      {name: "OpenGL", depth: 1},
+      {name: "atlas growth", depth: 2, status: pending, duration: -1},
+      {name: "slow gradient path", depth: 2, status: passed, duration: 1.42f}],
                      height: 500);
 }
 
-static const char *const st_src1[] = {
-  "function total(cart) {", "  let sum = 0;",
-  "  for (const item of cart.items) {", "    sum += item.price * item.qty;",
-  "  }", "  return sum;" };
-static const char *const st_src2[] = {
-  "export function checkout(user) {", "  const cart = carts.get(user.id);",
-  "  const amount = total(cart);", "  return charge(user, amount);" };
-static const cui_stack_frame st_frames[] = {
-  { "total", "src/cart.js", 3, 29, false, st_src1, 6, 1 },
-  { "checkout", "src/checkout.js", 3, 18, false, st_src2, 4, 1 },
-  { "handle", "node_modules/express/lib/router/layer.js", 95, 5, true },
-  { "next", "node_modules/express/lib/router/route.js", 149, 13, true },
-  { "dispatch", "node_modules/express/lib/router/index.js", 284, 15, true },
-  { "onRequest", "src/server.js", 41, 9, false },
-};
 
 static void devtools2_stack(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 760)
-    ui.stack_trace("trace", st_frames,
+    ui.stack_trace("trace", [
+      {function: "total", file: "src/cart.js", line: 3, column: 29,
+       source: ["function total(cart) {", "  let sum = 0;", "  for (const item of cart.items) {", "    sum += item.price * item.qty;", "  }", "  return sum;"],
+       source_first: 1},
+      {function: "checkout", file: "src/checkout.js", line: 3, column: 18,
+       source: ["export function checkout(user) {", "  const cart = carts.get(user.id);", "  const amount = total(cart);", "  return charge(user, amount);"],
+       source_first: 1},
+      {function: "handle", file: "node_modules/express/lib/router/layer.js",
+       line: 95, column: 5, external: true},
+      {function: "next", file: "node_modules/express/lib/router/route.js",
+       line: 149, column: 13, external: true},
+      {function: "dispatch", file: "node_modules/express/lib/router/index.js",
+       line: 284, column: 15, external: true},
+      {function: "onRequest", file: "src/server.js", line: 41, column: 9}],
       title: "TypeError",
       message: "Cannot read properties of undefined (reading 'items')",
       lang: "js");
@@ -140,30 +139,28 @@ static void devtools2_histogram(Ui ui) {
                       th_s0, th_s1, utc: true, height: 150);
 }
 
-static const cui_coverage_file cv_files[] = {
-  { "src/core/layout.c", 1840, 1702, 620, 541, 88, 86 },
-  { "src/core/state.c", 420, 401, 96, 90, 31, 31 },
-  { "src/core/draw.c", 960, 610, 300, 160, 54, 40 },
-  { "src/text/shape.c", 2210, 1490, 802, 411, 120, 88 },
-  { "src/text/atlas.c", 640, 598, 140, 131, 30, 30 },
-  { "src/render/gl.c", 1300, 410, 260, 60, 70, 22 },
-  { "src/render/software.c", 2400, 2210, 900, 799, 140, 136 },
-  { "src/main.c", 120, 120, 10, 10, 4, 4 },
-};
 
 static void devtools2_coverage(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 820)
-    ui.coverage("cov", cv_files, height: 372);
+    ui.coverage("cov", [
+      {path: "src/core/layout.c", lines: 1840, lines_hit: 1702, branches: 620,
+       branches_hit: 541, functions: 88, functions_hit: 86},
+      {path: "src/core/state.c", lines: 420, lines_hit: 401, branches: 96,
+       branches_hit: 90, functions: 31, functions_hit: 31},
+      {path: "src/core/draw.c", lines: 960, lines_hit: 610, branches: 300,
+       branches_hit: 160, functions: 54, functions_hit: 40},
+      {path: "src/text/shape.c", lines: 2210, lines_hit: 1490, branches: 802,
+       branches_hit: 411, functions: 120, functions_hit: 88},
+      {path: "src/text/atlas.c", lines: 640, lines_hit: 598, branches: 140,
+       branches_hit: 131, functions: 30, functions_hit: 30},
+      {path: "src/render/gl.c", lines: 1300, lines_hit: 410, branches: 260,
+       branches_hit: 60, functions: 70, functions_hit: 22},
+      {path: "src/render/software.c", lines: 2400, lines_hit: 2210,
+       branches: 900, branches_hit: 799, functions: 140, functions_hit: 136},
+      {path: "src/main.c", lines: 120, lines_hit: 120, branches: 10,
+       branches_hit: 10, functions: 4, functions_hit: 4}], height: 372);
 }
 
-static const int bl_commit[] = { 0, 0, 1, 1, 2, 2, 2, 1, 1, 0, 3, 3, 4, 3, 3 };
-static const cui_blame_commit bl_commits[] = {
-  { "a1b2c3d4e5", "Maya Okafor", "First layout pass", 1730000000 },
-  { "b2c3d4e5f6", "Jonas Berg", "Measure: count padding once", 1760000000 },
-  { "c3d4e5f6a7", "Priya Nair", "Gaps between children", 1790000000 },
-  { "d4e5f6a7b8", "Omid Saadat", "Layout entry point", 1793000000 },
-  { "e5f6a7b8c9", "Aiko Tanaka", "Measure every node", 1794100000 },
-};
 
 static void devtools2_blame(Ui ui) {
   List lines = %(
@@ -179,7 +176,17 @@ static void devtools2_blame(Ui ui) {
     "        measure(&ui->nodes[i]);"
     "    place(ui, 0);  /* the root */" "}");
   ui.column (gap: 10, width: fill, max_width: 900)
-    ui.blame("blame", lines, bl_commit, 15, bl_commits,
+    ui.blame("blame", lines, [0, 0, 1, 1, 2, 2, 2, 1, 1, 0, 3, 3, 4, 3, 3], 15, [
+      {hash: "a1b2c3d4e5", author: "Maya Okafor", summary: "First layout pass",
+       time: 1730000000},
+      {hash: "b2c3d4e5f6", author: "Jonas Berg",
+       summary: "Measure: count padding once", time: 1760000000},
+      {hash: "c3d4e5f6a7", author: "Priya Nair",
+       summary: "Gaps between children", time: 1790000000},
+      {hash: "d4e5f6a7b8", author: "Omid Saadat",
+       summary: "Layout entry point", time: 1793000000},
+      {hash: "e5f6a7b8c9", author: "Aiko Tanaka",
+       summary: "Measure every node", time: 1794100000}],
                lang: "c", now: 1794211200, height: 320,
                first_line: 120);
 }
@@ -201,29 +208,28 @@ static void devtools2_flags(Ui ui) {
                      %("Development" "Staging" "Production"));
 }
 
-static const cui_api_param ax_p1[] = {
-  { "id", "path", "string", true, "The user's id" },
-  { "fields", "query", "string", false, "Comma separated fields to return" },
-};
-static const cui_api_param ax_p2[] = {
-  { "limit", "query", "integer", false, "At most this many, default 20" },
-  { "cursor", "query", "string", false, "From a previous page" },
-};
-static const cui_api_endpoint ax_eps[] = {
-  { "GET", "/users", "List users", "Users", false, ax_p2, 2 },
-  { "POST", "/users", "Create a user", "Users" },
-  { "GET", "/users/{id}", "Get a user", "Users", false, ax_p1, 2 },
-  { "PATCH", "/users/{id}", "Update a user", "Users", false, ax_p1, 1 },
-  { "DELETE", "/users/{id}", "Delete a user", "Users", false, ax_p1, 1 },
-  { "GET", "/orders", "List orders", "Orders", false, ax_p2, 2 },
-  { "PUT", "/orders/{id}/status", "Set an order's status", "Orders" },
-  { "GET", "/v1/orders", "List orders (old)", "Orders", true },
-};
 static int ax_sel = 2;
 
 static void devtools2_api(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 820)
-    ui.api_explorer("api", ax_eps,
+    ui.api_explorer("api", [
+      {method: "GET", path: "/users", summary: "List users", tag: "Users",
+       params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+      {method: "POST", path: "/users", summary: "Create a user", tag: "Users"},
+      {method: "GET", path: "/users/{id}", summary: "Get a user", tag: "Users",
+       params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields to return"}]},
+      {method: "PATCH", path: "/users/{id}", summary: "Update a user",
+       tag: "Users",
+       params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields to return"}]},
+      {method: "DELETE", path: "/users/{id}", summary: "Delete a user",
+       tag: "Users",
+       params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields to return"}]},
+      {method: "GET", path: "/orders", summary: "List orders", tag: "Orders",
+       params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+      {method: "PUT", path: "/orders/{id}/status",
+       summary: "Set an order's status", tag: "Orders"},
+      {method: "GET", path: "/v1/orders", summary: "List orders (old)",
+       tag: "Orders", deprecated: true}],
                     selected: &ax_sel);
 }
 

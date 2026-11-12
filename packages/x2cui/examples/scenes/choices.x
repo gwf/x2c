@@ -26,13 +26,11 @@ static void scene_radio_cards(Ui ui) {
 }
 
 static void scene_toggle_group(Ui ui) {
-  static const char *format_icons[] = { CUI_ICON_BOLD, CUI_ICON_ITALIC,
-                                        CUI_ICON_UNDERLINE, CUI_ICON_CODE };
   static bool format[4] = { true, false, true, false };
   static bool align[3] = { true, false, false };
   ui.row (gap: 12, wrap: true) {
     ui.toggle_group("format", %("Bold" "Italic" "Underline" "Code"), format,
-                    icons: format_icons, icon_only: true);
+                    icons: [bold, italic, underline, code], icon_only: true);
     ui.toggle_group("align", %("Left" "Center" "Right"), align,
                     exclusive: true);
   }
@@ -180,15 +178,15 @@ static void scene_prompt_suggestions(Ui ui) {
 }
 
 static void scene_model_picker(Ui ui) {
-  static const cui_model models[] = {
-    { "Atlas", "Longer answers, reads files and code", "New",
-      CUI_ICON_LAYERS },
-    { "Atlas Fast", "Short answers in about a second", NULL, CUI_ICON_ZAP },
-    { "Atlas Mini", "Runs on your own machine", NULL, CUI_ICON_BOX } };
   static int model = 1;
   ui.row (gap: 8, align: center) {
     ui.text("Answer with", color: text_secondary);
-    ui.model_picker("model", models, model,
+    ui.model_picker("model", [
+      {name: "Atlas", detail: "Longer answers, reads files and code",
+       badge: "New", icon: layers},
+      {name: "Atlas Fast", detail: "Short answers in about a second",
+       icon: zap},
+      {name: "Atlas Mini", detail: "Runs on your own machine", icon: box}], model,
       placement: bottom_start);
   }
 }

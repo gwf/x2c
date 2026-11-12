@@ -86,26 +86,24 @@ static void prepare(void) {
 }
 
 static void scene_api_explorer(Ui ui) {
-  static const cui_api_param by_id[] = {
-    { "id", "path", "string", true, "The user's id" },
-    { "fields", "query", "string", false, "Comma separated fields" } };
-  static const cui_api_param paging[] = {
-    { "limit", "query", "integer", false, "At most this many, default 20" },
-    { "cursor", "query", "string", false, "From a previous page" } };
-  static const cui_api_endpoint endpoints[] = {
-    { "GET", "/users", "List users", "Users", false, paging, 2 },
-    { "POST", "/users", "Create a user", "Users" },
-    { "GET", "/users/{id}", "Get a user", "Users", false, by_id, 2 },
-    { "DELETE", "/users/{id}", "Delete a user", "Users", false, by_id, 1 },
-    { "GET", "/orders", "List orders", "Orders", false, paging, 2 },
-    { "GET", "/v1/orders", "List orders (old)", "Orders", true } };
   static int selected = 2;
-  ui.api_explorer("api", endpoints,
+  ui.api_explorer("api", [
+    {method: "GET", path: "/users", summary: "List users", tag: "Users",
+     params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+    {method: "POST", path: "/users", summary: "Create a user", tag: "Users"},
+    {method: "GET", path: "/users/{id}", summary: "Get a user", tag: "Users",
+     params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields"}]},
+    {method: "DELETE", path: "/users/{id}", summary: "Delete a user",
+     tag: "Users",
+     params: [{name: "id", in: "path", type: "string", required: true, description: "The user's id"}, {name: "fields", in: "query", type: "string", description: "Comma separated fields"}]},
+    {method: "GET", path: "/orders", summary: "List orders", tag: "Orders",
+     params: [{name: "limit", in: "query", type: "integer", description: "At most this many, default 20"}, {name: "cursor", in: "query", type: "string", description: "From a previous page"}]},
+    {method: "GET", path: "/v1/orders", summary: "List orders (old)",
+     tag: "Orders", deprecated: true}],
     width: fill, height: 320, selected: &selected);
 }
 
 static void scene_blame(Ui ui) {
-  static const int line_commit[] = { 0, 1, 2, 2, 1, 0, 0, 3, 3, 4, 3 };
   static const cui_blame_commit commits[] = {
     { "a1b2c3d4e5", "Maya Okafor", "First layout pass", 1730000000 },
     { "b2c3d4e5f6", "Jonas Berg", "Measure: count padding once",
@@ -113,7 +111,7 @@ static void scene_blame(Ui ui) {
     { "c3d4e5f6a7", "Priya Nair", "Gaps between children", 1790000000 },
     { "d4e5f6a7b8", "Leo Park", "Layout entry point", 1793000000 },
     { "e5f6a7b8c9", "Aiko Tanaka", "Measure every node", 1794100000 } };
-  ui.blame("blame", blame_lines, line_commit, blame_lines.len(), commits,
+  ui.blame("blame", blame_lines, [0, 1, 2, 2, 1, 0, 0, 3, 3, 4, 3], blame_lines.len(), commits,
              width: fill, height: 220, lang: "c",
              now: 1794211200, first_line: 120);
 }
@@ -188,10 +186,10 @@ static void scene_graph_view(Ui ui) {
     { "render", "software, OpenGL", CUI_TONE_INFO },
     { "tls", "mbedtls", CUI_TONE_WARNING },
     { "zlib", NULL, CUI_TONE_NEUTRAL } };
-  static const cui_graph_edge edges[] = {
-    { 0, 1 }, { 0, 2 }, { 1, 3 }, { 2, 4 }, { 2, 5 }, { 3, 5 } };
   static int selected = 1;
-  ui.graph_view("deps", nodes, edges,
+  ui.graph_view("deps", nodes, [
+    {from: 0, to: 1}, {from: 0, to: 2}, {from: 1, to: 3}, {from: 2, to: 4},
+    {from: 2, to: 5}, {from: 3, to: 5}],
                 width: 640, height: 280,
                 selected: &selected);
 }
@@ -206,32 +204,34 @@ static void scene_hex_view(Ui ui) {
     0x00, 0x00, 0x00, 0x0E, 't', 'E', 'X', 't',
     'S', 'o', 'f', 't', 'w', 'a', 'r', 'e', 0x00, 'x', '2', 'c', 'u', 'i',
     0x5B, 0x1E, 0x9C, 0x07 };
-  static const cui_hex_range marks[] = {
-    { 0, 8, CUI_TONE_INFO, "PNG signature" },
-    { 8, 25, CUI_TONE_VIOLET, "IHDR chunk, 1280 by 720 RGBA" },
-    { 33, 26, CUI_TONE_TEAL, "tEXt chunk, Software" } };
   static cui_hex_selection selection = { 0x10, 8, 0x17 };
   ui.hex_view("hex", png, sizeof png, selection,
-    width: 640, ranges: marks);
+    width: 640, ranges: [
+      {offset: 0, length: 8, tone: info, label: "PNG signature"},
+      {offset: 8, length: 25, tone: violet,
+       label: "IHDR chunk, 1280 by 720 RGBA"},
+      {offset: 33, length: 26, tone: teal, label: "tEXt chunk, Software"}]);
 }
 
 static void scene_keymap(Ui ui) {
-  static const cui_keymap_binding bindings[] = {
-    { { CUI_MOD_PRIMARY, CUI_KEY_S }, "Save", 0 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_O }, "Open", 0 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_P }, "Go to file", 1 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_G }, "Go to line", 1 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_F }, "Find", 2 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_Z }, "Undo", 2 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_B }, "Build", 3 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_R }, "Run", 3 },
-    { { CUI_MOD_PRIMARY, CUI_KEY_R }, "Rename symbol", 2 },
-    { { 0, CUI_KEY_F5 }, "Continue", 3 },
-    { { 0, CUI_KEY_F12 }, "Definition", 1 } };
   static const char *categories[] = { "File", "Navigate", "Edit",
                                       "Run and debug" };
   static int mods = CUI_MOD_PRIMARY;
-  ui.keymap("keys", bindings,
+  ui.keymap("keys", [
+    {combo: {mods: CUI_MOD_PRIMARY, key: s}, action: "Save", category: 0},
+    {combo: {mods: CUI_MOD_PRIMARY, key: o}, action: "Open", category: 0},
+    {combo: {mods: CUI_MOD_PRIMARY, key: p}, action: "Go to file",
+     category: 1},
+    {combo: {mods: CUI_MOD_PRIMARY, key: g}, action: "Go to line",
+     category: 1},
+    {combo: {mods: CUI_MOD_PRIMARY, key: f}, action: "Find", category: 2},
+    {combo: {mods: CUI_MOD_PRIMARY, key: z}, action: "Undo", category: 2},
+    {combo: {mods: CUI_MOD_PRIMARY, key: b}, action: "Build", category: 3},
+    {combo: {mods: CUI_MOD_PRIMARY, key: r}, action: "Run", category: 3},
+    {combo: {mods: CUI_MOD_PRIMARY, key: r}, action: "Rename symbol",
+     category: 2},
+    {combo: {mods: 0, key: f5}, action: "Continue", category: 3},
+    {combo: {mods: 0, key: f12}, action: "Definition", category: 1}],
     width: 664, categories: categories, mods: &mods);
 }
 
@@ -248,30 +248,32 @@ static void scene_kv_editor(Ui ui) {
 }
 
 static void scene_pipeline(Ui ui) {
-  static const cui_pipeline_job jobs[] = {
-    { "linux-x64", 0, CUI_JOB_PASSED, 142 },
-    { "macos-arm64", 0, CUI_JOB_PASSED, 201 },
-    { "unit", 1, CUI_JOB_PASSED, 64 },
-    { "integration", 1, CUI_JOB_RUNNING, 95 },
-    { "lint", 1, CUI_JOB_FAILED, 12, true },
-    { "staging", 2, CUI_JOB_PENDING, -1 } };
   static int selected = 3;
-  ui.pipeline("run", %("Build" "Test" "Deploy"), jobs,
+  ui.pipeline("run", %("Build" "Test" "Deploy"), [
+    {name: "linux-x64", stage: 0, status: passed, duration: 142},
+    {name: "macos-arm64", stage: 0, status: passed, duration: 201},
+    {name: "unit", stage: 1, status: passed, duration: 64},
+    {name: "integration", stage: 1, status: running, duration: 95},
+    {name: "lint", stage: 1, status: failed, duration: 12,
+     allow_failure: true},
+    {name: "staging", stage: 2, status: pending, duration: -1}],
               width: 640, selected: &selected);
 }
 
 static void scene_problems(Ui ui) {
-  static const cui_diagnostic diagnostics[] = {
-    { CUI_SEVERITY_ERROR, "use of undeclared identifier 'frame_time'",
-      "src/render/timing.c", 42, 17, "clang", "undeclared-var" },
-    { CUI_SEVERITY_WARNING, "unused variable 'scale'",
-      "src/render/timing.c", 88, 11, "clang", "-Wunused-variable" },
-    { CUI_SEVERITY_WARNING, "comparison of integers of different signs",
-      "src/app/main.c", 77, 18, "gcc", "-Wsign-compare" },
-    { CUI_SEVERITY_INFO, "function 'measure' could be declared static",
-      "src/core/layout.c", 402, 6, "clang-tidy",
-      "misc-use-internal-linkage" } };
-  ui.problems("problems", diagnostics,
+  ui.problems("problems", [
+    {severity: error, message: "use of undeclared identifier 'frame_time'",
+     file: "src/render/timing.c", line: 42, column: 17, source: "clang",
+     code: "undeclared-var"},
+    {severity: warning, message: "unused variable 'scale'",
+     file: "src/render/timing.c", line: 88, column: 11, source: "clang",
+     code: "-Wunused-variable"},
+    {severity: warning, message: "comparison of integers of different signs",
+     file: "src/app/main.c", line: 77, column: 18, source: "gcc",
+     code: "-Wsign-compare"},
+    {severity: info, message: "function 'measure' could be declared static",
+     file: "src/core/layout.c", line: 402, column: 6, source: "clang-tidy",
+     code: "misc-use-internal-linkage"}],
     width: 640, height: 250);
 }
 
@@ -340,30 +342,31 @@ static void scene_trace_view(Ui ui) {
 }
 
 static void scene_waterfall(Ui ui) {
-  static const cui_net_request requests[] = {
-    { "https://shop.example.com/", "GET", 200, "document", 18400, 0.000,
-      { 0.002, 0.018, 0.024, 0.031, 0.142, 0.012 } },
-    { "https://shop.example.com/assets/app.css", "GET", 200, "stylesheet",
-      42100, 0.232, { 0.004, 0, 0, 0, 0.061, 0.022 } },
-    { "https://shop.example.com/assets/app.js", "GET", 200, "script",
-      186000, 0.233, { 0.005, 0, 0, 0, 0.068, 0.094 } },
-    { "https://shop.example.com/api/session", "POST", 401, "fetch", 312,
-      0.402, { 0.002, 0, 0, 0, 0.083, 0.001 } },
-    { "https://shop.example.com/img/hero.avif", "GET", 200, "image",
-      212000, 0.410, { 0.012, 0, 0, 0, 0.052, 0.188 } },
-    { "https://analytics.example.org/collect", "POST", 0, "ping", 0, 0.702,
-      { 0.004, 0.026, 0.031, 0.036, 0.12, 0 } } };
   static int selected = 2;
-  ui.waterfall("net", requests,
+  ui.waterfall("net", [
+    {name: "https://shop.example.com/", method: "GET", status: 200,
+     type: "document", size: 18400, start: 0.000,
+     timing: [0.002, 0.018, 0.024, 0.031, 0.142, 0.012]},
+    {name: "https://shop.example.com/assets/app.css", method: "GET",
+     status: 200, type: "stylesheet", size: 42100, start: 0.232,
+     timing: [0.004, 0, 0, 0, 0.061, 0.022]},
+    {name: "https://shop.example.com/assets/app.js", method: "GET",
+     status: 200, type: "script", size: 186000, start: 0.233,
+     timing: [0.005, 0, 0, 0, 0.068, 0.094]},
+    {name: "https://shop.example.com/api/session", method: "POST", status: 401,
+     type: "fetch", size: 312, start: 0.402,
+     timing: [0.002, 0, 0, 0, 0.083, 0.001]},
+    {name: "https://shop.example.com/img/hero.avif", method: "GET",
+     status: 200, type: "image", size: 212000, start: 0.410,
+     timing: [0.012, 0, 0, 0, 0.052, 0.188]},
+    {name: "https://analytics.example.org/collect", method: "POST", status: 0,
+     type: "ping", size: 0, start: 0.702,
+     timing: [0.004, 0.026, 0.031, 0.036, 0.12, 0]}],
     width: fill, height: 250, selected: &selected,
     dom_loaded: 0.395, loaded: 0.68);
 }
 
 static void scene_tree_table(Ui ui) {
-  static const cui_grid_column columns[] = {
-    { "Name", 300, CUI_TEXT_LEFT, true },
-    { "Size", 100, CUI_TEXT_RIGHT, true, false, 1 },
-    { "Kind", 140, CUI_TEXT_LEFT, true, false, 2 } };
   // Each node links to its parent, first child, and next sibling.
   static cui_tree_node nodes[] = {
     { -1, 1, -1, CUI_TREE_HAS_CHILDREN | CUI_TREE_OPEN },
@@ -377,7 +380,10 @@ static void scene_tree_table(Ui ui) {
     { 0, -1, -1, 0 } };
   static int cursor = 6;
   int node;
-  ui.tree_table ("files", columns, nodes, width: 640, height: 340,
+  ui.tree_table ("files", [
+    {title: "Name", width: 300, align: left, sortable: true},
+    {title: "Size", width: 100, align: right, sortable: true, priority: 1},
+    {title: "Kind", width: 140, align: left, sortable: true, priority: 2}], nodes, width: 640, height: 340,
                  cursor: &cursor, guides: true)
     while ((node = ui.tree_table_row()) >= 0) {
       (String name, String size, String kind) = tree_files[node];
