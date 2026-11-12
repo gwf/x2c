@@ -7,12 +7,15 @@
 
       gallery              browse the pages in a window
       gallery --shots DIR  draw every page off screen to DIR/NN-NAME.png
+      gallery --time NAME N
+                           time N frames of the page NAME off screen
 
     The window follows CUI's: Ctrl or Command K opens the command palette,
     and J switches between light and dark.
 */
 
 #include "path.x"
+#include "time.x"
 #include "gallery/state.x"
 #include "gallery/overview.x"
 #include "gallery/buttons.x"
@@ -299,9 +302,42 @@ static int shoot(Gallery g, Path directory) {
   return empty ? 1 : 0;
 }
 
+static double seconds(void) => Time.monotonic().total_seconds();
+
+/* Prints the mean time to describe a frame of the page `name`, as its
+   image is named, and the mean time of a whole frame, over `count` frames
+   off screen after 30 that settle layout and animations. */
+static int time_page(Gallery g, String name, int count) {
+  g.page = -1;
+  for (int page = 0; page < page_total(); page++)
+    if (pages[page].name.lower().replace(" ", "-") == name) g.page = page;
+  if (g.page < 0) return fprintf(stderr, "no page %s\n", name), 2;
+  Offscreen screen = auto Offscreen.open(1240, 4800);
+  for (int i = 0; i < 30; i++) {
+    screen.begin();
+    draw(screen.ui(), g);
+    screen.end();
+  }
+  double describing = 0, start = seconds();
+  for (int i = 0; i < count; i++) {
+    double before = seconds();
+    screen.begin();
+    draw(screen.ui(), g);
+    describing += seconds() - before;
+    screen.end();
+  }
+  double whole = seconds() - start;
+  printf("%s, %d frames\n", name, count);
+  printf("  describing a frame  %8.3f ms\n", describing * 1000 / count);
+  printf("  whole frame         %8.3f ms\n", whole * 1000 / count);
+  return 0;
+}
+
 int main(int argc, char **argv) {
   Gallery g = Gallery.new();
   if (argc == 3 && !strcmp(argv[1], "--shots")) return shoot(g, argv[2]);
+  if (argc == 4 && !strcmp(argv[1], "--time"))
+    return time_page(g, argv[2], atoi(argv[3]));
 
   App app = auto App.open(title: "CUI Gallery", width: 1240, height: 820,
                           min_width: 720, min_height: 480);
