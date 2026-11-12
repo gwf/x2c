@@ -167,7 +167,6 @@ static void scene_image_compare(Ui ui) {
 static void scene_card_stack_item(Ui ui) {
   static String cities[] = { "Kyoto", "Lisbon", "Reykjavik" };
   static const unsigned colors[] = { 0xc8553d, 0x2d3047, 0x5b8e7d };
-  int swiped;
   ui.card_stack (swiped, "deck", 3, width: 240, height: 200)
   for (int k = 0; k < 3; k++) ui.card_stack_item (k)
   ui.box (width: fill, height: fill,

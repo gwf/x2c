@@ -97,7 +97,6 @@ void page_actions(Ui ui, Gallery g) {
                     "Reply to Jonas about the release"
                     "Book the offsite venue");
     ui.each (String title in titles) {
-      int action;
       ui.swipe_item (action, "row",
           [{icon: check, label: "Done", tone: success}],
           [{icon: archive, label: "Archive", tone: info},

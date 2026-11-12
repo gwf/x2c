@@ -121,7 +121,6 @@ void page_data(Ui ui, Gallery g) {
       CUI_TONE_INFO, CUI_TONE_NEUTRAL, CUI_TONE_INFO, CUI_TONE_WARNING,
       CUI_TONE_TEAL };
     List labels = %("Docs" "Video" "Docs" "Release" "Blog");
-    bool changed;
     ui.reorder (changed, "tasks", g.task_order)
     for (int i = 0; i < 5; i++) {
       ui.reorder_item (i) {

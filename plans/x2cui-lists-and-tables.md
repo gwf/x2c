@@ -297,8 +297,10 @@ component as a method form:
   form, so positional icons and enums take short names everywhere.
 - The node editor, its nodes, and the tree table are block forms; a tree
   leaf is `ui.tree (name, NULL, leaf: true) {}`; the inspector is always
-  a block. A card stack and a swipe item store their end call's result in
-  a variable the caller passes: `ui.card_stack (swiped, "deck", 3)`.
+  a block. A card stack, a swipe item, a reorder list, a kanban board,
+  and its columns and cards declare the result name they are given:
+  `ui.card_stack (swiped, "deck", 3)`. Such a form is a block of its own,
+  so an unbraced loop cannot take it as its body.
 - The gallery's people table uses `ui.each`, `ui.table_row`, `ui.cell`,
   and `List.sort_by` in place of an insertion sort, and the tree table's
   rows are `ui.table_row` blocks.

@@ -210,7 +210,6 @@ void page_social(Ui ui, Gallery g) {
       List names = %("Kyoto" "Lisbon" "Reykjavik" "Oaxaca" "Hanoi");
       static const unsigned cols[] = { 0xc8553d, 0x2d3047, 0x5b8e7d,
                                        0xb7791f, 0x1f3a5f };
-      int dir;
       ui.card_stack (dir, "deck", 3, width: 260, height: 200)
       for (int k = 0; k < 3; k++) {
         int idx = (deck + k) % 5;

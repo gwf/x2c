@@ -77,7 +77,6 @@ static void move_card(Array board, cui_kanban_move m) {
 }
 
 static void draw_card(Ui ui, Card card) {
-  bool clicked;
   ui.kanban_card (clicked, card.id) {
     if (clicked) ui.toast(card.title);
     ui.badge(card.tag, tone: card.tone, size: sm);
@@ -104,15 +103,15 @@ void page_planning(Ui ui, Gallery g) {
   if (!board) board = new_board();
   section(ui, "Kanban", "Drag cards within and between columns. Columns can "
                         "carry a work-in-progress limit.");
-  bool moved, added;
-  cui_kanban_move mv;
   ui.kanban (moved, mv, "board")
-  foreach (Column column in board)
+  foreach (Column column in board) {
+    // The column declares `added`, so it is a block of its own.
     ui.kanban_column (added, column.name, column.cards.len(), dot: column.dot,
                       limit: column.limit, width: 264) {
       if (added) ui.toast("New card", description: column.name);
       foreach (Card card in column.cards) draw_card(ui, card);
     }
+  }
   if (moved) move_card(board, mv);
 
   section(ui, "Week calendar", "Drag events to move them in 15 minute "

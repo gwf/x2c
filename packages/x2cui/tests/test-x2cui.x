@@ -621,17 +621,16 @@ typedef struct Board {
 static void board_frame(Offscreen screen, Board &b) {
   screen.begin();
   Ui ui = screen.ui();
-  bool moved, added, clicked;
-  cui_kanban_move move;
   ui.kanban (moved, move, "board")
   for (int c = 0; c < 2; c++) {
     Array cards = b.columns[c];
     ui.kanban_column (added, c ? "Done" : "To do", cards.len(), width: 160) {
-      foreach (int id in cards)
+      foreach (int id in cards) {
         ui.kanban_card (clicked, id) {
           ui.text(%"Card $id");
           if (id == 1) b.card = ui.last_rect();
         }
+      }
     }
     if (c == 1) b.target = ui.last_rect();
   }
@@ -641,9 +640,9 @@ static void board_frame(Offscreen screen, Board &b) {
   Array from = b.columns[move.from_column], to = b.columns[move.to_column];
   for (int k = 0; k < (int) from.len(); k++)
     if ((int) from[k] == move.card) {
+      int card = move.card, at = move.to_index;
       from.remove(k);
-      to.insert(move.to_index < (int) to.len() ? move.to_index : (int) to.len(),
-                move.card);
+      to.insert(at < (int) to.len() ? at : (int) to.len(), card);
       break;
     }
 }

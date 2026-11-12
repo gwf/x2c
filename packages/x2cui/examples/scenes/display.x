@@ -176,7 +176,6 @@ static void scene_reorder_item(Ui ui) {
   ui.text("Drag a row. The others make room as you go.",
           color: text_muted);
   ui.column (width: 440) {
-    bool changed;
     ui.reorder (changed, "tasks", order)
     for (int i = 0; i < 5; i++) {
       int task = order[i];
@@ -206,30 +205,29 @@ static void scene_timeline_item(Ui ui) {
 }
 
 static void scene_kanban_column_begin(Ui ui) {
-  static const char *columns[] = { "Backlog", "In progress", "Done" };
-  static const char *cards[3][2] = {
-    { "Audit the color tokens", "Virtualize the feed" },
-    { "Keyboard nav in date ranges", NULL },
-    { "Spring presets", NULL } };
-  static const char *owners[3][2] = {
-    { "Maya Okafor", "Jonas Berg" }, { "Priya Nair", NULL },
-    { "Rosa Delgado", NULL } };
-  static const int counts[] = { 2, 1, 1 };
-  bool moved, added, clicked;
-  cui_kanban_move move;
+  // Each column is its title and its cards, a card a title and an owner.
+  List board = %(
+    ("Backlog" ("Audit the color tokens" "Maya Okafor")
+               ("Virtualize the feed" "Jonas Berg"))
+    ("In progress" ("Keyboard nav in date ranges" "Priya Nair"))
+    ("Done" ("Spring presets" "Rosa Delgado")));
   ui.kanban (moved, move, "board")
-  for (int c = 0; c < 3; c++)
-    ui.kanban_column (added, columns[c], counts[c],
+  for (int c = 0; c < board.len(); c++) {
+    List column = board[c], cards = column.cdr();
+    ui.kanban_column (added, column[0], cards.len(),
                       dot: CUI_COLOR_SERIES(c), limit: c == 1 ? 3 : 0,
                       width: 200)
-    for (int k = 0; k < counts[c]; k++)
+    for (int k = 0; k < cards.len(); k++) {
+      (String title, String owner) = cards[k];
       ui.kanban_card (clicked, c * 10 + k) {
-        ui.text(cards[c][k], font: medium, size: 13.5f);
+        ui.text(title, font: medium, size: 13.5f);
         ui.row (gap: 8, align: center) {
-          ui.avatar(owners[c][k], size: 22);
-          ui.text(owners[c][k], size: 12, color: text_muted);
+          ui.avatar(owner, size: 22);
+          ui.text(owner, size: 12, color: text_muted);
         }
       }
+    }
+  }
   if (moved) ui.toast("Card moved");
 }
 
