@@ -18,7 +18,7 @@ void page_reader(Ui ui, Gallery g) {
   ui.row (gap: 28, align: CUI_ALIGN_START, width: CUI_FILL) {
     ui.scroll (id: "reader", height: CUI_PX(560),
                width: CUI_FILL, gap: 14, fade_edges: true) {
-      for (int k = 0; k < $cui.count(toc); k++) {
+      for (int k = 0; k < (int) (sizeof toc / sizeof *toc); k++) {
         ui.toc_anchor(toc[k].anchor);
         ui.heading(toc[k].title, toc[k].level ? 4 : 3);
         for (int p = 0; p < 3; p++) {
@@ -32,7 +32,7 @@ void page_reader(Ui ui, Gallery g) {
     ui.column (width: CUI_PX(200), gap: 10) {
       ui.text("On this page", size: 12, font: CUI_FONT_MEDIUM,
                               color: CUI_COLOR_TEXT_MUTED);
-      ui.toc("reader", toc, $cui.count(toc));
+      ui.toc("reader", toc);
     }
   }
 }

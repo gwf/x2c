@@ -27,8 +27,7 @@ void page_overview(Ui ui, Gallery g) {
     ui.metric("Components", "150", icon: CUI_ICON_BOX);
     ui.metric("Frame time", "0.4 ms",
       delta: -18.0f, delta_label: "-18% vs v0.9",
-      lower_is_better: true, spark: frame_times,
-      spark_count: $cui.count(frame_times), icon: CUI_ICON_ZAP);
+      lower_is_better: true, spark: frame_times, icon: CUI_ICON_ZAP);
     ui.metric("Dependencies", "0", icon: CUI_ICON_PACKAGE);
   }
   ui.box (dir: CUI_GRID, columns: 2, min_column_width: 260,

@@ -4,8 +4,9 @@
     prompts, calendars and schedules, and animation and property editors
 
     These components read arrays of CUI's records. The arrays are static C
-    arrays written with designated initializers, and `$cui.count` supplies
-    each count. The calendars show fixed dates in November 2026.
+    arrays written with designated initializers, and each method form
+    supplies the count of its array. The calendars show fixed dates in
+    November 2026.
 */
 
 #include "scene.x"
@@ -21,7 +22,7 @@ static void scene_radio_cards(Ui ui) {
       CUI_ICON_LAYERS, NULL } };
   static int place = 1;
   ui.box (width: CUI_FILL, max_width: 420)
-    ui.radio_cards("places", places, $cui.count(places), place);
+    ui.radio_cards("places", places, place);
 }
 
 static void scene_toggle_group(Ui ui) {
@@ -57,7 +58,7 @@ static void scene_tab_bar(Ui ui) {
               color: CUI_COLOR_TEXT_SECONDARY);
     }
     ui.box (pad: 12, width: CUI_FILL)
-      ui.tab_bar("tabs", tabs, $cui.count(tabs), tab, width: CUI_FILL);
+      ui.tab_bar("tabs", tabs, tab, width: CUI_FILL);
   }
 }
 
@@ -91,7 +92,7 @@ static void scene_speed_dial(Ui ui) {
     { CUI_ICON_MIC, "Record memo" } };
   static int chosen = 1;
   ui.row (gap: 16, align: CUI_ALIGN_CENTER) {
-    int picked = ui.speed_dial("create", actions, $cui.count(actions),
+    int picked = ui.speed_dial("create", actions,
                                tooltip: "Create");
     if (picked >= 0) chosen = picked;
     ui.text(%"Last created: $(actions[chosen].label)",
@@ -111,7 +112,7 @@ static void scene_checklist(Ui ui) {
     { "Turn on notifications", "Get pinged when something needs you.",
       "Enable", false } };
   ui.box (width: CUI_PX(460)) {
-    int done = ui.checklist("onboarding", steps, $cui.count(steps),
+    int done = ui.checklist("onboarding", steps,
       title: "Set up your workspace");
     if (done >= 0) steps[done].done = true;
   }
@@ -147,7 +148,7 @@ static void scene_tour(Ui ui) {
               "soil samples sent to the lab.",
               color: CUI_COLOR_TEXT_SECONDARY);
   }
-  if (step >= 0) ui.tour("intro", steps, $cui.count(steps), step);
+  if (step >= 0) ui.tour("intro", steps, step);
 }
 
 static void scene_agent_plan(Ui ui) {
@@ -158,7 +159,7 @@ static void scene_agent_plan(Ui ui) {
     { "Draft the summary", NULL, CUI_TASK_PENDING },
     { "Check the citations", NULL, CUI_TASK_PENDING } };
   ui.box (width: CUI_FILL, max_width: 460)
-    ui.agent_plan("plan", steps, $cui.count(steps),
+    ui.agent_plan("plan", steps,
       title: "Research plan");
 }
 
@@ -172,7 +173,7 @@ static void scene_prompt_suggestions(Ui ui) {
   ui.column (gap: 12, width: CUI_FILL, max_width: 560) {
     ui.heading("What can I help with?", 3);
     int chosen = ui.prompt_suggestions(
-      "starters", suggestions, $cui.count(suggestions), columns: 2);
+      "starters", suggestions, columns: 2);
     if (chosen >= 0) picked = chosen;
     if (picked >= 0) ui.muted(suggestions[picked].title);
   }
@@ -187,7 +188,7 @@ static void scene_model_picker(Ui ui) {
   static int model = 1;
   ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
     ui.text("Answer with", color: CUI_COLOR_TEXT_SECONDARY);
-    ui.model_picker("model", models, $cui.count(models), model,
+    ui.model_picker("model", models, model,
       placement: CUI_PLACE_BOTTOM_START);
   }
 }
@@ -205,7 +206,7 @@ static void scene_month_calendar(Ui ui) {
       CUI_TONE_SUCCESS },
     { "Board meeting", { 2026, 11, 30 }, { 0 }, 10, false, CUI_TONE_DANGER } };
   static cui_date month = { 2026, 11, 1 }, picked = { 2026, 11, 10 };
-  ui.month_calendar("month", month, events, $cui.count(events),
+  ui.month_calendar("month", month, events,
     selected: &picked, today: { 2026, 11, 10 }, cell_height: 58);
 }
 
@@ -218,7 +219,7 @@ static void scene_week_calendar(Ui ui) {
     { "Customer call", "Northlight", 3, 15, 16, CUI_TONE_DANGER },
     { "Demo day", "All hands", 4, 11, 12.5f, CUI_TONE_SUCCESS } };
   cui_date monday = { 2026, 11, 9 };
-  ui.week_calendar("week", monday, events, $cui.count(events),
+  ui.week_calendar("week", monday, events,
     start_hour: 8, end_hour: 18, hour_height: 34,
     height: CUI_PX(344));
 }
@@ -234,30 +235,31 @@ static void scene_gantt(Ui ui) {
     { "Docs and launch", "Priya Nair", 18, 20, 0, CUI_TONE_SUCCESS, 4,
       false } };
   cui_date origin = { 2026, 11, 2 };
-  ui.gantt("plan", tasks, $cui.count(tasks), origin, 21,
+  ui.gantt("plan", tasks, origin, 21,
     day_width: 20, today: 8);
 }
 
 // A shot: a logo that slides in and fades up, over a sound clip.
 static void scene_timeline_editor(Ui ui) {
-  static cui_curve_key slide[8] = {
+  enum { KEYS = 8 };
+  static cui_curve_key slide[KEYS] = {
     { 0, 0 }, { 1.5f, 320 }, { 3, 360 }, { 5, 360 } };
-  static cui_curve_key fade[8] = {
+  static cui_curve_key fade[KEYS] = {
     { 0, 0, 0, 0, 0, 0, CUI_CURVE_LINEAR }, { 1, 1 }, { 4.5f, 1 },
     { 5, 0, 0, 0, 0, 0, CUI_CURVE_LINEAR } };
-  static cui_timeline_clip sounds[] = {
+  static cui_timeline_clip sounds[2] = {
     { 0.5f, 2.5f, 0, "Whoosh", false },
     { 3, 4.75f, 0.5f, "Street ambience", false } };
   static cui_timeline_track tracks[] = {
     { "Logo", CUI_ICON_IMAGE, 0 },
     { "Position X", NULL, 1, .keys = slide, .key_count = 4,
-      .key_capacity = $cui.count(slide) },
+      .key_capacity = KEYS },
     { "Opacity", NULL, 1, .keys = fade, .key_count = 4,
-      .key_capacity = $cui.count(fade) },
+      .key_capacity = KEYS },
     { "Sound", CUI_ICON_AUDIO_LINES, 0, .color = 3, .clips = sounds,
-      .clip_count = $cui.count(sounds) } };
+      .clip_count = 2 } };
   static float time = 1.5f;
-  ui.timeline_editor("shot", tracks, $cui.count(tracks), time,
+  ui.timeline_editor("shot", tracks, time,
     end: 5, fps: 24, toggles: true);
 }
 
@@ -267,7 +269,7 @@ static void scene_curve_editor(Ui ui) {
     { 1.2f, 1.08f }, { 2, 1 } };
   static int count = 4, selected = 1;
   ui.box (width: CUI_FILL, max_width: 620)
-    ui.curve_editor("ease", keys, count, $cui.count(keys),
+    ui.curve_editor("ease", keys, count,
       x_max: 2, y_max: 1.2f, x_label: "Time", y_label: "Value",
       selected: &selected);
 }
@@ -281,7 +283,7 @@ static void scene_gradient_editor(Ui ui) {
   ui.column (width: CUI_FILL, max_width: 560, gap: 10) {
     ui.text("Flame color over lifetime", font: CUI_FONT_MEDIUM,
                                          size: 13);
-    ui.gradient_editor("flame", stops, count, $cui.count(stops),
+    ui.gradient_editor("flame", stops, count,
       selected: &selected);
   }
 }

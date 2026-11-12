@@ -46,21 +46,21 @@ void page_audio(Ui ui, Gallery g) {
       }
       float master[2] = { lv[0][0] * 1.4f, lv[4][1] * 1.3f };
       // The page ignores the result, so the method stands in for the macro.
-      ui.level_meter("master", master, $cui.count(master),
+      ui.level_meter("master", master,
         horizontal: true, length: 240, scale: true,
         segmented: true);
       steps[1].target = ui.last_id();
     }
     ui.card (dir: CUI_ROW, gap: 8, wrap: true) {
-      for (int k = 0; k < 6; k++) $cui.id_index(ui, k) {
+      for (int k = 0; k < 6; k++) ui.id (k) {
         String name = names[k];
         ui.fader(name, faders[k], -48, 6,
           unit: "dB", length: 180, ticks: k == 0 ? marks : NULL,
-          tick_count: k == 0 ? $cui.count(marks) : 0, meter: lv[k],
+          meter: lv[k],
           meter_channels: 2);
         if (k == 2) steps[2].target = ui.last_id();
       }
     }
   }
-  if (tour >= 0) ui.tour("audio-tour", steps, $cui.count(steps), tour);
+  if (tour >= 0) ui.tour("audio-tour", steps, tour);
 }

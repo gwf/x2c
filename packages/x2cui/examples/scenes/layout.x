@@ -67,11 +67,11 @@ static void scene_split(Ui ui) {
 static void scene_id_scope(Ui ui) {
   static bool first = true, second = false;
   // Both rows hold a switch labelled "Enabled"; the scope keeps them apart.
-  $cui.id_scope(ui, "wifi") ui.row (gap: 12) {
+  ui.id ("wifi") ui.row (gap: 12) {
     ui.label("Wi-Fi");
     ui.switch("Enabled", first);
   }
-  $cui.id_scope(ui, "bluetooth") ui.row (gap: 12) {
+  ui.id ("bluetooth") ui.row (gap: 12) {
     ui.label("Bluetooth");
     ui.switch("Enabled", second);
   }
@@ -80,7 +80,7 @@ static void scene_id_scope(Ui ui) {
 static void scene_disabled_scope(Ui ui) {
   static bool locked = true, notify = true;
   ui.switch("Lock the form", locked);
-  $cui.disabled_scope(ui, locked) ui.column (gap: 8) {
+  ui.disabled (locked) ui.column (gap: 8) {
     ui.checkbox("Send notifications", notify);
     ui.button("Save", variant: CUI_BUTTON_PRIMARY);
   }

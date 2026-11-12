@@ -2,9 +2,10 @@
 
 /*  viz.x -- scenes for visualizations, meters, and figure strips
 
-    These components read C arrays of numbers or of CUI's records. Each
-    method takes the array and its count, and `$cui.count` supplies the
-    count. The generated series are filled once, in `prepare`.
+    These components read C arrays of numbers or of CUI's records. A
+    method form takes the array alone and supplies its count. The
+    generated series are filled once, in `prepare`; their lengths are the
+    constants below.
 */
 
 #include <math.h>
@@ -17,24 +18,29 @@ static ArrayFloat shares;
 // Requests by weekday and hour.
 static float traffic[7 * 24];
 
+enum { HALF_YEAR = 182, TRADING_DAYS = 60, RUNS = 24, PEAKS = 80,
+       UPTIME_DAYS = 60, BUCKETS = 96 };
+
 // Commits on each day of the first half of 2026.
-static float commits[182];
+static float commits[HALF_YEAR];
 
 // One price candle a trading day.
-static cui_candle candles[60];
+static cui_candle candles[TRADING_DAYS];
 
 // Frame time against node count, sized by draw calls.
-static cui_vec2 software_points[24], opengl_points[24];
-static float software_sizes[24], opengl_sizes[24];
+static cui_vec2 software_points[RUNS], opengl_points[RUNS];
+static float software_sizes[RUNS], opengl_sizes[RUNS];
 
 // Audio peaks of a track, 0 to 1.
-static float peaks[80];
+static float peaks[PEAKS];
 
 // The fraction of each day a service was up; negative means no data.
-static float api_days[60], web_days[60], cdn_days[60];
+static float api_days[UPTIME_DAYS], web_days[UPTIME_DAYS],
+             cdn_days[UPTIME_DAYS];
 
 // Log lines in each 15 minute bucket of one day.
-static float info_lines[96], warning_lines[96], error_lines[96];
+static float info_lines[BUCKETS], warning_lines[BUCKETS],
+             error_lines[BUCKETS];
 
 static void prepare_traffic(void) {
   for (int d = 0; d < 7; d++)
@@ -48,7 +54,7 @@ static void prepare_traffic(void) {
 
 static void prepare_commits(void) {
   unsigned seed = 7;
-  for (int k = 0; k < $cui.count(commits); k++) {
+  for (int k = 0; k < HALF_YEAR; k++) {
     seed = seed * 1103515245u + 12345u;
     // 2026-01-01 is a Thursday, so weekday 5 and 6 are the weekend.
     int weekday = (k + 3) % 7;
@@ -60,7 +66,7 @@ static void prepare_commits(void) {
 
 static void prepare_candles(void) {
   float price = 64;
-  for (int k = 0; k < $cui.count(candles); k++) {
+  for (int k = 0; k < TRADING_DAYS; k++) {
     float open = price;
     float close = open * (1 + sinf(k * 0.37f) * 0.018f +
                           cosf(k * 0.11f) * 0.01f);
@@ -72,7 +78,7 @@ static void prepare_candles(void) {
 }
 
 static void prepare_scatter(void) {
-  for (int k = 0; k < $cui.count(software_points); k++) {
+  for (int k = 0; k < RUNS; k++) {
     float nodes = 200 + k * 160.0f;
     software_points[k] = (cui_vec2){
       nodes, 0.08f + nodes * 0.00006f + (float) ((k * 37) % 13) * 0.004f };
@@ -85,14 +91,14 @@ static void prepare_scatter(void) {
 }
 
 static void prepare_signals(void) {
-  for (int k = 0; k < $cui.count(peaks); k++)
+  for (int k = 0; k < PEAKS; k++)
     peaks[k] = 0.18f + 0.8f * fabsf(sinf(k * 0.37f) * sinf(k * 0.11f + 1.3f));
-  for (int d = 0; d < $cui.count(api_days); d++) {
+  for (int d = 0; d < UPTIME_DAYS; d++) {
     api_days[d] = d == 41 ? 0.962f : d % 17 == 5 ? 0.9985f : 1;
     web_days[d] = d == 28 ? 0.93f : 1;
     cdn_days[d] = d < 12 ? -1 : 1;
   }
-  for (int i = 0; i < $cui.count(info_lines); i++) {
+  for (int i = 0; i < BUCKETS; i++) {
     info_lines[i] = 120 + 80 * sinf(i / 96.0f * 6.28f * 2) + (i * 37 % 23);
     warning_lines[i] = 12 + (i * 13 % 9) + (i > 60 && i < 70 ? 40 : 0);
     error_lines[i] = (i * 7 % 5) + (i > 62 && i < 67 ? 30 : 0);
@@ -119,7 +125,7 @@ static void scene_activity_rings(Ui ui) {
   static const cui_viz_item rings[] = {
     { "Move", 0.82f }, { "Exercise", 1.24f }, { "Stand", 0.58f } };
   ui.card (pad: 18)
-    ui.activity_rings("rings", rings, $cui.count(rings),
+    ui.activity_rings("rings", rings,
       size: 170, center: "82%", caption: "of goal", legend: true);
 }
 
@@ -130,20 +136,19 @@ static void scene_bar_list(Ui ui) {
     { "/pricing", 640 } };
   ui.card (width: CUI_FILL, max_width: 480, gap: 10) {
     ui.label("Top pages this week");
-    ui.bar_list("pages", pages, $cui.count(pages));
+    ui.bar_list("pages", pages);
   }
 }
 
 static void scene_calendar_heatmap(Ui ui) {
   ui.card (pad: 18)
-    ui.calendar_heatmap("activity", (cui_date){ 2026, 1, 1 }, commits,
-                        $cui.count(commits), unit: "commits");
+    ui.calendar_heatmap("activity", (cui_date){ 2026, 1, 1 }, commits, unit: "commits");
 }
 
 static void scene_candlestick(Ui ui) {
   ui.card (width: CUI_FILL, max_width: 660, gap: 10) {
     ui.label("Price, 60 trading days");
-    ui.candlestick("price", candles, $cui.count(candles), height: 260);
+    ui.candlestick("price", candles, height: 260);
   }
 }
 
@@ -152,7 +157,7 @@ static void scene_funnel(Ui ui) {
     { "Visited", 12840 }, { "Signed up", 4210 }, { "Activated", 2380 },
     { "Subscribed", 860 } };
   ui.card (width: CUI_FILL, max_width: 520)
-    ui.funnel("signups", stages, $cui.count(stages));
+    ui.funnel("signups", stages);
 }
 
 static void scene_heatmap(Ui ui) {
@@ -168,13 +173,13 @@ static void scene_heatmap(Ui ui) {
 }
 
 static void scene_radar_chart(Ui ui) {
-  static const float stable[] = { 82, 64, 90, 58, 75, 88 };
-  static const float next[] = { 70, 85, 72, 80, 60, 79 };
+  enum { QUALITIES = 6 };
+  static const float stable[QUALITIES] = { 82, 64, 90, 58, 75, 88 };
+  static const float next[QUALITIES] = { 70, 85, 72, 80, 60, 79 };
   static const cui_series releases[] = {
-    { "1.0", stable, $cui.count(stable) },
-    { "1.1", next, $cui.count(next) } };
+    { "1.0", stable, QUALITIES }, { "1.1", next, QUALITIES } };
   ui.card (pad: 18)
-    ui.radar_chart("qualities", releases, $cui.count(releases),
+    ui.radar_chart("qualities", releases,
                    %("Speed" "Size" "Polish" "Docs" "Platforms" "Tests"),
                    size: 240, max: 100);
 }
@@ -186,16 +191,15 @@ static void scene_sankey(Ui ui) {
   ui.card (pad: 18, width: CUI_FILL, max_width: 660)
     ui.sankey("signups", %("Search" "Social" "Referral" "Sign up" "Bounced"
                            "Trial" "Paid" "Churned"),
-              links, $cui.count(links), height: 260);
+              links, height: 260);
 }
 
 static void scene_scatter_chart(Ui ui) {
   static const cui_scatter_series series[] = {
-    { "Software", software_points, software_sizes,
-      $cui.count(software_points) },
-    { "OpenGL", opengl_points, opengl_sizes, $cui.count(opengl_points) } };
+    { "Software", software_points, software_sizes, RUNS },
+    { "OpenGL", opengl_points, opengl_sizes, RUNS } };
   ui.card (pad: 18, width: CUI_FILL, max_width: 660)
-    ui.scatter_chart("frames", series, $cui.count(series),
+    ui.scatter_chart("frames", series,
       height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
 }
@@ -206,7 +210,7 @@ static void scene_split_bar(Ui ui) {
     { "Other", 8 } };
   ui.card (width: CUI_FILL, max_width: 520, gap: 10) {
     ui.label("Frame time by stage");
-    ui.split_bar("frame", parts, $cui.count(parts), format: "%.0f ms");
+    ui.split_bar("frame", parts, format: "%.0f ms");
   }
 }
 
@@ -216,7 +220,7 @@ static void scene_treemap(Ui ui) {
     { "Charts", 23 }, { "Overlays", 19 }, { "Platform", 16 },
     { "Theme", 9 }, { "Icons", 7 }, { "Grid", 6 } };
   ui.box (width: CUI_FILL, max_width: 620)
-    ui.treemap("bundle", modules, $cui.count(modules),
+    ui.treemap("bundle", modules,
                height: 280, format: "%.0f KB");
 }
 
@@ -225,7 +229,7 @@ static void scene_waffle(Ui ui) {
     { "Windows", 46 }, { "macOS", 31 }, { "Linux", 23 } };
   ui.card (pad: 18, gap: 10) {
     ui.label("Platforms of the last 100 installs");
-    ui.waffle("installs", platforms, $cui.count(platforms), cell: 16);
+    ui.waffle("installs", platforms, cell: 16);
   }
 }
 
@@ -236,7 +240,7 @@ static void scene_waveform(Ui ui) {
     ui.icon_button(CUI_ICON_PLAY, size: CUI_SIZE_SM,
                                   variant: CUI_BUTTON_SECONDARY);
     ui.box (width: CUI_FILL)
-      ui.waveform("track", peaks, $cui.count(peaks), progress,
+      ui.waveform("track", peaks, progress,
                   height: 34);
     ui.text("0:42", size: 12, tabular: true,
                     color: CUI_COLOR_TEXT_MUTED);
@@ -248,7 +252,7 @@ static void scene_level_meter(Ui ui) {
   static float levels[] = { 0.42f, 0.61f };
   ui.card (gap: 10) {
     ui.label("Master");
-    ui.level_meter("master", levels, $cui.count(levels),
+    ui.level_meter("master", levels,
       horizontal: true, length: 280, scale: true, segmented: true);
   }
 }
@@ -258,7 +262,7 @@ static void scene_histogram_slider(Ui ui) {
                                 30, 24, 19, 15, 11, 8, 6, 4, 3 };
   static float lo = 40, hi = 160;
   ui.card (width: CUI_PX(380), gap: 6) {
-    ui.histogram_slider("Price", bins, $cui.count(bins), lo, hi, 0, 240,
+    ui.histogram_slider("Price", bins, lo, hi, 0, 240,
                         format: "$%.0f");
     ui.muted("1,204 listings in range");
   }
@@ -273,18 +277,17 @@ static void scene_time_histogram(Ui ui) {
   static double day = 1794182400;
   static double from = 1794182400 + 3600 * 15, to = 1794182400 + 3600 * 17.5;
   ui.box (width: CUI_FILL, max_width: 660)
-    ui.time_histogram("logs", day, 900, $cui.count(info_lines), levels,
-                      $cui.count(levels), from, to,
+    ui.time_histogram("logs", day, 900, BUCKETS, levels, from, to,
                       utc: true, height: 150);
 }
 
 static void scene_uptime(Ui ui) {
   static const cui_uptime_service services[] = {
-    { "API", api_days, $cui.count(api_days) },
-    { "Website", web_days, $cui.count(web_days) },
-    { "CDN", cdn_days, $cui.count(cdn_days) } };
+    { "API", api_days, UPTIME_DAYS },
+    { "Website", web_days, UPTIME_DAYS },
+    { "CDN", cdn_days, UPTIME_DAYS } };
   ui.box (width: CUI_FILL, max_width: 660)
-    ui.uptime("status", services, $cui.count(services),
+    ui.uptime("status", services,
       last_day: (cui_date){ 2026, 11, 9 });
 }
 
@@ -294,7 +297,7 @@ static void scene_ticker(Ui ui) {
     { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
     { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 } };
   ui.box (width: CUI_FILL)
-    ui.ticker("figures", figures, $cui.count(figures));
+    ui.ticker("figures", figures);
 }
 
 static Scene viz_scenes[] = {

@@ -166,7 +166,8 @@ static void scene_image_compare(Ui ui) {
 static void scene_card_stack_item(Ui ui) {
   static String cities[] = { "Kyoto", "Lisbon", "Reykjavik" };
   static const unsigned colors[] = { 0xc8553d, 0x2d3047, 0x5b8e7d };
-  ui.card_stack_begin("deck", 3, { .width = CUI_PX(240), .height = 200 });
+  int swiped;
+  ui.card_stack (swiped, "deck", 3, width: 240, height: 200)
   for (int k = 0; k < 3; k++) ui.card_stack_item (k)
   ui.box (width: CUI_FILL, height: CUI_FILL,
           bg: CUI_RGB(colors[k]), radius: 25, pad: 20,
@@ -176,7 +177,7 @@ static void scene_card_stack_item(Ui ui) {
     ui.text("Swipe right to save", size: 13, font: CUI_FONT_MEDIUM,
                                    color: CUI_RGBA(0xfffffff0));
   }
-  ui.card_stack_end();
+  (void) swiped;
 }
 
 static void scene_counter(Ui ui) {
@@ -354,7 +355,7 @@ static void scene_fader(Ui ui) {
   static String names[4] = { "Vocals", "Guitar", "Bass", "Drums" };
   static const float marks[] = { 6, 0, -6, -12, -24, -48 };
   ui.row () ui.card (pad: 18, dir: CUI_ROW, gap: 10) {
-    for (int k = 0; k < 4; k++) $cui.id_index(ui, k)
+    for (int k = 0; k < 4; k++) ui.id (k)
       ui.fader(names[k], gains[k], -48, 6,
         unit: "dB", length: 170, ticks: k == 0 ? marks : NULL,
         tick_count: k == 0 ? 6 : 0);

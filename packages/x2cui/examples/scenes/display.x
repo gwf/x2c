@@ -56,9 +56,9 @@ static void scene_accordion(Ui ui) {
   }
 }
 
-// A file in the tree; a leaf never opens, so it has no children to end.
+// A file in the tree; a leaf never opens, so its block is empty.
 static void tree_file(Ui ui, String name, bool selected) {
-  ui.tree_begin(name, NULL, { .leaf = true, .selected = selected });
+  ui.tree (name, NULL, leaf: true, selected: selected) {}
 }
 
 static void scene_tree(Ui ui) {
@@ -323,7 +323,7 @@ static void scene_voice_orb(Ui ui) {
   static const float levels[] = { 0.2f, 0.7f, 0.2f, 0.5f };
   ui.row (gap: 18, align: CUI_ALIGN_CENTER) {
     for (int k = 0; k < 4; k++) {
-      $cui.id_index(ui, k) ui.column (align: CUI_ALIGN_CENTER,
+      ui.id (k) ui.column (align: CUI_ALIGN_CENTER,
                                       gap: 6) {
         ui.voice_orb("orb", (cui_voice_state) k, levels[k], size: 130);
         ui.text(names[k], size: 13, color: CUI_COLOR_TEXT_SECONDARY);
@@ -391,7 +391,7 @@ static void scene_spotlight(Ui ui) {
     "The core emits triangles; bring any GPU API." };
   ui.row (gap: 14, align: CUI_ALIGN_STRETCH, width: CUI_FILL) {
     for (int k = 0; k < 3; k++) {
-      $cui.id_index(ui, k)
+      ui.id (k)
       ui.spotlight ("renderer", width: CUI_GROW(1),
                                 beam: k == 1) {
         ui.text(titles[k], font: CUI_FONT_MEDIUM, size: 15);

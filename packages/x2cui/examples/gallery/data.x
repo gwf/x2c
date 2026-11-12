@@ -67,22 +67,22 @@ void page_data(Ui ui, Gallery g) {
       section(ui, "Tree view", NULL);
       ui.card (pad: 10, gap: 1)
       ui.tree ("src", g.tree_src) {
-        // A leaf has no open state, so it passes NULL for the flag.
+        // A leaf has no open state, so it passes NULL for the flag, and
+        // never opens, so its block is empty.
         ui.tree ("components", g.tree_ui) {
           int i = 0;
           foreach (String file in %("button.c" "dialog.c" "slider.c"
                                     "table.c")) {
-            ui.tree_begin(file, NULL, {
-              .leaf = true, .selected = g.selected_file == i });
+            ui.tree (file, NULL, leaf: true,
+                     selected: g.selected_file == i) {}
             if (ui.tree_clicked()) g.selected_file = i;
             i++;
           }
         }
         ui.tree ("assets", g.tree_assets) {
-          ui.tree_begin("logo.png", NULL, {
-            .leaf = true, .icon = CUI_ICON_IMAGE });
+          ui.tree ("logo.png", NULL, leaf: true, icon: CUI_ICON_IMAGE) {}
         }
-        ui.tree_begin("main.c", NULL, { .leaf = true });
+        ui.tree ("main.c", NULL, leaf: true) {}
       }
     }
     ui.column (gap: 12) {

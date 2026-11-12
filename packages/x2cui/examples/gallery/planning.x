@@ -34,7 +34,7 @@ static int kb_cols[4][8] = { { 1, 2, 3 }, { 4, 5 }, { 6 }, { 7, 8 } };
 static int kb_len[4] = { 3, 2, 1, 2 };
 
 static kb_card *kb_find(int id) {
-  for (int k = 0; k < $cui.count(kb_cards); k++)
+  for (int k = 0; k < (int) (sizeof kb_cards / sizeof *kb_cards); k++)
     if (kb_cards[k].id == id) return &kb_cards[k];
   return NULL;
 }
@@ -121,7 +121,7 @@ void page_planning(Ui ui, Gallery g) {
   int td = cui_date_to_days(today);
   int monday = td - ((td + 3) % 7 + 7) % 7;
   int ev = ui.week_calendar(
-    "week", cui_date_from_days(monday), events, $cui.count(events),
+    "week", cui_date_from_days(monday), events,
     start_hour: 8, end_hour: 19, height: CUI_PX(420));
   if (ev >= 0)
     ui.toast(events[ev].title, description: events[ev].detail);
@@ -141,7 +141,7 @@ void page_planning(Ui ui, Gallery g) {
       false },
   };
   cui_date origin = cui_date_from_days(monday - 7);
-  int tk = ui.gantt("plan", tasks, $cui.count(tasks), origin, 42,
+  int tk = ui.gantt("plan", tasks, origin, 42,
                     today: 7 + (td - monday));
   if (tk >= 0) {
     int days = tasks[tk].end - tasks[tk].start;
@@ -168,7 +168,7 @@ void page_planning(Ui ui, Gallery g) {
       9.0f + (float) (k % 8), span || k == 4, (cui_tone) (1 + k % 8) };
   }
   cui_month_result mr = ui.month_calendar(
-    "month", month, mev, $cui.count(mev), selected: &picked);
+    "month", month, mev, selected: &picked);
   if (mr.event >= 0)
     ui.toast(mev[mr.event].title,
       description: "Opened from the month calendar");

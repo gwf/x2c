@@ -268,14 +268,14 @@ static void scene_status_bar(Ui ui) {
   }
 }
 
-// Calls begin and end directly, with no block.
+// The block form of the inspector, as a program writes it.
 static void scene_inspector_begin(Ui ui) {
   static bool output_open = true;
   static int width = 1920, height = 1080, samples = 64;
   static bool denoise = true, cast = true;
   ui.card (width: CUI_FILL, max_width: 460, pad_x: 16,
            pad_y: 6, gap: 0) {
-    if (ui.inspector_begin("render", {})) {
+    ui.inspector ("render") {
       if (ui.inspector_group("Output", output_open)) {
         ui.prop_int("Width", width, min: 16, max: 8192,
                                     suffix: "px");
@@ -286,7 +286,6 @@ static void scene_inspector_begin(Ui ui) {
         ui.prop_bool("Cast shadows", cast, checkbox: true);
         ui.prop_text("Path", output_path);
       }
-      ui.inspector_end();
     }
   }
 }

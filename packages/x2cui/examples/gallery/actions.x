@@ -73,7 +73,7 @@ void page_actions(Ui ui, Gallery g) {
 
   section(ui, "Reactions", "Counts roll when they change.");
   // The page ignores the result, so the method stands in for the macro.
-  ui.reactions("reactions", reactions, $cui.count(reactions));
+  ui.reactions("reactions", reactions);
 
   section(ui, "Theme",
           "A compact switcher and a single toggle that morphs between sun "
@@ -107,18 +107,17 @@ void page_actions(Ui ui, Gallery g) {
     List titles = %("Review the design tokens"
                     "Reply to Jonas about the release"
                     "Book the offsite venue");
-    for (int i = 0; i < titles.len(); i++) $cui.id_index(ui, i) {
-      String title = titles[i];
-      ui.swipe_item_begin("row", left, $cui.count(left), right,
-                          $cui.count(right));
-      ui.icon(CUI_ICON_CIRCLE, 16, CUI_COLOR_TEXT_MUTED);
-      ui.text(title, width: CUI_FILL, nowrap: true);
-      ui.text("Today", size: 12, color: CUI_COLOR_TEXT_MUTED);
-      int a = ui.swipe_item_end();
-      if (a >= 0)
-        ui.toast(a == 0 ? "Marked as done" : a == 100 ? "Archived"
-                                                      : "Deleted",
-                 tone: a == 101 ? CUI_TONE_DANGER : CUI_TONE_SUCCESS);
+    ui.each (String title in titles) {
+      int action;
+      ui.swipe_item (action, "row", left, right) {
+        ui.icon(CUI_ICON_CIRCLE, 16, CUI_COLOR_TEXT_MUTED);
+        ui.text(title, width: CUI_FILL, nowrap: true);
+        ui.text("Today", size: 12, color: CUI_COLOR_TEXT_MUTED);
+      }
+      if (action >= 0)
+        ui.toast(action == 0 ? "Marked as done"
+                 : action == 100 ? "Archived" : "Deleted",
+                 tone: action == 101 ? CUI_TONE_DANGER : CUI_TONE_SUCCESS);
     }
   }
 
@@ -129,7 +128,7 @@ void page_actions(Ui ui, Gallery g) {
     static const cui_speed_action acts[] = {
       { CUI_ICON_FILE_TEXT, "New note" }, { CUI_ICON_IMAGE, "Upload image" },
       { CUI_ICON_MIC, "Record memo" } };
-    int c = ui.speed_dial("dial", acts, $cui.count(acts),
+    int c = ui.speed_dial("dial", acts,
                           tooltip: "Create");
     if (c >= 0) dial_choice = c;
     if (dial_choice >= 0) ui.muted(acts[dial_choice].label);

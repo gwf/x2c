@@ -10,8 +10,9 @@ enum { NC = 2000 };
 
 static float traffic[7 * 24];
 static float days[364];
-static cui_vec2 points_a[40], points_b[40];
-static float sizes_a[40], sizes_b[40];
+enum { RUNS = 40 };
+static cui_vec2 points_a[RUNS], points_b[RUNS];
+static float sizes_a[RUNS], sizes_b[RUNS];
 static cui_candle candles[NC];
 
 static void prepare(void) {
@@ -32,7 +33,7 @@ static void prepare(void) {
     float r = (float) ((s >> 16) % 1000) / 1000.0f;
     days[k] = r < 0.18f ? 0 : floorf(base * r * 4);
   }
-  for (int k = 0; k < 40; k++) {
+  for (int k = 0; k < RUNS; k++) {
     float n = 200 + k * 95.0f;
     points_a[k] = (cui_vec2){
       n, 0.08f + n * 0.00006f + (float) ((k * 37) % 13) * 0.004f };
@@ -75,7 +76,7 @@ void page_viz(Ui ui, Gallery g) {
   ui.card (pad: 18) {
     cui_date start =
       cui_date_from_days(cui_date_to_days(cui_date_today()) - 363);
-    ui.calendar_heatmap("activity", start, days, $cui.count(days),
+    ui.calendar_heatmap("activity", start, days,
                         unit: "contributions");
   }
   ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
@@ -86,17 +87,17 @@ void page_viz(Ui ui, Gallery g) {
         { "Controls", 31 }, { "Charts", 23 }, { "Overlays", 19 },
         { "Platform", 16 }, { "Theme", 9 }, { "Icons", 7 }, { "Grid", 6 },
       };
-      ui.treemap("bundle", mods, $cui.count(mods),
+      ui.treemap("bundle", mods,
                  height: 280, format: "%.0f KB");
     }
     ui.column (width: CUI_GROW(1), gap: 10,
                align: CUI_ALIGN_CENTER) {
       section(ui, "Radar", "Two releases across six qualities.");
-      static const float a[] = { 82, 64, 90, 58, 75, 88 };
-      static const float b[] = { 70, 85, 72, 80, 60, 79 };
-      cui_series rs[] = { { "1.0", a, $cui.count(a) },
-                          { "1.1", b, $cui.count(b) } };
-      ui.radar_chart("radar", rs, $cui.count(rs),
+      enum { QUALITIES = 6 };
+      static const float a[QUALITIES] = { 82, 64, 90, 58, 75, 88 };
+      static const float b[QUALITIES] = { 70, 85, 72, 80, 60, 79 };
+      cui_series rs[] = { { "1.0", a, QUALITIES }, { "1.1", b, QUALITIES } };
+      ui.radar_chart("radar", rs,
                      %("Speed" "Size" "Polish" "Docs" "Platforms" "Tests"),
                      size: 220, max: 100);
     }
@@ -107,19 +108,19 @@ void page_viz(Ui ui, Gallery g) {
       static const cui_viz_item stages[] = {
         { "Visited", 12840 }, { "Signed up", 4210 }, { "Activated", 2380 },
         { "Subscribed", 860 } };
-      ui.funnel("funnel", stages, $cui.count(stages));
+      ui.funnel("funnel", stages);
     }
     ui.column (width: CUI_GROW(1), gap: 10) {
       section(ui, "Split bar", "Where the time goes.");
       static const cui_viz_item parts[] = {
         { "Layout", 38 }, { "Text", 24 }, { "Paint", 21 }, { "Input", 9 },
         { "Other", 8 } };
-      ui.split_bar("split", parts, $cui.count(parts), format: "%.0f ms");
+      ui.split_bar("split", parts, format: "%.0f ms");
       ui.gap(18);
       section(ui, "Waffle", "Platforms of the last 100 installs.");
       static const cui_viz_item plats[] = {
         { "Windows", 46 }, { "macOS", 31 }, { "Linux", 23 } };
-      ui.waffle("waffle", plats, $cui.count(plats), cell: 14);
+      ui.waffle("waffle", plats, cell: 14);
     }
   }
   section(ui, "Sankey", "Where sign ups come from and where they end up.");
@@ -130,7 +131,7 @@ void page_viz(Ui ui, Gallery g) {
   ui.card (pad: 18, width: CUI_FILL)
     ui.sankey("flow", %("Search" "Social" "Referral" "Sign up" "Bounced"
                         "Trial" "Paid" "Churned"),
-              links, $cui.count(links), height: 280);
+              links, height: 280);
   ui.row (gap: 24, align: CUI_ALIGN_START, width: CUI_FILL) {
     ui.column (width: CUI_GROW(1.4f), gap: 10) {
       section(ui, "Bar list", "Ranked, keyed by label: press Shuffle and "
@@ -139,7 +140,7 @@ void page_viz(Ui ui, Gallery g) {
         { "/docs", 4820 }, { "/", 3920 }, { "/gallery", 2410 },
         { "/blog/fast-ui-in-c", 1830 }, { "/download", 1210 },
         { "/pricing", 640 } };
-      ui.bar_list("pages", pages, $cui.count(pages));
+      ui.bar_list("pages", pages);
       if (ui.button("Shuffle", size: CUI_SIZE_SM,
                                icon: CUI_ICON_SHUFFLE,
                                variant: CUI_BUTTON_OUTLINE))
@@ -151,17 +152,17 @@ void page_viz(Ui ui, Gallery g) {
       section(ui, "Activity rings", "Past one, a ring keeps winding.");
       static const cui_viz_item rings[] = {
         { "Move", 0.82f }, { "Exercise", 1.24f }, { "Stand", 0.58f } };
-      ui.activity_rings("rings", rings, $cui.count(rings),
+      ui.activity_rings("rings", rings,
         size: 170, center: "82%", caption: "of goal");
     }
   }
   section(ui, "Scatter",
           "Frame time against node count, sized by draw calls.");
   cui_scatter_series ss[] = {
-    { "Software", points_a, sizes_a, $cui.count(points_a) },
-    { "OpenGL", points_b, sizes_b, $cui.count(points_b) } };
+    { "Software", points_a, sizes_a, RUNS },
+    { "OpenGL", points_b, sizes_b, RUNS } };
   ui.card (pad: 18, width: CUI_FILL)
-    ui.scatter_chart("scatter", ss, $cui.count(ss),
+    ui.scatter_chart("scatter", ss,
       height: 300, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
   static const cui_gauge_band bands[] = {
@@ -170,8 +171,7 @@ void page_viz(Ui ui, Gallery g) {
   ui.card (pad: 18, width: CUI_FILL, dir: CUI_ROW,
            wrap: true, gap: 24, align: CUI_ALIGN_CENTER) {
     ui.radial_gauge("cpu", 64, 0, 100,
-      unit: "%", label: "CPU", bands: bands,
-      band_count: $cui.count(bands), size: 180);
+      unit: "%", label: "CPU", bands: bands, size: 180);
     ui.radial_gauge("temp", 71, 20, 100,
       unit: "C", label: "GPU temperature", show_target: true,
       target: 85, size: 180);
@@ -181,6 +181,6 @@ void page_viz(Ui ui, Gallery g) {
   }
   ui.card (pad: 18, width: CUI_FILL, gap: 10) {
     ui.label("Price, 2,000 periods");
-    ui.candlestick("price", candles, $cui.count(candles), height: 280);
+    ui.candlestick("price", candles, height: 280);
   }
 }

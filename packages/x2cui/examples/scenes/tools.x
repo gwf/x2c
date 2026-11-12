@@ -171,38 +171,36 @@ static void scene_node_editor(Ui ui) {
   static float x[5] = { 8, 140, 320, 500, 140 };
   static float y[5] = { 30, 20, 40, 200, 230 };
   static float factor = 0.35f, roughness = 0.62f;
-  if (!ui.node_editor_begin("material", view, { .height = CUI_FILL }))
-    return;
-  ui.node_begin(0, x[0], y[0], "UV", { .width = 110 });
-  ui.node_output(PIN_UV, "UV", type: TYPE_VECTOR);
-  ui.node_end();
-  ui.node_begin(1, x[1], y[1], "Brick texture", { .width = 160 });
-  ui.node_input(PIN_TEX_VEC, "Vector", type: TYPE_VECTOR);
-  ui.node_output(PIN_TEX_COLOR, "Color", type: TYPE_COLOR);
-  ui.node_end();
-  ui.node_begin(2, x[2], y[2], "Mix", { .width = 160 });
-  ui.node_input(PIN_MIX_A, "Color A", type: TYPE_COLOR);
-  ui.node_input(PIN_MIX_B, "Color B", type: TYPE_COLOR);
-  // An input without a link shows a control for its value.
-  if (!ui.node_input(PIN_MIX_FAC, "Factor", type: TYPE_FLOAT))
-    ui.node_content () ui.slider("##factor", factor, 0, 1);
-  ui.node_output(PIN_MIX_OUT, "Color", type: TYPE_COLOR);
-  ui.node_end();
-  ui.node_begin(3, x[3], y[3], "Material output", { .width = 150 });
-  ui.node_input(PIN_OUT_BASE, "Base color", type: TYPE_COLOR);
-  ui.node_input(PIN_OUT_ROUGH, "Roughness", type: TYPE_FLOAT);
-  ui.node_end();
-  ui.node_begin(4, x[4], y[4], "Roughness", { .width = 160 });
-  ui.node_content ()
-    ui.slider("Value", roughness, 0, 1,
-              show_value: true, format: "%.2f");
-  ui.node_output(PIN_ROUGH, "Value", type: TYPE_FLOAT);
-  ui.node_end();
-  ui.node_link(1, PIN_UV, PIN_TEX_VEC);
-  ui.node_link(2, PIN_TEX_COLOR, PIN_MIX_A);
-  ui.node_link(3, PIN_MIX_OUT, PIN_OUT_BASE);
-  ui.node_link(4, PIN_ROUGH, PIN_OUT_ROUGH);
-  ui.node_editor_end();
+  ui.node_editor ("material", view, height: CUI_FILL) {
+    ui.node (0, x[0], y[0], "UV", width: 110)
+      ui.node_output(PIN_UV, "UV", type: TYPE_VECTOR);
+    ui.node (1, x[1], y[1], "Brick texture", width: 160) {
+      ui.node_input(PIN_TEX_VEC, "Vector", type: TYPE_VECTOR);
+      ui.node_output(PIN_TEX_COLOR, "Color", type: TYPE_COLOR);
+    }
+    ui.node (2, x[2], y[2], "Mix", width: 160) {
+      ui.node_input(PIN_MIX_A, "Color A", type: TYPE_COLOR);
+      ui.node_input(PIN_MIX_B, "Color B", type: TYPE_COLOR);
+      // An input without a link shows a control for its value.
+      if (!ui.node_input(PIN_MIX_FAC, "Factor", type: TYPE_FLOAT))
+        ui.node_content () ui.slider("##factor", factor, 0, 1);
+      ui.node_output(PIN_MIX_OUT, "Color", type: TYPE_COLOR);
+    }
+    ui.node (3, x[3], y[3], "Material output", width: 150) {
+      ui.node_input(PIN_OUT_BASE, "Base color", type: TYPE_COLOR);
+      ui.node_input(PIN_OUT_ROUGH, "Roughness", type: TYPE_FLOAT);
+    }
+    ui.node (4, x[4], y[4], "Roughness", width: 160) {
+      ui.node_content ()
+        ui.slider("Value", roughness, 0, 1,
+                  show_value: true, format: "%.2f");
+      ui.node_output(PIN_ROUGH, "Value", type: TYPE_FLOAT);
+    }
+    ui.node_link(1, PIN_UV, PIN_TEX_VEC);
+    ui.node_link(2, PIN_TEX_COLOR, PIN_MIX_A);
+    ui.node_link(3, PIN_MIX_OUT, PIN_OUT_BASE);
+    ui.node_link(4, PIN_ROUGH, PIN_OUT_ROUGH);
+  }
 }
 
 static void scene_dockspace(Ui ui) {

@@ -85,7 +85,7 @@ void page_grid(Ui ui, Gallery g) {
   section(ui, "Filter bar", "Chips for active filters, values in a list, "
                             "and a search.");
   // `filters` holds one mask for each field.
-  ui.filter_bar("filters", fields, $cui.count(fields), filters, search);
+  ui.filter_bar("filters", fields, filters, search);
 
   section(ui, "Data grid", "2,000 rows, virtualized. Sort, resize columns, "
                            "select with Shift and Ctrl, edit names with a "

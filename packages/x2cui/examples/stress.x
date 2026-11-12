@@ -133,7 +133,7 @@ static void draw_components(Ui ui, Stress &stress) {
     for (int i = 0; i < count; i++) {
       float value = sweep(stress.clock * (0.1f + 0.5f * chance(i, 6)) +
                           chance(i, 7));
-      $cui.id_index(ui, i)
+      ui.id (i)
       ui.card (width: CUI_PX(96), pad: 8, gap: 6) {
         ui.row (gap: 8, align: CUI_ALIGN_CENTER) {
           ui.spinner(14);

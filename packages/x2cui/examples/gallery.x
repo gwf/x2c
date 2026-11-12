@@ -218,7 +218,7 @@ static void dialogs(Ui ui, Gallery g) {
     { "Invite teammate", CUI_ICON_USER_PLUS, "Actions" },
     { "Open settings", CUI_ICON_SETTINGS, "Actions", "Ctrl ," },
   };
-  switch (ui.command_palette(g.palette_open, commands, $cui.count(commands))) {
+  switch (ui.command_palette(g.palette_open, commands)) {
     case 0: g.page = PAGE_OVERVIEW; break;
     case 1: g.page = PAGE_BUTTONS; break;
     case 2: g.page = PAGE_INPUTS; break;
@@ -241,7 +241,7 @@ static void draw_page(Ui ui, Gallery g) {
     ui.column (gap: 6, pad_bottom: 8)
       ui.heading(pages[g.page].name, 2);
   // The page's name scopes its ids, so ids on different pages never meet.
-  $cui.id_scope(ui, pages[g.page].name) pages[g.page].draw(ui, g);
+  ui.id (pages[g.page].name) pages[g.page].draw(ui, g);
 }
 
 static void draw(Ui ui, Gallery g) {

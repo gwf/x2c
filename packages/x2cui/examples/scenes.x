@@ -2,7 +2,7 @@
 
     Each scene draws one component the way a program would use it. A scene
     is named for its CUI component: the scene `button` shows `ui.button`,
-    and the scene `row` shows `$cui.row`. The files under scenes/ group
+    and the scene `row` shows `ui.row`. The files under scenes/ group
     the scenes into families. The package's check draws them all, which
     shows that every component has an x2c form and draws.
 

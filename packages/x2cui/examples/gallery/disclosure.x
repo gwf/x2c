@@ -120,7 +120,7 @@ void page_disclosure(Ui ui, Gallery g) {
 
   section(ui, "Onboarding checklist", "Progress, with the next step open.");
   ui.box (width: CUI_PX(460)) {
-    int a = ui.checklist("onboarding", steps, $cui.count(steps),
+    int a = ui.checklist("onboarding", steps,
       title: "Set up your workspace");
     if (a >= 0) {
       steps[a].done = true;

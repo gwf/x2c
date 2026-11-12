@@ -86,10 +86,10 @@ void page_ai(Ui ui, Gallery g) {
                     "springs instead of fixed curves.", size: 15);
       ui.row (gap: 6, align: CUI_ALIGN_CENTER) {
         ui.text("Sources", size: 12, color: CUI_COLOR_TEXT_MUTED);
-        for (int k = 0; k < $cui.count(sources); k++)
+        for (int k = 0; k < (int) (sizeof sources / sizeof *sources); k++)
           ui.citation(k + 1, sources[k]);
       }
-      ui.source_list("sources", sources, $cui.count(sources));
+      ui.source_list("sources", sources);
       ui.row (gap: 8, align: CUI_ALIGN_CENTER,
               width: CUI_FILL) {
         int actions = ui.response_actions("actions",
@@ -100,13 +100,12 @@ void page_ai(Ui ui, Gallery g) {
         static const cui_viz_item parts[] = {
           { "System", 3200 }, { "Files", 41800 }, { "Messages", 68400 } };
         ui.context_meter("ctx", 113400, 200000,
-          parts: parts, part_count: $cui.count(parts));
+          parts: parts);
       }
       int event = ui.chat_composer("composer", draft,
         placeholder: "Ask a follow up", busy: busy,
         attachments: files, attachment_count: file_count,
-        removed: &removed, models: models,
-        model_count: $cui.count(models), model: &model);
+        removed: &removed, models: models, model: &model);
       if (event & CUI_COMPOSER_SEND) {
         draft.set("");
         busy = true;
@@ -134,7 +133,7 @@ void page_ai(Ui ui, Gallery g) {
         { "Check the citations", NULL, CUI_TASK_PENDING },
       };
       // The page ignores the result, so the method stands in for the macro.
-      ui.agent_plan("plan", steps, $cui.count(steps),
+      ui.agent_plan("plan", steps,
         title: "Research plan");
       section(ui, "Voice", "Idle, listening, thinking and speaking.");
       ui.column (align: CUI_ALIGN_CENTER, gap: 12,
@@ -157,7 +156,7 @@ void page_ai(Ui ui, Gallery g) {
         { CUI_ICON_BUG, "Debug an error", "Paste the stack trace" },
       };
       int picked = ui.prompt_suggestions(
-        "sugg", suggestions, $cui.count(suggestions), columns: 1);
+        "sugg", suggestions, columns: 1);
       if (picked >= 0) draft.set(%"$(suggestions[picked].title): ");
     }
   }

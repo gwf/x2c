@@ -36,7 +36,7 @@ void page_motion(Ui ui, Gallery g) {
       ui.shimmer_text("Thinking about your question\xe2\x80\xa6",
                       size: 15);
     }
-    $cui.id_index(ui, replay) {
+    ui.id (replay) {
       ui.typewriter("tw", "CUI draws a full frame in a fraction of a "
                           "millisecond, so text can stream in as fast as "
                           "it arrives.", caret: true, size: 15);
@@ -68,7 +68,7 @@ void page_motion(Ui ui, Gallery g) {
     int k = 0;
     foreach (List card in cards) {
       (String title, String blurb) = card;
-      $cui.id_index(ui, k)
+      ui.id (k)
       ui.spotlight ("spot", width: CUI_GROW(1), beam: k == 1) {
         ui.text(title, font: CUI_FONT_MEDIUM, size: 15);
         ui.text(blurb, size: 13, color: CUI_COLOR_TEXT_SECONDARY);
@@ -133,7 +133,7 @@ void page_motion(Ui ui, Gallery g) {
         ui.icon_button(CUI_ICON_PLAY, size: CUI_SIZE_SM,
                                       variant: CUI_BUTTON_SECONDARY);
         ui.box (width: CUI_FILL)
-          ui.waveform("wave", peaks, $cui.count(peaks), progress,
+          ui.waveform("wave", peaks, progress,
                       height: 34);
         ui.text("0:42", size: 12, tabular: true,
                         color: CUI_COLOR_TEXT_MUTED);
@@ -142,7 +142,7 @@ void page_motion(Ui ui, Gallery g) {
       static const cui_tab_bar_item tabs[] = {
         { CUI_ICON_HOUSE, "Home", 0 }, { CUI_ICON_SEARCH, "Search", 0 },
         { CUI_ICON_INBOX, "Inbox", 4 }, { CUI_ICON_USER, "Profile", 0 } };
-      ui.tab_bar("tabs", tabs, $cui.count(tabs), tab,
+      ui.tab_bar("tabs", tabs, tab,
                  width: CUI_PX(360));
     }
   }

@@ -23,7 +23,7 @@ static int kv_n = 4;
 static void devtools_kv(Ui ui) {
   ui.column (gap: 10, width: CUI_FILL, max_width: 680) {
     ui.text("Headers", font: CUI_FONT_MEDIUM);
-    ui.kv_editor("headers", kv_pairs, kv_n, $cui.count(kv_pairs));
+    ui.kv_editor("headers", kv_pairs, kv_n);
   }
 }
 
@@ -49,7 +49,7 @@ static const cui_diagnostic pbm_diags[] = {
 
 static void devtools_problems(Ui ui) {
   ui.column (gap: 10, width: CUI_FILL, max_width: 760)
-    ui.problems("problems", pbm_diags, $cui.count(pbm_diags),
+    ui.problems("problems", pbm_diags,
                 height: 300);
 }
 
@@ -69,8 +69,7 @@ static void devtools_pipeline(Ui ui) {
     { "production", 3, CUI_JOB_PENDING, -1 },
   };
   ui.column (gap: 10, width: CUI_FILL, max_width: 920)
-    ui.pipeline("run", %("Build" "Test" "Package" "Deploy"), jobs,
-                $cui.count(jobs), selected: &pl_sel);
+    ui.pipeline("run", %("Build" "Test" "Package" "Deploy"), jobs, selected: &pl_sel);
 }
 
 static const char *const qb_status[] = { "Open", "In progress", "Closed" };
@@ -88,12 +87,12 @@ static int qb_n = 5;
 
 static void devtools_query(Ui ui) {
   ui.column (gap: 10, width: CUI_FILL, max_width: 720) {
-    ui.query_builder("filter", qb_fields, $cui.count(qb_fields), qb_nodes,
-                     qb_n, $cui.count(qb_nodes));
+    ui.query_builder("filter", qb_fields, qb_nodes, qb_n);
     // CUI writes the query as a sentence into a buffer; it has no method.
     char text[256];
-    cui_query_text(qb_fields, $cui.count(qb_fields), qb_nodes, qb_n, text,
-                   sizeof text);
+    cui_query_text(qb_fields,
+                   (int) (sizeof qb_fields / sizeof *qb_fields), qb_nodes,
+                   qb_n, text, sizeof text);
     ui.text(text, size: 12, color: CUI_COLOR_TEXT_MUTED);
   }
 }
@@ -136,8 +135,8 @@ static void devtools_keymap(Ui ui) {
   static const char *cats_en[] = { "File", "Navigate", "Edit",
                                    "Run and debug" };
   ui.column (gap: 10, width: CUI_FILL, max_width: 900)
-    ui.keymap("keys", binds, $cui.count(binds),
-      categories: cats_en, category_count: $cui.count(cats_en),
+    ui.keymap("keys", binds,
+      categories: cats_en,
       mods: &km_mods);
 }
 
@@ -167,7 +166,7 @@ static int cg_sel = 1;
 
 static void devtools_commits(Ui ui) {
   ui.column (gap: 10, width: CUI_FILL, max_width: 920)
-    ui.commit_graph("history", cg_commits, $cui.count(cg_commits),
+    ui.commit_graph("history", cg_commits,
                     selected: &cg_sel, height: 320);
 }
 
@@ -190,8 +189,7 @@ static int gv_sel = 1;
 
 static void devtools_graph(Ui ui) {
   ui.column (gap: 10, width: CUI_FILL, max_width: 1000)
-    ui.graph_view("deps", gv_nodes, $cui.count(gv_nodes), gv_edges,
-                  $cui.count(gv_edges), selected: &gv_sel,
+    ui.graph_view("deps", gv_nodes, gv_edges, selected: &gv_sel,
                                         height: 340);
 }
 
@@ -221,7 +219,7 @@ static int wf_sel = 2;
 
 static void devtools_waterfall(Ui ui) {
   ui.column (gap: 10, width: CUI_FILL, max_width: 1000)
-    ui.waterfall("net", wf_reqs, $cui.count(wf_reqs),
+    ui.waterfall("net", wf_reqs,
       selected: &wf_sel, height: 340, dom_loaded: 0.395,
       loaded: 0.68);
 }
@@ -229,14 +227,15 @@ static void devtools_waterfall(Ui ui) {
 static cui_trace_track tr_tracks[] = {
   { "Main thread" }, { "Render" }, { "Worker 1" }, { "Worker 2" }, { "GPU" },
 };
-static cui_trace_span tr_spans[400];
+enum { TR_CAPACITY = 400 };
+static cui_trace_span tr_spans[TR_CAPACITY];
 static int tr_n = 0;
 static cui_trace_view tr_view = { 0.0042, 0.0418, 0, 0.0161, 0.0236 };
 static int tr_sel = -1;
 
 static void tr_add(const char *name, double s, double e, int track,
                    int depth) {
-  if (tr_n < $cui.count(tr_spans))
+  if (tr_n < TR_CAPACITY)
     tr_spans[tr_n++] = (cui_trace_span){ name, s, e, track, depth, 0 };
 }
 
@@ -278,10 +277,11 @@ static void devtools_trace(Ui ui) {
           && tr_spans[i].start < 0.03)
         tr_sel = i;
   ui.column (gap: 10, width: CUI_FILL, max_width: 1000)
-    ui.trace_view("trace", tr_tracks, $cui.count(tr_tracks), tr_spans, tr_n,
-                  tr_view, tr_sel,
-                    markers: tr_marks,
-                    marker_count: $cui.count(tr_marks), height: 320);
+    // The spans in use are fewer than the array holds, so both counts
+    // are written.
+    ui.trace_view("trace", tr_tracks,
+                  (int) (sizeof tr_tracks / sizeof *tr_tracks), tr_spans,
+                  tr_n, tr_view, tr_sel, markers: tr_marks, height: 320);
 }
 
 void page_devtools(Ui ui, Gallery g) {

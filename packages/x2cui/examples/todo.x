@@ -87,7 +87,7 @@ static void draw(Ui ui, Todo &todo) {
         if (!shown(task, todo.filter)) continue;
         visible++;
         // The index keeps two tasks with one title apart.
-        $cui.id_index(ui, i)
+        ui.id (i)
         ui.row (gap: 8, align: center, width: fill) {
           changed |= ui.checkbox(task.title, task.done);
           ui.spacer();

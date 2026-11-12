@@ -2,10 +2,9 @@
 
 /*  data.x -- scenes for charts, tables, and the data grid
 
-    These components read arrays of CUI's records. The arrays are C arrays
-    written with designated initializers, and each `$cui.` macro takes the
-    array itself and supplies its count. The numbers and rows come from x2c
-    collections.
+    These components read arrays of CUI's records. A table and a data grid
+    take their columns as a Map literal, and a chart takes a C array of
+    series alone. The numbers and rows come from x2c collections.
 */
 
 #include "scene.x"
@@ -35,7 +34,7 @@ static void scene_line_chart(Ui ui) {
   List months = %("Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep"
                   "Oct" "Nov" "Dec");
   ui.card (width: CUI_FILL, max_width: 660)
-    ui.line_chart("revenue", series, $cui.count(series), months,
+    ui.line_chart("revenue", series, months,
       area: true, smooth: true, height: 200, format: "$%.0fk");
 }
 
@@ -43,7 +42,7 @@ static void scene_bar_chart(Ui ui) {
   cui_series series[] = { cui_series.of("Desktop", desktop),
                           cui_series.of("Mobile", mobile) };
   ui.card (width: CUI_FILL, max_width: 520)
-    ui.bar_chart("visits", series, $cui.count(series),
+    ui.bar_chart("visits", series,
                  %("Jan" "Feb" "Mar" "Apr" "May" "Jun"), height: 200);
 }
 

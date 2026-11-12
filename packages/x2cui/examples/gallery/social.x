@@ -134,7 +134,7 @@ void page_social(Ui ui, Gallery g) {
   }
   section(ui, "Presence", "Who is here now. Hover to spread them out.");
   ui.row (gap: 24, align: CUI_ALIGN_CENTER) {
-    ui.presence("here", who, $cui.count(who), 5, 30);
+    ui.presence("here", who, 5, 30);
     ui.counter("rev", revenue, format: "$%.0f", size: 34,
                                group_thousands: true);
     if (ui.button("Add a sale", size: CUI_SIZE_SM,
@@ -149,7 +149,7 @@ void page_social(Ui ui, Gallery g) {
     { "Churn", "1.7%", -0.6f, true }, { "Latency", "182 ms", -8.4f, true },
     { "Builds", "1,204", 12.0f }, { "Uptime", "99.98%", 0 },
   };
-  ui.ticker("tick", tick, $cui.count(tick));
+  ui.ticker("tick", tick);
 
   section(ui, "Carousel", "Drag, flick, scroll sideways or use the arrows "
                           "and dots.");
@@ -204,8 +204,8 @@ void page_social(Ui ui, Gallery g) {
       List names = %("Kyoto" "Lisbon" "Reykjavik" "Oaxaca" "Hanoi");
       static const unsigned cols[] = { 0xc8553d, 0x2d3047, 0x5b8e7d,
                                        0xb7791f, 0x1f3a5f };
-      ui.card_stack_begin("deck", 3, { .width = CUI_PX(260),
-                                       .height = 200 });
+      int dir;
+      ui.card_stack (dir, "deck", 3, width: 260, height: 200)
       for (int k = 0; k < 3; k++) {
         int idx = (deck + k) % 5;
         String name = names[idx];
@@ -220,7 +220,6 @@ void page_social(Ui ui, Gallery g) {
             color: CUI_RGBA(0xfffffff0));
         }
       }
-      int dir = ui.card_stack_end();
       if (dir) {
         deck = (deck + 1) % 5;
         ui.toast(dir > 0 ? "Saved" : "Skipped");

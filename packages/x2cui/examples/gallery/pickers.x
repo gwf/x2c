@@ -91,7 +91,7 @@ void page_pickers(Ui ui, Gallery g) {
     }
     ui.card (width: CUI_FILL, gap: 6) {
       // The page ignores the result, so the method stands in for the macro.
-      ui.histogram_slider("Price", bins, $cui.count(bins), lo, hi, 0, 240,
+      ui.histogram_slider("Price", bins, lo, hi, 0, 240,
                           format: "$%.0f");
       ui.muted("1,204 listings in range");
     }
