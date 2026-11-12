@@ -32,5 +32,16 @@
     "{prefix}/include/sqlite3.h",
     "{prefix}/include/sqlite3ext.h",
     "{prefix}/lib/libsqlite3.a"
-  ]
+  ],
+  "distribution": {
+    "copies": [
+      {"from": "{prefix}/include/sqlite3.h", "to": "native/include/sqlite3.h"},
+      {"from": "{prefix}/include/sqlite3ext.h", "to": "native/include/sqlite3ext.h"},
+      {"from": "{prefix}/lib/libsqlite3.a", "to": "native/lib/libsqlite3.a"}
+    ],
+    "native_args": [
+      "--c-include-dir", "{package}/native/include",
+      "{package}/native/lib/libsqlite3.a", "-pthread"
+    ]
+  }
 }
