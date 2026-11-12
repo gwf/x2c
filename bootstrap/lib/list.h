@@ -10,10 +10,6 @@ typedef struct List * List;
 
 #include "common.h"
 #include "var/var.h"
-static inline Var car(List x);
-
-static inline List cdr(List x);
-
 typedef struct List{
   Var car;
   struct List * cdr;
@@ -40,11 +36,15 @@ List List_promote(List lst);
 
 int List_try_own(List lst);
 
+static inline Var car(List x);
+
 static List Var_list_payload(Var);
 
 static inline Var List_caar(List lst){
   return car(Var_list_payload(car(lst)));
 }
+
+static inline List cdr(List x);
 
 static inline Var List_cadr(List lst){
   return car(cdr(lst));
