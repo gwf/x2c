@@ -75,14 +75,14 @@ static void devtools2_stack(Ui ui) {
 }
 
 static int rq_method = 1;
-// The query parameters of the URL, an Array of KeyValue.
-static Array rq_params;
+// The query parameters of the URL, which the key-value editor edits.
+static KvPairs rq_params;
 
 static void devtools2_request(Ui ui) {
-  if (!rq_params) rq_params = KeyValue.of_url(rq_url.text());
+  if (!rq_params) rq_params = KvPairs.of_url(rq_url.text());
   ui.column (gap: 12, width: fill, max_width: 760) {
     cui_request_bar_result r = ui.request_bar("req", rq_method, rq_url);
-    if (r.changed) rq_params = KeyValue.of_url(rq_url.text());
+    if (r.changed) rq_params = KvPairs.of_url(rq_url.text());
     if (ui.kv_editor("params", rq_params)) rq_url.set_url_params(rq_params);
     ui.response_status(201, 0.142, 18400);
   }
@@ -188,15 +188,15 @@ static void devtools2_blame(Ui ui) {
 }
 
 // CUI changes the switches and shares in place.
-static cui_feature_flag ff_flags[] = {
-  { "new-checkout", "Single-page checkout with saved cards",
-    { true, true, false }, { 0, 25, 0 } },
-  { "dark-mode-default", "Start new accounts in dark mode",
-    { true, false, false } },
-  { "search-v2", "Ranked search with typo tolerance",
-    { true, true, true }, { 0, 100, 5 } },
-  { "export-pdf", "Export reports as PDF", { false, false, false } },
-};
+static FeatureFlags ff_flags = FeatureFlags.of([
+  {key: "new-checkout", description: "Single-page checkout with saved cards",
+   on: [true, true, false], rollout: [0, 25, 0]},
+  {key: "dark-mode-default", description: "Start new accounts in dark mode",
+   on: [true, false, false]},
+  {key: "search-v2", description: "Ranked search with typo tolerance",
+   on: [true, true, true], rollout: [0, 100, 5]},
+  {key: "export-pdf", description: "Export reports as PDF",
+   on: [false, false, false]}]);
 
 static void devtools2_flags(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 860)
@@ -204,30 +204,39 @@ static void devtools2_flags(Ui ui) {
                      %("Development" "Staging" "Production"));
 }
 
-static const cui_api_param ax_p1[] = {
-  { "id", "path", "string", true, "The user's id" },
-  { "fields", "query", "string", false, "Comma separated fields to return" },
-};
-static const cui_api_param ax_p2[] = {
-  { "limit", "query", "integer", false, "At most this many, default 20" },
-  { "cursor", "query", "string", false, "From a previous page" },
-};
 static int ax_sel = 2;
 
 static void devtools2_api(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 820)
     ui.api_explorer("api", [
       {method: "GET", path: "/users", summary: "List users", tag: "Users",
-       params: ax_p2},
+       params: [{name: "limit", in: "query", type: "integer",
+                 description: "At most this many, default 20"},
+                {name: "cursor", in: "query", type: "string",
+                 description: "From a previous page"}]},
       {method: "POST", path: "/users", summary: "Create a user", tag: "Users"},
       {method: "GET", path: "/users/{id}", summary: "Get a user", tag: "Users",
-       params: ax_p1},
+       params: [{name: "id", in: "path", type: "string", required: true,
+                 description: "The user's id"},
+                {name: "fields", in: "query", type: "string",
+                 description: "Comma separated fields to return"}]},
       {method: "PATCH", path: "/users/{id}", summary: "Update a user",
-       tag: "Users", params: ax_p1},
+       tag: "Users",
+       params: [{name: "id", in: "path", type: "string", required: true,
+                 description: "The user's id"},
+                {name: "fields", in: "query", type: "string",
+                 description: "Comma separated fields to return"}]},
       {method: "DELETE", path: "/users/{id}", summary: "Delete a user",
-       tag: "Users", params: ax_p1},
+       tag: "Users",
+       params: [{name: "id", in: "path", type: "string", required: true,
+                 description: "The user's id"},
+                {name: "fields", in: "query", type: "string",
+                 description: "Comma separated fields to return"}]},
       {method: "GET", path: "/orders", summary: "List orders", tag: "Orders",
-       params: ax_p2},
+       params: [{name: "limit", in: "query", type: "integer",
+                 description: "At most this many, default 20"},
+                {name: "cursor", in: "query", type: "string",
+                 description: "From a previous page"}]},
       {method: "PUT", path: "/orders/{id}/status",
        summary: "Set an order's status", tag: "Orders"},
       {method: "GET", path: "/v1/orders", summary: "List orders (old)",

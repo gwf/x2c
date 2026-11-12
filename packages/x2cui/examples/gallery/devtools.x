@@ -7,17 +7,17 @@
 // The cron expression that the schedule picker edits, created by prepare.
 static TextField sc_cron;
 
-// The headers the key-value editor edits, an Array of KeyValue.
-static Array headers;
+// The headers the key-value editor edits in place.
+static KvPairs headers = KvPairs.of([
+  {key: "Authorization", value: "Bearer 4f9c2e81d0b7a6", enabled: true,
+   secret: true},
+  {key: "Accept", value: "application/json", enabled: true},
+  {key: "X-Request-Id", value: "7d1c0a"},
+  {key: "Accept", value: "text/html", enabled: true}]);
 
 static void prepare(void) {
   sc_cron = TextField.new(64);
   sc_cron.set("30 9 * * 1-5");
-  headers = [
-    KeyValue.new("Authorization", "Bearer 4f9c2e81d0b7a6", true, true),
-    KeyValue.new("Accept", "application/json", true, false),
-    KeyValue.new("X-Request-Id", "7d1c0a", false, false),
-    KeyValue.new("Accept", "text/html", true, false)];
 }
 
 static void devtools_kv(Ui ui) {
@@ -76,28 +76,19 @@ static void devtools_pipeline(Ui ui) {
       selected: &pl_sel);
 }
 
-static const char *const qb_status[] = { "Open", "In progress", "Closed" };
-static cui_query_field qb_fields[] = {
-  { "Status", CUI_QUERY_CHOICE, qb_status, 3 },
-  { "Assignee", CUI_QUERY_TEXT },
-  { "Priority", CUI_QUERY_NUMBER },
-  { "Has PR", CUI_QUERY_BOOL },
-};
-static cui_query_node qb_nodes[16] = {
-  { 0, true, false }, { 1, false, false, 0, 0, "Open" }, { 1, true, true },
-  { 2, false, false, 1, 0, "me" }, { 2, false, false, 2, 2, "2" },
-};
-static int qb_n = 5;
+static QueryFields qb_fields = QueryFields.of([
+  {name: "Status", type: choice, choices: ["Open", "In progress", "Closed"]},
+  {name: "Assignee", type: text}, {name: "Priority", type: number},
+  {name: "Has PR", type: bool}]);
+static QueryNodes qb_nodes = QueryNodes.of([
+  {depth: 0, group: true}, {depth: 1, field: 0, op: 0, value: "Open"},
+  {depth: 1, group: true, any: true}, {depth: 2, field: 1, op: 0, value: "me"},
+  {depth: 2, field: 2, op: 2, value: "2"}]);
 
 static void devtools_query(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 720) {
-    ui.query_builder("filter", qb_fields, qb_nodes, qb_n);
-    // CUI writes the query as a sentence into a buffer; it has no method.
-    char text[256];
-    cui_query_text(qb_fields,
-                   (int) (sizeof qb_fields / sizeof *qb_fields), qb_nodes,
-                   qb_n, text, sizeof text);
-    ui.text(text, size: 12, color: text_muted);
+    ui.query_builder("filter", qb_fields, qb_nodes);
+    ui.text(qb_fields.text(qb_nodes), size: 12, color: text_muted);
   }
 }
 
@@ -242,19 +233,17 @@ static void devtools_waterfall(Ui ui) {
       loaded: 0.68);
 }
 
-static cui_trace_track tr_tracks[] = {
-  { "Main thread" }, { "Render" }, { "Worker 1" }, { "Worker 2" }, { "GPU" },
-};
-enum { TR_CAPACITY = 400 };
-static cui_trace_span tr_spans[TR_CAPACITY];
-static int tr_n = 0;
-static cui_trace_view tr_view = { 0.0042, 0.0418, 0, 0.0161, 0.0236 };
+static TraceTracks tr_tracks = TraceTracks.of([
+  {name: "Main thread"}, {name: "Render"}, {name: "Worker 1"},
+  {name: "Worker 2"}, {name: "GPU"}]);
+static TraceSpans tr_spans = TraceSpans.of([]);
+static cui_trace_view tr_view = cui_trace_view.of(
+  start: 0.0042, end: 0.0418, mark_start: 0.0161, mark_end: 0.0236);
 static int tr_sel = -1;
 
-static void tr_add(const char *name, double s, double e, int track,
-                   int depth) {
-  if (tr_n < TR_CAPACITY)
-    tr_spans[tr_n++] = (cui_trace_span){ name, s, e, track, depth, 0 };
+static void tr_add(String name, double s, double e, int track, int depth) {
+  tr_spans.push(cui_trace_span.of(name: name, start: s, end: e,
+                                  track: track, depth: depth));
 }
 
 static void tr_build(void) {
@@ -278,22 +267,20 @@ static void tr_build(void) {
     tr_add("Parse JSON", t + 0.0081, t + 0.0118, 3, 0);
     tr_add("Draw", t + 0.0164, t + 0.0166 + 0.0105, 4, 0);
   }
-  cui_trace_sort(tr_spans, tr_n);
+  cui_trace_sort(tr_spans.data(), tr_spans.len());
 }
 
 static void devtools_trace(Ui ui) {
-  if (!tr_n) tr_build();
+  if (!tr_spans.len()) tr_build();
   if (tr_sel < 0)
-    for (int i = 0; i < tr_n; i++)
-      if (!strcmp(tr_spans[i].name, "Update") && tr_spans[i].start > 0.016
-          && tr_spans[i].start < 0.03)
+    for (int i = 0; i < tr_spans.len(); i++) {
+      cui_trace_span *span = tr_spans[i];
+      if (!strcmp(span.name, "Update") && span.start > 0.016 &&
+          span.start < 0.03)
         tr_sel = i;
+    }
   ui.column (gap: 10, width: fill, max_width: 1000)
-    // The spans in use are fewer than the array holds, so both counts
-    // are written.
-    ui.trace_view("trace", tr_tracks,
-                  (int) (sizeof tr_tracks / sizeof *tr_tracks), tr_spans,
-                  tr_n, tr_view, tr_sel, markers: [
+    ui.trace_view("trace", tr_tracks, tr_spans, tr_view, tr_sel, markers: [
                     {name: "vsync", time: 0.0, tone: neutral},
                     {name: "vsync", time: 0.0166, tone: neutral},
                     {name: "GC pause", time: 0.0273, tone: warning},

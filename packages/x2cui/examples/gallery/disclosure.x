@@ -7,17 +7,18 @@
 void page_disclosure(Ui ui, Gallery g) {
   static bool banner = true;
   static bool card1 = true, card2 = false;
-  static cui_check_step steps[] = {
-    { "Create your workspace", "Pick a name and invite your team.", "Create",
-      true },
-    { "Connect a repository",
-      "Link GitHub or GitLab to sync issues and pull requests.", "Connect",
-      false },
-    { "Import your data", "Bring tasks over from a CSV or another tool.",
-      "Import", false },
-    { "Turn on notifications", "Get pinged when something needs you.",
-      "Enable", false },
-  };
+  static CheckSteps steps = CheckSteps.of([
+    {title: "Create your workspace",
+     description: "Pick a name and invite your team.", action: "Create",
+     done: true},
+    {title: "Connect a repository",
+     description: "Link GitHub or GitLab to sync issues and pull requests.",
+     action: "Connect"},
+    {title: "Import your data",
+     description: "Bring tasks over from a CSV or another tool.",
+     action: "Import"},
+    {title: "Turn on notifications",
+     description: "Get pinged when something needs you.", action: "Enable"}]);
   static int deleted;
   if (ui.banner("CUI 1.1 is out: data grid, kanban and forty new "
                 "components.", banner,

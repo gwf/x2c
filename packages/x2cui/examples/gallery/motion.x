@@ -6,11 +6,12 @@
 
 #include "state.x"
 
-static float peaks[96];
+static ArrayFloat peaks;
 
 static void prepare(void) {
+  peaks = [];
   for (int k = 0; k < 96; k++)
-    peaks[k] = 0.18f + 0.8f * fabsf(sinf(k * 0.37f) * sinf(k * 0.11f + 1.3f));
+    peaks.push(0.18f + 0.8f * fabsf(sinf(k * 0.37f) * sinf(k * 0.11f + 1.3f)));
 }
 
 void page_motion(Ui ui, Gallery g) {

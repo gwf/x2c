@@ -1,7 +1,7 @@
 /* A decorator that declares its caller's `Name` makes that name visible to
    the statements after the application, at function level, inside a plain
-   block, and inside another decorator's target, including a method-form
-   decorator nested in another one. */
+   block, inside another decorator's target, including a method-form
+   decorator nested in another one, and inside a decorated function body. */
 
 #include "x2c.x"
 
@@ -15,6 +15,12 @@ macro Decorator $counted(Stmt $body, Name $result) {
 
 macro Decorator $block(Stmt $body) {
   { $body }
+}
+
+$block()
+static int decorated(void) {
+  $counted(local) puts("decorated body");
+  return local + 1;
 }
 
 typedef struct Ui { int depth; } Ui;
@@ -47,5 +53,6 @@ int main(void) {
     ui.reorder (changed, "tasks") { puts("rows"); }
     if (changed) puts("changed");
   }
+  printf("%d\n", decorated());
   return 0;
 }

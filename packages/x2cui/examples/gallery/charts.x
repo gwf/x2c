@@ -7,6 +7,8 @@
 static ArrayFloat revenue, costs, desktop, mobile, shares;
 // Test runs per week.
 static ArrayFloat passed, retried, failed;
+// The series each chart draws, over the values above.
+static Series trends, visits, runs;
 
 static void prepare(void) {
   revenue = [18, 22, 21, 27, 31, 29, 36, 41, 39, 46, 52, 58];
@@ -17,6 +19,16 @@ static void prepare(void) {
   passed = [112, 124, 131, 128, 140, 152, 149, 161];
   retried = [9, 11, 8, 12, 10, 9, 13, 8];
   failed = [4, 6, 3, 5, 7, 4, 6, 3];
+  trends = Series.of([]);
+  trends.push(cui_series.of("Revenue", revenue));
+  trends.push(cui_series.of("Costs", costs));
+  visits = Series.of([]);
+  visits.push(cui_series.of("Desktop", desktop));
+  visits.push(cui_series.of("Mobile", mobile));
+  runs = Series.of([]);
+  runs.push(cui_series.of("Passed", passed));
+  runs.push(cui_series.of("Retried", retried));
+  runs.push(cui_series.of("Failed", failed));
 }
 
 void page_charts(Ui ui, Gallery g) {
@@ -30,9 +42,7 @@ void page_charts(Ui ui, Gallery g) {
   section(ui, "Line chart", "Hover to inspect values. The crosshair glides "
                             "between points.");
   ui.card () {
-    cui_series s[] = { cui_series.of("Revenue", revenue),
-                       cui_series.of("Costs", costs) };
-    ui.line_chart("revenue", s, months,
+    ui.line_chart("revenue", trends, months,
       area: true, smooth: true, height: 240, format: "$%.0fk");
   }
   ui.box (dir: grid, columns: 2, min_column_width: 260,
@@ -40,9 +50,7 @@ void page_charts(Ui ui, Gallery g) {
     ui.column (gap: 12) {
       section(ui, "Bar chart", NULL);
       ui.card () {
-        cui_series s[] = { cui_series.of("Desktop", desktop),
-                           cui_series.of("Mobile", mobile) };
-        ui.bar_chart("visits", s,
+        ui.bar_chart("visits", visits,
                      %("Jan" "Feb" "Mar" "Apr" "May" "Jun"),
                      height: 200);
       }
@@ -59,10 +67,7 @@ void page_charts(Ui ui, Gallery g) {
   ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
     ui.card () {
-      cui_series s[] = { cui_series.of("Passed", passed),
-                         cui_series.of("Retried", retried),
-                         cui_series.of("Failed", failed) };
-      ui.bar_chart("runs", s,
+      ui.bar_chart("runs", runs,
                    %("W1" "W2" "W3" "W4" "W5" "W6" "W7" "W8"),
                    stacked: true, height: 200);
     }

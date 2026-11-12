@@ -16,23 +16,24 @@
 static ArrayFloat shares;
 
 // Requests by weekday and hour.
-static float traffic[7 * 24];
+static ArrayFloat traffic;
 
 enum { HALF_YEAR = 182, TRADING_DAYS = 60, RUNS = 24, PEAKS = 80,
        UPTIME_DAYS = 60, BUCKETS = 96 };
 
 // Commits on each day of the first half of 2026.
-static float commits[HALF_YEAR];
+static ArrayFloat commits;
 
 // One price candle a trading day.
-static cui_candle candles[TRADING_DAYS];
+static Candles candles = Candles.of([]);
 
 // Frame time against node count, sized by draw calls.
-static cui_vec2 software_points[RUNS], opengl_points[RUNS];
-static float software_sizes[RUNS], opengl_sizes[RUNS];
+static ScatterSeries frames = ScatterSeries.of([]);
+static Vec2s software_points = Vec2s.of([]), opengl_points = Vec2s.of([]);
+static ArrayFloat software_sizes, opengl_sizes;
 
 // Audio peaks of a track, 0 to 1.
-static float peaks[PEAKS];
+static ArrayFloat peaks;
 
 // The fraction of each day a service was up; negative means no data.
 static float api_days[UPTIME_DAYS], web_days[UPTIME_DAYS],
@@ -43,16 +44,18 @@ static float info_lines[BUCKETS], warning_lines[BUCKETS],
              error_lines[BUCKETS];
 
 static void prepare_traffic(void) {
+  traffic = [];
   for (int d = 0; d < 7; d++)
     for (int h = 0; h < 24; h++) {
       float work = d < 5 ? 1.0f : 0.45f;
       float load = expf(-powf((h - 13.5f) / 4.2f, 2)) * 90 * work +
                    expf(-powf((h - 20.5f) / 2.0f, 2)) * 35;
-      traffic[d * 24 + h] = load + (float) ((d * 31 + h * 17) % 11);
+      traffic.push(load + (float) ((d * 31 + h * 17) % 11));
     }
 }
 
 static void prepare_commits(void) {
+  commits = [];
   unsigned seed = 7;
   for (int k = 0; k < HALF_YEAR; k++) {
     seed = seed * 1103515245u + 12345u;
@@ -60,7 +63,7 @@ static void prepare_commits(void) {
     int weekday = (k + 3) % 7;
     float base = weekday >= 5 ? 0.6f : 3.2f;
     float r = (float) ((seed >> 16) % 1000) / 1000.0f;
-    commits[k] = r < 0.18f ? 0 : floorf(base * r * 4);
+    commits.push(r < 0.18f ? 0 : floorf(base * r * 4));
   }
 }
 
@@ -70,29 +73,38 @@ static void prepare_candles(void) {
     float open = price;
     float close = open * (1 + sinf(k * 0.37f) * 0.018f +
                           cosf(k * 0.11f) * 0.01f);
-    candles[k] = (cui_candle){ open, fmaxf(open, close) * 1.006f,
-                               fminf(open, close) * 0.994f, close,
-                               2000 + (float) ((k * 7919) % 900) * 10 };
+    candles.push(cui_candle.of(
+      open: open, high: fmaxf(open, close) * 1.006f,
+      low: fminf(open, close) * 0.994f, close: close,
+      volume: 2000 + (float) ((k * 7919) % 900) * 10));
     price = close;
   }
 }
 
 static void prepare_scatter(void) {
+  software_sizes = [];
+  opengl_sizes = [];
   for (int k = 0; k < RUNS; k++) {
     float nodes = 200 + k * 160.0f;
-    software_points[k] = (cui_vec2){
-      nodes, 0.08f + nodes * 0.00006f + (float) ((k * 37) % 13) * 0.004f };
-    opengl_points[k] = (cui_vec2){
-      nodes * 0.9f + 150,
-      0.15f + nodes * 0.00011f + (float) ((k * 53) % 17) * 0.006f };
-    software_sizes[k] = (float) (10 + (k * 7) % 40);
-    opengl_sizes[k] = (float) (20 + (k * 11) % 50);
+    software_points.push(cui_vec2.of(
+      x: nodes,
+      y: 0.08f + nodes * 0.00006f + (float) ((k * 37) % 13) * 0.004f));
+    opengl_points.push(cui_vec2.of(
+      x: nodes * 0.9f + 150,
+      y: 0.15f + nodes * 0.00011f + (float) ((k * 53) % 17) * 0.006f));
+    software_sizes.push((float) (10 + (k * 7) % 40));
+    opengl_sizes.push((float) (20 + (k * 11) % 50));
   }
+  frames.push(cui_scatter_series.of(name: "Software", points: software_points,
+                                    sizes: software_sizes));
+  frames.push(cui_scatter_series.of(name: "OpenGL", points: opengl_points,
+                                    sizes: opengl_sizes));
 }
 
 static void prepare_signals(void) {
+  peaks = [];
   for (int k = 0; k < PEAKS; k++)
-    peaks[k] = 0.18f + 0.8f * fabsf(sinf(k * 0.37f) * sinf(k * 0.11f + 1.3f));
+    peaks.push(0.18f + 0.8f * fabsf(sinf(k * 0.37f) * sinf(k * 0.11f + 1.3f)));
   for (int d = 0; d < UPTIME_DAYS; d++) {
     api_days[d] = d == 41 ? 0.962f : d % 17 == 5 ? 0.9985f : 1;
     web_days[d] = d == 28 ? 0.93f : 1;
@@ -142,8 +154,8 @@ static void scene_bar_list(Ui ui) {
 
 static void scene_calendar_heatmap(Ui ui) {
   ui.card (pad: 18)
-    ui.calendar_heatmap("activity", (cui_date){ 2026, 1, 1 }, commits,
-                        unit: "commits");
+    ui.calendar_heatmap("activity", cui_date.of(year: 2026, month: 1, day: 1),
+                        commits, unit: "commits");
 }
 
 static void scene_candlestick(Ui ui) {
@@ -194,10 +206,7 @@ static void scene_sankey(Ui ui) {
 
 static void scene_scatter_chart(Ui ui) {
   ui.card (pad: 18, width: fill, max_width: 660)
-    ui.scatter_chart("frames", [
-      {name: "Software", points: software_points, sizes: software_sizes},
-      {name: "OpenGL", points: opengl_points, sizes: opengl_sizes}],
-      height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
+    ui.scatter_chart("frames", frames, height: 280, x_label: "Nodes", y_label: "Frame time (ms)",
       y_format: "%.2f");
 }
 

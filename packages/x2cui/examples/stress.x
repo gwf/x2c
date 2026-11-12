@@ -16,7 +16,7 @@
     `--no-vsync` is given, so its frame rate stops at the display's rate.
 */
 
-import "x2cui" with App, Offscreen, Ui;
+import "x2cui" with App, Offscreen, Ui, Vec2s;
 
 #include "time.x"
 
@@ -108,11 +108,11 @@ static void paint_shapes(cui_ctx *context, cui_rect area, void *user) {
     float wide = area.w - 2 * radius, high = area.h - 2 * radius;
     float angle = 6.2831853f * chance(i, 1);
     float travelled = (30 + 220 * chance(i, 2)) * field.clock;
-    cui_vec2 centre = {
-      area.x + radius + reflected(wide * chance(i, 3) +
-                                  travelled * cosf(angle), wide),
-      area.y + radius + reflected(high * chance(i, 4) +
-                                  travelled * sinf(angle), high) };
+    cui_vec2 centre = cui_vec2.of(
+      x: area.x + radius + reflected(wide * chance(i, 3) +
+                                     travelled * cosf(angle), wide),
+      y: area.y + radius + reflected(high * chance(i, 4) +
+                                     travelled * sinf(angle), high));
     ui.draw_circle(centre, radius, field.colors[(int) (6 * chance(i, 5))]);
   }
 }
@@ -170,14 +170,16 @@ static void paint_history(cui_ctx *context, cui_rect area, void *user) {
   for (int i = 0; i < HISTORY; i++)
     if (history.times[i] > limit) limit = history.times[i];
   float guide = area.y + area.h * (1 - 1000 / 60.0f / limit);
-  ui.draw_line((cui_vec2){ area.x, guide },
-               (cui_vec2){ area.x + area.w, guide }, 1, history.guide);
-  cui_vec2 points[HISTORY];
+  ui.draw_line(cui_vec2.of(x: area.x, y: guide),
+               cui_vec2.of(x: area.x + area.w, y: guide), 1, history.guide);
+  // One point a frame, kept between paints so a paint allocates nothing.
+  static Vec2s points = Vec2s.of([]);
+  while (points.len() < HISTORY) points.push(cui_vec2.of());
   for (int i = 0; i < HISTORY; i++)
-    points[i] = (cui_vec2){
-      area.x + area.w * i / (HISTORY - 1),
-      area.y + area.h * (1 - history.times[i] / limit) };
-  ui.draw_polyline(points, HISTORY, 1.5f, history.line, false);
+    *points[i] = cui_vec2.of(
+      x: area.x + area.w * i / (HISTORY - 1),
+      y: area.y + area.h * (1 - history.times[i] / limit));
+  ui.draw_polyline(points, 1.5f, history.line, false);
 }
 
 static void draw_history(Ui ui, Stress &stress) {

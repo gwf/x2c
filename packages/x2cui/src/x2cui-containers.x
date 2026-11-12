@@ -76,14 +76,11 @@ $x2cui.result_block(reorder, reorder_begin, reorder_end, bool);
 
 /* The template of a block whose begin call reports a result, as a kanban
    column and card do. The form declares `$result`, a `bool`, before the
-   block and stores the begin call's result in it before the block runs.
-   `$kind` is `bool`: a type the template is given, because a declaration
-   in a decorator spells its type through a hole. */
-macro Unit $x2cui.begin_result_block(
-  Name $block, Name $begin, Name $end, Type $kind) {
+   block and stores the begin call's result in it before the block runs. */
+macro Unit $x2cui.begin_result_block(Name $block, Name $begin, Name $end) {
   macro Decorator $Ui.$block(
     Stmt $body, Expr $ui, Name $result, Expr @args, Entry @options) {
-    $kind $result = false;
+    bool $result = false;
     {
       typeof($ui) ui = $ui;
       $result =
@@ -98,31 +95,25 @@ macro Unit $x2cui.begin_result_block(
    whether its "+" was clicked; `ui.kanban_card (clicked, id) { ... }`
    declares whether the card was clicked. */
 $x2cui.begin_result_block(kanban_column, kanban_column_begin,
-                          kanban_column_end, bool);
-$x2cui.begin_result_block(kanban_card, kanban_card_begin, kanban_card_end,
-                          bool);
+                          kanban_column_end);
+$x2cui.begin_result_block(kanban_card, kanban_card_begin, kanban_card_end);
 
-/* The template of `ui.kanban`, given the types it declares. */
-macro Unit $x2cui.kanban_block(Type $kind, Type $record) {
-  /** Runs the block inside a kanban board, whose columns are
-      `ui.kanban_column` blocks. The form declares `$moved`, a `bool`, and
-      `$move`, a `cui_kanban_move`: when a card was dropped in a new place
-      this frame, `$moved` is set and `$move` says where.
-  */
-  macro Decorator $Ui.kanban(
-    Stmt $body, Expr $ui, Name $moved, Name $move, Expr $id) {
-    $kind $moved = false;
-    $record $move = {};
-    {
-      typeof($ui) ui = $ui;
-      ui.kanban_begin($id);
-      defer $moved = ui.kanban_end($move);
-      $body
-    }
+/** Runs the block inside a kanban board, whose columns are
+    `ui.kanban_column` blocks. The form declares `$moved`, a `bool`, and
+    `$move`, a `cui_kanban_move`: when a card was dropped in a new place
+    this frame, `$moved` is set and `$move` says where.
+*/
+macro Decorator $Ui.kanban(
+  Stmt $body, Expr $ui, Name $moved, Name $move, Expr $id) {
+  bool $moved = false;
+  cui_kanban_move $move = {};
+  {
+    typeof($ui) ui = $ui;
+    ui.kanban_begin($id);
+    defer $moved = ui.kanban_end($move);
+    $body
   }
 }
-
-$x2cui.kanban_block(bool, cui_kanban_move);
 
 /*  Lists and tables
 

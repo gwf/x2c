@@ -1051,13 +1051,14 @@ The package has one way to write each component, its method form:
 - `ui.item` rows that take the keyboard, through
   `patches/focusable-canvas.patch`.
 - Data the program owns as x2c values: the kanban board's `Column` and
-  `Card` classes, and the key-value editor's `Array` of `KeyValue`.
-  State CUI edits in place stays a named array of CUI's records; the
-  README lists those parameters.
+  `Card` classes, and collections of CUI's records for state CUI edits
+  in place and data a program reads and passes, written with `T.of` and
+  `Ts.of([...])`; see
+  [Collections of CUI records](x2cui-lists-and-tables.md#collections-of-cui-records-2026-11-12).
 
 Review fixes (2026-11-11):
 
-- `x2cui_strings` keeps one native array for each distinct List in a
+- `List.c_strings` keeps one native array for each distinct List in a
   `Map` keyed by the List. A Map lookup of an existing List allocates
   nothing: 0 bytes more in the default malloc zone after 100,000 lookups,
   measured with `malloc_zone_statistics`.
@@ -1076,9 +1077,7 @@ Remaining limits:
   remade for a CUI upgrade.
 - Constants in program logic, such as `status == CUI_STATUS_BUSY`, keep
   CUI's spelling; short names need a parameter or field type.
-- Data that is both a component argument and read by the program, such
-  as the Reader page's table of contents, stays a named C array.
 - A form that declares a name is a block of its own, so an unbraced loop
   cannot take it as its body.
-- An Array literal outside a form compiles as a run-time `Array`; the
-  package's builds make the resulting cc warning an error.
+- An Array literal outside a form is a run-time `Array`; where a C
+  pointer is expected, x2c reports it ("cannot convert Array to ...").

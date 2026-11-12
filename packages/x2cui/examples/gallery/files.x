@@ -18,12 +18,13 @@ static int files_list(void *user, const char *path, cui_file_entry *out,
                       int cap, char *names, size_t names_cap, bool hidden) {
   int n = cui_fs_list(user, path, out, cap, names, names_cap, hidden);
   if (n >= 0 || strcmp(path, ".")) return n;
-  static const char *demo[] = { "assets", "src", "README.md", "notes.txt",
-                                "cover.png", "report.pdf" };
-  for (int k = 0; k < 6 && k < cap; k++)
-    out[k] = (cui_file_entry){ demo[k], k < 2, (uint64_t) (k * 13100),
-                               1730000000 + k * 86400 };
-  return 6;
+  List demo = %("assets" "src" "README.md" "notes.txt" "cover.png"
+                "report.pdf");
+  for (int k = 0; k < demo.len() && k < cap; k++)
+    out[k] = cui_file_entry.of(name: demo[k], dir: k < 2,
+                               size: (uint64_t) (k * 13100),
+                               modified: 1730000000 + k * 86400);
+  return demo.len();
 }
 
 static void prepare(void) {

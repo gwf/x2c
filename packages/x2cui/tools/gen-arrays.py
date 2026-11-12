@@ -94,11 +94,11 @@ def classify(name, params):
       consumed = 2
     elif ctype == "const char *const *" and after[0] == "int":
       declared.append(f"List {pname}")
-      passed += [f"x2cui_strings({pname})", f"{pname}.len()"]
+      passed += [f"{pname}.c_strings()", f"{pname}.len()"]
       consumed = 2
     elif ctype == "const char *const *":
       declared.append(f"List {pname}")
-      passed.append(f"x2cui_strings({pname})")
+      passed.append(f"{pname}.c_strings()")
     elif "*" in ctype and (name, pname) in SHARED:
       declared.append(f"{ctype}{pname}")
       passed.append(pname)
@@ -117,10 +117,10 @@ def classify(name, params):
       continue
     elif ("*" in ctype and after[0] == "int *" and after2[0] == "int"
           and after2[1] == "capacity"):
-      # An array the user grows: its live count, then its capacity.
-      pairs.append(len(declared))
-      declared += [f"{ctype}{pname}", f"int &{after[1]}", "int capacity"]
-      passed += [pname, f"&{after[1]}", "capacity"]
+      # An array the user grows: a collection, whose length is the live
+      # count and whose capacity the method reserves; see `grown`.
+      declared.append(f"Block {pname}")
+      passed += [f"({ctype.strip()}) {pname}.bytes", "&count", f"(int) {pname}.cap"]
       index += 3
       continue
     elif "*" in ctype and after[0] in ("int", "size_t"):
@@ -151,11 +151,28 @@ def forms(header, existing):
     rows.append(f"({short} {' '.join(map(str, pairs))})" if pairs else short)
     if result == "const char *":
       result = "String"
+    if "&count" in passed:
+      methods.append(grown(name, short, result, declared, passed))
+      continue
     methods.append(
       f"/** Calls `{name}`. */\n"
       + wrap(f"inline {result} Ui.{short}(", ["Ui u"] + declared, ") =>")
       + "\n" + wrap(f"  {name}(", ["u"] + passed, ");", "    ") + "\n")
   return methods, rows
+
+
+def grown(name, short, result, declared, passed):
+  """The method of an editor that grows its array in place: the records of
+  a collection, its length as the live count, and its capacity with one
+  record to spare, which `x2cui_spare` keeps."""
+  records = next(d.split()[1] for d in declared if d.startswith("Block "))
+  return (
+    f"/** Calls `{name}` on the records of `{records}`,\n"
+    "    which grow in place. */\n"
+    + wrap(f"{result} Ui.{short}(", ["Ui u"] + declared, ") {") + "\n"
+    + f"  int count = x2cui_spare({records});\n"
+    + wrap(f"  {result} result = {name}(", ["u"] + passed, ");", "    ")
+    + f"\n  {records}.length = count;\n  return result;\n}}\n")
 
 
 def written_methods(source):
@@ -205,18 +222,88 @@ def icon_parameters(header, hand):
   return list(dict.fromkeys(rows))
 
 
-def tone_names(header):
-  """The short names of `cui_tone`'s members, which count up from 0, so a
-  member's position is its value."""
-  body = re.search(r"typedef enum cui_tone \{(.*?)\}", header, re.S).group(1)
+# The enums whose members data names by Symbol, and the prefix of each.
+NAMED = [("cui_tone", "CUI_TONE_"), ("cui_log_level", "CUI_LOG_")]
+
+
+def member_names(header, enum, prefix):
+  """The short names of `enum`'s members, which count up from 0, so a
+  member's position is its value; a closing `*_COUNT` is not a member."""
+  body = re.search(r"typedef enum %s \{(.*?)\}" % enum, header, re.S).group(1)
   members = [m.strip() for m in body.split(",") if m.strip()]
   names = []
   for index, member in enumerate(members):
     name, _, value = member.partition("=")
+    name = name.strip()
+    if name.endswith("_COUNT"):
+      continue
     if value and int(value) != index:
-      sys.exit(f"cui_tone: {name.strip()} is not {index}")
-    names.append(name.strip()[len("CUI_TONE_"):].lower())
+      sys.exit(f"{enum}: {name} is not {index}")
+    names.append(name[len(prefix):].lower())
   return names
+
+
+def named(header, enum, prefix):
+  """`T.named(Symbol)`: the member of `enum` a Symbol names."""
+  names = member_names(header, enum, prefix)
+  short = enum[4:]
+  return (
+    f"static SymbolSet {short}_names =\n  %<" + " ".join(names) + ">;\n\n"
+    f"/** Returns the `{enum}` member `name` names, as `<{names[1]}>` names\n"
+    f"    `{prefix}{names[1].upper()}`, for one kept in quoted data; a name that is\n"
+    f"    not a member is `{prefix}{names[0].upper()}`. */\n"
+    f"{enum} {enum}.named(Symbol name) {{\n"
+    f"  int at = {short}_names.index(name);\n"
+    f"  return at < 0 ? {prefix}{names[0].upper()} : ({enum}) at;\n}}\n")
+
+
+# Records with no `T.of`: CUI's own plumbing, records an option already
+# builds, and `cui_series`, whose `of` is written by hand.
+NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
+               "cui_platform_iface", "cui_theme", "cui_strings",
+               "cui_text_metrics", "cui_size", "cui_box", "cui_color",
+               "cui_corners", "cui_shadow", "cui_vertex", "cui_draw_cmd",
+               "cui_draw_data", "cui_series"}
+
+# The records a program keeps by name: the arrays a component edits in
+# place, and the arrays a program both reads and passes to a component.
+COLLECTIONS = ["cui_cal_event", "cui_candle",
+               "cui_check_step", "cui_curve_key", "cui_doc_tab",
+               "cui_feature_flag", "cui_flame_span",
+               "cui_gantt_task", "cui_gradient_stop", "cui_kv_pair",
+               "cui_month_event", "cui_plan_step",
+               "cui_prompt_suggestion", "cui_query_field", "cui_query_node",
+               "cui_reaction", "cui_series", "cui_source", "cui_speed_action",
+               "cui_timeline_track",
+               "cui_toc_item", "cui_tour_step", "cui_trace_span",
+               "cui_trace_track", "cui_tree_node", "cui_vec2", "cui_viz_item",
+               "cui_scatter_series"]
+
+
+def records(header):
+  """The CUI record types that `T.of` builds."""
+  text = re.sub(r"/\*.*?\*/", "", header, flags=re.S)
+  names = re.findall(
+    r"typedef struct\s*\w*\s*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}\s*(cui_\w+)\s*;",
+    text)
+  return [n for n in names if not n.endswith(("_opts", "_result"))
+          and n not in NOT_RECORDS]
+
+
+def collection_name(record):
+  """`cui_kv_pair` is `KvPairs`, `cui_file_entry` is `FileEntries`."""
+  words = record[4:].split("_")
+  last = words[-1]
+  if last.endswith("s"):
+    pass
+  elif last.endswith("y") and last[-2] not in "aeiou":
+    last = last[:-1] + "ies"
+  elif last.endswith(("x", "ch", "sh")):
+    last += "es"
+  else:
+    last += "s"
+  words[-1] = last
+  return "".join(w[:1].upper() + w[1:] for w in words)
 
 
 def replace(path, kind, items):
@@ -256,9 +343,15 @@ def main():
   replace("src/x2cui-generate.x", "parameter names",
           [wrap("meta static List _parameter_names = %(", params, ");", "  ")
            .replace(", ", " ").replace(",\n", "\n")])
-  replace("src/x2cui.x", "tones",
-          ["static SymbolSet tone_names =\n  %<"
-           + " ".join(tone_names(header)) + ">;"])
+  replace("src/x2cui.x", "named enums",
+          [named(header, enum, prefix) for enum, prefix in NAMED])
+  rows = [wrap("", [f"$x2cui.record({r});" for r in records(header)], "",
+                "").replace(", ", " ").replace(",\n", "\n").lstrip("\n")]
+  for record in COLLECTIONS:
+    name = collection_name(record)
+    rows.append(f"typedef Block {name};\n$x2cui.records({record}, {name});\n"
+                f"$x2cui.collection({name}, {record});")
+  replace("src/x2cui.x", "records", rows)
   icons = icon_parameters(header, hand)
   replace("src/x2cui-options.x", "icons",
           [wrap("meta static List _icon_parameters = %(", icons, ");", "  ")

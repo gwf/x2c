@@ -5,12 +5,15 @@
 #include "state.x"
 
 void page_reader(Ui ui, Gallery g) {
-  static const cui_toc_item toc[] = {
-    { "Introduction", "intro", 0 }, { "Install", "install", 0 },
-    { "With CMake", "cmake", 1 }, { "Without CMake", "nocmake", 1 },
-    { "First window", "window", 0 }, { "Immediate mode", "imm", 0 },
-    { "Layout", "layout", 0 }, { "Next steps", "next", 0 },
-  };
+  static TocItems toc = TocItems.of([
+    {title: "Introduction", anchor: "intro", level: 0},
+    {title: "Install", anchor: "install", level: 0},
+    {title: "With CMake", anchor: "cmake", level: 1},
+    {title: "Without CMake", anchor: "nocmake", level: 1},
+    {title: "First window", anchor: "window", level: 0},
+    {title: "Immediate mode", anchor: "imm", level: 0},
+    {title: "Layout", anchor: "layout", level: 0},
+    {title: "Next steps", anchor: "next", level: 0}]);
   String para = "Components are functions. They draw themselves, handle "
                 "input and return what happened. Your variables are the "
                 "source of truth, so there is nothing to keep in sync, and "
@@ -18,7 +21,7 @@ void page_reader(Ui ui, Gallery g) {
   ui.row (gap: 28, align: start, width: fill) {
     ui.scroll (id: "reader", height: 560,
                width: fill, gap: 14, fade_edges: true) {
-      for (int k = 0; k < (int) (sizeof toc / sizeof *toc); k++) {
+      for (int k = 0; k < toc.len(); k++) {
         ui.toc_anchor(toc[k].anchor);
         ui.heading(toc[k].title, toc[k].level ? 4 : 3);
         for (int p = 0; p < 3; p++) {

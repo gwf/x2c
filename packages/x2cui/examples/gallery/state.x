@@ -7,7 +7,11 @@
     the program's whole state.
 */
 
-import "x2cui" with App, KeyValue, Offscreen, TextField, Ui;
+import "x2cui" with App, CalEvents, Candles, CheckSteps, FeatureFlags,
+  GanttTasks, KvPairs, MonthEvents, Offscreen, PlanSteps, PromptSuggestions,
+  QueryFields, QueryNodes, Reactions, ScatterSeries, Series, Sources,
+  SpeedActions, TextField, TocItems, TourSteps, TraceSpans, TraceTracks, Ui,
+  Vec2s, VizItems;
 
 // The first pages, in the order of the sidebar.
 enum {

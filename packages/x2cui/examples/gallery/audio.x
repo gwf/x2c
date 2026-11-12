@@ -19,15 +19,16 @@ void page_audio(Ui ui, Gallery g) {
       lv[k][c] = (0.3f + 0.1f * k) * (0.2f + 0.8f * expf(-beat * (2.5f + k)));
     }
   static int tour = -1;
-  static cui_tour_step steps[3] = {
-    { 0, "Turn a knob", "Drag up and down. Hold Shift for fine steps, "
-                        "double-click to reset.", CUI_PLACE_BOTTOM_START },
-    { 0, "Watch the levels", "Bars fall back after each peak; the mark "
-                             "above them holds the peak a moment.",
-      CUI_PLACE_TOP_START },
-    { 0, "Ride the faders", "Click a fader, then use the wheel or the "
-                            "arrow keys.", CUI_PLACE_LEFT_START },
-  };
+  static TourSteps steps = TourSteps.of([
+    {target: 0, title: "Turn a knob",
+     body: "Drag up and down. Hold Shift for fine steps, " "double-click to reset.",
+     placement: bottom_start},
+    {target: 0, title: "Watch the levels",
+     body: "Bars fall back after each peak; the mark " "above them holds the peak a moment.",
+     placement: top_start},
+    {target: 0, title: "Ride the faders",
+     body: "Click a fader, then use the wheel or the " "arrow keys.",
+     placement: left_start}]);
   if (ui.button("Take the tour", icon: sparkles,
                                  variant: outline))
     tour = 0;

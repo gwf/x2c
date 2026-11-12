@@ -43,8 +43,8 @@ draws from one thread.
 CUI's records, enums, constants, and icons, such as `cui_box`,
 `CUI_BUTTON_PRIMARY`, `CUI_FILL`, and `CUI_ICON_PLUS`, arrive under their
 own names through the published `src/cui-1.3.h`, the raw API. The
-package's own types, `Ui`, `App`, `Offscreen`, `TextField`, and
-`KeyValue`, are `x2cui__*` names and need `with` or the alias.
+package's own types, such as `Ui`, `App`, `Offscreen`, `TextField`, and
+the collections below, are `x2cui__*` names and need `with` or the alias.
 
 ## Build from a checkout
 
@@ -282,42 +282,92 @@ refuses a variable or a function call in an element, because the static
 array would keep its first value. CUI reads some arrays until the frame
 ends, so the form does not build an array on the stack instead.
 
-Data the program owns is x2c values: `class` records in an `Array` or a
-`List`, as the Planning page's kanban board keeps its cards. State that
-CUI edits in place stays a named array of CUI's own records, which the
-form takes without a count, and the form refuses a literal there, so a
-literal never keeps state between frames. These parameters and fields
-are such state: `cui_reactions` items, `cui_query_builder_ex` nodes,
-`cui_curve_editor_ex` keys, `cui_gradient_editor_ex` stops,
-`cui_timeline_editor_ex` and `cui_trace_view_ex` tracks,
-`cui_tree_table_begin_ex` nodes, `cui_week_calendar_ex` events,
-`cui_gantt_ex` tasks, `cui_checklist_ex` steps, `cui_feature_flags_ex`
-flags, `cui_diff_view_rows` rows, `cui_reorder_begin` order,
-`cui_toggle_group_ex` values, `cui_multi_select_ex` selected, and the
-`keys`, `key_selected`, and `clips` of a `cui_timeline_track`. The
-key-value editor is the one exception: it edits x2c values.
+A record a program builds is written `T.of(name: value ...)`, with the
+same short names: `cui_reaction.of(icon: heart, count: 4)` is a
+`cui_reaction`. Every CUI record type has one, except `cui_series`, whose
+`cui_series.of(name, values)` takes an `ArrayFloat`.
 
-An option that points to an array, such as `parts:` or `ticks:`, also
-gets its count, `part_count` or `tick_count`, when it is given a named C
-array. A program that passes a pointer rather than an array, or uses
-fewer elements than the array holds, writes every count of the call
-itself: `ui.trace_view("trace", tracks, 5, spans, used, ...)`. An editor
-that grows its array takes the array and its live count and supplies the
-capacity: `ui.gradient_editor("stops", stops, count)`.
-
-The key-value editor edits x2c values: an `Array` of `KeyValue`, a class
-with `key`, `value`, `enabled`, and `secret`. It has no count or
-capacity; a pair typed into the empty row is pushed, and a removed pair
-leaves the Array. `KeyValue.of_url(url)` reads a URL's query parameters,
-and `field.set_url_params(pairs)` writes them back into a `TextField`:
+Data a program keeps, and every array a component writes into, is a
+**collection**: CUI's records packed in one block that the component
+reads and writes in place, with no copy. A collection is written with
+an Array literal of `name: value` rows, copied once, or built with
+`push`:
 
 ```x2c
-Array headers = [KeyValue.new("Accept", "text/html", true, false)];
-if (ui.kv_editor("headers", headers)) save(headers);
+static Reactions reactions = Reactions.of([
+  {icon: thumbs_up, count: 12, active: true}, {icon: heart, count: 4}]);
+...
+ui.reactions("reactions", reactions);
+reactions[1].count += 1;
+reactions.push(cui_reaction.of(icon: rocket, count: 7));
+foreach (cui_reaction *r in reactions) total += r.count;
 ```
 
-A tone kept in quoted data is a Symbol; `cui_tone.named(<violet>)` is the
-tone it names.
+A form takes a collection where its component takes an array, and passes
+its records and length. An editor that grows its array, the key-value
+editor, the query builder, and the curve and gradient editors, takes the
+collection alone: the form keeps one record to spare past the end, which
+CUI types a new record into, and stores CUI's count back as the length.
+
+| Operation | What it does |
+| --- | --- |
+| `T.of([...])` | a collection of the rows of an Array literal |
+| `c[i]` | a pointer to record `i`, so `c[i].field = v` changes it |
+| `c.len()` | how many records it holds |
+| `c.push(r)`, `c.insert(i, r)`, `c.remove(i)` | grow or shrink it |
+| `foreach (T r in c)` | each record, by value |
+| `c.data()` | the records, for a raw CUI call such as `cui_trace_sort` |
+
+The collections:
+
+| Collection | Record |
+| --- | --- |
+| `CalEvents` | `cui_cal_event` |
+| `Candles` | `cui_candle` |
+| `CheckSteps` | `cui_check_step` |
+| `CurveKeys` | `cui_curve_key` |
+| `DocTabs` | `cui_doc_tab` |
+| `FeatureFlags` | `cui_feature_flag` |
+| `FlameSpans` | `cui_flame_span` |
+| `GanttTasks` | `cui_gantt_task` |
+| `GradientStops` | `cui_gradient_stop` |
+| `KvPairs` | `cui_kv_pair` |
+| `MonthEvents` | `cui_month_event` |
+| `PlanSteps` | `cui_plan_step` |
+| `PromptSuggestions` | `cui_prompt_suggestion` |
+| `QueryFields` | `cui_query_field` |
+| `QueryNodes` | `cui_query_node` |
+| `Reactions` | `cui_reaction` |
+| `Series` | `cui_series` |
+| `Sources` | `cui_source` |
+| `SpeedActions` | `cui_speed_action` |
+| `TimelineTracks` | `cui_timeline_track` |
+| `TocItems` | `cui_toc_item` |
+| `TourSteps` | `cui_tour_step` |
+| `TraceSpans` | `cui_trace_span` |
+| `TraceTracks` | `cui_trace_track` |
+| `TreeNodes` | `cui_tree_node` |
+| `Vec2s` | `cui_vec2` |
+| `VizItems` | `cui_viz_item` |
+| `ScatterSeries` | `cui_scatter_series` |
+
+A form refuses a C array of CUI's records, and an Array literal where
+CUI writes through the array, with a message that names a collection.
+Change a collection between frames, or after the call that passes it:
+`c[i]` and `data` are valid until the collection grows. CUI copies what it
+paints during the call, as `ui.line_chart` and `ui.bar_list` do, and an
+editor writes only during its call.
+
+`KvPairs.of_url(url)` reads a URL's query parameters,
+`field.set_url_params(pairs)` writes them back into a `TextField`, and
+`fields.text(nodes)` is the sentence a query builder's nodes say.
+
+A tone or a log level kept in quoted data is a Symbol:
+`cui_tone.named(<violet>)` is the tone it names, and
+`cui_log_level.named(<warn>)` the log level. A list of labels is a
+`List`, as `attachments: files` takes one, and an array of numbers is an
+`ArrayFloat` or an `ArrayInt`, which a form passes as it passes a
+collection.
 
 The table and the data grid take their columns as a Map literal; see
 [Lists and tables](#lists-and-tables). The data grid draws only the

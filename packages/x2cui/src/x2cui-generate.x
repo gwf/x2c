@@ -323,7 +323,7 @@ meta List x2cui_method(String function) {
     else if (_spelled(type, "(* const * const char)") && next &&
              _spelled(next, "(int)")) {
       params.push($!Param{ List $p });
-      args.push($!( x2cui_strings($p) ));
+      args.push($!( $p.c_strings() ));
       args.push($!( (int) $p.len() ));
       i++;
     }

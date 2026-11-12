@@ -24,26 +24,27 @@ static TextField field(int capacity, String text) {
 }
 
 static void fill_build_log(void) {
-  static const struct { cui_log_level level; const char *text; } lines[] = {
-    { CUI_LOG_INFO, "Loading project harbor_town (412 assets)" },
-    { CUI_LOG_DEBUG, "Asset cache hit rate 91.4% (376 of 412)" },
-    { CUI_LOG_INFO, "Compiling shaders: 64 variants on 8 threads" },
-    { CUI_LOG_WARN, "water_surface.frag:118: implicit float to half" },
-    { CUI_LOG_INFO, "Shaders compiled in 2.41 s" },
-    { CUI_LOG_TRACE, "gpu: uploaded 37 textures, 148.2 MB resident" },
-    { CUI_LOG_INFO, "Baking navmesh for 3 regions" },
-    { CUI_LOG_ERROR, "Missing material 'dock_planks_wet' on pier_03.obj" },
-    { CUI_LOG_INFO, "Entering play mode" },
-    { CUI_LOG_WARN, "Physics step took 21.4 ms (budget 16.6 ms)" },
-    { CUI_LOG_INFO, "Autosave written to saves/slot_2.sav (1.2 MB)" },
-  };
+  // A line is its level, named as `cui_log_level` names it, and its text.
+  List lines = %(
+    (info "Loading project harbor_town (412 assets)")
+    (debug "Asset cache hit rate 91.4% (376 of 412)")
+    (info "Compiling shaders: 64 variants on 8 threads")
+    (warn "water_surface.frag:118: implicit float to half")
+    (info "Shaders compiled in 2.41 s")
+    (trace "gpu: uploaded 37 textures, 148.2 MB resident")
+    (info "Baking navmesh for 3 regions")
+    (error "Missing material 'dock_planks_wet' on pier_03.obj")
+    (info "Entering play mode")
+    (warn "Physics step took 21.4 ms (budget 16.6 ms)")
+    (info "Autosave written to saves/slot_2.sav (1.2 MB)"));
   // cui_log_init has no method;
   // the buffer, line array, and text array are C storage.
   cui_log_init(&build_log, log_lines, 64, log_text, sizeof log_text);
   double t = 14 * 3600 + 2 * 60 + 7.12;
-  for (int k = 0; k < (int) (sizeof lines / sizeof *lines); k++) {
+  for (int k = 0; k < lines.len(); k++) {
+    (Symbol level, String text) = lines[k];
     build_log.now = t;
-    build_log.append(lines[k].level, "%s", lines[k].text);
+    build_log.append(cui_log_level.named(level), "%s", text);
     t += 0.083 + (k % 5) * 0.217;
   }
 }

@@ -24,8 +24,12 @@ List Compiler.expand_macro_invocation_node(
   Expansion x = {
     .c = c, .definition = _stored_definition(c, stored, invocation),
     .input = arguments, .invocation = invocation};
+  /* A Stmt decorator's items land in the caller's block, so a declaration
+     among them is visible to the statements after it; only a decorated
+     function body keeps them in a scope of its own. */
   int block_scope = x.definition.assoc(<kind>) == <decorator> &&
-                    x.definition.assoc(<target>) == <block>;
+                    x.definition.assoc(<target>) == <block> &&
+                    position != <block> && position != <statement>;
   if (block_scope) c.sym.push_new_scope();
   defer if (block_scope) c.sym.pop_scope();
   with (c.token = invocation) {

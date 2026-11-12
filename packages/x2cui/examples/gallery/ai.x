@@ -20,21 +20,17 @@ void page_ai(Ui ui, Gallery g) {
   static int model = 0, vote = 0, orb_state = 1, removed = -1;
   static bool busy = false;
   static double started = -1;
-  static const char *files[] = { "quarterly-report.pdf", "metrics.csv" };
-  static int file_count = 2;
-  static const cui_source sources[] = {
-    { "Immediate mode GUIs and why they keep coming back",
-      "https://fieldnotes.dev/immediate-mode",
-      "A look at retained and immediate mode toolkits and the trade offs "
-      "between them." },
-    { "Notes on subpixel text positioning",
-      "https://glyphlab.io/notes/subpixel",
-      "Shaping, hinting and subpixel positioning explained with examples." },
-    { "Spring physics for interface motion",
-      "https://motionbook.dev/springs",
-      "Why spring physics feel more natural than cubic beziers for "
-      "interface motion." },
-  };
+  static List files = %("quarterly-report.pdf" "metrics.csv");
+  static Sources sources = Sources.of([
+    {title: "Immediate mode GUIs and why they keep coming back",
+     url: "https://fieldnotes.dev/immediate-mode",
+     snippet: "A look at retained and immediate mode toolkits and the trade offs " "between them."},
+    {title: "Notes on subpixel text positioning",
+     url: "https://glyphlab.io/notes/subpixel",
+     snippet: "Shaping, hinting and subpixel positioning explained with examples."},
+    {title: "Spring physics for interface motion",
+     url: "https://motionbook.dev/springs",
+     snippet: "Why spring physics feel more natural than cubic beziers for " "interface motion."}]);
   double now = ui.time();
   if (busy && started < 0) started = now;
   if (!busy) started = -1;
@@ -80,8 +76,8 @@ void page_ai(Ui ui, Gallery g) {
                     "springs instead of fixed curves.", size: 15);
       ui.row (gap: 6, align: center) {
         ui.text("Sources", size: 12, color: text_muted);
-        for (int k = 0; k < (int) (sizeof sources / sizeof *sources); k++)
-          ui.citation(k + 1, sources[k]);
+        for (int k = 0; k < sources.len(); k++)
+          ui.citation(k + 1, *sources[k]);
       }
       ui.source_list("sources", sources);
       ui.row (gap: 8, align: center,
@@ -98,7 +94,7 @@ void page_ai(Ui ui, Gallery g) {
       }
       int event = ui.chat_composer("composer", draft,
         placeholder: "Ask a follow up", busy: busy,
-        attachments: files, attachment_count: file_count,
+        attachments: files,
         removed: &removed, models: [
           {name: "Atlas", detail: "Longer answers, reads files and code",
            badge: "New", icon: layers},
@@ -112,26 +108,29 @@ void page_ai(Ui ui, Gallery g) {
       }
       if (event & CUI_COMPOSER_STOP) busy = false;
       if ((event & CUI_COMPOSER_REMOVE) && removed >= 0 &&
-          removed < file_count) {
-        for (int k = removed; k < file_count - 1; k++) files[k] = files[k + 1];
-        file_count--;
-      }
+          removed < files.len())
+        files = List.concat(files[:removed], files[removed + 1:]);
       if (event & CUI_COMPOSER_ATTACH)
         ui.toast("Attach files",
           description: "Drop files on the window, too.");
     }
     ui.column (width: grow(1), gap: 14) {
       section(ui, "Agent plan", "Steps and their status.");
-      cui_plan_step steps[] = {
-        { "Search for sources", "3 results", CUI_TASK_DONE },
-        { "Read the attached report", busy ? "Page 12 of 40" : "40 pages",
-          busy ? CUI_TASK_RUNNING : CUI_TASK_DONE },
-        { "Compare the numbers with last quarter", NULL,
-          busy ? CUI_TASK_PENDING : CUI_TASK_DONE },
-        { "Draft the summary", NULL,
-          busy ? CUI_TASK_PENDING : CUI_TASK_RUNNING },
-        { "Check the citations", NULL, CUI_TASK_PENDING },
-      };
+      static PlanSteps steps = PlanSteps.of([
+        {title: "Search for sources", detail: "3 results", status: done},
+        {title: "Read the attached report"},
+        {title: "Compare the numbers with last quarter"},
+        {title: "Draft the summary"},
+        {title: "Check the citations", status: pending}]);
+      // The middle steps follow the assistant's progress.
+      *steps[1] = cui_plan_step.of(title: "Read the attached report",
+        detail: busy ? "Page 12 of 40" : "40 pages",
+        status: busy ? running : done);
+      *steps[2] = cui_plan_step.of(
+        title: "Compare the numbers with last quarter",
+        status: busy ? pending : done);
+      *steps[3] = cui_plan_step.of(title: "Draft the summary",
+                                      status: busy ? pending : running);
       // The page ignores the result, so the method stands in for the macro.
       ui.agent_plan("plan", steps,
         title: "Research plan");
@@ -148,13 +147,13 @@ void page_ai(Ui ui, Gallery g) {
                      size: sm);
       }
       section(ui, "Suggestions", "Ways to start.");
-      static const cui_prompt_suggestion suggestions[] = {
-        { CUI_ICON_CODE, "Explain this code", "Walk through what it does" },
-        { CUI_ICON_CHART_BAR, "Analyze a dataset",
-          "Find trends and outliers" },
-        { CUI_ICON_PENCIL, "Draft an email", "Clear and friendly" },
-        { CUI_ICON_BUG, "Debug an error", "Paste the stack trace" },
-      };
+      static PromptSuggestions suggestions = PromptSuggestions.of([
+        {icon: code, title: "Explain this code",
+         detail: "Walk through what it does"},
+        {icon: chart_bar, title: "Analyze a dataset",
+         detail: "Find trends and outliers"},
+        {icon: pencil, title: "Draft an email", detail: "Clear and friendly"},
+        {icon: bug, title: "Debug an error", detail: "Paste the stack trace"}]);
       int picked = ui.prompt_suggestions(
         "sugg", suggestions, columns: 1);
       if (picked >= 0) draft.set(%"$(suggestions[picked].title): ");

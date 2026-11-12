@@ -4,8 +4,8 @@
     components through CUI's own input functions, so none needs a window.
 */
 
-import "x2cui" with App, KeyValue, Offscreen, RowState, TextField, Ui,
-  x2cui_arguments, x2cui_strings;
+import "x2cui" with App, KvPairs, Offscreen, Reactions, RowState, TextField, Ui,
+  x2cui_arguments;
 
 #include <malloc/malloc.h>
 
@@ -240,16 +240,16 @@ static size_t bytes_in_use(void) {
    List's array holds its Strings. */
 static void string_lists_convert_once(void) {
   List labels = %("One" "Two");
-  const char *const *names = x2cui_strings(labels);
+  const char *const *names = labels.c_strings();
   EXPECT_STR_EQ(names[1], "Two");
-  x2cui_strings(%());
+  %().c_strings();
   size_t before = bytes_in_use();
   for (int i = 0; i < 100000; i++) {
-    x2cui_strings(%());
-    x2cui_strings(labels);
+    %().c_strings();
+    labels.c_strings();
   }
   EXPECT_INT_EQ(bytes_in_use() - before, 0);
-  EXPECT_TRUE(x2cui_strings(labels) == names);
+  EXPECT_TRUE(labels.c_strings() == names);
 }
 
 // method forms
@@ -443,26 +443,30 @@ static void an_id_scope_keeps_state_per_key(void) {
   for (int k = 0; k < 3; k++) EXPECT_TRUE(ids[0][k] == ids[1][k]);
 }
 
-static const cui_tab_bar_item tab_items[] = {
-  { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" },
-  { CUI_ICON_USER, "Profile" } };
-
 static void tabs_by_form(Ui ui) {
   static int selected = 0;
-  ui.tab_bar("tabs", tab_items, selected);
+  ui.tab_bar("tabs", [{icon: house, label: "Home"},
+                      {icon: search, label: "Search"},
+                      {icon: user, label: "Profile"}], selected);
 }
 
+// The C the form stands for, over a C array of CUI's records.
 static void tabs_in_c(Ui ui) {
   static int selected = 0;
+  static const cui_tab_bar_item tab_items[] = {
+    { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" },
+    { CUI_ICON_USER, "Profile" } };
   cui_tab_bar_ex(ui, "tabs", tab_items, 3, &selected, NULL);
 }
 
 static void two_tabs_by_form(Ui ui) {
   static int selected = 0;
-  ui.tab_bar("tabs", tab_items, 2, selected);
+  ui.tab_bar("tabs", [{icon: house, label: "Home"},
+                      {icon: search, label: "Search"},
+                      {icon: user, label: "Profile"}], 2, selected);
 }
 
-/* An array form passes the count of its C array; a count written out is
+/* An array form passes the count of its array; a count written out is
    passed as it is. */
 static void an_array_form_passes_the_count(void) {
   EXPECT_TRUE(same_pixels(tabs_by_form, tabs_in_c));
@@ -569,7 +573,7 @@ static void a_literal_is_one_constant_array(void) {
 
 static cui_rect kv_rect;
 
-static void kv_frame(Offscreen screen, Array pairs) {
+static void kv_frame(Offscreen screen, KvPairs pairs) {
   screen.begin();
   Ui ui = screen.ui();
   ui.column (pad: 8, width: fill) ui.kv_editor("headers", pairs);
@@ -577,7 +581,7 @@ static void kv_frame(Offscreen screen, Array pairs) {
   screen.end();
 }
 
-static void kv_click(Offscreen screen, Array pairs, float x, float y) {
+static void kv_click(Offscreen screen, KvPairs pairs, float x, float y) {
   Ui ui = screen.ui();
   ui.input_mouse_move(x, y);
   kv_frame(screen, pairs);
@@ -588,24 +592,75 @@ static void kv_click(Offscreen screen, Array pairs, float x, float y) {
   kv_frame(screen, pairs);
 }
 
-/* The editor edits an Array of KeyValue: turning a pair off and typing a
-   new pair reach the values of the Array. */
-static void a_kv_editor_edits_an_array(void) {
-  Array pairs = [KeyValue.new("Accept", "text/html", true, false),
-                 KeyValue.new("X-Id", "7d1c0a", true, false)];
+/* The editor edits its collection in place: turning a pair off changes
+   the record, and typing a new pair grows the collection. */
+static void a_kv_editor_grows_its_collection(void) {
+  KvPairs pairs = KvPairs.of([
+    {key: "Accept", value: "text/html", enabled: true},
+    {key: "X-Id", value: "7d1c0a", enabled: true}]);
   Offscreen screen = auto Offscreen.open(480, 240);
   for (int i = 0; i < 3; i++) kv_frame(screen, pairs);
-  KeyValue first = pairs[0];
   kv_click(screen, pairs, kv_rect.x + 9, kv_rect.y + 9);
-  EXPECT_FALSE(first.enabled);
+  EXPECT_FALSE(pairs[0].enabled);
   EXPECT_INT_EQ(pairs.len(), 2);
   float fresh = kv_rect.y + kv_rect.h - 50;   // the empty key
   kv_click(screen, pairs, kv_rect.x + 120, fresh);
   screen.ui().input_text("Host");
   for (int i = 0; i < 3; i++) kv_frame(screen, pairs);
   EXPECT_INT_EQ(pairs.len(), 3);
-  KeyValue added = pairs[2];
-  EXPECT_TRUE(added.key == "Host");
+  EXPECT_TRUE(String.new(pairs[2].key) == "Host");
+}
+
+// collections
+
+// A collection at file scope, shared by the two functions below.
+static Reactions shared = Reactions.of([
+  {icon: thumbs_up, count: 12, active: true}, {icon: heart, count: 4}]);
+
+static void add_one(int index) { shared[index].count += 1; }
+
+static int total(Reactions reactions) {
+  int sum = 0;
+  foreach (cui_reaction *r in reactions) sum += r.count;
+  return sum;
+}
+
+/* `of` lowers its rows by field type; `at` changes a record in place;
+   `push`, `insert`, and `remove` change the length. */
+static void a_collection_holds_records(void) {
+  EXPECT_INT_EQ(shared.len(), 2);
+  EXPECT_TRUE(!strcmp(shared[0].icon, CUI_ICON_THUMBS_UP));
+  EXPECT_TRUE(shared[0].active);
+  add_one(1);
+  EXPECT_INT_EQ(shared[1].count, 5);
+  Reactions local = Reactions.of([]);
+  EXPECT_INT_EQ(local.len(), 0);
+  local.push(cui_reaction.of(icon: rocket, count: 7));
+  local.push(cui_reaction.of(icon: smile, count: 2));
+  local.insert(0, cui_reaction.of(icon: star, count: 1));
+  EXPECT_INT_EQ(local.len(), 3);
+  EXPECT_INT_EQ(local[0].count, 1);
+  EXPECT_INT_EQ(local[2].count, 2);
+  local.remove(1);
+  EXPECT_INT_EQ(local.len(), 2);
+  EXPECT_INT_EQ(total(local), 3);
+  EXPECT_INT_EQ(total(shared), 17);
+}
+
+/* `T.of` builds one record with options' lowering: short names by field
+   type, an icon, and a count after a nested array. A short name may be a
+   C keyword, as `bool` names CUI_QUERY_BOOL. */
+static void a_record_form_lowers_by_field_type(void) {
+  cui_swipe_action done = cui_swipe_action.of(icon: check, label: "Done",
+                                              tone: success);
+  EXPECT_TRUE(!strcmp(done.icon, CUI_ICON_CHECK));
+  EXPECT_INT_EQ(done.tone, CUI_TONE_SUCCESS);
+  cui_query_field field = cui_query_field.of(
+    name: "Status", type: choice, choices: ["Open", "Closed"]);
+  EXPECT_INT_EQ(field.type, CUI_QUERY_CHOICE);
+  EXPECT_INT_EQ(field.choice_count, 2);
+  EXPECT_INT_EQ(cui_query_field.of(name: "PR", type: bool).type,
+                CUI_QUERY_BOOL);
 }
 
 // a board
@@ -640,15 +695,17 @@ static void board_frame(Offscreen screen, Board &b) {
   Array from = b.columns[move.from_column], to = b.columns[move.to_column];
   for (int k = 0; k < (int) from.len(); k++)
     if ((int) from[k] == move.card) {
-      int card = move.card, at = move.to_index;
       from.remove(k);
-      to.insert(at < (int) to.len() ? at : (int) to.len(), card);
+      to.insert(move.to_index < (int) to.len() ? move.to_index
+                                                : (int) to.len(),
+                move.card);
       break;
     }
 }
 
 /* A card dragged to the other column arrives as a move, which the program
-   applies to its own Arrays. A tone kept in data is named. */
+   applies to its own Arrays. A tone or a log level kept in data is
+   named. */
 static void a_kanban_move_reaches_the_arrays(void) {
   Board b = { .columns = [[1, 2], [3]] };
   Offscreen screen = auto Offscreen.open(400, 300);
@@ -673,6 +730,8 @@ static void a_kanban_move_reaches_the_arrays(void) {
   EXPECT_INT_EQ(cui_tone.named(<rose>), CUI_TONE_ROSE);
   EXPECT_INT_EQ(cui_tone.named(<accent>), CUI_TONE_ACCENT);
   EXPECT_INT_EQ(cui_tone.named(<unknown>), CUI_TONE_NEUTRAL);
+  EXPECT_INT_EQ(cui_log_level.named(<warn>), CUI_LOG_WARN);
+  EXPECT_INT_EQ(cui_log_level.named(<unknown>), CUI_LOG_TRACE);
 }
 
 // lists
@@ -849,7 +908,9 @@ void x2cui_suite(void) {
   $test.run(a_record_array_lowers_by_field_type);
   $test.run(an_option_array_fills_its_count);
   $test.run(a_literal_is_one_constant_array);
-  $test.run(a_kv_editor_edits_an_array);
+  $test.run(a_kv_editor_grows_its_collection);
+  $test.run(a_collection_holds_records);
+  $test.run(a_record_form_lowers_by_field_type);
   $test.run(a_kanban_move_reaches_the_arrays);
   $test.run(string_lists_convert_once);
   $test.run(a_virtual_list_draws_the_rows_in_view);
