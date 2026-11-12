@@ -139,7 +139,9 @@ so a row keeps its state when the list is filtered or reordered.
 `ui.item (row, selected: ...) { ... }` is an interactive row: it draws a
 quiet fill when selected or hovered, and inside `ui.each` a hairline
 along its top edge unless it is the first item or it or the item before
-it is selected. `row` is a `RowState` with `hovered`, `pressed`, and
+it is selected. Tab reaches each item in order, and Enter or Space clicks
+the focused item, as they click a button; the focused item draws CUI's
+focus ring. `row` is a `RowState` with `hovered`, `pressed`, and
 `clicked` for this frame:
 
 ```x2c

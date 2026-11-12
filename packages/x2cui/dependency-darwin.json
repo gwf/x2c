@@ -15,6 +15,10 @@
     {
       "path": "patches/table-row-state.patch",
       "sha256": "66b33b791c7516e57f2a40126a627cadeb859a13d4aebd17d9feaec7bcc05262"
+    },
+    {
+      "path": "patches/focusable-canvas.patch",
+      "sha256": "c91497d21bceaa1cd9daa82b87fb199b6de8259f7c1ff3662900265ed123fde3"
     }
   ],
   "steps": [
@@ -25,6 +29,15 @@
         "-p1",
         "-i",
         "{package}/patches/table-row-state.patch"
+      ]
+    },
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/focusable-canvas.patch"
       ]
     },
     {

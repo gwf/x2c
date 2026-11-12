@@ -329,13 +329,24 @@ void Ui.each_end(Ui ui, ItemTrail outer) {
   item_trail = outer;
 }
 
-/* What an item's painter needs: its state and whether it draws the
-   hairline along its top edge. */
-typedef struct ItemPaint { bool hovered, selected, rule; } ItemPaint;
+/* What an item's painter needs: its id, its state, and whether it draws
+   the hairline along its top edge. */
+typedef struct ItemPaint { cui_id id; bool hovered, selected, rule; } ItemPaint;
 
-// A quiet fill when selected or hovered, otherwise the hairline.
+/* A quiet fill when selected or hovered, otherwise the hairline, and the
+   focus ring while the item has keyboard focus. The canvas clips its
+   painter, so the ring of CUI's color and width lies on the item's edge
+   rather than outside it. */
 static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
   ItemPaint *paint = user;
+  _paint_item_fill(ui, r, paint);
+  if (cui_focus_visible(ui, paint.id))
+    cui_draw_rect_border(
+      ui, r, CUI_CORNERS(10), (cui_color){},
+      cui_token_color(ui, CUI_TOKEN_FOCUS_RING), 2);
+}
+
+static void _paint_item_fill(cui_ctx *ui, cui_rect r, ItemPaint *paint) {
   if (paint.selected)
     cui_draw_rect(
       ui, r, CUI_CORNERS(10), cui_token_color(ui, CUI_TOKEN_ACTIVE));
@@ -349,10 +360,12 @@ static void _paint_item(cui_ctx *ui, cui_rect r, void *user) {
 }
 
 /** Begins an interactive row of a list, a stack box the width of its
-    parent, and returns what the pointer did to it. The row draws its own
-    fill when selected or hovered. Inside `ui.each`, it draws a hairline
-    along its top edge unless it is the first item, it is selected, or the
-    item before it is selected. `Ui.box_end` ends it.
+    parent, and returns what the pointer or the keyboard did to it. Tab
+    reaches the row, and Enter or Space clicks it, as a button. The row
+    draws its own fill when selected or hovered. Inside `ui.each`, it
+    draws a hairline along its top edge unless it is the first item, it
+    is selected, or the item before it is selected. A focused row draws
+    the focus ring. `Ui.box_end` ends it.
 */
 RowState Ui.item_begin(Ui ui, RowOptions opts) {
   cui_box_begin(ui, &(cui_box){ .dir = CUI_STACK, .width = CUI_FILL });
@@ -360,10 +373,12 @@ RowState Ui.item_begin(Ui ui, RowOptions opts) {
               !opts.selected;
   item_trail.items++;
   item_trail.selected = opts.selected;
-  bool *hovered = cui_state(ui, cui_make_id(ui, "x2cui-item"), sizeof(bool));
-  ItemPaint paint = { *hovered, opts.selected, rule };
-  cui_canvas_result result = cui_canvas(
-    ui, "x2cui-item", CUI_FILL, CUI_FILL, _paint_item, &paint, sizeof paint);
+  cui_id id = cui_make_id(ui, "x2cui-item");
+  bool *hovered = cui_state(ui, id, sizeof(bool));
+  ItemPaint paint = { id, *hovered, opts.selected, rule };
+  cui_canvas_result result = cui_canvas_ex(
+    ui, "x2cui-item", CUI_FILL, CUI_FILL, _paint_item, &paint, sizeof paint,
+    CUI_CANVAS_FOCUSABLE);
   *hovered = result.hovered;
   return (RowState){ result.hovered, result.pressed, result.clicked };
 }

@@ -1044,9 +1044,15 @@ Review fixes (2026-11-11):
   says to draw on one thread, rather than adding a lock.
 - The Makefile links `-lX11 -ldl -lm -lpthread` on Linux and the Cocoa
   frameworks on macOS. The Linux build was not run.
-- `ui.item` rows are not keyboard-focusable. CUI's `cui_canvas` interacts
-  with `CUI_IF_DRAG` only, and its public API has no way to make an id
-  focusable or to read Enter or Space activation for it. Doing it needs a
-  CUI patch, such as a canvas variant that takes interaction flags and
-  reports keyboard activation; not done.
+- `ui.item` rows take the keyboard. CUI's `cui_canvas` interacts with
+  `CUI_IF_DRAG` only, so `patches/focusable-canvas.patch` adds
+  `cui_canvas_ex` with a `CUI_CANVAS_FOCUSABLE` flag and
+  `cui_focus_visible` for the painter. Tab reaches each item, Enter or
+  Space sets `row.clicked`, and the painter draws a ring of CUI's
+  `CUI_TOKEN_FOCUS_RING` color and 2-pixel width while the item has
+  keyboard focus. The canvas clips its painter, so the ring lies on the
+  item's edge rather than 3 pixels outside it, as CUI's own ring does. A
+  test tabs to the second item, presses Enter, and checks that only that
+  item reports a click. Table rows were already focusable when the table
+  is `selectable:` and needed no change. Verified.
 

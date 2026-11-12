@@ -271,6 +271,11 @@ static bool same_pixels(void (*draw)(Ui ui), void (*expected)(Ui ui)) {
   Path one = directory.join("one.png"), two = directory.join("two.png");
   shoot(one, draw);
   shoot(two, expected);
+  return same_files(one, two);
+}
+
+// Whether the files `one` and `two` hold the same bytes.
+static bool same_files(String one, String two) {
   FILE *a = fopen(one, "rb"), *b = fopen(two, "rb");
   defer { fclose(a); fclose(b); }
   int x, y;
@@ -466,7 +471,7 @@ static void an_array_form_passes_the_count(void) {
 // lists
 
 typedef struct Picks {
-  int clicked, passes;
+  int clicked, clicks, passes;
   bool hovered;
   cui_rect second;       // the second row's label
 } Picks;
@@ -478,6 +483,7 @@ static void draw_list(Ui ui, Picks &p) {
       if (name == "skipped") continue;
       ui.item (row, selected: name == "three") {
         if (row.clicked) p.clicked = name == "two" ? 2 : 1;
+        if (row.clicked) p.clicks++;
         if (name == "two") p.hovered = row.hovered;
         ui.label(name);
         if (name == "two") p.second = ui.last_rect();
@@ -509,6 +515,36 @@ static void an_item_reports_what_the_pointer_did(void) {
   ui.input_mouse_button(left, false);
   list_frame(screen, p);
   EXPECT_INT_EQ(p.clicked, 2);
+}
+
+// Presses `key` and draws the list for the frame that reads it.
+static void key_frame(Offscreen screen, Picks &p, cui_key key) {
+  Ui ui = screen.ui();
+  ui.input_key(key, true, 0);
+  list_frame(screen, p);
+  ui.input_key(key, false, 0);
+  list_frame(screen, p);
+}
+
+/* Tab reaches each item in order, and Enter clicks the focused item once.
+   The focused item draws its ring. */
+static void an_item_takes_the_keyboard(void) {
+  Picks p = {};
+  Offscreen screen = auto Offscreen.open(240, 240);
+  Path directory = Path.temp_dir();
+  defer directory.remove_tree();
+  Path plain = directory.join("plain.png"), ring = directory.join("ring.png");
+  list_frame(screen, p);
+  list_frame(screen, p);
+  screen.write_png(plain);
+  key_frame(screen, p, CUI_KEY_TAB);
+  key_frame(screen, p, CUI_KEY_TAB);
+  EXPECT_INT_EQ(p.clicks, 0);
+  screen.write_png(ring);
+  EXPECT_FALSE(same_files(plain, ring));
+  key_frame(screen, p, CUI_KEY_ENTER);
+  EXPECT_INT_EQ(p.clicked, 2);
+  EXPECT_INT_EQ(p.clicks, 1);
 }
 
 /* A form takes any count of ordinary arguments: the virtual list's six,
@@ -600,6 +636,7 @@ void x2cui_suite(void) {
   $test.run(a_table_takes_its_columns_from_a_map);
   $test.run(a_data_grid_takes_its_columns_from_a_map);
   $test.run(an_item_reports_what_the_pointer_did);
+  $test.run(an_item_takes_the_keyboard);
   $test.run(an_id_scope_keeps_state_per_key);
   $test.run(an_array_form_passes_the_count);
   $test.run(string_lists_convert_once);
