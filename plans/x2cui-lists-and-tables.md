@@ -334,12 +334,9 @@ the ones Gary approved. Verified.
    arrays, because CUI keeps a pointer to them for good.
 8. A form that declares a result name expands to a declaration and a
    block, so an unbraced loop or `if` cannot take it as its one
-   statement. A decorator declares the name with a type that a `Type`
-   hole of an enclosing template supplies, because a type spelled in the
-   decorator before a `Name` hole does not parse, except `int`. Boxing a
-   field of a declared record into a `Var`, as `cards.push(move.card)`,
-   fails as an unresolved expression; reading it into a local first
-   works. Both are reported to the orchestrator with reproducers.
+   statement. The result block template takes the result's type as a
+   `Type` hole because it serves `int` and `bool`; the kanban forms spell
+   `bool` and `cui_kanban_move`.
 
 ## One paradigm (2026-11-11)
 

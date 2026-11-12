@@ -695,9 +695,10 @@ static void board_frame(Offscreen screen, Board &b) {
   Array from = b.columns[move.from_column], to = b.columns[move.to_column];
   for (int k = 0; k < (int) from.len(); k++)
     if ((int) from[k] == move.card) {
-      int card = move.card, at = move.to_index;
       from.remove(k);
-      to.insert(at < (int) to.len() ? at : (int) to.len(), card);
+      to.insert(move.to_index < (int) to.len() ? move.to_index
+                                                : (int) to.len(),
+                move.card);
       break;
     }
 }

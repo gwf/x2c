@@ -1079,5 +1079,5 @@ Remaining limits:
   CUI's spelling; short names need a parameter or field type.
 - A form that declares a name is a block of its own, so an unbraced loop
   cannot take it as its body.
-- An Array literal outside a form compiles as a run-time `Array`; the
-  package's builds make the resulting cc warning an error.
+- An Array literal outside a form is a run-time `Array`; where a C
+  pointer is expected, x2c reports it ("cannot convert Array to ...").
