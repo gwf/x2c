@@ -159,7 +159,9 @@ along its top edge unless it is the first item or it or the item before
 it is selected. Tab reaches each item in order, and Enter or Space clicks
 the focused item, as they click a button; the focused item draws CUI's
 focus ring. `row` is a `RowState` with `hovered`, `pressed`, and
-`clicked` for this frame:
+`clicked` for this frame. An item stacks its children on top of one
+another, so an item with several components puts them in one `ui.column`
+or `ui.row`:
 
 ```x2c
 ui.each (Message m in shown, key: m.id)
@@ -318,7 +320,7 @@ CUI types a new record into, and stores CUI's count back as the length.
 | `c[i]` | a pointer to record `i`, so `c[i].field = v` changes it |
 | `c.len()` | how many records it holds |
 | `c.push(r)`, `c.insert(i, r)`, `c.remove(i)` | grow or shrink it |
-| `foreach (T r in c)` | each record, by value |
+| `foreach (T *r in c)` | a pointer to each record |
 | `c.data()` | the records, for a raw CUI call such as `cui_trace_sort` |
 
 The collections:
