@@ -1065,5 +1065,6 @@ cc -iquote include/x2c /tmp/x2c-example/foreach.c \
 `--help` (`-h`) and `--version` (`-V`) write to standard output and return
 `0`. Source, host-tool, and link failures return `1`. Invalid commands,
 options, response files, manifests, and preflight state return `2`. After a
-successful `run`, the program's status is returned. Diagnostics and action output use standard
-error; requested dumps and program output use standard output.
+successful `run`, the program's status is returned. Diagnostics and action
+output use standard error; requested dumps and program output use standard
+output.
