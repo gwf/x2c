@@ -9,9 +9,15 @@ CUI_INCLUDE := $(CUI_PREFIX)/include
 PACKAGE_X_FLAGS += -I $(CUI_INCLUDE)
 PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CUI_INCLUDE) \
 	-I $(CUI_INCLUDE)
-# CUI's window layer on macOS is Cocoa over OpenGL.
-PACKAGE_LINK := $(CUI_PREFIX)/lib/libcui.a -Wl,-framework,Cocoa \
-	-Wl,-framework,QuartzCore -Wl,-framework,OpenGL
+# CUI's window layer is X11 on Linux, as dependency.json builds it, and
+# Cocoa over OpenGL on macOS.
+PACKAGE_LINK := $(CUI_PREFIX)/lib/libcui.a
+ifeq ($(shell uname -s),Linux)
+PACKAGE_LINK += -lX11 -ldl -lm -lpthread
+else
+PACKAGE_LINK += -Wl,-framework,Cocoa -Wl,-framework,QuartzCore \
+	-Wl,-framework,OpenGL
+endif
 
 # Each example with files of its own keeps them in a directory beside it.
 PACKAGE_X_FLAGS += --x-include-dir examples
