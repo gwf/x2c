@@ -32,6 +32,33 @@ you intend to build, such as `./configure --packages termbox2`. See the
 These reports check command availability and required OpenSSL Perl modules;
 upstream configure scripts and compilers still check platform support.
 
+## Build a fresh clone
+
+1. Clone the repository and enter it:
+
+   ```sh
+   git clone https://github.com/gwf/x2c.git
+   cd x2c
+   ```
+
+2. Build the compiler as `./x2c`:
+
+   ```sh
+   make build-safe
+   ```
+
+3. Build the external commands, such as `x2c new` and `x2c test`:
+
+   ```sh
+   make commands
+   ```
+
+4. Run an example:
+
+   ```sh
+   ./x2c run -q examples/foreach.x
+   ```
+
 ## Why a bootstrap exists
 
 The compiler and runtime are written in x2c. A fresh machine cannot translate
@@ -110,7 +137,7 @@ writes `builds/wasm/libx2c.a`. `tools/wasm-build` translates one `.x` file
 and links the whole archive directly with Emscripten. It writes an ES module
 loader (`.js`) and a `.wasm` file beside the requested output stem. The
 native runtime archive is never passed to this link. Neither command is
-part of `make check`; the manual check workflow has an optional wasm job.
+part of `make check`.
 
 The build defaults to `emcc`, `emar`, signed characters, size optimization,
 and Emscripten longjmp support. `WASM_CC`, `WASM_AR`, and `WASM_CFLAGS`
@@ -138,22 +165,11 @@ behavior. In-memory HTTP parsing, routing, and response construction remain
 available. Browser execution requires Memory64;
 check the playground's support notice before running a program.
 
-## Installation layouts and release candidates
+## Installation layouts
 
 With no `PREFIX`, `make install` runs `make build-install`: it copies the
 development compiler to `bin/x2c-<branch>`, links `bin/x2c` to that copy, and
 installs the shipped commands under `libexec/x2c/`.
-
-`tools/check-install-script.sh` exercises the release installer against a
-release layout built from the current tree. The `check` workflow's
-`windows_spike` input tests the WSL2 and MSYS2 routes.
-
-Install a shared prefix from a tagged `main`, so a defect seen through it
-reproduces for every user. Validate a staging candidate in a fresh scratch
-prefix with its explicit package index, then remove that prefix. The staging
-site supplies the candidate installer and commands; a bare `x2c install`
-uses the production package index. The compiler version alone does not
-distinguish two candidates of the same version.
 
 The feature records in `etc/syntax/extensions.x` connect each syntax family
 to grammar productions, lexical rules, example spellings, and a reference
