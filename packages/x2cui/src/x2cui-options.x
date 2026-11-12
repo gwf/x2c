@@ -32,6 +32,12 @@
       a number for a cui_size        pixels: 26 is CUI_PX(26)
       grow(w) for a cui_size         CUI_GROW(w)
       test ? a : b                   each arm lowered
+      an Array literal for a         a static array, with its count
+      pointer                        when the count is left out; a Map
+                                     literal element is one record:
+                                     [{to: 60, tone: success}] is a
+                                     cui_gauge_band array; in icons or
+                                     *_icons each element is an icon
 
     A short name is in lower case. A declared name keeps its own value,
     and so does a C macro such as CUI_FILL or NULL.
@@ -127,6 +133,8 @@ meta List x2cui_value(Type type, List value) {
       return _short(type, name, value);
     case %(expr () (call (expr () (ident (binding ? "grow"))) (args ?weight))):
       return _size(type) ? _cui_call("CUI_GROW", weight) : value;
+    case %(expr ? (array *elements)):
+      return _array(type, elements);
   }
   return _size(type) && Type.numeric(Code.type(value))
     ? _cui_call("CUI_PX", value) : value;
@@ -138,15 +146,7 @@ meta List x2cui_value(Type type, List value) {
     the count of the array when `options` leave the count out.
 */
 meta List x2cui_record(Type record, List options) {
-  List fields = Type.fields(record);
-  Array rows = [];
-  foreach (List row in options) {
-    rows.push(_field(fields, row));
-    String count = _count_field(fields, _key(row));
-    if (count && !_option(options, count))
-      rows.push(%(dotinit ($count) $(_count(row[2]))));
-  }
-  List initializers = rows.list_free();
+  List initializers = _initializers(record, options, NULL);
   return $!( ($record){ @initializers } );
 }
 
@@ -202,12 +202,13 @@ meta static Type _signature(List ui, String method) {
 
 /* `name: value` sets the field `name`. A name the record does not have
    keeps its value, so the C compiler reports the field. */
-meta static List _field(List fields, List row) {
+meta static List _field(List fields, List row, Array statics) {
   String name = _key(row);
   List field = fields.find(%!(List f) => f.car() == name);
   Type type = field ? field[1] : NULL;
   if (type && Type.is_text(type) && _icon_field(name)) type = _icon();
-  return %(dotinit ($name) $(x2cui_value(type, row[2])));
+  if (type && type.car() == <*> && _icons_field(name)) type = _icons();
+  return %(dotinit ($name) $(_lower(type, row[2], statics)));
 }
 
 /* The count field that follows the array field `name`: `part_count`
@@ -217,7 +218,9 @@ meta static String _count_field(List fields, String name) {
   for (int i = 0; i + 1 < fields.len(); i++) {
     if (fields[i].car() != name) continue;
     String count = fields[i + 1].car();
-    if (!count.endswith("_count") || fields[i][1].car() != <*>) return NULL;
+    if (fields[i][1].car() != <*>) return NULL;
+    if (count == "count") return count;
+    if (!count.endswith("_count")) return NULL;
     String stem = count[:count.len() - 6];
     if (name == stem || name == stem + "s" ||
         (stem.endswith("y") && name == stem[:stem.len() - 1] + "ies"))
@@ -249,6 +252,10 @@ meta static List _count(List array) {
     case %(expr ? (op ? ?test ?yes ?no)):
       return _choice(test, _count(yes), _count(no));
     case %(expr ? (ident (binding ? "NULL"))): return $!( 0 );
+    case %(expr ? (array *elements)): {
+      int n = elements.len();
+      return $!( $n );
+    }
   }
   Macro count = $x2cui.count;
   return Macro_apply(count, %($array));
@@ -260,6 +267,19 @@ meta static int _number(List literal) {
     case %(expr ? (literal ? ?(String digits))): return atoi(digits);
   }
   return -1;
+}
+
+// The designated initializers of `x2cui_record`, without the record type.
+meta static List _initializers(Type record, List options, Array statics) {
+  List fields = Type.fields(record);
+  Array rows = [];
+  foreach (List row in options) {
+    rows.push(_field(fields, row, statics));
+    String count = _count_field(fields, _key(row));
+    if (count && !_option(options, count))
+      rows.push(%(dotinit ($count) $(_count(row[2]))));
+  }
+  return rows.list_free();
 }
 
 // The name of a `name: value` row.
@@ -306,6 +326,53 @@ meta static List _column_of(
 
 // values
 
+/* The static array an Array literal of `elements` lowers to where a
+   pointer of type `type` is expected. A Map literal element is one record,
+   its rows lowered as option rows are; any other element is one value
+   lowered by the element type. An Array literal inside a record is a
+   static array declared before the array that points to it. Each array
+   is initialized once, so a component that edits one keeps its edits from
+   frame to frame. */
+meta static List _array(Type type, List elements) {
+  Array statics = [];
+  List array = _static(type, elements, statics);
+  List declarations = statics.list_free();
+  return $!( ({ @declarations $array; }) );
+}
+
+/* Declares the static array of `elements` in `statics`, after the arrays
+   its records point to, and returns its name. */
+meta static List _static(Type type, List elements, Array statics) {
+  int icons = type ~= %(icons);
+  // `(* const "cui_viz_item")` points to `(const "cui_viz_item")`.
+  Type element = icons ? _icon() : type.cdr();
+  List rows = elements.map(%!(List e) => _element(element, e, statics));
+  List name = x2c_ident(%"x2cui_array_$(statics.len())");
+  if (icons) statics.push($!{ static const char *$name[] = { @rows }; });
+  else statics.push($!{ static $element $name[] = { @rows }; });
+  return $!( $name );
+}
+
+meta static List _element(Type element, List value, Array statics) {
+  match (value) {
+    case %(expr ? (map *rows)): {
+      List initializers = _initializers(element, rows, statics);
+      return $!( { @initializers } );
+    }
+  }
+  return _lower(element, value, statics);
+}
+
+/* `value` lowered by `type`, with an Array literal declared in `statics`
+   when there are any. */
+meta static List _lower(Type type, List value, Array statics) {
+  match (value) {
+    case %(expr ? (array *elements)):
+      if (statics != NULL && type) return _static(type, elements, statics);
+  }
+  return x2cui_value(type, value);
+}
+
 meta static List _choice(List test, List yes, List no) =>
   $!( $test ? $yes : $no );
 
@@ -336,6 +403,12 @@ meta static Type _icon(void) => %(icon);
 
 meta static int _icon_field(String name) =>
   name == "icon" || name.startswith("icon_") || name.endswith("_icon");
+
+/* The type of an array field of icons, named `icons` or `*_icons`. */
+meta static Type _icons(void) => %(icons);
+
+meta static int _icons_field(String name) =>
+  name == "icons" || name.endswith("_icons");
 
 /* The parameters of the `Ui` methods that name an icon, as
    `("method" position)` rows counted after the receiver. CUI names
