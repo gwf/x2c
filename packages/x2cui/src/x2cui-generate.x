@@ -482,4 +482,3 @@ meta List x2cui_form(String method, List pairs) {
   List form = _method_form(method, lowered, pairs);
   return form ? $(form) : %();
 }
-

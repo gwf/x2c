@@ -377,4 +377,3 @@ and the To-Do, Mail, and Orders images Gary approved.
 The compiler repair merged at `dffc0f662` makes a decorator's `Name`
 hole visible after the block, also inside another decorator's block, so
 the result forms now declare their names.
-
