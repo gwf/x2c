@@ -89,11 +89,11 @@ module List _conditional(
   else if (!same) {
     Type pointer = _conditional_pointer(r.c, ontrue, onfalse);
     if (pointer) type = pointer;
-    else if (_conditional_joins(r.c, false_type, true_type)) {
+    else if (_conditional_joins(r.c, onfalse, ontrue)) {
       type = false_type;
       ontrue = r.c.convert_expression(ontrue, type);
     }
-    else if (_conditional_joins(r.c, true_type, false_type))
+    else if (_conditional_joins(r.c, ontrue, onfalse))
       onfalse = r.c.convert_expression(onfalse, type);
   }
   return %(expr $type (op $operator $condition $ontrue $onfalse));
@@ -133,11 +133,14 @@ static Type _conditional_pointer(Compiler c, List lhs, List rhs) {
   return joined;
 }
 
-/* A conditional whose arms are a `Var` and another value is a `Var`: the
-   other arm boxes, so C sees one operand type. Other mixed arms keep their
-   C types until a target converts each arm. */
-static int _conditional_joins(Compiler c, Type type, Type other) =>
-  type && other && c.sym.is_var_type(type) && !c.sym.is_var_type(other);
+/* A conditional whose arms are a `Var` and another value, `NULL` included,
+   is a `Var`: the other arm boxes, so C sees one operand type. Other mixed
+   arms keep their C types until a target converts each arm. */
+static int _conditional_joins(Compiler c, List var_arm, List other) {
+  Type type = var_arm.cadr(), other_type = other.cadr();
+  return type && c.sym.is_var_type(type) &&
+    (other_type ? !c.sym.is_var_type(other_type) : _conditional_null(other));
+}
 
 module List _binary(Resolve &r, Var operator, List left, List right) {
   List lhs = r.c.resolve_expression(left, r.origin);
