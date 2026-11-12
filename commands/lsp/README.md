@@ -67,7 +67,7 @@ For an optional, longer checkpoint probe, run
 uses the production budget and writes an evidence report in its temporary
 directory. It is separate from `make commands-check`.
 
-For optional regressions retained from the retired editor adapter, run
+For optional regressions, run
 `python3 commands/lsp/tests/legacy.py "$PWD"`. These cover unsaved includes,
 macro declaration identity and repair, package aliases, and native CPP read
 boundaries. They are separate from `make commands-check`.

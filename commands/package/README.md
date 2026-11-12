@@ -19,7 +19,7 @@ x2c-package ensure --lock /project/x2c.lock [--index INDEX] [--quiet] -- NAME VE
 
 The project reader supplies dependency pairs in declaration order. The command
 preserves locked archive choices, installs missing packages, and writes the
-existing six-field lockfile. A satisfied lockfile needs no index or network.
+six-field lockfile. A satisfied lockfile needs no index or network.
 Zero pairs remove an obsolete lockfile. Exit status is the only response;
 diagnostics and receipts use standard error. This is an internal interface
 between the matching driver and command, not an additional user command.
