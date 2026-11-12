@@ -40,7 +40,7 @@ static void draw(Ui ui, Array tasks, TextField draft) {
 int main(void) {
   Array tasks = [];
   TextField draft = TextField.new(96);
-  App app = auto App.open({ .title = "To do", .width = 520, .height = 640 });
+  App app = auto App.open(title: "To do", width: 520, height: 640);
   while (app.frame()) draw(app.ui(), tasks, draft);
   return 0;
 }
@@ -315,6 +315,7 @@ in those cases.
 
 ```x2c
 App App.open(cui_app_desc desc);          // raises when the window fails
+App.open(title: "Mail", width: 420);      // the form: rows of cui_app_desc
 bool App.frame(App app);
 Ui App.ui(App app);
 void App.close(App app);                  // idempotent

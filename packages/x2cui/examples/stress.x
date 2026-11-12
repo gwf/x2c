@@ -221,9 +221,8 @@ static void draw(Ui ui, Stress &stress) {
 static double seconds(void) => Time.monotonic().total_seconds();
 
 static int run_window(bool no_vsync) {
-  App app = auto App.open({ .title = "x2cui stress", .width = 1240,
-                            .height = 820, .continuous = true,
-                            .no_vsync = no_vsync });
+  App app = auto App.open(title: "x2cui stress", width: 1240, height: 820,
+                          continuous: true, no_vsync: no_vsync);
   Stress stress = stress_new(SHAPES, 2000);
   double last = seconds(), spent = 0;
   while (app.frame()) {

@@ -13,7 +13,7 @@ public name compiles to `x2cui__*`.
 import "x2cui" with App, Ui;
 
 int main(void) {
-  App app = auto App.open({ .title = "Hello", .width = 420, .height = 300 });
+  App app = auto App.open(title: "Hello", width: 420, height: 300);
   bool notify = true;
   int clicks = 0;
   while (app.frame()) {
@@ -188,7 +188,9 @@ Each formatted text is a String, as an interpolated label is.
 
 ## Windows and frames
 
-`App.open` opens a window and raises `<init-fail>` when it cannot.
+`App.open` opens a window and raises `<init-fail>` when it cannot. Its
+`name: value` rows set the fields of CUI's `cui_app_desc`, as in
+`App.open(title: "Mail", width: 420, height: 600, min_width: 320)`.
 `app.frame()` presents the last frame, waits for input or animation, and
 begins the next; it returns false once the window has closed. On macOS it
 also gives the window's title bar the background color of the current

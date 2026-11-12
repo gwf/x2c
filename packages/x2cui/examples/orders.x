@@ -109,7 +109,8 @@ static void draw(Ui ui, Dashboard &s) {
 
 // The table sorted by amount, largest first, with the third row selected.
 static int shot(Dashboard &s, String image) {
-  s.sort = (cui_table_sort){ .column = 4, .descending = true };
+  s.sort.column = 4;
+  s.sort.descending = true;
   s.selected = orders[2];
   Offscreen screen = auto Offscreen.open(760, 560);
   // The second and third frames settle layout and opening animations.
@@ -128,8 +129,8 @@ int main(int argc, char **argv) {
   foreach (List row in rows) orders.push(Order.new(row));
   Dashboard s = { .search = TextField.new(64) };
   if (argc == 3 && !strcmp(argv[1], "--shot")) return shot(s, argv[2]);
-  App app = auto App.open({ .title = "Orders", .width = 760, .height = 560,
-                            .min_width = 480, .min_height = 360 });
+  App app = auto App.open(title: "Orders", width: 760, height: 560,
+                          min_width: 480, min_height: 360);
   while (app.frame()) draw(app.ui(), s);
   return 0;
 }

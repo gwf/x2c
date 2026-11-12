@@ -304,9 +304,8 @@ int main(int argc, char **argv) {
   Gallery g = Gallery.new();
   if (argc == 3 && !strcmp(argv[1], "--shots")) return shoot(g, argv[2]);
 
-  App app = auto App.open({ .title = "CUI Gallery", .width = 1240,
-                            .height = 820, .min_width = 720,
-                            .min_height = 480 });
+  App app = auto App.open(title: "CUI Gallery", width: 1240, height: 820,
+                          min_width: 720, min_height: 480);
   while (app.frame()) draw(app.ui(), g);
   return 0;
 }

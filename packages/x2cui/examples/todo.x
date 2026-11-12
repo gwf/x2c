@@ -149,8 +149,8 @@ int main(int argc, char **argv) {
 
   todo.file = argc > 1 ? argv[1] : "todo.txt";
   load(todo);
-  App app = auto App.open({ .title = "To do", .width = 520, .height = 640,
-                            .min_width = 360, .min_height = 420 });
+  App app = auto App.open(title: "To do", width: 520, height: 640,
+                          min_width: 360, min_height: 420);
   while (app.frame()) draw(app.ui(), todo);
   return 0;
 }

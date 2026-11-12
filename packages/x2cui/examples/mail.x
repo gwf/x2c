@@ -147,8 +147,8 @@ static int shot(String image) {
 int main(int argc, char **argv) {
   if (argc == 3 && !strcmp(argv[1], "--shot")) return shot(argv[2]);
   Mail a = open_mail();
-  App app = auto App.open({ .title = "Mail", .width = 420, .height = 600,
-                            .min_width = 320, .min_height = 360 });
+  App app = auto App.open(title: "Mail", width: 420, height: 600,
+                          min_width: 320, min_height: 360);
   while (app.frame()) message_list(app.ui(), a);
   return 0;
 }

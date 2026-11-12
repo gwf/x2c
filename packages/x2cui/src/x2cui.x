@@ -64,6 +64,11 @@ App App.open(cui_app_desc desc) {
   return app;
 }
 
+/** Opens a window from `name: value` rows of `cui_app_desc`, as in
+    `App.open(title: "Mail", width: 420, height: 600)`. */
+macro Expression $App.open(Entry @options) =>
+  App.open($x2cui_record(%("cui_app_desc"), $options));
+
 /** Presents the last frame, waits for input or animation, and begins the
     next frame. Returns false once the window has closed. The window's
     title bar takes the background color of the current theme.
