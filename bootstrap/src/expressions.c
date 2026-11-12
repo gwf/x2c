@@ -2561,7 +2561,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1944 = cons(_1943, NULL);
   _1945 = cons(_250, _1944);
   _1946 = List_var(_1945);
-  _1947 = int_var(88764);
+  _1947 = int_var(88975);
   _1948 = cons(_1947, NULL);
   _1949 = cons(_255, _1948);
   _1950 = List_var(_1949);
@@ -2760,7 +2760,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2140 = cons(_2139, NULL);
   _2141 = cons(_242, _2140);
   _2142 = List_var(_2141);
-  _2143 = int_var(89126);
+  _2143 = int_var(89337);
   _2144 = cons(_2143, NULL);
   _2145 = cons(_255, _2144);
   _2146 = List_var(_2145);
@@ -2877,7 +2877,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2257 = cons(_2256, NULL);
   _2258 = cons(_242, _2257);
   _2259 = List_var(_2258);
-  _2260 = int_var(89888);
+  _2260 = int_var(90099);
   _2261 = cons(_2260, NULL);
   _2262 = cons(_255, _2261);
   _2263 = List_var(_2262);
@@ -2975,7 +2975,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2355 = cons(_2354, NULL);
   _2356 = cons(_242, _2355);
   _2357 = List_var(_2356);
-  _2358 = int_var(89972);
+  _2358 = int_var(90183);
   _2359 = cons(_2358, NULL);
   _2360 = cons(_255, _2359);
   _2361 = List_var(_2360);
@@ -3100,7 +3100,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2480 = cons(_2479, NULL);
   _2481 = cons(_242, _2480);
   _2482 = List_var(_2481);
-  _2483 = int_var(89709);
+  _2483 = int_var(89920);
   _2484 = cons(_2483, NULL);
   _2485 = cons(_255, _2484);
   _2486 = List_var(_2485);
@@ -3201,7 +3201,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2578 = cons(_2577, NULL);
   _2579 = cons(_242, _2578);
   _2580 = List_var(_2579);
-  _2581 = int_var(89538);
+  _2581 = int_var(89749);
   _2582 = cons(_2581, NULL);
   _2583 = cons(_255, _2582);
   _2584 = List_var(_2583);
@@ -3423,7 +3423,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2800 = cons(_2799, NULL);
   _2801 = cons(_242, _2800);
   _2802 = List_var(_2801);
-  _2803 = int_var(90179);
+  _2803 = int_var(90390);
   _2804 = cons(_2803, NULL);
   _2805 = cons(_255, _2804);
   _2806 = List_var(_2805);
@@ -3631,7 +3631,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3008 = List_var(_3007);
   _3009 = cons(_202, _84);
   _3010 = List_var(_3009);
-  _3011 = int_var(92581);
+  _3011 = int_var(92792);
   _3012 = cons(_3011, NULL);
   _3013 = cons(_255, _3012);
   _3014 = List_var(_3013);
@@ -3984,6 +3984,10 @@ List Compiler_parse_variable(Compiler c){
   }
   List name = Compiler_parse_complex_identifier(c);
   Token after = c -> token;
+  if(Compiler_peek(c, 0) == 81 && Var_is_row(List_car(name), 11, 7, 1)){
+    List macro = Compiler_try_parse_static_macro(c, Var_as_string(List_car(name)), origin);
+    if(List_truth(macro)) return macro;
+  }
   List result = Compiler_resolve_expression(c, cons(_41, cons(_14, cons(List_var(cons(_58, cons(List_var(name), NULL))), NULL))), origin);
   if(c -> source_facts){
     List _x2c_gensym_match_expr_2 = result;
@@ -4830,7 +4834,7 @@ static List f6_syntax____parse_postfix_arrow(Compiler c, List expr){
   Token origin = c -> token;  Compiler_expect(c, 11645);  if(Compiler_at_completion(c)){
     List rows = Compiler_postfix_completions(c, Var_type(List_cadr(expr)), 11645); {
       Var _x2c_gensym_literal_part_30 = List_var(rows);  Var _x2c_gensym_literal_part_31 = List_cadr(expr); {
-        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 867};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 5, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), _x2c_gensym_literal_part_30, Symbol_var(768378638630), List_var(NULL), Symbol_var(1247900447076), _x2c_gensym_literal_part_31, Symbol_var(73608422), Symbol_var(11645));
+        static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_arrow",.line = 872};  x2c_error_raise_n(& _x2c_gensym_error_site_0, 1248787135328, 5, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), _x2c_gensym_literal_part_30, Symbol_var(768378638630), List_var(NULL), Symbol_var(1247900447076), _x2c_gensym_literal_part_31, Symbol_var(73608422), Symbol_var(11645));
       }
 
     }
@@ -4842,7 +4846,7 @@ static List f6_syntax____parse_postfix_arrow(Compiler c, List expr){
 static List f6_syntax____parse_postfix_dot(Compiler c, List expr, Token start){
   Token origin = c -> token;  Compiler_expect(c, 93);  if(Compiler_at_completion(c)){
     Type receiver = Var_type(_is_raw_string_literal(expr) ? List_var(_683) : List_cadr(expr));  List rows = Compiler_postfix_completions(c, receiver, 93); {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 887};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 5, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL), Symbol_var(1247900447076), List_var(receiver), Symbol_var(73608422), Symbol_var(93));
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/expressions/syntax.x",.function = "f6_syntax____parse_postfix_dot",.line = 892};  x2c_error_raise_n(& _x2c_gensym_error_site_1, 1248787135328, 5, Symbol_var(740232), Symbol_var(28280237222), Symbol_var(1211878), List_var(rows), Symbol_var(768378638630), List_var(NULL), Symbol_var(1247900447076), List_var(receiver), Symbol_var(73608422), Symbol_var(93));
     }
 
   }

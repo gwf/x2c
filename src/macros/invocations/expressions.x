@@ -59,6 +59,34 @@ List Compiler.try_parse_method_macro(
   return NULL;
 }
 
+/** Expands `T.name(...)` as the Expression macro `$T.name` when `T` names
+    a type, with the call's arguments unchanged, as `$T.name(...)` takes
+    them. `spelling` is the call's folded name, as `T_name`, whose `T.name`
+    tokens end at the cursor. Returns NULL, consuming nothing, when no such
+    macro applies. Raises `<method-dec>` as `try_parse_method_macro` does
+    for a decorator `$T.name` at the start of a statement.
+*/
+List Compiler.try_parse_static_macro(
+  Compiler c, String spelling, Token start) {
+  Token name = _previous_source_token(c, c.token);
+  if (_previous_source_token(c, name).type != <.> ||
+      !spelling.endswith("_" + name.text))
+    return NULL;
+  String owner = spelling[:spelling.len() - name.text.len() - 1];
+  Type type = c.sym.get($(owner));
+  if (!type || !type.is_typedef()) return NULL;
+  List definition = _type_macro(c, owner, name.text, _own_definition(c));
+  if (!definition) return NULL;
+  if (definition.assoc(<kind>) == <expression>)
+    return c.resolve_expression(
+      _expression_invocation(c, definition, start), start);
+  if (start == c.meta_statement && _target_follows(c)) {
+    c.method_decorator = definition;
+    raise %(method-dec);
+  }
+  return NULL;
+}
+
 /** Parses the method-form decorator application whose arguments begin at
     the cursor, after `try_parse_method_macro` raised `<method-dec>` for
     the expression statement that begins at `start`. In a template whose
@@ -189,7 +217,11 @@ static List _method_macro(
   Compiler c, List receiver, String name, Var own) {
   Type type = receiver.cadr();
   Var owner = type ? type.car() : NULL;
-  if (owner is not <string>) return NULL;
+  return owner is <string> ? _type_macro(c, owner, name, own) : NULL;
+}
+
+// The same for the type spelled `owner`, as `Ui` or `x2cui__Ui`.
+static List _type_macro(Compiler c, String owner, String name, Var own) {
   String source = c.package_source_name(owner);
   Var stored;
   if (!_try_macro(c, c.macros, Atom.intern(%"$owner.$name"), stored) &&

@@ -172,6 +172,11 @@ List Compiler.parse_variable(Compiler c) {
   }
   List name = c.parse_complex_identifier();
   Token after = c.token;
+  // `T.name(...)` invokes a macro `$T.name` when one applies.
+  if (c.peek(0) == <(> && name.car() is <string>) {
+    List macro = c.try_parse_static_macro(name.car(), origin);
+    if (macro) return macro;
+  }
   List result = c.resolve_expression(%(expr () (ident $name)), origin);
   if (c.source_facts) match (result)
     case %(expr ?type (ident ?binding)):
