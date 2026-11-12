@@ -2,10 +2,11 @@
 
 > Status: Gary accepted decisions 1 to 5 on 2026-11-11, and approved the
 > To-Do, Mail, and Orders sources and images. Implemented on `x2cui`
-> (gwf/x2c#663, `7a7129f20`), over `dev` with the compiler change for
-> [method-form macros](method-form-macros.md). The data grid's form and
-> the migration of the package's programs are on the local branch
-> `gwf/x2cui-data-grid`. Not on `dev`.
+> (gwf/x2c#663 and #664), over `dev` with the compiler change for
+> [method-form macros](method-form-macros.md). On 2026-11-11 Gary decided
+> the package has one way to write each thing; the local branch
+> `gwf/x2cui-idiomatic` removes the `$cui.*` decorators. See
+> [One paradigm](#one-paradigm-2026-11-11). Not on `dev`.
 > Every "verified" statement below was compiled and run on macOS arm64
 > with that branch's stage 0, built from its bootstrap seed. Statements
 > marked "not verified" were not.
@@ -112,10 +113,10 @@ beside `ui.table`, on the same helpers. `columns:` is a Map literal lowered
 by `cui_columns` to a static `cui_grid_column` array; a width is lowered by
 the type of the record's `width` field, so a grid's widths are points
 where a table's are sizes. `first` and `last` are `int` variables the form
-declares, as `$cui.data_grid` declares them. The other options are those
+declares. The other options are those
 of `cui_grid_opts`, through `cui_options`. The gallery's data grid page
 and the data grid scene use it, and their images are byte-identical. A
-test draws the same pixels with the form and with `$cui.data_grid`.
+test draws the same pixels with the form and with CUI's own C calls.
 Verified.
 
 The form writes its begin call itself and asks `cui_options` only for
@@ -224,10 +225,10 @@ the ones Gary approved. Verified.
    would be the form again and recurse. A block's begin method and the
    list constructs' methods have no forms, so `cui_begin` and `cui_call`
    still build those calls.
-3. A call that passes an option record value, rather than `name: value`
-   rows, must call the method as `Ui.NAME(ui, ..., record)`; the method
-   form takes the call. The earlier `$cui.NAME(ui, ..., { ... })`
-   decorators remain.
+3. A method form takes `name: value` rows only. No program in the package
+   passes a prebuilt option record, so the package offers no way to; the
+   generated `Ui.NAME` methods that take a record are what the forms
+   expand to, not a documented spelling.
 4. Method forms work in statement and expression positions only, not at
    file scope.
 5. A table row's hover and press come from a patch to CUI; see
@@ -235,3 +236,44 @@ the ones Gary approved. Verified.
 6. The mail and orders examples have no tests of their own beyond drawing
    an image; the package test covers clicks, hover, and the column
    lowering.
+
+## One paradigm (2026-11-11)
+
+Gary: "I don't want to see two programming paradigms. I want to see one."
+The package's programs, tests, README, and PROFILE now write every
+component as a method form:
+
+- The `$cui.*` block decorators are deleted. The generator's internal
+  templates and helpers are named `$x2cui.*` and `x2cui_*`:
+  `$x2cui.method`, `$x2cui.widget`, `$x2cui.block`, `$x2cui.result_block`,
+  `$x2cui.count`, and the meta functions in `x2cui-options.x`. No program
+  calls them.
+- `ui.id (key)` replaces `$cui.id_index` and `$cui.id_scope`, choosing
+  `cui_push_id` or `cui_push_id_int` by the key's type, and
+  `ui.disabled (condition)` replaces `$cui.disabled_scope`.
+- A component that takes an array and its count takes the array alone.
+  The generator records, for each such method, where its arrays are; the
+  form supplies the count with `$x2cui.count`, or the capacity of an
+  editor that grows its array. An option field that points to an array
+  and is followed by its `_count` field gets the count the same way. A
+  call that writes every count keeps them, for a count that differs from
+  the array's length.
+- Every generated method whose parameters `x2cui_value` lowers has a
+  form, so positional icons and enums take short names everywhere.
+- The node editor, its nodes, and the tree table are block forms; a tree
+  leaf is `ui.tree (name, NULL, leaf: true) {}`; the inspector is always
+  a block. A card stack and a swipe item store their end call's result in
+  a variable the caller passes: `ui.card_stack (swiped, "deck", 3)`.
+- The gallery's people table uses `ui.each`, `ui.table_row`, `ui.cell`,
+  and `List.sort_by` in place of an insertion sort, and the tree table's
+  rows are `ui.table_row` blocks.
+
+Every image stays byte-identical: the 229 images against `b393dd58c`,
+and the To-Do, Mail, and Orders images Gary approved.
+
+A form cannot declare a result name for the statements after it when it
+is itself inside another block form's block: the following reference is
+undeclared in the generated C. At function level it works. Reproducer:
+`repro-decorator-binder.x` in the worker's scratch directory. The card
+stack and swipe item forms therefore take a variable the caller declares.
+
