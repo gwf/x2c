@@ -20,10 +20,12 @@
     `Ui` is CUI's `cui_ctx *` and `App` is its `cui_app *`, so every raw
     CUI call takes them as they are. `Offscreen` draws with the software
     renderer into pixels, with no window. `TextField` holds text that a
-    component edits in place, and `KeyValue` is one pair of the key-value
-    editor. Labels are Strings; a CUI function that takes a `printf`
-    format is a method that takes the format and x2c values:
-    `ui.textf("%d items", n)`.
+    component edits in place. A collection such as `Reactions` keeps
+    CUI's records in a `Block`: `Reactions.of([{...}, ...])` builds one,
+    `reactions[i]` points at a record, and a component reads and writes
+    its records in place. Labels are Strings, and a list of labels is a
+    List; a CUI function that takes a `printf` format is a method that
+    takes the format and x2c values: `ui.textf("%d items", n)`.
 
     This unit is the `x2cui` package entry: `import "x2cui"` reaches every
     nonstatic name as `x2cui__*` and every method form. The vendored
