@@ -21,7 +21,7 @@ The termbox2 package needs its own dependency preparation, and its release
 bundles are built on macOS and Linux, on both arm64 and x86_64.
 `./configure --packages termbox2` reports missing
 prerequisites; it does not install them. The build then prepares the pinned
-dependency as needed. Interactive play does not require Expect.
+dependency as needed.
 
 The <a href="https://github.com/gwf/x2c/blob/main/packages/termbox2/README.md" data-example-action="guide">package guide</a>
 covers drawing, input, and the terminal's lifetime.

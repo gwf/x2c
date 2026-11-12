@@ -21,7 +21,7 @@ const html = await codeToHtml(source, {
   lang: { ...grammar, name: "x2c" }, theme: x2cDarkTheme,
 });
 ---
-<BaseLayout title={`${page.title.replace(/\.$/, "")} \u2014 x2c`} description={page.description}>
+<BaseLayout title="A notes service — x2c" description={page.description}>
   <Fragment slot="header"><SiteHeader examples /></Fragment>
   <ExamplesShell current="notes">
   <article class="example-page" data-example="notes" data-section="magic"
@@ -36,8 +36,8 @@ const html = await codeToHtml(source, {
         queries. Queries bind request values as parameters. The HTTP library
         supplies routing and connection handling.</p>
       <p>The page, external HTTP checks, and read-load tool live beside the
-        program in the
-        <a href="https://github.com/gwf/x2c/tree/main/examples/apps/notes">notes
+        program in the <a
+        href="https://github.com/gwf/x2c/tree/main/examples/apps/notes">notes
         directory</a>. The server uses plain HTTP. Deploy behind a TLS
         reverse proxy.</p>
     </div>
@@ -68,7 +68,7 @@ make -C examples/apps/notes check`} />
     </nav>
   </article>
   </ExamplesShell>
-  <SiteFooter />
+  <SiteFooter slot="footer" />
 </BaseLayout>
 <style>
   .source-scroll { max-width: 100%; overflow-x: auto; margin-top: 24px; }

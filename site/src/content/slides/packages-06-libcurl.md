@@ -34,9 +34,8 @@ joins each page path to the site's base URL; `get_all` runs the batch
 with up to three transfers at once. Read each response body as a String
 and extract its title.
 
-The complete example accepts the site URL on the command line and
-defines the small title-extraction helper. This captured run uses the
-package's local fixture pages.
+The complete example accepts the site URL on the command line. This
+captured run uses the package's local fixture pages.
 
 Output:
 

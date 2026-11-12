@@ -3,8 +3,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import { exampleRoutes as routes } from "../lib/example-catalog";
 const base = import.meta.env.BASE_URL;
 ---
-<BaseLayout title="Examples - x2c" description="The playground examples now live in Examples.">
-    <p>The playground has moved to <a href={`${base}examples/`}>Examples</a>.</p>
+<BaseLayout title="Examples — x2c" description="Opening x2c examples."
+  robots="noindex" canonical={false}>
+    <p>Opening <a href={`${base}examples/`}>Examples</a>...</p>
     <script is:inline define:vars={{ routes, base }}>
       const requested = new URL(location.href).searchParams.get("example");
       location.replace(`${base}examples/${routes[requested] ?? ""}`);

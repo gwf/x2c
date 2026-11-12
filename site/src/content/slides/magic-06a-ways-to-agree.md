@@ -39,8 +39,8 @@ meta static List squares(int n) {
 ~}
 ```
 
-A `meta` function computes the squares during translation, and a literal and
-direct `cons` calls write `(1 4 9)` out. Runtime Lisp calculates the squares
+A `meta` function computes the squares during translation, a literal writes
+`(1 4 9)` out, and direct `cons` calls build the same cells. Runtime Lisp calculates the squares
 on the fly to produce the same List.
 All four results compare equal in constant time because they resolve to the
 exact same object.

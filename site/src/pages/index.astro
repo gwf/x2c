@@ -164,9 +164,13 @@ const [titleHtml, kickerHtml] = await Promise.all([
           </div>
         </header>
         <p>
+          x2c is experimental: the language and library can still change
+          between releases.
+        </p>
+        <p>
           <strong>Platforms.</strong>{" "}
           macOS 15 or later (arm64, x86_64); Linux with glibc 2.38 or later
-          (x86_64, aarch64); Windows through WSL2.
+          on x86_64 or arm64 (aarch64); Windows through WSL2.
         </p>
         <p>
           <strong>Install a release.</strong>{" "}
@@ -174,6 +178,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
           examples for your platform into <code>{destination.staging
             ? "$X2C_PREFIX" : "~/.local/x2c"}</code>{destination.staging
             ? ", ideally a fresh scratch directory." : "."}{" "}
+          The installer needs a C compiler named <code>cc</code>.{" "}
           Then add packages from the{" "}
           <a href={local("docs/guide/packages.html#install-packages")}>
             package index</a> with{" "}
@@ -324,7 +329,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
     </div>
   </section>
 
-  <SiteFooter home />
+  <SiteFooter slot="footer" home />
 </BaseLayout>
 
 <script>

@@ -6,4 +6,4 @@ cd x2c${destination.sourceRef === "main" ? "" :
 make build-safe`;
 
 export const corePrerequisites =
-  "You need a GCC- or Clang-compatible C compiler, ar, GNU Make, and Bash.";
+  "You need Git, a GCC- or Clang-compatible C compiler, ar, GNU Make, and Bash.";

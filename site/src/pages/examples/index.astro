@@ -6,10 +6,10 @@ import ExamplesShell from "../../components/ExamplesShell.astro";
 import ExamplesTopic from "../../components/ExamplesTopic.astro";
 import { exampleRoutes as routes } from "../../lib/example-catalog";
 ---
-<BaseLayout title="Examples - x2c" description="Browse x2c examples, from everyday values to complete programs.">
+<BaseLayout title="Examples — x2c" description="Browse x2c examples, from everyday values to complete programs.">
 <Fragment slot="header"><SiteHeader examples /></Fragment>
 <ExamplesShell current="love"><ExamplesTopic topic="love" /></ExamplesShell>
-<SiteFooter />
+<SiteFooter slot="footer" />
 <script is:inline define:vars={{routes, base: import.meta.env.BASE_URL}}>
   const requested = new URL(location.href).searchParams.get("example");
   if (requested && routes[requested]) location.replace(`${base}examples/${routes[requested]}`);

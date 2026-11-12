@@ -37,6 +37,6 @@ title: Text is something you work with.
 ~}
 ```
 
-Split an HTTP request, select a path component, and format the result. Slices, splitting, interpolation, and joining turn text processing into ordinary expressions.
+Split an HTTP request, select a path component, and format the result. Stripping, splitting, interpolation, and joining turn text processing into ordinary expressions.
 
 Strings are immutable values, so transformations produce a result without changing the original.

@@ -13,6 +13,7 @@ export const socialImagePath = "/x2c-social.png";
 
 export const unindexedHtmlFiles = new Set([
   "404.html",
+  "playground/index.html",
   "docs/404.html",
   "docs/print.html",
   "docs/toc.html"

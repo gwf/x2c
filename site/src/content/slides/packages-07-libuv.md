@@ -44,7 +44,7 @@ Both children start before the loop runs. Their captured output remains
 available afterward, and both exit successfully. The complete example
 also prints their process IDs before collecting the results.
 
-Full example output:
+Output after the process IDs:
 
 ```text
 normalized:

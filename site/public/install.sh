@@ -25,7 +25,7 @@ Options:
 
 X2C_VERSION and X2C_PREFIX set the same defaults as the options. X2C_RELEASES
 selects the download base; it defaults to the GitHub release assets.
-X2C_RELEASE_TAG selects an independent candidate tag; it defaults to vVERSION.
+X2C_RELEASE_TAG selects the release tag to download (default vVERSION).
 X2C_VERSION_URL names the file holding the latest version; it defaults to
 the one the site publishes. Re-running the script upgrades in place and keeps
 installed packages.

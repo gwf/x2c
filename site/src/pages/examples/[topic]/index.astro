@@ -7,8 +7,8 @@ import ExamplesTopic from "../../../components/ExamplesTopic.astro";
 export function getStaticPaths() { return ["love", "power", "magic", "programs"].map(topic => ({params:{topic}})); }
 const { topic } = Astro.params;
 ---
-<BaseLayout title={`${topic} examples - x2c`} description="Read related x2c examples and run published browser programs.">
+<BaseLayout title={`${topic[0].toUpperCase()}${topic.slice(1)} examples — x2c`} description="Read related x2c examples and run published browser programs.">
 <Fragment slot="header"><SiteHeader examples /></Fragment>
 <ExamplesShell current={topic}><ExamplesTopic topic={topic} /></ExamplesShell>
-<SiteFooter />
+<SiteFooter slot="footer" />
 </BaseLayout>

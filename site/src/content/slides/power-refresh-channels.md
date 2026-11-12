@@ -4,7 +4,7 @@ aliases: [threads]
 section: power
 home: true
 order: 8
-tab: threads
+tab: channels
 title: Give each worker a job.
 ---
 
