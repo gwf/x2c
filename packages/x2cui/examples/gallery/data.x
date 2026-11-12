@@ -4,62 +4,67 @@
 
 #include "state.x"
 
-typedef struct person_row {
-  String name, email, role, status;
-  cui_tone status_tone;
-  String amount;
-} person_row;
+class Person {
+  int index;             // the person's place in `people`
+  String name, email, role, status, amount;
+  cui_tone tone;
+} *;
 
-// The text of a row that the table sorts by in `column`.
-static String sort_key(person_row *row, int column) =>
-  column == 0 ? row.name : column == 2 ? row.role : row.status;
+// A row is: name, email, role, status, revenue, and the status's tone.
+void Person.init(Person p, int index, List row) {
+  p.index = index;
+  p.name = row[0];
+  p.email = row[1];
+  p.role = row[2];
+  p.status = row[3];
+  p.amount = row[4];
+  p.tone = (int) row[5];
+}
+
+// The text the table sorts by in `column`.
+String Person.sort_key(Person p, int column) =>
+  column == 0 ? p.name : column == 2 ? p.role : p.status;
+
+static List people_rows = %(
+  ("Jonas Berg" "jonas@northlight.io" "Owner" "Active" "\$12,384" 2)
+  ("Priya Nair" "priya@harbor.dev" "Admin" "Active" "\$9,846" 2)
+  ("Tomas Rivera" "tomas@kiln.app" "Editor" "Invited" "\$7,215" 3)
+  ("Lena Fischer" "lena@fischer.dev" "Viewer" "Active" "\$3,127" 2)
+  ("Aiko Tanaka" "aiko@tanaka.design" "Editor" "Suspended" "\$1,962" 4));
+
+static List people;
+
+/* The people in the table's order: sorted by the clicked column, with
+   rows that tie keeping their order in either direction. */
+static List sorted_people(cui_table_sort sort) {
+  Func key = %!(Person p) => p.sort_key(sort.column);
+  return sort.descending ? people.reverse().sort_by(key).reverse()
+                         : people.sort_by(key);
+}
 
 void page_data(Ui ui, Gallery g) {
   section(ui, "Table", "Sortable columns, row selection and components in "
                        "cells.");
-  static person_row rows[] = {
-    { "Jonas Berg", "jonas@northlight.io", "Owner", "Active",
-      CUI_TONE_SUCCESS, "$12,384" },
-    { "Priya Nair", "priya@harbor.dev", "Admin", "Active",
-      CUI_TONE_SUCCESS, "$9,846" },
-    { "Tomas Rivera", "tomas@kiln.app", "Editor", "Invited",
-      CUI_TONE_WARNING, "$7,215" },
-    { "Lena Fischer", "lena@fischer.dev", "Viewer", "Active",
-      CUI_TONE_SUCCESS, "$3,127" },
-    { "Aiko Tanaka", "aiko@tanaka.design", "Editor", "Suspended",
-      CUI_TONE_DANGER, "$1,962" },
-  };
-  int order[5] = { 0, 1, 2, 3, 4 };
-  for (int i = 1; i < 5; i++) {
-    int v = order[i], j = i - 1;
-    while (j >= 0) {
-      int c = String.compare(sort_key(&rows[order[j]], g.sort.column),
-                             sort_key(&rows[v], g.sort.column));
-      if (g.sort.descending ? c < 0 : c > 0) {
-        order[j + 1] = order[j];
-        j--;
-      }
-      else break;
-    }
-    order[j + 1] = v;
+  if (!people) {
+    Array all = [];
+    foreach (List row in people_rows) all.push(Person.new(all.len(), row));
+    people = all;
   }
   ui.table ("people", sort: &g.sort, selectable: true,
             columns: {"Name": fill, "Email": unsorted(grow(1.2)),
                       "Role": 110, "Status": 120,
-                      "Revenue": right(unsorted(110))}) {
-    for (int k = 0; k < 5; k++) {
-      person_row *r = &rows[order[k]];
-      if (ui.table_row(g.selected_row == order[k])) g.selected_row = order[k];
-      ui.table_cell();
-      ui.avatar(r.name, size: 26);
-      ui.text(r.name, font: medium, nowrap: true);
-      ui.table_cell();
-      ui.text(r.email, color: text_secondary, nowrap: true);
-      ui.table_cell_text(r.role);
-      ui.table_cell();
-      ui.badge(r.status, tone: r.status_tone, dot: true);
-      ui.table_cell_text(r.amount);
+                      "Revenue": right(unsorted(110))})
+  ui.each (Person p in sorted_people(g.sort), key: p.index)
+  ui.table_row (row, selected: g.selected_row == p.index) {
+    if (row.clicked) g.selected_row = p.index;
+    ui.cell () {
+      ui.avatar(p.name, size: 26);
+      ui.text(p.name, font: medium, nowrap: true);
     }
+    ui.cell () ui.text(p.email, color: text_secondary, nowrap: true);
+    ui.cell_text(p.role);
+    ui.cell () ui.badge(p.status, tone: p.tone, dot: true);
+    ui.cell_text(p.amount);
   }
   ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {

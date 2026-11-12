@@ -124,35 +124,33 @@ void page_grid(Ui ui, Gallery g) {
     ui.table ("tree", columns: {"Name": unsorted(fill),
                                 "Files": right(unsorted(80)),
                                 "Size": right(unsorted(100))}) {
-      ui.table_row(false);
-      ui.table_cell();
-      ui.tree_cell("src", 0, true, open_src, folder);
-      ui.table_cell_text("42");
-      ui.table_cell_text("1.2 MB");
-      if (open_src) {
-        ui.table_row(false);
-        ui.table_cell();
-        ui.tree_cell("ui", 1, true, open_ui, folder);
-        ui.table_cell_text("18");
-        ui.table_cell_text("640 KB");
-        if (open_ui) {
-          ui.table_row(false);
-          ui.table_cell();
-          ui.tree_cell("button.c", 2, false, NULL, file);
-          ui.table_cell_text("1");
-          ui.table_cell_text("24 KB");
-        }
-        ui.table_row(false);
-        ui.table_cell();
-        ui.tree_cell("main.c", 1, false, NULL, file);
-        ui.table_cell_text("1");
-        ui.table_cell_text("8 KB");
+      ui.table_row (row) {
+        ui.cell () ui.tree_cell("src", 0, true, open_src, folder);
+        ui.cell_text("42");
+        ui.cell_text("1.2 MB");
       }
-      ui.table_row(false);
-      ui.table_cell();
-      ui.tree_cell("README.md", 0, false, NULL, file_text);
-      ui.table_cell_text("1");
-      ui.table_cell_text("12 KB");
+      if (open_src) {
+        ui.table_row (row) {
+          ui.cell () ui.tree_cell("ui", 1, true, open_ui, folder);
+          ui.cell_text("18");
+          ui.cell_text("640 KB");
+        }
+        if (open_ui) ui.table_row (row) {
+          ui.cell () ui.tree_cell("button.c", 2, false, NULL, file);
+          ui.cell_text("1");
+          ui.cell_text("24 KB");
+        }
+        ui.table_row (row) {
+          ui.cell () ui.tree_cell("main.c", 1, false, NULL, file);
+          ui.cell_text("1");
+          ui.cell_text("8 KB");
+        }
+      }
+      ui.table_row (row) {
+        ui.cell () ui.tree_cell("README.md", 0, false, NULL, file_text);
+        ui.cell_text("1");
+        ui.cell_text("12 KB");
+      }
     }
   }
 }

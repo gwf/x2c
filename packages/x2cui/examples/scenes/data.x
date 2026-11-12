@@ -57,15 +57,17 @@ static void scene_table(Ui ui) {
     int index = 0;
     foreach (List person in people) {
       (String name, String team, int commits, double score) = person;
-      if (ui.table_row(index == chosen)) chosen = index;
+      ui.table_row (row, selected: index == chosen) {
+        if (row.clicked) chosen = index;
+        ui.cell () {
+          ui.avatar(name, size: 24);
+          ui.text(name, font: medium, nowrap: true);
+        }
+        ui.cell () ui.badge(team);
+        ui.cell_text(%"$commits");
+        ui.cell_text(String.format("%.1f", score));
+      }
       index++;
-      ui.table_cell();
-      ui.avatar(name, size: 24);
-      ui.text(name, font: medium, nowrap: true);
-      ui.table_cell();
-      ui.badge(team);
-      ui.table_cell_text(%"$commits");
-      ui.table_cell_text(String.format("%.1f", score));
     }
   }
 }
