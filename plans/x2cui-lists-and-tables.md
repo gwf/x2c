@@ -172,6 +172,41 @@ is lowered by its parameter's type the same way, so
 `ui.icon_button(x, ...)` works. Upper-case names keep their value, which
 keeps `NULL` and `CUI_*` constants working.
 
+## Arrays of constants
+
+An Array literal where a component takes a pointer is the array, and the
+form passes its count: `bands: [{to: 60, tone: success}]`. A Map literal
+element is one record, its rows lowered by field type as option rows are.
+Any other element is one value lowered by the element type, and in an
+option named `icons` or `*_icons` each element is an icon. Inside a record,
+an Array literal is an array declared before the record's array and a Map
+literal is a record field; a C array field such as `int parent[2]` takes
+`[1, 4]`. A count field after an array (`band_count`, or `count` after
+`values`) is filled, and `[]` is NULL with a count of 0.
+
+`x2cui_value` lowers the literal at compile time to a statement expression
+that declares `static const` arrays under fresh names from
+`x2c_binding_fresh`, then casts the outer array to the parameter's pointer
+type. The arrays are initialized once; no frame builds an Array or a Map.
+
+Two kinds of literal are refused at compile time:
+
+- A pointer to elements that are not `const`, which CUI may write
+  through, such as `cui_reactions`, `cui_kv_editor_ex`, or
+  `cui_gantt_ex`. A literal must read as a value, and a static array CUI
+  edits would keep state between frames. That data is named program state.
+- An element that is not a constant: a variable, or a call of anything but
+  a C macro. x2c gives a block-scope static with such an initializer a
+  guarded one-time initialization, so the array would keep the variable's
+  first value. An automatic array is not used instead, because CUI may
+  read an array until the frame ends, as `x2cui_strings` documents.
+
+Tests read the lowered values through probe methods: enum and icon short
+names in records, a nested `values:` with its `count`, a `_count` option
+field, a `const` enum scalar array, `[]`, and a program name that a fresh
+name does not hide. `make refused-literal` checks both refusals.
+Verified.
+
 ## Generated method forms
 
 `src/x2cui-generate.x` gives every generated component whose last C

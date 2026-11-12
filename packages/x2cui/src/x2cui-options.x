@@ -392,7 +392,29 @@ meta static List _lower(Type type, List value, Array statics) {
       return $!( { @initializers } );
     }
   }
+  if (statics != NULL && !_fixed(value))
+    raise %(bad-arg (operation "Array literal")
+            (reason "an element is not a constant: name the array instead"));
   return x2cui_value(type, value);
+}
+
+/* Whether `value` is a constant a static array can hold: a literal, a
+   name x2c does not declare (a short name or a C macro such as
+   CUI_RGB), an enum constant, a static array, or an operator or a call
+   of a C macro on constants. A variable's value would be read once and
+   kept, so it is refused. */
+meta static int _fixed(List value) {
+  match (value) {
+    case %(expr ? (literal *)): return 1;
+    case %(expr () (ident *)): return 1;
+    case %(expr (enum *) (ident *)): return 1;
+    case %(expr ((dim *) *) (ident *)): return 1;
+    case %(expr ? (op ? *operands)):
+      return operands.all(%!(List v) => _fixed(v));
+    case %(expr ? (call (expr () (ident *)) (args *arguments))):
+      return arguments.all(%!(List v) => _fixed(v));
+  }
+  return 0;
 }
 
 // Whether `type` is a C array, as `int parent[2]` is: `((dim ("2")) int)`.

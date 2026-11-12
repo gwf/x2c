@@ -240,25 +240,44 @@ write. The package's tests drive components this way, with CUI's own
 ## Arrays of records
 
 A component such as a chart or a calendar reads an array of CUI's own
-records. In x2c that array is a C array of those records, written with
-designated initializers, and the component takes the array alone:
+records. Constant data is an Array literal, written where the component
+takes the array. Each element is a Map literal of the record's fields,
+lowered by the type of each field as options are, and the form passes
+the count:
 
 ```x2c
-static cui_tab_bar_item tabs[] = {
-  { CUI_ICON_HOUSE, "Home" }, { CUI_ICON_SEARCH, "Search" } };
-ui.tab_bar("tabs", tabs, selected);
+ui.tab_bar("tabs", [{icon: house, label: "Home"},
+                    {icon: search, label: "Search"}], selected);
+ui.radial_gauge("cpu", 64, 0, 100, bands: [
+  {to: 60, tone: success}, {to: 85, tone: warning}, {to: 100, tone: danger}]);
 ```
 
-The form passes the array's count. An option that points to an array,
-such as `parts:` or `ticks:`, also gets its count, `part_count` or
-`tick_count`. A program that passes a pointer rather than an array, or
-uses fewer elements than the array holds, writes every count of the
-call itself: `ui.trace_view("trace", tracks, 5, spans, used, ...)`. An
-editor that grows its array takes the array and its live count and
-supplies the capacity: `ui.kv_editor("headers", pairs, count)`. An x2c
-`Array` or `List` of records is not converted; the array is a C array.
-CUI writes into the array of a component that edits its records, such
-as a calendar whose events are dragged.
+An element that is not a Map literal is one value: `["Mon", "Tue"]` for
+labels, and in an option named `icons` or `*_icons`, `[bold, italic]` is
+an array of icons. An Array literal inside a record is an array too, as
+in `{name: "1.0", values: [82, 64, 90]}`, and a record field is a Map
+literal, as in `{combo: {mods: 0, key: f5}}`. A count field after the
+array, as `band_count` follows `bands` and `count` follows `values`, is
+filled. `[]` is NULL with a count of 0.
+
+The literal is constant. It lowers to a `static const` C array that is
+initialized once, so it costs nothing per frame, and every element must
+be a constant: a literal, a constant name, or the address of a static
+array. A local variable or a function call in an element is a C error,
+"initializer element is not a compile-time constant". CUI reads some
+arrays until the frame ends, so the form does not build an array on the
+stack for such an element. A component that writes into its array, such
+as a calendar whose events are dragged or a key-value editor, refuses a
+literal: a literal never keeps state between frames. That data is a
+named C array the program keeps.
+
+An option that points to an array, such as `parts:` or `ticks:`, also
+gets its count, `part_count` or `tick_count`, when it is given a named C
+array. A program that passes a pointer rather than an array, or uses
+fewer elements than the array holds, writes every count of the call
+itself: `ui.trace_view("trace", tracks, 5, spans, used, ...)`. An editor
+that grows its array takes the array and its live count and supplies the
+capacity: `ui.kv_editor("headers", pairs, count)`.
 
 The table and the data grid take their columns as a Map literal; see
 [Lists and tables](#lists-and-tables). The data grid draws only the

@@ -27,11 +27,13 @@ PACKAGE_X_FLAGS += --x-include-dir examples
 
 check: test run refused-literal
 
-# The form refuses an Array literal where CUI may write through the array.
+# The form refuses an Array literal where CUI may write through the array,
+# and one with a variable in an element.
 refused-literal: build | builds
 	! $(X2C) translate --out-dir builds/refused $(PACKAGE_X_FLAGS) \
 	  tests/refused-literal.x >builds/refused.log 2>&1
 	grep -q "CUI may write through this array" builds/refused.log
+	grep -q "an element is not a constant" builds/refused.log
 
 short-example: builds/todo
 
