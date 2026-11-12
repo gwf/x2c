@@ -1539,7 +1539,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _582 = List_var(_581);
   _583 = cons(_503, _500);
   _584 = List_var(_583);
-  _585 = int_var(123670);
+  _585 = int_var(123826);
   _586 = cons(_585, NULL);
   _587 = cons(_508, _586);
   _588 = List_var(_587);
@@ -3403,15 +3403,18 @@ static int f5_units____skip_collected_form(Compiler c){
     return 1;
   }
   if((! c -> collect_protocols || c -> signature_only) && Compiler_skip_named_type_declaration(c)) return 1;
-  if(! Compiler_macro_starts_target_at(c, 1405544)) return 0;
-  if(! c -> signature_only && c -> collect_protocols && Compiler_collect_unit_macro(c)) return 1;
-  do{
-    Compiler_skip_macro_invocation(c);
-    if(Compiler_test(c, 119)) return 1;
+  if(Compiler_macro_starts_target_at(c, 1405544) && ! c -> signature_only && c -> collect_protocols && Compiler_collect_unit_macro(c)) return 1;
+  for(; ; ){
+    Token target = Compiler_method_decorator_target(c);
+    if(target) c -> token = target;
+    else if(! Compiler_macro_starts_target_at(c, 1405544)) return 0;
+    else{
+      Compiler_skip_macro_invocation(c);
+      if(Compiler_test(c, 119)) return 1;
+    }
+
   }
-  while(Compiler_macro_starts_target_at(c, 1405544));
-  ;
-  return 0;
+
 }
 
 static List f5_units____top_level_decorator(Compiler c){
@@ -4049,7 +4052,7 @@ static List _bind_api_source(Compiler c, Var line, Var doc, Var syntax){
   line = invocation ? int_var(invocation -> line) : line;
   doc = String_var(String_truth(invocation_doc) ? invocation_doc : f5_units____filled_doc(c, Var_as_string(doc)));
   if(c -> shallow) return cons(_33, cons(line, cons(doc, cons(List_var(bound), NULL))));
-  _definition_source(c, bound, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/parse/units.x",.function = "_bind_api_source",.line = 676}; & _x2c_gensym_error_site_0; }))), Var_as_string(doc), NULL);
+  _definition_source(c, bound, Var_int(Var_convert_at(line, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../src/parse/units.x",.function = "_bind_api_source",.line = 680}; & _x2c_gensym_error_site_0; }))), Var_as_string(doc), NULL);
   return bound;
 }
 
@@ -4106,8 +4109,8 @@ static Map f5_units____hole_spellings(Compiler c){
               Var _x2c_gensym_match_value_9 = end;
               {
                 String path = Var_as_string(_x2c_gensym_match_value_7);
-                int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_8, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 708}; & _x2c_gensym_error_site_1; })));
-                int end = Var_int(Var_convert_at(_x2c_gensym_match_value_9, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 708}; & _x2c_gensym_error_site_2; })));
+                int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_8, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 712}; & _x2c_gensym_error_site_1; })));
+                int end = Var_int(Var_convert_at(_x2c_gensym_match_value_9, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 712}; & _x2c_gensym_error_site_2; })));
                 if(String_truth(c -> text)) if(String_equal(path, file)) Map_setindex(written, syntax, String_var(String_new_len(c -> text + begin, end - begin)));
               }
 
@@ -4168,8 +4171,8 @@ static Map f5_units____hole_spellings(Compiler c){
         Var _x2c_gensym_match_value_12 = end;
         {
           String path = Var_as_string(_x2c_gensym_match_value_10);
-          int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_11, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 718}; & _x2c_gensym_error_site_3; })));
-          int end = Var_int(Var_convert_at(_x2c_gensym_match_value_12, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 718}; & _x2c_gensym_error_site_4; })));
+          int begin = Var_int(Var_convert_at(_x2c_gensym_match_value_11, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 722}; & _x2c_gensym_error_site_3; })));
+          int end = Var_int(Var_convert_at(_x2c_gensym_match_value_12, 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../src/parse/units.x",.function = "f5_units____hole_spellings",.line = 722}; & _x2c_gensym_error_site_4; })));
           if(Var_is_void(spelling)) if(String_truth(c -> text)) if(String_equal(path, file)) spelling = String_var(String_new_len(c -> text + begin, end - begin));
         }
 
@@ -4314,7 +4317,7 @@ static List f5_units____bind_inspected_bundle(Compiler c, List rows){
 static void f5_units____finish_inspected_expansion(Compiler c, Array frames, Array projected){
   List _x2c_gensym_destructure_1 = Var_list_payload(Array_take_last(frames));
   List frame = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));
-  int first = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/parse/units.x",.function = "f5_units____finish_inspected_expansion",.line = 774}; & _x2c_gensym_error_site_5; })));
+  int first = Var_int(Var_convert_at(List_getindex(_x2c_gensym_destructure_1, 1), 3453797, ({ static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../src/parse/units.x",.function = "f5_units____finish_inspected_expansion",.line = 778}; & _x2c_gensym_error_site_5; })));
   Array range = Array_getslice(projected, x2c_slice_bound(first), (-2147483647 - 1), 1);
   Compiler_print_macro_expansion(c, frame, cons(_54, Array_list_free(range)));
 }

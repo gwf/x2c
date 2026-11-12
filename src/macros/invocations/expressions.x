@@ -76,6 +76,64 @@ List Compiler.parse_method_decorator(
   return %(method-decorator $call $(c.parse_governed(position)));
 }
 
+/** Returns where the target begins when a file-scope item at the cursor
+    has the shape of a method-form decorator application,
+    `receiver.name(arguments) TARGET`, or NULL. The item begins with a
+    variable, followed by a postfix chain whose last step is `.name(...)`,
+    a target follows, and some macro is named `$T.name`. No declaration has
+    that shape, so every other item keeps the declaration parser and its
+    diagnostics. This query does not consume tokens.
+*/
+Token Compiler.method_decorator_target(Compiler c) {
+  if (c.peek(0) != <ident> || !(c.peek(1) in %<"." "->" "[">)) return NULL;
+  Type binding = c.sym.get($(c.token.text));
+  if (!binding || binding.is_typedef()) return NULL;
+  Token token = Token.skip_trivia(c.token + 1);
+  String member = NULL;
+  loop {
+    int dot = token.type == <.>;
+    if (dot || token.type == <"->">) {
+      token = Token.skip_trivia(token + 1);
+      if (token.type != <ident>) return NULL;
+      member = dot ? token.text : NULL;
+      token = Token.skip_trivia(token + 1);
+      if (token.type != <(>) member = NULL;
+      if (member) token = token.after_group();
+    }
+    else if (token.type == <[> || token.type == <(>) {
+      member = NULL;
+      token = token.after_group();
+    }
+    else return member && _begins_target(token) &&
+                _names_some_macro(c, member) ? token : NULL;
+  }
+}
+
+// Whether a visible macro's name ends in `.member`.
+static int _names_some_macro(Compiler c, String member) {
+  String suffix = "." + member;
+  foreach ((Atom name, Var _) in c.macros)
+    if (name.str().endswith(suffix)) return 1;
+  return 0;
+}
+
+/** Parses the file-scope method-form decorator application at the cursor,
+    which `method_decorator_target` recognized, through the ordinary
+    expression parse of its receiver. Returns NULL, with the cursor
+    restored, when the receiver's type has no such decorator.
+*/
+List Compiler.parse_unit_method_decorator(Compiler c) {
+  Token start = c.token;
+  try {
+    with (c.meta_statement = start) { (void) c.parse_expression(); }
+  }
+  catch %(method-dec *):
+    if (c.method_decorator) return c.parse_method_decorator(start, <unit>);
+  c.method_receiver = NULL;
+  c.token = start;
+  return NULL;
+}
+
 /** Marks a template's call `receiver.name(...)` written in the template of
     a macro `$T.name` as `(expr () (method-call DEFINITION CALL))`, so that
     where the template expands the call is `$T.name`'s method, not the
@@ -209,11 +267,12 @@ static List _call_values(List supplied) {
    cursor: a brace, `$`, or a word other than the operators `is` and `in`.
    No other word can follow the closing parenthesis of a call inside an
    expression. */
-static int _target_follows(Compiler c) {
-  Token next = c.token.after_group();
-  return next.type == <"{"> || next.type == <$> ||
-    (next.text.is_identifier() && next.text != "is" && next.text != "in");
-}
+static int _target_follows(Compiler c) =>
+  _begins_target(c.token.after_group());
+
+static int _begins_target(Token next) =>
+  next.type == <"{"> || next.type == <$> ||
+  (next.text.is_identifier() && next.text != "is" && next.text != "in");
 
 /* Returns the Macro value of a `$name` without arguments; otherwise restores
    the cursor to `$`. */
