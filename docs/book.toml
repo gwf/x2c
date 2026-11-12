@@ -18,7 +18,7 @@ default-theme = "light"
 preferred-dark-theme = "light"
 git-repository-url = "https://github.com/gwf/x2c"
 edit-url-template = "https://github.com/gwf/x2c/edit/main/docs/{path}"
-additional-css = ["theme/header.css", "theme/x2c.css"]
+additional-css = ["theme/header.css", "theme/x2c.css", "theme/reading.css"]
 
 [output.html.fold]
 enable = true

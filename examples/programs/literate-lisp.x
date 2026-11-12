@@ -256,41 +256,7 @@ typedef struct Repl {
   int failed, incomplete, interactive, done;                                     // C integer flags coordinate the REPL.
 } Repl;
 
-/* Command-line interface ----------------------------------------------------------------------------------------------
-   main converts argv to x2c Strings and matches the command line.
-   No arguments starts the REPL; -e evaluates an expression; --selftest
-   runs a small check; a path loads a Lisp file. Every mode first loads
-   the native functions and the Lisp definitions in _stdlib. */
-int main(int argc, char **argv) {                                                // Standard C argc/argv entry point.
-  auto {                                                                     // Session-wide allocation region.
-    try {                                                                        // Structured exception boundary.
-      Array args = range(argc - 1)                                         // Lazy range iterator.
-        .map(%!(int i) using &argv => String.new(argv[i]));                      // Capture &argv; convert each entry.
-      Interp self = _interpreter();                                              // Session record returned by value.
-      String source;                                                             // Immutable String held by a handle.
-      match (args.list()) {                                                      // Chain conversion into matching.
-        case %(?): return _repl(self) ? 0 : 1;                                   // ? matches without binding.
-        case %(? "-e" ?text): source = text;                                     // Bound Var converts to String.
-        case %(? "--selftest"):                                                  // Match a literal String argument.
-          source = "(list (apply + '(10 20 12)) (append '(1 2) '(3 4)))";        // C literal promotes to cached String.
-        case %(? ?file): {                                                       // Wildcard plus bound filename.
-          const char *path = file.str();                                         // Borrow a C string pointer.
-          source = File.open(path ? path : "", "r").string_close();              // Chain File open, read, and close.
-        }
-        default: {                                                               // Fallback when no pattern matches.
-          Stderr.printf("usage: %s [--selftest | -e FORM | FILE]\n",             // Native format string with File I/O.
-                        args[0]      );                                          // Array indexing, then String access.
-          return 1;
-        }
-      }
-      Stdout.printf("%s\n", _eval_text(self, source).repr());                    // Evaluate and print the last value.
-      return 0;
-    }
-    catch %(?code *detail):                                                      // Destructure the error as a List.
-      Stderr.printf("error: %s\n", cons(code, detail).repr());                   // Construct List, then format it.
-  }
-  return 1;
-}
+
 
 /* Each special form gets its own function value before the library loads.
    Saving that value under another name keeps the same behavior, even if
@@ -1021,4 +987,40 @@ static Var Repl.finish_batch(Repl &self) {
     self.cursor = 0;
   }
   return void;                                                                   // Return the distinct void value.
+}
+
+/* Command-line interface ----------------------------------------------------------------------------------------------
+   main converts argv to x2c Strings and matches the command line.
+   No arguments starts the REPL; -e evaluates an expression; --selftest
+   runs a small check; a path loads a Lisp file. Every mode first loads
+   the native functions and the Lisp definitions in _stdlib. */
+int main(int argc, char **argv) {                                                // Standard C argc/argv entry point.
+  auto {                                                                     // Session-wide allocation region.
+    try {                                                                        // Structured exception boundary.
+      Array args = range(argc - 1)                                         // Lazy range iterator.
+        .map(%!(int i) using &argv => String.new(argv[i]));                      // Capture &argv; convert each entry.
+      Interp self = _interpreter();                                              // Session record returned by value.
+      String source;                                                             // Immutable String held by a handle.
+      match (args.list()) {                                                      // Chain conversion into matching.
+        case %(?): return _repl(self) ? 0 : 1;                                   // ? matches without binding.
+        case %(? "-e" ?text): source = text;                                     // Bound Var converts to String.
+        case %(? "--selftest"):                                                  // Match a literal String argument.
+          source = "(list (apply + '(10 20 12)) (append '(1 2) '(3 4)))";        // C literal promotes to cached String.
+        case %(? ?file): {                                                       // Wildcard plus bound filename.
+          const char *path = file.str();                                         // Borrow a C string pointer.
+          source = File.open(path ? path : "", "r").string_close();              // Chain File open, read, and close.
+        }
+        default: {                                                               // Fallback when no pattern matches.
+          Stderr.printf("usage: %s [--selftest | -e FORM | FILE]\n",             // Native format string with File I/O.
+                        args[0]      );                                          // Array indexing, then String access.
+          return 1;
+        }
+      }
+      Stdout.printf("%s\n", _eval_text(self, source).repr());                    // Evaluate and print the last value.
+      return 0;
+    }
+    catch %(?code *detail):                                                      // Destructure the error as a List.
+      Stderr.printf("error: %s\n", cons(code, detail).repr());                   // Construct List, then format it.
+  }
+  return 1;
 }

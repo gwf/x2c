@@ -1,4 +1,5 @@
 import type { MarkdownInstance } from "astro";
+import { x2cExcerpt } from "../../x2c-excerpt.mjs";
 
 type ExampleMarkdown = MarkdownInstance<Record<string, any>>;
 
@@ -44,8 +45,7 @@ const programs = new Set(import.meta.env.PROD ? built ?? [] : []);
 const visibleCode = (slide: string, source: string) => {
   const block = (slideSources[`../content/slides/${slide}`] as string ?? "")
     .match(/```x2c\n([\s\S]*?)\n```/)?.[1];
-  return block?.split("\n").filter((line) => !line.trimStart().startsWith("~"))
-    .join("\n").trim() ?? source;
+  return block === undefined ? source : x2cExcerpt(block);
 };
 
 const sourceFor = (id: string) =>

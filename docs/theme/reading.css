@@ -1,0 +1,129 @@
+/* Shared reading rhythm for the book, About, and Examples. */
+:root {
+  --reading-width: 720px;
+  --reading-wide: 720px;
+  --reading-top: 42px;
+  --reading-gutter: 24px;
+  --reading-bottom: 48px;
+  --reading-title: clamp(36px, 4.2vw, 46px);
+}
+
+.about-page,
+.examples-topic-heading,
+.examples-reading .example-heading,
+.content main {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.about-page > h1,
+.examples-reading .examples-topic-heading h1,
+.examples-reading .example-heading h1,
+.content h1 {
+  margin: 0 0 24px;
+  font: 400 var(--reading-title)/1.05 "Instrument Serif", Georgia, serif;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.about-copy h2,
+.examples-reading .reading-example h2,
+.examples-reading .example-prose h2,
+.examples-reading .feature-copy h2,
+.content h2 {
+  font: 600 25px/1.25 Archivo, Helvetica, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.about-copy p,
+.examples-reading .reading-example-prose,
+.examples-reading .example-prose,
+.examples-reading .example-premise,
+.examples-reading .feature-copy p,
+.examples-topic-heading > p:last-child,
+.content :is(p, ul, ol) {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.about-page {
+  width: min(100%, calc(var(--reading-width) + 2 * var(--reading-gutter)));
+  padding: var(--reading-top) var(--reading-gutter) var(--reading-bottom);
+}
+.about-copy p { max-width: none; margin: 0 0 18px; }
+.about-page .about-kicker { max-width: none; margin: 0 0 40px; }
+.about-copy h2 { margin: 48px 0 18px; }
+.about-copy h2:first-child { margin-top: 48px; }
+
+.examples-reading { padding: var(--reading-top) var(--reading-gutter) var(--reading-bottom); }
+.examples-reading > * { max-width: var(--reading-wide); }
+.examples-reading > .examples-topic-heading,
+.examples-reading > .examples-program-list,
+.examples-reading .example-heading,
+.examples-reading .reading-example > header,
+.examples-reading .reading-example-prose,
+.examples-reading .example-prose,
+.examples-reading .feature-copy {
+  max-width: var(--reading-width);
+  margin-inline: auto;
+}
+.examples-reading .example-premise { max-width: none; }
+.examples-topic-heading { margin-bottom: 48px; }
+.reading-example-prose p { margin-bottom: 18px; }
+.examples-reading .reading-example:last-child { margin-bottom: 0; }
+.examples-reading .example-heading { margin-bottom: 40px; }
+.examples-reading .example-prose { line-height: 1.6; }
+.examples-reading .example-next { margin-top: 48px; }
+
+/* The book keeps its chapter navigation and theme-specific colors. */
+:root { --content-max-width: var(--reading-width); --page-padding: var(--reading-gutter); }
+.content { padding: var(--reading-top) 0 0; }
+.content h2 { margin: 48px 0 18px; padding-top: 24px; }
+.content main > p { margin: 0 0 18px; }
+.x2c-pager { margin: 48px auto 0; padding-top: 24px; }
+.x2c-footer { margin: 0 auto; padding: 24px 0 40px; }
+
+body:has(.about-page) .landing-footer,
+body:has(.examples-shell) .landing-footer {
+  width: min(calc(100% - 2 * var(--reading-gutter)), var(--reading-width));
+  padding: 24px 0 40px;
+  border-top: 1px solid var(--line);
+}
+@media (min-width: 1080px) {
+  html.sidebar-visible body:has(.examples-shell) .landing-footer {
+    width: min(calc(100% - var(--sidebar-width) - 8px - 2 * var(--reading-gutter)), var(--reading-width));
+    position: relative;
+    left: calc((var(--sidebar-width) + 8px) / 2);
+  }
+}
+@media (max-width: 800px) {
+  :root { --reading-top: 28px; --reading-gutter: 20px; }
+}
+
+/* Every part of an example shares the same column edges. */
+.examples-reading .example-reading { width: 100%; max-width: var(--reading-width); }
+.examples-reading .example-page:not(.literate-page) { max-width: var(--reading-width); }
+.examples-reading .example-run h2 { font: 600 25px/1.25 Archivo, Helvetica, sans-serif; }
+.examples-program-list { list-style: none; padding: 0; }
+.examples-program-list li { padding: 24px 0; border-top: 1px solid var(--line); }
+.examples-program-list h2 { margin: 0 0 10px; font: 600 22px/1.25 Archivo, Helvetica, sans-serif; }
+.examples-program-list h2 a { text-decoration: none; }
+.examples-program-list h2 a:hover { text-decoration: underline; }
+.examples-program-list p { margin: 0; font-size: 17px; line-height: 1.6; color: var(--muted-dark); }
+
+/* Walkthrough notes and article prose use the same heading hierarchy. */
+.examples-reading .example-page :is(.feature-copy, .example-prose, .example-run) :is(h2, h3) {
+  font-family: Archivo, Helvetica, sans-serif;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+  margin: 32px 0 16px;
+}
+.examples-reading .example-page :is(.feature-copy, .example-prose, .example-run) h2 { font-size: 25px; }
+.examples-reading .example-page :is(.feature-copy, .example-prose, .example-run) h3 { font-size: 21px; }
+.examples-reading .example-page :is(.feature-copy, .example-prose, .example-run) > :is(h2, h3):first-child { margin-top: 0; }
+.examples-reading .example-page :is(.feature-copy, .example-prose, .example-run) :is(p, ul, ol) {
+  font-size: 17px;
+  line-height: 1.6;
+  margin-block: 0 18px;
+}
