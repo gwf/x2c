@@ -4,7 +4,9 @@ This package provides an x2c interface to [CUI](https://github.com/yappologistic
 1.3.1, an immediate-mode UI library that draws its own components. A program
 describes the screen with calls on every frame. CUI lays it out, handles the
 mouse and keyboard, and draws it in a window or into pixels. `PROFILE.md`
-records the build.
+records the build. The book's
+[Building Interfaces with x2cui](../../docs/src/guide/x2cui.md) chapter
+teaches the package from a first program.
 
 It is an importable package: `src/x2cui.x` is its entry unit and every
 public name compiles to `x2cui__*`.
@@ -32,9 +34,10 @@ int main(void) {
 ## Status
 
 The package is a preview. Native builds are supported on macOS arm64
-only. The browser build needs Memory64, JavaScript Promise Integration,
-and WebGL 2; it was run in a Chromium-based browser and under Node. The
-Linux build is not run. CUI has no accessibility tree, no inline
+and on Linux arm64 and x86_64. On Linux the package check passes, which
+draws off screen; no window has been opened there. The browser build
+needs Memory64, JavaScript Promise Integration, and WebGL 2; it was run
+in a Chromium-based browser and under Node. CUI has no accessibility tree, no inline
 input-method composition, and no bidirectional text. The package
 applies two patches to CUI, `table-row-state` and `focusable-canvas`
 (see `PROFILE.md`), and an upgrade of CUI must remake them. A program
@@ -59,9 +62,9 @@ make -C packages/x2cui build
 ./hello
 ```
 
-Platforms: source only. macOS is built and tested, and the gallery runs
-in a browser; see [In a browser](#in-a-browser). The Linux profile is
-written and has not been built; see `PROFILE.md`.
+Platforms: source only. macOS and Linux are built and tested, and the
+gallery runs in a browser; see [In a browser](#in-a-browser). Linux needs
+the X11 development headers; see `PROFILE.md`.
 
 The driver adds the package's `builds` and `src` directories and links
 `builds/libx2cui.a` with CUI and the system frameworks. The `-I` lets x2c's
@@ -156,7 +159,9 @@ along its top edge unless it is the first item or it or the item before
 it is selected. Tab reaches each item in order, and Enter or Space clicks
 the focused item, as they click a button; the focused item draws CUI's
 focus ring. `row` is a `RowState` with `hovered`, `pressed`, and
-`clicked` for this frame:
+`clicked` for this frame. An item stacks its children on top of one
+another, so an item with several components puts them in one `ui.column`
+or `ui.row`:
 
 ```x2c
 ui.each (Message m in shown, key: m.id)
@@ -315,7 +320,7 @@ CUI types a new record into, and stores CUI's count back as the length.
 | `c[i]` | a pointer to record `i`, so `c[i].field = v` changes it |
 | `c.len()` | how many records it holds |
 | `c.push(r)`, `c.insert(i, r)`, `c.remove(i)` | grow or shrink it |
-| `foreach (T r in c)` | each record, by value |
+| `foreach (T *r in c)` | a pointer to each record |
 | `c.data()` | the records, for a raw CUI call such as `cui_trace_sort` |
 
 The collections:

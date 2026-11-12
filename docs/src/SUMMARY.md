@@ -110,6 +110,7 @@
 - [Advanced Topics](library/advanced-topics.md)
   - [Automatic Differentiation](guide/autodiff.md)
   - [Training and Inference with torch](guide/torch.md)
+  - [Building Interfaces with x2cui](guide/x2cui.md)
   - [The Region Model](guide/regions.md)
 
 # Compiler API (provisional)

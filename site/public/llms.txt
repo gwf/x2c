@@ -58,6 +58,7 @@
 - [Advanced Topics](https://x2c-lang.dev/docs/library/advanced-topics.html)
 - [Automatic Differentiation](https://x2c-lang.dev/docs/guide/autodiff.html)
 - [Training and Inference with torch](https://x2c-lang.dev/docs/guide/torch.html)
+- [Building Interfaces with x2cui](https://x2c-lang.dev/docs/guide/x2cui.html)
 - [The Region Model](https://x2c-lang.dev/docs/guide/regions.html)
 
 ## Optional

@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Install build and runtime test tools
-        run: sudo apt-get update && sudo apt-get install -y build-essential clang python3 git autoconf automake libtool pkg-config perl expect jq file patch ca-certificates unzip diffutils
+        run: sudo apt-get update && sudo apt-get install -y build-essential clang python3 git autoconf automake libtool pkg-config perl expect jq file patch ca-certificates unzip diffutils libx11-dev
       - uses: ./.github/actions/select-clang
       - name: Build from checked-in bootstrap
         run: make build-safe

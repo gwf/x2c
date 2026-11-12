@@ -65,10 +65,12 @@ redistributed. Verified on macOS arm64.
 
 `dependency.json`. The window layer is X11. `cui.c` is compiled as C with
 `-std=gnu99`, and a program links `libcui.a` with `-lX11 -ldl -lm
--lpthread`. Building needs the X11 development headers on the host.
+-lpthread`. Building needs the X11 development headers on the host,
+`libx11-dev` on Ubuntu. CUI loads OpenGL when a window opens, so linking
+needs no OpenGL package. Emoji draw only when the host has an emoji font.
 
-This profile has not been built or run. The package is not in `PACKAGES`
-in `packages/Makefile` until it has been.
+Verified on Ubuntu 24.04 arm64 and x86_64 with `make check`, which draws
+off screen and needs no X server. A window has not been opened on Linux.
 
 ## Browser
 

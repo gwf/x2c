@@ -60,7 +60,7 @@ verification check against them. A release publishes these packages:
 - A source archive of each package with no dependency manifest under
   `packages/` and `examples/packages/`, currently autodiff and greet.
 
-raylib and SQLite are not released in any form. Build their bundles from a
+raylib, SQLite, and x2cui are not released in any form. Build their bundles from a
 checkout with `make -C packages/<name> bundle`. `PACKAGES` in
 `packages/Makefile` is a different list: the packages that `make packages`,
 `make packages-check` check. The release-validation workflow excludes Torch

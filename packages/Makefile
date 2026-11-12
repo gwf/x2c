@@ -2,7 +2,7 @@
 # release-validation excludes torch and the notes application. Each package's own `check` target
 # names what checking it runs; agents/releasing.md lists what releases ship.
 PACKAGES := pcre2 yyjson sqlite libcurl termbox2 blis libuv raylib torch \
-  autodiff
+  autodiff x2cui
 
 .PHONY: list examples check prepare test-deps cache-path \
 	$(addprefix prepare-,$(PACKAGES))

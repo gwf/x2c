@@ -7,7 +7,11 @@
 import "x2cui" with App, KvPairs, Offscreen, Reactions, RowState, TextField, Ui,
   x2cui_arguments;
 
+#ifdef __APPLE__
 #include <malloc/malloc.h>
+#else
+#include <malloc.h>
+#endif
 
 #include "path.x"
 #include "test-support.x"
@@ -229,11 +233,16 @@ static void formatted_text_takes_x2c_values(void) {
   EXPECT_TRUE(screen.commands() > 0);
 }
 
-// What the default malloc zone has allocated and not freed.
+// What the default allocator has allocated and not freed.
 static size_t bytes_in_use(void) {
+#ifdef __APPLE__
   malloc_statistics_t stats;
   malloc_zone_statistics(NULL, &stats);
   return stats.size_in_use;
+#else
+  struct mallinfo2 info = mallinfo2();
+  return info.uordblks + info.hblkhd;
+#endif
 }
 
 /* The empty List and a List converted before allocate nothing, and a
