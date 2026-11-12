@@ -62,7 +62,6 @@
       "stdout",
       "strcasecmp",
       "strchr",
-      "strcmp",
       "strlen",
       "strncpy",
       "strstr",
