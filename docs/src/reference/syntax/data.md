@@ -8,7 +8,7 @@ Three modules under `etc/syntax/` hold the data:
 
 | Module | Accessor | Contents |
 | --- | --- | --- |
-| `grammar.x` | `syntax_grammar()` | Entry point and 203 productions |
+| `grammar.x` | `syntax_grammar()` | Entry point and productions |
 | `lexical.x` | `syntax_lexical()` | Byte patterns, ordered scanning, modes, transitions, predicates, token passes, failures |
 | `extensions.x` | `syntax_extensions()` | Reviewed C11 comparison, feature groups, affected rule names, example spellings, documentation links |
 
@@ -123,8 +123,7 @@ and closing delimiters return to the previous stack mode.
 
 `write` generates the EBNF, lexical inventory, and the table in the
 [x2c syntax map](../../guide/x2c-syntax-map.md). `check` validates references and
-reports stale generated outputs without changing them. These are optional
-commands; no recurring build or publication check was added.
+reports stale generated outputs without changing them.
 
 The extension data lists the productions that x2c adds to or changes from C.
 

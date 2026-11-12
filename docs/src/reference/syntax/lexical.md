@@ -71,7 +71,7 @@ associated auto break case catch char const continue default defer delegate
 The table selects lexical modes, not language-wide identifier reservation.
 After scanning and optional CPP, the compiler retags the nine contextual x2c
 additions and the predefined `expand` alias to `ident`; `in` and `match`
-retain their existing lookahead rules.
+are reclassified by lookahead (see below).
 C keywords and `defer` stay reserved. Percent and angle literal choices are
 already settled before retagging; see [compiler reclassification](#compiler-reclassification-and-preprocessing)
 and [contextual keywords](../language.md#contextual-keywords).
@@ -345,8 +345,8 @@ Apply the following transformation in order:
 6. A line consisting of `do:` becomes a bare block if the first following
    non-directive line at the same or lower indentation is not a same-indent
    `while` trailer without a final colon. Otherwise retain `do`.
-7. Append `;` to an ordinary statement line unless it already ends with `;`,
-   is in an enum body. A whole-line
+7. Append `;` to an ordinary statement line unless it already ends with `;`
+   or is in an enum body. A whole-line
    `$name`, `@name`, or computed `@producer(...)` hole also takes no semicolon,
    including a hole after a control header's `)`. The leading `@` in
    `@$decorator(...)` becomes trivia and suppresses the semicolon.
