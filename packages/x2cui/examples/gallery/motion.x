@@ -86,17 +86,17 @@ void page_motion(Ui ui, Gallery g) {
           height: 110, align: end)
   ui.dock ("dock") {
     if (ui.dock_item(folder, "Files",
-                     color: CUI_RGB(0x3b82f6), running: true))
+                     color: 0x3b82f6, running: true))
       ui.toast("Files");
-    ui.dock_item(mail, "Mail", color: CUI_RGB(0x0ea5e9),
+    ui.dock_item(mail, "Mail", color: 0x0ea5e9,
                                         badge: 3, running: true);
     ui.dock_item(calendar, "Calendar",
-                 color: CUI_RGB(0xef4444));
-    ui.dock_item(music, "Music", color: CUI_RGB(0xec4899),
+                 color: 0xef4444);
+    ui.dock_item(music, "Music", color: 0xec4899,
                                           running: true);
     ui.dock_item(square_terminal, "Terminal",
-                 color: CUI_RGB(0x27272a));
-    ui.dock_item(palette, "Design", color: CUI_RGB(0x8b5cf6));
+                 color: 0x27272a);
+    ui.dock_item(palette, "Design", color: 0x8b5cf6);
     ui.dock_separator();
     ui.dock_item(settings, "Settings");
     ui.dock_item(trash_2, "Trash");

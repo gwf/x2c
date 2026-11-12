@@ -7,7 +7,7 @@
     the program's whole state.
 */
 
-import "x2cui" with App, Offscreen, TextField, Ui;
+import "x2cui" with App, KeyValue, Offscreen, TextField, Ui;
 
 // The first pages, in the order of the sidebar.
 enum {

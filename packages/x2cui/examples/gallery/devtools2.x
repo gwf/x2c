@@ -77,18 +77,15 @@ static void devtools2_stack(Ui ui) {
 }
 
 static int rq_method = 1;
-static cui_kv_pair rq_params[8];
-static int rq_n = -1;
+// The query parameters of the URL, an Array of KeyValue.
+static Array rq_params;
 
-// cui_url_params and cui_url_set_params take no cui_ctx, so they are raw C
-// calls on the field's buffer.
 static void devtools2_request(Ui ui) {
-  if (rq_n < 0) rq_n = cui_url_params(rq_url.buffer, rq_params, 8);
+  if (!rq_params) rq_params = KeyValue.of_url(rq_url.text());
   ui.column (gap: 12, width: fill, max_width: 760) {
     cui_request_bar_result r = ui.request_bar("req", rq_method, rq_url);
-    if (r.changed) rq_n = cui_url_params(rq_url.buffer, rq_params, 8);
-    if (ui.kv_editor("params", rq_params, rq_n))
-      cui_url_set_params(rq_url.buffer, rq_url.capacity, rq_params, rq_n);
+    if (r.changed) rq_params = KeyValue.of_url(rq_url.text());
+    if (ui.kv_editor("params", rq_params)) rq_url.set_url_params(rq_params);
     ui.response_status(201, 0.142, 18400);
   }
 }

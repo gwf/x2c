@@ -4,8 +4,8 @@
     components through CUI's own input functions, so none needs a window.
 */
 
-import "x2cui" with App, Offscreen, RowState, TextField, Ui, x2cui_arguments,
-  x2cui_strings;
+import "x2cui" with App, KeyValue, Offscreen, RowState, TextField, Ui,
+  x2cui_arguments, x2cui_strings;
 
 #include <malloc/malloc.h>
 
@@ -565,6 +565,117 @@ static void a_literal_is_one_constant_array(void) {
   EXPECT_INT_EQ(p.count, 2);
 }
 
+// key-value pairs
+
+static cui_rect kv_rect;
+
+static void kv_frame(Offscreen screen, Array pairs) {
+  screen.begin();
+  Ui ui = screen.ui();
+  ui.column (pad: 8, width: fill) ui.kv_editor("headers", pairs);
+  kv_rect = ui.last_rect();
+  screen.end();
+}
+
+static void kv_click(Offscreen screen, Array pairs, float x, float y) {
+  Ui ui = screen.ui();
+  ui.input_mouse_move(x, y);
+  kv_frame(screen, pairs);
+  ui.input_mouse_button(left, true);
+  kv_frame(screen, pairs);
+  ui.input_mouse_button(left, false);
+  kv_frame(screen, pairs);
+  kv_frame(screen, pairs);
+}
+
+/* The editor edits an Array of KeyValue: turning a pair off and typing a
+   new pair reach the values of the Array. */
+static void a_kv_editor_edits_an_array(void) {
+  Array pairs = [KeyValue.new("Accept", "text/html", true, false),
+                 KeyValue.new("X-Id", "7d1c0a", true, false)];
+  Offscreen screen = auto Offscreen.open(480, 240);
+  for (int i = 0; i < 3; i++) kv_frame(screen, pairs);
+  KeyValue first = pairs[0];
+  kv_click(screen, pairs, kv_rect.x + 9, kv_rect.y + 9);
+  EXPECT_FALSE(first.enabled);
+  EXPECT_INT_EQ(pairs.len(), 2);
+  float fresh = kv_rect.y + kv_rect.h - 50;   // the empty key
+  kv_click(screen, pairs, kv_rect.x + 120, fresh);
+  screen.ui().input_text("Host");
+  for (int i = 0; i < 3; i++) kv_frame(screen, pairs);
+  EXPECT_INT_EQ(pairs.len(), 3);
+  KeyValue added = pairs[2];
+  EXPECT_TRUE(added.key == "Host");
+}
+
+// a board
+
+// Two columns of card ids, and where the first card and the second column
+// were drawn.
+typedef struct Board {
+  Array columns;
+  cui_rect card, target;
+  int moves;
+} Board;
+
+static void board_frame(Offscreen screen, Board &b) {
+  screen.begin();
+  Ui ui = screen.ui();
+  bool moved, added, clicked;
+  cui_kanban_move move;
+  ui.kanban (moved, move, "board")
+  for (int c = 0; c < 2; c++) {
+    Array cards = b.columns[c];
+    ui.kanban_column (added, c ? "Done" : "To do", cards.len(), width: 160) {
+      foreach (int id in cards)
+        ui.kanban_card (clicked, id) {
+          ui.text(%"Card $id");
+          if (id == 1) b.card = ui.last_rect();
+        }
+    }
+    if (c == 1) b.target = ui.last_rect();
+  }
+  screen.end();
+  if (!moved) return;
+  b.moves++;
+  Array from = b.columns[move.from_column], to = b.columns[move.to_column];
+  for (int k = 0; k < (int) from.len(); k++)
+    if ((int) from[k] == move.card) {
+      from.remove(k);
+      to.insert(move.to_index < (int) to.len() ? move.to_index : (int) to.len(),
+                move.card);
+      break;
+    }
+}
+
+/* A card dragged to the other column arrives as a move, which the program
+   applies to its own Arrays. A tone kept in data is named. */
+static void a_kanban_move_reaches_the_arrays(void) {
+  Board b = { .columns = [[1, 2], [3]] };
+  Offscreen screen = auto Offscreen.open(400, 300);
+  for (int i = 0; i < 3; i++) board_frame(screen, b);
+  Ui ui = screen.ui();
+  float x = b.card.x + b.card.w / 2, y = b.card.y + b.card.h / 2;
+  ui.input_mouse_move(x, y);
+  board_frame(screen, b);
+  ui.input_mouse_button(left, true);
+  board_frame(screen, b);
+  float tx = b.target.x + b.target.w / 2;
+  for (int step = 1; step <= 10; step++) {
+    ui.input_mouse_move(x + (tx - x) * step / 10, y + 20);
+    board_frame(screen, b);
+  }
+  ui.input_mouse_button(left, false);
+  for (int i = 0; i < 3; i++) board_frame(screen, b);
+  EXPECT_INT_EQ(b.moves, 1);
+  Array to_do = b.columns[0], done = b.columns[1];
+  EXPECT_INT_EQ(to_do.len(), 1);
+  EXPECT_INT_EQ(done.len(), 2);
+  EXPECT_INT_EQ(cui_tone.named(<rose>), CUI_TONE_ROSE);
+  EXPECT_INT_EQ(cui_tone.named(<accent>), CUI_TONE_ACCENT);
+  EXPECT_INT_EQ(cui_tone.named(<unknown>), CUI_TONE_NEUTRAL);
+}
+
 // lists
 
 typedef struct Picks {
@@ -739,6 +850,8 @@ void x2cui_suite(void) {
   $test.run(a_record_array_lowers_by_field_type);
   $test.run(an_option_array_fills_its_count);
   $test.run(a_literal_is_one_constant_array);
+  $test.run(a_kv_editor_edits_an_array);
+  $test.run(a_kanban_move_reaches_the_arrays);
   $test.run(string_lists_convert_once);
   $test.run(a_virtual_list_draws_the_rows_in_view);
   $test.run(a_table_row_reports_what_the_pointer_did);

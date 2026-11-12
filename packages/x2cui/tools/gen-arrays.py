@@ -25,7 +25,9 @@ BEGIN = "/* gen-arrays: begin generated %s */"
 END = "/* gen-arrays: end generated %s */"
 
 # No method: these return through pointers to pointers, or are variadic.
-SKIP = {"cui_signature_points"}
+SKIP = {"cui_signature_points",
+        # patches/focusable-canvas.patch adds these for `ui.item` alone.
+        "cui_canvas_ex", "cui_focus_visible"}
 # The parameter after the array that holds its count, where it is not the
 # next one. diff_view_rows takes the first row, then the capacity.
 COUNT_AFTER = {("cui_diff_view_rows", "rows"): "cap"}

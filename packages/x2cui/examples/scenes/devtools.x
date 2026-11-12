@@ -245,14 +245,14 @@ static void scene_keymap(Ui ui) {
 }
 
 static void scene_kv_editor(Ui ui) {
-  static cui_kv_pair headers[8] = {
-    { "Authorization", "Bearer 4f9c2e81d0b7a6", true, true },
-    { "Accept", "application/json", true },
-    { "X-Request-Id", "7d1c0a", false } };
-  static int count = 3;
+  static Array headers;
+  if (!headers) headers = [
+    KeyValue.new("Authorization", "Bearer 4f9c2e81d0b7a6", true, true),
+    KeyValue.new("Accept", "application/json", true, false),
+    KeyValue.new("X-Request-Id", "7d1c0a", false, false)];
   ui.column (width: 600, gap: 10) {
     ui.text("Headers", font: medium);
-    ui.kv_editor("headers", headers, count);
+    ui.kv_editor("headers", headers);
   }
 }
 

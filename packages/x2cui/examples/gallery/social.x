@@ -172,10 +172,10 @@ void page_social(Ui ui, Gallery g) {
     for (int k = 0; k < 4; k++) ui.carousel_slide () {
       String title = titles[k], desc = descs[k];
       ui.box (width: fill, height: fill,
-              bg: CUI_RGB(tops[k]), radius: 16, pad: 28,
+              bg: tops[k], radius: 16, pad: 28,
               gap: 8, justify: end) {
         ui.text(title, font: display, size: 24,
-                       color: CUI_RGB(0xffffff));
+                       color: 0xffffff);
         ui.text(desc, color: CUI_RGBA(0xffffffc0));
       }
     }
@@ -217,10 +217,10 @@ void page_social(Ui ui, Gallery g) {
         String name = names[idx];
         ui.card_stack_item (k)
         ui.box (width: fill, height: fill,
-                bg: CUI_RGB(cols[idx]), radius: 25, pad: 20,
+                bg: cols[idx], radius: 25, pad: 20,
                 justify: end, gap: 4) {
           ui.text(name, font: display, size: 22,
-                        color: CUI_RGB(0xffffff));
+                        color: 0xffffff);
           ui.text("Swipe right to save",
             size: 13, font: medium,
             color: CUI_RGBA(0xfffffff0));

@@ -7,23 +7,23 @@
 // The cron expression that the schedule picker edits, created by prepare.
 static TextField sc_cron;
 
+// The headers the key-value editor edits, an Array of KeyValue.
+static Array headers;
+
 static void prepare(void) {
   sc_cron = TextField.new(64);
   sc_cron.set("30 9 * * 1-5");
+  headers = [
+    KeyValue.new("Authorization", "Bearer 4f9c2e81d0b7a6", true, true),
+    KeyValue.new("Accept", "application/json", true, false),
+    KeyValue.new("X-Request-Id", "7d1c0a", false, false),
+    KeyValue.new("Accept", "text/html", true, false)];
 }
-
-static cui_kv_pair kv_pairs[12] = {
-  { "Authorization", "Bearer 4f9c2e81d0b7a6", true, true },
-  { "Accept", "application/json", true },
-  { "X-Request-Id", "7d1c0a", false },
-  { "Accept", "text/html", true },
-};
-static int kv_n = 4;
 
 static void devtools_kv(Ui ui) {
   ui.column (gap: 10, width: fill, max_width: 680) {
     ui.text("Headers", font: medium);
-    ui.kv_editor("headers", kv_pairs, kv_n);
+    ui.kv_editor("headers", headers);
   }
 }
 

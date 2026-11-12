@@ -125,8 +125,9 @@ its field or parameter decides the constant:
 | another `cui_T`, such as `cui_color` or `cui_font` | `accent`, `medium` | `CUI_COLOR_ACCENT`, `CUI_FONT_MEDIUM` |
 | an icon: an option named `icon`, `icon_*`, or `*_icon`, or a parameter CUI names `icon` | `plus` | `CUI_ICON_PLUS` |
 
-A number for a `cui_size` is pixels: `width: 26` is `CUI_PX(26)`, and
-`grow(1.5)` is `CUI_GROW(1.5)`. In `font: m.unread ? medium : body`, each
+A number for a `cui_color` is `0xRRGGBB`: `color: 0x3b82f6` is
+`CUI_RGB(0x3b82f6)`. A number for a `cui_size` is pixels: `width: 26` is
+`CUI_PX(26)`, and `grow(1.5)` is `CUI_GROW(1.5)`. In `font: m.unread ? medium : body`, each
 arm is lowered. A declared name keeps its own value, and so does a C
 macro such as `CUI_FILL` or `NULL`.
 
@@ -277,7 +278,21 @@ array. A program that passes a pointer rather than an array, or uses
 fewer elements than the array holds, writes every count of the call
 itself: `ui.trace_view("trace", tracks, 5, spans, used, ...)`. An editor
 that grows its array takes the array and its live count and supplies the
-capacity: `ui.kv_editor("headers", pairs, count)`.
+capacity: `ui.gradient_editor("stops", stops, count)`.
+
+The key-value editor edits x2c values: an `Array` of `KeyValue`, a class
+with `key`, `value`, `enabled`, and `secret`. It has no count or
+capacity; a pair typed into the empty row is pushed, and a removed pair
+leaves the Array. `KeyValue.of_url(url)` reads a URL's query parameters,
+and `field.set_url_params(pairs)` writes them back into a `TextField`:
+
+```x2c
+Array headers = [KeyValue.new("Accept", "text/html", true, false)];
+if (ui.kv_editor("headers", headers)) save(headers);
+```
+
+A tone kept in quoted data is a Symbol; `cui_tone.named(<violet>)` is the
+tone it names.
 
 The table and the data grid take their columns as a Map literal; see
 [Lists and tables](#lists-and-tables). The data grid draws only the

@@ -30,6 +30,8 @@
                                      *_icon, or a parameter CUI names
                                      icon
       a number for a cui_size        pixels: 26 is CUI_PX(26)
+      a number for a cui_color       0xRRGGBB: 0x3b82f6 is
+                                     CUI_RGB(0x3b82f6)
       grow(w) for a cui_size         CUI_GROW(w)
       test ? a : b                   each arm lowered
       an Array literal for a         a static array, with its count
@@ -136,8 +138,9 @@ meta List x2cui_value(Type type, List value) {
     case %(expr ? (array *elements)):
       return _array(type, elements);
   }
-  return _size(type) && Type.numeric(Code.type(value))
-    ? _cui_call("CUI_PX", value) : value;
+  if (!Type.numeric(Code.type(value))) return value;
+  if (_size(type)) return _cui_call("CUI_PX", value);
+  return type ~= %("cui_color") ? _cui_call("CUI_RGB", value) : value;
 }
 
 /** Returns the designated initializer of the record `record` that sets

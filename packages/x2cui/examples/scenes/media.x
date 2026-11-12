@@ -12,16 +12,16 @@ static void scene_dock_item(Ui ui) {
   ui.row (width: fill, height: fill,
           justify: center, align: end)
   ui.dock ("dock") {
-    ui.dock_item(folder, "Files", color: CUI_RGB(0x3b82f6),
+    ui.dock_item(folder, "Files", color: 0x3b82f6,
                                            running: true);
-    ui.dock_item(mail, "Mail", color: CUI_RGB(0x0ea5e9),
+    ui.dock_item(mail, "Mail", color: 0x0ea5e9,
                                         badge: 3, running: true);
     ui.dock_item(calendar, "Calendar",
-                 color: CUI_RGB(0xef4444));
-    ui.dock_item(music, "Music", color: CUI_RGB(0xec4899),
+                 color: 0xef4444);
+    ui.dock_item(music, "Music", color: 0xec4899,
                                           running: true);
     ui.dock_item(square_terminal, "Terminal",
-                 color: CUI_RGB(0x27272a));
+                 color: 0x27272a);
     ui.dock_separator();
     ui.dock_item(settings, "Settings");
     ui.dock_item(trash_2, "Trash");
@@ -112,10 +112,10 @@ static void scene_carousel(Ui ui) {
   ui.carousel ("tour", 3, slide, height: 200) {
     for (int k = 0; k < 3; k++) ui.carousel_slide ()
     ui.box (width: fill, height: fill,
-            bg: CUI_RGB(colors[k]), radius: 16, pad: 28,
+            bg: colors[k], radius: 16, pad: 28,
             gap: 8, justify: end) {
       ui.text(titles[k], font: display, size: 24,
-                         color: CUI_RGB(0xffffff));
+                         color: 0xffffff);
       ui.text(notes[k], color: CUI_RGBA(0xffffffc0));
     }
   }
@@ -171,10 +171,10 @@ static void scene_card_stack_item(Ui ui) {
   ui.card_stack (swiped, "deck", 3, width: 240, height: 200)
   for (int k = 0; k < 3; k++) ui.card_stack_item (k)
   ui.box (width: fill, height: fill,
-          bg: CUI_RGB(colors[k]), radius: 25, pad: 20,
+          bg: colors[k], radius: 25, pad: 20,
           gap: 4, justify: end) {
     ui.text(cities[k], font: display, size: 22,
-                       color: CUI_RGB(0xffffff));
+                       color: 0xffffff);
     ui.text("Swipe right to save", size: 13, font: medium,
                                    color: CUI_RGBA(0xfffffff0));
   }

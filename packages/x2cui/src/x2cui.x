@@ -401,6 +401,116 @@ void Ui.grid_cell_text(Ui u, String text) => cui_data_grid_cell_text(u, text);
 /** Returns the field's writable text for a component that edits it. */
 char *x2cui_buffer(TextField field) => field.buffer;
 
+// tones in data
+
+// CUI's tones, in the order `cui_tone` declares them.
+static SymbolSet tone_names =
+  %<neutral info success warning danger violet teal rose accent>;
+
+/** Returns the tone `name` names, as `<violet>` names the violet tone, for
+    a tone kept in quoted data; a name that is not a tone is neutral. */
+cui_tone cui_tone.named(Symbol name) {
+  int at = tone_names.index(name);
+  return at < 0 ? CUI_TONE_NEUTRAL : (cui_tone) at;
+}
+
+// key-value pairs
+
+/** One pair of `ui.kv_editor`: a key, its value, whether the pair is on,
+    and whether its value shows as dots. */
+class KeyValue {
+  String key, value;
+  bool enabled, secret;
+} *;
+
+void KeyValue.init(
+  KeyValue kv, String key, String value, bool enabled, bool secret) {
+  kv.key = key;
+  kv.value = value;
+  kv.enabled = enabled;
+  kv.secret = secret;
+}
+
+/* The C pairs CUI edits for one editor, kept between frames: CUI types a
+   new pair into the slot after the last until it is complete. */
+typedef struct PairSlots {
+  cui_kv_pair *pairs;
+  int capacity;
+} PairSlots;
+
+static void _free_slots(cui_ctx *ui, void *data) {
+  PairSlots *slots = data;
+  free(slots.pairs);
+}
+
+/** Edits `pairs`, an `Array` of `KeyValue`, in place, and returns true when
+    anything changed. Typing in the empty row at the end adds a pair, and
+    the x removes one. CUI edits its own C records, kept for the editor
+    between frames; each frame copies the pairs into them, and a change is
+    copied back, so `pairs` holds what the editor shows.
+*/
+bool Ui.kv_editor(Ui ui, String id, Array pairs, cui_kv_editor_opts opts) {
+  cui_id key = cui_make_id(ui, id) ^ 0x6b76;
+  PairSlots *slots = cui_state(ui, key, sizeof *slots);
+  int count = (int) pairs.len();
+  if (slots.capacity < count + 1) {
+    slots.capacity = count + 8;
+    slots.pairs = realloc(slots.pairs, slots.capacity * sizeof *slots.pairs);
+    memset(slots.pairs + count, 0,
+           (slots.capacity - count) * sizeof *slots.pairs);
+    cui_state_on_free(ui, key, _free_slots);
+  }
+  for (int i = 0; i < count; i++) _pair_to_c(pairs[i], slots.pairs[i]);
+  int edited = count;
+  bool changed = cui_kv_editor_ex(
+    ui, id, slots.pairs, &edited, slots.capacity, &opts);
+  if (changed) _pairs_from_c(pairs, slots.pairs, edited);
+  return changed;
+}
+
+/** Returns the query parameters of `url`, up to 32, as an `Array` of
+    `KeyValue`, all on. */
+Array KeyValue.of_url(String url) {
+  cui_kv_pair found[32];
+  int count = cui_url_params(url, found, 32);
+  Array pairs = [];
+  _pairs_from_c(pairs, found, count);
+  return pairs;
+}
+
+/** Replaces the query of the URL in `url` with the pairs of `pairs` that
+    are on. */
+void TextField.set_url_params(TextField url, Array pairs) {
+  int count = (int) pairs.len();
+  cui_kv_pair *c = calloc(count ? count : 1, sizeof *c);
+  for (int i = 0; i < count; i++) _pair_to_c(pairs[i], c[i]);
+  cui_url_set_params(url.buffer, url.capacity, c, count);
+  free(c);
+}
+
+static void _pair_to_c(KeyValue kv, cui_kv_pair &pair) {
+  snprintf(pair.key, sizeof pair.key, "%s", kv.key);
+  snprintf(pair.value, sizeof pair.value, "%s", kv.value);
+  pair.enabled = kv.enabled;
+  pair.secret = kv.secret;
+}
+
+static void _pairs_from_c(Array pairs, cui_kv_pair *edited, int count) {
+  while ((int) pairs.len() > count) pairs.take_last();
+  for (int i = 0; i < count; i++) {
+    cui_kv_pair pair = edited[i];
+    KeyValue kv = i < (int) pairs.len() ? pairs[i] : NULL;
+    if (!kv) {
+      kv = KeyValue.new("", "", false, false);
+      pairs.push(kv);
+    }
+    kv.key = String.new(pair.key);
+    kv.value = String.new(pair.value);
+    kv.enabled = pair.enabled;
+    kv.secret = pair.secret;
+  }
+}
+
 /* One native array for each List of Strings a component has been given,
    keyed by the List. A List is canonical and lives as long as the pool
    that interned it, so equal Lists share one entry and an entry never goes
@@ -792,12 +902,6 @@ inline cui_timeline_editor_result Ui.timeline_editor(
   cui_timeline_editor_opts opts) =>
   cui_timeline_editor_ex(ui, id, tracks, count, &time, &opts);
 
-/** Calls `cui_kv_editor_ex`. */
-inline bool Ui.kv_editor(
-  Ui ui, String id, cui_kv_pair *pairs, int &count, int capacity,
-  cui_kv_editor_opts opts) =>
-  cui_kv_editor_ex(ui, id, pairs, &count, capacity, &opts);
-
 /** Calls `cui_problems_ex`. */
 inline cui_problems_result Ui.problems(
   Ui ui, String id, const cui_diagnostic *diags, int count,
@@ -925,7 +1029,7 @@ expand %(
   prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell donut_chart
   sparkline otp_input reorder_begin (line_chart 1) (bar_chart 1)
   each_begin each_end item_begin table_row_begin cell_text grid_cell_text
-  (tour 1) toggle_group (reactions 1) (speed_dial 1)
+  kv_editor (tour 1) toggle_group (reactions 1) (speed_dial 1)
   (swipe_item_begin 1 3) (filter_bar 1) (tree_table_begin 1 3)
   diff_view_rows (presence 1) (ticker 1) heatmap (calendar_heatmap 2)
   (treemap 1) (radar_chart 1) (funnel 1) (sankey 2) (waffle 1)
@@ -935,10 +1039,10 @@ expand %(
   (month_calendar 2) (gantt 1) (toc 1) (checklist 1) multi_select
   (histogram_slider 1) (level_meter 1) (doc_tabs 1) (prop_vec 1)
   (hex_view 1) (flame_graph 1) (curve_editor 1) (gradient_editor 1)
-  (timeline_editor 1) (kv_editor 1) (problems 1) (pipeline 2)
-  (query_builder 1 3) (keymap 1) (commit_graph 1) (graph_view 1 3)
-  (waterfall 1) (trace_view 1 3) (test_explorer 1) (stack_trace 1)
-  (uptime 1) (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
+  (timeline_editor 1) (problems 1) (pipeline 2) (query_builder 1 3)
+  (keymap 1) (commit_graph 1) (graph_view 1 3) (waterfall 1)
+  (trace_view 1 3) (test_explorer 1) (stack_trace 1) (uptime 1)
+  (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
   (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
 macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)
