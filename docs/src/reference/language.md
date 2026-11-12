@@ -864,11 +864,10 @@ values. Delegation emits the field access and direct call; it adds no wrapper,
 temporary, runtime check, symbol, or dispatch table.
 
 Ordinary [dot-call lookup](#dot-call-lookup) runs first. Delegate fields are
-searched only if those lookups fail, and a member rewrite a program registers
-for the receiver's own type is tried before them. The shipped component
-`src/components/delegate-members.x` does this search. `$rewrite` registers
-it with the receiver pattern `%(expr <delegate> *)`. It runs only when the
-receiver's aggregate declares a delegate field. The search visits marked
+searched only if those lookups fail, and a member
+[rewrite rule](../library/modules/rewrite.md) that a program registers for the
+receiver's own type is tried before them. The search runs only when the
+receiver's aggregate declares a delegate field. It visits marked
 fields in source order to produce consistent diagnostics. One resolving path
 is used; two or more are an ambiguity error, regardless of field order. An
 explicit outer method therefore resolves an otherwise ambiguous pair.
@@ -3695,12 +3694,10 @@ the converted result, and returns to the literal grammar. In `%()`, `@` makes
 the same crossing but splices the evaluated `List`'s elements. Collection
 insertion converts to the representation required by the literal; `String`
 insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
-`Var`, and supported numeric values under the existing conversion rules. The
-shipped component `src/components/interpolation.x` joins a `%""`
-literal's parts, a translator that `$rewrite(%(expr ("String") (segments *)))`
-registers on the literal's `segments` head. A program's rule for `String.join`
-receives only the calls that the program writes, including one inside a `$`
-insertion. It does not receive the call that the shipped rule writes.
+`Var`, and supported numeric values under the ordinary conversion rules. A
+program's rewrite rule for `String.join` receives only the calls the program
+writes, including one inside a `$` insertion, not the join the compiler
+generates for `%""`.
 
 The parentheses are part of the unquote and contain one complete x2c expression,
 including nested calls, indexing, casts, assignments, conditionals, comma
@@ -3857,8 +3854,7 @@ an open list, string, block comment, or symbol literal, a reader prefix without
 its form, or an escape cut off by end of input. `<malformed>` means the bytes
 already prove the form invalid, such as a bad escape, raw string newline,
 malformed number, invalid closed symbol literal, or stray closing parenthesis.
-The shared `Tokenizer` classifies lexemes; `Lisp.read` checks structural form
-balance and preserves the form-start cursor on either failure.
+On either failure, `Lisp.read` leaves its cursor at the start of the form.
 
 ### Atoms
 
@@ -3870,12 +3866,11 @@ balance and preserves the form-start cursor on either failure.
 - a private `<lsym>` whose payload is the canonical `String` pointer otherwise.
 
 `Atom.intern` is the only function that maps a spelling to a representation.
-Repeated construction of one spelling has identical `Var` bits. Long `Atom`
-equality therefore completes in the existing raw-`Var` fast path, and its hash
-is the `String`'s cached hash. `Atom.str` returns the exact bytes, and `Atom`
-representation escapes delimiters, numeric-looking prefixes, comment openers,
-whitespace, controls, and backslashes so both `%()` and `Lisp.read` recover the
-same value.
+Repeated construction of one spelling has identical `Var` bits. Two `Atom`s
+are equal exactly when their `Var` bits are equal. `Atom.str` returns the
+exact bytes, and `Atom` representation escapes delimiters, numeric-looking
+prefixes, comment openers, whitespace, controls, and backslashes so both `%()`
+and `Lisp.read` recover the same value.
 
 Long `Atom`s follow the canonical `String` pool lifetime, which is described in
 [scopes and lifetime](../guide/memory.md). Promoting a `List` also promotes
@@ -4090,10 +4085,8 @@ format specifiers convert it to the required promoted C type through
 static format literal. Automatic lowering covers numeric conversions, `%c`,
 `%s`, `*` width and precision, and the `hh`, `h`, `l`, `ll`, and `L` modifiers.
 Other modifiers, pointer and count conversions, wide strings and characters,
-and positional formats require explicit native arguments. This lowering is
-the compiler component `src/components/printf-format.x`, which registers a `$rewrite`
-call pattern for each family member. A project can register its own call
-pattern the same way, for example for its own logging function.
+and positional formats require explicit native arguments. A project can add
+its own function, such as a logging call, to this family with a rewrite rule.
 
 ### Dynamic truthiness and binary operators
 
@@ -4165,22 +4158,9 @@ For `+`, when each operand is a `String`, an alias reaching `String`, a
 the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
 
-`src/expressions/operators.x` resolves String addition and ordinary protocol
-operators. `src/transform/operators.x` lowers Var comparisons. The shipped
-component `src/components/dynamic-operators.x` supplies unresolved dynamic
-arithmetic, compound assignments, increments, and unary fallback rejection
-after protocol resolution. It registers
-each translator with `$rewrite` and a Match pattern typed `Var`, such as
-`%(expr ("Var") (op (!or + - (!quote *) / % ...) ? ?))`, which keys the rule
-by each operator the pattern names and `Var`. A pattern that types the
-operation or an operand `Var`, or an alias of it, takes the dynamic
-operations. They run after protocol operators resolve, only when an operand
-has `Var` identity, so native operands never reach them; each operation
-arrives typed `Var`. A program's rule registered for the same operator is
-tried first. The holes in a macro pattern select the operands that its rule
-receives, so a rule for `$!Money{...}` with `typedef Var Money` leaves other
-`Var` operands to the shipped rules. The same order applies to every shipped
-component: a program's rule for the same head is tried first.
+A program's rewrite rule for an operator is tried before the built-in dynamic
+operation; a rule whose pattern names a `Var` typedef such as `Money` receives
+only those operands.
 
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each
@@ -4816,11 +4796,8 @@ after matching, with captures visible, and uses ordinary truth conversion.
 False tries the next arm; errors propagate normally. A successful guard runs
 the body once.
 
-The shipped component `src/components/pattern-match.x` lowers `match`.
-`$rewrite($matched)` registers it on the `match` statement head; a rule a
-program registers there runs first. A program's `switch` rule receives the
-statements in the arms. It does not receive the `switch` that the lowering
-writes.
+A program's rewrite rule for `match` runs first; a rule for `switch` does not
+see the `switch` that `match` lowering writes.
 
 ### Pattern conditions
 
@@ -4864,10 +4841,8 @@ Values are restricted recursively to `Null`/`nil`, numeric and enum values,
 `Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
 pointers, mutable containers, resources, custom objects, and other
 identity-bearing values are invalid. A value whose own type is invalid is a
-compiler error; invalid contents of a `List` or `Var` value reach `Error`'s
-`<bad-types>` raw floor when the `raise` runs. The shipped component
-`src/components/raise.x` performs the conversions and the check.
-`$rewrite($raised)` registers on the `raise` statement head. The compiler
+compiler error; invalid contents of a `List` or `Var` value raise
+`<bad-types>` when the `raise` runs. The compiler
 evaluates the converted code and values once each, left to right, and builds
 their literals when the `raise` runs. A `try` may have adjacent `catch` arms:
 
