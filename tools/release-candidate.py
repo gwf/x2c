@@ -368,8 +368,9 @@ def publish(args):
     existing = subprocess.run(['gh', 'release', 'view', tag, '--repo', args.repository,
                                '--json', 'tagName'], capture_output=True, text=True)
     if existing.returncode:
+        title = tag if args.destination == 'staging' else 'x2c ' + manifest['version']
         command = ['gh', 'release', 'create', tag, '--repo', args.repository,
-                   '--draft', '--title', tag, '--notes',
+                   '--draft', '--title', title, '--notes',
                    f"Source gwf/x2c@{manifest['source_sha']}; candidate {manifest['identity']}."]
         if args.destination == 'staging':
             command.append('--prerelease')

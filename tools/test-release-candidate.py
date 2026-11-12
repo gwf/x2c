@@ -209,6 +209,35 @@ class Candidates(unittest.TestCase):
         self.assertFalse(any('--clobber' in call for call in calls))
         self.assertFalse(any(call[:3] == ('gh', 'release', 'edit') for call in calls))
 
+    def created_release(self, destination, repository):
+        self.sites()
+        calls = []
+        def fake_run(*args, **kwargs):
+            calls.append(args)
+            if args[:3] == ('gh', 'release', 'view'):
+                raise ValueError('stop after create')
+            return ''
+        with patch.object(c, 'run', side_effect=fake_run), \
+                patch.object(c, 'guard'), \
+                patch.object(c, 'verify', return_value=self.manifest), \
+                patch.object(c.subprocess, 'run') as probe:
+            probe.return_value.returncode = 1
+            with self.assertRaisesRegex(ValueError, 'stop after create'):
+                c.publish(argparse.Namespace(candidate=self.candidate,
+                          repository=repository, destination=destination))
+        return calls[0]
+
+    def test_production_release_is_titled_with_the_version(self):
+        create = self.created_release('production', 'gwf/x2c')
+        self.assertEqual(create[3], 'v1.2.3')
+        self.assertEqual(create[create.index('--title') + 1], 'x2c 1.2.3')
+
+    def test_staging_release_is_titled_with_its_tag(self):
+        create = self.created_release('staging', 'gwf/x2c-staging')
+        tag = self.manifest['identity']
+        self.assertEqual(create[3], tag)
+        self.assertEqual(create[create.index('--title') + 1], tag)
+
 
 if __name__ == '__main__':
     unittest.main()
