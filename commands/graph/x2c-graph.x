@@ -2841,10 +2841,11 @@ String x2c_embedded_identity(void);
 
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
-  if (argc == 2 && (!strcmp(argv[1], "--help") ||
-                    !strcmp(argv[1], "-h"))) {
-    $output.graph.usage(Stdout);
-    return 0;
+  for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "--help") || !strcmp(argv[i], "-h")) {
+      $output.graph.usage(Stdout);
+      return 0;
+    }
   }
   String verb = argc > 1 ? String.new(argv[1]) : "";
   if (verb in
