@@ -322,6 +322,7 @@ main:focus {
 
 .landing {
   background: var(--paper);
+  overflow-x: clip;
 }
 
 .landing-hero,
@@ -371,42 +372,59 @@ main:focus {
   text-wrap: nowrap;
 }
 
-.hero-title-line {
+/* Fixed hit area while the title updates one character at a time. */
+.hero-title {
+  overflow: visible;
   display: block;
   position: relative;
-  width: max-content;
-  letter-spacing: -0.02em;
+  width: calc(100% + 0.24em);
+  margin-inline: -0.08em;
+  padding: 0 0.16em 0 0.08em;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: 1.12;
+  text-align: left;
+  white-space: nowrap;
+  cursor: default;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Fit each headline to the container using Instrument Serif's proportions. */
-.hero-title-line:first-child {
-  font-size: 13.849cqw;
+.hero-title:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 10px;
 }
 
-/*
- * Lift: under a mouse pointer, a copy of each letter is placed over it by
- * the title's script, and the nearest copy rises a few pixels.
- * The line's own text turns transparent while the copies are shown. A copy
- * shares the line's font and line height, so at left: <letter> it covers
- * the letter exactly.
- */
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  .hero-heading h1 {
-    isolation: isolate;
-  }
+.title-text {
+  display: inline-block;
+  white-space: pre;
+}
 
-  .hero-title-line .lift-copy {
-    position: absolute;
-    top: 0;
-    color: var(--dark);
-    pointer-events: none;
-    transform: translateY(calc(var(--lift, 0) * -1px));
-    transition: transform 240ms cubic-bezier(0.2, 0.7, 0.3, 1);
-  }
+.title-falling-letter {
+  position: absolute;
+  top: 0;
+  display: block;
+  white-space: pre;
+  pointer-events: none;
+}
 
-  .hero-heading h1.is-live .hero-title-line {
-    color: transparent;
-  }
+/* The question mark invites interaction only while the opening title rests. */
+.title-question.is-dancing {
+  transform-origin: 50% 80%;
+  animation: title-question-dance 1200ms ease-in-out;
+}
+
+@keyframes title-question-dance {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(6deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title-question.is-dancing { animation: none; }
 }
 
 .hero-heading p {

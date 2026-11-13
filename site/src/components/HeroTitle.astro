@@ -1,106 +1,160 @@
 ---
-const { html } = Astro.props;
+const { subject, opening, ending } = Astro.props;
 ---
 
-<h1 data-lift>{html.split(/<br\s*\/?>/i).map((line) =>
-  <span class="hero-title-line" set:html={line} />
-)}</h1>
+<h1>
+  <button class="hero-title" type="button"
+    aria-label={`${subject} ${opening} Click to change the title.`}
+    data-title data-subject={subject} data-opening={opening} data-ending={ending}>
+    <span class="title-text" aria-hidden="true">{subject} {opening}</span>
+  </button>
+</h1>
 
 <script>
-  // Lift: only the nearest letter within 80px of the pointer rises,
-  // up to 5px, and eases back as the pointer moves. While the pointer is over the title, each letter is
-  // covered by a copy placed at the letter's measured position, and the
-  // copies move; the title's own text never changes layout. Touch and
-  // reduced motion get the static title.
-  const title = document.querySelector<HTMLElement>("[data-lift]")!;
-  const lines = [...title.querySelectorAll<HTMLElement>(".hero-title-line")];
-  const able = matchMedia(
-    "(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)");
-  type Spot = { copy: HTMLElement; x: number; top: number; bottom: number; rise: number };
-  let spots: Spot[] = [];
-  let last: PointerEvent | null = null;
+  const title = document.querySelector<HTMLButtonElement>("[data-title]")!;
+  const text = title.querySelector<HTMLElement>(".title-text")!;
+  const subject = title.dataset.subject!;
+  const prefix = `${title.dataset.ending} `;
+  const suffix = ` ${title.dataset.opening}`;
+  const steps = prefix.length;
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const shotSpeed = 2000;
+  const shiftPause = 10;
+  const letters = [...suffix].map((char) => {
+    const letter = document.createElement("span");
+    letter.textContent = char;
+    letter.className = char === "?" ? "title-falling-letter title-question" : "title-falling-letter";
+    letter.setAttribute("aria-hidden", "true");
+    title.append(letter);
+    return letter;
+  });
+  type Spot = { x: number; width: number; fits: boolean };
+  type Shot = { start: number; end: number; x: number; distance: number };
+  let frames: Spot[][] = [];
+  let shifts: number[] = [];
+  let shots: (Shot | undefined)[] = [];
+  let elapsed = 0;
+  let end = 0;
+  let forward = false;
   let frame = 0;
-  let timer = 0;
+  let lastTime: number | null = null;
+  let enteredAt = -Infinity;
 
-  function cover(line: HTMLElement): Spot[] {
-    const made: Spot[] = [];
-    const origin = line.getBoundingClientRect();
-    const range = document.createRange();
-    for (const node of [...line.childNodes]) {
-      if (node.nodeType !== Node.TEXT_NODE) continue;
-      const text = (node as Text).data;
-      for (let i = 0; i < text.length; i++) {
-        if (text[i] === " ") continue;
-        range.setStart(node, i);
-        range.setEnd(node, i + 1);
-        const r = range.getBoundingClientRect();
-        const copy = document.createElement("span");
-        copy.className = "lift-copy";
-        copy.setAttribute("aria-hidden", "true");
-        copy.textContent = text[i];
-        copy.style.left = `${r.left - origin.left}px`;
-        line.append(copy);
-        made.push({ copy, x: r.left + r.width / 2 + scrollX,
-          top: r.top + scrollY, bottom: r.bottom + scrollY, rise: 0 });
+  const question = title.querySelector<HTMLElement>(".title-question")!;
+  let inviting = false;
+  let danceTimer = 0;
+
+  function scheduleDance() {
+    danceTimer = window.setTimeout(() => {
+      question.classList.add("is-dancing");
+    }, 6000 + Math.random() * 12000);
+  }
+
+  function setInvitation(active: boolean) {
+    active = active && !reducedMotion.matches;
+    if (active === inviting) return;
+    inviting = active;
+    clearTimeout(danceTimer);
+    question.classList.remove("is-dancing");
+    if (inviting) scheduleDance();
+  }
+
+  question.addEventListener("animationend", () => {
+    question.classList.remove("is-dancing");
+    if (inviting) scheduleDance();
+  });
+  reducedMotion.addEventListener("change", () => setInvitation(!forward && elapsed === 0));
+
+  function measure() {
+    const bounds = title.getBoundingClientRect();
+    const right = bounds.right - parseFloat(getComputedStyle(title).paddingRight);
+    frames = Array.from({ length: steps + 1 }, (_, step) => {
+      const leading = prefix.slice(prefix.length - step);
+      text.textContent = leading + subject + suffix;
+      const range = document.createRange();
+      return [...suffix].map((_, index) => {
+        const offset = leading.length + subject.length + index;
+        range.setStart(text.firstChild!, offset);
+        range.setEnd(text.firstChild!, offset + 1);
+        const rect = range.getBoundingClientRect();
+        return { x: rect.left - bounds.left, width: rect.width, fits: rect.right <= right };
+      });
+    });
+    const completed = elapsed === end;
+    shifts = [0];
+    shots = [];
+    end = 0;
+    for (let step = 1; step <= steps; step++) {
+      end += shiftPause;
+      shifts.push(end);
+      // Finish each rejected letter's flight before the next shift or shot.
+      for (let index = letters.length - 1; index >= 0; index--) {
+        if (shots[index] || frames[step][index].fits) continue;
+        const spot = frames[step][index];
+        const distance = Math.max(0, document.documentElement.clientWidth - bounds.left - spot.x + spot.width);
+        const flight = suffix[index].trim()
+          ? distance / shotSpeed * 1000 : 0;
+        shots[index] = { start: end, end: end + flight, x: spot.x, distance };
+        end += flight;
       }
     }
-    return made;
+    if (!frame) elapsed = forward && completed ? end : 0;
+    else elapsed = Math.min(elapsed, end);
+    render();
   }
 
-  function place() {
-    frame = 0;
-    if (!last) return;
-    let nearest: Spot | undefined;
-    let distance = 80;
-    for (const s of spots) {
-      const dy = Math.max(0, s.top - last.pageY, last.pageY - s.bottom);
-      const d = Math.hypot(last.pageX - s.x, dy);
-      if (d < distance) { nearest = s; distance = d; }
-    }
-    for (const s of spots) {
-      const rise = s === nearest
-        ? 2.5 + 2.5 * Math.cos((Math.PI * distance) / 80) : 0;
-      if (rise !== s.rise) {
-        // Reset the previous letter immediately so only one is displaced.
-        s.copy.style.transition = rise ? "" : "none";
-        s.rise = rise;
-        s.copy.style.setProperty("--lift", rise.toFixed(2));
-      }
-    }
+  function render() {
+    if (!frames.length) return;
+    let step = 0;
+    while (step < steps && elapsed >= shifts[step + 1]) step++;
+    const atStart = !forward && elapsed === 0;
+    if (atStart) step = 0;
+    setInvitation(atStart);
+    text.textContent = prefix.slice(prefix.length - step) + subject;
+    letters.forEach((letter, index) => {
+      const shot = shots[index];
+      const fired = !atStart && shot && elapsed >= shot.start;
+      const finished = fired && elapsed >= shot.end;
+      const p = fired && shot.end > shot.start
+        ? (elapsed - shot.start) / (shot.end - shot.start) : 0;
+      const eased = Math.min(1, p) ** 2;
+      const x = fired ? shot.x + shot.distance * eased : frames[step][index].x;
+      letter.style.left = `${Math.round(x)}px`;
+      letter.style.visibility = finished ? "hidden" : "visible";
+    });
   }
 
-  function enter(e: PointerEvent) {
-    if (e.pointerType !== "mouse" || !able.matches || spots.length) return;
-    // Copies from a leave that is still settling go now, or they would
-    // stay under the new ones.
-    clearTimeout(timer);
-    for (const old of title.querySelectorAll(".lift-copy")) old.remove();
-    spots = lines.flatMap(cover);
-    title.classList.add("is-live");
+  function advance(now: number) {
+    const delta = lastTime === null ? 0 : now - lastTime;
+    lastTime = now;
+    elapsed = forward ? Math.min(end, elapsed + delta) : Math.max(0, elapsed - delta);
+    render();
+    frame = elapsed !== (forward ? end : 0) ? requestAnimationFrame(advance) : 0;
   }
 
-  function move(e: PointerEvent) {
-    if (e.pointerType !== "mouse" || !able.matches) return;
-    if (!spots.length) enter(e);
-    last = e;
-    frame ||= requestAnimationFrame(place);
-  }
-
-  function leave() {
-    if (!spots.length) return;
+  function toggle() {
     cancelAnimationFrame(frame);
-    frame = 0;
-    for (const s of spots) s.copy.style.setProperty("--lift", "0");
-    const settled = spots;
-    spots = [];
-    timer = window.setTimeout(() => {
-      title.classList.remove("is-live");
-      for (const s of settled) s.copy.remove();
-    }, 340);
+    forward = !forward;
+    setInvitation(false);
+    title.setAttribute("aria-label", `${forward ? prefix + subject + "." : subject + suffix} Click to change the title.`);
+    if (reducedMotion.matches) {
+      elapsed = forward ? end : 0;
+      render();
+    } else {
+      lastTime = null;
+      frame = requestAnimationFrame(advance);
+    }
   }
-
-  title.addEventListener("pointerenter", enter);
-  title.addEventListener("pointermove", move);
-  title.addEventListener("pointerleave", leave);
-  able.addEventListener("change", () => { if (!able.matches) leave(); });
+  new ResizeObserver(measure).observe(title);
+  document.fonts.ready.then(measure);
+  title.addEventListener("pointerenter", (event) => {
+    if (event.pointerType !== "mouse") return;
+    enteredAt = performance.now();
+    toggle();
+  });
+  title.addEventListener("click", (event) => {
+    // A click immediately following mouse entry belongs to the same gesture.
+    if (event.detail && performance.now() - enteredAt < 900) return;
+    toggle();
+  });
 </script>

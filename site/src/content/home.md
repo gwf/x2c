@@ -1,5 +1,7 @@
 ---
-title: Programming is Dead.<br/>Long Live Programming.
+titleSubject: Programming
+titleOpening: is Dead?
+titleEnding: Long Live
 kicker: "x2c is a language for people who love to code."
 ---
 
