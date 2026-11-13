@@ -62,7 +62,9 @@ continue to use its own methods.
 A typedef can inherit the nearest visible ancestor's resolved protocol
 methods without its own adoption. It also inherits the associated types,
 conversions, and representation unchanged. The compiler creates no new
-adoption, adapter, alias, descriptor, tag, or registration for that use.
+adoption, adapter, alias, descriptor, tag, or registration for that use. A
+`Var` descriptor is the per-tag table of methods the runtime uses for boxed
+values.
 
 An explicit adoption on the typedef takes precedence and resolves those
 choices again. If it is invalid, the compiler reports the error; it does not
@@ -147,8 +149,9 @@ gives the [linkage and visibility rules](../reference/language.md#protocols).
 An adoption needs only the conversions that its generated adapters use. Name
 the forward conversion `Base P.base(P)` and the reverse `P Base.p(Base)`. The
 forward conversion must accept every participant value. The reverse may fail
-for a base value that holds no `P`. `Var(T)` descriptor thunks both unbox
-arguments and box results, so most object participants need both:
+for a base value that holds no `P`. `Var(T)` descriptor thunks, the
+generated descriptor entries that call `T`'s methods, both unbox arguments
+and box results, so most object participants need both:
 
 ```x2c
 ~typedef struct Vec *Vec;
@@ -253,8 +256,9 @@ participation even though both conversion functions still exist.
 
 ### Polar: a total forward view
 
-Polar implements `magnitude` and inherits the `Cartesian.angle` member.
-The generated `Polar.angle` needs only the total forward view:
+Polar implements `magnitude`, and the compiler adapts the base's
+`Cartesian.angle` through the `Polar.cartesian` view. The generated `Polar.angle` needs only the total forward
+view:
 
 ```x2c
 #include <math.h>
@@ -310,9 +314,8 @@ a hard error at `protocol Cartesian(Polar);`.
 
 ### Bytes: ordinary defaults and punctuation
 
-The built-in manifest declares `protocol Block(Bytes);` centrally. The
-`Bytes.block` forward view is declared in `common.x` and implemented in
-`block.x`; no reverse `Block.bytes` adapter is needed. Members such as
+The runtime declares `protocol Block(Bytes);` with a `Bytes.block` forward
+view; no reverse `Block.bytes` adapter is needed. Members such as
 `len`, `truth`, `pop`, `free`, and `truncate` forward through that view.
 
 ```x2c
