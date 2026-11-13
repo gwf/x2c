@@ -212,8 +212,9 @@ macro Expression $note.expressions_untyped_identifier(Expr $expression) =>
   ({
     Var found = NULL;
     List bindings = NULL;
-    String name = List.try_search(
-        $expression, %(expr () (ident ?)), found, bindings)
+    int untyped = List.try_search(
+      $expression, %(expr () (ident ?)), found, bindings);
+    String name = untyped
       ? Ast.binding_spelling(((List) found).caddr().cadr()) : NULL;
     name ? %"give '$name' a declared x2c type before boxing it"
          : "give the expression a declared x2c type before boxing it";

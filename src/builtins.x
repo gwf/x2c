@@ -192,11 +192,10 @@ static List _foreach_expand(
       "foreach requires one binding or a two-name destructuring declaration");
   List spec = direct ? %() : _typed_cursor_spec(type, targets);
   if (!direct && !spec) spec = _cursor_spec(type, type, targets.len());
-  if (!direct && !converter && !spec) {
+  if (!direct && !converter && !spec)
     x2c_diagnostic_fail(
       %"type $(type.spelling()) is not iterable",
       "declare a matching try_next cursor or an Iter protocol adoption");
-  }
   Foreach f = {
     .declaration = declaration, .collection = collection, .body = body,
     .targets = targets, .type = type, .iterator = iterator, .item = item,
