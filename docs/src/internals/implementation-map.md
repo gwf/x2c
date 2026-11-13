@@ -37,7 +37,7 @@ int sum(List numbers) {
 Print the AST after lowering:
 
 ```sh
-./builds/0/x2c translate --dump-transforms sum.x
+./x2c translate --dump-transforms sum.x
 ```
 
 ```text

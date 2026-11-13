@@ -48,7 +48,8 @@ builds and is not tracked. `include/x2c/` holds only symlinks: the runtime
 `.x` sources from `lib/`, and the `.h` files stage 0 generated from them.
 That is where `cc -iquote include/x2c` finds runtime headers. The C under
 `bootstrap/` is tracked, and it is re-emitted from a known-good stage 0
-instead of edited by hand. The compiler under development is `builds/0/x2c`; see
+instead of edited by hand. The compiler under development is
+`builds/0/x2c`, which `./x2c` links to; see
 [building the compiler](building.md) for how it is built.
 
 ## The compiler pipeline
@@ -75,8 +76,8 @@ source
 
 Most phases have a flag that prints their output and stops, so the same file
 can be printed after each phase; the flags are in
-[compiler options](../reference/cli.md). The example below follows one file
-through the phases.
+[inspection modes](../reference/cli.md#inspection-modes). The example below
+follows one file through the phases.
 
 ### A worked example
 
@@ -91,7 +92,7 @@ directory,
 
 ```sh
 mkdir -p /tmp/x2c-arch
-./builds/0/x2c translate --out-dir /tmp/x2c-arch greet.x
+./x2c translate --out-dir /tmp/x2c-arch greet.x
 ```
 
 it produces `greet.h`:
@@ -160,7 +161,7 @@ percent/angle literal choices; retagging does not rescan literal contents.
 C keywords, `defer`, and the two C thread-local spellings stay reserved.
 
 ```sh
-./builds/0/x2c translate --dump-tokens greet.x
+./x2c translate --dump-tokens greet.x
 ```
 
 ```text
@@ -379,7 +380,7 @@ and `meta` call slots are evaluated when that binder reaches them; there is no
 second macro grammar or post-expansion validation pass.
 
 ```sh
-./builds/0/x2c translate --dump-ast greet.x
+./x2c translate --dump-ast greet.x
 ```
 
 ```text
@@ -407,7 +408,7 @@ no dynamic references, so `src/literals/literals.x` recorded it as a cacheable
 constant and the AST refers to it by slot:
 
 ```sh
-./builds/0/x2c translate --dump-cache greet.x
+./x2c translate --dump-cache greet.x
 ```
 
 ```text
@@ -446,7 +447,7 @@ them `volatile` unless their address escapes. Transfer rewriting follows
 expression and lambda normalization within the function.
 
 ```sh
-./builds/0/x2c translate --dump-transforms greet.x
+./x2c translate --dump-transforms greet.x
 ```
 
 ```text
@@ -535,7 +536,7 @@ too, with `.x` include targets rewritten to the generated `.h` they correspond
 to.
 
 ```sh
-./builds/0/x2c translate --dump-code greet.x
+./x2c translate --dump-code greet.x
 ```
 
 ```text

@@ -9,7 +9,7 @@ call-frame machinery.
 Build it from the repository root:
 
 ```sh
-./builds/0/x2c build --output /tmp/reference-lisp \
+./x2c build --output /tmp/reference-lisp \
   examples/programs/literate-lisp.x
 /tmp/reference-lisp --selftest
 /tmp/reference-lisp -e '(map (lambda (x) (* x x)) (list 1 2 3 4))'
@@ -172,7 +172,7 @@ its output alongside the other examples. The optional differential checker
 builds both implementations and compares exit status, stdout, and stderr:
 
 ```sh
-x2c script examples/programs/check-reference-lisp --build
+./x2c script examples/programs/check-reference-lisp --build
 ```
 
 The corpus covers ordinary values, arithmetic, macros, capture, shadowing,
