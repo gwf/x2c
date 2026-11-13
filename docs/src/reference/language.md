@@ -141,9 +141,6 @@ named `expand` remains usable.
 between two operands, and `match` as `match (...)` followed by `case` or
 `{`. Elsewhere both are identifiers.
 
-`in` and `match` retain their existing contextual rules, described under
-[Directives in the generated C](#directives-in-the-generated-c).
-
 ### Module blocks
 
 A module block splits one large source file across a directory without
@@ -548,6 +545,8 @@ or struct belongs to its enclosing
 aggregate, and `.` reaches it through a pointer like any other member. `.`
 reaches through one pointer level, so a pointer to a pointer typedef keeps
 `(*pointer).field`.
+
+### Methods and `Self`
 
 x2c also recognizes method-style calls such as `list.len()`. The namespaced
 function is selected from the static receiver type. When that function
@@ -1084,7 +1083,7 @@ The form is flat. Targets must be simple identifiers. Nested targets, members,
 indexed targets, dereferenced pointer targets, and rest captures are not
 supported.
 
-### Protocols
+## Protocols
 
 Protocols declare a compile-time relationship between a concrete base and
 explicit participant types. The grammar is:
@@ -1211,7 +1210,7 @@ participants, a plain `protocol Var(PrivateType);` for an internal type that
 crosses `Var`, and an explicit `static protocol PrivateBase(PrivateType);` for
 a fully private relationship.
 
-#### Member resolution
+### Member resolution
 
 Each adopted member resolves independently. Omitting one does not prevent the
 others from working.
@@ -1257,7 +1256,7 @@ A participant method with the right name but an incompatible signature is a
 `sig-conflict`. The compiler reports an error at the adoption and identifies
 the protocol member and conflicting definition.
 
-#### Associated types
+### Associated types
 
 `associated Name = Default;` declares a type variable local to the protocol.
 A generated member has one owner. The compiler infers a participant's
@@ -1269,7 +1268,7 @@ Calls through a boxed value pass associated arguments and results as `Var`;
 the generated thunk converts each exactly once. Direct calls keep the
 participant's static signature.
 
-#### Dot-call lookup
+### Dot-call lookup
 
 A dot call visits the receiver's static type, then each typedef parent. At
 each type it tries the type's ordinary method, then a method an imported
@@ -1281,7 +1280,7 @@ not. When that conformance is inherited from an ancestor, a call that the
 type's own method would otherwise handle is an error: adopt the protocol for
 that type so its own method is selected.
 
-#### Conversions required by adapters
+### Conversions required by adapters
 
 The selected methods determine which conversions an adoption needs. The
 compiler generates adapters for those methods and requires only the
@@ -1321,7 +1320,7 @@ error at the adoption, naming the method that needs it. For an ordinary
 protocol, a member the participant implements needs no adapter, so its
 signature may use `T` inside a compound type, as in `int T_area(T *self)`.
 
-#### Operators
+### Operators
 
 Operators call the same resolved methods as dot syntax. The mappings include:
 
@@ -1403,7 +1402,7 @@ The lvalue is evaluated once. Its current value is passed to the member once,
 and the returned `Participant` is stored once. Compound assignment and prefix
 forms return the stored value; postfix forms return the original value.
 
-#### Members shared by several protocols
+### Members shared by several protocols
 
 A participant implementation satisfies every adopted protocol that declares
 the same compatible member, and no protocol generates that member.
@@ -2009,6 +2008,8 @@ target's captured source must participate in the decorator's `Match`
 replacement, and dropping it makes the match fail. Imported decorators work
 without an extra prototype.
 
+### Keyword aliases
+
 A `.x` file may give a visible macro or decorator an identifier spelling:
 
 ```text
@@ -2508,6 +2509,8 @@ A named `case` whose arguments are all binders, such as `case $add(?left,
 ?right):`, keeps the recognition described above, including pending
 invocations. One with a nested pattern among its arguments, such as
 `case $add(?left, $neg(?right)):`, uses the derived pattern.
+
+### Quotations
 
 A quotation is an anonymous macro applied where it is written: `$!( expression
 )` for an expression, `$!{ items }` for statements, and `$!Kind{ ... }` for
@@ -3370,6 +3373,8 @@ prototype before any file-scope initializer that references it, and no
 incompatible function-pointer cast is emitted. The expression therefore suits
 private descriptor tables and other fixed C callback positions.
 
+## Classes, regions, and managed declarations
+
 ### Class declarations
 
 The shipped `class` keyword aliases the `$class` NamedType decorator. See
@@ -3415,13 +3420,23 @@ or a function definition, such as `auto int f(void) { ... }`. An
 expression-bodied function can use the prefix too. Normal `return`, `break`,
 `continue`, and error transfer retain their meaning.
 
+Region `auto` opens one region around its following statement and defers its
+close inside an inner block containing that statement. `auto` around a loop
+creates one region; `auto` around its body creates one per iteration.
+
 `auto (pointer)` evaluates the Scope-pointer expression once, selects that
 allocation destination for the following statement or function body, and
-restores the previous destination on exit. It does not release the selected
-Scope. The argument is required: empty `auto()` is not accepted.
+restores the previous destination on exit. It pushes that destination and
+uses the same inner-block placement for a deferred pop. The pop restores the
+previous destination without releasing the selected Scope. The argument is
+required: empty `auto()` is not accepted, and more than one argument is an
+invocation error.
 
-These forms use the region operations and cleanup boundaries.
-`$scope()` and `$scope(pointer)` remain compatibility spellings. Variable
+Region `auto` needs no per-source import and retains normal runtime
+declaration requirements. It uses native syntax and adds ordinary blocks and
+defers and no hidden loops. These forms use the region operations and cleanup
+boundaries. `$scope()` and `$scope(pointer)` remain compatibility spellings,
+and the `$scope` decorator retains its macro collision policy. Variable
 declaration `auto` and initializer `auto` keep their distinct meanings below.
 
 ### Managed declarations and initializers
@@ -3715,6 +3730,8 @@ signed value, in any radix, so `%(-0x80000001)` is the `long` value
 type C would choose and its modular negation, so `%(-1u)` is the `unsigned`
 value 4294967295.
 
+#### Interpolation
+
 `$name` inserts one identifier expression into a quoted collection.
 `$(expression)` inserts one arbitrary x2c expression, including calls, member
 and index expressions, operators, casts, compound literals, `NULL`, enum
@@ -3763,6 +3780,8 @@ then makes a compile-time call. `$name(...)` remains a macro invocation or
 contexts do not change Lisp `quote` or
 `quasiquote`.
 
+#### Lisp quote forms
+
 For `List`s that will be evaluated as Lisp, `'`, `` ` ``, `,`, and `,@` are the
 short forms of `quote`, `quasiquote`, `unquote`, and `unquote-splicing`. Each
 wraps the one element that follows it, wherever it appears, so `%(...)` and
@@ -3773,6 +3792,8 @@ insert or splice x2c values while the `List` itself is being constructed.
 A `@` followed by whitespace, `)`, or `=` is ordinary `@` or `@=`
 atom data. `%(op @ a b)` remains a List of atoms; it does not authorize
 matrix operator syntax.
+
+#### Symbol sets
 
 `%<...>` is an immutable ordered `SymbolSet`. An unescaped `>` closes the
 literal unless it belongs to a quoted or angle-form member. For example,
@@ -3788,6 +3809,8 @@ compile-time error. `SymbolSet.index` returns the source-order index or `-1`,
 `Iter` protocol traverses members in source order. The compiler emits the
 perfect hash and ordered membership table as static bytes, with no runtime
 construction or allocation.
+
+#### String escapes
 
 Percent strings are byte strings: they may span physical lines and their
 `\x`, `\u`, and `\U` escapes consume one or two hexadecimal digits and
@@ -3815,6 +3838,8 @@ as a header's `PRId64` is, so `printf("%" PRId64 "\n", count)` works. This
 adjacency rule does not combine percent strings or change quoted collection
 syntax.
 
+#### Literal caching
+
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,
 as in `String name = "x2c";`; a dynamic `char *` or `char[]` value still
@@ -3835,6 +3860,8 @@ Caching does not change the other identity rules: `List`s and non-empty
 `String`s are canonical when constructed through their canonicalizers; `Array`s
 and `Map`s are mutable identity-bearing objects and are constructed at each
 evaluation. Non-empty `Array` and `Map` literals use counted construction.
+
+#### Static initialization
 
 File-static `String`, `List`, `Array`, and `Map` declarations may use their
 percent literals directly. A file-static `Var` may likewise use one of those
@@ -4470,6 +4497,8 @@ function handles have file-static lifetime.
 x2c accepts C-style `if`, `switch`, `while`, `do`, classic `for`, labels,
 `goto`, `return`, `break`, and `continue` statements.
 
+#### `switch` on a String
+
 A `switch` whose selector has static type `String`, or an alias of `String`,
 selects its case by content. Each case label of that switch is a string
 literal, including adjacent literals and a native macro that expands to one;
@@ -4507,22 +4536,14 @@ int main(void) {
 
 ### System block decorators
 
-Region `auto` and `$lock` need no per-source import. They retain normal
-runtime declaration requirements. Region `auto` uses native syntax; `$lock`
-retains its explicit macro spelling. The compatibility `$scope` decorator
-retains its macro collision policy.
-
-Region `auto` opens one region around its following statement and defers its
-close inside an inner block containing that statement. `auto (pointer)`
-evaluates the Scope-pointer expression once, pushes that destination, and
-uses the same inner-block placement for a deferred pop. Pop restores the
-previous destination without destroying the selected Scope. More than one
-argument is an invocation error. A decorator around a loop creates one
-region; a decorator around its body creates one per iteration.
+`$lock` needs no per-source import. It retains normal runtime declaration
+requirements and its explicit macro spelling.
 
 `$lock(mutex)` evaluates a Mutex expression once, calls `lock`, then defers
-`unlock` around its body. A failed acquisition registers no unlock. These
-forms add ordinary blocks and defers and no hidden loops.
+`unlock` around its body. A failed acquisition registers no unlock. `$lock`
+adds an ordinary block and defer and no hidden loop.
+
+Region `auto` is specified under [allocation regions](#allocation-regions).
 
 See [Classes and System Macros](../guide/system-macros.md) for examples and
 expansions.
@@ -4777,7 +4798,7 @@ adapter produces an already-exhausted iterator. A receiver with a statically
 known type and no visible exact or inherited `Iter` conformance is rejected as
 not iterable.
 
-## Iterator destination omission
+### Iterator destination omission
 
 Iterator sources and lazy operations take a final `Iter` destination pointer.
 That argument may be omitted for calls nested in an iterator expression that
@@ -4886,6 +4907,8 @@ different identities.
 
 ### Errors and cleanup
 
+#### `try`, `catch`, and `finally`
+
 `try` requires a following `catch`, `finally`, or both. A bare `catch:`
 handles every cause; a filtered `catch` handles only matching causes.
 
@@ -4927,6 +4950,8 @@ optimization-specific qualifiers for ordinary assignments in `try`, `catch`,
 or `finally`. `Error` transfer does not restore the process signal mask; code
 that changes a signal mask must restore it.
 
+#### `raise`
+
 `raise %(CODE (KEY VALUE)...);` records one structured `Error`. Every `KEY` is
 a bare `Symbol` read by this syntax, and `CODE` is either a bare `Symbol` or
 `$name`, a variable converted to `Symbol`; each `VALUE` is one expression.
@@ -4938,6 +4963,8 @@ compiler error; invalid contents of a `List` or `Var` value raise
 `<bad-types>` when the `raise` runs. The compiler
 evaluates the converted code and values once each, left to right, and builds
 their literals when the `raise` runs.
+
+#### Shared causes
 
 Every cause in the shared table never returns to its raising call. `Error`
 keeps their policies at `<abort>` and observing handlers cannot consume them;
@@ -4984,6 +5011,8 @@ cannot change it:
 
 Unknown codes also default to `<abort>`. A process may set a policy only for
 unknown and user-defined codes.
+
+#### `defer`
 
 The `defer` statement schedules the statement for the current block exit.
 Multiple `defer` statements unwind in last-in, first-out order. Cleanup runs
@@ -5239,11 +5268,12 @@ was written in, and it can use a macro defined later in the file. It is
 emitted before a later `#undef` and before any conditional group that
 contains one, so the macro definitions in effect where it was written apply to
 it. A body written inside a conditional arm is also emitted before a later
-`#define` or `#include` and
-before any conditional group that contains one. C therefore selects its arm
-with the macros in effect where it was written. For example, a body inside
-the include-guard idiom `#ifndef GUARD`, `#define GUARD`, ..., `#endif` stays
-in the generated C.
+`#define` or `#include` and before any conditional group that contains one.
+C therefore selects its arm with the macros in effect where it was written.
+For example, a body inside the include-guard idiom `#ifndef GUARD`,
+`#define GUARD`, ..., `#endif` stays in the generated C.
+
+### C headers and native declaration macros
 
 A C source file renamed from `.c` to `.x` is an x2c translation unit. A C
 header stays a `.h` file reached with `#include`; x2c collects its
