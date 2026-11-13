@@ -626,7 +626,7 @@ static Job _start_tool(Job command, String program, String * failure){
 }
 
 static void _print_action(Symbol phase, List arguments){
-  fprintf(stderr, "x2c: %s", Symbol_str(phase));
+  fprintf(stderr, "x2c: %s", x2c_string_text(Symbol_str(phase)));
   {
     String argument;
     List _x2c_gensym_macro_object_1 = arguments;

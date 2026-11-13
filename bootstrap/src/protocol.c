@@ -786,7 +786,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _349 = String_var(_348);
   _350 = List_var(NULL);
   _351 = Symbol_var(106239471489226);
-  _352 = int_var(2260);
+  _352 = int_var(2261);
   _353 = String_new("");
   _354 = String_var(_353);
   _355 = String_new("x2c.hole");
@@ -889,7 +889,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _452 = cons(_444, _451);
   _453 = cons(_438, _452);
   _454 = List_var(_453);
-  _455 = int_var(2325);
+  _455 = int_var(2326);
   _456 = Symbol_var(1544849476362);
   _457 = List_var(_30);
   _458 = cons(_457, NULL);
@@ -983,7 +983,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _543 = cons(_444, NULL);
   _544 = cons(_438, _543);
   _545 = List_var(_544);
-  _546 = int_var(2332);
+  _546 = int_var(2333);
   _547 = Symbol_var(405758822009820);
   _548 = cons(_397, _390);
   _549 = cons(_357, _548);
@@ -1199,7 +1199,6 @@ static Symbol _adoption_storage(List adoption){
   return Var_symbol(List_cadr(List_cddr(adoption)));
 }
 
-static List Type_list(Type);
 static void f8_registry____install_occurrence(Compiler c, Type base, List record, Symbol storage, List location){
   String file = _canonical_file(c, location);  if(storage == 1317118534 && ! String_equal(file, _path(c))) return;  Var stored;  if(! Map_try_get(c -> protocols, List_var(base), &(stored))){
     Map_setindex(c -> protocols, List_var(base), List_var(f8_registry____occurrence(record, storage, location)));  return;
@@ -1211,7 +1210,7 @@ static void f8_registry____install_occurrence(Compiler c, Type base, List record
     String swap = first_location;  first_location = second_location;  second_location = swap;
   }
   {
-    String _x2c_gensym_macro_first_0 = String_join(NULL, cons(String_var(_94), cons(String_var(first_location), NULL)));  String _x2c_gensym_macro_second_0 = String_join(NULL, cons(String_var(_95), cons(String_var(second_location), NULL)));  Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_96), cons(String_var(List_repr(Type_list(base))), NULL))), c -> token, cons(String_var(_x2c_gensym_macro_first_0), cons(String_var(_x2c_gensym_macro_second_0), NULL)));
+    String _x2c_gensym_macro_first_0 = String_join(NULL, cons(String_var(_94), cons(String_var(first_location), NULL)));  String _x2c_gensym_macro_second_0 = String_join(NULL, cons(String_var(_95), cons(String_var(second_location), NULL)));  Compiler_report_error(c, 1139215899608, String_join(NULL, cons(String_var(_96), cons(String_var(_type_spelling(base)), NULL))), c -> token, cons(String_var(_x2c_gensym_macro_first_0), cons(String_var(_x2c_gensym_macro_second_0), NULL)));
   }
 
 }
@@ -1224,6 +1223,7 @@ static List _occurrence_location(List occurrence){
   return Var_list_payload(List_caddr(occurrence));
 }
 
+static List Type_list(Type);
 List Sym_get(Sym, List);
 int Type_is_typedef(Type);
 static List f8_registry____publish(f8_registry___AdoptionDraft * a){
@@ -1952,9 +1952,9 @@ static void _report_signature_conflict(Compiler c, Type base, Type participant, 
   {
     String _x2c_gensym_macro_protocol_note_0 = String_join(NULL, cons(String_var(_216), cons(String_var(member), cons(String_var(_217), cons(String_var(owner), NULL)))));
     if(String_truth(declaration_site)) _x2c_gensym_macro_protocol_note_0 = String_join(NULL, cons(String_var(_x2c_gensym_macro_protocol_note_0), cons(String_var(_218), cons(String_var(declaration_site), NULL))));
-    String _x2c_gensym_macro_actual_repr_0 = List_repr(Type_list(actual));
-    String _x2c_gensym_macro_conflict_note_0 = String_join(NULL, cons(String_var(_219), cons(String_var(binding), cons(String_var(_220), cons(String_var(_x2c_gensym_macro_actual_repr_0), NULL)))));
-    String _x2c_gensym_macro_expected_note_0 = String_join(NULL, cons(String_var(_221), cons(String_var(List_repr(Type_list(expected))), NULL)));
+    String _x2c_gensym_macro_actual_text_0 = Type_spelling(actual);
+    String _x2c_gensym_macro_conflict_note_0 = String_join(NULL, cons(String_var(_219), cons(String_var(binding), cons(String_var(_220), cons(String_var(_x2c_gensym_macro_actual_text_0), NULL)))));
+    String _x2c_gensym_macro_expected_note_0 = String_join(NULL, cons(String_var(_221), cons(String_var(Type_spelling(expected)), NULL)));
     Diagnostics_report(c -> diagnostics, 1139215899608, String_add(String_join(NULL, cons(String_var(_176), cons(String_var(binding), cons(String_var(_222), NULL)))), String_join(NULL, cons(String_var(_223), cons(String_var(owner), cons(String_var(_224), cons(String_var(member), cons(String_var(_176), NULL))))))), location, cons(String_var(_x2c_gensym_macro_protocol_note_0), cons(String_var(_x2c_gensym_macro_conflict_note_0), cons(String_var(_x2c_gensym_macro_expected_note_0), NULL))));
   }
 
@@ -3309,7 +3309,7 @@ static List f6_lookup____member_row(Compiler c, List protocols, Type participant
 }
 
 static void f6_lookup____dump_row(const char * kind, int owned, Type base, Type participant, List rows){
-  printf("(%s %s %s %s", kind, owned ? "owned" : "visible", List_repr(Type_list(base)), List_repr(Type_list(participant)));
+  printf("(%s %s %s %s", kind, owned ? "owned" : "visible", x2c_string_text(List_repr(Type_list(base))), x2c_string_text(List_repr(Type_list(participant))));
   {
     List row;
     List _x2c_gensym_macro_object_39 = rows;
@@ -3348,7 +3348,7 @@ static void f6_lookup____dump_row(const char * kind, int owned, Type base, Type 
                 break;
               }
               if(status == 647492367624 || status == 4507969008424 || status == 942951818) punctuation = "dot+punctuation";
-              printf(" (%s %s %s %s)", member, name, String_truth(source) ? source : "-", punctuation);
+              printf(" (%s %s %s %s)", x2c_string_text(member), name, x2c_string_text(String_truth(source) ? source : "-"), punctuation);
             }
 
           }
@@ -4659,10 +4659,10 @@ static List f8_adapters____collision_notes(Symbol kind, List first, List second)
   );
   if(! List_equal(Type_list(first_expected), Type_list(second_expected))) return({
     Var _x2c_gensym_literal_part_173 = String_var(({
-      Var _x2c_gensym_literal_part_169 = String_var(first_repr);  Var _x2c_gensym_literal_part_170 = String_var(List_repr(Type_list(first_expected)));  String_join(NULL, cons(_x2c_gensym_literal_part_169, cons(String_var(_614), cons(_x2c_gensym_literal_part_170, NULL))));
+      Var _x2c_gensym_literal_part_169 = String_var(first_repr);  Var _x2c_gensym_literal_part_170 = String_var(Type_spelling(first_expected));  String_join(NULL, cons(_x2c_gensym_literal_part_169, cons(String_var(_614), cons(_x2c_gensym_literal_part_170, NULL))));
     }
     ));  Var _x2c_gensym_literal_part_174 = String_var(({
-      Var _x2c_gensym_literal_part_171 = String_var(second_repr);  Var _x2c_gensym_literal_part_172 = String_var(List_repr(Type_list(second_expected)));  String_join(NULL, cons(_x2c_gensym_literal_part_171, cons(String_var(_614), cons(_x2c_gensym_literal_part_172, NULL))));
+      Var _x2c_gensym_literal_part_171 = String_var(second_repr);  Var _x2c_gensym_literal_part_172 = String_var(Type_spelling(second_expected));  String_join(NULL, cons(_x2c_gensym_literal_part_171, cons(String_var(_614), cons(_x2c_gensym_literal_part_172, NULL))));
     }
     ));  cons(_x2c_gensym_literal_part_173, cons(_x2c_gensym_literal_part_174, NULL));
   }

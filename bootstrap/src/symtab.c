@@ -2030,8 +2030,10 @@ static Type f5_types____resolve_chain(Sym s, Type key, Type stop, Type origin, i
   return key;
 }
 
+String Type_spelling(Type);
+
 static void f5_types____typedef_budget_error(Sym s, Type origin){
-  Compiler_report_error(s -> c, 1362954, String_join(NULL, cons(String_var(_149), cons(String_var(List_repr(Type_list(origin))), NULL))), NULL, NULL);
+  Compiler_report_error(s -> c, 1362954, String_join(NULL, cons(String_var(_149), cons(String_var(Type_spelling(origin)), NULL))), NULL, NULL);
 }
 
 static Type f5_types____typedef_target(Sym s, Type key){

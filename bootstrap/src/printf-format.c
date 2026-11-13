@@ -4,11 +4,11 @@
 #include "x2c.h"
 
 #include "rewrite.h"
-static List _14, _13, _12, _11, _10, _8, _6, _5;
+static List _21, _20, _19, _14, _13, _12, _11, _10, _8, _6, _5;
 
-static String _17, _16, _15, _2, _1, _0;
+static String _29, _28, _27, _24, _2, _1, _0;
 
-static Var _9, _7, _4, _3;
+static Var _26, _25, _23, _22, _18, _17, _16, _15, _9, _7, _4, _3;
 
 static int _init_guard_ = 0;
 
@@ -17,6 +17,8 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void);
 static int _printf_valid(String length, int conversion);
 
 static Type _printf_type(String length, int conversion);
+
+static Code _printf_text(Code text);
 
 static String _printf_length(const char * * at);
 
@@ -41,9 +43,21 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
   _12 = cons(_9, _11);
   _13 = cons(_3, _11);
   _14 = cons(_9, _13);
-  _15 = String_new("hh");
-  _16 = String_new("h");
-  _17 = String_new("ll");
+  _15 = Symbol_var(377892);
+  _16 = Symbol_var(54);
+  _17 = Symbol_var(7304424);
+  _18 = Symbol_var(213092);
+  _19 = cons(_18, NULL);
+  _20 = cons(_17, _19);
+  _21 = cons(_16, _20);
+  _22 = List_var(_21);
+  _23 = Symbol_var(199448);
+  _24 = String_new("x2c_string_text");
+  _25 = String_var(_24);
+  _26 = Symbol_var(102886);
+  _27 = String_new("hh");
+  _28 = String_new("h");
+  _29 = String_new("ll");
 }
 
 static int _printf_valid(String length, int conversion){
@@ -67,6 +81,10 @@ static Type _printf_type(String length, int conversion){
   return NULL;
 }
 
+static Code _printf_text(Code text){
+  return cons(_15, cons(_22, cons(List_var(cons(_23, cons(_25, cons(List_var(cons(_26, cons(List_var(text), NULL))), NULL)))), NULL)));
+}
+
 static String _printf_length(const char * * at){
   const char * start =(* at);
   if(*(* at) && strchr("hljztL", *(* at)))(* at) +=(*(* at) == 'h' || *(* at) == 'l') &&(* at)[1] == *(* at) ? 2 : 1;
@@ -74,11 +92,11 @@ static String _printf_length(const char * * at){
 }
 
 static int _x2c_gensym_string_switch_0(String s){
-  if(String_equal(s, _15)) return 1;
-  if(String_equal(s, _16)) return 2;
+  if(String_equal(s, _27)) return 1;
+  if(String_equal(s, _28)) return 2;
   if(String_equal(s, _1)) return 3;
   if(String_equal(s, _2)) return 4;
-  if(String_equal(s, _17)) return 5;
+  if(String_equal(s, _29)) return 5;
   return 0;
 }
 

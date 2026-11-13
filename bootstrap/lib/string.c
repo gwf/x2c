@@ -907,7 +907,7 @@ String String_escape(String str);
 String String_repr(String str){
   if(! _init_guard_) _file_init_();
   if(! String_truth(str)) return _7;
-  return String_printf(_8, String_escape(str));
+  return String_printf(_8, x2c_string_text(String_escape(str)));
 }
 
 String String_escape(String str){

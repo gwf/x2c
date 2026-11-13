@@ -1540,7 +1540,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_1(void)
   _583 = List_var(_582);
   _584 = cons(_504, _501);
   _585 = List_var(_584);
-  _586 = int_var(124110);
+  _586 = int_var(124118);
   _587 = cons(_586, NULL);
   _588 = cons(_509, _587);
   _589 = List_var(_588);
@@ -4029,7 +4029,7 @@ static List f5_units____alias_target(Compiler c, List declaration, Var binding, 
         Var native_binding;
         native_binding = x2c_match_value_1;
         {
-          if(Var_truth(native_type) && ! Type_is_function(Var_type(native_type))) Compiler_report_error(c, 1362954, _47, c -> token, cons(String_var(String_join(NULL, cons(String_var(_48), cons(String_var(Var_repr(native_type)), NULL)))), NULL));
+          if(Var_truth(native_type) && ! Type_is_function(Var_type(native_type))) Compiler_report_error(c, 1362954, _47, c -> token, cons(String_var(String_join(NULL, cons(String_var(_48), cons(String_var(Type_spelling(Var_type(native_type))), NULL)))), NULL));
           if(List_equal(Var_list_payload(binding), Var_list_payload(native_binding))) Compiler_report_error(c, 33658058, _49, c -> token, NULL);
           Compiler_clear_source_external(c, Var_list_payload(binding));
           return cons(_50, cons(List_var(declaration), cons(native_binding, NULL)));

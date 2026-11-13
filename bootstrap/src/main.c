@@ -243,7 +243,7 @@ static int _run_env(CliRequest request){
         name = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 0));
         value = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 1));
         const char * text = String_truth(value) ? value : "";
-        if(! String_truth(wanted)) printf("%s = %s\n", name, text);
+        if(! String_truth(wanted)) printf("%s = %s\n", x2c_string_text(name), text);
         else if(String_equal(name, wanted)){
           printf("%s\n", text);
           return 0;

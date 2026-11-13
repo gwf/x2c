@@ -535,11 +535,13 @@ static Type List_type(List);
 
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
+String Type_spelling(Type);
+
 List Compiler_finish_return_statement(Compiler c, List expr){
   if(! _init_guard_) _file_init_();
   if(! List_truth(expr)) return _10;
   List resolved = Compiler_resolve_expression(c, expr, c -> token);
-  if(List_equal(Type_list(Sym_resolve_key(c -> sym, Var_type(List_cadr(resolved)))), _12) && ! List_equal(Type_list(Sym_resolve_key(c -> sym, List_type(c -> return_type))), _12)) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_13), cons(String_var(List_repr(c -> return_type)), NULL))), c -> token, NULL);
+  if(List_equal(Type_list(Sym_resolve_key(c -> sym, Var_type(List_cadr(resolved)))), _12) && ! List_equal(Type_list(Sym_resolve_key(c -> sym, List_type(c -> return_type))), _12)) Compiler_report_error(c, 1362954, String_join(NULL, cons(String_var(_13), cons(String_var(Type_spelling(List_type(c -> return_type))), NULL))), c -> token, NULL);
   Compiler_check_explicit_converter(c, resolved, List_type(c -> return_type), 0);
   return cons(_9, cons(List_var(c -> return_type), cons(List_var(resolved), NULL)));
 }

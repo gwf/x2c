@@ -248,7 +248,7 @@ String Var_pointer_string(Var v){
   if(! _init_guard_) _file_init_();
   Symbol tag = Var_tag(v);
   if(tag == 3683441) return String_printf(_1, (long) Var_pointer(v));
-  return String_printf(_2, Symbol_str(tag), (long) Var_pointer(v));
+  return String_printf(_2, x2c_string_text(Symbol_str(tag)), (long) Var_pointer(v));
 }
 
 Buffer Var_fallback_write_repr(Var v, Buffer out);
@@ -1007,7 +1007,7 @@ static VarDescriptor * _declare(Symbol tag){
 static VarDescriptor * _claim_name(VarDescriptor * descriptor, Symbol tag, String name){
   if(! String_truth(descriptor -> name)) descriptor -> name = name;
   if(! String_equal(descriptor -> name, name)){
-    fprintf(stderr, "Var descriptor: tag <%s> names both %s and %s\n", Symbol_str(tag), (char *) descriptor -> name, (char *) name);
+    fprintf(stderr, "Var descriptor: tag <%s> names both %s and %s\n", x2c_string_text(Symbol_str(tag)), (char *) descriptor -> name, (char *) name);
     abort();
   }
   return descriptor;
@@ -1039,7 +1039,7 @@ static void _install_methods(VarDescriptor * descriptor, VarMethods methods){
 static VarDescriptor * _reserve_tagged(Symbol tag, String name){
   if(! tag || ! String_truth(name)) return 0;
   if(_tag_row(tag)){
-    fprintf(stderr, "Var descriptor: explicit tag <%s> is built in\n", Symbol_str(tag));
+    fprintf(stderr, "Var descriptor: explicit tag <%s> is built in\n", x2c_string_text(Symbol_str(tag)));
     abort();
   }
   return _claim_name(_declare(tag), tag, name);

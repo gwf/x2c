@@ -5243,7 +5243,7 @@ static void f8_bindings____check(f8_bindings___NativeBinding * n, Var function){
   List suppliers =(* n).suppliers;
   if(List_truth(List_cdr(suppliers)) && x2c_var_equal_lane(function, f8_bindings____module_target(&((* n))))) f8_bindings____meta_native_warn_duplicate(c, (* n).marker, &((* n)), suppliers);
   if(! Compiler_native_meta_accepts(c, function, (* n).signature)) Compiler_report_error(c, 1362954, _1850, (* n).marker, ({
-    Var _x2c_gensym_literal_part_24 = String_var(String_join(NULL, cons(String_var(_1849), cons(String_var((* n).name), NULL))));  Var _x2c_gensym_literal_part_25 = String_var(String_join(NULL, cons(String_var(_1851), cons(String_var(List_repr((* n).signature)), NULL))));  cons(_x2c_gensym_literal_part_24, cons(_x2c_gensym_literal_part_25, NULL));
+    Var _x2c_gensym_literal_part_24 = String_var(String_join(NULL, cons(String_var(_1849), cons(String_var((* n).name), NULL))));  Var _x2c_gensym_literal_part_25 = String_var(String_join(NULL, cons(String_var(_1851), cons(String_var(Type_spelling(List_type((* n).signature))), NULL))));  cons(_x2c_gensym_literal_part_24, cons(_x2c_gensym_literal_part_25, NULL));
   }
   ));
 }
@@ -5320,7 +5320,7 @@ static void f8_bindings____certify_native_meta(Compiler c, String name, List sig
     return;
   }
   if(marker) Compiler_report_error(c, 1362954, _1856, marker, ({
-    Var _x2c_gensym_literal_part_31 = String_var(String_join(NULL, cons(String_var(_1849), cons(String_var(name), NULL))));  Var _x2c_gensym_literal_part_32 = String_var(String_join(NULL, cons(String_var(_1851), cons(String_var(List_repr(signature)), NULL))));  cons(_x2c_gensym_literal_part_31, cons(_x2c_gensym_literal_part_32, cons(String_var(_1857), NULL)));
+    Var _x2c_gensym_literal_part_31 = String_var(String_join(NULL, cons(String_var(_1849), cons(String_var(name), NULL))));  Var _x2c_gensym_literal_part_32 = String_var(String_join(NULL, cons(String_var(_1851), cons(String_var(Type_spelling(List_type(signature))), NULL))));  cons(_x2c_gensym_literal_part_31, cons(_x2c_gensym_literal_part_32, cons(String_var(_1857), NULL)));
   }
   ));
 }

@@ -415,7 +415,7 @@ static void _print_commands(Translation * t){
 }
 
 static void _preprocessor_errors(String text){
-  File_printf(Stderr, "%s", text);
+  File_printf(Stderr, "%s", x2c_string_text(text));
 }
 
 static int _translate_parallel(Translation * t){
@@ -830,7 +830,7 @@ static int _inspect_collected(ParsedUnit * unit, Symbol dump){
   Compiler cpp =(* unit).preprocessor;
   String text =(* unit).preprocessor_output;
   switch(dump){
-    case 320883072032 : if(String_truth(text)) printf("%s", text);
+    case 320883072032 : if(String_truth(text)) printf("%s", x2c_string_text(text));
     break;
     case 247458062609318 : if(cpp) Compiler_dump_tokens(cpp);
     break;
@@ -865,7 +865,7 @@ static int _inspect_parsed(ParsedUnit * unit, String filename, Symbol dump){
 }
 
 static void _print_conformance(Compiler c, String filename, Map globals){
-  printf("(unit %s)\n", filename);
+  printf("(unit %s)\n", x2c_string_text(filename));
   Compiler_dump_conformance(c, globals);
 }
 

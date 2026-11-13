@@ -1803,7 +1803,7 @@ static void f4_help____print_help_usage(void){
 
 static void f4_help____print_top_help(void){
   puts(_155);
-  for(CliCommand * command = cli_commands;  command -> name;  command ++) printf("  %-12s%s\n", Symbol_str(command -> name), command -> description);
+  for(CliCommand * command = cli_commands;  command -> name;  command ++) printf("  %-12s%s\n", x2c_string_text(Symbol_str(command -> name)), command -> description);
   f4_help____print_external_commands();
   f4_help____print_options(0);
   puts("\nInput syntax:\n");
@@ -1923,11 +1923,11 @@ static void f4_help____print_help_row(const char * label, const char * descripti
   String rest = String_new(description);
   while(String_len(rest) > room){
     int cut = String_rfind(String_getslice(rest, (-2147483647 - 1), x2c_slice_bound(room + 1), 1), _162);
-    printf("%*s%s\n", column - width, "", String_getslice(rest, (-2147483647 - 1), x2c_slice_bound(cut), 1));
+    printf("%*s%s\n", column - width, "", x2c_string_text(String_getslice(rest, (-2147483647 - 1), x2c_slice_bound(cut), 1)));
     rest = String_getslice(rest, x2c_slice_bound(cut + 1), (-2147483647 - 1), 1);
     width = 0;
   }
-  printf("%*s%s\n", column - width, "", rest);
+  printf("%*s%s\n", column - width, "", x2c_string_text(rest));
 }
 
 Symbol TargetKind_named(String spelling, String * refusal){

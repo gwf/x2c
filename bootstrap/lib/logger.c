@@ -1756,7 +1756,7 @@ static void _report_uncaught(List entry){
     Var _x2c_gensym_literal_part_6 = String_var(line);  Var _x2c_gensym_literal_part_7 = String_var(_detail_text(detail));  String_join(NULL, cons(_x2c_gensym_literal_part_6, cons(String_var(_10), cons(_x2c_gensym_literal_part_7, NULL))));
   }
   );
-  fprintf(stderr, "%s\n", line);
+  fprintf(stderr, "%s\n", x2c_string_text(line));
   fflush(stderr);
 }
 

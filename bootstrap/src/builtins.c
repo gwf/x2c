@@ -2173,10 +2173,7 @@ static List _foreach_expand(List declaration, List collection, List body, Var it
   if(List_len(targets) != 1 && List_len(targets) != 2) x2c_diagnostic_fail(_530, NULL);
   List spec = direct ? NULL : _typed_cursor_spec(type, targets);
   if(! direct && ! List_truth(spec)) spec = _cursor_spec(type, type, List_len(targets));
-  if(! direct && ! List_truth(converter) && ! List_truth(spec)){
-    Var printable = List_var(type);
-    x2c_diagnostic_fail(String_add(String_add(_531, Var_repr(printable)), _532), cons(String_var(_533), NULL));
-  }
+  if(! direct && ! List_truth(converter) && ! List_truth(spec)) x2c_diagnostic_fail(String_join(NULL, cons(String_var(_531), cons(String_var(Type_spelling(type)), cons(String_var(_532), NULL)))), cons(String_var(_533), NULL));
   Foreach f ={
     .declaration = declaration, .collection = collection, .body = body, .targets = targets, .type = Type_list(type), .iterator = iterator, .item = item, .pair = pair, .object = object, .cursor = cursor
   }

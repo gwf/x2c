@@ -4336,10 +4336,10 @@ List Compiler_definition_rows(Compiler c, List ast);
 
 void Compiler_dump_definitions(Compiler c, List ast){
   if(! _init_guard_) _file_init_();
-  printf("%s\n", List_repr(cons(_695, cons(String_var(c -> filename), NULL))));
+  printf("%s\n", x2c_string_text(List_repr(cons(_695, cons(String_var(c -> filename), NULL)))));
   Token tokens = c -> tokenizer -> tokens, first = tokens;
   while(first -> type == 40896714 || first -> type == 35579270086) first ++;
-  if(first -> type == 7477210024) printf("%s\n", List_repr(cons(_696, cons(String_var(first -> text), NULL))));
+  if(first -> type == 7477210024) printf("%s\n", x2c_string_text(List_repr(cons(_696, cons(String_var(first -> text), NULL)))));
   {
     List row;
     List _x2c_gensym_macro_object_59 = Compiler_definition_rows(c, ast);
@@ -4377,10 +4377,10 @@ void Compiler_dump_definitions(Compiler c, List ast){
           Var _x2c_gensym_match_value_18 = name;
           {
             String name = Var_as_string(_x2c_gensym_match_value_18);
-            printf("%s\n", List_repr(({
+            printf("%s\n", x2c_string_text(List_repr(({
               Var _x2c_gensym_literal_part_61 = List_var(cons(_187, cons(String_var(name), NULL)));  Var _x2c_gensym_literal_part_62 = List_var(cons(_546, cons(line, NULL)));  Var _x2c_gensym_literal_part_63 = List_var(cons(_697, cons(int_var(Map_contains(c -> meta_comptime, String_var(name))), NULL)));  cons(_698, cons(_x2c_gensym_literal_part_61, cons(_x2c_gensym_literal_part_62, cons(_x2c_gensym_literal_part_63, NULL))));
             }
-            )));
+            ))));
           }
 
         }
@@ -4675,10 +4675,10 @@ static void f11_definitions____print_function(Compiler c, Token tokens, List row
 
       }
       List location = f11_definitions____location(tokens, Var_list_payload(span));
-      printf("%s\n", List_repr(({
+      printf("%s\n", x2c_string_text(List_repr(({
         Var _x2c_gensym_literal_part_77 = List_var(cons(_187, cons(name, NULL)));  Var _x2c_gensym_literal_part_78 = List_var(cons(_705, cons(display, NULL)));  Var _x2c_gensym_literal_part_79 = List_var(cons(_546, cons(line, NULL)));  Var _x2c_gensym_literal_part_80 = List_var(f11_definitions____definition_source(c, tokens, Var_list_payload(Var_truth(declarator) ? declarator : span), Var_integer(line)));  Var _x2c_gensym_literal_part_81 = List_cadr(location);  Var _x2c_gensym_literal_part_82 = List_var(cons(_133, cons(is_static, NULL)));  Var _x2c_gensym_literal_part_83 = List_var(cons(_539, cons(origin, NULL)));  Var _x2c_gensym_literal_part_84 = List_var(cons(_706, cons(doc, NULL)));  Var _x2c_gensym_literal_part_85 = List_var(cons(_707, cons(String_var(text), NULL)));  Var _x2c_gensym_literal_part_86 = List_var(cons(_173, cons(type, NULL)));  Var _x2c_gensym_literal_part_87 = List_var(cons(_196, cons(names, NULL)));  cons(_53, cons(_x2c_gensym_literal_part_77, cons(_x2c_gensym_literal_part_78, cons(_x2c_gensym_literal_part_79, cons(_x2c_gensym_literal_part_80, cons(_x2c_gensym_literal_part_81, cons(_x2c_gensym_literal_part_82, cons(_x2c_gensym_literal_part_83, cons(_x2c_gensym_literal_part_84, cons(_x2c_gensym_literal_part_85, cons(_x2c_gensym_literal_part_86, cons(_x2c_gensym_literal_part_87, NULL))))))))))));
       }
-      )));
+      ))));
     }
 
   }
@@ -4735,10 +4735,10 @@ static void f11_definitions____print_type(Compiler c, Token tokens, List row){
         }
 
       }
-      printf("%s\n", List_repr(({
+      printf("%s\n", x2c_string_text(List_repr(({
         Var _x2c_gensym_literal_part_88 = List_var(cons(_187, cons(name, NULL)));  Var _x2c_gensym_literal_part_89 = List_var(cons(_172, cons(kind, NULL)));  List _x2c_gensym_literal_part_90 = location;  Var _x2c_gensym_literal_part_91 = List_var(f11_definitions____definition_source(c, tokens, Var_list_payload(span), 0));  List _x2c_gensym_literal_part_92 = privacy;  Var _x2c_gensym_literal_part_93 = List_var(cons(_706, cons(doc, NULL)));  Var _x2c_gensym_literal_part_94 = List_var(cons(_707, cons(text, NULL)));  cons(_173, cons(_x2c_gensym_literal_part_88, cons(_x2c_gensym_literal_part_89, List_append(_x2c_gensym_literal_part_90, cons(_x2c_gensym_literal_part_91, List_append(_x2c_gensym_literal_part_92, cons(_x2c_gensym_literal_part_93, cons(_x2c_gensym_literal_part_94, NULL))))))));
       }
-      )));
+      ))));
     }
 
   }

@@ -1123,7 +1123,7 @@ static Array _target_sources(Project p, ProjectTarget target){
       path = Var_as_string(_x2c_gensym_macro_cursor_output_8);
       {
         if(!(Array_contains(excluded, String_var(path)))) Array_push(kept, String_var(path));
-        else if(p -> command -> verbose) fprintf(stderr, "x2c: excluded %s from target %s\n", path, target -> name);
+        else if(p -> command -> verbose) fprintf(stderr, "x2c: excluded %s from target %s\n", x2c_string_text(path), x2c_string_text(target -> name));
       }
 
     }

@@ -587,6 +587,10 @@ static inline int String_truth(String string){
   return string != NULL && * string != '\0';
 }
 
+static inline const char * x2c_string_text(String string){
+  return String_truth(string) ? string : "";
+}
+
 static inline unsigned long x2c_mix64(unsigned long word);
 static inline unsigned x2c_hash_word(unsigned long word);
 static inline unsigned x2c_hash_bytes(unsigned long seed, const void * data, size_t width){

@@ -1399,7 +1399,7 @@ static void _write(HttpResponse res, File output, int keep_alive, int head_only)
         while(Map_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0), &(_x2c_gensym_macro_cursor_output_1))){
           name = _x2c_gensym_macro_cursor_output_0;
           value = _x2c_gensym_macro_cursor_output_1;
-          Buffer_printf(head, "%s: %s\r\n", Var_str(name), Var_str(value));
+          Buffer_printf(head, "%s: %s\r\n", x2c_string_text(Var_str(name)), x2c_string_text(Var_str(value)));
         }
 
       }

@@ -446,7 +446,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _248 = cons(_245, _247);
   _249 = List_var(_248);
   _250 = Symbol_var(1133019155420);
-  _251 = int_var(2866);
+  _251 = int_var(2882);
   _252 = cons(_251, NULL);
   _253 = cons(_250, _252);
   _254 = List_var(_253);
@@ -592,7 +592,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _394 = cons(_393, NULL);
   _395 = cons(_237, _394);
   _396 = List_var(_395);
-  _397 = int_var(2684);
+  _397 = int_var(2700);
   _398 = cons(_397, NULL);
   _399 = cons(_250, _398);
   _400 = List_var(_399);
@@ -651,7 +651,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_0(void)
   _453 = cons(_452, NULL);
   _454 = cons(_237, _453);
   _455 = List_var(_454);
-  _456 = int_var(2748);
+  _456 = int_var(2764);
   _457 = cons(_456, NULL);
   _458 = cons(_250, _457);
   _459 = List_var(_458);
@@ -1666,8 +1666,8 @@ return 0;
 void Compiler_report_error(Compiler, Symbol, String, Token, List);
 
 static void _adapter_error(Compiler c, String message, Type target, Type source, List details){
-  String target_note = List_truth(Type_list(target)) ? String_join(NULL, cons(String_var(_646), cons(String_var(List_repr(Type_list(target))), NULL))) : _647;
-  String source_note = List_truth(Type_list(source)) ? String_join(NULL, cons(String_var(_648), cons(String_var(List_repr(Type_list(source))), NULL))) : _649;
+  String target_note = List_truth(Type_list(target)) ? String_join(NULL, cons(String_var(_646), cons(String_var(Type_spelling(target)), NULL))) : _647;
+  String source_note = List_truth(Type_list(source)) ? String_join(NULL, cons(String_var(_648), cons(String_var(Type_spelling(source)), NULL))) : _649;
   Compiler_report_error(c, 1362954, message, NULL, cons(String_var(target_note), cons(String_var(source_note), details)));
 }
 
@@ -2212,7 +2212,7 @@ static void f9_callbacks____check_params(f9_callbacks___Callback * cb){
     Type target = Var_type(List_car(targets));
     Type source = Var_type(List_car(sources));
     if(f9_callbacks____allows(&((* cb)), target, source)) continue;
-    String _x2c_gensym_macro_detail_1 = String_printf(_959, index + 1, List_repr(Type_list(target)), List_repr(Type_list(source)));
+    String _x2c_gensym_macro_detail_1 = String_printf(_959, index + 1, x2c_string_text(Type_spelling(target)), x2c_string_text(Type_spelling(source)));
     f9_callbacks____fail(&((* cb)), _960, cons(String_var(_x2c_gensym_macro_detail_1), NULL));
   }
 

@@ -216,7 +216,7 @@ static void _draw(Symbol phase, int done, int total, String detail){
   _fill_bar(bar, done, total);
   char line[2048];
   String name = String_capitalize(Symbol_str(phase));
-  snprintf(line, sizeof(line), "%s [%s] %d/%d  %s", name, bar, done, total, String_truth(detail) ? detail : "");
+  snprintf(line, sizeof(line), "%s [%s] %d/%d  %s", x2c_string_text(name), bar, done, total, x2c_string_text(String_truth(detail) ? detail : ""));
   int length = _clip(line, report.columns > 1 ? report.columns - 1 : 79);
   _emit(_clear, sizeof(_clear) - 1, _color(34081994), line, 0);
   report.width = length;

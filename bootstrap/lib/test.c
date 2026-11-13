@@ -143,7 +143,7 @@ int Test_main(int argc, char * * argv){
     else if(String_equal(arg, _9)) list = 1;
     else if(String_equal(arg, _10)) quiet = 1;
     else{
-      File_printf(Stderr, "test: unknown or incomplete option %s\n", arg);
+      File_printf(Stderr, "test: unknown or incomplete option %s\n", x2c_string_text(arg));
       return 2;
     }
 
@@ -165,13 +165,13 @@ int Test_main(int argc, char * * argv){
         if(! _selected(name, filters)) continue;
         matched ++;
         if(list){
-          File_printf(Stdout, "%s\n", name);
+          File_printf(Stdout, "%s\n", x2c_string_text(name));
           continue;
         }
         _run((TestFunction) function);
         if(List_truth(_failures)){
           failed ++;
-          File_printf(Stdout, "FAIL %s (%s:%d)\n", name, file, line);
+          File_printf(Stdout, "FAIL %s (%s:%d)\n", x2c_string_text(name), x2c_string_text(file), line);
           {
             String failure;
             List _x2c_gensym_macro_object_0 = List_reverse(_failures);
@@ -179,7 +179,7 @@ int Test_main(int argc, char * * argv){
             Var _x2c_gensym_macro_cursor_output_0;
             while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
               failure = Var_as_string(_x2c_gensym_macro_cursor_output_0);
-              File_printf(Stdout, "  %s\n", failure);
+              File_printf(Stdout, "  %s\n", x2c_string_text(failure));
             }
 
           }
@@ -187,11 +187,11 @@ int Test_main(int argc, char * * argv){
         }
         else if(_did_skip){
           skipped ++;
-          File_printf(Stdout, "skip %s: %s\n", name, String_truth(_skipped) ? _skipped : "");
+          File_printf(Stdout, "skip %s: %s\n", x2c_string_text(name), x2c_string_text(String_truth(_skipped) ? _skipped : ""));
         }
         else{
           passed ++;
-          if(! quiet) File_printf(Stdout, "ok %s\n", name);
+          if(! quiet) File_printf(Stdout, "ok %s\n", x2c_string_text(name));
         }
 
       }

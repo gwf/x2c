@@ -175,7 +175,7 @@ String Diff_unified(String old, String new, String old_name, String new_name){
               at ++, old_line ++, new_line ++;
               continue;
             }
-            if(! Buffer_len(out)) Buffer_printf(out, _0, old_name, new_name);
+            if(! Buffer_len(out)) Buffer_printf(out, _0, x2c_string_text(old_name), x2c_string_text(new_name));
             Hunk h = _hunk(edits, at, old_line, new_line);
             _write(&(h), edits, out);
             at = h.end;

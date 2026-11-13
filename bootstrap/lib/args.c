@@ -358,16 +358,16 @@ String Args_usage(String program, List spec){
                         String label = _label(&((* option)));
                         if(! option -> operand) _write_row(options, label, option -> help);
                         else{
-                          Buffer_printf(synopsis, " %s", label);
+                          Buffer_printf(synopsis, " %s", x2c_string_text(label));
                           if(String_truth(option -> help)) _write_row(operands, label, option -> help);
                         }
 
                       }
                       String option_rows = Buffer_str(options), operand_rows = Buffer_str(operands);
                       String words = Buffer_str(synopsis);
-                      Buffer_printf(out, _3, program, String_truth(option_rows) ? " [options]" : "", String_truth(words) ? words : "");
-                      if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", option_rows);
-                      if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", operand_rows);
+                      Buffer_printf(out, _3, x2c_string_text(program), String_truth(option_rows) ? " [options]" : "", x2c_string_text(String_truth(words) ? words : ""));
+                      if(String_truth(option_rows)) Buffer_printf(out, "\nOptions:\n%s", x2c_string_text(option_rows));
+                      if(String_truth(operand_rows)) Buffer_printf(out, "\nOperands:\n%s", x2c_string_text(operand_rows));
                       {
                         String _x2c_gensym_return_value_1 = Buffer_str(out);
                         {
@@ -695,9 +695,9 @@ static String _label(Option * o){
 
 static void _write_row(Buffer out, String label, String help){
   const int column = 30;
-  if(! String_truth(help)) Buffer_printf(out, "  %s\n", label);
-  else if(String_len(label) + 2 >= column) Buffer_printf(out, "  %s\n%*s%s\n", label, column, "", help);
-  else Buffer_printf(out, "  %-*s%s\n", column - 2, label, help);
+  if(! String_truth(help)) Buffer_printf(out, "  %s\n", x2c_string_text(label));
+  else if(String_len(label) + 2 >= column) Buffer_printf(out, "  %s\n%*s%s\n", x2c_string_text(label), column, "", x2c_string_text(help));
+  else Buffer_printf(out, "  %-*s%s\n", column - 2, x2c_string_text(label), x2c_string_text(help));
 }
 
 static void _x2c_gensym_defer_cleanup_0(void * _x2c_gensym_defer_opaque_0){

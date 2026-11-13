@@ -227,7 +227,7 @@ void Ast_print_dump(List ast){
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
-      printf("\n%s\n", _node_repr(node));
+      printf("\n%s\n", x2c_string_text(_node_repr(node)));
     }
 
   }
