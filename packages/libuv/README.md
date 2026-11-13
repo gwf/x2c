@@ -322,11 +322,16 @@ still running instead of orphaning it.
   environment  ok       strict
   line-count   ok       3
   fingerprint  ok       1253032073
+  changed      sum.txt
+  changed      lines.txt
   slow-scan    timed out
   artifact     lines.txt    3
   artifact     sum.txt      1253032073
 3 passed, 1 timed out
 ```
+
+The first three checks and the two `changed` lines print in completion
+order, so their order can differ from run to run.
 
 ## Ownership and execution
 
@@ -383,8 +388,11 @@ make test
 ```
 
 `make verify-pins` checks the prepared upstream headers and the license texts
-against their reviewed SHA-256 values, and `make verify-linkage` asserts that
-the linked example depends on nothing but `/usr/lib/libSystem.B.dylib`.
+against their reviewed SHA-256 values. `make verify-linkage` asserts that the
+linked example has only system dynamic dependencies. On macOS, `otool -L`
+must list nothing but `/usr/lib/libSystem.B.dylib`. On Linux, every `NEEDED`
+entry from `readelf -d` must be a C runtime library such as `libc.so.6`,
+`libm.so.6`, `libpthread.so.0`, or the dynamic loader.
 Nothing links until `verify-profile` passes.
 
 The client and its tests are licensed under
