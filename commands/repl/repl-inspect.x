@@ -13,8 +13,9 @@
 List ReplSession.resolve(ReplSession session, String expression);
 
 static String _declaration(Compiler c, Type type, List binding) =>
-  String.new(c.code_pretty_string(
-    c.emit($(type.declaration_ast(binding)), NULL), NULL)).strip();
+  String.new(
+    c.code_pretty_string(
+      c.emit($(type.declaration_ast(binding)), NULL), NULL)).strip();
 
 static String _type_text(Compiler c, Type type) {
   type = type.declared();
@@ -72,8 +73,9 @@ static String _named_declaration(
   syntax = Ast.without_origin(syntax);
   match (syntax) {
     case %(function ?spec ?bound ?):
-      return String.new(c.code_pretty_string(
-        c.emit(%((declare $spec (bindings $bound))), NULL), NULL)).strip();
+      return String.new(
+        c.code_pretty_string(
+          c.emit(%((declare $spec (bindings $bound))), NULL), NULL)).strip();
     case %((!or declare typedef) *):
       return String.new(c.code_pretty_string(c.emit($(syntax), NULL), NULL))
         .strip();
@@ -150,9 +152,10 @@ String ReplSession.symbol_text(
         !(kind == <function> && row_kind == <native>)) continue;
     if (path && origin != path &&
         (!origin || Path.absolute(origin) != Path.absolute(path))) continue;
-    out.printf("%-9s %s", row_kind == <native> ? "function" : row_kind.str(),
-               display && display != name ? display
-                 : declaration ? declaration : name);
+    out.printf(
+      "%-9s %s", row_kind == <native> ? "function" : row_kind.str(),
+      display && display != name ? display
+        : declaration ? declaration : name);
     if (display && display != name && declaration)
       out.printf("  %s", declaration);
     if (origin) out.printf("  [%s]", origin);
@@ -222,7 +225,8 @@ static void _related_functions(
     if (!related) continue;
     Map description = session.descriptions[name];
     String declaration = description ? description["declaration"] : NULL;
-    out.printf("  function %s\n",
+    out.printf(
+      "  function %s\n",
       declaration ? declaration : _declaration(c, signature, $(name)));
     if (_related(c, result, type)) out.write("           returns this type\n");
     position = 0;
@@ -337,8 +341,9 @@ String ReplSession.info(ReplSession session, String text) {
     if (description["unavailable"] is not void &&
         description["unavailable"].truth())
       out.write("execution: unavailable (no native provider)\n");
-    else out.write(description["kind"] == <macro>
-      ? "expansion: preprocessor macro\n" : "execution: native\n");
+    else out.write(
+      description["kind"] == <macro>
+        ? "expansion: preprocessor macro\n" : "execution: native\n");
     Type type = description["type"];
     if (type && !type.is_function()) {
       _field_rows(session.compiler, type, out);
@@ -373,7 +378,9 @@ String ReplSession.source(ReplSession session, String name) {
   return out;
 }
 
-/** Displays known value containers without invoking user representation hooks. */
+/** Displays known value containers without invoking user representation
+    hooks.
+*/
 Buffer repl_inspect_value(Buffer out, Var value, int depth, int *remaining) {
   if (value is <string>) return String.write_repr(value, out);
   if (value is <symbol>) return Symbol.write_repr(value, out);
@@ -437,7 +444,8 @@ static List _render_array(
   List position = %(expr (unsigned long long) (ident $index));
   Type element = type.dereference();
   List selected = %(expr $element (index $expression $position));
-  List item = _render_value(c, element, selected, output, remaining, depth - 1);
+  List item = _render_value(
+    c, element, selected, output, remaining, depth - 1);
   return $!{
     $output.write("[ ");
     unsigned long long $index = 0;
@@ -454,14 +462,15 @@ static List _render_array(
 }
 
 static void _render_fields(
-  Compiler c, Type shape, List expression, List output,
-  List remaining, int depth, List separated, List truncated, Array statements) {
+  Compiler c, Type shape, List expression, List output, List remaining,
+  int depth, List separated, List truncated, Array statements) {
   foreach (List row in c.sym.field_order(shape).cdr()) {
     (String name, Type member) = row;
     Type member_shape = _shape(c, member);
     if (!name && (member_shape ~= %(struct *))) {
-      _render_fields(c, member_shape, expression, output, remaining, depth,
-                     separated, truncated, statements);
+      _render_fields(
+        c, member_shape, expression, output, remaining, depth,
+        separated, truncated, statements);
       continue;
     }
     if (!name && !(member_shape ~= %(union *))) continue;
@@ -473,16 +482,17 @@ static void _render_fields(
         : _render_value(c, member, selected, output, remaining, depth - 1);
     if (!name) name = "<anonymous union>";
     String label = name + ": ";
-    statements.push($!{
-      if ($remaining > 0) {
-        if ($separated) $output.write(", ");
-        $separated = 1;
-        $output.write($label);
-        $remaining--;
-        @($(value))
-      }
-      else $truncated = 1;
-    });
+    statements.push(
+      $!{
+        if ($remaining > 0) {
+          if ($separated) $output.write(", ");
+          $separated = 1;
+          $output.write($label);
+          $remaining--;
+          @($(value))
+        }
+        else $truncated = 1;
+      });
   }
 }
 
@@ -495,8 +505,9 @@ static List _render_struct(
   List separated = %(expr (int) (ident $separator));
   List truncation = c.sym.introduce(c.fresh_name("repl_truncated"));
   List truncated = %(expr (int) (ident $truncation));
-  _render_fields(c, shape, expression, output, remaining, depth,
-                 separated, truncated, statements);
+  _render_fields(
+    c, shape, expression, output, remaining, depth,
+    separated, truncated, statements);
   return $!{
     $output.write("{ ");
     int $separator = 0, $truncation = 0;
@@ -514,16 +525,17 @@ static List _render_union(
   foreach (List row in c.sym.field_order(shape).cdr()) {
     String name = row.car();
     if (!name) continue;
-    statements.push($!{
-      if ($separated) $output.write(", ");
-      if ($remaining <= 0) {
-        $output.write("...");
-        break;
-      }
-      $output.write($name);
-      $separated = 1;
-      $remaining--;
-    });
+    statements.push(
+      $!{
+        if ($separated) $output.write(", ");
+        if ($remaining <= 0) {
+          $output.write("...");
+          break;
+        }
+        $output.write($name);
+        $separated = 1;
+        $remaining--;
+      });
   }
   return $!{
     $output.write("{ members: ");
