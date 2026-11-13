@@ -13,8 +13,8 @@
 #include "ast-rewrite.x"
 #include <dlfcn.h>
 
-void ReplSession.describe(ReplSession session, String name,
-                          List syntax, String source);
+void ReplSession.describe(
+  ReplSession session, String name, List syntax, String source);
 List repl_member_candidates(Compiler c, Type type);
 
 static List _ledger_rows(String text) {
@@ -72,7 +72,6 @@ static void _restore_parser_input(Compiler c, struct _ParserInput input) {
   c.packed_marks = input.packed_marks;
 }
 
-/* An internal name, or a value or constant whose type is internal. */
 static int _is_internal(ReplSession session, String name, Type type) {
   if (name in session.internal) return 1;
   if (!type || type.is_typedef() || type.is_function()) return 0;
@@ -166,8 +165,9 @@ ReplCompletion ReplSession.complete(
     c.mark_completion(marked.len() - marker.len());
     _x2c_complete_here(
       c, <submit>,
-      @(_x2c_block_keywords().filter(%!(word) =>
-        !(word in %("case" "break" "continue" "goto" "default")))));
+      @(_x2c_block_keywords().filter(
+        %!(word) =>
+          !(word in %("case" "break" "continue" "goto" "default")))));
     int declaration = c.test_declaration();
     int end = marked.len();
     if (!declaration) {
@@ -182,7 +182,8 @@ ReplCompletion ReplSession.complete(
   catch %(replcomp (kind ?(Symbol found_kind)) (rows ?found)
                    (keywords ?found_keywords) *more): {
     kind = found_kind;
-    /* Error owns catch captures; retain query values before leaving the arm. */
+    /* Error owns catch captures; retain query values before leaving the
+       arm. */
     rows = Error.snapshot(found);
     keywords = Error.snapshot(found_keywords);
     foreach (List fact, more) match (fact) {
@@ -194,7 +195,8 @@ ReplCompletion ReplSession.complete(
   if (receiver && access == <.>) {
     Array candidates = [];
     foreach (List candidate, repl_member_candidates(c, receiver))
-      if (candidate.cadr().str().startswith(prefix)) candidates.push(candidate);
+      if (candidate.cadr().str().startswith(prefix))
+        candidates.push(candidate);
     result.candidates = candidates.list_free();
   }
   else if (rows || keywords) result.candidates = _completion_filter(
@@ -249,7 +251,8 @@ static int _file_submission(Compiler c) {
   defer transaction.rollback();
   try with (c.shallow = 1) {
     List declaration = c.parse_declaration_row();
-    return _type_only(declaration) || declaration.type_from_ast().is_function();
+    return _type_only(declaration) ||
+      declaration.type_from_ast().is_function();
   }
   catch %((!or incomplete malformed) *): return 0;
   return 0;
@@ -271,16 +274,15 @@ static List _native_top_statements(Compiler c, List statements) {
       node = lowered;
       expanded = Ast.rewrap_origin(anchored, lowered);
     }
-    if (node ~= %(seq *items)) {
+    if (node ~= %(seq *items))
       foreach (List item, _native_top_statements(c, items)) result.push(item);
-    }
     else result.push(expanded);
   }
   return result.list_free();
 }
 
-static void _submission_objects(ReplSession session, List items,
-                                Array declarations, Array names) {
+static void _submission_objects(
+  ReplSession session, List items, Array declarations, Array names) {
   Compiler c = session.compiler;
   foreach (List anchored, items) {
     List node = _session_bare(anchored);
@@ -417,7 +419,7 @@ static ReplResult _submit_native(ReplSession session, String source) {
   auto (&scratch) c.braces = [];
   SymTxn transaction = c.begin_semantic_transaction();
   defer transaction.rollback();
-  Array declarations = auto [], names = auto [], retained = auto [];
+  auto Array declarations = [], names = [], retained = [];
   size_t cleanup_count = session.cleanups.len();
   int committed = 0;
   defer if (!committed) _discard_cleanups(session, cleanup_count);
@@ -441,9 +443,9 @@ static ReplResult _submit_native(ReplSession session, String source) {
       syntax = c.parse_submission(source.len());
       if (_type_only(syntax)) {
         Type type = syntax.cadr().type().base_type();
-        if (syntax ~= %(typedef ? (bindings *rows))) {
-          foreach (List row, rows) names.push(Ast.binding_spelling(row.cadr()));
-        }
+        if (syntax ~= %(typedef ? (bindings *rows)))
+          foreach (List row, rows)
+            names.push(Ast.binding_spelling(row.cadr()));
         String tag = _tag_name(type);
         if (tag && (syntax.car() != <typedef> ||
                     type.is_aggregate_tag_body() || type.is_enum_tag_body()))
@@ -529,7 +531,8 @@ static ReplResult _submit_native(ReplSession session, String source) {
       session.describe(function, syntax, source);
       result.name = function;
     }
-    if (function || names.len() || retained.len()) transaction.commit_transient();
+    if (function || names.len() || retained.len())
+      transaction.commit_transient();
     if (prints) result.formatted = published["formatted"];
     result.status = function ? <defined> : prints ? <value> : <executed>;
     committed = 1;
@@ -557,7 +560,8 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   foreach (List entry, result.diagnostics) {
     match (entry)
       case %(?code ?severity ?message
-        (location ((file ?file) ? ? (length ?length) (position ?(int position))))
+        (location ((file ?file) ? ? (length ?length)
+          (position ?(int position))))
         ?notes): {
         int at = position - _eval_head().len();
         at = at < 0 ? 0 : at > source.len() ? source.len() : at;
@@ -574,7 +578,9 @@ ReplResult ReplSession.submit(ReplSession session, String source) {
   return result;
 }
 
-/** Evaluates an inspection expression once using the ordinary native backend. */
+/** Evaluates an inspection expression once using the ordinary native
+    backend.
+*/
 ReplResult ReplSession.inspect_expression(
   ReplSession session, String expression, int depth, int limit) {
   with (session.inspect_depth = depth, session.inspect_limit = limit) {
