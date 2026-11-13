@@ -226,7 +226,7 @@ Modules load on macOS, Linux and WSL. On other platforms, importing a
 package that has a module reports that native modules are not supported.
 There, link the package's compile-time part into a compiler built from a
 checkout instead, with `x2c build --extension`;
-[Build native artifacts](../reference/cli.md#build-native-artifacts) gives
+[Package extensions](../internals/building.md#package-extensions) gives
 the command. That compiler then calls `tally`'s `meta` functions through
 `import "tally"` alone, never loads a module, and needs no
 `builds/tally.module`. The build translates the package's `src/*.x`

@@ -218,7 +218,9 @@ Installing these support directories directly into a shared tree such as
 `/usr` is not supported.
 
 An installed prefix records `cc` and `ar` in `lib/x2c/toolchain`;
-[Environment](../reference/cli.md#environment) gives the full tool selection
+[C compiler and linker
+options](../reference/cli.md#c-compiler-and-linker-options) gives the full
+tool selection
 order.
 
 ## Windows
