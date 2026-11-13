@@ -2,8 +2,8 @@
 
 This experimental command uses the current stage-0 x2c compiler as a
 library. From the repository root, run `make commands` to build it at
-`builds/0/libexec/x2c-graph`. The compiler archive is provisional and
-stays in the checkout. Run `make commands-check` for its smoke tests.
+`builds/0/libexec/x2c-graph`. Run `make commands-check` for its smoke tests.
+`x2c graph SUB` and `builds/0/libexec/x2c-graph SUB` run the same command.
 
 ## Investigate a change
 
@@ -27,8 +27,7 @@ splices its member files into one unit, so pass the entry, not the members.
 
 Commands use emitted
 names (`String_split_n` for `String.split_n`); supply the relevant source
-files to resolve calls across units. Rerun commands for current counts;
-archived reports describe older trees. Inspect reported sites before removing
+files to resolve calls across units. Inspect reported sites before removing
 walks or allocations; absent results do not establish safety.
 Text-search hits can be definitions, declarations, or comments as well as
 calls; a hit absent from graph edges does not establish an unresolved call.
@@ -244,9 +243,6 @@ for name in $(cut -d'|' -f1 commands/manifest.txt); do
 done
 builds/0/libexec/x2c-graph datasets /tmp/x2c-datasets -I . -I src -I lib "$@"
 ```
-
-The compiler driver runs the same command as
-`x2c graph datasets OUTPUT [-I DIR] SRC_FILE... -- LIB_FILE... [-- COMMAND_FILE...]`.
 
 ### Reading and analyzing the datasets
 
