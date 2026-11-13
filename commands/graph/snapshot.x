@@ -98,7 +98,7 @@ static void _snapshot_merge(Map snapshot, Map unit, Map files) {
   Array sources = snapshot["files"];
   foreach (Map file, unit["files"]) {
     String path = file["path"];
-    if (files.contains(path)) {
+    if (path in files) {
       if (files[path] != file["text"])
         raise %(bad-state (reason "source changed during snapshot")
                 (path $path));
