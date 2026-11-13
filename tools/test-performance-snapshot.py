@@ -21,6 +21,50 @@ snapshot = load_script(SCRIPT, "performance_snapshot")
 
 
 class PerformanceSnapshotTests(unittest.TestCase):
+  def test_snapshot_commands_share_writable_cache_and_retain_it_on_failure(self):
+    for setting in (None, "", "explicit"):
+      with self.subTest(setting=setting), \
+          tempfile.TemporaryDirectory() as directory:
+        root = Path(directory)
+        (root / "etc").mkdir()
+        (root / "etc/build-mode").write_text("optimize\n")
+        probe = (
+          "import os; from pathlib import Path; "
+          "p = Path(os.environ['X2C_CACHE_DIR']); "
+          "p.mkdir(parents=True, exist_ok=True); "
+          "(p / 'receipt').write_text('cached')"
+        )
+        reuse = (
+          "import os; from pathlib import Path; "
+          "assert (Path(os.environ['X2C_CACHE_DIR']) / 'receipt')"
+          ".read_text() == 'cached'; raise SystemExit(7)"
+        )
+        commands = (("setup", [sys.executable, "-c", probe]),
+                    ("failure", [sys.executable, "-c", reuse]))
+        environment = {"PATH": os.environ["PATH"], "HOME": str(root / "no-home")}
+        if setting is not None:
+          environment["X2C_CACHE_DIR"] = (
+            str(root / "explicit-cache") if setting else ""
+          )
+        def git_result(*args, **kwargs):
+          return "" if args[0] == "status" else "test-revision"
+        with mock.patch.dict(os.environ, environment, clear=True), \
+            mock.patch.object(snapshot, "ROOT", root), \
+            mock.patch.object(snapshot, "git", side_effect=git_result), \
+            mock.patch.object(snapshot, "machine_receipt", return_value={}), \
+            mock.patch.object(snapshot, "COMMANDS", commands), \
+            contextlib.redirect_stdout(io.StringIO()):
+          self.assertEqual(snapshot.run_snapshot(root / "history", False, 10), 1)
+        summary = json.loads((root / "history/latest-attempt.json").read_text())
+        cache = Path(summary["configuration"]["cache_dir"])
+        expected = root / "explicit-cache" if setting else next(
+          (root / "history/runs").glob("*/*/*/*/cache")
+        )
+        self.assertEqual(cache, expected)
+        self.assertEqual((cache / "receipt").read_text(), "cached")
+        self.assertEqual([step["returncode"] for step in summary["steps"]], [0, 7])
+        self.assertFalse((root / "no-home").exists())
+
   def test_command_order_builds_stage_three_only_once(self):
     names = [name for name, _ in snapshot.COMMANDS]
     self.assertEqual(
