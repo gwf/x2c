@@ -49,6 +49,7 @@ PACKAGE_SOURCES := $(wildcard src/*.x)
 PACKAGE_NATIVE := $(wildcard src/*.c)
 PACKAGE_HEADERS := $(PACKAGE_SOURCES:src/%.x=builds/%.h)
 PACKAGE_GENERATED := $(PACKAGE_SOURCES:src/%.x=builds/%.c)
+PACKAGE_TRANSLATED := $(PACKAGE_SOURCES:src/%.x=builds/%.translated)
 PACKAGE_ARCHIVE := builds/lib$(PACKAGE).a
 PACKAGE_RESPONSE := builds/$(PACKAGE).native.rsp
 PACKAGE_MODULE := builds/$(PACKAGE).module
@@ -92,8 +93,8 @@ prepare:
 else
 include $(PACKAGE_SUPPORT)dependency.mk
 
-$(PACKAGE_SOURCES:src/%.x=builds/%.c) $(PACKAGE_HEADERS) \
-  $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE): $(DEPENDENCY_MANIFEST)
+$(PACKAGE_TRANSLATED) $(PACKAGE_ARCHIVE) $(PACKAGE_RESPONSE): \
+  $(DEPENDENCY_MANIFEST)
 
 # dependency.mk owns download, verification, and the shared cache; this
 # only exposes the prepared prefix at a stable path inside the package.
@@ -121,17 +122,28 @@ ifneq ($(wildcard licenses.sha256),)
 endif
 endif
 
-$(PACKAGE_GENERATED) $(PACKAGE_HEADERS): \
-  $(PACKAGE_TRANSLATION) $(PACKAGE_COMPILER)
-
 $(PACKAGE_TRANSLATION): package-build-force | builds
 	@set -e; identity=$$("$(X2C)" env identity); \
 	  printf '%s\n' "$(X2C)" "$(PACKAGE_COMPILER)" "$$identity" \
 	    $(PACKAGE_X_FLAGS) >$@.tmp; \
 	  cmp -s $@.tmp $@ || mv $@.tmp $@; rm -f $@.tmp
 
-builds/%.c builds/%.h: src/%.x | builds $(DEPENDENCY_PREREQUISITE)
-	"$(X2C)" translate --out-dir builds $(PACKAGE_X_FLAGS) $<
+# Translation leaves a .c or .h whose text is unchanged alone, so make
+# compares the invocation and inputs with a stamp each translation leaves.
+# The stamp keeps the time translation started, so an input changed during
+# translation is newer. builds/<unit>.d names the stamp as its target.
+PACKAGE_TRANSLATE = { touch builds/$*.translated.tmp && \
+  "$(X2C)" translate --out-dir builds --dep-target builds/$*.translated \
+    $(PACKAGE_X_FLAGS) src/$*.x && \
+  mv builds/$*.translated.tmp builds/$*.translated; }
+
+$(PACKAGE_TRANSLATED): builds/%.translated: src/%.x $(PACKAGE_TRANSLATION) \
+  $(PACKAGE_COMPILER) | builds $(DEPENDENCY_PREREQUISITE)
+	$(PACKAGE_TRANSLATE)
+
+# Only a deleted output translates again.
+builds/%.c builds/%.h: builds/%.translated
+	@[ -f builds/$*.c ] && [ -f builds/$*.h ] || $(PACKAGE_TRANSLATE)
 
 # A consumer resolves the package through both files, so the archive carries
 # the response file as a prerequisite; otherwise `make run` on a clean
