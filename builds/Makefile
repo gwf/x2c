@@ -12,7 +12,6 @@ PRINT_LINE = @printf '%80s\n' | tr ' ' '\#'
 x2c:
 	mkdir -p 0
 	$(MAKE) -f ../stage.mk -C 0
-	$(PRINT_LINE)
 
 test:
 	@if [ ! -f 0/x2c ]; then \
