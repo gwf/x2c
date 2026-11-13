@@ -95,7 +95,7 @@ static int _help(String command) {
       fprintf(stderr, "unknown command: %s\n", command);
       return 0;
     }
-    printf("%s\n  %s\n", row->synopsis, row->description);
+    printf("%s\n  %s\n", row.synopsis, row.description);
     return 1;
   }
   puts($dedent(%"
@@ -354,8 +354,8 @@ static int _replay(struct ReplClient &client, String argument) {
 
 static int _control(
   struct ReplClient &client, const struct ReplCommand *command, String argument) {
-  String operation = command->spelling;
-  if (command->argument == <none> && argument) return 0;
+  String operation = command.spelling;
+  if (command.argument == <none> && argument) return 0;
   if (operation == ":quit") { client.pending = ""; client.quit = 1; return 1; }
   if (operation == ":cancel") { client.pending = ""; return 1; }
   if (operation == ":help") return _help(argument) ? 1 : -1;
@@ -408,7 +408,7 @@ static int _line(struct ReplClient &client, String line) {
     }
     int result = _control(client, command, text);
     if (result <= 0) {
-      if (!result) fprintf(stderr, "usage: %s\n", command->synopsis);
+      if (!result) fprintf(stderr, "usage: %s\n", command.synopsis);
       return 0;
     }
     if (operation == ":load" || operation == ":reload" || operation == ":reset")
@@ -526,16 +526,16 @@ static ReplInputCompletion _complete_input(void *raw, String text, size_t cursor
     }
     const struct ReplCommand *command = _command(spelling);
     if (!command) return (ReplInputCompletion) {.candidates = NULL};
-    if (command->argument == <path>) return _path_completion(text, cursor, end);
+    if (command.argument == <path>) return _path_completion(text, cursor, end);
     size_t start = end;
     while (start < cursor && _blank(text[start])) start++;
-    if (command->argument == <statmode>)
+    if (command.argument == <statmode>)
       return (ReplInputCompletion) {.start = start, .end = cursor,
         .candidates = "verbose".startswith(text[start:cursor]) ? %((keyword "verbose")) : NULL};
     return _argument_completion(*client, spelling, text, cursor, start);
   }
-  String source = client->pending + text;
-  size_t offset = client->pending.len();
+  String source = client.pending + text;
+  size_t offset = client.pending.len();
   Map result = _call(*client,
     {operation: <complete>, text: source, cursor: offset + cursor}, 0);
   if (!result || result[<start>].integer() < offset)
