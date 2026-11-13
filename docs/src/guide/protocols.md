@@ -257,8 +257,8 @@ participation even though both conversion functions still exist.
 ### Polar: a total forward view
 
 Polar implements `magnitude`, and the compiler adapts the base's
-`Cartesian.angle` through the `Polar.cartesian` view. The generated `Polar.angle` needs only the total forward
-view:
+`Cartesian.angle` through the `Polar.cartesian` view. The generated
+`Polar.angle` needs only the total forward view:
 
 ```x2c
 #include <math.h>
