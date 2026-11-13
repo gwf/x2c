@@ -434,8 +434,7 @@ static List _analyze_walk_unit(Compiler compiler, List ast, String path) {
             $visibility (parameters @parameter_list) (calls @call_list)
             (direct
               @(_walk_direct_parameters(
-                body, target, parameter_list, call_list
-              )))));
+                body, target, parameter_list, call_list)))));
       }
   functions.sort();
   return functions.list_free();
@@ -2183,8 +2182,8 @@ static int _certify_file_effect(Var value) {
 
 /* Certify reopens each input on every pass, so it prints diagnostics only
    for a unit that fails. */
-static int _certify_open(Frontend frontend, String input,
-                         ParsedUnit &parsed) {
+static int _certify_open(
+  Frontend frontend, String input, ParsedUnit &parsed) {
   if (frontend.open(input, parsed)) return 1;
   foreach (Var diagnostic, parsed.compiler.diagnostics())
     parsed.compiler.print_diagnostic(diagnostic);
@@ -2209,8 +2208,9 @@ static List _certify_parse_units(Frontend frontend, Array inputs) {
     if (effect && !has_top) {
       Array extended = [];
       foreach (List function, functions) extended.push(function);
-      extended.push(%(function 0 "<top-level>" static
-                      (source "<top-level>" 0 $path source) (calls)));
+      extended.push(
+        %(function 0 "<top-level>" static
+          (source "<top-level>" 0 $path source) (calls)));
       functions = extended.sort().list_free();
     }
     List record = %(
@@ -2260,15 +2260,15 @@ Map certify_contracts(String path, int &valid) {
   Scope tokens_scope = auto Scope.new_named("contract tokens");
   Tokenizer tokenizer = Tokenizer.from_lisp(source, &tokens_scope);
   while ((status = tokenizer.read_lisp_form(
-      source, 0, cursor, form)) == <value>) {
+    source, 0, cursor, form)) == <value>) {
     match (form) case %(native ?(String name) ?effect)
       if (_certify_effect(effect) && !contracts.contains(name) &&
           !Compiler.has_region_row(name)): {
         contracts[name] = effect;
         continue;
       }
-    Stderr.printf("invalid or duplicate native contract in %s: %s\n",
-                  path, form.repr());
+    Stderr.printf(
+      "invalid or duplicate native contract in %s: %s\n", path, form.repr());
     valid = 0;
     return contracts;
   }
@@ -2289,8 +2289,8 @@ static List _certify_path(List target, Map parent) {
   return path;
 }
 
-static void _certify_reach(List graph, Array roots, Map nodes,
-                           Map reached, Map parent, Array missing) {
+static void _certify_reach(
+  List graph, Array roots, Map nodes, Map reached, Map parent, Array missing) {
   foreach (List unit, graph)
     match (unit) case %(unit ?path (functions *functions)):
       foreach (List function, functions)
@@ -2373,8 +2373,9 @@ static List _certify_unit_graph(String path, List graph) {
   return NULL;
 }
 
-static int _certify_round(Frontend frontend, Array inputs, List graph,
-                          Map summaries, Map contracts, Array findings) {
+static int _certify_round(
+  Frontend frontend, Array inputs, List graph, Map summaries, Map contracts,
+  Array findings) {
   int changed = 0;
   foreach (String input, inputs) {
     ParsedUnit parsed;
@@ -2385,8 +2386,7 @@ static int _certify_round(Frontend frontend, Array inputs, List graph,
     Map seed = _certify_seed(path, graph, summaries);
     Array current = [];
     Map calculated = compiler.audit_regions(
-      parsed.ast, seed, contracts, current
-    );
+      parsed.ast, seed, contracts, current);
     List unit = _certify_unit_graph(path, graph);
     match (unit) case %(unit ? (functions *functions)):
       foreach (List function, functions)
@@ -2404,9 +2404,10 @@ static int _certify_round(Frontend frontend, Array inputs, List graph,
       (String name, Symbol code, int origin, String message, List notes) =
         finding;
       List location = project_location(compiler, path, origin);
-      findings.push(context.export(%(
-        finding (target $path $name) $code $location $message $notes
-      )).list());
+      findings.push(
+        context.export(
+          %(finding (target $path $name) $code $location
+            $message $notes)).list());
     }
     parsed.close();
   }
@@ -2494,19 +2495,22 @@ static void _certify_scan(
       return;
     }
     case %((!or goto label) *):
-      scan.obstacles.push(%(obstacle $caller $location
-        "nonlocal control flow is outside the proof subset"));
+      scan.obstacles.push(
+        %(obstacle $caller $location
+          "nonlocal control flow is outside the proof subset"));
   }
   match (node) {
     case %(expr ?type ?inner): {
       if (_certify_indirect_result(scan.compiler, type))
         match (inner) {
           case %(op (!or (!quote .) (!quote ->)) *):
-            scan.obstacles.push(%(obstacle $caller $location
-              "pointer-bearing field access is outside the proof subset"));
+            scan.obstacles.push(
+              %(obstacle $caller $location
+                "pointer-bearing field access is outside the proof subset"));
           case %((!or getindex index) *):
-            scan.obstacles.push(%(obstacle $caller $location
-              "pointer-bearing indexed access is outside the proof subset"));
+            scan.obstacles.push(
+              %(obstacle $caller $location
+                "pointer-bearing indexed access is outside the proof subset"));
         }
     }
     case %(call ? ?): {
@@ -2526,36 +2530,43 @@ static void _certify_scan(
       else if (!resolved && _certify_printf_format(callee, arguments))
         scan.assumptions[callee] = %(summary 0 ());
       else if (!resolved && (!callee || !Compiler.has_region_row(callee)))
-        scan.obstacles.push(%(obstacle $caller $location
-          "call has no project body or lifetime effect contract" $callee));
+        scan.obstacles.push(
+          %(obstacle $caller $location
+            "call has no project body or lifetime effect contract" $callee));
       if (callee && callee.startswith("Context_"))
-        scan.obstacles.push(%(obstacle $caller $location
-          "Context lifetime is outside the region walk" $callee));
+        scan.obstacles.push(
+          %(obstacle $caller $location
+            "Context lifetime is outside the region walk" $callee));
       if (callee in %("Scope_new" "Scope_new_named"))
-        scan.obstacles.push(%(obstacle $caller $location
-          "Scope object destruction is outside the proof subset" $callee));
+        scan.obstacles.push(
+          %(obstacle $caller $location
+            "Scope object destruction is outside the proof subset" $callee));
       match (callee ? Compiler.region_effect(callee) : void) {
         case %(!or (free scope) (alloc moved)):
-          scan.obstacles.push(%(obstacle $caller $location
-            "explicit free or realloc has untracked aliases" $callee));
+          scan.obstacles.push(
+            %(obstacle $caller $location
+              "explicit free or realloc has untracked aliases" $callee));
         case %(open ?kind): {
           project_count(scan.scope_counts, %(open $kind), 1);
           if (conditional)
-            scan.obstacles.push(%(obstacle $caller $location
-              "conditional region opening is outside the proof subset"
-              $callee));
+            scan.obstacles.push(
+              %(obstacle $caller $location
+                "conditional region opening is outside the proof subset"
+                $callee));
         }
         case %(close ?kind): {
           project_count(scan.scope_counts, %(close $kind), 1);
           if (!deferred || conditional)
-            scan.obstacles.push(%(obstacle $caller $location
-              "region closing is not an unconditional lexical defer"
-              $callee));
+            scan.obstacles.push(
+              %(obstacle $caller $location
+                "region closing is not an unconditional lexical defer"
+                $callee));
         }
         case %(!or (move) (exit)):
-          scan.obligations.push(%(caller $caller $location
-            "transferred storage must be released by its destination"
-            $callee));
+          scan.obligations.push(
+            %(caller $caller $location
+              "transferred storage must be released by its destination"
+              $callee));
       }
     }
     case %(cast ?type ?inner): {
@@ -2564,8 +2575,9 @@ static void _certify_scan(
       match (inner) case %(expr ?source ?): source_type = source;
       if ((target_type && target_type.is_pointer()) ||
           (source_type && source_type.is_pointer()))
-        scan.obstacles.push(%(obstacle $caller $location
-          "pointer cast is outside the lifetime model"));
+        scan.obstacles.push(
+          %(obstacle $caller $location
+            "pointer cast is outside the lifetime model"));
     }
     case %(op ?operator ?left ?right): {
       if (operator == <+> || operator == <->) {
@@ -2574,12 +2586,14 @@ static void _certify_scan(
         match (right) case %(expr ?t ?): right_type = t;
         if ((left_type && left_type.is_pointer()) ||
             (right_type && right_type.is_pointer()))
-          scan.obstacles.push(%(obstacle $caller $location
-            "pointer arithmetic is outside the lifetime model"));
+          scan.obstacles.push(
+            %(obstacle $caller $location
+              "pointer arithmetic is outside the lifetime model"));
       }
       if (operator == <=> && _certify_aggregate(scan.compiler, right))
-        scan.obstacles.push(%(obstacle $caller $location
-          "aggregate copy may hide a borrowed pointer"));
+        scan.obstacles.push(
+          %(obstacle $caller $location
+            "aggregate copy may hide a borrowed pointer"));
       /* The region walk checks an indexed store against its base owner. */
       Var indexed = NULL;
       if (operator == <=>)
@@ -2592,21 +2606,23 @@ static void _certify_scan(
       }
     }
     case %(op (!quote *) ?):
-      scan.obstacles.push(%(obstacle $caller $location
-        "pointer dereference is outside the proof subset"));
+      scan.obstacles.push(
+        %(obstacle $caller $location
+          "pointer dereference is outside the proof subset"));
     case %(return ? ?result): {
       if (_certify_aggregate(scan.compiler, result))
-        scan.obstacles.push(%(obstacle $caller $location
-          "aggregate return may hide a borrowed pointer"));
+        scan.obstacles.push(
+          %(obstacle $caller $location
+            "aggregate return may hide a borrowed pointer"));
     }
   }
   foreach (Var child, node)
     _certify_scan(scan, child, origin, conditional, deferred);
 }
 
-static int _certify_coverage(Frontend frontend, Array inputs, List graph,
-                             Map reached, Map contracts, Map assumptions,
-                             Array obligations, Array obstacles) {
+static int _certify_coverage(
+  Frontend frontend, Array inputs, List graph, Map reached, Map contracts,
+  Map assumptions, Array obligations, Array obstacles) {
   Map publics = _certify_publics(graph);
   foreach (String input, inputs) {
     ParsedUnit parsed;
@@ -2636,19 +2652,19 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
             case %(open ?kind)
               if (scan.scope_counts.getdefault(%(open $kind), 0).int() !=
                   scan.scope_counts.getdefault(%(close $kind), 0).int()):
-              obstacles.push(%(obstacle $target (location $path 0 0)
-                "region opening and lexical closing do not match" $open));
+              obstacles.push(
+                %(obstacle $target (location $path 0 0)
+                  "region opening and lexical closing do not match" $open));
         continue;
       }
       /* Executable file-scope forms are roots, but the region walk does
          not model their process lifetime. */
       if (_certify_file_effect(node) &&
           %(target $path "<top-level>") in reached)
-        obstacles.push(context.export(%(obstacle
-          (target $path "<top-level>")
-          (location $path 0 0)
-          "file-scope execution is outside the region walk"
-        )).list());
+        obstacles.push(
+          context.export(
+            %(obstacle (target $path "<top-level>") (location $path 0 0)
+              "file-scope execution is outside the region walk")).list());
     }
     for (int i = first_obstacle; i < obstacles.len(); i++)
       obstacles[i] = context.export(obstacles[i]);
@@ -2659,8 +2675,8 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
   return 1;
 }
 
-List certify_result(Frontend frontend, Array inputs, Array roots,
-                    Map contracts, int &status) {
+List certify_result(
+  Frontend frontend, Array inputs, Array roots, Map contracts, int &status) {
   List units = _certify_parse_units(frontend, inputs);
   if (!units) { status = 2; return NULL; }
   List graph = _resolve_graph(units, NULL);
@@ -2678,27 +2694,30 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
   int changed = 1, rounds = 0;
   while (changed && rounds++ < 256) {
     Array ignored = [];
-    changed = _certify_round(frontend, inputs, graph, summaries,
-                             contracts, ignored);
+    changed = _certify_round(
+      frontend, inputs, graph, summaries, contracts, ignored);
     if (changed < 0) { status = 2; return NULL; }
   }
   Array findings = [], obstacles = [], violations = [], obligations = [];
   Map assumptions = {};
   foreach (List row, missing)
     match (row) case %(root ?name ?reason):
-      obstacles.push(%(obstacle (target "<root>" $name)
-        (location "<project>" 0 0) "selected root is unresolved" $reason));
+      obstacles.push(
+        %(obstacle (target "<root>" $name)
+          (location "<project>" 0 0) "selected root is unresolved" $reason));
   if (changed) {
     List target = NULL;
     foreach (List current, reached.keys())
       if (!target || List.compare(current, target) < 0) target = current;
-    obstacles.push(%(obstacle $target (location "<project>" 0 0)
-      "project summary did not settle"));
+    obstacles.push(
+      %(obstacle $target (location "<project>" 0 0)
+        "project summary did not settle"));
   }
-  if (_certify_round(frontend, inputs, graph, summaries,
-                     contracts, findings) < 0 ||
-      !_certify_coverage(frontend, inputs, graph, reached, contracts,
-                          assumptions, obligations, obstacles)) {
+  if (_certify_round(
+    frontend, inputs, graph, summaries, contracts, findings) < 0 ||
+      !_certify_coverage(
+        frontend, inputs, graph, reached, contracts, assumptions,
+        obligations, obstacles)) {
     status = 2;
     return NULL;
   }
@@ -2710,29 +2729,33 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
     match (finding) case %(finding ?target ?code ?location ?message ?notes)
       if (target in reached): {
         if (target in blocked)
-          obstacles.push(%(obstacle $target $location
-            "region finding requires review with incomplete coverage"
-            $message));
+          obstacles.push(
+            %(obstacle $target $location
+              "region finding requires review with incomplete coverage"
+              $message));
         else
-          violations.push(%(violation $(_certify_path(target, parent))
-                            $code $location $message $notes));
+          violations.push(
+            %(violation $(_certify_path(target, parent))
+              $code $location $message $notes));
       }
   Array reported_obstacles = [];
   foreach (List obstacle, obstacles)
     match (obstacle) case %(obstacle ?target ?location ?reason *rest):
-      reported_obstacles.push(%(obstacle
-        $(_certify_path(target, parent)) $location $reason @rest));
+      reported_obstacles.push(
+        %(obstacle $(_certify_path(target, parent)) $location $reason @rest));
   foreach (List target, reached.keys())
     match (target) case %(target ? ?name) if (name in roots &&
         target in summaries): {
       List summary = summaries[target];
       int owner = summary.car().int();
       if (owner & 1)
-        obligations.push(%(caller $target
-          "returned storage may belong to the caller's active Scope"));
+        obligations.push(
+          %(caller $target
+            "returned storage may belong to the caller's active Scope"));
       if (owner & 2)
-        obligations.push(%(caller $target
-          "returned storage may belong to the caller's active Pool"));
+        obligations.push(
+          %(caller $target
+            "returned storage may belong to the caller's active Pool"));
     }
   Array used = [];
   foreach (String name, assumptions.keys())
@@ -2750,7 +2773,6 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
     (obstacles @(reported_obstacles.sort().list_free()))
   );
 }
-
 
 /* Each command's operand and option rows, ahead of the shared `-I DIR`
    and input rows; NULL for an unknown command. `datasets` and `compare`
@@ -2850,11 +2872,11 @@ int main(int argc, char **argv) {
     if (verb == "clones" && options["min-size"])
       clone_minimum = _clone_minimum(options["min-size"]);
     if (!clone_minimum ||
-        !_add_inputs(inputs, subtrees, options.getdefault("inputs", NULL),
-                     <src>) ||
+        !_add_inputs(
+          inputs, subtrees, options.getdefault("inputs", NULL), <src>) ||
         (libraries &&
-         !_add_inputs(inputs, subtrees, libraries["inputs"],
-                      datasets ? <lib> : <src>)) ||
+         !_add_inputs(
+           inputs, subtrees, libraries["inputs"], datasets ? <lib> : <src>)) ||
         (command_files &&
          !_add_inputs(inputs, subtrees, command_files["inputs"], <commands>)))
       raise %(bad-arg);
@@ -2886,8 +2908,7 @@ int main(int argc, char **argv) {
         Map contracts = certify_contracts(options["contracts"], valid);
         if (!valid) status = 2;
         else result = certify_result(
-          frontend, inputs, options["root"].list(), contracts, status
-        );
+          frontend, inputs, options["root"].list(), contracts, status);
         break;
       }
       case "clones":
