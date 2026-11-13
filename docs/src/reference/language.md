@@ -3299,34 +3299,6 @@ is the complete canonical type syntax; a forward uses an empty TYPE. This form
 is constructible by any macro or `meta` function. Binding it publishes the same
 ordinary typedef and aggregate declarations as the captured source.
 
-A `Declaration` macro, or a `NamedType` decorator, produces declarations once
-while the owning source's public declarations are collected. Its result is
-retained for full binding; the producer is not evaluated again to obtain its
-bodies. Nested declaration producers share this rule. Static publication and
-ordinary dependency invalidation apply to the retained result.
-Imported and cached declarations publish the selected signatures of their
-owning source.
-
-The canonical container is `(declaration-bundle (rows ITEM ...))`. Rows may
-include ordinary top-level syntax and these constructible forms:
-
-- `(default FUNCTION)` supplies a function candidate. An ordinary declaration
-  of that exact function in the owning source wins, including a later one.
-  Only the selected body is bound. A candidate produced by a static type
-  declaration has static linkage. Two ordinary definitions still conflict.
-- `(declaration-recipe CALLBACK ARGUMENTS)` defers a `meta` producer until the
-  owning source's declarations are available. It is evaluated once, and its
-  declarations join the same bundle.
-- `(default-forward CHILD PARENT MEMBER FALLBACK)` selects an ordinary parent
-  method after signatures are collected and supplies a child forwarding
-  method. FALLBACK is an optional function candidate when no parent applies.
-- `(syntax-recipe CALLBACK ARGUMENTS)` supplies syntax when a retained body is
-  bound, allowing it to use the selected method signatures.
-
-Retained bodies also carry the usual macro bindings and source locations for
-diagnostics. A consumer cannot replace a provider's exported default by
-defining another function with its name.
-
 ### Checked foreign aliases
 
 The reserved target macro `$x2c.foreign.alias` binds one top-level x2c
