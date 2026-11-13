@@ -121,7 +121,8 @@ static void _program_family(Map all, Map selected, Type type) {
   List parameters = NULL;
   Type result = NULL;
   if (type.function_parts(parameters, result)) {
-    foreach (Type parameter, parameters) _program_family(all, selected, parameter);
+    foreach (Type parameter, parameters)
+      _program_family(all, selected, parameter);
     _program_family(all, selected, result);
     return;
   }
@@ -184,8 +185,10 @@ static void _program_symbol(
   if (documentation) program.descriptions[name].map()["documentation"] = documentation;
   if (kind != <type> && !(name in b.units)) {
     b.units[name] = 1;
-    String native = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
-    b.exports.push(file_static ? $(name, native ? native : name, <private>)
+    String native =
+      c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
+    b.exports.push(
+      file_static ? $(name, native ? native : name, <private>)
       : path.endswith(".h") && !inline_body
         ? $(name, native ? native : name, <dynamic>)
         : $(name, native ? native : name));
@@ -211,11 +214,13 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
       if (_program_origin(c, span, source_line) != path) continue;
       List function = functions[name];
       String declaration = function
-        ? _program_text(c, %(declare $(function.cadr())
-                                  (bindings $(function.caddr())))).strip()
+        ? _program_text(
+          c, %(declare $(function.cadr()) (bindings $(function.caddr()))))
+          .strip()
         : _program_declaration(c, type, name);
-      _program_symbol(b, c, path, name, type, row, declaration,
-                      _program_slice(c, span), source_line);
+      _program_symbol(
+        b, c, path, name, type, row, declaration, _program_slice(c, span),
+        source_line);
       Map description = b.program.descriptions[name];
       description["display"] = display;
       description["parameters"] = parameters;
@@ -246,8 +251,9 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
         String declaration = type.is_function() || type.is_typedef()
           ? _program_text(c, node).strip()
           : _program_declaration(c, type, name);
-        _program_symbol(b, c, path, name, type, node, declaration,
-                        type.is_function() ? NULL : _program_slice(c, span), line);
+        _program_symbol(
+          b, c, path, name, type, node, declaration,
+          type.is_function() ? NULL : _program_slice(c, span), line);
       }
     }
   }
@@ -330,7 +336,8 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
 /* Native C declarations retain their authored aggregate attributes. */
 static String _program_c_header(Compiler c, List ast) {
   Buffer text = auto Buffer.new();
-  text.write($dedent(%"
+  text.write(
+    $dedent(%"
     #pragma once
     #include \"x2c.h\"
     "));
@@ -386,7 +393,10 @@ static void _program_macro(
   String body = NULL, parameters = "";
   List site = NULL;
   match (raw) {
-    case %(object ? ?replacement ?origin): { body = replacement; site = origin; }
+    case %(object ? ?replacement ?origin): {
+      body = replacement;
+      site = origin;
+    }
     case %(function ? ?names ?variadic ?replacement ?origin): {
       parameters = "(" + ", ".join(names) +
         (variadic ? (names ? ", ..." : "...") : "") + ")";
@@ -411,7 +421,8 @@ static void _program_macro(
 }
 
 /* The ordinary driver links imported package archives. Keep their native
-   client flags and pinned headers for later submissions in the same program. */
+   client flags and pinned headers for later submissions in the same
+   program. */
 static void _program_packages(ProgramBuild &b, ParsedUnit &unit) {
   ReplProgram program = b.program;
   foreach (Var (name, raw), unit.compiler.package_roots) {
@@ -419,11 +430,14 @@ static void _program_packages(ProgramBuild &b, ParsedUnit &unit) {
     if (root in b.packages) continue;
     b.packages[root] = 1;
     foreach (String directory, $(%"$root/builds", %"$root/src"))
-      if (!(directory in b.includes)) b.includes.push(unit.context.export(directory));
+      if (!(directory in b.includes))
+        b.includes.push(unit.context.export(directory));
     if (!Path.is_file(response)) continue;
     CliRequest native = CliRequest.package_options(response, root);
-    program.cc_args = unit.context.export(program.cc_args.append(native.cc_args));
-    program.ld_args = unit.context.export(program.ld_args.append(native.ld_args));
+    program.cc_args =
+      unit.context.export(program.cc_args.append(native.cc_args));
+    program.ld_args =
+      unit.context.export(program.ld_args.append(native.ld_args));
     String module = %"$root/builds/$name.module";
     if (Path.is_file(module))
       program.dependencies[unit.context.export(module)] =
@@ -495,7 +509,8 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
   if (native && path.endswith(".h"))
     foreach (List node, unit.ast)
       match (node) case %(function ?spec (bind ?binding ?) ?):
-        if (spec.type().is_inline()) inline_bodies[Ast.binding_spelling(binding)] = 1;
+        if (spec.type().is_inline())
+          inline_bodies[Ast.binding_spelling(binding)] = 1;
   if (native)
     foreach (Var (key, value), c.sym.unit_symbols()) {
       if (key is not <list> || value is not <list>) continue;
@@ -509,8 +524,10 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
         if (!type.is_typedef() && !c.sym.enumerator_owner($(name)) &&
             !(name in local.units)) {
           local.units[name] = 1;
-          String emitted = c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
-          local.exports.push(inline_body ? $(name, emitted ? emitted : name)
+          String emitted =
+            c.emitted_binding_name(c.sym.resolve_global($(name), NULL));
+          local.exports.push(
+            inline_body ? $(name, emitted ? emitted : name)
             : $(name, emitted ? emitted : name, <dynamic>));
         }
       }
@@ -531,8 +548,9 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
       return %"ambiguous file-local name $name: $(prior.car()) and $path";
   }
   if (path.endswith(".c"))
-    input = unit.context.export(_program_c_input(
-      path, local.exports, program.directory, b.headers.len()));
+    input = unit.context.export(
+      _program_c_input(
+        path, local.exports, program.directory, b.headers.len()));
   program.symbols.merge(unit.context.export(collected.symbols));
   foreach (List row, (Array) unit.context.export(local.exports))
     if (!(row.car() in b.units)) {
@@ -541,13 +559,14 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
     }
   String header = %"$(program.directory)/unit-$(b.headers.len()).h";
   if (path.endswith(".h"))
-    Path.write_text(header, $dedent(%"
+    Path.write_text(
+      header, $dedent(%"
     #pragma once
     #include %s
     ").printf(path.repr()));
   else if (Path.is_x2c_source(path)) {
-    List code = c.generate_code_text(c.transform(unit.ast),
-                                    %"unit-$(b.headers.len())");
+    List code = c.generate_code_text(
+      c.transform(unit.ast), %"unit-$(b.headers.len())");
     Path.write_text(header, code.cadr());
   }
   else Path.write_text(header, _program_c_header(c, unit.ast));
@@ -559,7 +578,8 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
       b.fingerprints[unit.context.export(file)] =
         unit.context.export(Path.content_identity(file));
     String home = Compiler.home_dir();
-    String package = Compiler.package_directory(frontend.request.package_roots(), file);
+    String package = Compiler.package_directory(
+      frontend.request.package_roots(), file);
     if (Path.is_x2c_source(file) &&
         !(package && Compiler.is_package_source(package, file)) &&
         !(home && file.startswith(%"$home/lib/", %"$home/src/", %"$home/etc/")) && !(file in b.seen))
@@ -569,7 +589,8 @@ static String _program_unit(ProgramBuild &b, String path, String &input) {
     : c.included_macros(path, 0, Path.dirname(path), NULL);
   foreach (List row, macros) {
     String name = row.car();
-    program.macros[unit.context.export(name)] = unit.context.export(row.cadr());
+    program.macros[unit.context.export(name)] =
+      unit.context.export(row.cadr());
     _program_macro(&collected, c, path, name, row.cadr());
   }
   program.descriptions.merge(unit.context.export(collected.descriptions));
@@ -635,8 +656,8 @@ static CliRequest _program_request(ProgramBuild &b, String &failure) {
   int index = 0;
   for (ProjectBuild node = plan; node; node = node.next) {
     CliRequest request = node.request;
-    request.inputs = request.inputs.map(%!(String path) =>
-      path in products ? products[path].str() : path);
+    request.inputs = request.inputs.map(
+      %!(String path) => path in products ? products[path].str() : path);
     request.native_modules = request.native_modules.map(
       %!(String path) =>
         path in products ? products[path].str() : path);
@@ -644,8 +665,8 @@ static CliRequest _program_request(ProgramBuild &b, String &failure) {
     String directory = %"$(b.program.directory)/dependency-$index";
     String suffix = request.kind == <module> ? ".module" : ".a";
     String output = %"$(b.program.directory)/dependency-$index$suffix";
-    failure = _program_native_build(b, request, request.inputs, request.kind,
-                                    output, directory);
+    failure = _program_native_build(
+      b, request, request.inputs, request.kind, output, directory);
     if (failure) return NULL;
     if (request.output) products[request.output] = output;
     _program_generated_dirs(%"$directory/gen", b.includes);
@@ -677,8 +698,8 @@ static String _program_main(ProgramBuild &b) {
     return "loaded main must take void or (int, char **) and return int";
   String entry = "x2c_repl_program_main";
   String source = %"$(program.directory)/main-entry.x";
-  Path.write_text(source,
-    $dedent(%"
+  Path.write_text(
+    source, $dedent(%"
     int main(int argc, char **argv);
     int x2c_repl_program_main(Array values) {
       int count = values.len();
@@ -724,7 +745,8 @@ static String _program_exports(ProgramBuild &b) {
 #endif
       code.push(%"extern __typeof__($name) $name __attribute__(($attribute));\n");
     }
-  code.push($dedent(%"
+  code.push(
+    $dedent(%"
     extern int x2c_repl_program_main(Array values);
     void *x2c_repl_program_address(unsigned index) {
       switch(index) {
@@ -767,7 +789,8 @@ static String _program_header(ProgramBuild &b) {
   String source = %"$(program.directory)/declarations.c";
   String expanded = %"$(program.directory)/declarations.i";
   Buffer text = auto Buffer.new();
-  text.write($dedent(%"
+  text.write(
+    $dedent(%"
     #include \"x2c.h\"
     #include \"meta.h\"
     #line 1 \"x2c-repl-declarations\"
@@ -789,8 +812,8 @@ static String _program_header(ProgramBuild &b) {
   int start = result[marker:].find("\n");
   if (start >= 0) start += marker;
   program.header = %"$(program.directory)/program.h";
-  Path.write_text(program.header,
-    "#pragma once\n" + (start < 0 ? "" : result[start + 1:]));
+  Path.write_text(
+    program.header, "#pragma once\n" + (start < 0 ? "" : result[start + 1:]));
   return NULL;
 }
 
@@ -824,8 +847,10 @@ static String _program_open(ReplProgram program) {
   return NULL;
 }
 
-/* Explicit native modules stay outside the retained program artifact. */
-static void _program_native_dependencies(ReplProgram program, CliRequest request) {
+/* Explicit native modules stay outside the retained program artifact, so
+   their changes require :reload. */
+static void _program_native_dependencies(
+  ReplProgram program, CliRequest request) {
   foreach (String path, request.native_modules)
     if (Path.is_file(path)) {
       String file = Path.resolved_absolute(path);
@@ -848,7 +873,8 @@ static void _program_link_dependencies(ReplProgram program, String text) {
 }
 
 /* Selection reads declarations before building. Only explicitly added main
-   roots can retire an earlier program root; startup keeps ordinary conflicts. */
+   roots can retire an earlier program root; startup keeps ordinary
+   conflicts. */
 static int _program_has_main(Frontend frontend, String path, String &failure) {
   if (!(Path.is_x2c_source(path) || path.endswith(".c"))) return 0;
   ParsedUnit unit;
@@ -924,7 +950,8 @@ ReplProgram repl_program_build_selected(
     derived = request.inputs;
   }
   _program_native_dependencies(program, request);
-  if (requested) roots = _program_select_roots(frontend, roots, requested, failure);
+  if (requested)
+    roots = _program_select_roots(frontend, roots, requested, failure);
   if (failure) return NULL;
   Array native = [], source = [];
   foreach (String root, roots.append(derived)) {
@@ -951,8 +978,8 @@ ReplProgram repl_program_build_selected(
   program.module = %"$(program.directory)/program.module";
   List inputs = %(@source @(native.list()) @(build.objects.list()));
   String native_directory = %"$(program.directory)/native";
-  failure = _program_native_build(build, request, inputs, <module>,
-                                  program.module, native_directory);
+  failure = _program_native_build(
+    build, request, inputs, <module>, program.module, native_directory);
   if (failure) return NULL;
   _program_generated_dirs(%"$native_directory/gen", build.includes);
   failure = _program_header(build);
@@ -967,7 +994,9 @@ ReplProgram repl_program_build_selected(
   return failure ? NULL : program;
 }
 
-/** Publishes native addresses and compiler-owned declaration rows in a worker. */
+/** Publishes native addresses and compiler-owned declaration rows in a
+    worker.
+*/
 void repl_program_bind(ReplProgram program, ReplSession session) {
   session.program = program;
   session.frontend.request.cc_args = program.cc_args;
@@ -1010,18 +1039,20 @@ static Map _program_snapshot_descriptions(ReplProgram program) {
   return descriptions;
 }
 
-/** Exports retained artifacts and descriptions, excluding process addresses. */
+/** Exports retained artifacts and descriptions, excluding process
+    addresses.
+*/
 List repl_program_snapshot(ReplProgram p) =>
-  $(p.directory, p.module, p.header, p.roots, p.exports,
-    p.symbols, _program_snapshot_descriptions(p), p.sources, p.dependencies, p.macros,
+  $(p.directory, p.module, p.header, p.roots, p.exports, p.symbols,
+    _program_snapshot_descriptions(p), p.sources, p.dependencies, p.macros,
     p.cc_args, p.ld_args);
 
 /** Reopens an exact retained native program and recreates its addresses. */
 ReplProgram repl_program_restore(List snapshot, String &failure) {
   ReplProgram p = xcalloc(1, sizeof(struct ReplProgram));
   p.directory = snapshot[0]; p.module = snapshot[1]; p.header = snapshot[2];
-  p.roots = snapshot[3]; p.exports = snapshot[4];
-  p.symbols = snapshot[5]; p.descriptions = snapshot[6]; p.sources = snapshot[7];
+  p.roots = snapshot[3]; p.exports = snapshot[4]; p.symbols = snapshot[5];
+  p.descriptions = snapshot[6]; p.sources = snapshot[7];
   p.dependencies = snapshot[8]; p.macros = snapshot[9];
   p.cc_args = snapshot[10]; p.ld_args = snapshot[11];
   foreach (Var (name, raw), p.descriptions) {

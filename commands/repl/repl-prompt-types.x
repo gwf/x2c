@@ -19,8 +19,9 @@ static typedef struct PromptTypes {
 } PromptTypes;
 
 /** Retains direct prompt record definitions and gives captures native names.
-    The caller commits retained declarations only after initialization succeeds.
-    Symbol changes participate in its existing semantic transaction. */
+    The caller commits retained declarations only after initialization
+    succeeds. Symbol changes participate in its existing semantic transaction.
+*/
 List repl_prompt_types(
   ReplSession session, List statements, Array retained) {
   PromptTypes types = {
@@ -33,7 +34,8 @@ List repl_prompt_types(
     types.replacements.cleanup();
     types.ordered.free();
   }
-  foreach (List statement, statements) _prompt_declarations(types, statement, 0);
+  foreach (List statement, statements)
+    _prompt_declarations(types, statement, 0);
   foreach (Var record, types.ordered)
     _prompt_publish(types, record.pointer(), retained);
   Array rewritten = [];
@@ -139,7 +141,8 @@ static void _prompt_publish(
   c.set_fact(%(ntype $(record.alias)), record.family);
   List declaration = %(typedef $definition
     (bindings (bind $(record.alias) ())));
-  retained.push(record.origin ? %(at $(record.origin) $declaration) : declaration);
+  retained.push(
+    record.origin ? %(at $(record.origin) $declaration) : declaration);
 }
 
 static void _prompt_bind_fields(Compiler c, Type family, List fields) {
@@ -151,8 +154,8 @@ static void _prompt_bind_fields(Compiler c, Type family, List fields) {
         foreach (List row, rows) {
           List binding = row.cadr();
           if (Ast.binding_spelling(binding))
-            c.sym.bind_identity(family, binding,
-              %(declare $spec (bindings $row)));
+            c.sym.bind_identity(
+              family, binding, %(declare $spec (bindings $row)));
         }
     }
   }

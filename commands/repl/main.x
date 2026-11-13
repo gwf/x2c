@@ -29,7 +29,8 @@ int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   List arguments = Args.from_argv(argc, argv);
   if ("--help" in arguments || "-h" in arguments) {
-    puts($dedent(%"
+    puts(
+      $dedent(%"
       Usage:
         x2c repl [options] [<input>...]
 
