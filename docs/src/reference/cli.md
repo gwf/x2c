@@ -6,8 +6,9 @@ lists every command the compiler has. An installed compiler has `translate`,
 `build`, `run`, `new`, `script`, `env`, `install`, `remove`, `list`, `help`,
 `lsp`, `package`, and `test`. The driver runs some of them through
 [external commands](#commands): `build`, `run`, and `script` through
-`x2c-build`, `new` through `x2c-new`, and `install`, `remove`, and `list`
-through `x2c-package`. A checkout can also build the experimental commands
+`x2c-build`, `new` through `x2c-new`, `install`, `remove`, `list`, and
+`package` through `x2c-package`, `lsp` through `x2c-lsp`, and `test` through
+`x2c-test`. A checkout can also build the experimental commands
 `bind`, `graph`, `lint`, and `repl`, which an install does not include.
 
 This chapter has these sections:
@@ -143,7 +144,7 @@ map. Combine source mapping with native debug information to set breakpoints,
 step through statements, and read backtraces in the original `.x` files:
 
 ```sh
-x2c build --source-map -g -O0 --save-temps -o /tmp/example example.x
+x2c build -g -O0 --save-temps -o /tmp/example example.x
 lldb /tmp/example
 ```
 
@@ -411,9 +412,7 @@ a project manifest keeps the ordinary build path. Use `--build-dir <dir>`
 to retain generated files and objects for inspection or reuse. Otherwise
 temporary intermediates are removed after the program finishes. `--clean`
 and `--rebuild` require the cached path.
-`build` and `run` enable source mapping, so native diagnostics,
-`__FILE__`, and `__LINE__` name the `.x` source; use `--no-source-map` for
-generated-C locations.
+Source mapping is on by default; see [Source mapping](#source-mapping).
 
 `--` ends build options. Every later value is passed to the program,
 including values that begin with `-` or end in `.x`. The driver expands
@@ -543,9 +542,9 @@ In a source checkout, `./x2c` no longer names the compiler after `cd hello`.
 Set `compiler="$PWD/x2c"` in the repository root first, and write
 `"$compiler"` in place of `x2c` after changing directories.
 
-It writes `x2c.toml`, `src/main.x`, and `.gitignore`, which ignores the
-default build directory `.x2c-build/`. The manifest has one executable target
-named after the directory:
+`x2c new` writes `x2c.toml`, `src/main.x`, and `.gitignore`, which ignores
+the default build directory `.x2c-build/`. The manifest has one executable
+target named after the directory:
 
 ```toml
 [target.hello]
@@ -1004,13 +1003,13 @@ Eight codes are reported as warnings:
 - `region` reports that a value allocated inside a region can still be reached after
   the region ends, and names how it leaves. Its note gives the line that
   opened the region.
-- `after-free` reports that a local was read after `Scope.free`, `Scope.realloc`,
-  or `Array.list_free` consumed it.
+- `after-free` reports that a local was read after a call freed it, such as
+  `Scope.free`, `Array.free`, or `cleanup`.
 - `bad-free` reports that `Scope.free` or `Scope.realloc` was given a literal, a
   local's address, or other storage no Scope allocator returned.
 - `literal` reports that a bare word inside a macro is a `Symbol` where a value was
   probably meant, and shows the unquoted spelling that inserts the value.
-- `macro` carries what a macro reported through `x2c.diagnostic.warn`, at the
+- `macro` carries what a macro reported through `x2c_diagnostic_warn`, at the
   invocation, with the notes the macro supplied.
 - `conversion` reports that a cast or explicit converter call spells a conversion
   its destination already performs.
@@ -1079,7 +1078,7 @@ and `--quiet` suppress successful progress and receipts without suppressing
 diagnostics or a run program's output.
 `--color=auto|always|never` controls color; `NO_COLOR` disables automatic
 color. `--debug` enables compiler debug logging. It does not enable native
-debug information: use `-g --source-map -O0` to debug original x2c source.
+debug information: use `-g -O0` to debug original x2c source.
 These debugging options also work with `script`. For `build` and `run`, add
 `--save-temps` when inspecting generated C; scripts retain their cached build.
 

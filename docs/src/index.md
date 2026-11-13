@@ -32,7 +32,8 @@ x2c adds these features to C:
 - `match` selects the first matching case for structured `List` data and
   exposes named captures as local variables.
 - `Thread` runs work on native threads and returns results through `join`;
-  `Mutex` coordinates access to shared mutable data.
+  `Mutex` coordinates access to shared mutable data. `Channel` passes values
+  between threads or `Task`s, which run cooperatively on one thread.
 - `Error` carries structured failures. `try`, `catch`, and `raise` handle
   them; `finally` and `defer` run cleanup when control leaves a block.
 - `macro` expands to parsed source at compile time. Names that a macro
@@ -68,3 +69,12 @@ matching.
 The book describes implemented behavior. Its x2c samples compile with the
 current compiler, and a sample followed by its output runs and produces that
 output.
+
+### Running the samples
+
+A sample that shows only statements runs inside `main`. To run one as a
+file, wrap it in `int main(void) { ... return 0; }`, or make the file a
+script by starting it with `#!/usr/bin/env -S x2c script`. Then run it with
+`x2c run file.x` or `x2c script file.x`. See [scripting](guide/scripting.md)
+and [Run a script](reference/cli.md#run-a-script). Some samples also hide
+setup lines they need; the code block's expander shows them.

@@ -13,7 +13,8 @@ operation. x2c provides that type: `Var`.
 
 A `Var` is a single 64-bit value holding a payload plus a tag that names what
 the payload is. Assigning a typed value into a `Var` boxes it, and the tag
-records where the value came from.
+records where the value came from. To run a sample like this one as a file,
+see [Running the samples](../index.md#running-the-samples).
 
 ```x2c
 Var count = 42;

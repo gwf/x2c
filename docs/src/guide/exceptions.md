@@ -22,14 +22,14 @@ cause is what a handler branches on. Put the reporting mechanism and the
 module that found the failure in the details.
 
 The runtime raises 31 *shared causes*; the
-[reference](../reference/language.md#errors-and-cleanup) lists them. Prefer
+[reference](../reference/language.md#shared-causes) lists them. Prefer
 the most specific shared cause. For example, `<bad-arity>` identifies an
 argument count, `<bad-types>` identifies unsupported dynamic operand types,
 `<not-found>` identifies a missing external resource, and `<invariant>`
 identifies an impossible internal state. A raiser may add any detail keys
 without changing the cause. Detail values must be immutable data: `Null`,
 numbers, enum values, `Symbol`s, `Atom`s, `String`s, and `List`s of those.
-The [reference](../reference/language.md#errors-and-cleanup) gives the full
+The [reference](../reference/language.md#raise) gives the full
 rule.
 
 Every shared cause aborts by default and never returns to the raising call.
@@ -114,8 +114,9 @@ bad-arg ((operation "load"))
 ```
 
 A pattern in the cause position selects several causes in one arm, and
-`raise` accepts the bound cause as `$code`. This arm rewraps either cause
-under its own cause and lets every other cause continue outward:
+`raise` accepts the bound cause as `$code`. This arm raises the selected
+cause again, adding an index and the original error as its `cause` detail.
+Every other cause continues outward:
 
 ```x2c
 try raise %(conv-range (value 300));

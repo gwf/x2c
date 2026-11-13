@@ -90,8 +90,8 @@ The store may register a temporary borrow that cleanup removes before
 return. The pass does not prove that cleanup; the code must satisfy its C
 lifetime contract. Returned addresses, static stores, known retaining
 operations such as `Array.push`, and already ended regions keep their
-checks. The optional audit keeps the possible-escape finding, and meta
-functions keep the error.
+checks. `x2c graph certify`, an experimental checkout command, keeps the
+possible-escape finding, and meta functions keep the error.
 
 The check covers lexical regions and the storage it tracks. It does not
 cover:

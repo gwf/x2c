@@ -23,8 +23,9 @@ int main(void) {
 }
 ```
 
-Array literals and iteration work alongside ordinary C functions. The runtime
-is available without an explicit include. The
+Array literals and iteration work alongside ordinary C functions. The core
+runtime types need no include; other library modules name their `#include`
+on their [reference page](docs/src/library/modules/index.md). The
 [language tour](examples/tours/language.x) shows more: dynamic values,
 destructuring, maps, lambdas, matching, memory scopes, and embedded Lisp.
 
@@ -72,6 +73,11 @@ make commands
 commands it runs, such as `x2c new`, `x2c test`, and `x2c repl`. The
 [installation guide](docs/src/guide/installation.md) lists supported
 platforms and covers installing from source, a first project, and upgrades.
+
+`make build-safe` runs `make configure`, which sets this clone's
+`core.hooksPath` to `tools/hooks` if it is unset; that maintainer pre-push
+hook needs Python 3. To remove it, delete the `core.hooksPath` entry from
+`.git/config`.
 
 ## What to explore
 

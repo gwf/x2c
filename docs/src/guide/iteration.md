@@ -319,13 +319,14 @@ int main(void) {
 
 x2c inserts a distinct `struct Iter` compound literal for each missing final
 destination. Those objects have automatic storage and remain alive through
-the enclosing block. A `meta` function body compiles the same way.
+the enclosing block.
 Completion applies only when the chain ends in
 `try_next`, `next`, `list`, `array`, `foldl`, `any`, `all`, `find`, `count`,
 `sum`, `product`, `min`, `max`, `parallel_map`, `parallel_map_in`, or
 `foreach`. A `List` or `Array` destination ends the chain the same way: it
 calls `list` or `array` for you, which is why the chain above needs no
-explicit collector.
+explicit collector. Iterator destination omission also works in a `meta`
+function body.
 
 It does not apply when an iterator is assigned, returned, or passed as an
 argument. Then declare one `struct Iter` for each stage:
@@ -423,8 +424,8 @@ Some operations need a little explanation:
 Nothing runs until you ask for an element. Each stage then requests an
 element from its source. Taking two elements from a `map` over a range calls
 the mapping function twice. The first pipeline in
-[the storage convention](#the-storage-convention) starts when `array()`
-requests its first element.
+[the storage convention](#the-storage-convention) starts when the implicit
+collection requests its first element.
 
 ## Collecting and folding
 
