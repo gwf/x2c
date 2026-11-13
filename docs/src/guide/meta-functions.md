@@ -699,15 +699,15 @@ no Scope allocator returned.
 A translation runs in two phases. Before any unit is translated, the
 compiler gathers the bodied `meta` functions the inputs reach: those of
 each ordinary source module an input reaches, directly, through includes,
-or through a package. It emits them, with the declarations they use, as C through the ordinary
-backend, compiles them with the host C compiler (`--meta-cc`, default
-`cc`, never the target `--cc`), and links them with the host runtime into
-one helper program, the project meta module. A group has access to the headers its
-unit includes, found from the unit's directory and the `-I` directories.
-The translation then
-sends each `$` call of one of those
-functions to the helper and inserts the reply. A project whose inputs
-reach no `meta` function builds nothing extra.
+or through a package. It emits them, with the declarations they use, as C
+through the ordinary backend, compiles them with the host C compiler
+(`--meta-cc`, default `cc`, never the target `--cc`), and links them with
+the host runtime into one helper program, the project meta module. Each
+unit's meta functions form a group, which has access to the headers that
+unit includes, found from the unit's directory and the `-I` directories. The
+translation then sends each `$` call of one of those functions to the helper
+and inserts the reply. A project whose inputs reach no `meta` function
+builds nothing extra.
 
 A call runs with the functions of the file that wrote it. An included
 `.x` file computes its file-scope constants, such as an enumerator or an
@@ -745,9 +745,9 @@ A call of a project function waits until the body runs, so a pattern built
 by one cannot capture.
 
 Each unit gets its own `meta static` values: the helper runs their
-initializers again before that unit's first call reaches their provider. What those
-initializers allocate, a Job one starts included, lasts until the next
-unit's reset or the end of the helper.
+initializers again before that unit's first call reaches their provider.
+Whatever those initializers allocate, including a Job one of them starts,
+lasts until the next unit's reset or the end of the helper.
 
 A project `meta` function receives arguments and returns a value.
 Quotations, `x2c_ident`, `Code.name`, `Code.binding_spelling`, `Type.parts`,
