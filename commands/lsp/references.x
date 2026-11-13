@@ -84,6 +84,7 @@ static Map _reference_query(LspWorkspace w, String path, int offset) {
       foreach (String input in node.request.inputs)
         if (Path.is_x2c_source(input)) inputs.push(Path.absolute(input));
   }
+  // lint: allow one-statement-braces ST-1: braces bind the else below
   else if (manifest) {
     foreach (String input in w.frontend.request.inputs)
       if (Path.is_x2c_source(input)) inputs.push(Path.absolute(input));
