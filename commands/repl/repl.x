@@ -389,7 +389,7 @@ static int _control(
   if (operation == ":load") {
     List paths = _paths(argument);
     if (!paths) return 0;
-    Array roots = auto [], requested = auto [];
+    auto Array roots = [], requested = [];
     foreach (String path, client.roots) roots.push(path);
     foreach (String path, paths) {
       path = Path.resolved_absolute(path);
