@@ -1,6 +1,6 @@
 ---
 titleSubject: Programming
-titleOpening: is Dead
+titleOpening: is Dead?
 titleEnding: Long Live
 kicker: "x2c is a language for people who love to code."
 ---

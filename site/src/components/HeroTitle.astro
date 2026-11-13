@@ -3,33 +3,150 @@ const { subject, opening, ending } = Astro.props;
 ---
 
 <h1>
-  <button class="hero-title" type="button" aria-label={`${subject} ${opening} Click to change the title.`} data-title>
-    <span class="title-track" aria-hidden="true">
-      <span class="title-prefix">{ending}&nbsp;</span>
-      <span class="title-subject">{subject}<span class="title-ending">&nbsp;{opening}</span></span>
-    </span>
+  <button class="hero-title" type="button"
+    aria-label={`${subject} ${opening} Click to change the title.`}
+    data-title data-subject={subject} data-opening={opening} data-ending={ending}>
+    <span class="title-text" aria-hidden="true">{subject} {opening}</span>
   </button>
 </h1>
 
 <script>
   const title = document.querySelector<HTMLButtonElement>("[data-title]")!;
-  const prefix = title.querySelector<HTMLElement>(".title-prefix")!;
-  const subject = title.querySelector<HTMLElement>(".title-subject")!;
-  const openingLabel = title.getAttribute("aria-label")!;
-  const finalLabel = `${prefix.textContent!.trim()} ${subject.firstChild!.textContent}. Click to change the title.`;
-  let alive = false;
+  const text = title.querySelector<HTMLElement>(".title-text")!;
+  const subject = title.dataset.subject!;
+  const prefix = `${title.dataset.ending} `;
+  const suffix = ` ${title.dataset.opening}`;
+  const steps = prefix.length;
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  const shotSpeed = 2000;
+  const shiftPause = 10;
+  const letters = [...suffix].map((char) => {
+    const letter = document.createElement("span");
+    letter.textContent = char;
+    letter.className = char === "?" ? "title-falling-letter title-question" : "title-falling-letter";
+    letter.setAttribute("aria-hidden", "true");
+    title.append(letter);
+    return letter;
+  });
+  type Spot = { x: number; width: number; fits: boolean };
+  type Shot = { start: number; end: number; x: number; distance: number };
+  let frames: Spot[][] = [];
+  let shifts: number[] = [];
+  let shots: (Shot | undefined)[] = [];
+  let elapsed = 0;
+  let end = 0;
+  let forward = false;
+  let frame = 0;
+  let lastTime: number | null = null;
   let enteredAt = -Infinity;
 
+  const question = title.querySelector<HTMLElement>(".title-question")!;
+  let inviting = false;
+  let danceTimer = 0;
+
+  function scheduleDance() {
+    danceTimer = window.setTimeout(() => {
+      question.classList.add("is-dancing");
+    }, 6000 + Math.random() * 12000);
+  }
+
+  function setInvitation(active: boolean) {
+    active = active && !reducedMotion.matches;
+    if (active === inviting) return;
+    inviting = active;
+    clearTimeout(danceTimer);
+    question.classList.remove("is-dancing");
+    if (inviting) scheduleDance();
+  }
+
+  question.addEventListener("animationend", () => {
+    question.classList.remove("is-dancing");
+    if (inviting) scheduleDance();
+  });
+  reducedMotion.addEventListener("change", () => setInvitation(!forward && elapsed === 0));
+
   function measure() {
-    const shift = prefix.getBoundingClientRect().width;
-    title.style.setProperty("--title-shift", `${shift}px`);
-    title.style.setProperty("--title-width", `${shift + subject.getBoundingClientRect().width}px`);
+    const bounds = title.getBoundingClientRect();
+    const right = bounds.right - parseFloat(getComputedStyle(title).paddingRight);
+    frames = Array.from({ length: steps + 1 }, (_, step) => {
+      const leading = prefix.slice(prefix.length - step);
+      text.textContent = leading + subject + suffix;
+      const range = document.createRange();
+      return [...suffix].map((_, index) => {
+        const offset = leading.length + subject.length + index;
+        range.setStart(text.firstChild!, offset);
+        range.setEnd(text.firstChild!, offset + 1);
+        const rect = range.getBoundingClientRect();
+        return { x: rect.left - bounds.left, width: rect.width, fits: rect.right <= right };
+      });
+    });
+    const completed = elapsed === end;
+    shifts = [0];
+    shots = [];
+    end = 0;
+    for (let step = 1; step <= steps; step++) {
+      end += shiftPause;
+      shifts.push(end);
+      // Finish each rejected letter's flight before the next shift or shot.
+      for (let index = letters.length - 1; index >= 0; index--) {
+        if (shots[index] || frames[step][index].fits) continue;
+        const spot = frames[step][index];
+        const distance = Math.max(0, document.documentElement.clientWidth - bounds.left - spot.x + spot.width);
+        const flight = suffix[index].trim()
+          ? distance / shotSpeed * 1000 : 0;
+        shots[index] = { start: end, end: end + flight, x: spot.x, distance };
+        end += flight;
+      }
+    }
+    if (!frame) elapsed = forward && completed ? end : 0;
+    else elapsed = Math.min(elapsed, end);
+    render();
   }
+
+  function render() {
+    if (!frames.length) return;
+    let step = 0;
+    while (step < steps && elapsed >= shifts[step + 1]) step++;
+    const atStart = !forward && elapsed === 0;
+    if (atStart) step = 0;
+    setInvitation(atStart);
+    text.textContent = prefix.slice(prefix.length - step) + subject;
+    letters.forEach((letter, index) => {
+      const shot = shots[index];
+      const fired = !atStart && shot && elapsed >= shot.start;
+      const finished = fired && elapsed >= shot.end;
+      const p = fired && shot.end > shot.start
+        ? (elapsed - shot.start) / (shot.end - shot.start) : 0;
+      const eased = Math.min(1, p) ** 2;
+      const x = fired ? shot.x + shot.distance * eased : frames[step][index].x;
+      letter.style.left = `${Math.round(x)}px`;
+      letter.style.visibility = finished ? "hidden" : "visible";
+    });
+  }
+
+  function advance(now: number) {
+    const delta = lastTime === null ? 0 : now - lastTime;
+    lastTime = now;
+    elapsed = forward ? Math.min(end, elapsed + delta) : Math.max(0, elapsed - delta);
+    render();
+    frame = elapsed !== (forward ? end : 0) ? requestAnimationFrame(advance) : 0;
+  }
+
   function toggle() {
-    alive = !alive;
-    title.classList.toggle("is-alive", alive);
-    title.setAttribute("aria-label", alive ? finalLabel : openingLabel);
+    cancelAnimationFrame(frame);
+    forward = !forward;
+    setInvitation(false);
+    title.setAttribute("aria-label", `${forward ? prefix + subject + "." : subject + suffix} Click to change the title.`);
+    if (reducedMotion.matches) {
+      elapsed = forward ? end : 0;
+      render();
+    } else {
+      lastTime = null;
+      frame = requestAnimationFrame(advance);
+    }
   }
+  new ResizeObserver(measure).observe(title);
+  document.fonts.ready.then(measure);
   title.addEventListener("pointerenter", (event) => {
     if (event.pointerType !== "mouse") return;
     enteredAt = performance.now();
@@ -40,7 +157,4 @@ const { subject, opening, ending } = Astro.props;
     if (event.detail && performance.now() - enteredAt < 900) return;
     toggle();
   });
-  new ResizeObserver(measure).observe(prefix);
-  document.fonts.ready.then(measure);
-  measure();
 </script>

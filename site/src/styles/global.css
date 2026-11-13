@@ -322,6 +322,7 @@ main:focus {
 
 .landing {
   background: var(--paper);
+  overflow-x: clip;
 }
 
 .landing-hero,
@@ -371,18 +372,16 @@ main:focus {
   text-wrap: nowrap;
 }
 
-/* All three phrases travel together through a softly feathered opening. */
+/* Fixed hit area while the title updates one character at a time. */
 .hero-title {
-  overflow: clip;
+  overflow: visible;
   display: block;
   position: relative;
-  width: calc(var(--title-width, 100%) + 0.24em);
+  width: calc(100% + 0.24em);
   margin-inline: -0.08em;
   padding: 0 0.16em 0 0.08em;
   border: 0;
   background: none;
-  mask-image: linear-gradient(to right, transparent, #000 0.16em,
-    #000 calc(100% - 0.16em), transparent);
   color: inherit;
   font: inherit;
   letter-spacing: inherit;
@@ -398,36 +397,34 @@ main:focus {
   outline-offset: 10px;
 }
 
-.title-track {
+.title-text {
   display: inline-block;
-  position: relative;
-  transform: translateX(0);
-  transition: transform 1100ms cubic-bezier(0.22, 1, 0.36, 1);
+  white-space: pre;
 }
 
-.title-prefix,
-.title-ending {
+.title-falling-letter {
   position: absolute;
   top: 0;
-}
-
-.title-prefix {
-  right: 100%;
+  display: block;
+  white-space: pre;
   pointer-events: none;
 }
 
-.title-ending {
-  left: 100%;
+/* The question mark invites interaction only while the opening title rests. */
+.title-question.is-dancing {
+  transform-origin: 50% 80%;
+  animation: title-question-dance 1200ms ease-in-out;
 }
 
-.is-alive .title-track {
-  transform: translateX(var(--title-shift));
+@keyframes title-question-dance {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-5deg); }
+  50% { transform: rotate(6deg); }
+  75% { transform: rotate(-2deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .title-track {
-    transition: none;
-  }
+  .title-question.is-dancing { animation: none; }
 }
 
 .hero-heading p {
