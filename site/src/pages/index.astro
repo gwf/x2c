@@ -48,10 +48,7 @@ const sourceLines = (name: string) =>
   `${number(statistics.source[name].code)} / ` +
   number(statistics.source[name].comments);
 
-const [titleHtml, kickerHtml] = await Promise.all([
-  inlineMarkdown(home.title),
-  inlineMarkdown(home.kicker),
-]);
+const kickerHtml = await inlineMarkdown(home.kicker);
 ---
 
 <BaseLayout
@@ -64,7 +61,7 @@ const [titleHtml, kickerHtml] = await Promise.all([
   <div class="landing">
     <section id="top" class="landing-hero">
       <header class="hero-heading">
-        <HeroTitle html={titleHtml} />
+        <HeroTitle subject={home.titleSubject} opening={home.titleOpening} ending={home.titleEnding} />
         <p set:html={kickerHtml} />
       </header>
       <HomeIntroduction />
