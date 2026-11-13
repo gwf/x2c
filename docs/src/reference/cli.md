@@ -10,6 +10,36 @@ lists every command the compiler has. An installed compiler has `translate`,
 through `x2c-package`. A checkout can also build the experimental commands
 `bind`, `graph`, `lint`, and `repl`, which an install does not include.
 
+This chapter has these sections:
+
+- [Translate to C](#translate-to-c): generated files, parallel translation,
+  depfile and preprocessing options, and [source mapping](#source-mapping).
+- [Inspection modes](#inspection-modes): `--dump-ast` and the other dump
+  options, which print an intermediate result and stop.
+- [Build native artifacts](#build-native-artifacts),
+  [Build and run](#build-and-run), and [Run a script](#run-a-script):
+  products, build directories, and the script cache.
+- [Selecting inputs](#selecting-inputs): wildcards and response files.
+- [Start a project](#start-a-project) and
+  [Project manifests](#project-manifests): `x2c new`, `x2c.toml`, targets,
+  profiles, and pinned packages.
+- [Include and package directories](#include-and-package-directories):
+  header and package search.
+- [C compiler and linker options](#c-compiler-and-linker-options): defines,
+  optimization, linking, and C compiler selection.
+- [Packages](#packages): `install`, `remove`, and `list`.
+- [Environment](#environment): `x2c env`, the home, and environment
+  variables.
+- [Commands](#commands): every command `x2c help` lists, external commands,
+  and `bind`, `graph`, `lint`, and `test`.
+- [Editors](#editors): the language server and VS Code.
+- [Compiler diagnostics](#compiler-diagnostics) and
+  [Progress and receipts](#progress-and-receipts): diagnostic formats,
+  warnings, JSON diagnostics, and build receipts.
+- [Dependencies and external builds](#dependencies-and-external-builds):
+  depfiles, build reuse, and external Make builds.
+- [Help, version, and status](#help-version-and-status): exit status.
+
 This chapter's examples use `./x2c` from the root of a source checkout, which
 selects `builds/0/x2c`, the development compiler, without using `PATH`.
 
@@ -133,6 +163,8 @@ fails the build and retains intermediates for diagnosis. A later `-Xcc -g0`
 overrides an earlier `-g`, including one selected by a project profile.
 Linux builds produce no companion directory. `--build-dir` and `--save-temps`
 retain intermediate files on either platform.
+
+### Inspection modes
 
 Inspection modes print an intermediate result and stop translation:
 
@@ -299,8 +331,12 @@ library naming, and initialization rules.
 executable being built, which must be the compiler, and repeats. The
 package's `src/*.x` and `src/*.c` become inputs, and a generated unit
 registers its `meta` functions under the package's name. The resulting
-compiler imports the package without loading its module. [Native modules](../guide/meta-functions.md#native-modules) explains what a
-module contains.
+compiler imports the package without loading its module. The build needs
+the compiler's sources, so it runs from a source checkout;
+[Building the Compiler](../internals/building.md#package-extensions) gives
+the command.
+[Native modules](../guide/meta-functions.md#native-modules) explains what
+a module contains.
 
 `-c`, or `--compile-only`, stops after compilation. By default, each input
 writes `<input-stem>.o` into the working directory. One input may name its
@@ -644,7 +680,10 @@ package directories. Compile providers for direct `#include` as ordinary
 sources with flat names, and consume package-compiled providers through
 `import`.
 
-`-D` and `-U` define and undefine a macro for
+## C compiler and linker options
+
+`build`, `run`, and `script` pass these options to the C compiler and
+linker. `-D` and `-U` define and undefine a macro for
 x2c's optional [preprocessing](language.md#preprocessing) with `--cpp`, for
 requested host preprocessing, and for C compilation. `translate` accepts them
 too, and the C generated with them needs the same options. Optimization,
@@ -660,12 +699,10 @@ toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
 installed record, then `ar`. Project `meta` code runs inside the compiler's
 host, so it is built by `--meta-cc`, `X2C_META_CC`, `META_CC`, the installed
 record's `META_CC`, then `cc`, never by the target `--cc`; `translate`
-accepts `--meta-cc` too. `X2C_META_TIMEOUT` limits one `$` call in the
-project meta helper to that many seconds, 60 by default; `0` removes the
-limit. A call past the limit stops the helper and is reported at the
-call. Omitted optimization, debug, define, and undefine
-options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
-implicitly consumed.
+accepts `--meta-cc` too. Omitted optimization, debug, define, and
+undefine options preserve host defaults. `CFLAGS` and `LDFLAGS` are not
+shell-split or implicitly consumed.
+
 For every C compilation it runs, x2c selects signed plain `char`. The
 runtime requires an eight-bit signed `char`, even on hosts whose C compiler
 defaults to unsigned plain `char`.
@@ -728,18 +765,49 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 `<home>/builds/0/libx2c.a`, the stage 0 runtime whose headers a source
 checkout's `include/x2c` names.
 
+`X2C_META_TIMEOUT` limits one `$` call in the project meta helper to that
+many seconds, 60 by default; `0` removes the limit. A call past the limit
+stops the helper and is reported at the call.
+
+Other sections describe the remaining environment variables: `X2C_CC`,
+`CC`, `X2C_AR`, `AR`, `X2C_META_CC`, and `META_CC` in
+[C compiler and linker options](#c-compiler-and-linker-options);
+`X2C_CACHE_DIR` and `XDG_CACHE_HOME` in [Run a script](#run-a-script);
+`MAKELEVEL` in [Build native artifacts](#build-native-artifacts); and
+`NO_COLOR` in [Progress and receipts](#progress-and-receipts).
+
 ## Commands
 
 The built-in commands are listed by `x2c help`. External commands are separate
 programs named `x2c-<name>` in the directory printed by `x2c env libexec`.
-For the stage 0 checkout compiler this is `builds/0/libexec`. A development
-install in `bin/` and an installed prefix use `<home>/libexec/x2c`. The driver does not search `PATH` for them.
-`x2c help` lists their summaries from that directory's `commands.txt`.
+An installed prefix and a development install in `bin/` use
+`<home>/libexec/x2c`; a checkout's `./x2c` uses `builds/0/libexec`. The
+driver does not search `PATH` for them. `x2c help` lists their summaries
+from that directory's `commands.txt`.
 
 The driver passes arguments after an external command name directly to its
 program, including arguments beginning with `@`. The external command owns
 its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
+
+`x2c help` lists these commands, in this order:
+
+- `translate`: [Translate to C](#translate-to-c).
+- `build`: [Build native artifacts](#build-native-artifacts).
+- `run`: [Build and run](#build-and-run).
+- `new`: [Start a project](#start-a-project).
+- `script`: [Run a script](#run-a-script).
+- `env`: [Environment](#environment).
+- `install`, `remove`, and `list`: [Packages](#packages); the
+  [Packages chapter](../guide/packages.md) explains packages.
+- `help`: [Help, version, and status](#help-version-and-status).
+- `bind`, `graph`, and `lint`: the sections below.
+- `lsp`: [Language server](#language-server).
+- `package`: [Packages](#packages).
+- `repl`: [Library Playground](../guide/repl.md).
+- `test`: [x2c test](#x2c-test).
+
+### x2c bind
 
 `x2c bind` writes the mechanical part of a new package from a C header.
 The command is experimental and available in checkout builds; `make install`
@@ -754,10 +822,14 @@ The command does not write the ordinary x2c surface, Error conversion,
 dependency pins, or license files; see
 [Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
 
+### x2c graph
+
 `x2c graph` inspects x2c source graphs: it saves and queries snapshots of a
 build, or analyzes source files directly. It is experimental and available in
 checkout builds; an install does not include it. Run `x2c help graph` for its
 subcommands.
+
+### x2c lint
 
 `x2c lint` checks x2c source style and idioms. It is experimental and
 available in checkout builds; `make install` and release payloads do not
@@ -767,6 +839,8 @@ install it. Run `x2c help lint` for its rules and rule-selection options.
 error and exits `1`, while checking the other readable inputs. This also
 applies when checking formatting or showing formatting differences. The lint
 command treats `-` as an ordinary file name in these modes.
+
+### x2c test
 
 `x2c test [options] [files-or-directories...]` builds and runs project test
 programs. Installed compilers include the command; a checkout builds it with

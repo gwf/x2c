@@ -59,12 +59,15 @@ upstream configure scripts and compilers still check platform support.
    ./x2c run -q examples/foreach.x
    ```
 
-In a
-checkout, `make build-safe` builds the compiler and `x2c-build` only. Run
-`make commands` afterward to build `new`, `package`, `test`, and `lsp`, along
-with the experimental `bind`, `graph`, `lint`, and `repl`. `./bin/x2c`
-selects the bootstrap compiler until `make build-install` links it to an
-installed copy of the development compiler.
+`./x2c` is a tracked symbolic link to `builds/0/x2c`, the development
+compiler, so a command run from the repository root uses it without `PATH`.
+The book writes the installed compiler as `x2c` and the checkout's compiler
+as `./x2c`.
+
+`make build-safe` builds the compiler and `x2c-build` only; `build`, `run`,
+and `script` use that external command. `make commands` builds `new`,
+`package`, `test`, and `lsp`, along with the experimental `bind`, `graph`,
+`lint`, and `repl`, which an install does not include.
 
 ## Why a bootstrap exists
 
@@ -106,11 +109,13 @@ which [the self-host build](architecture.md#the-self-host-build) explains.
   - `docs/src/reference/syntax/x2c.ebnf` and
     `docs/src/reference/syntax/lexical-data.md`, which
     `tools/syntax-spec write` renders from `etc/syntax/`.
- `tools/gen-linked-meta.sh` and
-`tools/gen-meta-queries.sh` select the compiler's linked copies and the
-helper's forwarders from these rows.
 
 Do not hand-edit any of them; regenerate them with their targets.
+`tools/gen-linked-meta.sh` writes `src/linked-meta.x`, and
+`tools/gen-meta-queries.sh` writes `etc/meta-queries.x`. They select the
+compiler's linked copies and the helper's forwarders from the `meta` rows
+that `--dump-definitions` prints; see
+[inspection modes](../reference/cli.md#inspection-modes).
 
 ## Unit interfaces and native bindings
 
@@ -181,15 +186,22 @@ With no `PREFIX`, `make install` runs `make build-install`: it copies the
 development compiler to `bin/x2c-<branch>`, links `bin/x2c` to that copy, and
 installs the shipped commands under `libexec/x2c/`.
 
+## Syntax feature records
+
 The feature records in `etc/syntax/extensions.x` connect each syntax family
 to grammar productions, lexical rules, example spellings, and a reference
 section. The table in [What x2c Adds to C Syntax](../guide/x2c-syntax-map.md)
 is generated from those records.
 
-## Build a compiler with package extensions
+## Package extensions
 
-From a built compiler
-checkout, include every compiler unit and both header search roots:
+`--extension <dir>` links a package's compile-time part into a compiler that
+`build` makes;
+[build native artifacts](../reference/cli.md#build-native-artifacts)
+describes the option. The compiler's own sources are inputs, so run the
+build from a checkout whose compiler is built. Name every compiler unit and
+both header search roots. In this example, `packages/tally` is the
+package's directory:
 
 ```sh
 tools/sources.sh |
