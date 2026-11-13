@@ -6,8 +6,8 @@ one element at a time, then collect, aggregate, or loop over the result.
 
 An immediately consumed chain uses caller stack storage for every stage.
 Name that storage yourself when the iterator has to stay live between
-expressions. A `meta` function body compiles the same way. The
-[storage convention](#the-storage-convention) gives the rules.
+expressions. The [storage convention](#the-storage-convention) gives the
+rules.
 
 [The language reference](../reference/language.md) states the `foreach` rules,
 and the [standard library overview](../library/overview.md) links to every
@@ -61,7 +61,8 @@ Parenthesize declarations to give each loop binding its own type, as in
 `foreach (Var (name, age) in ages)` remains available. Native cursors assign
 each output directly to its declared type; iterator outputs use the ordinary
 `Var` conversions. For example, `foreach ((Substr word, int count) in counts)`
-can traverse a `MapSubInt` without boxing keys or allocating an iterator.
+can traverse a `MapSubInt` without boxing keys or allocating an iterator;
+[lazy String fields](#lazy-string-fields) introduces both types.
 
 A `Map` yields its values, like every other collection. Two binders yield
 the key as well; with native loop types the loop does not allocate. For an
@@ -103,7 +104,9 @@ foreach (Substr word in text)
 `Substr` is an alias for `Substring`, an immutable borrowed view with a source
 String, byte offset, and byte length. Iteration coalesces C whitespace and
 yields no empty words. The cursor and each view allocate nothing; keep the
-source String and its owning pool alive through every use of a view.
+source String and its owning pool (see
+[Scopes and Lifetime](memory.md#bounding-temporary-canonical-lists)) alive
+through every use of a view.
 
 `text.substring(offset, length)` constructs a checked view. Negative or
 out-of-range spans raise `<bad-arg>`; an empty span at the end is valid.
@@ -114,9 +117,10 @@ pool chain. The result follows its actual pool's lifetime; export it before
 closing that pool if it must survive.
 
 `substring-map.x` provides `MapSubInt` for native occurrence counts. Its keys
-borrow their source Strings until cleanup; explicit Context export preserves
-those sources. `MapStringInt.add_substr(view, count)` instead retains String
-keys: it compares the view's bytes on lookup and converts only missing keys.
+borrow their source Strings until cleanup; explicit `Context` export (see
+[Contexts and Threads](contexts-and-threads.md)) preserves those sources.
+`MapStringInt.add_substr(view, count)` instead retains String keys: it
+compares the view's bytes on lookup and converts only missing keys.
 As with other mutable Maps, callers coordinate concurrent access. Neither
 operation changes the source String's ownership.
 
@@ -315,7 +319,8 @@ int main(void) {
 
 x2c inserts a distinct `struct Iter` compound literal for each missing final
 destination. Those objects have automatic storage and remain alive through
-the enclosing block. Completion applies only when the chain ends in
+the enclosing block. A `meta` function body compiles the same way.
+Completion applies only when the chain ends in
 `try_next`, `next`, `list`, `array`, `foldl`, `any`, `all`, `find`, `count`,
 `sum`, `product`, `min`, `max`, `parallel_map`, `parallel_map_in`, or
 `foreach`. A `List` or `Array` destination ends the chain the same way: it
@@ -354,8 +359,8 @@ storage, and any dynamic or captured callback must outlive the returned
 value.
 
 The iterators need no cleanup. A collected `List` or `Array` is scope-owned
-data, so the first program brackets its work with `auto`. See
-[scopes and lifetime](memory.md) for the region lifetime.
+data, so the first example in this section brackets its work with `auto`.
+See [scopes and lifetime](memory.md) for the region lifetime.
 
 ## Pipeline operations
 
@@ -417,8 +422,9 @@ Some operations need a little explanation:
 
 Nothing runs until you ask for an element. Each stage then requests an
 element from its source. Taking two elements from a `map` over a range calls
-the mapping function twice. The pipeline above starts when `array()` requests
-its first element.
+the mapping function twice. The first pipeline in
+[the storage convention](#the-storage-convention) starts when `array()`
+requests its first element.
 
 ## Collecting and folding
 
