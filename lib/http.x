@@ -205,7 +205,13 @@ Router Router.new(void) {
   return router;
 }
 
-/** Registers a method, segment pattern, and two-argument handler. */
+/** Registers a handler for `method` requests whose path matches `pattern`.
+    The pattern is split at `/`. A `:name` segment matches any one path
+    segment, and a final `*rest` segment matches the rest of the path; the
+    handler reads each capture from `req.params` under its name. The handler
+    takes `(HttpRequest req, HttpResponse res)` and fills in `res`. Routes
+    match in registration order. Returns `r`.
+*/
 Router Router.route(Router r, Symbol method, String pattern, Func handler) {
   HttpRoute route = Scope.calloc(1, sizeof(struct HttpRoute));
   route.method = method;
@@ -215,16 +221,18 @@ Router Router.route(Router r, Symbol method, String pattern, Func handler) {
   return r;
 }
 
-/** Registers GET. */
+/** Registers `fn` for GET requests that match `p`, as `Router.route` does. */
 Router Router.get(Router r, String p, Func fn) => r.route(<get>, p, fn);
 
-/** Registers POST. */
+/** Registers `fn` for POST requests that match `p`, as `Router.route` does. */
 Router Router.post(Router r, String p, Func fn) => r.route(<post>, p, fn);
 
-/** Registers PUT. */
+/** Registers `fn` for PUT requests that match `p`, as `Router.route` does. */
 Router Router.put(Router r, String p, Func fn) => r.route(<put>, p, fn);
 
-/** Registers DELETE. */
+/** Registers `fn` for DELETE requests that match `p`, as `Router.route`
+    does.
+*/
 Router Router.delete(Router r, String p, Func fn) => r.route(<delete>, p, fn);
 
 /** Serves files below directory, with index.html for directories. */
@@ -269,9 +277,21 @@ void Router.dispatch(Router router, HttpRequest req, HttpResponse res) {
   Http.fail(found ? 405 : 404, found ? "method not allowed" : "not found");
 }
 
-/** Binds immediately; port 0 selects an available port.
+/** Creates a server for `router` and binds its port immediately.
+    Port 0 selects an available port.
     Keyword options use Symbol keys. Splice an existing Map with
-    `@options`; omitted options use the server defaults.
+    `@options`; omitted options use the server defaults:
+
+    - `host`, the address to bind, defaults to `"::"`;
+    - `port` defaults to 8080;
+    - `workers`, the number of worker threads, defaults to 8;
+    - `idle-ms`, each connection's socket timeout in milliseconds, defaults
+      to 5000;
+    - `body-limit`, the largest accepted request body in bytes, defaults
+      to 1048576;
+    - `logger`, the `Logger` that records requests and errors, defaults to
+      a new `<info>` logger that writes to standard error.
+
     Raises: `<bad-arg>` for fewer than one worker, an idle timeout below one
     millisecond, a negative body limit, a NULL `logger`, or an invalid port,
     `<not-found>` when the host does not resolve, or `<io-fail>` on a host

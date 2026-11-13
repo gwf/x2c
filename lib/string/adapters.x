@@ -7,9 +7,9 @@
 */
 String String.str(String str) => str;
 
-/** Appends `str` to `out` unchanged.
+/** Appends `s` to `out` unchanged.
     A `String` is already its own display text, so this writes it directly
-    instead of routing through `String.str`. `Null` `str` is a no-op. The
+    instead of routing through `String.str`. `Null` `s` is a no-op. The
     borrowed `out` is returned and not retained.
     Raises: any cause from `Buffer.write`.
 */

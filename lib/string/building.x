@@ -98,6 +98,8 @@ meta native String String.join(String sep, List strings) {
 }
 
 /** Pads the left side of `str` to the requested width.
+    Writes `fill` before `str` until the result is `width` bytes long. A
+    `width` not greater than the length of `str` returns `str` unchanged.
     Raises: `<bad-arg>` when `fill` is NUL, `<size-limit>` when `width`
     cannot be represented, or `<alloc-fail>` when result storage cannot be
     allocated.
@@ -106,12 +108,17 @@ meta native String String.pad_left(String str, int width, char fill) =>
   _pad(str, width, fill, 1);
 
 /** Pads the right side of `str` to the requested width.
+    Writes `fill` after `str` until the result is `width` bytes long. A
+    `width` not greater than the length of `str` returns `str` unchanged.
     Raises: the same causes as `String.pad_left`.
 */
 meta native String String.pad_right(String str, int width, char fill) =>
   _pad(str, width, fill, 0);
 
 /** Pads both sides of `str` to the requested width.
+    Splits the `fill` bytes between the two sides, putting the odd one on
+    the right, so `"ab".pad_center(5, '.')` is `".ab.."`. A `width` not
+    greater than the length of `str` returns `str` unchanged.
     Raises: the same causes as `String.pad_left`.
 */
 meta native String String.pad_center(String str, int width, char fill) =>

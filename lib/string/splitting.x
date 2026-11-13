@@ -24,8 +24,10 @@ String String.strip(String str, List @chars) {
   return String.new_len(str + start, end - start);
 }
 
-/** Removes leading bytes found in the C string `chars`.
-    Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+/** Removes leading bytes that appear in the optional charset argument.
+    The optional `chars` argument is one `String` listing the bytes to remove,
+    as in `"xxhi".lstrip("x")`. Omitting it or passing NULL removes the
+    whitespace bytes `" \t\n\v\f\r"`. The result is
     canonical; null input returns NULL. An unchanged input is returned as-is.
     Raises: `<bad-arity>` for more than one charset, or `<alloc-fail>`
     while constructing a changed result.
@@ -39,8 +41,10 @@ String String.lstrip(String str, List @chars) {
   return String.new(str + beg);
 }
 
-/** Removes trailing bytes found in the C string `chars`.
-    Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+/** Removes trailing bytes that appear in the optional charset argument.
+    The optional `chars` argument is one `String` listing the bytes to remove,
+    as in `"hixx".rstrip("x")`. Omitting it or passing NULL removes the
+    whitespace bytes `" \t\n\v\f\r"`. The result is
     canonical; null input returns NULL. An unchanged input is returned as-is.
     Raises: `<bad-arity>` for more than one charset, or `<alloc-fail>`
     while constructing a changed result.
