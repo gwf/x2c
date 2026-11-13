@@ -603,9 +603,8 @@ static size_t _fold_line_count(const char *buf, size_t len) {
 
 /* Return true if the text should be folded: if it contains newlines or is at
  * least PASTE_FOLD_THRESHOLD bytes long. */
-static int _should_fold(const char *buf, size_t len) {
-  return memchr(buf, '\n', len) != NULL || len >= PASTE_FOLD_THRESHOLD;
-}
+static int _should_fold(const char *buf, size_t len) =>
+  memchr(buf, '\n', len) != NULL || len >= PASTE_FOLD_THRESHOLD;
 
 /* Restore one fold from a history entry. History stores
  * the real text, but not the original paste boundaries, so we reconstruct
