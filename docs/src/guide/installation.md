@@ -220,8 +220,7 @@ Installing these support directories directly into a shared tree such as
 An installed prefix records `cc` and `ar` in `lib/x2c/toolchain`;
 [C compiler and linker
 options](../reference/cli.md#c-compiler-and-linker-options) gives the full
-tool selection
-order.
+tool selection order.
 
 ## Windows
 
