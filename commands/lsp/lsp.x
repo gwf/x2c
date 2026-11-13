@@ -126,9 +126,9 @@ static void _receive(Server &server) {
   String method = message.getdefault("method", NULL);
   if (method == "$/cancelRequest") {
     Map params = message.getdefault("params", {});
-    if (params.contains("id"))
+    if ("id" in params)
       foreach (Map queued, server.queued)
-        if (queued.contains("id") && queued["id"] == params["id"])
+        if ("id" in queued && queued["id"] == params["id"])
           server.cancelled[params["id"]] = 1;
     _discard(message);
   }
@@ -137,9 +137,9 @@ static void _receive(Server &server) {
 
 static void _dispatch(Server &server, Map message) {
   String method = message.getdefault("method", NULL);
-  int request = message.contains("id");
+  int request = "id" in message;
   Var id = message.getdefault("id", NULL);
-  if (request && server.cancelled.contains(id)) {
+  if (request && id in server.cancelled) {
     server.cancelled.del(id);
     _error(server, id, -32800, "Request cancelled");
     return;
@@ -227,7 +227,7 @@ static void _change(Server &server, Map params) {
 static void _save(Server &server, Map params) {
   String path = server.workspace.retain(_document(params));
   if (!path) return;
-  String text = params.contains("text") ? params["text"].str()
+  String text = "text" in params ? params["text"].str()
                                       : server.workspace.document(path);
   text = server.workspace.retain(text);
   _affected(server, path);
@@ -310,7 +310,7 @@ static void _rename(Server &server, Var id, Map params) {
 
 static void _answer(Server &server, Var id, Map answer) {
   Map message = {jsonrpc: "2.0", id: id};
-  if (answer.contains("error")) message[<error>] = answer["error"];
+  if ("error" in answer) message[<error>] = answer["error"];
   else message[<result>] = answer["result"];
   _send(server, message);
   _notice(server);
@@ -349,7 +349,7 @@ static void _pending(Server &server, String path, Var version) {
 
 static void _affected(Server &server, String path) {
   foreach (String document, server.workspace.affected(path))
-    if (server.documents.contains(document))
+    if (document in server.documents)
       server.pending[document] = server.documents[document];
 }
 
