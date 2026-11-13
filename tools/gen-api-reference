@@ -8,6 +8,9 @@
     `docs/library-api-tiers.txt`. This tool owns `docs/src/library/modules/`,
     `docs/src/internals/compiler-api/`, and their sections of
     `docs/src/SUMMARY.md`; `docs/src/library/overview.md` is authored prose.
+    Native protocol aliases such as `File.close` take their targets from
+    source, and small tables below name each module's guide chapter, its
+    globals, and the protocol members its adoptions generate.
 
     `--check-path` audits the public documentation of one or more assigned
     compiler or library sources without generating pages.
@@ -20,8 +23,8 @@
 #include "definitions.x"
 
 static Path root, pages_dir, compiler_dir, summary_path, x2c
-static Regex whitespace, plain_id
-static Map see_index, evidence, titles
+static Regex whitespace, plain_id, alias_member
+static Map see_index, evidence, titles, guides, globals, members
 static const String library_section = "# Libraries and packages"
 static const String internals_section = "# Compiler internals"
 static const String compiler_entry =
@@ -118,7 +121,8 @@ static void _flush_section(Array sections, String kind, Array lines):
     sections.push($(kind, String.join("\n", lines)))
 
 /* Keyed sections of a doc comment as `(kind text)`, where kind is NULL for
-   ordinary prose. Blank lines carry no meaning. */
+   ordinary prose. A key starts a section at the start of a line or after a
+   sentence within one. Blank lines carry no meaning. */
 static List _doc_sections(String doc):
   Array sections = [], lines = []
   String kind = NULL
@@ -126,11 +130,18 @@ static List _doc_sections(String doc):
   foreach String line in doc.split("\n"):
     String stripped = line.lstrip(NULL)
     if stripped && stripped.startswith("```"): fenced = !fenced
-    String key = NULL
+    String key = NULL, lead = NULL
     if !fenced && stripped:
       foreach String candidate in %("Raises" "See" "API"):
-        if !key && stripped.startswith(candidate + ":"): key = candidate
+        if key: continue
+        int at = line.find(". " + candidate + ":")
+        if stripped.startswith(candidate + ":"): key = candidate
+        else if at >= 0:
+          key = candidate
+          lead = line[:at + 1]
+          stripped = line[at + 2:]
     if key:
+      if lead: lines.push(lead)
       _flush_section(sections, kind, lines)
       kind = key
       lines = [stripped[key.len() + 1:].lstrip(NULL)]
@@ -187,6 +198,55 @@ static Map _item(List definition, String tier, String label):
 
 static int _future_public(String name) =>
   !name.startswith("_") && !name.contains("__")
+
+/* The native alias members that `unit`'s own source declares, such as
+   `File.close` for `fclose`, as callable definitions. The compiler reports
+   them without prose or a source line, so each takes its line and target
+   from its protocol member and its summary from a `//` comment directly
+   above that member, if any. */
+static List _alias_definitions(Unit unit):
+  String path = unit["path"], note = ""
+  Map declared = {}
+  int number = 0
+  foreach String text in root.join(path).read_text().split("\n"):
+    number++
+    RegexMatch member = alias_member.match(text)
+    if member: declared[member["method"]] = $(number, member["target"], note)
+    String stripped = text.strip(NULL)
+    note = stripped && stripped.startswith("//")
+         ? stripped[2:].strip(NULL) : ""
+  Array found = []
+  foreach Map row in unit["functions"].array():
+    if row["origin"] != <alias> || row["static"].integer() ||
+       Prose.normalize(row["doc"]): continue
+    (String receiver, String mark, String method) =
+      row["name"].str().partition("_")
+    if !declared.contains(method): continue
+    (int line, String target, String comment) = declared[method].list()
+    String name = %"$receiver.$method"
+    String doc = comment ? comment : %"Calls C's `$target` on the `$receiver`."
+    found.push($(name, Unit.signature(name, row["type"], row["params"]),
+                 line, doc, $(path, line)))
+  return found.list_free()
+
+/* Fails unless `unit` still defines the generated members and declares the
+   globals that the tables list for its module. */
+static void _check_members(Unit unit, String stem):
+  String path = unit["path"]
+  if members.contains(stem):
+    (String receiver, String protocol, String methods) = members[stem].list()
+    foreach String method in methods.split(" "):
+      String name = %"$(receiver)_$method"
+      List rows = unit["functions"].array()
+      if !rows.any(%!(Map row) => row["name"] == name):
+        _fatal(%"the member table lists $receiver.$method, which $path " +
+               "does not define")
+  if !globals.contains(stem): return
+  String text = root.join(path).read_text()
+  foreach List row in globals[stem].array():
+    (String name, String type) = row
+    if !text.contains(%"extern $type ") || !text.contains(name):
+      _fatal(%"the global table lists $name, which $path does not declare")
 
 /* Public authored types use the compiler's effective publication flag.
    A class completion replaces its forward declaration. */
@@ -366,9 +426,10 @@ static Array _collect(Map units):
     Map module = _module(unit, visibility, note)
     if visibility == "api" || visibility == "optional":
       (List callables, List declarations) = _public_surface(unit, 0)
-      foreach List definition in callables:
+      foreach List definition in callables.append(_alias_definitions(unit)):
         String tier = _take_tier(remaining, path, definition.car())
         module["items"].array().push(_item(definition, tier, NULL))
+      _check_members(unit, module["stem"])
       foreach Map item in declarations:
         item["tier"] = _take_tier(remaining, path, item["name"])
         module["declarations"].array().push(item)
@@ -540,9 +601,53 @@ static void _include(Array lines, Map module):
   if module["note"]:
     _add(lines, $(String.join("\n", Prose.wrap(module["note"], 79)), ""))
 
+/* The `# ` title of the book page `page` under `docs/src/`. */
+static String _chapter_title(String page):
+  Path path = root.join("docs/src").join(page)
+  if !path.is_file():
+    _fatal(%"the reference links docs/src/$page, which does not exist")
+  String first = path.read_text().partition("\n").car()
+  if !first.startswith("# "):
+    _fatal(%"docs/src/$page does not start with a '# ' title")
+  return first[2:].strip(NULL)
+
+/* The guide chapter that teaches a module, as a line under its source. */
+static void _guide(Array lines, Map module):
+  if !guides.contains(module["stem"]): return
+  String page = %"guide/$(guides[module["stem"]])"
+  _add(lines, $(%"Guide: [$(_chapter_title(page))](../../$page)", ""))
+
+/* The module's globals and generated protocol members, which have no
+   entries of their own. */
+static void _extras(Array lines, Map module):
+  String stem = module["stem"]
+  if globals.contains(stem):
+    lines.push($dedent(%"
+      | Global | Type | Summary |
+      | --- | --- | --- |"))
+    foreach List row in globals[stem].array():
+      (String name, String type, String summary) = row
+      lines.push(%"| `$name` | `$type` | $summary |")
+    lines.push("")
+  if !members.contains(stem): return
+  (String receiver, String protocol, String methods) = members[stem].list()
+  Array links = []
+  foreach String method in methods.split(" "):
+    String target = %"$protocol.$method"
+    if !see_index.contains(target):
+      _fatal(%"the member table links $target, which is not a documented " +
+             "public function")
+    links.push(%"[`$method`]($(see_index[target]).md#$target)")
+  String text = %"`$receiver` also has the members that its `$protocol` " +
+    "protocol adoption generates: " + String.join(", ", links.list_free()) +
+    "."
+  _add(lines, $(String.join("\n", Prose.wrap(text, 79)), ""))
+
 static String _page(Map module):
   Array lines = [banner, "", %"# $(module["title"])", "",
-                 %"Source: `$(module["path"])`", "", _lead(module), ""]
+                 %"Source: `$(module["path"])`", ""]
+  _guide(lines, module)
+  _add(lines, $(_lead(module), ""))
   if module["visibility"] == "optional": _include(lines, module)
   List items = module["items"].array()
   int primary = 0
@@ -551,6 +656,7 @@ static String _page(Map module):
     if !tiered: continue
     if tier == "primary": primary = 1
     _add(lines, $(%"## $(_tier_heading(tier))", ""))
+    if tier == "primary": _extras(lines, module)
     if tier == "internal":
       lines.push($dedent(%"
         These callables connect runtime translation units. They are documented
@@ -624,7 +730,8 @@ static String _index(Array modules):
       These modules ship with x2c but are not loaded by the standard
       prelude. Include one explicitly to use its declarations.
       ")))
-    foreach Map module in optional:
+    foreach Map module in
+        optional.sort_by(%!(Map module) => module["title"].str().lower()):
       lines.push(%"- [$(module["title"])]($(module["stem"]).md) - " +
                  _lead(module))
   _module_list(lines, modules, "internal", $($dedent(%"
@@ -715,7 +822,7 @@ static Array _replace_section(
 static String _summary(Array modules, Array compiler, String current):
   Array standard = [
     library_section, "", "- [Standard Library](library/index.md)",
-    "  - [Overview](library/overview.md)",
+    %"  - [$(_chapter_title("library/overview.md"))](library/overview.md)",
     "  - [Module Reference](library/modules/index.md)",
     "    - [x2c C API](library/modules/x2c-c-api.md)"]
   foreach Map module in _by_title(modules):
@@ -891,11 +998,13 @@ static const char *evidence_rows[][3] = {
   {"buffer", "unittest/test-buffer.x", ""},
   {"channel", "unittest/test-channel.x unittest/test-channel-batch.x",
    "power/channel-word-count power/channel-service"},
+  {"common", "unittest/test-var.x unittest/test-varops.x", ""},
   {"context", "unittest/test-context.x", ""},
   {"derive", "unittest/test-derive.x", "power/derive"},
   {"diff", "unittest/test-diff.x", ""},
   {"digest", "unittest/test-digest.x", ""},
   {"encoding", "unittest/test-encoding.x", ""},
+  {"error", "unittest/test-error.x", ""},
   {"random", "unittest/test-random.x", ""},
   {"time", "unittest/test-time.x", ""},
   {"url", "unittest/test-url.x", ""},
@@ -941,7 +1050,8 @@ static const char *evidence_rows[][3] = {
   {"var", "unittest/test-var.x unittest/test-varops.x", ""},
   {NULL, NULL, NULL}}
 
-/* Page titles for modules whose stem does not name the type they define. */
+/* Page titles for modules whose stem does not name the type they define, or
+   whose type is not spelled as readers write the name. */
 static const char *title_rows[][2] = {
   {"common", "Runtime Core"},
   {"common-types", "Core Types"},
@@ -953,7 +1063,9 @@ static const char *title_rows[][2] = {
   {"lib", "DisjointSet"},
   {"lisp-bindings", "Lisp Bindings"},
   {"list-selectors", "List Selectors"},
-  {"macrovalue", "Macro"},
+  {"http", "HTTP"},
+  {"json", "JSON"},
+  {"macrovalue", "Macro Values"},
   {"match", "Match"},
   {"meta", "Meta"},
   {"net", "Sockets"},
@@ -965,7 +1077,70 @@ static const char *title_rows[][2] = {
   {"typed-array", "Typed Arrays"},
   {"typed-list", "Typed Lists"},
   {"typed-map", "Typed Maps"},
+  {"url", "URL"},
   {NULL, NULL}}
+
+/* The guide chapter under `docs/src/guide/` that teaches each module. */
+static const char *guide_rows[][2] = {
+  {"args", "scripting.md"},
+  {"array", "collections.md"},
+  {"atom", "symbols.md"},
+  {"buffer", "collections.md"},
+  {"channel", "channels.md"},
+  {"context", "contexts-and-threads.md"},
+  {"derive", "deriving-records.md"},
+  {"diff", "scripting.md"},
+  {"digest", "scripting.md"},
+  {"encoding", "time-random-encodings.md"},
+  {"error", "exceptions.md"},
+  {"exception", "exceptions.md"},
+  {"file", "scripting.md"},
+  {"http", "networking.md"},
+  {"iter", "iteration.md"},
+  {"json", "scripting.md"},
+  {"list", "collections.md"},
+  {"macrovalue", "macros.md"},
+  {"map", "collections.md"},
+  {"match", "match.md"},
+  {"meta", "generating-code.md"},
+  {"mutex", "contexts-and-threads.md"},
+  {"net", "networking.md"},
+  {"path", "scripting.md"},
+  {"pool", "memory.md"},
+  {"process", "scripting.md"},
+  {"random", "time-random-encodings.md"},
+  {"regex", "scripting.md"},
+  {"rewrite", "generating-code.md"},
+  {"scope", "memory.md"},
+  {"scripting", "scripting.md"},
+  {"string", "collections.md"},
+  {"substring", "iteration.md"},
+  {"symbol", "symbols.md"},
+  {"symbolset", "collections.md"},
+  {"system-macros", "system-macros.md"},
+  {"task", "contexts-and-threads.md"},
+  {"test", "testing.md"},
+  {"thread", "contexts-and-threads.md"},
+  {"time", "time-random-encodings.md"},
+  {"typed-array", "collections.md"},
+  {"typed-list", "collections.md"},
+  {"typed-map", "collections.md"},
+  {"url", "time-random-encodings.md"},
+  {"var", "values.md"},
+  {NULL, NULL}}
+
+/* Public globals, which the compiler reports no definition rows for. */
+static const char *global_rows[][4] = {
+  {"file", "Stdin", "File", "Standard input, borrowed from the process."},
+  {"file", "Stdout", "File", "Standard output, borrowed from the process."},
+  {"file", "Stderr", "File", "Standard error, borrowed from the process."},
+  {NULL, NULL, NULL, NULL}}
+
+/* Undocumented members that a protocol adoption generates, which a page
+   lists with links to the protocol's own entries. */
+static const char *member_rows[][4] = {
+  {"array", "Array", "Block", "clear len capacity truth pop truncate"},
+  {NULL, NULL, NULL, NULL}}
 
 Path self = String.new(argv[0])
 root = self.absolute().dirname().dirname()
@@ -979,9 +1154,24 @@ evidence = {}
 for (int at = 0; evidence_rows[at][0]; at++):
   evidence[String.new(evidence_rows[at][0])] =
     String.new(evidence_rows[at][2])
+alias_member = Regex.compile(
+  "^\\s*[^/]*\\bT\\.(?<method>\\w+)\\(.*\\)\\s*=\\s*(?<target>\\w+)\\s*;")
 titles = {}
 for (int at = 0; title_rows[at][0]; at++):
   titles[String.new(title_rows[at][0])] = String.new(title_rows[at][1])
+guides = {}
+for (int at = 0; guide_rows[at][0]; at++):
+  guides[String.new(guide_rows[at][0])] = String.new(guide_rows[at][1])
+globals = {}
+for (int at = 0; global_rows[at][0]; at++):
+  String stem = String.new(global_rows[at][0])
+  if !globals.contains(stem): globals[stem] = []
+  globals[stem].array().push($(String.new(global_rows[at][1]),
+    String.new(global_rows[at][2]), String.new(global_rows[at][3])))
+members = {}
+for (int at = 0; member_rows[at][0]; at++):
+  members[String.new(member_rows[at][0])] = $(String.new(member_rows[at][1]),
+    String.new(member_rows[at][2]), String.new(member_rows[at][3]))
 
 String usage = %"usage: $(self.basename()) [-h] " +
                "[--write | --check | --check-path PATH]\n"

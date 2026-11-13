@@ -5,13 +5,16 @@
     llms.txt indexes the published book, while llms-full.txt concatenates the
     core language chapters. Relative links become published URLs and hidden
     sample lines are revealed because their leading `~` is book markup.
+    Both files state the version that `Compiler.version` returns. llms.txt
+    lists the compiler internals under their own heading, apart from the
+    library API.
 */
 #include "system-macros.x"
 
 static Path root, book, summary, public_dir, index_path, full_path
 static const String site = "https://x2c-lang.dev"
 static const String docs = "https://x2c-lang.dev/docs/"
-static Regex entry, fence, _link, scheme, whitespace
+static Regex entry, fence, _link, scheme, whitespace, version
 
 static List _full_text(void) => %(
   "guide/from-c.md"
@@ -20,8 +23,18 @@ static List _full_text(void) => %(
   "reference/language.md"
   "reference/cli.md")
 
-static int _optional_section(String heading) =>
-  heading == "Compiler internals"
+static const String internals = "Compiler internals"
+
+/* The version, status, and install command, after each file's summary. */
+static String _status(void):
+  Path source = root.join("src/cli/requests.x")
+  RegexMatch found = version.match(source.read_text())
+  if !found:
+    raise %(llms-fatal
+            (reason "src/cli/requests.x defines no Compiler.version"))
+  return %"These pages describe x2c $(found["version"]). x2c is " +
+         "experimental. Install it with " +
+         %"`curl -fsSL $site/install.sh | sh`."
 
 /* Each section is `(heading rows)`, where rows is an Array of
    `(depth title path)` forms. */
@@ -127,10 +140,13 @@ static List _render(void):
   (String title, String paragraph) = _book_summary()
   String chapter_names = String.join(
     ", ", chapters.map(%!(String page) => entries[page].str()))
+  String status = _status()
   Array index_lines = [$dedent(%"
     # x2c
 
     > $paragraph
+
+    $status
 
     [$title]($docs) contains every chapter.
 
@@ -138,20 +154,29 @@ static List _render(void):
 
     - [x2c language reference]($site/llms-full.txt): $chapter_names
   ")]
-  Array optional = []
+  Array optional = [], compiler = []
   foreach List section in sections:
     String heading = section.car()
     Array listed = []
     foreach List row in section.cadr().array():
       (int depth, String name, String path) = row
       String item = %"- [$name]($(_page_url(path)))"
-      if _optional_section(heading) || depth >= 2: optional.push(item)
+      if heading == internals: compiler.push(item)
+      else if depth >= 2: optional.push(item)
       else: listed.push(item)
     if listed.len():
       index_lines.push(%"## $heading")
       index_lines.push("")
       foreach String item in listed: index_lines.push(item)
       index_lines.push("")
+  index_lines.push($dedent(%"
+    ## $internals
+
+    These pages describe the compiler's own source for readers who study or
+    modify it. A program cannot call the compiler functions they list.
+    "))
+  foreach String item in compiler: index_lines.push(item)
+  index_lines.push("")
   index_lines.push("## Optional")
   index_lines.push("")
   foreach String item in optional: index_lines.push(item)
@@ -161,6 +186,8 @@ static List _render(void):
     # x2c language reference
 
     > $paragraph
+
+    $status
 
     These chapters come from [$title]($docs).
     Each chapter follows a comment naming its published URL. Samples
@@ -214,6 +241,8 @@ fence = Regex.compile("^\\s*```(?<info>[^`]*)$")
 _link = Regex.compile("(\\]\\(|^\\[[^]]+\\]:\\s*)(?<target>[^)\\s]+)")
 scheme = Regex.compile("(?i)^[a-z][a-z0-9+.-]*:")
 whitespace = Regex.compile("\\s+")
+version = Regex.compile(
+  "Compiler\\.version\\(void\\)\\s*=>\\s*\"x2c (?<version>[^\"]+)\"")
 
 String usage = %"usage: $(self.basename()) [-h] [--write | --check]\n"
 if args.contains("-h") || args.contains("--help"):
