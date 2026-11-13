@@ -401,7 +401,8 @@ static int _control(
   if (operation == ":stats") {
     if (argument && argument != "verbose") return 0;
     return _query(
-      client, {operation: <stats>, text: "", verbose: argument == "verbose"}, 0);
+      client,
+      {operation: <stats>, text: "", verbose: argument == "verbose"}, 0);
   }
   if (!argument) return 0;
   Symbol query = Symbol.new(operation[1:]);
