@@ -15,9 +15,13 @@ A printf-family call whose format is a static literal passes each Var
 value the format consumes as the C type its conversion reads: a numeric
 conversion converts the value through `Var.convert`, `%c` and a `*`
 width or precision read an int, and `%s` displays it through `Var.str`.
-The format is read once, left to right. A Var value that no conversion
-consumes, or one at a conversion with no native reading, is an error.
-Each family member is one call pattern, keyed by its callee.
+`%s` reads a String, and a Var's display String, as nonnull text, so
+the empty String prints as no text. A List, Array, Map, or Symbol at
+`%s` is an error. The format is read once, left to right. A Var value
+that no conversion consumes, or one at a conversion with no native
+reading, is an error; a call with no Var keeps a format the walk cannot
+read as written. Each family member is one call pattern, keyed by its
+callee.
 
 Each definition precedes the definitions that call it: the compiler
 settles whether a linked copy reaches a compile-time operation when the

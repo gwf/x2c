@@ -98,6 +98,7 @@ prefix.
 | `x2c_set_root` | `src/utils.x` | `void x2c_set_root(String root)` |
 | [`x2c_slice_bound`](common.md#x2c_slice_bound) | `lib/common.x` | `int x2c_slice_bound(int bound)` |
 | [`x2c_string_from_bytes`](string.md#x2c_string_from_bytes) | `lib/string/string.x` | `String x2c_string_from_bytes(const char *bytes, int length)` |
+| [`x2c_string_text`](common.md#x2c_string_text) | `lib/common.x` | `inline const char *x2c_string_text(String string)` |
 | [`x2c_string_unescape_bytes`](string.md#x2c_string_unescape_bytes) | `lib/string/string.x` | `String x2c_string_unescape_bytes(String str)` |
 | [`x2c_task_channel_notify`](task.md#x2c_task_channel_notify) | `lib/task.x` | `void x2c_task_channel_notify(X2CChannelMonitor *monitor)` |
 | [`x2c_task_channel_sleep`](task.md#x2c_task_channel_sleep) | `lib/task.x` | `void x2c_task_channel_sleep(X2CChannelMonitor *monitor, Thread *owner)` |
@@ -146,4 +147,4 @@ prefix.
 | [`x2c_var_update_ulong_long`](var.md#x2c_var_update_ulong_long) | `lib/var/var.x` | `unsigned long long x2c_var_update_ulong_long(volatile unsigned long long *lhs, Symbol op, Var rhs)` |
 | [`x2c_var_update_volatile`](var.md#x2c_var_update_volatile) | `lib/var/var.x` | `Var x2c_var_update_volatile(volatile Var &?lhs, Symbol op, Var rhs)` |
 
-Total: 132 functions.
+Total: 133 functions.

@@ -164,6 +164,8 @@ Source: `src/diagnostics.x`
 
 Returns the note naming the innermost source expansion and the place
 that defines it, with the path shown as diagnostic headings show it.
+The compiler prelude's builtin constructs, such as `foreach`, are not
+the user's definitions, so the note names the expansion around them.
 
 Source: `src/diagnostics.x`
 
