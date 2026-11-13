@@ -55,7 +55,7 @@ static inline unsigned f3_map____record_hash(struct MapRecord * _x2c_gensym_macr
 
 static inline void f3_map____remember_hash(struct MapRecord * _x2c_gensym_macro_record_1, unsigned _x2c_gensym_macro_hash_0);
 
-struct _x2c_gensym_macro__HashTrailer_c069d1a6{
+struct _x2c_gensym_macro__HashTrailer_7107b96a{
   unsigned deleted;
   unsigned * hashes;
 }
@@ -306,7 +306,7 @@ static Bytes f3_map___Map_new_controls(Map _x2c_gensym_macro_unused_0, unsigned 
   (void) _x2c_gensym_macro_unused_0;
   unsigned _x2c_gensym_macro_count_0 = _x2c_gensym_macro__control_count_0(_x2c_gensym_macro_capacity_5);
   size_t _x2c_gensym_macro_bytes_0 =(size_t) _x2c_gensym_macro_count_0 + sizeof(unsigned);
-  if(_x2c_gensym_macro__split_hashes_0(_x2c_gensym_macro_capacity_5)) _x2c_gensym_macro_bytes_0 = _x2c_gensym_macro_count_0 + sizeof(struct _x2c_gensym_macro__HashTrailer_c069d1a6);
+  if(_x2c_gensym_macro__split_hashes_0(_x2c_gensym_macro_capacity_5)) _x2c_gensym_macro_bytes_0 = _x2c_gensym_macro_count_0 + sizeof(struct _x2c_gensym_macro__HashTrailer_7107b96a);
   else if(1) _x2c_gensym_macro_bytes_0 +=(size_t) _x2c_gensym_macro_capacity_5 * sizeof(unsigned);
   Bytes _x2c_gensym_macro_controls_0 = Bytes_new(_x2c_gensym_macro_bytes_0);
   {
@@ -326,7 +326,7 @@ static Bytes f3_map___Map_new_controls(Map _x2c_gensym_macro_unused_0, unsigned 
       if(_x2c_gensym_macro__split_hashes_0(_x2c_gensym_macro_capacity_5)){
         Block _x2c_gensym_macro_block_0 = Bytes_block(_x2c_gensym_macro_controls_0);
         (void) Block_scope(_x2c_gensym_macro_block_0);
-        struct _x2c_gensym_macro__HashTrailer_c069d1a6 * _x2c_gensym_macro_trailer_0 =(void *)((unsigned char *) _x2c_gensym_macro_controls_0 + _x2c_gensym_macro_count_0);
+        struct _x2c_gensym_macro__HashTrailer_7107b96a * _x2c_gensym_macro_trailer_0 =(void *)((unsigned char *) _x2c_gensym_macro_controls_0 + _x2c_gensym_macro_count_0);
         _x2c_gensym_macro_trailer_0 -> hashes = Scope_calloc_in(& _x2c_gensym_macro_block_0 -> lifetime, _x2c_gensym_macro_capacity_5, sizeof(unsigned));
       }
       Bytes _x2c_gensym_macro_result_0 = _x2c_gensym_macro_controls_0;
@@ -347,7 +347,7 @@ static Bytes f3_map___Map_new_controls(Map _x2c_gensym_macro_unused_0, unsigned 
 }
 
 static inline unsigned * f3_map___Map_full_hashes(Map _x2c_gensym_macro_map_3){
-  if(_x2c_gensym_macro__split_hashes_0(_x2c_gensym_macro_map_3 -> capacity)) return((struct _x2c_gensym_macro__HashTrailer_c069d1a6 *) _x2c_gensym_macro__deleted_0(_x2c_gensym_macro_map_3)) -> hashes;
+  if(_x2c_gensym_macro__split_hashes_0(_x2c_gensym_macro_map_3 -> capacity)) return((struct _x2c_gensym_macro__HashTrailer_7107b96a *) _x2c_gensym_macro__deleted_0(_x2c_gensym_macro_map_3)) -> hashes;
   return _x2c_gensym_macro__deleted_0(_x2c_gensym_macro_map_3) + 1;
 }
 
