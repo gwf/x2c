@@ -83,13 +83,10 @@ errors propagate normally. The guard uses ordinary expression truth rules.
 
 A typed name has the same type throughout its arm, including other occurrences
 written as `?name` and occurrences in alternative patterns. Repeated names
-require equal values. `!quote` stays opaque, and each binder must be assigned
-in every alternative. Explicit `(!is ?name type string)` keeps `name` as a
-`Var`.
-
-The shorthand lowers to the `!is` pattern predicate and ordinary
-typed local declarations. An expression guard lowers to an ordinary `if`;
-both forms match exactly as the explicit patterns do.
+require equal values, and each binder must be assigned in every
+alternative. The shorthand matches exactly as the `!is` pattern operator
+does (see [pattern operators](#pattern-operators)), and an expression guard
+lowers to an ordinary `if`.
 
 ## The pattern vocabulary
 
@@ -156,9 +153,9 @@ match (tree) {
 }
 ```
 
-### Guards
+### Pattern operators
 
-Six guard operators turn a position in a pattern into a test. Each is written
+Six pattern operators turn a position in a pattern into a test. Each is written
 as a sublist headed by the operator.
 
 `(!or a b ...)` succeeds when any alternative matches, `(!and a b ...)` when
@@ -183,12 +180,15 @@ match (%(color green)) {
 binder interpretation inside it. `(!is ...)` is the type and category
 predicate: `(!is type string)` checks a `Var` tag, and `(!is atom)`,
 `(!is binder)`, `(!is op)`, `(!is var binder)`, and `(!is list binder)` check
-the named category.
+the named category. `(!is atom)` accepts any non-List element (Lisp's sense
+of atom), including numbers.
 
-Every guard except `!quote` accepts an optional leading binder, which
-captures the slice of input the guard checked. A leading binder needs at
-least one operand after it, so `(!not ?y)` tests `?y` rather than capturing
-it, and `(!set ?w a b)` captures the `a`-or-`b` membership:
+Every pattern operator except `!quote` accepts an optional leading binder,
+which captures the slice of input the operator checked. A binder captured
+by `(!is ?name type string)` stays a `Var`, unlike `?(String name)`. A
+leading binder needs at least one operand after it, so `(!not ?y)` tests
+`?y` rather than capturing it, and `(!set ?w a b)` captures the `a`-or-`b`
+membership:
 
 ```x2c
 match (%(node 7 8)) {
@@ -403,9 +403,8 @@ mismatch.
 ## Limitations
 
 `default` must be the last arm. The compiler diagnoses a later arm. A final
-`default` runs only when every earlier case failed. Each branch of a
-conditional group may end with its own `default`, as long as no arm follows
-the group.
+`default` runs only when every earlier case failed. Each branch of an `#if`
+group may end with its own `default`, as long as no arm follows the group.
 
 A `case` pattern must be a `%(...)` `List` literal or the pattern of a
 [Macro value](../reference/language.md#macro-values), such as
@@ -414,7 +413,7 @@ pattern such as `<?whole>`, but the statement form does not. The compiler
 rejects any other case pattern with a positioned x2c diagnostic before
 generating C.
 
-Source guard operators must be literal. Runtime-built patterns may
+Source pattern operators must be literal. Runtime-built patterns may
 interpolate an interned operator `Symbol`, but a source arm needs a literal
 operator so definite binder assignment can be checked. The `?binder?` family
 is reserved and is not a working predicate.
