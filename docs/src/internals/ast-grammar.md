@@ -758,6 +758,8 @@ _forward][declaration-defaults];
 See [named types and declaration
 production](../reference/language.md#named-types-and-declaration-production).
 
+#### Declaration bundle rows
+
 A `Declaration` macro, or a `NamedType` decorator, produces declarations once
 while the owning source's public declarations are collected. Its result is
 retained for full binding; the producer is not evaluated again to obtain its

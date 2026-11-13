@@ -3222,21 +3222,14 @@ See [Meta Functions](../guide/meta-functions.md) for the authoring guide.
 ### Compiler-supplied definitions
 
 The operations in `lib/meta.x` are bodyless `meta` prototypes supplied by the
-compiler itself, which generates its table of them from those declarations.
-The builtin macros, such as `foreach`, `class`, `with`, `$scope`, `$auto`, and
-`$lock`, are ordinary x2c source in the compiler prelude
-`etc/compiler-prelude.x`, which the compiler reads before each unit.
+compiler itself. The builtin macros, such as `foreach`, `class`, `with`,
+`$scope`, `$auto`, and `$lock`, are ordinary x2c source that the compiler
+reads before each unit, and they behave like macros defined in source.
 
-`x2c_meta_definition_hashes()` returns a `Map` with one entry for each function
-or initialized file-static value the unit has defined so far. The key is the
-definition's name. The value is a String hash of the definition's code tokens,
-from the first token after any `meta` marker to the end of its body or
-initializer. The compiler carries native copies of the `meta` functions in the
-source modules it ships (`src/linked-meta.x`, generated from them) and records
-their hashes with it. An included `meta` definition runs as its native copy
-when its hash matches the copy's. The hash of every unit definition it reaches
-through references must match too. An edited definition, or one that reaches an
-edited definition, is compiled with the unit's group like any other.
+An included `meta` definition that has been edited, or that reaches an edited
+definition, is compiled with the unit's group like any other. The
+[compiler architecture](../internals/architecture.md#shallow-parse-and-global-environment-discovery)
+describes how definition hashes detect that change.
 
 A run-time call to a `meta` function that reaches a compiler query or a
 source-template constructor is diagnosed where it is written. The diagnostic
@@ -3298,6 +3291,10 @@ The captured form is `(named-type NAME TYPE)`, where NAME is a String and TYPE
 is the complete canonical type syntax; a forward uses an empty TYPE. This form
 is constructible by any macro or `meta` function. Binding it publishes the same
 ordinary typedef and aggregate declarations as the captured source.
+
+A `Declaration` macro or `NamedType` decorator produces its declarations
+once; the retained result and the forms it may contain are described under
+[declaration bundle rows](../internals/ast-grammar.md#declaration-bundle-rows).
 
 ### Checked foreign aliases
 
