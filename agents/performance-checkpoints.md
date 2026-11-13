@@ -38,6 +38,12 @@ Only one snapshot may write that history at a time, and each suite command has
 a two-hour timeout so a hung nightly run records failure and releases the next
 attempt.
 
+Each snapshot defaults `X2C_CACHE_DIR` to `cache/` inside its retained run
+directory. Setup and all measured commands share this cache, so they do not
+need write access to the user cache. An explicit `X2C_CACHE_DIR` takes
+precedence. The summary records the selected path; the cache remains with
+the run artifacts for reproduction.
+
 ## Build cost score
 
 The stage 3 time grows when the compiler gets slower and when there is more
