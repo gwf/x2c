@@ -13,8 +13,9 @@ Array LspWorkspace.document_symbols(LspWorkspace w, String path) {
   if (cached is not <map>) return symbols;
   foreach (Map row, cached.map()["definitions"].array()) {
     if (row["file"].str() != path) continue;
-    symbols.push({name: row["display"], kind: row["kind"],
-      range: row["range"], selectionRange: row["selectionRange"]});
+    symbols.push(
+      {name: row["display"], kind: row["kind"], range: row["range"],
+       selectionRange: row["selectionRange"]});
   }
   return symbols;
 }

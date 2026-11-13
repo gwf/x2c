@@ -10,17 +10,18 @@ String x2c_embedded_identity(void);
 int main(int argc, char **argv) {
   x2c_initialize_command_environment(argv[0], x2c_embedded_identity());
   if (argc == 2 && (!strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))) {
-    puts($dedent(%"
-      Usage:
-        x2c lsp [options]
+    puts(
+      $dedent(%"
+        Usage:
+          x2c lsp [options]
 
-      Serve the workspace in the current directory over the Language Server
-      Protocol on stdio: diagnostics, definitions, hover, completion,
-      symbols, references, and rename. Editor setup is described at
-      https://x2c-lang.dev/docs/reference/cli.html#language-server
+        Serve the workspace in the current directory over the Language Server
+        Protocol on stdio: diagnostics, definitions, hover, completion,
+        symbols, references, and rename. Editor setup is described at
+        https://x2c-lang.dev/docs/reference/cli.html#language-server
 
-      Options:
-        -h, --help                  Show help and exit"));
+        Options:
+          -h, --help                  Show help and exit"));
     return 0;
   }
   int resume = -1;

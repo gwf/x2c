@@ -188,7 +188,8 @@ Var LspWorkspace.hover(LspWorkspace w, String path, int offset) {
   Type type = row[4];
   if (!type) return (Var) {0};
   List declaration = type.declaration_ast(row[3]);
-  String text = String.new(c.code_pretty_string(c.emit($(declaration), NULL), NULL));
+  String text = String.new(
+    c.code_pretty_string(c.emit($(declaration), NULL), NULL));
   return {contents: {language: "c", value: text},
           range: lsp_range(w.text(path), row[1], row[2])};
 }
@@ -303,9 +304,10 @@ static void _lsp_add_definition(
     Array entries = locations[$(name, path)];
     List selection = _lsp_definition_selection(entries, start, end);
     if (!selection) return;
-    rows.push({"name": name, "display": display, "kind": kind, "file": path,
-               "range": $(start, end),
-               "selectionRange": $(selection[1], selection[2])});
+    rows.push(
+      {"name": name, "display": display, "kind": kind, "file": path,
+       "range": $(start, end),
+       "selectionRange": $(selection[1], selection[2])});
   }
 }
 

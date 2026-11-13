@@ -226,8 +226,9 @@ static Map _rename_failure(String message) =>
   {"error": {"code": -32602, "message": message}};
 
 static Map _rename_spelling_failure(void) =>
-  _rename_failure("x2c lsp: the new name must preserve the binding's owner "
-                  "and namespace prefixes");
+  _rename_failure(
+    "x2c lsp: the new name must preserve the binding's owner "
+    "and namespace prefixes");
 
 static Map _reference_failure(void) =>
   {"error": {"code": -32803,
