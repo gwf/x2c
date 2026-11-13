@@ -12,6 +12,43 @@ compiler](../internals/building.md) covers the self-host stages behind it.
 The [syntax specifications](syntax/index.md) catalog the source rules and
 provide an extracted EBNF grammar and lexical transition specification.
 
+How this reference is organized:
+
+- [Source files and visibility](#source-files-and-visibility): `static` and
+  public declarations, `struct` publication, contextual keywords such as
+  `in`, `match`, and `expand`, `module` blocks, `#!` script units, and
+  indentation syntax.
+- [Packages and `import`](#packages-and-import): package `import` and name
+  prefixes.
+- [C foundation](#c-foundation): member access, methods and `Self`, `=>`
+  function bodies, statement expressions, rest and reference parameters,
+  `delegate` fields, `threaded` storage, initializers, `typeof`, `_Generic`,
+  and List destructuring.
+- [Protocols](#protocols): `protocol` declarations and adoptions,
+  `associated` types, operators, and direct updates such as `+=`.
+- [Compile-time macros](#compile-time-macros): `macro` definitions, holes,
+  result kinds, decorators, `keyword` aliases, `expand`, `Macro` values,
+  quotations (`$!`), hygiene and `using`, `meta` functions, and macro-visible
+  syntax.
+- [Classes, regions, and managed
+  declarations](#classes-regions-and-managed-declarations): `class`, region
+  `auto`, declaration and initializer `auto`, `$auto`, and
+  `TYPE.initialize` and `TYPE.shutdown`.
+- [Values and literals](#values-and-literals): Array and Map literals,
+  percent literals, interpolation, string escapes, static initialization,
+  `Symbol`, `Atom`, `Var`, `in`, `is`, and dynamic operators.
+- [Indexing and slicing](#indexing-and-slicing): bracket access and slices.
+- [Lambdas](#lambdas): `%!` lambdas, captures, and `Func`.
+- [Statements](#statements): `switch` on a String, `$lock`, `with`, `alias`,
+  `foreach`, omitted iterator destinations, `match`, `~=`, `try`, `catch`,
+  `finally`, `raise`, shared causes, and `defer`.
+- [Types and conversions](#types-and-conversions): typedefs, converters, and
+  qualifier rules.
+- [Preprocessing](#preprocessing): `--cpp` macro expansion, host
+  preprocessing, directives, `extern "C"`, and native declaration macros.
+- [Runtime Lisp](#runtime-lisp): embedded Lisp sessions.
+- [Diagnostics](#diagnostics): error limits, recovery, and warnings.
+
 ## Source files and visibility
 
 An `.x` file combines declarations and definitions. Translation produces a
@@ -1792,6 +1829,7 @@ A macro has one result kind as well as argument kinds:
 | `Enumerator` | braced, comma-separated enumerators | enum body |
 | `Unit` | braced declarations and definitions | file scope |
 | `Declaration` | braced declarations with retained public signatures | file scope |
+| `Decorator` | replacement for its first-parameter target; see [decorators](#decorators) | directly before that target, with no semicolon |
 
 The result kind is required between `macro` and the `$` name. An arrow body
 requires `Expression` or `Stmt`. An anonymous macro's arrow body omits that
@@ -4831,7 +4869,7 @@ Inside `?(`, `typename` is ordinary source type syntax rather than literal
 List data: write `?(String text)` or `?(List payload)`. The compiler stores
 named types such as `String` as Strings in type syntax. The type List
 `%("String")` therefore differs from `%(String)`, which contains an `Atom`;
-see [macro values](#macro-values). Typedefs use their underlying `Var` tag,
+see [quotations](#quotations). Typedefs use their underlying `Var` tag,
 so `?(Type type)`, with `typedef List Type`, tests for a List payload without
 validating its contents as type syntax. The tag test precedes the native
 local declaration.
