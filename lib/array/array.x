@@ -70,7 +70,8 @@ meta native Self Array.reverse(Self);
 meta native Var Array.unshift(Array, Var);
 
 /** Releases the `Array` and its backing storage, invalidating every alias.
-    The `Block` protocol generates the definition.
+    Call it to end the lifetime before the owning `Scope` does. Contents
+    that the `Array` owns through `Array.scope` are destroyed with it.
 */
 meta void Array.free(Array array);
 

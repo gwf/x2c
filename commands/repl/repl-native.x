@@ -12,8 +12,8 @@
 #include "scope/scope.x"
 #include <stdint.h>
 
-List repl_render(Compiler c, Type type, List expression, List output,
-                 int depth, int limit);
+List repl_render(
+  Compiler c, Type type, List expression, List output, int depth, int limit);
 
 static typedef struct NativeSubmission {
   ReplSession session;
@@ -57,8 +57,8 @@ static List _native_name(NativeSubmission &n, Type type, List binding) {
   }
   String name = Ast.binding_spelling(binding);
   Type global_type = NULL;
-  List global = name ? n.session.compiler.sym.resolve_global($(name), global_type)
-                     : NULL;
+  List global = name
+    ? n.session.compiler.sym.resolve_global($(name), global_type) : NULL;
   if (!global || global != binding) return NULL;
   if (n.session.program) {
     Map description = n.session.program.descriptions[name];
@@ -121,8 +121,8 @@ static void _native_object(
   List pointer_binding = c.sym.introduce(
     %"__repl_object_$(binding.cadr())");
   List pointer = _native_expr(c, %(* void), pointer_binding);
-  c.add_early(c.bind_syntax(
-    $!Unit{ static void *$pointer_binding; }, <unit>, NULL));
+  c.add_early(
+    c.bind_syntax($!Unit{ static void *$pointer_binding; }, <unit>, NULL));
   n.objects[binding] = pointer;
   List temporary = c.sym.introduce(%"__repl_initial_$(binding.cadr())");
   List declaration = %(declare $spec (bindings
@@ -132,13 +132,14 @@ static void _native_object(
   n.body.push(declaration);
   List value = _native_expr(c, type, temporary);
   List allocator = c.sym.reference_global(%("repl_native_storage"));
-  List allocate = c.rebuild_statement($!{
-    $pointer = $allocator(sizeof($value), _Alignof(__typeof__($value)));
-  });
+  List allocate = c.rebuild_statement(
+    $!{
+      $pointer = $allocator(sizeof($value), _Alignof(__typeof__($value)));
+    });
   n.body.push(allocate);
-  n.body.push(c.rebuild_statement($!{
-    memcpy($pointer, (const void *) &$value, sizeof($value));
-  }));
+  n.body.push(
+    c.rebuild_statement(
+      $!{ memcpy($pointer, (const void *) &$value, sizeof($value)); }));
   n.body.push(_native_result_set(c, result, name, pointer));
   if (type.is_array() && !type.car().list().cdr()) {
     List extent = c.resolve_expression(
@@ -201,7 +202,8 @@ static void _native_render(
     Type pointer = type.reference();
     List declaration = pointer.declaration_ast(name);
     declaration = %(declare $(declaration.cadr()) (bindings
-      (op = $(declaration.caddr().cadr()) (expr $pointer (op & $expression)))));
+      (op = $(declaration.caddr().cadr())
+        (expr $pointer (op & $expression)))));
     c.sym.bind_identity(NULL, name, declaration);
     n.body.push(declaration);
     value = %(expr $type (op * $( _native_expr(c, pointer, name) )));
@@ -217,9 +219,12 @@ static void _native_render(
   List output_binding = c.sym.introduce(c.fresh_name("repl_output"));
   c.sym.bind_identity(NULL, output_binding, %("Buffer"));
   List output = _native_expr(c, %("Buffer"), output_binding);
-  n.body.push(c.rebuild_statement($!{ Buffer $output_binding = Buffer.new(128); }));
-  n.body.push(repl_render(c, type, value, output,
-    n.session.inspect_depth, n.session.inspect_limit));
+  n.body.push(
+    c.rebuild_statement($!{ Buffer $output_binding = Buffer.new(128); }));
+  n.body.push(
+    repl_render(
+      c, type, value, output,
+      n.session.inspect_depth, n.session.inspect_limit));
   List formatted = c.resolve_expression($!String{ $output.str() }, NULL);
   n.body.push(_native_result_set(c, result, "formatted", formatted));
   n.body.push(c.rebuild_statement($!{ $output.free(); }));
@@ -230,9 +235,10 @@ static List _native_prepare(Compiler c, NativeSubmission &n) {
   n.environment = _native_expr(c, %(* * void), env);
   c.add_early(c.bind_syntax($!Unit{ static void **$env; }, <unit>, NULL));
   List allocator = c.sym.introduce("repl_native_storage");
-  c.add_early(c.bind_syntax(
-    $!Unit{ void *$allocator(size_t size, size_t alignment); },
-    <unit>, NULL));
+  c.add_early(
+    c.bind_syntax(
+      $!Unit{ void *$allocator(size_t size, size_t alignment); },
+      <unit>, NULL));
   List argument = c.sym.introduce("__repl_captures");
   List parameter = _native_expr(c, %(* void), argument);
   List returned = c.sym.introduce("__repl_response");
@@ -244,16 +250,19 @@ static List _native_prepare(Compiler c, NativeSubmission &n) {
   n.body.push(c.rebuild_statement($!{ Map $returned = {}; }));
   if (n.syntax ~= %(function ?spec (bind ?original ?mods) ?body)) {
     n.original = original;
-    n.type = %(declare $spec (bindings (bind $original $mods))).type_from_ast();
+    n.type =
+      %(declare $spec (bindings (bind $original $mods))).type_from_ast();
     n.entry = c.sym.introduce(
       %"__repl_native_$(original.cadr())_$(Ast.binding_spelling(original))");
     List storage = n.type.is_static() ? spec : cons(<static>, spec);
-    c.add_early(%(function $storage (bind $(n.entry) $mods)
-      $(_native_rewrite(n, body))));
+    c.add_early(
+      %(function $storage (bind $(n.entry) $mods)
+        $(_native_rewrite(n, body))));
     List target = _native_expr(c, n.type, n.entry);
-    n.body.push(_native_result_set(c, result,
-      Ast.binding_spelling(original), c.resolve_expression(
-        $!(void *){ (void *) &$target }, NULL)));
+    n.body.push(
+      _native_result_set(
+        c, result, Ast.binding_spelling(original),
+        c.resolve_expression($!(void *){ (void *) &$target }, NULL)));
   }
   else {
     List statements = n.syntax;
@@ -269,11 +278,12 @@ static List _native_prepare(Compiler c, NativeSubmission &n) {
     }
     else _native_statements(n, statements, result);
   }
-  List initialize = c.rebuild_statement($!{
-    if (!$(n.environment))
-      $(n.environment) = (void **) xmemdup(
-        $parameter, $(n.values.len() * sizeof(void *)));
-  });
+  List initialize = c.rebuild_statement(
+    $!{
+      if (!$(n.environment))
+        $(n.environment) = (void **) xmemdup(
+          $parameter, $(n.values.len() * sizeof(void *)));
+    });
   List setup = n.body;
   List body = %(block $initialize @setup (return ("Map") $result));
   return c.bind_syntax(
@@ -284,8 +294,8 @@ static List _native_prepare(Compiler c, NativeSubmission &n) {
 }
 
 /** Compiles one entry with the session's native configuration and runs it. */
-Map repl_native_execute(ReplSession session, List syntax, int persistent,
-                        int prints) {
+Map repl_native_execute(
+  ReplSession session, List syntax, int persistent, int prints) {
   NativeSubmission n = {
     .session = session, .syntax = syntax, .persistent = persistent,
     .prints = prints, .captures = {}, .objects = {},
@@ -327,7 +337,8 @@ Map repl_native_execute(ReplSession session, List syntax, int persistent,
       "-iquote", toolchain.include_dir, @(toolchain.cc_args),
       %"$directory/$cname");
     String output = %"$module.$((long) getpid())";
-    ToolAction action = toolchain.module_action(output, inputs, x2c_get_executable());
+    ToolAction action = toolchain.module_action(
+      output, inputs, x2c_get_executable());
     failure = Compiler.meta_cc_run(action.arguments, directory);
     if (failure) raise %(repl (reason $failure));
     Path.move_to(output, module);

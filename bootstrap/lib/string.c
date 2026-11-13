@@ -530,7 +530,7 @@ String String_printf(String fmt, ...){
 static int f8_building____join_length(List strings, int sep_len){
   size_t total = 0;  for(List cell = strings;  List_truth(cell);  cell = List_cdr(cell)){
     Var item = List_car(cell);  if(! Var_is_row(item, 11, 7, 1)) return - 1;  total +=(size_t) String_len(Var_string_payload(item));  if(List_truth(List_cdr(cell))) total +=(size_t) sep_len;  if(total > INT_MAX - 1){
-      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/building.x",.function = "f8_building____join_length",.line = 169,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.join")), NULL))));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_8 = {.file = "../../lib/string/building.x",.function = "f8_building____join_length",.line = 176,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_8, 1358596898646632, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.join")), NULL))));  __builtin_unreachable();
     }
 
   }
@@ -577,11 +577,11 @@ static void f8_building____join_into(char * out, List strings, String sep, int s
 
 static String f8_building____pad(String str, int width, char fill, int side){
   if(fill == '\0'){
-    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 204,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_9 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 211,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_9, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))));  __builtin_unreachable();
   }
   int length = String_len(str);  if(width <= length) return _canonical(str);  if(width == INT_MAX){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("String.pad")), NULL))); {
-      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 208,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
+      static const X2CErrorSite _x2c_gensym_error_site_10 = {.file = "../../lib/string/building.x",.function = "f8_building____pad",.line = 215,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_10, 1358596898646632, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(48833808), int_var(width));  __builtin_unreachable();
     }
 
   }
@@ -626,7 +626,7 @@ static int f9_splitting____newline_width(String str){
 
 static Var _optional(List values, Var fallback, String operation){
   if(List_truth(values) && List_truth(List_cdr(values))){
-    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/splitting.x",.function = "_optional",.line = 158,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477439593778, 1, Symbol_var(34096809266140), String_var(operation));  __builtin_unreachable();
+    static const X2CErrorSite _x2c_gensym_error_site_11 = {.file = "../../lib/string/splitting.x",.function = "_optional",.line = 162,.runtime = 1};  x2c_error_raise_n(& _x2c_gensym_error_site_11, 4477439593778, 1, Symbol_var(34096809266140), String_var(operation));  __builtin_unreachable();
   }
   return List_truth(values) ? List_car(values) : fallback;
 }

@@ -15,7 +15,9 @@ String snapshot_text(Var value) {
   return out;
 }
 
-/** Reads exactly one stored value or structural pattern, without evaluation. */
+/** Reads exactly one stored value or structural pattern, without
+    evaluation.
+*/
 Var snapshot_value(String text) {
   unsigned cursor = 0;
   Var value = void, extra = void;

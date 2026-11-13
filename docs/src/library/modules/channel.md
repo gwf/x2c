@@ -5,6 +5,8 @@
 
 Source: `lib/channel.x`
 
+Guide: [Channels](../../guide/channels.md)
+
 Var transport and explicit storage handoff.
 
 ## Primary API

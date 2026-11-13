@@ -55,7 +55,7 @@ a pointer to the declared parameter is rejected with that spelling as the fix.
 print their selected result and stop:
 
 - `--dump-tokens` / `--dump-cpp-tokens` — inspect lexer output
-- `--dump-ast` / `--dump-transforms` — observe initial and transformed ASTs
+- `--dump-ast` / `--dump-transforms` — observe expanded and transformed ASTs
 - `--dump-cache` — inspect the compiler cache after parsing
 - `--dump-code` — print the unformatted C token stream
 - `--dump-symbols` / `--dump-cpp-symbols` — inspect compiler symbol tables

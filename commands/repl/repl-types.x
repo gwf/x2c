@@ -25,7 +25,9 @@ typedef struct ReplSession {
   int inspect_depth, inspect_limit;
 } *ReplSession;
 
-/** A submission result; native values are rendered before leaving their entry. */
+/** A submission result; native values are rendered before leaving their
+    entry.
+*/
 typedef struct ReplResult {
   Symbol status;
   String name, message, source, formatted, artifact;

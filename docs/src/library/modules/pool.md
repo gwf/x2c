@@ -5,6 +5,8 @@
 
 Source: `lib/pool/pool.x`
 
+Guide: [Scopes and Lifetime](../../guide/memory.md)
+
 Nested interning pools with region-backed object storage.
 
 ## Primary API

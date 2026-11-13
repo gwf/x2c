@@ -110,12 +110,12 @@ conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
   spelling is an invalid token. An unescaped `>` closes the literal unless
   it belongs to a quoted or angle-form member, so `%<">" ">=" ">>">` holds
   three operator Symbols, and `x %<foo>` after an operand is still modulo
-  by `<foo>`. See
-  [Percent literals, quote, and unquote](language.md#percent-literals-quote-and-unquote).
+  by `<foo>`. See [Symbol sets](language.md#symbol-sets).
 - `associated`, `catch`, `delegate`, `finally`, `import`, `protocol`,
   `raise`, `threaded`, and `try` are contextual keywords: outside their
   keyword forms they can name objects, functions, parameters, fields,
-  typedefs, and labels. `defer` and the C keywords remain reserved. See
+  typedefs, and labels. `defer` remains reserved in expressions, and the C
+  keywords remain reserved. See
   [Contextual keywords](language.md#contextual-keywords).
 - A decorator can take a `Macro` target, and a decorator can return another
   decorator, which then consumes the next source target. `expand ROWS`

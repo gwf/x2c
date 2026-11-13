@@ -5,6 +5,8 @@
 
 Source: `lib/net.x`
 
+Guide: [Sockets and HTTP](../../guide/networking.md)
+
 Blocking TCP sockets backed by File streams.
 
 Include it with `#include "net.x"`.
@@ -18,7 +20,6 @@ Include it with `#include "net.x"`.
 | [`Listener.close`](#Listener.close) | Releases the listener. |
 | [`Listener.port`](#Listener.port) | Returns the actual bound port, including when bind requested port zero. |
 | [`Listener.stop`](#Listener.stop) | Requests stopping from any thread. |
-| [`Listener.write_repr`](#Listener.write_repr) | Writes the listener's fields, reading its stop state atomically. |
 | [`Socket.adopt`](#Socket.adopt) | Takes ownership of fd, including on failure, and creates separate File streams. |
 | [`Socket.close`](#Socket.close) | Closes both streams. |
 | [`Socket.connect`](#Socket.connect) | Connects to host, trying resolved addresses in order. |
@@ -88,15 +89,6 @@ poll interval. The listener descriptor remains owned until close.
 
 Source: `lib/net.x`
 
-<a id="Listener.write_repr"></a>
-#### Listener.write_repr
-
-`Buffer Listener.write_repr(Listener listener, Buffer out)`
-
-Writes the listener's fields, reading its stop state atomically.
-
-Source: `lib/net.x`
-
 ### `Socket`
 
 <a id="Socket.adopt"></a>
@@ -106,7 +98,9 @@ Source: `lib/net.x`
 
 Takes ownership of fd, including on failure, and creates separate File
 streams. The descriptor must name a connected TCP socket. This operation
-enables TCP_NODELAY. Raises: `<io-fail>` on a host failure.
+enables TCP_NODELAY.
+
+**Raises:** `<io-fail>` on a host failure.
 
 Source: `lib/net.x`
 
@@ -175,6 +169,7 @@ Source: `lib/net.x`
 | Function | Summary |
 | --- | --- |
 | [`Listener.cleanup`](#Listener.cleanup) | Releases the listener when a managed local leaves its block. |
+| [`Listener.write_repr`](#Listener.write_repr) | Writes the listener's fields, reading its stop state atomically. |
 | [`Socket.cleanup`](#Socket.cleanup) | Releases both streams when a managed local leaves its block. |
 
 ### `Listener`
@@ -185,6 +180,15 @@ Source: `lib/net.x`
 `void Listener.cleanup(Listener listener)`
 
 Releases the listener when a managed local leaves its block.
+
+Source: `lib/net.x`
+
+<a id="Listener.write_repr"></a>
+#### Listener.write_repr
+
+`Buffer Listener.write_repr(Listener listener, Buffer out)`
+
+Writes the listener's fields, reading its stop state atomically.
 
 Source: `lib/net.x`
 

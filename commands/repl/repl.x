@@ -95,10 +95,11 @@ static int _help(String command) {
       fprintf(stderr, "unknown command: %s\n", command);
       return 0;
     }
-    printf("%s\n  %s\n", row->synopsis, row->description);
+    printf("%s\n  %s\n", row.synopsis, row.description);
     return 1;
   }
-  puts($dedent(%"
+  puts(
+    $dedent(%"
     Enter C or x2c declarations and statements with semicolons.
     Each executable submission compiles to native code.
 
@@ -108,7 +109,8 @@ static int _help(String command) {
     if (_commands[i].spelling == ":stats") puts("\nInspect execution and control input");
     printf("  %-12s %s\n", _commands[i].spelling, _commands[i].description);
   }
-  puts("\n" + $dedent(%"
+  puts(
+    "\n" + $dedent(%"
     Try a library
       :load \"points.c\"
       :symbols point
@@ -133,7 +135,8 @@ static List _paths(String argument) {
   tokens.scan();
   if (tokens.status() != <ok>) return NULL;
   Array paths = [];
-  for (Token token = tokens.next(); token.type != <eof>; token = tokens.next()) {
+  for (Token token = tokens.next(); token.type != <eof>;
+       token = tokens.next()) {
     if (token.type != <lit-char*>) return NULL;
     paths.push(token.text.parse());
   }
@@ -154,14 +157,16 @@ static void _record(struct ReplClient &client, String source) {
 /* A restored candidate shares the live artifact. A fresh one gets its own
    directory here, so this removes it even when the candidate is killed. */
 static int _replace(
-  struct ReplClient &client, List roots, String snapshot, List requested, int announce) {
+  struct ReplClient &client, List roots, String snapshot, List requested,
+  int announce) {
   String artifact = snapshot ? client.artifact : Path.temp_dir();
-  ReplWorker candidate = repl_worker_start((ReplWorkerStart) {
-    .arguments = client.options.arguments, .roots = roots, .requested = requested,
-    .snapshot = snapshot, .directory = artifact,
-    .interactive = client.interactive,
-    .previous = client.worker, .input = client.input
-  });
+  ReplWorker candidate = repl_worker_start(
+    (ReplWorkerStart) {
+      .arguments = client.options.arguments, .roots = roots,
+      .requested = requested, .snapshot = snapshot, .directory = artifact,
+      .interactive = client.interactive,
+      .previous = client.worker, .input = client.input
+    });
   if (candidate.failure) {
     // Before the first session there is no session to keep.
     fprintf(
@@ -181,7 +186,8 @@ static int _replace(
   client.pending = "";
   if (announce) puts("started fresh session; cleared all prompt and library state");
   if (previous) repl_worker_close(previous);
-  if (previous_artifact != client.artifact) _artifact_remove(previous_artifact);
+  if (previous_artifact != client.artifact)
+    _artifact_remove(previous_artifact);
   return 1;
 }
 
@@ -227,8 +233,10 @@ static int _show_response(struct ReplClient &client, Map response) {
   if (status == <incomplete>) return 1;
   String message = response[<message>];
   if (!message) message = response[<cause>];
-  if (message) fprintf(stderr, "%s: %s\n",
-                      status == <rejected> ? "rejected" : "failed", message);
+  if (message)
+    fprintf(
+      stderr, "%s: %s\n", status == <rejected> ? "rejected" : "failed",
+      message);
   return 0;
 }
 
@@ -259,7 +267,8 @@ static int _symbols(struct ReplClient &client, String argument) {
       String name = _word(argument);
       if (!name) return 0;
       kind = Symbol.new(name);
-      if (!(kind in %<function native global value type macro constant>)) return 0;
+      if (!(kind in %<function native global value type macro constant>))
+        return 0;
     }
     else if (word == "--file") {
       if (argument.startswith("\"")) {
@@ -276,9 +285,10 @@ static int _symbols(struct ReplClient &client, String argument) {
     else if (!prefix && !word.startswith("--")) prefix = word;
     else return 0;
   }
-  return _query(client,
-    {operation: <symbols>, text: "", prefix: prefix, kind: kind,
-     path: path, all: all}, 0);
+  return _query(
+    client,
+    {operation: <symbols>, text: "", prefix: prefix, kind: kind, path: path,
+     all: all}, 0);
 }
 
 static int _number(String word, int &value) {
@@ -299,7 +309,8 @@ static int _inspect(struct ReplClient &client, String argument) {
     else return 0;
   }
   if (!argument) return 0;
-  return _query(client,
+  return _query(
+    client,
     {operation: <inspect>, text: argument, depth: depth, limit: limit}, 1);
 }
 
@@ -353,9 +364,10 @@ static int _replay(struct ReplClient &client, String argument) {
 }
 
 static int _control(
-  struct ReplClient &client, const struct ReplCommand *command, String argument) {
-  String operation = command->spelling;
-  if (command->argument == <none> && argument) return 0;
+  struct ReplClient &client, const struct ReplCommand *command,
+  String argument) {
+  String operation = command.spelling;
+  if (command.argument == <none> && argument) return 0;
   if (operation == ":quit") { client.pending = ""; client.quit = 1; return 1; }
   if (operation == ":cancel") { client.pending = ""; return 1; }
   if (operation == ":help") return _help(argument) ? 1 : -1;
@@ -377,7 +389,7 @@ static int _control(
   if (operation == ":load") {
     List paths = _paths(argument);
     if (!paths) return 0;
-    Array roots = auto [], requested = auto [];
+    auto Array roots = [], requested = [];
     foreach (String path, client.roots) roots.push(path);
     foreach (String path, paths) {
       path = Path.resolved_absolute(path);
@@ -388,7 +400,8 @@ static int _control(
   }
   if (operation == ":stats") {
     if (argument && argument != "verbose") return 0;
-    return _query(client,
+    return _query(
+      client,
       {operation: <stats>, text: "", verbose: argument == "verbose"}, 0);
   }
   if (!argument) return 0;
@@ -408,7 +421,7 @@ static int _line(struct ReplClient &client, String line) {
     }
     int result = _control(client, command, text);
     if (result <= 0) {
-      if (!result) fprintf(stderr, "usage: %s\n", command->synopsis);
+      if (!result) fprintf(stderr, "usage: %s\n", command.synopsis);
       return 0;
     }
     if (operation == ":load" || operation == ":reload" || operation == ":reset")
@@ -426,7 +439,8 @@ static int _line(struct ReplClient &client, String line) {
   return result;
 }
 
-static ReplInputCompletion _path_completion(String text, size_t cursor, size_t start) {
+static ReplInputCompletion _path_completion(
+  String text, size_t cursor, size_t start) {
   while (start < cursor && _blank(text[start])) start++;
   int quoted = 0, closed = 0;
   for (size_t i = start; i < cursor; i++) {
@@ -460,7 +474,8 @@ static ReplInputCompletion _literal_completion(
 }
 
 static ReplInputCompletion _argument_completion(
-  struct ReplClient &client, String command, String text, size_t cursor, size_t start) {
+  struct ReplClient &client, String command, String text, size_t cursor,
+  size_t start) {
   String argument = text[start:cursor];
   if (command == ":help") {
     Array names = auto [];
@@ -474,9 +489,10 @@ static ReplInputCompletion _argument_completion(
     while (argument.startswith("--")) {
       String flag = _word(argument);
       if (!argument && cursor && !_blank(text[cursor - 1]))
-        return _literal_completion(flag, cursor - flag.len(), cursor,
+        return _literal_completion(
+          flag, cursor - flag.len(), cursor,
           command == ":symbols" ? %("--all" "--kind" "--file")
-                                 : %("--depth" "--limit"), <keyword>);
+                                : %("--depth" "--limit"), <keyword>);
       if (flag == "--file") {
         Tokenizer paths = auto Tokenizer.new(argument, <x2c>);
         paths.scan();
@@ -492,7 +508,8 @@ static ReplInputCompletion _argument_completion(
       if (flag == "--kind") {
         String kind = _word(argument);
         if (!argument && (!kind || !_blank(text[cursor - 1])))
-          return _literal_completion(kind, cursor - kind.len(), cursor,
+          return _literal_completion(
+            kind, cursor - kind.len(), cursor,
             %("function" "native" "global" "value" "type" "macro" "constant"),
             <keyword>);
       }
@@ -501,14 +518,18 @@ static ReplInputCompletion _argument_completion(
     }
     start = cursor - argument.len();
   }
-  Map result = _call(client,
+  Map result = _call(
+    client,
     {operation: <complete>, text: argument, cursor: argument.len()}, 0);
   if (!result) return (ReplInputCompletion) {.candidates = NULL};
-  return (ReplInputCompletion) {.start = start + result[<start>].integer(),
-    .end = start + result[<end>].integer(), .candidates = result[<candidates>]};
+  return (ReplInputCompletion) {
+    .start = start + result[<start>].integer(),
+    .end = start + result[<end>].integer(),
+    .candidates = result[<candidates>]};
 }
 
-static ReplInputCompletion _complete_input(void *raw, String text, size_t cursor) {
+static ReplInputCompletion _complete_input(
+  void *raw, String text, size_t cursor) {
   struct ReplClient *client = raw;
   size_t first = 0;
   while (first < text.len() && _blank(text[first])) first++;
@@ -526,17 +547,18 @@ static ReplInputCompletion _complete_input(void *raw, String text, size_t cursor
     }
     const struct ReplCommand *command = _command(spelling);
     if (!command) return (ReplInputCompletion) {.candidates = NULL};
-    if (command->argument == <path>) return _path_completion(text, cursor, end);
+    if (command.argument == <path>) return _path_completion(text, cursor, end);
     size_t start = end;
     while (start < cursor && _blank(text[start])) start++;
-    if (command->argument == <statmode>)
+    if (command.argument == <statmode>)
       return (ReplInputCompletion) {.start = start, .end = cursor,
         .candidates = "verbose".startswith(text[start:cursor]) ? %((keyword "verbose")) : NULL};
     return _argument_completion(*client, spelling, text, cursor, start);
   }
-  String source = client->pending + text;
-  size_t offset = client->pending.len();
-  Map result = _call(*client,
+  String source = client.pending + text;
+  size_t offset = client.pending.len();
+  Map result = _call(
+    *client,
     {operation: <complete>, text: source, cursor: offset + cursor}, 0);
   if (!result || result[<start>].integer() < offset)
     return (ReplInputCompletion) {.candidates = NULL};
@@ -603,8 +625,10 @@ int repl_run(CliRequest request, ReplOptions options) {
     if (!ok) client.failed = 1;
     fflush(stdout);
   }
-  if ((options.stats || options.verbose_stats) && client.worker && client.worker.pid) {
-    Map result = _call(client,
+  if ((options.stats || options.verbose_stats) && client.worker &&
+      client.worker.pid) {
+    Map result = _call(
+      client,
       {operation: <stats>, text: "", verbose: options.verbose_stats}, 0);
     if (result && result[<status>] == <ok>)
       fprintf(stderr, "%s", result[<text>]);

@@ -6,13 +6,16 @@
 #pragma once
 #include "analysis.x"
 
-/** Completes a source prefix without publishing the marker or borrowed types. */
+/** Completes a source prefix without publishing the marker or borrowed
+    types.
+*/
 Var LspWorkspace.complete(LspWorkspace w, String path, int offset) {
   String source = w.retain(w.text(path));
   w.close_unit();
   if (offset < 0 || offset > source.len()) return [];
   CliRequest selected = w.request;
-  if (selected.command != <build> && selected.command != <translate>) return [];
+  if (selected.command != <build> && selected.command != <translate>)
+    return [];
   if (!selected.inputs && selected.command == <build>)
     selected = ProjectBuild.owning_target(selected, path);
   if (!selected) {
@@ -62,8 +65,8 @@ static Array _lsp_complete(
   }
   catch %(replcomp (kind ?(Symbol role)) (rows ?rows)
                    (keywords ?keywords) *):
-    items = _lsp_completion_items(role, rows, keywords, prefix,
-                                 lsp_range(source, start, end));
+    items = _lsp_completion_items(
+      role, rows, keywords, prefix, lsp_range(source, start, end));
   catch %((!or incomplete malformed) *): { }
   items = unit.context.export(items);
   unit.close();
@@ -78,7 +81,8 @@ static int _lsp_completion_marker(Compiler c) {
   return -1;
 }
 
-/* Find the enclosing top-level form; the parser owns its meta classification. */
+/* Find the enclosing top-level form; the parser owns its meta
+   classification. */
 static int _lsp_meta_completion(Compiler c, int offset) {
   Token first = NULL;
   int braces = 0;
@@ -121,11 +125,13 @@ static Array _lsp_completion_items(
     items[name] = _lsp_completion_item(name, kind, range);
   }
   Array result = [];
-  foreach (String name in items.keys().array().sort()) result.push(items[name]);
+  foreach (String name in items.keys().array().sort())
+    result.push(items[name]);
   return result;
 }
 
-/* Completion captures borrow the Error record, which closes after the catch. */
+/* Completion captures borrow the Error record, which closes after the
+   catch. */
 static Map _lsp_completion_item(String name, int kind, Map range) {
   name = String.new(name);
   return {"label": name, "kind": kind,

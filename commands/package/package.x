@@ -393,9 +393,8 @@ static int _native_meta(String builds, String name) {
 
 // installed packages
 
-/** Returns the version an installed package records, or NULL when no package
-    of that name is installed or it records no version. Reaches no network.
-*/
+/* Returns the version an installed package records, or NULL when no package
+   of that name is installed or it records no version. Reaches no network. */
 static String install_version(String name) =>
   _installed_version(%"$(_home_packages("install"))/$name");
 
@@ -428,12 +427,11 @@ static String _marker_string(String path, String field) {
 
 // the index
 
-/** Returns the package rows of `text`: its lines holding the six fields
-    `name version kind platform url sha256`, where `kind` is `source` or
-    `bundle` and a source row's platform is `-`. Blank lines, `#` comments,
-    and lines with another field count are skipped. The package index and a
-    project lockfile share this format.
-*/
+/* Returns the package rows of `text`: its lines holding the six fields
+   `name version kind platform url sha256`, where `kind` is `source` or
+   `bundle` and a source row's platform is `-`. Blank lines, `#` comments,
+   and lines with another field count are skipped. The package index and a
+   project lockfile share this format. */
 static List install_rows(String text) {
   Array rows = [];
   foreach (String line, text.split_lines()) {
@@ -646,4 +644,3 @@ static void _write_lock(String path, List rows) {
   try Path.publish_files($(path, text));
   catch %(io-fail *detail): Diagnostics.host_error(detail);
 }
-

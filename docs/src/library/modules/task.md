@@ -5,6 +5,8 @@
 
 Source: `lib/task.x`
 
+Guide: [Contexts and Threads](../../guide/contexts-and-threads.md)
+
 Cooperative Channel jobs on stable native stacks.
 
 ## Primary API

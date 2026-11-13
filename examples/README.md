@@ -184,7 +184,8 @@ notes across restarts.
 The [package examples](packages/README.md) cover creating and using
 packages, with links to every maintained adapter's build and run
 instructions. The [Greet example](power/greet-client.x) imports the small
-teaching package in [packages/greet](packages/greet/).
+teaching package in [packages/greet](packages/greet/). Outside a checkout,
+install that package first with `x2c install greet`.
 
 The [Benchmarks Game suite](shootout/README.md) adopts ten Benchmarks Game
 problems, with two x2c variants and up to six contributed reference

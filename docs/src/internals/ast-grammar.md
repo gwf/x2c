@@ -5,11 +5,17 @@ a literal AST construction, a structural pattern, or an AST dump. The
 [source grammar](../reference/syntax/grammar.md) describes tokens; this
 chapter describes the values those tokens become.
 
-This chapter describes the implementation and may lag behind it; the source
-on `main` is authoritative. The structures are implementation contracts, not a
-promise that internal representations remain compatible between compiler
-versions. Language meaning remains in the
+This chapter describes the implementation and may lag behind it; the
+compiler source is authoritative. The structures are implementation contracts,
+not a promise that internal representations remain compatible between
+compiler versions. Language meaning remains in the
 [language reference](../reference/language.md).
+
+Macro authors should start with [macros](../guide/macros.md),
+[meta functions](../guide/meta-functions.md),
+[generating code](../guide/generating-code.md), and the
+[`meta` module](../library/modules/meta.md). `x2c translate --dump-ast`
+prints a unit's AST, and `--dump-expansions` prints bound macro expansions.
 
 ## Representation and notation
 
@@ -246,8 +252,6 @@ SEGMENT    ::= (segvar EXPR) | (segexp EXPR) | (cache CACHE-ID)
 
 A call-site rest splice uses `(expr ("List") (splice EXPR))`. Ordinary
 List-valued arguments retain their expression form and contribute one value.
-Dynamic-call extraction represents a splice as `(func-splice EXPR)` alongside
-ordinary `(func-arg VALUE ADDRESS SOURCE)` rows.
 
 Map rows contain key then value; they are not argument Lists. `splice` retains
 a value that contributes a sequence. `cons` and `append` express runtime List
@@ -257,7 +261,7 @@ boxing/cache support, not a source keyword.
 An empty percent String is `(expr ("String") (0))`, whose content has an
 integer head. Ordinary String segments are `segvar` for `$name`, `segexp` for a
 `$(...)` expression, and cached text. The interpolation component also accepts
-`segraw` text; no current parser producer emits that form.
+`segraw` text.
 
 Owners: [Compiler.parse_list_literal, Compiler.literal_cell][quotation-reader];
 [collection literal parsing][collection-reader];
@@ -672,6 +676,7 @@ REBUILD-KEY-ROW ::= (SOURCE-KEY VALUE-KEY EXPRESSION-KEY SPLICE-KEY
 ENV-ROW    ::= (IDENTITY VALUE)
 ```
 
+`--dump-ast` prints a definition as `(macrodef <macro NAME>)`.
 The definition producer writes one of each descriptor row except `env`;
 `Macro_close` can append the captured environment. Consumers use assoc lookup,
 not the physical row order. Kind and target categories select ordinary
@@ -693,8 +698,8 @@ Unit sequences retain the ordinary `declaration-bundle` production, including
 empty output and several mapped applications.
 
 Global definitions bind at unit position; local definitions bind in blocks.
-`imported` is not a current produced descriptor row. The macro registry instead
-has a separate `(imported-macro FROZEN-DEFINITION)` wrapper.
+The macro registry wraps an imported definition as
+`(imported-macro FROZEN-DEFINITION)`.
 
 Owners: [_definition_node, _fresh_rows, _rebuild_template,
 _rebuild_keys][macro-definitions]; [definition reading][macro-reading];
@@ -962,8 +967,8 @@ expression head. Cache keys can also retain expression forms and converted
 values. Their meaning depends on the existing cache operation.
 
 The transform still consumes `varray` and `vmap` as array/map compatibility
-heads with unchanged children. There are no current literal constructors in the
-surveyed compiler/runtime/tooling sources. In particular, `vmap` does not
+heads with unchanged children. No literal constructor produces them.
+In particular, `vmap` does not
 establish a separate `vpair` row grammar.
 
 Owners: [Compiler.cache, Compiler.cache_literal_var,
@@ -1004,8 +1009,7 @@ own position contracts.
 `comment` and `space` are presentation nodes. `preproc` retains source-order
 text and rewrites x2c include targets during emission. `src-at` belongs to the
 flat output token stream consumed by formatting, not source AST input. Match
-lowering constructs ordinary blocks, switches, and native sequences; there is
-no current `matchcases` production.
+lowering constructs ordinary blocks, switches, and native sequences.
 
 Owners: [_emit, _sequence, _prefix, _leaf][emit-dispatch];
 [_banner, _header_guard, _source_unit, _vertical_spacing][generation-output];
@@ -1076,7 +1080,7 @@ being mistaken for additional program nodes.
 | --- | --- | --- |
 | Initializer and lambda facts | `enum-value`, `first`, `next`, `lambda-capture`, `lambda-depth`, `lambda-order`, `lambda-param`, `lambda-scope`, `lambda-snapshot`, `parameter`, `reference-param`, `optional-reference-param` | [type parser][type-parser], [lambdas][lambdas], binding facts; not accepted expression heads. |
 | Binding and source facts | `aggfact`, `alias`, `automatic`, `class-tag`, `defer-ownr`, `definition-span`, `ntype`, `present-references`, `source-spelling`, `src-key`, `type`, `using` | [symbol bindings][symbol-bindings] and [binding facts][binding-facts]; keyed compiler state. |
-| Member and callable results | `field`, `method`, `delegate`, `step`, `ambiguous`, `func-arg`, `func-splice`, `indirect-adapter`, `inherited`, `thunk`, `no-value` | [access][access], [calls][calls], [callable adapters][callable-adapters]; lookup/extraction results. |
+| Member and callable results | `field`, `method`, `delegate`, `step`, `ambiguous`, `indirect-adapter`, `inherited`, `thunk`, `no-value` | [access][access], [calls][calls], [callable adapters][callable-adapters]; lookup/extraction results. |
 | Memo and resolution keys | `fadapt`, `fgetter`, `fhandle`, `findirect`, `fpointer-factory`, memo-key `tadapt`, `iadapt`, `string-switch`, `unit-support`, `unit-init` | [callable values][callable-values], [callbacks][callbacks], components and placement; not expression productions despite repeated heads. |
 | Region analysis | `alloc`, `close`, `destroy`, `exit`, `free`, `move`, `open`, `pool`, `store`, `summary`, `wrap` | [region analysis][regions-owner]; describes effects, not executable AST nodes. |
 | Declaration replay | `(declaration-source END BUNDLE FACTS)`, `(package-import PACKAGE ALIAS MEMBERS)`, `("source-node" ...)`, `(imported-macro DEFINITION)` | [declaration production][declaration-production], [portable syntax][portable-syntax], macro registry; retains source-order effects outside binder syntax. |

@@ -5,6 +5,8 @@
 
 Source: `lib/symbol.x`
 
+Guide: [Symbols and Atoms](../../guide/symbols.md)
+
 Immediate encoded names.
 
 ## Primary API

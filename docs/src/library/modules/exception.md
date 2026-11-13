@@ -5,20 +5,29 @@
 
 Source: `lib/exception.x`
 
-Transfer frames for x2c `Error` unwinding and cleanup.
+Guide: [Errors and Cleanup](../../guide/exceptions.md)
 
-## Advanced and interop API
+The runtime behind `try`, `catch`, `finally`, and `defer`. Programs use those statements, which the guide chapter Errors and Cleanup describes, and do not call these functions.
+
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
 | [`x2c_cleanup_leave`](#x2c_cleanup_leave) | Removes and runs the current compiler-generated cleanup record. |
 | [`x2c_cleanup_push`](#x2c_cleanup_push) | Pushes one compiler-generated cleanup record. |
 | [`x2c_exception_claim`](#x2c_exception_claim) | Claims a frame's cleanup for the calling exit path, once per frame. |
+| [`x2c_exception_execution_free`](#x2c_exception_execution_free) | Releases backing after its execution has left all protected regions. |
+| [`x2c_exception_execution_new`](#x2c_exception_execution_new) | Allocates empty backing for one execution's native exception heads. |
+| [`x2c_exception_execution_swap`](#x2c_exception_execution_swap) | Exchanges heads whose frames remain live on their execution's stack. |
 | [`x2c_exception_is_error_target`](#x2c_exception_is_error_target) | Reports whether `frame` is carrying an `Error` transfer targeted to itself. |
 | [`x2c_exception_landed`](#x2c_exception_landed) | Restores `Error` handler and dispatch state after a frame landing. |
 | [`x2c_exception_leave`](#x2c_exception_leave) | Removes an active exception frame and continues any pending `Error` transfer. |
 | [`x2c_exception_mark_handled`](#x2c_exception_mark_handled) | Marks a selected exception-frame `Error` transfer as handled. |
 | [`x2c_exception_push`](#x2c_exception_push) | Initializes and pushes one compiler-generated exception frame. |
+| [`x2c_exception_unwinding`](#x2c_exception_unwinding) | Reports whether any active frame is carrying an `Error` transfer. |
 | [`ExceptionFrame.unwind`](#ExceptionFrame.unwind) | Transfers an `Error` toward the selected active exception frame. |
 
 ### Functions
@@ -57,6 +66,30 @@ from the finalizer transfers to the enclosing frame instead of re-entering
 this landing and running the finalizer again; that transfer abandons this
 frame and replaces any `Error` it was already carrying. A null or already
 claimed frame reports zero.
+
+Source: `lib/exception.x`
+
+#### x2c_exception_execution_free
+
+`void x2c_exception_execution_free(void *backing)`
+
+Releases backing after its execution has left all protected regions.
+
+Source: `lib/exception.x`
+
+#### x2c_exception_execution_new
+
+`void *x2c_exception_execution_new(void)`
+
+Allocates empty backing for one execution's native exception heads.
+
+Source: `lib/exception.x`
+
+#### x2c_exception_execution_swap
+
+`void x2c_exception_execution_swap(void *backing)`
+
+Exchanges heads whose frames remain live on their execution's stack.
 
 Source: `lib/exception.x`
 
@@ -115,6 +148,14 @@ frame does nothing.
 
 Source: `lib/exception.x`
 
+#### x2c_exception_unwinding
+
+`int x2c_exception_unwinding(void)`
+
+Reports whether any active frame is carrying an `Error` transfer.
+
+Source: `lib/exception.x`
+
 ### `ExceptionFrame`
 
 <a id="ExceptionFrame.unwind"></a>
@@ -133,55 +174,17 @@ path. The transfer does not restore the process signal mask.
 
 Source: `lib/exception.x`
 
-## Runtime-internal callables
+## Internal types
 
-These callables connect runtime translation units. They are documented
-for source readers but are not supported as user API.
-
-| Function | Summary |
-| --- | --- |
-| [`x2c_exception_execution_free`](#x2c_exception_execution_free) | Releases backing after its execution has left all protected regions. |
-| [`x2c_exception_execution_new`](#x2c_exception_execution_new) | Allocates empty backing for one execution's native exception heads. |
-| [`x2c_exception_execution_swap`](#x2c_exception_execution_swap) | Exchanges heads whose frames remain live on their execution's stack. |
-| [`x2c_exception_unwinding`](#x2c_exception_unwinding) | Reports whether any active frame is carrying an `Error` transfer. |
-
-### x2c_exception_execution_free
-
-`void x2c_exception_execution_free(void *backing)`
-
-Releases backing after its execution has left all protected regions.
-
-Source: `lib/exception.x`
-
-### x2c_exception_execution_new
-
-`void *x2c_exception_execution_new(void)`
-
-Allocates empty backing for one execution's native exception heads.
-
-Source: `lib/exception.x`
-
-### x2c_exception_execution_swap
-
-`void x2c_exception_execution_swap(void *backing)`
-
-Exchanges heads whose frames remain live on their execution's stack.
-
-Source: `lib/exception.x`
-
-### x2c_exception_unwinding
-
-`int x2c_exception_unwinding(void)`
-
-Reports whether any active frame is carrying an `Error` transfer.
-
-Source: `lib/exception.x`
-
-## Public types
+These types connect runtime translation units and compiler-generated
+code. They are documented for source readers but are not supported as
+user API.
 
 | Type | Kind | Summary |
 | --- | --- | --- |
 | [`ExceptionFrame`](#ExceptionFrame) | struct | Holds one caller-owned non-local `Error` transfer frame. |
+| [`X2CCleanup`](#X2CCleanup) | struct | Holds one caller-owned cleanup registration. |
+| [`X2CCleanupFn`](#X2CCleanupFn) | callback | Performs one compiler-generated cleanup using its borrowed environment. |
 
 <a id="ExceptionFrame"></a>
 ### ExceptionFrame
@@ -195,17 +198,6 @@ fields capture cleanup and `Error` restore points and are runtime-managed
 while the frame is active.
 
 Source: `lib/exception.x`
-
-## Internal types
-
-These types connect runtime translation units and compiler-generated
-code. They are documented for source readers but are not supported as
-user API.
-
-| Type | Kind | Summary |
-| --- | --- | --- |
-| [`X2CCleanup`](#X2CCleanup) | struct | Holds one caller-owned cleanup registration. |
-| [`X2CCleanupFn`](#X2CCleanupFn) | callback | Performs one compiler-generated cleanup using its borrowed environment. |
 
 <a id="X2CCleanup"></a>
 ### X2CCleanup

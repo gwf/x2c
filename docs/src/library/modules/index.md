@@ -27,18 +27,18 @@ points used by generated code, native callers, and compiler setup.
 | [DisjointSet](lib.md) | `lib/lib.x` | Disjoint sets with union-find. |
 | [Encodings](encoding.md) | `lib/encoding.x` | UTF-8 code points and base64, hex, and percent encodings. |
 | [Error](error.md) | `lib/error/error.x` | Handler stack and accumulated errors. |
-| [Error Unwinding](exception.md) | `lib/exception.x` | Transfer frames for x2c `Error` unwinding and cleanup. |
+| [Error Unwinding](exception.md) | `lib/exception.x` | The runtime behind `try`, `catch`, `finally`, and `defer`. Programs use those statements, which the guide chapter Errors and Cleanup describes, and do not call these functions. |
 | [File](file.md) | `lib/file.x` | `File` I/O operations and stream handling. |
 | [Func](func.md) | `lib/func/func.x` | Generic native function binding. |
-| [Http](http.md) | `lib/http.x` | Blocking HTTP/1.1 routing and worker-pool service. |
+| [HTTP](http.md) | `lib/http.x` | Blocking HTTP/1.1 routing and worker-pool service. |
 | [Iter](iter.md) | `lib/iter.x` | Single-pass pull iterators. |
-| [Json](json.md) | `lib/json.x` | JSON text to and from ordinary x2c values. |
+| [JSON](json.md) | `lib/json.x` | JSON text to and from ordinary x2c values. |
 | [Lisp](lisp.md) | `lib/lisp/lisp.x` | The Lisp runtime: reader, session, and evaluator. |
 | [Lisp Bindings](lisp-bindings.md) | `lib/lisp-bindings.x` | Native functions a Lisp session can call. |
 | [List](list.md) | `lib/list/list.x` | Linked list with `Var` elements. |
 | [List Selectors](list-selectors.md) | `lib/list-selectors.x` | Optional compound `List` selectors. |
 | [Logger](logger.md) | `lib/logger.x` | Owned structured event delivery. |
-| [Macro](macrovalue.md) | `lib/macrovalue/macrovalue.x` | Macros as values that build and recognize code. |
+| [Macro Values](macrovalue.md) | `lib/macrovalue/macrovalue.x` | Macros as values that build and recognize code. |
 | [Map](map.md) | `lib/map/map.x` | Hash table mapping `Var` keys to `Var` values. |
 | [Match](match.md) | `lib/match/match.x` | Pattern matching and transformation utilities for lists. |
 | [Meta](meta.md) | `lib/meta.x` | The compiler surface a `meta` function calls. |
@@ -68,7 +68,7 @@ points used by generated code, native callers, and compiler setup.
 | [Typed Arrays](typed-array.md) | `lib/typed-array.x` | Packed typed `Array`s generated from shared methods. |
 | [Typed Lists](typed-list.md) | `lib/typed-list.x` | Typed views over canonical List cells. |
 | [Typed Maps](typed-map.md) | `lib/typed-map.x` | Typed `Map`s generated from shared storage. |
-| [Url](url.md) | `lib/url.x` | URL references and query strings. |
+| [URL](url.md) | `lib/url.x` | URL references and query strings. |
 | [Var](var.md) | `lib/var/var.x` | Variant type for dynamic typing. |
 | [Var Dispatch](dispatch.md) | `lib/dispatch.x` | Typed descriptors for runtime `Var` behavior. |
 
@@ -80,21 +80,21 @@ prelude. Include one explicitly to use its declarations.
 - [Args](args.md) - Parse program arguments against a declarative spec.
 - [Derive Macro](derive.md) - Generate record mappings from declared fields.
 - [Diff](diff.md) - Line differences between two texts.
-- [SHA-256 Digests](digest.md) - SHA-256 digests of Strings and streams.
 - [Encodings](encoding.md) - UTF-8 code points and base64, hex, and percent encodings.
-- [Http](http.md) - Blocking HTTP/1.1 routing and worker-pool service.
-- [Json](json.md) - JSON text to and from ordinary x2c values.
+- [HTTP](http.md) - Blocking HTTP/1.1 routing and worker-pool service.
+- [JSON](json.md) - JSON text to and from ordinary x2c values.
 - [List Selectors](list-selectors.md) - Optional compound `List` selectors.
 - [Meta](meta.md) - The compiler surface a `meta` function calls.
-- [Sockets](net.md) - Blocking TCP sockets backed by File streams.
 - [Path](path.md) - Filesystem locations and the operations on them.
 - [Processes](process.md) - Run commands and pipelines without a shell.
 - [Random](random.md) - Pseudorandom numbers, system entropy, and UUIDs.
 - [Regex](regex.md) - Regular expressions over the bytes of a String.
 - [Rewrite Decorator](rewrite.md) - Pattern registration for compiler rewrites.
 - [Scripting](scripting.md) - The modules every script unit includes.
-- [Substring Maps](substring-map.md) - Native counts of borrowed String views.
+- [SHA-256 Digests](digest.md) - SHA-256 digests of Strings and streams.
+- [Sockets](net.md) - Blocking TCP sockets backed by File streams.
 - [Substring](substring.md) - Borrowed immutable views of String bytes.
+- [Substring Maps](substring-map.md) - Native counts of borrowed String views.
 - [System Macros](system-macros.md) - Convenience macros for text, timing, and processes.
 - [Test](test.md) - Registered tests and assertions for user programs.
 - [Time](time.md) - Clocks, durations, and calendar time.
@@ -102,7 +102,7 @@ prelude. Include one explicitly to use its declarations.
 - [Typed Arrays](typed-array.md) - Packed typed `Array`s generated from shared methods.
 - [Typed Lists](typed-list.md) - Typed views over canonical List cells.
 - [Typed Maps](typed-map.md) - Typed `Map`s generated from shared storage.
-- [Url](url.md) - URL references and query strings.
+- [URL](url.md) - URL references and query strings.
 
 ## Runtime-internal
 

@@ -1,4 +1,6 @@
-/*  exception.x -- transfer frames for x2c `Error` unwinding and cleanup
+/*  exception.x -- the runtime behind `try`, `catch`, `finally`, and `defer`.
+    Programs use those statements, which the guide chapter Errors and Cleanup
+    describes, and do not call these functions.
 
     The emitter allocates `ExceptionFrame` objects on the C stack for
     filtered catches and finally clauses. Callable cleanup records cover

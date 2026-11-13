@@ -5,6 +5,8 @@
 
 Source: `lib/typed-list.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Typed views over canonical List cells.
 
 Include it with `#include "typed-list.x"`.

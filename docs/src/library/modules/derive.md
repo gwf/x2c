@@ -5,6 +5,8 @@
 
 Source: `lib/derive.x`
 
+Guide: [Deriving Record Mappings](../../guide/deriving-records.md)
+
 Generate record mappings from declared fields.
 
 Include it with `#include "derive.x"`.

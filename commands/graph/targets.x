@@ -4,7 +4,6 @@
 
 #include "compiler/compiler.x"
 
-
 Map project_function_targets(Compiler compiler, List ast, String path) {
   Map definitions = {};
   foreach (List node, ast)
@@ -21,7 +20,7 @@ Map project_function_targets(Compiler compiler, List ast, String path) {
 /** Returns whether a binding names an automatic object, such as a local
     function pointer, rather than a definition the program links to. */
 int project_automatic(Compiler compiler, List binding) =>
-  compiler.semantic_binding_facts().contains(%(automatic $binding));
+  %(automatic $binding) in compiler.semantic_binding_facts();
 
 /** Classifies a callee: `<direct>` when it names a linked definition,
     `<automatic>` when it names an automatic binding, and `<computed>`
@@ -91,7 +90,7 @@ void project_add_public(Map publics, List target) {
     List already contains it. Returns whether `value` was added. */
 int project_add_unique(Map lists, Var key, Var value) {
   List values = lists.getdefault(key, NULL);
-  if (values.contains(value)) return 0;
+  if (value in values) return 0;
   lists[key] = cons(value, values);
   return 1;
 }

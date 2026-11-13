@@ -63,7 +63,7 @@ meta native unsigned long Var.tag_bottom(Symbol tag) {
 
 // tags and kinds
 
-/** Reports whether `value` has the requested runtime tag.
+/** Reports whether `var` has the requested runtime tag.
     This tests one family. For a `Var` holding an `unsigned char`, this returns
     0 for `<i32>` even though both are integers. When any integer will do, use
     `Var.is_integer`, or compare `Var.kind`.

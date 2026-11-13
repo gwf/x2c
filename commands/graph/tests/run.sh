@@ -1048,8 +1048,18 @@ EOF_TIERS
     grep -q '(wider))'
 }
 
+# A help option after any subcommand prints the command's usage.
+check_help() {
+  $tool --help >"$tmp/help"
+  grep -q '^Usage:' "$tmp/help"
+  $tool focus --help >"$tmp/help-focus"
+  cmp "$tmp/help" "$tmp/help-focus"
+  $tool status -h >"$tmp/help-status"
+  cmp "$tmp/help" "$tmp/help-status"
+}
+
 . commands/parallel.sh
-for check in ast_parity calls tiers architecture fields sites walks \
+for check in help ast_parity calls tiers architecture fields sites walks \
   loop_allocations lifetimes flows flow_failures graph_failures \
   query_failures
 do

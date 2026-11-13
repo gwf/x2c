@@ -6,8 +6,9 @@ The runtime API is described in the [standard library
 overview](../library/overview.md), and advice about which construct to use is
 in [idioms](../guide/idioms.md). Flags and the dump options that expose each
 phase are in [compiler options](cli.md). If you have not built the compiler
-yet, the website's install page is the quickest route, and [building the
-compiler](../internals/building.md) covers the self-host stages behind it.
+yet, [Install a Native Compiler](../guide/installation.md) is the quickest
+route, and [building the compiler](../internals/building.md) covers the
+self-host stages behind it.
 
 The [syntax specifications](syntax/index.md) catalog the source rules and
 provide an extracted EBNF grammar and lexical transition specification.
@@ -28,15 +29,16 @@ How this reference is organized:
   `associated` types, operators, and direct updates such as `+=`.
 - [Compile-time macros](#compile-time-macros): `macro` definitions, holes,
   result kinds, decorators, `keyword` aliases, `expand`, `Macro` values,
-  quotations (`$!`), hygiene and `using`, `meta` functions, and macro-visible
-  syntax.
+  quotations (`$!`), hygiene and `using`, `meta` functions, macro-visible
+  syntax, named types, checked foreign aliases, and typed callback adapters.
 - [Classes, regions, and managed
   declarations](#classes-regions-and-managed-declarations): `class`, region
   `auto`, declaration and initializer `auto`, `$auto`, and
   `TYPE.initialize` and `TYPE.shutdown`.
 - [Values and literals](#values-and-literals): Array and Map literals,
-  percent literals, interpolation, string escapes, static initialization,
-  `Symbol`, `Atom`, `Var`, `in`, `is`, and dynamic operators.
+  evaluated Lists and Maps (`$(...)`, `${...}`), percent literals,
+  interpolation, string escapes, static initialization, `Symbol`, `Atom`,
+  `Var`, `in`, `is`, and dynamic operators.
 - [Indexing and slicing](#indexing-and-slicing): bracket access and slices.
 - [Lambdas](#lambdas): `%!` lambdas, captures, and `Func`.
 - [Statements](#statements): `switch` on a String, `$lock`, `with`, `alias`,
@@ -970,14 +972,14 @@ typedef struct Record { String names[2]; Var last; } Record;
 Record record = {.names[1] = "second", "last"};
 ```
 
-Each supplied value converts to its destination element or field type. A
-value that the converter of an aggregate destination accepts converts to
-that whole aggregate instead of initializing its first member: with
-`Size int.size(int)` and a field `Size width`, `{ .width = 5 }` stores
-`int_size(5)`. After
-`.names[1] = "second"` above, the next value initializes `last`, including its
-ordinary conversion to `Var`. With `.names = "first", "second", "last"`,
-brace elision fills both array elements before continuing to `last`. Explicit
+Each supplied value converts to its destination element or field type.
+After `.names[1] = "second"` above, the next value initializes `last`,
+including its ordinary conversion to `Var`. With
+`.names = "first", "second", "last"`, brace elision fills both array
+elements before continuing to `last`. A value that the converter of an
+aggregate destination accepts converts to that whole aggregate instead of
+initializing its first member: with `Size int.size(int)` and a field
+`Size width`, `{ .width = 5 }` stores `int_size(5)`. Explicit
 braces delimit a nested initializer. Typedefs and compound literals retain
 the ordinary destination conversions, including C literals to `String`.
 The native compiler checks index constant expressions, array dimensions, and
@@ -1521,9 +1523,10 @@ macro Expression $legacy.twice(Expr $value) => ($value * 2)
 Ordinary global invocation is `$qualified.name(arguments)`. A local macro is
 invoked as `name(arguments)`. A source file may also give a visible global
 macro an identifier spelling through a `keyword` declaration, described under
-[Decorators](#decorators). Macro names are separate from C identifiers and
-global names may be qualified, as in `$project.logging.trace`. A part after a
-dot may be a keyword, as in `$error.arg.void`. The `x2c.*` and `lisp.*` macro
+[Keyword aliases](#keyword-aliases). Macro names are separate from C
+identifiers and global names may be qualified, as in
+`$project.logging.trace`. A part after a dot may be a keyword, as in
+`$error.arg.void`. The `x2c.*` and `lisp.*` macro
 namespaces are reserved for compiler-shipped facilities; `$lisp.bind`,
 `$lisp.binding`, and `$lisp.install` are the shipped native-binding macros.
 
@@ -1558,7 +1561,7 @@ without parentheses remains an ordinary identifier. `(name)(arguments)` is an
 explicit ordinary call, while `$name(arguments)` selects only a global macro
 or a `meta` function. A local and global definition may therefore share a name
 without ambiguity. A local decorator with no explicit parameters follows the
-[`keyword` alias](#decorators) spelling instead: `name TARGET`, with no
+[`keyword` alias](#keyword-aliases) spelling instead: `name TARGET`, with no
 parentheses, so `name() { ... }` reads `()` as its target.
 
 A local definition follows the [hygiene](#hygiene-and-generated-names) rules
@@ -2046,6 +2049,9 @@ target's captured source must participate in the decorator's `Match`
 replacement, and dropping it makes the match fail. Imported decorators work
 without an extra prototype.
 
+A decorator cannot turn a block that reads local variables into a C callback.
+It may wrap an existing callback or a block that captures nothing.
+
 ### Keyword aliases
 
 A `.x` file may give a visible macro or decorator an identifier spelling:
@@ -2127,9 +2133,7 @@ Macro templates are parsed when defined, so a later alias does not reinterpret
 an earlier template. Generated `List`s and strings are not reparsed as
 alias-bearing source.
 
-An alias adds only a spelling. A decorator cannot turn a block that reads
-local variables into a C callback. It may wrap an existing callback or a block
-that captures nothing.
+An alias adds only a spelling.
 
 ### Mapping rows with `expand`
 
@@ -2950,8 +2954,9 @@ them for no notes, or splice an existing List with `@notes`.
 `x2c_diagnostic_error_at` reports there and
 returns, failing the translation when it finishes.
 
-`x2c_ident` returns the tagged name value described above and accepts a
-`String` that is a valid identifier spelling.
+`x2c_ident` accepts a `String` that is a valid identifier spelling and
+returns a name value: checked identifier syntax that the compiler resolves
+where the returned expression is bound.
 
 `x2c_binding_fresh` returns a new binding whose C spelling is built from the
 identifier `role`, as for the compiler's own generated declarations. Code that
@@ -3540,7 +3545,7 @@ generated C calls an initializer that was compiled out.
 Other initialization statements and runtime-valued static assignments belong in
 the method body. Eligible file-static percent literals use the generated
 sequence described under
-[Percent literals, quote, and unquote](#percent-literals-quote-and-unquote).
+[Static initialization](#static-initialization).
 Top-level decorators are rejected.
 
 ### Type-owned shutdown
@@ -3820,7 +3825,7 @@ compile-time error. `SymbolSet.index` returns the source-order index or `-1`,
 perfect hash and ordered membership table as static bytes, with no runtime
 construction or allocation.
 
-#### String escapes
+### String escapes
 
 Percent strings are byte strings: they may span physical lines and their
 `\x`, `\u`, and `\U` escapes consume one or two hexadecimal digits and
@@ -3848,7 +3853,7 @@ as a header's `PRId64` is, so `printf("%" PRId64 "\n", count)` works. This
 adjacency rule does not combine percent strings or change quoted collection
 syntax.
 
-#### Literal caching
+### Literal caching
 
 Immutable literal construction is cached for the process lifetime. This
 includes an ordinary C string literal when its context promotes it to `String`,
@@ -3871,7 +3876,7 @@ Caching does not change the other identity rules: `List`s and non-empty
 and `Map`s are mutable identity-bearing objects and are constructed at each
 evaluation. Non-empty `Array` and `Map` literals use counted construction.
 
-#### Static initialization
+### Static initialization
 
 File-static `String`, `List`, `Array`, and `Map` declarations may use their
 percent literals directly. A file-static `Var` may likewise use one of those
@@ -4848,7 +4853,7 @@ paths. A sigil-leading `Atom` with any other suffix is a malformed pattern:
 recursive matching fails, `MatchPlan` reports `binder-name`, and compiled
 `match` syntax reports a positioned diagnostic.
 
-`Match` operators and predicate names are compact `Symbol`s. The
+Pattern operators and predicate names are compact `Symbol`s. The
 `?binder?`, `*binder?`, and `!op?` spellings are reserved control vocabulary
 only in their `!is` predicate operand positions; they are not named
 binders. Nested `List` patterns, literal comparison, default selection, and the
@@ -4936,7 +4941,7 @@ catch %(bad-arg *rest): report(rest);
 catch: return -1;
 ```
 
-The newest `Error` is matched as `%(CODE @DETAIL)`. Filtered arms use the same
+The newest `Error` is matched as `%(CODE *DETAIL)`. Filtered arms use the same
 pattern and binder rules as `match`; `?name` declares a `Var`, `*name`
 declares a `List`, and the first matching arm runs. The code position takes a
 bare `Symbol`, a binder, or any single pattern, so
@@ -4956,7 +4961,7 @@ through the selected arm and must be copied with `Error.snapshot` to outlive
 it.
 
 Generated `Error` transfer preserves the automatic locals and parameters a
-protected body modifies under the repository's optimized build, whether the
+protected body modifies with optimization enabled, whether the
 body assigns them by name or writes through a pointer it holds the address in.
 The compiler supplies the required volatile C representation for those values
 and for the transfer state its frames carry; source code does not need
@@ -4980,14 +4985,12 @@ their literals when the `raise` runs.
 
 #### Shared causes
 
-Every cause in the shared table never returns to its raising call. `Error`
-keeps their policies at `<abort>` and observing handlers cannot consume them;
-only a matching filtered `catch` transfers control. For a literal `raise` of
-one of them, generated C places `__builtin_unreachable()` after the runtime
-`raise` call so C control flow has the same rule.
-
-These are the shared causes. The policy of each is `<abort>`, and a process
-cannot change it:
+The table below lists the shared causes. The policy of each is `<abort>`,
+and a process cannot change it. A shared cause never returns to its raising
+call: observing handlers cannot consume it, and only a matching filtered
+`catch` transfers control. For a literal `raise` of one of them, generated C
+places `__builtin_unreachable()` after the runtime `raise` call so C control
+flow has the same rule.
 
 | Code | Cause |
 | --- | --- |
@@ -5037,7 +5040,8 @@ uncaught `Error` aborts the program, or when native code calls `exit` or
 innermost enclosing loop or `switch` (whichever the jump targets) and stop
 there; a `defer` or cleanup frame registered outside that boundary is left for
 a later normal exit, `return`, or `Error` transfer to reach. The [errors and
-cleanup](../guide/exceptions.md) chapter shows how the two are combined.
+cleanup](../guide/exceptions.md) chapter shows how `defer` combines with `try`
+and `finally`.
 
 A `return` expression is evaluated and saved before its cleanups run; the
 saved result is returned afterward. A `goto` within the same cleanup ancestry
@@ -5473,10 +5477,6 @@ entry points, and `char *` parameters. `Lisp.new()` loads these names from
 
 ## Diagnostics
 
-Command-line options, including the dump flags that expose an individual
-phase and the include and output directory switches, are listed in
-[compiler options](cli.md).
-
 Translation stops a unit after 20 errors by default.
 [Compiler diagnostics](cli.md#compiler-diagnostics) describes `--max-errors`
 and the line that reports the stop. Parsing
@@ -5513,6 +5513,7 @@ raw pointer arithmetic, values reached through a field of a stack `struct`,
 callbacks, or `Context` regions.
 
 Possible frame escapes through raw pointer stores with unknown destination
-lifetimes are reserved for the optional audit and meta-function errors.
+lifetimes are reported only by `x2c graph certify`, an experimental
+checkout command, and as meta-function errors.
 Ordinary translation still checks returned addresses, static stores, known
 retaining storage, and already ended regions, including through helpers.

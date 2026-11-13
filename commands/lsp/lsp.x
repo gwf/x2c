@@ -53,7 +53,8 @@ int lsp_serve(int resume) {
     else if (server.eof) break;
     if (!server.queued.len() && (server.eof || !_waiting())) _publish(server);
     if (!server.queued.len() && !server.pending.len() && !server.eof &&
-        !server.shutdown && !server.exiting && !_waiting()) _checkpoint(server);
+        !server.shutdown && !server.exiting && !_waiting())
+      _checkpoint(server);
   }
   if (server.workspace) server.workspace.close_unit();
   int result = server.exiting && !server.shutdown ? 1 : 0;
@@ -78,8 +79,8 @@ static void _reply(Server &server, Var id, Var result) =>
   _send(server, {jsonrpc: "2.0", id: id, result: result});
 
 static void _error(Server &server, Var id, int code, String message) =>
-  _send(server, {jsonrpc: "2.0", id: id,
-                 error: {code: code, message: message}});
+  _send(
+    server, {jsonrpc: "2.0", id: id, error: {code: code, message: message}});
 
 /* Unbuffered stdin keeps poll's view consistent with the framing reader. */
 static String _frame(Server &server) {
@@ -126,9 +127,9 @@ static void _receive(Server &server) {
   String method = message.getdefault("method", NULL);
   if (method == "$/cancelRequest") {
     Map params = message.getdefault("params", {});
-    if (params.contains("id"))
+    if ("id" in params)
       foreach (Map queued, server.queued)
-        if (queued.contains("id") && queued["id"] == params["id"])
+        if ("id" in queued && queued["id"] == params["id"])
           server.cancelled[params["id"]] = 1;
     _discard(message);
   }
@@ -137,9 +138,9 @@ static void _receive(Server &server) {
 
 static void _dispatch(Server &server, Map message) {
   String method = message.getdefault("method", NULL);
-  int request = message.contains("id");
+  int request = "id" in message;
   Var id = message.getdefault("id", NULL);
-  if (request && server.cancelled.contains(id)) {
+  if (request && id in server.cancelled) {
     server.cancelled.del(id);
     _error(server, id, -32800, "Request cancelled");
     return;
@@ -185,14 +186,16 @@ static void _initialize(Server &server, Var id, Map params) {
   server.arguments = options.getdefault("arguments", []).array().copy();
   server.workspace = LspWorkspace.new(server.arguments);
   server.initialized = 1;
-  _reply(server, id, {capabilities: {
-    textDocumentSync: {openClose: Json.bool(1), change: 1,
-                       save: {includeText: Json.bool(1)}},
-    definitionProvider: Json.bool(1), hoverProvider: Json.bool(1),
-    completionProvider: {triggerCharacters: [".", ">", "$"]},
-    documentSymbolProvider: Json.bool(1), workspaceSymbolProvider: Json.bool(1),
-    referencesProvider: Json.bool(1), renameProvider: Json.bool(1)},
-    serverInfo: {name: "x2c"}});
+  _reply(
+    server, id, {capabilities: {
+      textDocumentSync: {openClose: Json.bool(1), change: 1,
+                         save: {includeText: Json.bool(1)}},
+      definitionProvider: Json.bool(1), hoverProvider: Json.bool(1),
+      completionProvider: {triggerCharacters: [".", ">", "$"]},
+      documentSymbolProvider: Json.bool(1),
+      workspaceSymbolProvider: Json.bool(1),
+      referencesProvider: Json.bool(1), renameProvider: Json.bool(1)},
+      serverInfo: {name: "x2c"}});
 }
 
 static String _document(Map params) {
@@ -227,8 +230,8 @@ static void _change(Server &server, Map params) {
 static void _save(Server &server, Map params) {
   String path = server.workspace.retain(_document(params));
   if (!path) return;
-  String text = params.contains("text") ? params["text"].str()
-                                      : server.workspace.document(path);
+  String text = "text" in params ? params["text"].str()
+                                : server.workspace.document(path);
   text = server.workspace.retain(text);
   _affected(server, path);
   server.workspace.change(path, text, 0);
@@ -242,8 +245,9 @@ static void _close(Server &server, Map params) {
   server.workspace.close_document(path);
   server.documents.del(path);
   server.pending.del(path);
-  _send(server, {jsonrpc: "2.0", method: "textDocument/publishDiagnostics",
-                 params: {uri: lsp_uri(path), diagnostics: []}});
+  _send(
+    server, {jsonrpc: "2.0", method: "textDocument/publishDiagnostics",
+             params: {uri: lsp_uri(path), diagnostics: []}});
 }
 
 static void _watched(Server &server, Map params) {
@@ -266,15 +270,18 @@ static void _query(Server &server, Var id, Map params, int definition) {
 
 static Cursor _cursor(Server &server, Map params) {
   String path = server.workspace.retain(_document(params));
-  int offset = path ? lsp_offset(server.workspace.text(path),
-    params.getdefault("position", {}).map()) : 0;
+  int offset = path ? lsp_offset(
+    server.workspace.text(path), params.getdefault("position", {}).map())
+    : 0;
   return (Cursor) {.path = path, .offset = offset};
 }
 
 static void _completion(Server &server, Var id, Map params) {
   Cursor cursor = _cursor(server, params);
-  _reply(server, id, cursor.path
-    ? server.workspace.complete(cursor.path, cursor.offset) : (Var) {0});
+  _reply(
+    server, id,
+    cursor.path ? server.workspace.complete(cursor.path, cursor.offset)
+                : (Var) {0});
   _notice(server);
 }
 
@@ -285,7 +292,8 @@ static void _symbols(Server &server, Var id, Map params) {
 }
 
 static void _workspace_symbols(Server &server, Var id, Map params) {
-  _reply(server, id,
+  _reply(
+    server, id,
     server.workspace.workspace_symbols(params.getdefault("query", "")));
 }
 
@@ -293,9 +301,11 @@ static void _references(Server &server, Var id, Map params) {
   Cursor cursor = _cursor(server, params);
   if (!cursor.path) { _reply(server, id, []); return; }
   Map context = params.getdefault("context", {});
-  _answer(server, id, server.workspace.references(
-    cursor.path, cursor.offset,
-    Json.boolean(context.getdefault("includeDeclaration", Json.bool(0)))));
+  _answer(
+    server, id,
+    server.workspace.references(
+      cursor.path, cursor.offset,
+      Json.boolean(context.getdefault("includeDeclaration", Json.bool(0)))));
 }
 
 static void _rename(Server &server, Var id, Map params) {
@@ -304,13 +314,15 @@ static void _rename(Server &server, Var id, Map params) {
     _error(server, id, -32602, "Rename requires a file document");
     return;
   }
-  _answer(server, id, server.workspace.rename(
-    cursor.path, cursor.offset, params.getdefault("newName", "")));
+  _answer(
+    server, id,
+    server.workspace.rename(
+      cursor.path, cursor.offset, params.getdefault("newName", "")));
 }
 
 static void _answer(Server &server, Var id, Map answer) {
   Map message = {jsonrpc: "2.0", id: id};
-  if (answer.contains("error")) message[<error>] = answer["error"];
+  if ("error" in answer) message[<error>] = answer["error"];
   else message[<result>] = answer["result"];
   _send(server, message);
   _notice(server);
@@ -326,8 +338,9 @@ static void _publish(Server &server) {
     Map params = {uri: lsp_uri(path), diagnostics: diagnostics};
     if (!server.pending[path].is_null())
       params[<version>] = server.pending[path];
-    _send(server, {jsonrpc: "2.0", method: "textDocument/publishDiagnostics",
-                   params: params});
+    _send(
+      server, {jsonrpc: "2.0", method: "textDocument/publishDiagnostics",
+               params: params});
     server.pending.del(path);
     _notice(server);
   }
@@ -335,8 +348,10 @@ static void _publish(Server &server) {
 
 static void _notice(Server &server) {
   String message = server.workspace.take_notice();
-  if (message) _send(server, {jsonrpc: "2.0", method: "window/showMessage",
-                             params: {type: 2, message: message}});
+  if (message)
+    _send(
+      server, {jsonrpc: "2.0", method: "window/showMessage",
+               params: {type: 2, message: message}});
 }
 
 /* Only documents registered as x2c receive their own diagnostics. Other open
@@ -349,7 +364,7 @@ static void _pending(Server &server, String path, Var version) {
 
 static void _affected(Server &server, String path) {
   foreach (String document, server.workspace.affected(path))
-    if (server.documents.contains(document))
+    if (document in server.documents)
       server.pending[document] = server.documents[document];
 }
 
@@ -386,9 +401,10 @@ static void _checkpoint(Server &server) {
   catch %(*failure): {
     server.restart_disabled = 1;
     Stderr.printf("x2c lsp: idle restart failed: %s\n", failure.repr());
-    _send(server, {jsonrpc: "2.0", method: "window/showMessage", params: {
-      type: 2, message: "x2c lsp: could not reclaim retained history; "
-                       "restart the language server when convenient"}});
+    _send(
+      server, {jsonrpc: "2.0", method: "window/showMessage", params: {
+        type: 2, message: "x2c lsp: could not reclaim retained history; "
+                          "restart the language server when convenient"}});
   }
 }
 
@@ -465,4 +481,5 @@ static void _restore_descriptors(Map descriptors) {
 }
 
 static size_t _retained_bytes(void) =>
-  Scope.stats().live_requested_bytes + Pool.stats(Pool.current()).backing_bytes;
+  Scope.stats().live_requested_bytes +
+    Pool.stats(Pool.current()).backing_bytes;

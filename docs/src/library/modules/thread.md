@@ -5,6 +5,8 @@
 
 Source: `lib/thread.x`
 
+Guide: [Contexts and Threads](../../guide/contexts-and-threads.md)
+
 Native workers with explicit result lifetimes.
 
 ## Primary API

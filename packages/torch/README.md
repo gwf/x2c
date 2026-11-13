@@ -99,7 +99,7 @@ converts parameters and buffers together.
 
 Each constructor takes PyTorch's arguments in PyTorch's order and produces
 the parameter and buffer names Python's `state_dict()` uses;
-`make verify-python` compares them against the pinned wheel.
+`make -C packages/torch verify-python` compares them against the pinned wheel.
 
 | x2c | PyTorch |
 | --- | --- |
@@ -265,7 +265,7 @@ test accuracy 0.9323
 
 That run used the published MNIST files, one epoch in 3.8 seconds on this
 machine. The tests build their own 10,000-row synthetic IDX set instead, so
-`make test` exercises the reader without the download.
+`make -C packages/torch test` exercises the reader without the download.
 
 ## Checkpoints
 
@@ -311,8 +311,9 @@ keeps integer and floating values distinct, an absent optional is
 unit keeps the operator protocol rows, creation from Lists, autograd, and
 the exact `item`; where the two units share a name, `torch.x` wins and the
 generated overload takes a suffix. `schema/README.md` records how the
-schema was selected and what tier 1 leaves out. `make verify-ops` compares
-a sample against the pinned Python torch:
+schema was selected and what tier 1 leaves out.
+`make -C packages/torch verify-ops` compares a sample against the pinned
+Python torch:
 
 ```text
 23 operators compared, 0 disagreed, largest delta 0
@@ -383,9 +384,8 @@ only before that pool starts. `Torch.num_threads` and
 
 ## Benchmarks
 
-`benchmarks/` holds the matched x2c and PyTorch applications from
-the [historical comparison](../../plans/HISTORY.md#packages-applications-and-releases):
-tabular regression, the MNIST CNN,
+`benchmarks/` holds the matched x2c and PyTorch applications from an earlier
+x2c and PyTorch comparison: tabular regression, the MNIST CNN,
 sequence forecasting, and an interop diagnostic, with a runner for
 correctness, timing, and memory modes. They are outside every package
 target and gate; `benchmarks/README.md` gives the commands and

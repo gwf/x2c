@@ -5,6 +5,8 @@
 
 Source: `lib/symbolset.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Immutable ordered sets of compact `Symbol`s.
 
 ## Primary API

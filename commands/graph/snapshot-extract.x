@@ -154,7 +154,7 @@ static String _sx_type(SnapshotExtract &s, Type type) {
   Type scalar = base.scalar();
   if (scalar) base = scalar;
   String key = _sx_ast(s, base);
-  if (s.type_ids.contains(key)) return s.type_ids[key];
+  if (key in s.type_ids) return s.type_ids[key];
   String name = key;
   match (base) {
     case %(?(String spelling)): name = spelling;
@@ -213,13 +213,13 @@ static void _sx_type_edge(
 
 static Map _sx_binding(
   SnapshotExtract &s, List binding, Type type, String kind, String owner) {
-  if (s.bindings.contains(binding)) return s.records[s.bindings[binding]];
+  if (binding in s.bindings) return s.records[s.bindings[binding]];
   String name = Ast.binding_spelling(binding);
   String emitted = s.c.emitted_binding_name(binding);
   Var method = s.c.semantic_binding_facts()[%(method $binding)];
   match (method) case %(?owner_name ?member): name = %"$owner_name.$member";
   String id = %"$owner::$kind::$emitted";
-  if (s.records.contains(id)) id = %"$id::$(binding.cadr())";
+  if (id in s.records) id = %"$id::$(binding.cadr())";
   Map entity = _sx_entity(s, id, kind, name, owner);
   entity["binding"] = snapshot_text(binding);
   entity["emitted_name"] = emitted;
@@ -239,7 +239,7 @@ static void _sx_fields(SnapshotExtract &s, Type aggregate, String owner) {
     (String name, Type type) = row;
     if (!name) name = %"<anonymous-$(s.entities.len())>";
     String id = %"$owner::field::$name";
-    if (s.records.contains(id)) continue;
+    if (id in s.records) continue;
     Map field = _sx_entity(s, id, "field", name, owner);
     field["definition"] = 1;
     List binding = s.c.sym.lookup(%(@aggregate $name), NULL);
@@ -311,13 +311,14 @@ static void _sx_declarations(
             _sx_type_edge(s, id, type, "aliases", 0);
           }
           else if (top_level || type.is_function()) {
-            Map entity = _sx_binding(s, binding, type,
+            Map entity = _sx_binding(
+              s, binding, type,
               type.is_function() ? "function" : "global", owner);
             if (entity["definition"].int() &&
-                (type.is_function() || type.contains(<extern>))) continue;
+                (type.is_function() || <extern> in type)) continue;
             if (entity["ast"] == "") entity["ast"] = _sx_ast(s, node);
             _sx_span(s, entity, node, binding);
-            if (type.is_function() || type.contains(<extern>))
+            if (type.is_function() || <extern> in type)
               entity["definition"] = 0;
           }
         }
@@ -331,7 +332,7 @@ static void _sx_declarations(
 /* A referenced declaration remains visible even without its implementation. */
 static String _sx_reference(
   SnapshotExtract &s, List binding, Type type, String owner) {
-  if (s.bindings.contains(binding)) return s.bindings[binding];
+  if (binding in s.bindings) return s.bindings[binding];
   if (project_automatic(s.c, binding)) return "";
   /* A call or protocol adapter may substitute its receiver type. The
      declaration entity keeps the binding's own signature instead. */
@@ -341,8 +342,8 @@ static String _sx_reference(
     Var key = s.c.semantic_binding_facts()[%(src-key $binding)];
     match (key) case %(?symbols ?name): type = symbols.map()[name];
   }
-  Map entity = _sx_binding(s, binding, type,
-    type.is_function() ? "function" : "global", s.unit_id);
+  Map entity = _sx_binding(
+    s, binding, type, type.is_function() ? "function" : "global", s.unit_id);
   entity["definition"] = 0;
   return entity["id"];
 }
@@ -353,7 +354,7 @@ static String _sx_field(SnapshotExtract &s, Type receiver, String member) {
   String owner = _sx_type(s, aggregate);
   _sx_fields(s, aggregate, owner);
   String id = %"$owner::field::$member";
-  return s.records.contains(id) ? id : "";
+  return id in s.records ? id : "";
 }
 
 static Type _sx_operand_type(Var operand) {
@@ -432,8 +433,8 @@ static void _sx_walk(
       _sx_walk(s, operand, owner, origin, "mutates"); return;
     }
     case %((!or index getindex) ?base *indices): {
-      _sx_walk(s, base, owner, origin,
-        access == "reads" ? "reads" : "mutates");
+      _sx_walk(
+        s, base, owner, origin, access == "reads" ? "reads" : "mutates");
       foreach (Var index, indices) _sx_walk(s, index, owner, origin, "reads");
       return;
     }

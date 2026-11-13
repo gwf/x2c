@@ -9,7 +9,6 @@ typedef struct LoopAllocations *LoopAllocations;
 
 enum { LOOP_ALLOCATION_LIMIT = 25 };
 
-
 /* One unit's loop-allocation walk: the function being walked and the
    direct allocations and helper calls found in its loops. */
 typedef struct LoopWalk LoopWalk;

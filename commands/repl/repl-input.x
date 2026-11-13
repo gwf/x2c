@@ -256,18 +256,21 @@ static size_t _previous_grapheme_len(const char *buf, size_t pos) {
       curpos -= prevlen;
       cp = prevcp;
       continue;  /* Check if there's more extending before this. */
-    } else if (_is_grapheme_extension(cp)) {
+    }
+    else if (_is_grapheme_extension(cp)) {
       /* Current cp is an extending character; include previous. */
       total += prevlen;
       curpos -= prevlen;
       cp = prevcp;
       continue;
-    } else if (_is_regional_indicator(cp) && _is_regional_indicator(prevcp)) {
+    }
+    else if (_is_regional_indicator(cp) && _is_regional_indicator(prevcp)) {
       /* Regional indicators form one flag pair. */
       total += prevlen;
       curpos -= prevlen;
       break;
-    } else break;
+    }
+    else break;
   }
 
   return total;
@@ -303,18 +306,21 @@ static size_t _next_grapheme_len(const char *buf, size_t pos, size_t len) {
       total += nextlen;
       curpos += nextlen;
       continue;  /* Check for more extending after the joined char. */
-    } else if (_is_grapheme_extension(nextcp)) {
+    }
+    else if (_is_grapheme_extension(nextcp)) {
       /* Variation selector, skin tone, combining mark, etc. */
       total += nextlen;
       curpos += nextlen;
       continue;
-    } else if (regional && _is_regional_indicator(nextcp)) {
+    }
+    else if (regional && _is_regional_indicator(nextcp)) {
       /* Second regional indicator for a flag pair. */
       total += nextlen;
       curpos += nextlen;
       regional = 0;  /* Only pair once. */
       continue;
-    } else break;
+    }
+    else break;
   }
 
   return total;
@@ -469,7 +475,7 @@ static int _unsupported_terminal(void) {
 
   if (term == NULL) return 0;
   for (j = 0; unsupported_term[j]; j++)
-    if (!strcasecmp(term,unsupported_term[j])) return 1;
+    if (!strcasecmp(term, unsupported_term[j])) return 1;
   return 0;
 }
 
@@ -536,7 +542,7 @@ static int _cursor_column(int ifd, int ofd) {
 
   /* Read the response: ESC [ rows ; cols R */
   while (i < sizeof(buf)-1) {
-    if (read(ifd,buf+i,1) != 1) break;
+    if (read(ifd, buf+i, 1) != 1) break;
     if (buf[i] == 'R') break;
     i++;
   }
@@ -544,7 +550,7 @@ static int _cursor_column(int ifd, int ofd) {
 
   /* Parse it. */
   if (buf[0] != ESC || buf[1] != '[') return -1;
-  if (sscanf(buf+2,"%d;%d",&rows,&cols) != 2) return -1;
+  if (sscanf(buf+2, "%d;%d", &rows, &cols) != 2) return -1;
   return cols;
 }
 
@@ -558,19 +564,19 @@ static int _terminal_columns(int ifd, int ofd) {
     int start, cols;
 
     /* Get the initial position so we can restore it later. */
-    start = _cursor_column(ifd,ofd);
+    start = _cursor_column(ifd, ofd);
     if (start == -1) goto failed;
 
     /* Go to right margin and get position. */
-    if (write(ofd,"\x1b[999C",6) != 6) goto failed;
-    cols = _cursor_column(ifd,ofd);
+    if (write(ofd, "\x1b[999C", 6) != 6) goto failed;
+    cols = _cursor_column(ifd, ofd);
     if (cols == -1) goto failed;
 
     /* Restore position. A failed restore leaves the width known. */
     if (cols > start) {
       char seq[32];
-      snprintf(seq,32,"\x1b[%dD",cols-start);
-      if (write(ofd,seq,strlen(seq)) < 0) {}
+      snprintf(seq, 32, "\x1b[%dD", cols-start);
+      if (write(ofd, seq, strlen(seq)) < 0) {}
     }
     return cols;
   }
@@ -603,9 +609,8 @@ static size_t _fold_line_count(const char *buf, size_t len) {
 
 /* Return true if the text should be folded: if it contains newlines or is at
  * least PASTE_FOLD_THRESHOLD bytes long. */
-static int _should_fold(const char *buf, size_t len) {
-  return memchr(buf, '\n', len) != NULL || len >= PASTE_FOLD_THRESHOLD;
-}
+static int _should_fold(const char *buf, size_t len) =>
+  memchr(buf, '\n', len) != NULL || len >= PASTE_FOLD_THRESHOLD;
 
 /* Restore one fold from a history entry. History stores
  * the real text, but not the original paste boundaries, so we reconstruct
@@ -614,7 +619,7 @@ static int _should_fold(const char *buf, size_t len) {
 static void _history_fold(EditState &l) {
   size_t start = 0, end = 0;
   if (l.len == 0) return;
-  if (!_should_fold(l.buf,l.len)) return;
+  if (!_should_fold(l.buf, l.len)) return;
 
   start = 0;
   end = l.len;
@@ -625,7 +630,7 @@ static void _history_fold(EditState &l) {
     /* We leave (if possible) a few chars on
      * the start before the fold, to give context. */
     while (pos < l.len && chars < PASTE_FOLD_CONTEXT) {
-      size_t step = _next_grapheme_len(l.buf,pos,l.len);
+      size_t step = _next_grapheme_len(l.buf, pos, l.len);
       if (step == 0 || pos + step > l.len) break;
       if (l.buf[pos] == '\n') nl = 1;
       pos += step;
@@ -638,7 +643,7 @@ static void _history_fold(EditState &l) {
     chars = 0;
     nl = 0;
     while (pos > 0 && chars < PASTE_FOLD_CONTEXT) {
-      size_t step = _previous_grapheme_len(l.buf,pos);
+      size_t step = _previous_grapheme_len(l.buf, pos);
       if (step == 0 || step > pos) break;
       pos -= step;
       if (l.buf[pos] == '\n') nl = 1;
@@ -744,7 +749,8 @@ static void _adjust_folds_after_insert(
       l.fold_start[j] += len;
       l.fold_end[j] += len;
       j++;
-    } else if (pos < l.fold_end[j]) _fold_remove(l, j);
+    }
+    else if (pos < l.fold_end[j]) _fold_remove(l, j);
     else j++;
   }
 }
@@ -761,7 +767,8 @@ static void _adjust_folds_after_delete(
       l.fold_start[j] -= len;
       l.fold_end[j] -= len;
       j++;
-    } else if (pos >= l.fold_end[j]) j++;
+    }
+    else if (pos >= l.fold_end[j]) j++;
     else _fold_remove(l, j);
   }
 }
@@ -878,15 +885,15 @@ static int _insert_raw(EditState &l, const char *c, size_t clen) {
 
   if (_grow(l, l.len+clen) == -1) return -1;
 
-  if (l.len == l.pos) memcpy(l.buf+l.pos,c,clen);
+  if (l.len == l.pos) memcpy(l.buf+l.pos, c, clen);
   else {
-    memmove(l.buf+l.pos+clen,l.buf+l.pos,l.len-l.pos);
-    memcpy(l.buf+l.pos,c,clen);
+    memmove(l.buf+l.pos+clen, l.buf+l.pos, l.len-l.pos);
+    memcpy(l.buf+l.pos, c, clen);
   }
   l.pos += clen;
   l.len += clen;
   l.buf[l.len] = '\0';
-  _adjust_folds_after_insert(l, insert_pos,clen);
+  _adjust_folds_after_insert(l, insert_pos, clen);
   return 0;
 }
 
@@ -945,7 +952,8 @@ static void _recall(EditState &l, int dir) {
     if (l.history_index < 0) {
       l.history_index = 0;
       return;
-    } else if (l.history_index >= l.history_len) {
+    }
+    else if (l.history_index >= l.history_len) {
       l.history_index = l.history_len - 1;
       return;
     }
@@ -954,7 +962,7 @@ static void _recall(EditState &l, int dir) {
     src = l.history[l.history_len - 1 - l.history_index];
     len = strlen(src);
     if (_grow(l, len) == -1) _size_limit();
-    memcpy(l.buf,src,len);
+    memcpy(l.buf, src, len);
     l.buf[len] = '\0';
     l.len = l.pos = len;
     _fold_clear(l);
@@ -973,7 +981,7 @@ static void _recall(EditState &l, int dir) {
 static void _delete(EditState &l) {
   if (l.len > 0 && l.pos < l.len) {
     size_t clen = _next_edit_len(l, l.pos);
-    _adjust_folds_after_delete(l, l.pos,clen);
+    _adjust_folds_after_delete(l, l.pos, clen);
     memmove(l.buf+l.pos, l.buf+l.pos+clen, l.len-l.pos-clen);
     l.len -= clen;
     l.buf[l.len] = '\0';
@@ -985,7 +993,7 @@ static void _delete(EditState &l) {
 static void _backspace(EditState &l) {
   if (l.pos > 0 && l.len > 0) {
     size_t clen = _previous_edit_len(l, l.pos);
-    _adjust_folds_after_delete(l, l.pos-clen,clen);
+    _adjust_folds_after_delete(l, l.pos-clen, clen);
     memmove(l.buf+l.pos-clen, l.buf+l.pos, l.len-l.pos);
     l.pos -= clen;
     l.len -= clen;
@@ -1007,7 +1015,7 @@ static void _delete_previous_word(EditState &l) {
   while (l.pos > 0 && l.buf[l.pos-1] != ' ')
     l.pos -= _previous_edit_len(l, l.pos);
   diff = old_pos - l.pos;
-  _adjust_folds_after_delete(l, l.pos,diff);
+  _adjust_folds_after_delete(l, l.pos, diff);
   memmove(l.buf+l.pos, l.buf+old_pos, l.len-old_pos+1);
   l.len -= diff;
   _refresh_line(l);
@@ -1124,18 +1132,20 @@ static void _paste(EditState &l) {
       if (buf[r] == '\r') {
         buf[w++] = '\n';
         r += (r+1 < len && buf[r+1] == '\n') ? 2 : 1;
-      } else if (buf[r]) buf[w++] = buf[r++];
+      }
+      else if (buf[r]) buf[w++] = buf[r++];
       else r++;
     }
     len = w;
   }
 
-  if (_should_fold(buf,len)) {
+  if (_should_fold(buf, len)) {
     size_t start = l.pos;
-    if (_insert_raw(l, buf,len) == -1) _size_limit();
-    _fold_add(l, start,start+len);
+    if (_insert_raw(l, buf, len) == -1) _size_limit();
+    _fold_add(l, start, start+len);
     _refresh_line(l);
-  } else _insert(l, buf,len);
+  }
+  else _insert(l, buf, len);
 }
 
 static void _replace_completion(
@@ -1256,7 +1266,7 @@ static Symbol _feed(EditState &l) {
 
   if (c != TAB) l.completion_pending = 0;
 
-  switch(c) {
+  switch (c) {
   case KEY_NULL: break;
   case TAB:
     _complete(l);
@@ -1283,7 +1293,7 @@ static Symbol _feed(EditState &l) {
       size_t currlen = _next_edit_len(l, l.pos);
       size_t prevstart = l.pos - prevlen;
       if (prevlen > sizeof(tmp) || currlen > sizeof(tmp)) break;
-      if (_overlaps_fold(l, prevstart,prevlen+currlen)) {
+      if (_overlaps_fold(l, prevstart, prevlen+currlen)) {
         _beep();
         break;
       }
@@ -1332,10 +1342,11 @@ static Symbol _feed(EditState &l) {
         }
         if (final == '~') {
           if (plen == 1 && param[0] == '3') _delete(l);
-          else if (plen == 3 && memcmp(param,"200",3) == 0) _paste(l);
+          else if (plen == 3 && memcmp(param, "200", 3) == 0) _paste(l);
         }
-      } else {
-        switch(seq[1]) {
+      }
+      else {
+        switch (seq[1]) {
         case 'A': /* Up */
           _recall(l, LINENOISE_HISTORY_PREV);
           break;
@@ -1360,7 +1371,7 @@ static Symbol _feed(EditState &l) {
 
     /* ESC O sequences. */
     else if (seq[0] == 'O') {
-      switch(seq[1]) {
+      switch (seq[1]) {
       case 'H': /* Home */
         _move_home(l);
         break;
@@ -1390,7 +1401,7 @@ static Symbol _feed(EditState &l) {
     _refresh_line(l);
     break;
   case CTRL_K: /* Ctrl+k, delete from current to end of line. */
-    _adjust_folds_after_delete(l, l.pos,l.len-l.pos);
+    _adjust_folds_after_delete(l, l.pos, l.len-l.pos);
     l.buf[l.pos] = '\0';
     l.len = l.pos;
     _refresh_line(l);
@@ -1524,7 +1535,9 @@ void ReplInput.close(ReplInput r) {
   r.discard_inherited();
 }
 
-/** Releases a forked worker's copy of editor storage without touching its tty. */
+/** Releases a forked worker's copy of editor storage without touching its
+    tty.
+*/
 void ReplInput.discard_inherited(ReplInput r) {
   if (!r || !r.open) return;
   r.storage.destroy();

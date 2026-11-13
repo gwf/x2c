@@ -98,7 +98,7 @@ static void _snapshot_merge(Map snapshot, Map unit, Map files) {
   Array sources = snapshot["files"];
   foreach (Map file, unit["files"]) {
     String path = file["path"];
-    if (files.contains(path)) {
+    if (path in files) {
       if (files[path] != file["text"])
         raise %(bad-state (reason "source changed during snapshot")
                 (path $path));
@@ -179,8 +179,8 @@ static Map _snapshot_build(Array arguments) {
   _snapshot_analyze(snapshot, plan);
   graph_snapshot_resolve(snapshot);
   String contents = snapshot_text(snapshot);
-  snapshot["identity"] = "%016llx".printf((unsigned long long)
-    fnv_bytes(FNV_OFFSET_BASIS, contents, contents.len()));
+  snapshot["identity"] = "%016llx".printf(
+    (unsigned long long)fnv_bytes(FNV_OFFSET_BASIS, contents, contents.len()));
   return snapshot;
 }
 
@@ -230,11 +230,13 @@ static Map _snapshot_status(Map snapshot, String executable) {
     foreach (String path, current) if (!(path in recorded)) added.push(path);
     foreach (String path, recorded) if (!(path in current)) removed.push(path);
   }
-  return {"snapshot": snapshot["identity"],
+  return {
+    "snapshot": snapshot["identity"],
     "coverage": snapshot["coverage"],
     "configurations": snapshot["configurations"],
-    "fresh": Json.bool(!status && !changed.len() && !missing.len() &&
-                       !added.len() && !removed.len()),
+    "fresh": Json.bool(
+      !status && !changed.len() && !missing.len() &&
+      !added.len() && !removed.len()),
     "membership_checked": Json.bool(!status), "membership_error": errors,
     "changed": changed, "missing": missing,
     "added_inputs": added, "removed_inputs": removed};

@@ -5,6 +5,8 @@
 
 Source: `lib/context.x`
 
+Guide: [Contexts and Threads](../../guide/contexts-and-threads.md)
+
 Bounded runtime state and value export.
 
 ## Primary API

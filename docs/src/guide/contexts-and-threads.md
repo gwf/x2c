@@ -4,7 +4,8 @@ A `Context` runs a piece of work with its own `Scope`, `Error` state, and
 `Match` state, and reclaims what that work allocated when it closes. A
 `Thread` runs a function on another native thread. This chapter covers
 bounded work in a `Context`, starting and joining threads, running batches
-of jobs, mapping over data in parallel, and stopping jobs.
+of jobs on threads or as `Channel` tasks on one thread, stopping jobs, and
+mapping over data in parallel.
 
 ## Use a Context for bounded work
 
@@ -117,9 +118,7 @@ describes.
 The input bits are copied, while referenced storage stays with its caller. Keep
 the input graph alive and read-only until join. This includes a Map's contents
 and the storage of boxed wide numbers. Join returns result bits without
-exporting or transferring storage. Preserve worker-created mutable output
-explicitly before the callback exits. Each concurrent worker needs exclusive
-access to its output owner; do not allocate into a shared caller scope.
+exporting or transferring storage.
 
 For mutable output, supply an owner that only this worker uses until join:
 

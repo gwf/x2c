@@ -5,9 +5,16 @@
 
 Source: `lib/array/array.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Dynamic contiguous arrays of `Var` elements.
 
 ## Primary API
+
+`Array` also has the members that its `Block` protocol adoption generates:
+[`clear`](block.md#Block.clear), [`len`](block.md#Block.len),
+[`capacity`](block.md#Block.capacity), [`truth`](block.md#Block.truth),
+[`pop`](block.md#Block.pop), [`truncate`](block.md#Block.truncate).
 
 | Function | Summary |
 | --- | --- |
@@ -15,6 +22,7 @@ Dynamic contiguous arrays of `Var` elements.
 | [`Array.contains`](#Array.contains) | Reports whether an element is `==` to `value`. |
 | [`Array.copy`](#Array.copy) | Returns a fresh packed copy, or NULL for a null array. |
 | [`Array.count`](#Array.count) | Returns how many elements are `==` to `value`. |
+| [`Array.equal`](#Array.equal) | Reports elementwise native equality. |
 | [`Array.find`](#Array.find) | Returns the first element accepted by `pred`'s ordinary `Var` truth, or `void` when absent. |
 | [`Array.foldl`](#Array.foldl) | Folds `fn` over `array` from `seed`, front to back. |
 | [`Array.free`](#Array.free) | Releases the `Array` and its backing storage, invalidating every alias. |
@@ -30,6 +38,7 @@ Dynamic contiguous arrays of `Var` elements.
 | [`Array.postfixindex`](#Array.postfixindex) | Applies postfix `Array` element increment or decrement. |
 | [`Array.push`](#Array.push) | Appends `value` and returns it. |
 | [`Array.remove`](#Array.remove) | Removes and returns the element at normalized `index`. |
+| [`Array.repr`](#Array.repr) | Returns the readable packed-Array representation. |
 | [`Array.resize`](#Array.resize) | Resizes `arr`, truncating or appending `Null` elements as needed. |
 | [`Array.reverse`](#Array.reverse) | Reverses `array` in place and returns that same array. |
 | [`Array.setindex`](#Array.setindex) | Stores and returns `value`, counting negatives from the end. |
@@ -39,12 +48,12 @@ Dynamic contiguous arrays of `Var` elements.
 | [`Array.sort_by`](#Array.sort_by) | Stably sorts `array` by keys produced once per value, returning the Array. |
 | [`Array.sort_with`](#Array.sort_with) | Stably sorts `array` with a borrowed synchronous comparator and returns it. |
 | [`Array.splice`](#Array.splice) | Replaces `remove_count` values at normalized `index` and returns them. |
+| [`Array.str`](#Array.str) | Returns the packed-Array display String. |
 | [`Array.take_last`](#Array.take_last) | Removes and returns the last element. |
 | [`Array.try_next`](#Array.try_next) | Writes the next native element, advances `cursor`, and returns one. |
 | [`Array.try_take_last`](#Array.try_take_last) | Removes the last element into `out` and returns one when present. |
 | [`Array.unshift`](#Array.unshift) | Inserts `value` at the front and returns it, shifting elements right. |
 | [`Array.updateindex`](#Array.updateindex) | Updates one boxed element while preserving its Var tag. |
-| [`Array.write_str`](#Array.write_str) | Appends the packed-Array display text to `out`. |
 | [`Block.array`](#Block.array) | Returns the same object as an `Array` view; mutations remain shared. |
 | [`Iter.array`](#Iter.array) | Drains `iter` into a fresh `Array`. |
 
@@ -105,6 +114,17 @@ null array returns zero; the scan is linear.
 
 Source: `lib/array/array.x`
 
+<a id="Array.equal"></a>
+#### Array.equal
+
+`int Array.equal(Array a, Array b)`
+
+Reports elementwise native equality.
+Two null arrays compare equal; one null array or different lengths
+compare unequal.
+
+Source: `lib/array/array.x`
+
 <a id="Array.find"></a>
 #### Array.find
 
@@ -143,7 +163,8 @@ Source: `lib/array/array.x`
 `void Array.free(Array a0)`
 
 Releases the `Array` and its backing storage, invalidating every alias.
-The `Block` protocol generates the definition.
+Call it to end the lifetime before the owning `Scope` does. Contents
+that the `Array` owns through `Array.scope` are destroyed with it.
 
 Source: `lib/array/array.x`
 
@@ -240,7 +261,9 @@ digits. A null `separator` joins with nothing between elements, and an
 empty array yields the empty `String`.
 
 The receiver here is the `Array`. In `String.join` the separator is the
-receiver and the elements arrive as a `List`. Raises: `<alloc-fail>` or
+receiver and the elements arrive as a `List`.
+
+**Raises:** `<alloc-fail>` or
 `<size-limit>` while rendering or canonicalizing the result, or a cause
 from an element's `write_str`.
 
@@ -326,6 +349,15 @@ Negative indices count from the end; following elements shift left.
 
 **Raises:** `<bad-arg>` for a null array or an index outside it, or
 `<size-limit>` when the length exceeds the integer index domain.
+
+Source: `lib/array/array.x`
+
+<a id="Array.repr"></a>
+#### Array.repr
+
+`String Array.repr(Array array)`
+
+Returns the readable packed-Array representation.
 
 Source: `lib/array/array.x`
 
@@ -427,7 +459,9 @@ Stably sorts `array` by keys produced once per value, returning the Array.
 The borrowed callback runs front to back and must not mutate this Array.
 Keys use `Var.compare`; equal keys preserve the original element order.
 A null or empty Array invokes no callback. Sorting another Array inside
-the callback is valid. Raises: allocation, `Func.apply`, or key-extraction
+the callback is valid.
+
+**Raises:** allocation, `Func.apply`, or key-extraction
 causes. Failure during key extraction leaves the original Array unchanged;
 callback side effects are not undone. Key comparisons run inside libc
 `qsort` and must return normally. If an Error or another nonlocal exit
@@ -465,6 +499,15 @@ null `values` performs deletion, and self-splicing is supported.
 
 **Raises:** `<bad-arg>` for a null array, `<size-limit>` outside the integer
 index domain, or `<alloc-fail>` on allocation failure.
+
+Source: `lib/array/array.x`
+
+<a id="Array.str"></a>
+#### Array.str
+
+`String Array.str(Array array)`
+
+Returns the packed-Array display String.
 
 Source: `lib/array/array.x`
 
@@ -531,15 +574,6 @@ any cause from `Var.update`. The element is unchanged on failure.
 
 Source: `lib/array/array.x`
 
-<a id="Array.write_str"></a>
-#### Array.write_str
-
-`Buffer Array.write_str(Array array, Buffer out)`
-
-Appends the packed-Array display text to `out`.
-
-Source: `lib/array/array.x`
-
 ### `Block`
 
 <a id="Block.array"></a>
@@ -568,15 +602,13 @@ Source: `lib/array/array.x`
 | --- | --- |
 | [`Array.cleanup`](#Array.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`Array.compare`](#Array.compare) | Compares packed Arrays lexicographically with the element family's ordering. |
-| [`Array.equal`](#Array.equal) | Reports elementwise native equality. |
 | [`Array.heap_pop`](#Array.heap_pop) | Removes and returns the smallest element of `heap`, or `void` when it is empty. |
 | [`Array.heap_push`](#Array.heap_push) | Adds `val` to `heap`, an `Array` maintained as a binary min-heap. |
 | [`Array.heapify`](#Array.heapify) | Rearranges `heap` in place so that it satisfies the min-heap invariant. |
 | [`Array.remslice`](#Array.remslice) | Removes the region `array[start:end]` and returns a fresh packed array. |
-| [`Array.repr`](#Array.repr) | Returns the readable packed-Array representation. |
-| [`Array.str`](#Array.str) | Returns the packed-Array display String. |
 | [`Array.update_n`](#Array.update_n) | Appends exactly `element_count` variadic values to `array`. |
 | [`Array.write_repr`](#Array.write_repr) | Appends the readable packed-Array representation to `out`. |
+| [`Array.write_str`](#Array.write_str) | Appends the packed-Array display text to `out`. |
 
 ### `Array`
 
@@ -596,17 +628,6 @@ Source: `lib/array/array.x`
 
 Compares packed Arrays lexicographically with the element family's
 ordering. Identical handles compare equal and NULL sorts first.
-
-Source: `lib/array/array.x`
-
-<a id="Array.equal"></a>
-#### Array.equal
-
-`int Array.equal(Array a, Array b)`
-
-Reports elementwise native equality.
-Two null arrays compare equal; one null array or different lengths
-compare unequal.
 
 Source: `lib/array/array.x`
 
@@ -690,24 +711,6 @@ index domain, or `<alloc-fail>` on allocation failure.
 
 Source: `lib/array/array.x`
 
-<a id="Array.repr"></a>
-#### Array.repr
-
-`String Array.repr(Array array)`
-
-Returns the readable packed-Array representation.
-
-Source: `lib/array/array.x`
-
-<a id="Array.str"></a>
-#### Array.str
-
-`String Array.str(Array array)`
-
-Returns the packed-Array display String.
-
-Source: `lib/array/array.x`
-
 <a id="Array.update_n"></a>
 #### Array.update_n
 
@@ -729,6 +732,15 @@ Source: `lib/array/array.x`
 `Buffer Array.write_repr(Array array, Buffer out)`
 
 Appends the readable packed-Array representation to `out`.
+
+Source: `lib/array/array.x`
+
+<a id="Array.write_str"></a>
+#### Array.write_str
+
+`Buffer Array.write_str(Array array, Buffer out)`
+
+Appends the packed-Array display text to `out`.
 
 Source: `lib/array/array.x`
 

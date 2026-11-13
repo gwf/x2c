@@ -14,8 +14,8 @@ macro Stmt $output.graph.function_row(
   Expr $origin, Expr $external, Expr $indirect) {
   String row =
     "%s\t%s\t%s\t%s\t%s\t%d\t%d\t%s\t%s\t%s\t%s\t%s\t%d\t%d".printf(
-    $id, $kind, $subtree, $unit, $file, $lines, $order, $source, $emitted,
-    $visibility, $needed, $origin, $external, $indirect);
+      $id, $kind, $subtree, $unit, $file, $lines, $order, $source, $emitted,
+      $visibility, $needed, $origin, $external, $indirect);
   $rows.push(row);
 }
 

@@ -233,8 +233,9 @@ Source: `lib/block.x`
 `inline Self Bytes.append(Self bytes, const void *source, size_t count)`
 
 Appends `count` elements to `bytes` and returns its current base pointer.
-Callers must use the return because growth may relocate storage. Raises:
-the same causes as `Block.append`; failure leaves the original view live.
+Callers must use the return because growth may relocate storage.
+
+**Raises:** the same causes as `Block.append`; failure leaves the original view live.
 
 Source: `lib/block.x`
 
@@ -244,8 +245,9 @@ Source: `lib/block.x`
 `inline Self Bytes.append_fill(Self bytes, const void *element, size_t count)`
 
 Appends repeated elements to `bytes` and returns its current base pointer.
-Callers must use the return because growth may relocate storage. Raises:
-the same causes as `Block.append_fill`; failure leaves the original view
+Callers must use the return because growth may relocate storage.
+
+**Raises:** the same causes as `Block.append_fill`; failure leaves the original view
 live.
 
 Source: `lib/block.x`
@@ -298,7 +300,9 @@ Source: `lib/block.x`
 
 Ensures `bytes` can hold at least `minimum` elements and returns its base.
 Growth may relocate storage, so callers must use the returned `Bytes` and
-discard earlier views. Raises: the same causes as `Block.reserve`; failure
+discard earlier views.
+
+**Raises:** the same causes as `Block.reserve`; failure
 leaves the original view live.
 
 Source: `lib/block.x`

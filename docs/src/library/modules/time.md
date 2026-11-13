@@ -5,6 +5,8 @@
 
 Source: `lib/time.x`
 
+Guide: [Time, Random Values, and Encodings](../../guide/time-random-encodings.md)
+
 Clocks, durations, and calendar time.
 
 Include it with `#include "time.x"`.

@@ -5,6 +5,8 @@
 
 Source: `lib/typed-map.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Typed `Map`s generated from shared storage.
 
 Include it with `#include "typed-map.x"`.
@@ -238,7 +240,9 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Comparisons while sorting temporary entries run inside libc
 `qsort` and must return normally. If an Error or another nonlocal exit
 crosses `qsort`, cleanup, memory safety, and container state are not
-guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
+guaranteed.
+
+**Raises:** `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
 Source: `lib/typed-map.x`
@@ -643,7 +647,9 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Comparisons while sorting temporary entries run inside libc
 `qsort` and must return normally. If an Error or another nonlocal exit
 crosses `qsort`, cleanup, memory safety, and container state are not
-guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
+guaranteed.
+
+**Raises:** `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
 Source: `lib/typed-map.x`
@@ -1059,7 +1065,9 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Comparisons while sorting temporary entries run inside libc
 `qsort` and must return normally. If an Error or another nonlocal exit
 crosses `qsort`, cleanup, memory safety, and container state are not
-guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
+guaranteed.
+
+**Raises:** `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
 Source: `lib/typed-map.x`
@@ -1464,7 +1472,9 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Comparisons while sorting temporary entries run inside libc
 `qsort` and must return normally. If an Error or another nonlocal exit
 crosses `qsort`, cleanup, memory safety, and container state are not
-guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
+guaranteed.
+
+**Raises:** `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
 Source: `lib/typed-map.x`

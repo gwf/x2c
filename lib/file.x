@@ -183,10 +183,10 @@ int File.copy_to(File source, File output, size_t &?copied) {
 
 // line iteration
 
-/** Returns an iterator over `File`.
-    The caller supplies `dest`; each pull yields one `String` under the
-    canonical pool-chain lifetime described above, including its newline when
-    present.
+/** Returns an iterator over the lines of `file`.
+    The caller supplies `dest`; each pull yields one line as a `String`,
+    including its newline when present, with the canonical pool-chain
+    lifetime that this module's design notes describe.
     The iterator borrows `file`, which must remain open through every pull.
     Clean EOF exhausts the iterator and releases its line storage. Abandoning
     it before exhaustion leaves that `Scope`-owned `Block` until its `Scope` is
@@ -328,9 +328,9 @@ String File.repr(File file) {
 
 /** Returns the display `String` for `file`.
     A nonnull file follows `File.string`. It advances through EOF, returns a
-    canonical result under the pool-chain lifetime described above or NULL
-    when empty, and transfers the same causes. A null handle returns its
-    pointer representation without reading.
+    canonical result with the pool-chain lifetime that this module's design
+    notes describe, or NULL when empty, and transfers the same causes. A null
+    handle returns its pointer representation without reading.
 */
 String File.str(File file) => file ? file.string() : Var.pointer_string(file);
 

@@ -6,16 +6,17 @@ methods and a `repeat` function, and its Makefile builds it with
 [packages chapter](../../../docs/src/guide/packages.md) walks through it, and
 the [Greet example](../../power/greet-client.x) imports it.
 
-Install the released package, then build a program that imports it:
+Install the released package, then run the Greet example from the
+installed prefix:
 
 ```sh
 x2c install greet
-x2c build -o greeter greeter.x
+x2c run -q ~/.local/x2c/examples/power/greet-client.x
 ```
 
-From the repository root of a checkout, build it in place instead:
+From the repository root of a checkout, build the package in place instead:
 
 ```sh
 make -C examples/packages/greet build
-./x2c build --package-dir examples/packages -o greeter greeter.x
+./x2c run -q --package-dir examples/packages examples/power/greet-client.x
 ```

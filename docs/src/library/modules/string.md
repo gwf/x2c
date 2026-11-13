@@ -5,6 +5,8 @@
 
 Source: `lib/string/string.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Canonical byte strings and core text operations.
 
 ## Primary API
@@ -13,14 +15,15 @@ Canonical byte strings and core text operations.
 | --- | --- |
 | [`Split.iter`](#Split.iter) | Returns an iterator over a lazy `String` cursor. |
 | [`Split.try_next`](#Split.try_next) | Yields the next field and advances a caller-owned position on success. |
-| [`Split.var`](#Split.var) | Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross into compile-time code or a `Var` container. |
 | [`String.add`](#String.add) | Returns `str` followed by `other`. |
 | [`String.capitalize`](#String.capitalize) | Upper-cases the first byte of `str` and lower-cases the remainder. |
+| [`String.compare`](#String.compare) | Compares `x` and `y` bytewise, returning negative, zero, or positive. |
 | [`String.contains`](#String.contains) | Reports whether the bytes of `sub` occur anywhere in `str`. |
 | [`String.contains_digit`](#String.contains_digit) | Reports whether `str` contains a decimal digit. |
 | [`String.count`](#String.count) | Returns the non-overlapping count of `sub` in `str`. |
 | [`String.dedent`](#String.dedent) | Removes the indentation the text was written with. |
 | [`String.endswith`](#String.endswith) | Reports whether `str` ends with any supplied suffix. |
+| [`String.equal`](#String.equal) | Reports whether `x` and `y` contain the same bytes. |
 | [`String.filter`](#String.filter) | Returns the bytes of `str` accepted by ordinary `Var` truthiness of `fn`. |
 | [`String.find`](#String.find) | Returns the index of the first occurrence of `sub` in `str`, or -1. |
 | [`String.find_all`](#String.find_all) | Returns each non-overlapping starting index at which `sub` occurs. |
@@ -28,6 +31,7 @@ Canonical byte strings and core text operations.
 | [`String.format`](#String.format) | Formats `values` through a checked, C-style subset of `fmt`. |
 | [`String.getindex`](#String.getindex) | Returns the byte at `index` in `str` as an int, or -1 if out of range. |
 | [`String.getslice`](#String.getslice) | Returns the canonical `String` `s[start:stop:step]`. |
+| [`String.intern_free`](#String.intern_free) | Finalizes an owned `String.malloc` buffer into a canonical `String`. |
 | [`String.is_alnum`](#String.is_alnum) | Reports whether every byte of nonempty `s` is alphanumeric. |
 | [`String.is_alnum_under`](#String.is_alnum_under) | Reports whether nonempty `s` is alphanumeric or underscore. |
 | [`String.is_alpha`](#String.is_alpha) | Reports whether every byte of nonempty `s` is alphabetic. |
@@ -45,7 +49,8 @@ Canonical byte strings and core text operations.
 | [`String.len`](#String.len) | Returns the byte length of `str`, excluding the terminating NUL. |
 | [`String.lines`](#String.lines) | Returns a lazy cursor over lines in `str`, with endings removed. |
 | [`String.lower`](#String.lower) | Returns `str` with every upper-case byte lowered. |
-| [`String.lstrip`](#String.lstrip) | Removes leading bytes found in the C string `chars`. |
+| [`String.lstrip`](#String.lstrip) | Removes leading bytes that appear in the optional charset argument. |
+| [`String.malloc`](#String.malloc) | Allocates a transient mutable buffer of `len` bytes, not a `String`. |
 | [`String.map`](#String.map) | Returns `str` with `fn` applied to every byte. |
 | [`String.new`](#String.new) | Returns the canonical `String` holding the bytes of the C string `str`. |
 | [`String.pad_center`](#String.pad_center) | Pads both sides of `str` to the requested width. |
@@ -58,9 +63,10 @@ Canonical byte strings and core text operations.
 | [`String.repeat`](#String.repeat) | Returns a canonical `String` containing `count` copies of `str`. |
 | [`String.replace`](#String.replace) | Returns `str` with occurrences of `old` replaced by `replacement`. |
 | [`String.replace_n`](#String.replace_n) | Replaces at most `max_replacements` non-overlapping occurrences of `old`. |
+| [`String.repr`](#String.repr) | Returns a canonical quoted and escaped representation of `str`. |
 | [`String.rfind`](#String.rfind) | Returns the index of the last occurrence of `sub` in `str`, or -1. |
 | [`String.rpartition`](#String.rpartition) | Splits `str` around its final occurrence of `sep`. |
-| [`String.rstrip`](#String.rstrip) | Removes trailing bytes found in the C string `chars`. |
+| [`String.rstrip`](#String.rstrip) | Removes trailing bytes that appear in the optional charset argument. |
 | [`String.split`](#String.split) | Splits `str` on `sep`, with an optional maximum number of splits. |
 | [`String.split_lines`](#String.split_lines) | Splits `str` into a `List` of lines. |
 | [`String.split_n`](#String.split_n) | Splits `str` at no more than `max_splits` separators. |
@@ -68,13 +74,13 @@ Canonical byte strings and core text operations.
 | [`String.squeeze`](#String.squeeze) | Collapses adjacent runs of each byte listed in `chars`. |
 | [`String.startswith`](#String.startswith) | Reports whether `str` starts with any supplied prefix. |
 | [`String.strip`](#String.strip) | Returns `str` with leading and trailing bytes in `chars` removed. |
+| [`String.try_double`](#String.try_double) | Parses all of `str` as a floating-point number, writing `out`. |
+| [`String.try_long`](#String.try_long) | Parses all of `str` as an integer, writing it through `out`. |
 | [`String.try_next`](#String.try_next) | Writes the next byte, advances `cursor`, and returns one. |
 | [`String.unescape`](#String.unescape) | Decodes C backslash escapes in `str` into a canonical `String`. |
 | [`String.upper`](#String.upper) | Returns `str` with every lower-case byte raised. |
 | [`String.withindex`](#String.withindex) | Returns a canonical copy of `str` with the byte at `index` set. |
 | [`String.words`](#String.words) | Returns a lazy cursor over whitespace-delimited words in `str`. |
-| [`String.write_str`](#String.write_str) | Appends `str` to `out` unchanged. |
-| [`Var.split`](#Var.split) | Unboxes a descriptor from a `Var` produced by `Split.var`. |
 
 ### `Split`
 
@@ -127,17 +133,6 @@ arguments produce exhaustion without raising.
 
 Source: `lib/string/cursors.x`
 
-<a id="Split.var"></a>
-#### Split.var
-
-`Var Split.var(Split split)`
-
-Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross
-into compile-time code or a `Var` container. The box does not own the
-descriptor, which stays live only as long as its `Scope`.
-
-Source: `lib/string/cursors.x`
-
 ### `String`
 
 <a id="String.add"></a>
@@ -173,6 +168,19 @@ unchanged inputs are returned as-is.
 **Raises:** `<alloc-fail>` while constructing the result.
 
 Source: `lib/string/mapping.x`
+
+<a id="String.compare"></a>
+#### String.compare
+
+`meta native int String.compare(String x, String y)`
+
+Compares `x` and `y` bytewise, returning negative, zero, or positive.
+The ordering is C's `strcmp` on the raw bytes, so it is neither
+locale-aware nor Unicode collation, and only the sign of the result is
+meaningful. The empty `String`, being the null pointer, sorts before
+every non-empty `String`, and two empty `String`s compare equal.
+
+Source: `lib/string/storage.x`
 
 <a id="String.contains"></a>
 #### String.contains
@@ -237,6 +245,20 @@ Matching is bytewise and case-sensitive. Arguments and splices are
 evaluated once in order before matching.
 
 Source: `lib/string/search.x`
+
+<a id="String.equal"></a>
+#### String.equal
+
+`int String.equal(String x, String y)`
+
+Reports whether `x` and `y` contain the same bytes.
+Interning already makes `x == y` a content test for two canonical
+`String`s, so use this when one side may be a transient
+`String.malloc` buffer or when null has to compare cleanly. Two nulls
+are equal, since the null pointer is the empty `String`, and a null
+equals no non-empty `String`.
+
+Source: `lib/string/storage.x`
 
 <a id="String.filter"></a>
 #### String.filter
@@ -365,6 +387,37 @@ NULL, the empty `String`.
 `<alloc-fail>` while constructing a nonempty result.
 
 Source: `lib/string/editing.x`
+
+<a id="String.intern_free"></a>
+#### String.intern_free
+
+`Self String.intern_free(Self string)`
+
+Finalizes an owned `String.malloc` buffer into a canonical `String`.
+This takes ownership. The length and hash are computed from the
+buffer's NUL-terminated contents, then the buffer either becomes the
+canonical `String` for that content or, when an equal canonical `String`
+already exists, is released in favor of the existing one. Either way
+the argument must not be used again; keep the return value. Passing an
+already canonical `String` visible in the active pool chain is a harmless
+no-op that returns it unchanged. The argument and its storage must be
+visible in that chain; a canonical `String` from a detached or sibling pool
+is not valid here because installing its pointer would outlive its storage.
+
+```x2c
+~String buf = String.malloc(6);
+~char *bytes = buf;
+~for (int i = 0; i < 5; i++) bytes[i] = 'a' + i;
+~bytes[5] = '\0';
+String canonical = buf.intern_free();
+printf("%s %d\n", canonical, canonical == "abcde");
+```
+
+**Raises:** `<alloc-fail>` when the canonical value cannot be registered. A
+null argument returns NULL, and a buffer empty at its first byte is
+released and reported as NULL, the empty `String`, without raising.
+
+Source: `lib/string/storage.x`
 
 <a id="String.is_alnum"></a>
 #### String.is_alnum
@@ -577,14 +630,42 @@ Source: `lib/string/mapping.x`
 
 `String String.lstrip(String str, List @chars)`
 
-Removes leading bytes found in the C string `chars`.
-Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+Removes leading bytes that appear in the optional charset argument.
+The optional `chars` argument is one `String` listing the bytes to remove,
+as in `"xxhi".lstrip("x")`. Omitting it or passing NULL removes the
+whitespace bytes `" \t\n\v\f\r"`. The result is
 canonical; null input returns NULL. An unchanged input is returned as-is.
 
 **Raises:** `<bad-arity>` for more than one charset, or `<alloc-fail>`
 while constructing a changed result.
 
 Source: `lib/string/splitting.x`
+
+<a id="String.malloc"></a>
+#### String.malloc
+
+`String String.malloc(int len)`
+
+Allocates a transient mutable buffer of `len` bytes, not a `String`.
+The byte count includes room for the terminating NUL, so `len - 1`
+bytes are writable and `String.len` on a fresh buffer reports
+`len - 1`. The buffer is not interned and has no cached hash, so `==`
+against a canonical `String` is meaningless until it is finalized. Fill
+it with native indexing, then call `String.intern_free` to canonicalize
+and release it, or `String.free` to discard it. The backing allocation
+belongs to the active `String`/`List` pool and is invalidated when that
+pool is released, even though the caller controls finalization.
+
+```x2c
+String buf = String.malloc(6);
+printf("%d writable bytes\n", buf.len());
+~String.free(buf);
+```
+
+**Raises:** `<alloc-fail>` when storage cannot be allocated. A nonpositive or
+oversized `len` returns NULL without raising.
+
+Source: `lib/string/storage.x`
 
 <a id="String.map"></a>
 #### String.map
@@ -632,6 +713,9 @@ Source: `lib/string/storage.x`
 `meta native String String.pad_center(String str, int width, char fill)`
 
 Pads both sides of `str` to the requested width.
+Splits the `fill` bytes between the two sides, putting the odd one on
+the right, so `"ab".pad_center(5, '.')` is `".ab.."`. A `width` not
+greater than the length of `str` returns `str` unchanged.
 
 **Raises:** the same causes as `String.pad_left`.
 
@@ -643,6 +727,8 @@ Source: `lib/string/building.x`
 `meta native String String.pad_left(String str, int width, char fill)`
 
 Pads the left side of `str` to the requested width.
+Writes `fill` before `str` until the result is `width` bytes long. A
+`width` not greater than the length of `str` returns `str` unchanged.
 
 **Raises:** `<bad-arg>` when `fill` is NUL, `<size-limit>` when `width`
 cannot be represented, or `<alloc-fail>` when result storage cannot be
@@ -656,6 +742,8 @@ Source: `lib/string/building.x`
 `meta native String String.pad_right(String str, int width, char fill)`
 
 Pads the right side of `str` to the requested width.
+Writes `fill` after `str` until the result is `width` bytes long. A
+`width` not greater than the length of `str` returns `str` unchanged.
 
 **Raises:** the same causes as `String.pad_left`.
 
@@ -773,6 +861,19 @@ or no match returns `str` unchanged. `Null` `replacement` deletes matches.
 
 Source: `lib/string/editing.x`
 
+<a id="String.repr"></a>
+#### String.repr
+
+`String String.repr(String str)`
+
+Returns a canonical quoted and escaped representation of `str`.
+Empty input returns the canonical literal spelling `"\"\""`.
+
+**Raises:** the same causes as `String.escape`, or `<alloc-fail>` while
+formatting a nonempty `String`.
+
+Source: `lib/string/escape.x`
+
 <a id="String.rfind"></a>
 #### String.rfind
 
@@ -808,8 +909,10 @@ Source: `lib/string/splitting.x`
 
 `String String.rstrip(String str, List @chars)`
 
-Removes trailing bytes found in the C string `chars`.
-Omitting `chars` or passing NULL uses `" \t\n\v\f\r"`. The result is
+Removes trailing bytes that appear in the optional charset argument.
+The optional `chars` argument is one `String` listing the bytes to remove,
+as in `"hixx".rstrip("x")`. Omitting it or passing NULL removes the
+whitespace bytes `" \t\n\v\f\r"`. The result is
 canonical; null input returns NULL. An unchanged input is returned as-is.
 
 **Raises:** `<bad-arity>` for more than one charset, or `<alloc-fail>`
@@ -940,6 +1043,49 @@ raising.
 
 Source: `lib/string/splitting.x`
 
+<a id="String.try_double"></a>
+#### String.try_double
+
+`meta native int String.try_double(String str, double &?out)`
+
+Parses all of `str` as a floating-point number, writing `out`.
+Returns 1 and writes `out` on success; returns 0 and leaves `out`
+untouched on failure.
+
+The whole string must be the number, on the same terms as
+`String.try_long`: leading and trailing whitespace are allowed and any
+other unconsumed character is a failure, so `1.5junk` does not parse.
+
+It accepts what C's `strtod` accepts, including hex-float literals such
+as `0x1p4` and the `inf` and `nan` spellings. A value that overflows or
+underflows `double` fails. The integer parser's `0o` and `0b` prefixes
+leave unconsumed text, so `0b101` fails the complete-parse check.
+
+Source: `lib/string/number.x`
+
+<a id="String.try_long"></a>
+#### String.try_long
+
+`meta native int String.try_long(String str, long &?out)`
+
+Parses all of `str` as an integer, writing it through `out`.
+Returns 1 and writes `out` on success; returns 0 and leaves `out`
+untouched on failure.
+
+The whole string must be the number. Leading and trailing whitespace are
+allowed and any other unconsumed character is a failure, so `42` succeeds
+and `42junk` does not. A `+` or `-` sign is accepted, and the radix
+prefixes `0x`, `0o`, `0b`, and C's leading-zero octal are recognized.
+A value outside the range of `long` fails.
+
+```x2c
+~long value = 0;
+printf("%d %ld\n", " -0b101 ".try_long(value), value);
+printf("%d\n", "42junk".try_long(value));
+```
+
+Source: `lib/string/number.x`
+
 <a id="String.try_next"></a>
 #### String.try_next
 
@@ -1030,45 +1176,20 @@ An empty `String` produces an exhausted cursor.
 
 Source: `lib/string/cursors.x`
 
-<a id="String.write_str"></a>
-#### String.write_str
-
-`Buffer String.write_str(String s, Buffer out)`
-
-Appends `str` to `out` unchanged.
-A `String` is already its own display text, so this writes it directly
-instead of routing through `String.str`. `Null` `str` is a no-op. The
-borrowed `out` is returned and not retained.
-
-**Raises:** any cause from `Buffer.write`.
-
-Source: `lib/string/adapters.x`
-
-### `Var`
-
-<a id="Var.split"></a>
-#### Var.split
-
-`Split Var.split(Var value)`
-
-Unboxes a descriptor from a `Var` produced by `Split.var`.
-
-Source: `lib/string/cursors.x`
-
 ## Advanced and interop API
 
 | Function | Summary |
 | --- | --- |
 | [`x2c_string_from_bytes`](#x2c_string_from_bytes) | Canonicalizes a known NUL-free byte span in the active pool chain. |
+| [`Split.var`](#Split.var) | Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross into compile-time code or a `Var` container. |
+| [`String.c_compare`](#String.c_compare) | Calls C's `strcmp` on the `String`. |
+| [`String.c_find`](#String.c_find) | Calls C's `strchr` on the `String`. |
+| [`String.c_len`](#String.c_len) | Calls C's `strlen` on the `String`. |
 | [`String.cached_hash`](#String.cached_hash) | Returns the content hash installed in `str`'s header, or zero for the empty `String` and an unfinished `String.malloc` buffer. |
-| [`String.compare`](#String.compare) | Compares `x` and `y` bytewise, returning negative, zero, or positive. |
-| [`String.equal`](#String.equal) | Reports whether `x` and `y` contain the same bytes. |
 | [`String.escape`](#String.escape) | Returns a canonical escaped representation of the bytes in `str`. |
 | [`String.free`](#String.free) | Releases a transient `String.malloc` buffer early. |
 | [`String.hash`](#String.hash) | Returns the content hash of `str`, or zero for the empty `String`. |
 | [`String.intern`](#String.intern) | Returns the canonical `String` for the borrowed bytes of `string`. |
-| [`String.intern_free`](#String.intern_free) | Finalizes an owned `String.malloc` buffer into a canonical `String`. |
-| [`String.malloc`](#String.malloc) | Allocates a transient mutable buffer of `len` bytes, not a `String`. |
 | [`String.new_fill`](#String.new_fill) | Returns the canonical `String` containing `count` copies of `fill`. |
 | [`String.new_in`](#String.new_in) | Returns the canonical `String` for at most `length` borrowed bytes in `pool`. |
 | [`String.new_len`](#String.new_len) | Returns the canonical `String` holding at most `len` bytes of `str`. |
@@ -1076,12 +1197,11 @@ Source: `lib/string/cursors.x`
 | [`String.parse_char`](#String.parse_char) | Parses one leading single-quoted escaped or literal byte, or returns -1. |
 | [`String.printf`](#String.printf) | Formats a canonical `String` from `fmt` and the trailing arguments. |
 | [`String.promote`](#String.promote) | Moves `str` from the active pool to its parent and returns the same pointer. |
-| [`String.repr`](#String.repr) | Returns a canonical quoted and escaped representation of `str`. |
 | [`String.str`](#String.str) | Returns `str` itself as its display `String` without copying or retaining it. |
 | [`String.symbol`](#String.symbol) | Returns the compact `Symbol` encoded from `str`, or zero for empty input. |
-| [`String.try_double`](#String.try_double) | Parses all of `str` as a floating-point number, writing `out`. |
-| [`String.try_long`](#String.try_long) | Parses all of `str` as an integer, writing it through `out`. |
 | [`String.write_repr`](#String.write_repr) | Appends a quoted escaped representation of `str` to borrowed `out`. |
+| [`String.write_str`](#String.write_str) | Appends `s` to `out` unchanged. |
+| [`Var.split`](#Var.split) | Unboxes a descriptor from a `Var` produced by `Split.var`. |
 
 ### Functions
 
@@ -1098,7 +1218,47 @@ Null input or a nonpositive length returns the empty String.
 
 Source: `lib/string/storage.x`
 
+### `Split`
+
+<a id="Split.var"></a>
+#### Split.var
+
+`Var Split.var(Split split)`
+
+Boxes a borrowed descriptor as a `<split>` `Var`, so a `Split` can cross
+into compile-time code or a `Var` container. The box does not own the
+descriptor, which stays live only as long as its `Scope`.
+
+Source: `lib/string/cursors.x`
+
 ### `String`
+
+<a id="String.c_compare"></a>
+#### String.c_compare
+
+`int String.c_compare(const char *, const char *)`
+
+Calls C's `strcmp` on the `String`.
+
+Source: `lib/string/string.x`
+
+<a id="String.c_find"></a>
+#### String.c_find
+
+`char * String.c_find(const char *, int)`
+
+Calls C's `strchr` on the `String`.
+
+Source: `lib/string/string.x`
+
+<a id="String.c_len"></a>
+#### String.c_len
+
+`size_t String.c_len(const char *)`
+
+Calls C's `strlen` on the `String`.
+
+Source: `lib/string/string.x`
 
 <a id="String.cached_hash"></a>
 #### String.cached_hash
@@ -1108,33 +1268,6 @@ Source: `lib/string/storage.x`
 Returns the content hash installed in `str`'s header, or zero for the
 empty `String` and an unfinished `String.malloc` buffer. Unlike
 `String.hash`, this never hashes the bytes.
-
-Source: `lib/string/storage.x`
-
-<a id="String.compare"></a>
-#### String.compare
-
-`meta native int String.compare(String x, String y)`
-
-Compares `x` and `y` bytewise, returning negative, zero, or positive.
-The ordering is C's `strcmp` on the raw bytes, so it is neither
-locale-aware nor Unicode collation, and only the sign of the result is
-meaningful. The empty `String`, being the null pointer, sorts before
-every non-empty `String`, and two empty `String`s compare equal.
-
-Source: `lib/string/storage.x`
-
-<a id="String.equal"></a>
-#### String.equal
-
-`int String.equal(String x, String y)`
-
-Reports whether `x` and `y` contain the same bytes.
-Interning already makes `x == y` a content test for two canonical
-`String`s, so use this when one side may be a transient
-`String.malloc` buffer or when null has to compare cleanly. Two nulls
-are equal, since the null pointer is the empty `String`, and a null
-equals no non-empty `String`.
 
 Source: `lib/string/storage.x`
 
@@ -1195,63 +1328,6 @@ caller to free. Use `String.intern_free` for an owned buffer.
 
 **Raises:** `<alloc-fail>` when canonical storage cannot be allocated. `Null`
 or empty input returns NULL, the empty `String`, without raising.
-
-Source: `lib/string/storage.x`
-
-<a id="String.intern_free"></a>
-#### String.intern_free
-
-`Self String.intern_free(Self string)`
-
-Finalizes an owned `String.malloc` buffer into a canonical `String`.
-This takes ownership. The length and hash are computed from the
-buffer's NUL-terminated contents, then the buffer either becomes the
-canonical `String` for that content or, when an equal canonical `String`
-already exists, is released in favor of the existing one. Either way
-the argument must not be used again; keep the return value. Passing an
-already canonical `String` visible in the active pool chain is a harmless
-no-op that returns it unchanged. The argument and its storage must be
-visible in that chain; a canonical `String` from a detached or sibling pool
-is not valid here because installing its pointer would outlive its storage.
-
-```x2c
-~String buf = String.malloc(6);
-~char *bytes = buf;
-~for (int i = 0; i < 5; i++) bytes[i] = 'a' + i;
-~bytes[5] = '\0';
-String canonical = buf.intern_free();
-printf("%s %d\n", canonical, canonical == "abcde");
-```
-
-**Raises:** `<alloc-fail>` when the canonical value cannot be registered. A
-null argument returns NULL, and a buffer empty at its first byte is
-released and reported as NULL, the empty `String`, without raising.
-
-Source: `lib/string/storage.x`
-
-<a id="String.malloc"></a>
-#### String.malloc
-
-`String String.malloc(int len)`
-
-Allocates a transient mutable buffer of `len` bytes, not a `String`.
-The byte count includes room for the terminating NUL, so `len - 1`
-bytes are writable and `String.len` on a fresh buffer reports
-`len - 1`. The buffer is not interned and has no cached hash, so `==`
-against a canonical `String` is meaningless until it is finalized. Fill
-it with native indexing, then call `String.intern_free` to canonicalize
-and release it, or `String.free` to discard it. The backing allocation
-belongs to the active `String`/`List` pool and is invalidated when that
-pool is released, even though the caller controls finalization.
-
-```x2c
-String buf = String.malloc(6);
-printf("%d writable bytes\n", buf.len());
-~String.free(buf);
-```
-
-**Raises:** `<alloc-fail>` when storage cannot be allocated. A nonpositive or
-oversized `len` returns NULL without raising.
 
 Source: `lib/string/storage.x`
 
@@ -1365,19 +1441,6 @@ the promotion.
 
 Source: `lib/string/storage.x`
 
-<a id="String.repr"></a>
-#### String.repr
-
-`String String.repr(String str)`
-
-Returns a canonical quoted and escaped representation of `str`.
-Empty input returns the canonical literal spelling `"\"\""`.
-
-**Raises:** the same causes as `String.escape`, or `<alloc-fail>` while
-formatting a nonempty `String`.
-
-Source: `lib/string/escape.x`
-
 <a id="String.str"></a>
 #### String.str
 
@@ -1400,49 +1463,6 @@ truncated. Use `Symbol.try_new` when every byte must be preserved.
 
 Source: `lib/string/adapters.x`
 
-<a id="String.try_double"></a>
-#### String.try_double
-
-`meta native int String.try_double(String str, double &?out)`
-
-Parses all of `str` as a floating-point number, writing `out`.
-Returns 1 and writes `out` on success; returns 0 and leaves `out`
-untouched on failure.
-
-The whole string must be the number, on the same terms as
-`String.try_long`: leading and trailing whitespace are allowed and any
-other unconsumed character is a failure, so `1.5junk` does not parse.
-
-It accepts what C's `strtod` accepts, including hex-float literals such
-as `0x1p4` and the `inf` and `nan` spellings. A value that overflows or
-underflows `double` fails. The integer parser's `0o` and `0b` prefixes
-leave unconsumed text, so `0b101` fails the complete-parse check.
-
-Source: `lib/string/number.x`
-
-<a id="String.try_long"></a>
-#### String.try_long
-
-`meta native int String.try_long(String str, long &?out)`
-
-Parses all of `str` as an integer, writing it through `out`.
-Returns 1 and writes `out` on success; returns 0 and leaves `out`
-untouched on failure.
-
-The whole string must be the number. Leading and trailing whitespace are
-allowed and any other unconsumed character is a failure, so `42` succeeds
-and `42junk` does not. A `+` or `-` sign is accepted, and the radix
-prefixes `0x`, `0o`, `0b`, and C's leading-zero octal are recognized.
-A value outside the range of `long` fails.
-
-```x2c
-~long value = 0;
-printf("%d %ld\n", " -0b101 ".try_long(value), value);
-printf("%d\n", "42junk".try_long(value));
-```
-
-Source: `lib/string/number.x`
-
 <a id="String.write_repr"></a>
 #### String.write_repr
 
@@ -1456,6 +1476,31 @@ remains in the `Buffer`.
 **Raises:** any cause from `Buffer.write_char` or `Buffer.write_len`.
 
 Source: `lib/string/escape.x`
+
+<a id="String.write_str"></a>
+#### String.write_str
+
+`Buffer String.write_str(String s, Buffer out)`
+
+Appends `s` to `out` unchanged.
+A `String` is already its own display text, so this writes it directly
+instead of routing through `String.str`. `Null` `s` is a no-op. The
+borrowed `out` is returned and not retained.
+
+**Raises:** any cause from `Buffer.write`.
+
+Source: `lib/string/adapters.x`
+
+### `Var`
+
+<a id="Var.split"></a>
+#### Var.split
+
+`Split Var.split(Var value)`
+
+Unboxes a descriptor from a `Var` produced by `Split.var`.
+
+Source: `lib/string/cursors.x`
 
 ## Runtime-internal callables
 

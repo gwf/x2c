@@ -81,8 +81,10 @@ or `xrealloc`, or passing managed memory to native `free` or `realloc`, is
 undefined behavior.
 
 A *scope slot* is a variable of type `Scope`. New allocations go to the
-scope held by the active slot. `Scope.open` stores a new scope in the active
-slot, linked to the scope the slot held, and so opens a region;
+scope held by the active slot. Each thread starts with one active slot;
+`Scope.push`, described below, selects another. `Scope.open` stores a new
+scope in the active slot, linked to the scope the slot held, and so opens a
+region;
 `Scope.close` frees everything allocated inside it and restores the earlier
 scope. Between them, the allocation calls go into the open region:
 
@@ -450,8 +452,8 @@ outlives the function. [The Region Model](regions.md) gives the limits of
 that check.
 
 Two more warnings come from the same check.
-`after-free` reports a local read after `Scope.free`, `Scope.realloc`, or
-`Array.list_free` consumed it. `bad-free` reports `Scope.free` or
+`after-free` reports a local read after a call freed it, such as
+`Scope.free`, `Array.free`, or `cleanup`. `bad-free` reports `Scope.free` or
 `Scope.realloc` given a literal, a local's address, or other storage no
 `Scope` allocator returned. In a `meta` function, each of these findings is
 an error; see [Meta Functions](meta-functions.md).

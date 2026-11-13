@@ -38,14 +38,18 @@ int main(int argc, char **argv) {
     Diagnostics.driver_error(option ? %"test: $why '$option'" : %"test: $why");
   }
   if (options["help"].integer()) {
-    fputs(Args.usage("x2c test", spec), stdout);
+    String about = "\nBuild and run test files, found below the nearest "
+                   "x2c.toml or\nthe current directory unless <inputs> "
+                   "name them.\n\nOptions:";
+    fputs(Args.usage("x2c test", spec).replace("\nOptions:", about), stdout);
     return 0;
   }
   Run run = _configure(options);
   Array files = _discover(options["inputs"], run.root);
   if (!files.len()) _no_tests(options["inputs"], run.root);
   _run_files(run, files);
-  printf("files: %d passed, %d failed; tests: %d passed, %d failed\n",
+  printf(
+    "files: %d passed, %d failed; tests: %d passed, %d failed\n",
     run.files_passed, run.files_failed, run.tests_passed, run.tests_failed);
   return run.files_failed ? 1 : run.filtered && !run.files_passed ? 2 : 0;
 }
@@ -190,8 +194,9 @@ static int _summary_counts(
   foreach (String line in output.split_lines().reverse()) {
     if (!line) continue;
     int end = 0;
-    int fields = sscanf(line, "%d passed, %d failed, %d skipped%n",
-                        &passed, &failed, &skipped, &end);
+    int fields = sscanf(
+      line, "%d passed, %d failed, %d skipped%n",
+      &passed, &failed, &skipped, &end);
     if (fields == 3 && end == line.len()) return 1;
   }
   return 0;
@@ -219,7 +224,7 @@ static Job _start(Run run, Path file) {
   command.push(file);
   foreach (String arg in run.program_args) command.push(arg);
   Job job = command.list();
-  return job.options(stderr: <stdout>, env: {
-    "X2C_CACHE_DIR": %"$(run.root)/.x2c-build/tests"
-  }).start();
+  return job.options(
+    stderr: <stdout>,
+    env: {"X2C_CACHE_DIR": %"$(run.root)/.x2c-build/tests"}).start();
 }

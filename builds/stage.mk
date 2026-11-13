@@ -192,10 +192,10 @@ endif
 $(LIB_BUILD)/group-match.h: $(LIB_SOURCE)/map/group-match.h | $(LIB_BUILD)
 	cp $< $@
 
-$(LIB_BUILD)/task-native.c: $(LIB_SOURCE)/task/stack.c
+$(LIB_BUILD)/task-native.c: $(LIB_SOURCE)/task/stack.c | $(LIB_BUILD)
 	cp $< $@
 
-$(LIB_BUILD)/minicoro.h: $(LIB_SOURCE)/task/minicoro.h
+$(LIB_BUILD)/minicoro.h: $(LIB_SOURCE)/task/minicoro.h | $(LIB_BUILD)
 	cp $< $@
 
 $(LIB_BUILD)/task-native.o: $(LIB_BUILD)/minicoro.h

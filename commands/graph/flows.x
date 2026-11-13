@@ -11,7 +11,6 @@
 #include "compiler/compiler.x"
 #include "targets.x"
 
-
 #include <string.h>
 
 /* One function's value-flow walk: the unit facts its calls resolve
@@ -34,7 +33,7 @@ static List _flow_summary(FlowUnit &unit, Var value, Map locals) {
     case %(ident (!set ?binding (binding ? ?spelling))): {
       Var position;
       if (unit.parameters.try_get(binding, position)) return position;
-      if (locals.contains(binding)) return %(local $spelling);
+      if (binding in locals) return %(local $spelling);
       return %(identifier $(unit.compiler.emitted_binding_name(binding)));
     }
     case %(call ?callee (args *)): {
@@ -79,7 +78,7 @@ static List _flow_source(FlowUnit &unit, Var value, int origin, Map locals) {
     case %(ident (!set ?binding (binding ? ?spelling))): {
       Var position;
       if (unit.parameters.try_get(binding, position)) return position;
-      if (locals.contains(binding)) return locals[binding];
+      if (binding in locals) return locals[binding];
       return %(value $(_flow_summary(unit, node, locals)));
     }
     case %(call ? (args *arguments)): {
@@ -149,7 +148,7 @@ static void _flow_invalidate_addressed(
     }
     case %(op & ?inner): {
       List binding = _flow_local_binding(inner);
-      if (binding && locals.contains(binding)) {
+      if (binding && binding in locals) {
         List prior = locals[binding];
         locals[binding] = %(
           unknown "address-mutation" $(_flow_location(unit, origin)) $prior
@@ -245,7 +244,7 @@ static void _flow_statement(
     case %(stmnt (expr ? (op ?operator ?left ?right))): {
       List binding = _flow_local_binding(left);
       if (binding && operator != <=>) {
-        List prior = locals.contains(binding)
+        List prior = binding in locals
                    ? locals[binding].list()
                    : %(unknown "prior" $(_flow_location(unit, origin)));
         locals[binding] = %(
@@ -437,13 +436,12 @@ static int _flow_is_tainted(FlowTrace &trace, List source, List current) {
       return _flow_is_tainted(trace, ontrue, current) ||
              _flow_is_tainted(trace, onfalse, current);
     case %(parameter ?position ? ?):
-      return trace.tainted_parameters.contains(
-        %(parameter $current $position));
+      return %(parameter $current $position) in trace.tainted_parameters;
     case %(call ?raw ? ? (arguments *)): {
       List target = resolve_project_target(raw, trace.publics);
       if (target &&
           (List.equal(target, trace.producer) ||
-           trace.tainted_returns.contains(target)))
+           target in trace.tainted_returns))
         return 1;
     }
   }
@@ -575,7 +573,7 @@ static void _flow_trace(
                 ): {
                   List target = resolve_project_target(raw, trace.publics);
                   if (!target || !List.equal(target, current)) continue;
-                  if (trace.active.contains(caller_target)) continue;
+                  if (caller_target in trace.active) continue;
                   List argument = _flow_argument(
                     arguments, position.integer());
                   if (argument &&
@@ -599,7 +597,7 @@ static void _flow_trace(
         return;
       }
       String reason = !target ? _flow_unresolved_call(raw, trace.publics)
-                    : trace.active.contains(target) ? "recursive-call"
+                    : target in trace.active ? "recursive-call"
                     : !trace.by_target.contains(target) ? "external-call"
                     : NULL;
       if (reason) {

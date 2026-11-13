@@ -45,8 +45,9 @@ Array lsp_type_rename_methods(
     String method_owner = spelling[:spelling.len() - suffix.len()];
     if (!method_owner.endswith(owner)) continue;
     String prefix = method_owner[:method_owner.len() - owner.len()];
-    methods.push({"binding": binding, "spelling": spelling, "member": member,
-      "replacement": prefix + replacement + suffix});
+    methods.push(
+      {"binding": binding, "spelling": spelling, "member": member,
+       "replacement": prefix + replacement + suffix});
   }
   return methods;
 }

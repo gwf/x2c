@@ -5,6 +5,8 @@
 
 Source: `lib/scope/scope.x`
 
+Guide: [Scopes and Lifetime](../../guide/memory.md)
+
 Memory allocation scope management.
 
 ## Primary API

@@ -5,6 +5,8 @@
 
 Source: `lib/regex.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 Regular expressions over the bytes of a String.
 
 Include it with `#include "regex.x"`.

@@ -5,6 +5,8 @@
 
 Source: `lib/test.x`
 
+Guide: [Testing Your Project](../../guide/testing.md)
+
 Registered tests and assertions for user programs.
 
 Include it with `#include "test.x"`.

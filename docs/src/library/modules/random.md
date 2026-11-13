@@ -5,6 +5,8 @@
 
 Source: `lib/random.x`
 
+Guide: [Time, Random Values, and Encodings](../../guide/time-random-encodings.md)
+
 Pseudorandom numbers, system entropy, and UUIDs.
 
 Include it with `#include "random.x"`.

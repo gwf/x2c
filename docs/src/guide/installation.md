@@ -32,8 +32,8 @@ Add the `export` line to your shell startup file to keep `x2c` on `PATH`.
 `X2C_PREFIX` or `--prefix <dir>` chooses another prefix, and `--version <n>`
 pins a release; pass options to the script with `sh -s --`. The current
 version comes from `https://x2c-lang.dev/x2c-version.txt`. Releases publish
-the compiler for macOS and Linux on arm64 and x86_64, and every release's
-downloads stay available.
+the compiler for macOS on arm64 and x86_64 and for Linux on x86_64 and
+aarch64, and every release's downloads stay available.
 
 To upgrade, run the installer again. It replaces the compiler in the same
 prefix and keeps installed packages.
@@ -62,7 +62,9 @@ make commands
 
 `make build-safe` builds the compiler as `./x2c`. `make commands` builds the
 external commands it runs, such as `x2c new`, `x2c test`, `x2c lint`,
-`x2c lsp`, and `x2c repl`. The checkout is then a complete x2c home; the
+`x2c lsp`, and `x2c repl` (`lint` and `repl` build only in a checkout).
+The checkout is then a complete x2c home. Use `./x2c` there; run
+`make build-install` before putting its `bin/` on `PATH`. The
 [developer workflow](#developer-workflow) explains using it in place.
 
 To install into a prefix instead:

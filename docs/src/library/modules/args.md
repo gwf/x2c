@@ -5,6 +5,8 @@
 
 Source: `lib/args.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 Parse program arguments against a declarative spec.
 
 Include it with `#include "args.x"`.

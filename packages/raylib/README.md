@@ -100,8 +100,8 @@ defer pixels.free();
 for (int index = 0; index < pixels.len(); index++)
   if (pixels[index].r < 96) pixels[index] = Color.rgba(0, 0, 0, 0);
 
-Image cleaned = pixels.image();
-defer cleaned.free();
+// An Image destination converts through pixels.image(), which copies.
+auto Image cleaned = pixels;
 ```
 
 The ownership rule: `ImagePixels` owns the buffer and nothing else does. The

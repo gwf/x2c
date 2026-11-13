@@ -5,6 +5,8 @@
 
 Source: `lib/typed-array.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Packed typed `Array`s generated from shared methods.
 
 Include it with `#include "typed-array.x"`.
@@ -3439,7 +3441,9 @@ Source: `lib/typed-array.x`
 
 Concatenates `rhs` onto the String at raw `index` and returns the stored
 canonical String. The index has the unchecked C-pointer preconditions of
-bracket access. Raises: `<bad-op>` for any operation other than `+`.
+bracket access.
+
+**Raises:** `<bad-op>` for any operation other than `+`.
 A failure leaves the element unchanged.
 
 Source: `lib/typed-array.x`

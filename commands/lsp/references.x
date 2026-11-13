@@ -84,6 +84,7 @@ static Map _reference_query(LspWorkspace w, String path, int offset) {
       foreach (String input in node.request.inputs)
         if (Path.is_x2c_source(input)) inputs.push(Path.absolute(input));
   }
+  // lint: allow one-statement-braces ST-1: braces bind the else below
   else if (manifest) {
     foreach (String input in w.frontend.request.inputs)
       if (Path.is_x2c_source(input)) inputs.push(Path.absolute(input));
@@ -226,8 +227,9 @@ static Map _rename_failure(String message) =>
   {"error": {"code": -32602, "message": message}};
 
 static Map _rename_spelling_failure(void) =>
-  _rename_failure("x2c lsp: the new name must preserve the binding's owner "
-                  "and namespace prefixes");
+  _rename_failure(
+    "x2c lsp: the new name must preserve the binding's owner "
+    "and namespace prefixes");
 
 static Map _reference_failure(void) =>
   {"error": {"code": -32803,

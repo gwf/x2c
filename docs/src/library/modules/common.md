@@ -7,6 +7,196 @@ Source: `lib/common.x`
 
 The `Var` encoding every runtime module shares.
 
+## Primary API
+
+| Function | Summary |
+| --- | --- |
+| [`Var.char`](#Var.char) | Returns `x` as a native `char` under the `Var.convert` rules. |
+| [`Var.double`](#Var.double) | Returns `x` as a native `double` under the `Var.convert` rules. |
+| [`Var.float`](#Var.float) | Returns `x` as a native `float` under the `Var.convert` rules. |
+| [`Var.int`](#Var.int) | Returns `x` as a native `int` under the `Var.convert` rules. |
+| [`Var.long`](#Var.long) | Returns `x` as a native `long` under the `Var.convert` rules. |
+| [`Var.long_double`](#Var.long_double) | Returns `x` as a native `long double` under the `Var.convert` rules. |
+| [`Var.long_long`](#Var.long_long) | Returns `x` as a native `long long` under the `Var.convert` rules. |
+| [`Var.short`](#Var.short) | Returns `x` as a native `short` under the `Var.convert` rules. |
+| [`Var.uchar`](#Var.uchar) | Returns `x` as a native `uchar` under the `Var.convert` rules. |
+| [`Var.uint`](#Var.uint) | Returns `x` as a native `uint` under the `Var.convert` rules. |
+| [`Var.ulong`](#Var.ulong) | Returns `x` as a native `ulong` under the `Var.convert` rules. |
+| [`Var.ulong_long`](#Var.ulong_long) | Returns `x` as a native `unsigned long long` under the `Var.convert` rules. |
+| [`Var.unsigned`](#Var.unsigned) | Returns `x` as a native `unsigned` under the `Var.convert` rules. |
+| [`Var.ushort`](#Var.ushort) | Returns `x` as a native `ushort` under the `Var.convert` rules. |
+
+### `Var`
+
+<a id="Var.char"></a>
+#### Var.char
+
+`meta native char Var.char(Var x)`
+
+Returns `x` as a native `char` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.double"></a>
+#### Var.double
+
+`meta native double Var.double(Var x)`
+
+Returns `x` as a native `double` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
+invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.float"></a>
+#### Var.float
+
+`meta native float Var.float(Var x)`
+
+Returns `x` as a native `float` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
+invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.int"></a>
+#### Var.int
+
+`inline int Var.int(Var x)`
+
+Returns `x` as a native `int` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.long"></a>
+#### Var.long
+
+`meta native long Var.long(Var x)`
+
+Returns `x` as a native `long` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.long_double"></a>
+#### Var.long_double
+
+`meta native long double Var.long_double(Var x)`
+
+Returns `x` as a native `long double` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
+invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.long_long"></a>
+#### Var.long_long
+
+`meta native long long Var.long_long(Var x)`
+
+Returns `x` as a native `long long` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.short"></a>
+#### Var.short
+
+`meta native short Var.short(Var x)`
+
+Returns `x` as a native `short` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.uchar"></a>
+#### Var.uchar
+
+`meta native uchar Var.uchar(Var x)`
+
+Returns `x` as a native `uchar` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.uint"></a>
+#### Var.uint
+
+`meta native uint Var.uint(Var x)`
+
+Returns `x` as a native `uint` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.ulong"></a>
+#### Var.ulong
+
+`meta native ulong Var.ulong(Var x)`
+
+Returns `x` as a native `ulong` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.ulong_long"></a>
+#### Var.ulong_long
+
+`meta native unsigned long long Var.ulong_long(Var x)`
+
+Returns `x` as a native `unsigned long long` under the `Var.convert`
+rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.unsigned"></a>
+#### Var.unsigned
+
+`meta native unsigned Var.unsigned(Var x)`
+
+Returns `x` as a native `unsigned` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
+<a id="Var.ushort"></a>
+#### Var.ushort
+
+`meta native ushort Var.ushort(Var x)`
+
+Returns `x` as a native `ushort` under the `Var.convert` rules.
+
+**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
+of floating range, or invalidly encoded.
+
+Source: `lib/common.x`
+
 ## Advanced and interop API
 
 | Function | Summary |
@@ -49,31 +239,17 @@ The `Var` encoding every runtime module shares.
 | [`Var.box_u8`](#Var.box_u8) | Boxes a native `uchar` as an immediate `<u8>` `Var`. |
 | [`Var.buffer_payload`](#Var.buffer_payload) | Extracts the `Buffer` payload of `value`, or NULL for another tag. |
 | [`Var.bytes_payload`](#Var.bytes_payload) | Extracts the `Bytes` payload of `value`, or NULL for another tag. |
-| [`Var.char`](#Var.char) | Returns `x` as a native `char` under the `Var.convert` rules. |
 | [`Var.decode_f32`](#Var.decode_f32) | Decodes an immediate `<f32>` `Var`. |
 | [`Var.decode_f64`](#Var.decode_f64) | Decodes an immediate `<f64>` `Var`. |
-| [`Var.double`](#Var.double) | Returns `x` as a native `double` under the `Var.convert` rules. |
 | [`Var.file_payload`](#Var.file_payload) | Extracts the `File` payload of `value`, or NULL for another tag. |
-| [`Var.float`](#Var.float) | Returns `x` as a native `float` under the `Var.convert` rules. |
-| [`Var.int`](#Var.int) | Returns `x` as a native `int` under the `Var.convert` rules. |
 | [`Var.is_row`](#Var.is_row) | Reports whether `value` occupies the encoding row at `top`/`bottom`. |
 | [`Var.is_wide`](#Var.is_wide) | Reports whether `v` uses a scope-owned wide numeric box. |
 | [`Var.iter_payload`](#Var.iter_payload) | Extracts the `Iter` payload of `value`, or NULL for another tag. |
 | [`Var.list_payload`](#Var.list_payload) | Extracts the `List` payload of `value`, or NULL for another tag. |
-| [`Var.long`](#Var.long) | Returns `x` as a native `long` under the `Var.convert` rules. |
-| [`Var.long_double`](#Var.long_double) | Returns `x` as a native `long double` under the `Var.convert` rules. |
-| [`Var.long_long`](#Var.long_long) | Returns `x` as a native `long long` under the `Var.convert` rules. |
 | [`Var.map_payload`](#Var.map_payload) | Extracts the `Map` payload of `value`, or NULL for another tag. |
 | [`Var.payload32`](#Var.payload32) | Returns the low 32 payload bits of an immediate `Var`. |
-| [`Var.short`](#Var.short) | Returns `x` as a native `short` under the `Var.convert` rules. |
 | [`Var.string_payload`](#Var.string_payload) | Extracts the `String` payload of `value`, or NULL for another tag. |
 | [`Var.symbol`](#Var.symbol) | Extracts the `symbol` payload after the caller establishes the matching `Var` kind. |
-| [`Var.uchar`](#Var.uchar) | Returns `x` as a native `uchar` under the `Var.convert` rules. |
-| [`Var.uint`](#Var.uint) | Returns `x` as a native `uint` under the `Var.convert` rules. |
-| [`Var.ulong`](#Var.ulong) | Returns `x` as a native `ulong` under the `Var.convert` rules. |
-| [`Var.ulong_long`](#Var.ulong_long) | Returns `x` as a native `unsigned long long` under the `Var.convert` rules. |
-| [`Var.unsigned`](#Var.unsigned) | Returns `x` as a native `unsigned` under the `Var.convert` rules. |
-| [`Var.ushort`](#Var.ushort) | Returns `x` as a native `ushort` under the `Var.convert` rules. |
 | [`char.repr`](#char.repr) | Returns the readable representation of `char`. |
 | [`char.str`](#char.str) | Returns the display `String` of `char`. |
 | [`char.var`](#char.var) | Boxes a native `char` value as `Var`. |
@@ -479,18 +655,6 @@ Extracts the `Bytes` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x`
 
-<a id="Var.char"></a>
-#### Var.char
-
-`meta native char Var.char(Var x)`
-
-Returns `x` as a native `char` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
 <a id="Var.decode_f32"></a>
 #### Var.decode_f32
 
@@ -509,48 +673,12 @@ Decodes an immediate `<f64>` `Var`.
 
 Source: `lib/common.x`
 
-<a id="Var.double"></a>
-#### Var.double
-
-`meta native double Var.double(Var x)`
-
-Returns `x` as a native `double` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
-invalidly encoded.
-
-Source: `lib/common.x`
-
 <a id="Var.file_payload"></a>
 #### Var.file_payload
 
 `File Var.file_payload(Var value)`
 
 Extracts the `File` payload of `value`, or NULL for another tag.
-
-Source: `lib/common.x`
-
-<a id="Var.float"></a>
-#### Var.float
-
-`meta native float Var.float(Var x)`
-
-Returns `x` as a native `float` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
-invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.int"></a>
-#### Var.int
-
-`inline int Var.int(Var x)`
-
-Returns `x` as a native `int` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
 
 Source: `lib/common.x`
 
@@ -595,42 +723,6 @@ Extracts the `List` payload of `value`, or NULL for another tag.
 
 Source: `lib/common.x`
 
-<a id="Var.long"></a>
-#### Var.long
-
-`meta native long Var.long(Var x)`
-
-Returns `x` as a native `long` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.long_double"></a>
-#### Var.long_double
-
-`meta native long double Var.long_double(Var x)`
-
-Returns `x` as a native `long double` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, or
-invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.long_long"></a>
-#### Var.long_long
-
-`meta native long long Var.long_long(Var x)`
-
-Returns `x` as a native `long long` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
 <a id="Var.map_payload"></a>
 #### Var.map_payload
 
@@ -646,18 +738,6 @@ Source: `lib/common.x`
 `inline unsigned Var.payload32(Var value)`
 
 Returns the low 32 payload bits of an immediate `Var`.
-
-Source: `lib/common.x`
-
-<a id="Var.short"></a>
-#### Var.short
-
-`meta native short Var.short(Var x)`
-
-Returns `x` as a native `short` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
 
 Source: `lib/common.x`
 
@@ -677,79 +757,6 @@ Source: `lib/common.x`
 
 Extracts the `symbol` payload after the caller establishes the matching
 `Var` kind.
-
-Source: `lib/common.x`
-
-<a id="Var.uchar"></a>
-#### Var.uchar
-
-`meta native uchar Var.uchar(Var x)`
-
-Returns `x` as a native `uchar` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.uint"></a>
-#### Var.uint
-
-`meta native uint Var.uint(Var x)`
-
-Returns `x` as a native `uint` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.ulong"></a>
-#### Var.ulong
-
-`meta native ulong Var.ulong(Var x)`
-
-Returns `x` as a native `ulong` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.ulong_long"></a>
-#### Var.ulong_long
-
-`meta native unsigned long long Var.ulong_long(Var x)`
-
-Returns `x` as a native `unsigned long long` under the `Var.convert`
-rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.unsigned"></a>
-#### Var.unsigned
-
-`meta native unsigned Var.unsigned(Var x)`
-
-Returns `x` as a native `unsigned` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
-
-Source: `lib/common.x`
-
-<a id="Var.ushort"></a>
-#### Var.ushort
-
-`meta native ushort Var.ushort(Var x)`
-
-Returns `x` as a native `ushort` under the `Var.convert` rules.
-
-**Raises:** `Var.convert`'s causes when the source is nonnumeric, `void`, out
-of floating range, or invalidly encoded.
 
 Source: `lib/common.x`
 
