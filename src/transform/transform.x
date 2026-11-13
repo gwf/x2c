@@ -42,7 +42,7 @@
 static macro Stmt $fail.transform_slice_unsupported(
   Expr $c, Expr $site, Expr $type, Expr $notes) =>
   $c.report_error(
-    <xform>, %"type $($type) does not support slicing",
+    <xform>, %"type $(Type.spelling($type)) does not support slicing",
     $site, @($notes));
 
 static macro Stmt $fail.transform_no_shipped_rule(
@@ -65,7 +65,7 @@ static macro Stmt $fail.transform_string_compound(Expr $c, Expr $site) =>
 static macro Stmt $fail.transform_container_compound(
   Expr $c, Expr $site, Expr $lhs_type) {
   {
-    String type = $lhs_type.repr();
+    String type = Type.spelling($lhs_type);
     $c.report_error(
       <xform>, %"container type $type does not support compound assignment",
       $site, "update an indexed element instead");

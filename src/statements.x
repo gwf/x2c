@@ -60,7 +60,7 @@ static macro Stmt $fail.statements_return_void(
   Expr $c, Expr $site, Expr $type) =>
   $c.report_error(
     <type>, %"cannot return a void expression from a function returning $(
-      $type.repr())", $site);
+      Type.spelling($type))", $site);
 
 // conditionals and loops
 

@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/provenance-generated-lambda.x:6:33: xform: dynamic numeric operators require numeric operands
     values.map(%!(value) => value * text);
                                   ^
-  note: operator: * left type: ("Var") right type: ("String")
+  note: operator: * left type: Var right type: String
 

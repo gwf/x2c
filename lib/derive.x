@@ -53,7 +53,7 @@ meta List _derive_fields(Type type, Symbol kind) {
     if (category == <pointer>)
       x2c_diagnostic_fail(
         %"derive: field '$(field.car())' of $(type.car()) has pointer type "
-          + field.cadr().repr());
+          + Type.spelling(field.cadr()));
     if ((kind == <args> && (category == <value> || category == <struct>)) ||
         (kind == <row> && category == <struct>))
       x2c_diagnostic_fail(

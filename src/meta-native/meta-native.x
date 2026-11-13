@@ -82,14 +82,14 @@ static macro Stmt $fail.meta_native_meta_signature(
   $c.report_error(
     <type>,
     "native meta function declaration does not match its target",
-    $site, %"name: $($n.name)", %"signature: $($n.signature.repr())");
+    $site, %"name: $($n.name)", %"signature: $(Type.spelling($n.signature))");
 
 static macro Stmt $fail.meta_native_meta_lifetime(
   Expr $c, Expr $site, Expr $name, Expr $signature) =>
   $c.report_error(
     <type>,
     "unproved native meta lifetime",
-    $site, %"name: $($name)", %"signature: $($signature.repr())",
+    $site, %"name: $($name)", %"signature: $(Type.spelling($signature))",
     "it might return or keep its argument; ownership cannot be inferred");
 
 static macro Stmt $fail.meta_native_package_platform(

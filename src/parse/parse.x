@@ -302,7 +302,7 @@ static macro Stmt $fail.parse_alias_function(
   Expr $c, Expr $site, Expr $native_type) =>
   $c.report_error(
     <type>, "foreign alias native target is not a function",
-    $site, %"type: $($native_type.repr())");
+    $site, %"type: $(Type.spelling($native_type))");
 
 static macro Stmt $fail.parse_reference_placement(Expr $c, Expr $site) =>
   $c.report_error(

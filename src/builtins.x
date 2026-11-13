@@ -193,9 +193,8 @@ static List _foreach_expand(
   List spec = direct ? %() : _typed_cursor_spec(type, targets);
   if (!direct && !spec) spec = _cursor_spec(type, type, targets.len());
   if (!direct && !converter && !spec) {
-    Var printable = type;
     x2c_diagnostic_fail(
-      "type " + printable.repr() + " is not iterable",
+      %"type $(type.spelling()) is not iterable",
       "declare a matching try_next cursor or an Iter protocol adoption");
   }
   Foreach f = {

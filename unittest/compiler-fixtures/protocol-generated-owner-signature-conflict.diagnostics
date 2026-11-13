@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/protocol-generated-owner-signature-conflict.x:32:1: protocol: 'Item_truth' has a signature incompatible with Var(Item) member 'truth'
   protocol Var(Item);
   ^^^^^^^^
-  note: protocol member 'truth' declared by Var(Item) at lib/protocols.x:<line>:<column> conflicting definition 'Item_truth': ((func (("Item") (int))) int) expected: ((func (("Item"))) int)
+  note: protocol member 'truth' declared by Var(Item) at lib/protocols.x:<line>:<column> conflicting definition 'Item_truth': int (Item, int) expected: int (Item)
 

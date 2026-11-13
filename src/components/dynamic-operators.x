@@ -19,7 +19,8 @@
 macro Stmt $fail.operators_numeric_operands(
   Expr $site, Expr $left_type, Expr $right_type, Expr $op) {
   {
-    String left_name = $left_type.repr(), right_name = $right_type.repr();
+    String left_name = Type.spelling($left_type);
+    String right_name = Type.spelling($right_type);
     x2c_diagnostic_fail_at(
       $site, <xform>, "dynamic numeric operators require numeric operands",
       %"operator: $op left type: $left_name right type: $right_name");
@@ -33,7 +34,7 @@ macro Stmt $fail.operators_enum_target(Expr $site) =>
 macro Stmt $fail.operators_numeric_target(Expr $site, Expr $type) =>
   x2c_diagnostic_fail_at(
     $site, <xform>, "dynamic compound assignment requires a numeric lvalue",
-    %"left type: $($type.repr())");
+    %"left type: $(Type.spelling($type))");
 
 macro Stmt $fail.operators_bitfield_target(Expr $site) =>
   x2c_diagnostic_fail_at(
@@ -46,7 +47,7 @@ macro Stmt $fail.operators_operand(
     $site, <xform>, $operation == <+>
       ? "dynamic += requires a numeric, Var, or String operand"
       : "dynamic compound assignment requires a numeric or Var operand",
-    %"right type: $($right_type.repr())");
+    %"right type: $(Type.spelling($right_type))");
 
 // dynamic operators
 

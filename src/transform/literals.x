@@ -82,7 +82,7 @@ module Ast _collection_literal(Compiler c, Ast ast, Symbol tag) {
   Symbol head = map ? <map> : <array>;
   List lowered = _shipped_lowering(
     c, <literal>, head, %(expr $type ($head @(ast.cdr()))), <expression>,
-    type, %"$(type.repr()) literal");
+    type, map ? "Map literal" : "Array literal");
   match (lowered) case %(expr ? (call ?callee (args *arguments))): {
     auto Array values = [], orders = [];
     foreach (List argument in arguments) {

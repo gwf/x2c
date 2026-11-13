@@ -44,11 +44,11 @@ static macro Stmt $fail.callable_parameter(
     $target, $source);
 
 static macro Expression $note.callable_target(Expr $target) =>
-  $target ? %"target signature: $($target.repr())"
+  $target ? %"target signature: $(Type.spelling($target))"
           : "target signature: unresolved";
 
 static macro Expression $note.callable_source(Expr $source) =>
-  $source ? %"source signature: $($source.repr())"
+  $source ? %"source signature: $(Type.spelling($source))"
           : "source signature: unresolved";
 
 static macro Expression $func_address(Expr $value) => &$value;

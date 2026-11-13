@@ -4,7 +4,8 @@ static macro Stmt $fail.macros_result_type(
   Expr $c, Expr $site, Expr $expected, Expr $actual) =>
   $c.report_error(
     <type>, "indexed rewrite must preserve the getter result type", $site,
-    %"expected: $($expected.repr())", %"actual: $($actual.repr())",
+    %"expected: $(Type.spelling($expected))",
+    %"actual: $(Type.spelling($actual))",
     "return an explicitly converted expression");
 
 static macro Stmt $fail.macros_expansion_count(Expr $c, Expr $origin) =>

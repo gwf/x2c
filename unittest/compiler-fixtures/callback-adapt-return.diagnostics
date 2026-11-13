@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/callback-adapt-return.x:10:3: type: typed callback adapter return type mismatch
     $x2c.callback.adapt(StringCallback, length);
     ^
-  note: target signature: (* (func (("Var"))) "String") source signature: ((func (("String"))) int)
+  note: target signature: String (*)(Var) source signature: int (String)
 

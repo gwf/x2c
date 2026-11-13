@@ -30,7 +30,7 @@ static macro Stmt $fail.callable_callback_result(Expr $cb) =>
 static macro Stmt $fail.callable_callback_parameter(
   Expr $cb, Expr $index, Expr $target, Expr $source) {
   String detail = "parameter %d: %s cannot adapt to %s".printf(
-    $index + 1, $target.repr(), $source.repr());
+    $index + 1, Type.spelling($target), Type.spelling($source));
   _fail($cb, "typed callback adapter parameter mismatch", detail);
 }
 

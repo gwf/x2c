@@ -739,7 +739,7 @@ static String _suffix_text(List modifier) {
 static String _parameters_text(List parameters) {
   String text = NULL;
   foreach (List parameter in parameters) {
-    String spelled = _source_text(parameter);
+    String spelled = parameter ~= %(...) ? "..." : _source_text(parameter);
     if (!spelled) return NULL;
     text = text ? %"$text, $spelled" : spelled;
   }

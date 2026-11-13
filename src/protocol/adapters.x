@@ -25,8 +25,8 @@ static macro Expression $note.protocol_collision_linkage_notes(
 static macro Expression $note.protocol_collision_signature_notes(
   Expr $first, Expr $second, Expr $first_value, Expr $second_value) =>
   %(
-    "$($first) signature: $($first_value.repr())"
-    "$($second) signature: $($second_value.repr())"
+    "$($first) signature: $(Type.spelling($first_value))"
+    "$($second) signature: $(Type.spelling($second_value))"
   );
 
 static macro Expression $note.protocol_collision_source_notes(

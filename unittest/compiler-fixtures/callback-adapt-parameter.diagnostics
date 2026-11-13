@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/callback-adapt-parameter.x:10:3: type: typed callback adapter parameter mismatch
     $x2c.callback.adapt(IntCallback, source);
     ^
-  note: target signature: (* (func ((int))) "String") source signature: ((func (("String"))) "String") parameter 1: (int) cannot adapt to ("String")
+  note: target signature: String (*)(int) source signature: String (String) parameter 1: int cannot adapt to String
 

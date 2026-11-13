@@ -69,7 +69,8 @@ static macro Stmt $fail.symbols_typedef_depth(
   Expr $c, Expr $site, Expr $origin) {
   $c.report_error(
     <type>,
-    %"typedef chain too deep (possible cycle) resolving $($origin.repr())",
+    %"typedef chain too deep (possible cycle) resolving $(
+      Type.spelling($origin))",
     $site);
 }
 

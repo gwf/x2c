@@ -118,10 +118,10 @@ static macro Stmt $report.protocol_signature_conflict(
       %"protocol member '$($member)' declared by $($owner)";
     if ($declaration_site)
       protocol_note = %"$protocol_note at $($declaration_site)";
-    String actual_repr = $actual.repr();
+    String actual_text = Type.spelling($actual);
     String conflict_note =
-      %"conflicting definition '$($binding)': $actual_repr";
-    String expected_note = %"expected: $($expected.repr())";
+      %"conflicting definition '$($binding)': $actual_text";
+    String expected_note = %"expected: $(Type.spelling($expected))";
     $c.diagnostics.report(
       <protocol>,
       %"'$($binding)' has a signature incompatible " +

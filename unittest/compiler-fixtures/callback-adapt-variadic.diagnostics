@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/callback-adapt-variadic.x:10:3: type: typed callback adapter cannot be variadic
     $x2c.callback.adapt(VariadicCallback, source);
     ^
-  note: target signature: (* (func (("Var") (...))) int) source signature: ((func (("String") (...))) int)
+  note: target signature: int (*)(Var, ...) source signature: int (String, ...)
 

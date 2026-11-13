@@ -1,9 +1,9 @@
 unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:17:1: protocol: 'InvalidChild_iter' has a signature incompatible with Iter(InvalidChild) member 'iter'
   protocol Iter(InvalidChild);
   ^^^^^^^^
-  note: protocol member 'iter' declared by Iter(InvalidChild) at lib/protocols.x:<line>:<column> conflicting definition 'InvalidChild_iter': ((func (("InvalidChild") (int))) int) expected: ((func (("InvalidChild") ("Iter"))) "Iter")
+  note: protocol member 'iter' declared by Iter(InvalidChild) at lib/protocols.x:<line>:<column> conflicting definition 'InvalidChild_iter': int (InvalidChild, int) expected: Iter (InvalidChild, Iter)
 
-unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:21:3: macro: type ("InvalidChild") is not iterable
+unittest/compiler-fixtures/protocol-typedef-inherited-invalid.x:21:3: macro: type InvalidChild is not iterable
     foreach(int value, values) (void) value;
     ^^^^^^^
   note: declare a matching try_next cursor or an Iter protocol adoption in expansion of 'x2c.foreach' defined at etc/compiler-prelude.x:34:1

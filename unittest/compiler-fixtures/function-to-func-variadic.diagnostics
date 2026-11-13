@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/function-to-func-variadic.x:11:3: type: function conversion to Func cannot be variadic
     Func function = pointer;
     ^^^^
-  note: target signature: ("Func") source signature: (* (func ((int) (...))) int)
+  note: target signature: Func source signature: int (*)(int, ...)
 

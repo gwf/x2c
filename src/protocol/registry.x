@@ -25,7 +25,8 @@ static macro Stmt $fail.protocol_decl_conflict(
     String first = %"first: $($first_location)";
     String second = %"second: $($second_location)";
     $c.report_error(
-      <protocol>, %"conflicting protocol declarations for $($base.repr())",
+      <protocol>,
+      %"conflicting protocol declarations for $(_type_spelling($base))",
       $site, first, second);
   }
 }
