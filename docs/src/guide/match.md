@@ -61,7 +61,7 @@ Inside `?(`, `typename` uses ordinary source type syntax, so write
 `?(String text)` or `?(List payload)`. This is an exception to the pattern's
 bare-spelling rule. The compiler represents a named type such as `String`
 with the type List `%("String")`; `%(String)` instead contains an `Atom`.
-See [type syntax in macro values](../reference/language.md#macro-values).
+See [type syntax in macro values](../reference/language.md#quotations).
 
 Typedefs use their underlying `Var` tag. Since `Type` is a typedef for
 `List`, `?(Type type)` tests for a List payload. It does not check whether
