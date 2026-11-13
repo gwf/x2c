@@ -53,8 +53,8 @@ static List _sq_node_fields(void) =>
     "argument_type");
 
 static void _sq_validate_walk(Map request) {
-  if (request.contains("depth")) _sq_integer(request["depth"], 0, "depth");
-  if (request.contains("direction")) {
+  if ("depth" in request) _sq_integer(request["depth"], 0, "depth");
+  if ("direction" in request) {
     String direction = _sq_string(request["direction"], "direction");
     if (!(direction in %("in" "out")))
       _sq_error("direction must be in or out");
@@ -117,17 +117,17 @@ static String _sq_validate_query(Map request) {
     default: _sq_error(%"unknown operation: $op");
   }
   _sq_keys(request, "op", "offset", "limit", @fields);
-  if (request.contains("offset")) _sq_integer(request["offset"], 0, "offset");
-  if (request.contains("limit")) _sq_integer(request["limit"], 1, "limit");
-  if (request.contains("select") ||
+  if ("offset" in request) _sq_integer(request["offset"], 0, "offset");
+  if ("limit" in request) _sq_integer(request["limit"], 1, "limit");
+  if ("select" in request ||
       (op in %("inspect" "traverse" "path")))
     _sq_validate_filter(_sq_object(request["select"], "select"), 0);
   if (op == "path")
     _sq_validate_filter(_sq_object(request["target"], "target"), 0);
-  if (request.contains("where"))
+  if ("where" in request)
     _sq_validate_filter(_sq_object(request["where"], "where"), 0);
   if (op == "traverse" || op == "path") _sq_validate_walk(request);
-  if (request.contains("view")) {
+  if ("view" in request) {
     String view = _sq_string(request["view"], "view");
     if (!(view in %("summary" "declaration" "source" "typed_ast")))
       _sq_error("view must be summary, declaration, source, or typed_ast");
@@ -136,9 +136,9 @@ static String _sq_validate_query(Map request) {
     (void) _sq_string(request["pattern"], "pattern");
     Map predicates = {};
     foreach (String field, _sq_node_fields())
-      if (request.contains(field)) predicates[field] = request[field];
+      if (field in request) predicates[field] = request[field];
     _sq_validate_filter(predicates, 1);
-    if (request.contains("node_where"))
+    if ("node_where" in request)
       _sq_validate_filter(_sq_object(request["node_where"], "node_where"), 1);
   }
   return op;
@@ -162,7 +162,7 @@ static SnapshotQuery _sq_open(Map snapshot) {
     .edges = snapshot["edges"]};
   foreach (Map entity, q.entities) {
     q.entities_by_id[entity["id"]] = entity;
-    if (entity.contains("binding"))
+    if ("binding" in entity)
       _sq_append(q.bindings, _sq_binding_key(entity, entity["binding"]),
         entity);
   }
@@ -177,7 +177,7 @@ static Map _sq_canonical(Map entity, Map by_id) {
 }
 
 static String _sq_canonical_id(String id, Map by_id) =>
-  id && by_id.contains(id) ? _sq_canonical(by_id[id], by_id)["id"] : id;
+  id && id in by_id ? _sq_canonical(by_id[id], by_id)["id"] : id;
 
 /* Build indexes only for queries which follow relationships. */
 static void _sq_index_edges(SnapshotQuery &q) {
@@ -219,10 +219,10 @@ static Array _sq_select(SnapshotQuery &q, Map selector) {
   Array selected = [];
   Map seen = {};
   foreach (Map original, q.entities) {
-    Map entity = selector.contains("id") ? original
+    Map entity = "id" in selector ? original
       : _sq_canonical(original, q.entities_by_id);
     String id = entity["id"];
-    if (seen.contains(id)) continue;
+    if (id in seen) continue;
     seen[id] = 1;
     if (_sq_filter(q, entity, selector)) selected.push(entity);
   }
@@ -252,7 +252,7 @@ static Map _sq_walk(
       String source = edge.getdefault(inward ? "to" : "from", NULL);
       String target = edge.getdefault(inward ? "from" : "to", NULL);
       if (!source || !target || source != id ||
-          distances.contains(target) ||
+          target in distances ||
           !q.entities_by_id.contains(target)) continue;
       distances[target] = depth + 1;
       if ((void *) predecessors) predecessors[target] =
@@ -334,7 +334,7 @@ static Map _sq_page(Map snapshot, Map request, Array rows) {
 }
 
 static Array _sq_find(SnapshotQuery &q, Map request) {
-  Map where = request.contains("where")
+  Map where = "where" in request
     ? request["where"].map() : {};
   Array rows = [];
   foreach (Map entity, _sq_select(q, where)) rows.push(_sq_summary(entity));
@@ -357,7 +357,7 @@ static Array _sq_traverse(SnapshotQuery &q, Map request) {
   Array starts = _sq_select(q, request["select"].map());
   Map predecessors = {};
   Map distances = _sq_walk(q, starts, request, predecessors);
-  Map where = request.contains("where")
+  Map where = "where" in request
     ? request["where"].map() : {};
   Array rows = [];
   foreach ((String id, Var distance) in distances) {
@@ -365,7 +365,7 @@ static Array _sq_traverse(SnapshotQuery &q, Map request) {
     if (!_sq_filter(q, entity, where)) continue;
     Map row = _sq_summary(entity);
     row["distance"] = distance;
-    if (predecessors.contains(id))
+    if (id in predecessors)
       row["via"] = predecessors[id].map()["edge"];
     rows.push(row);
   }
@@ -390,7 +390,7 @@ static Map _sq_path(SnapshotQuery &q, Map request) {
   Map distances = _sq_walk(q, starts, request, predecessors);
   String target = _sq_canonical(targets[0], q.entities_by_id)["id"];
   Array rows = [];
-  if (distances.contains(target)) {
+  if (target in distances) {
     List nodes = NULL, edges = NULL;
     for (String id = target; id;) {
       nodes = cons(_sq_summary(q.entities_by_id[id]), nodes);
@@ -409,7 +409,7 @@ static Map _sq_path(SnapshotQuery &q, Map request) {
 
 /* Origins are provenance, not part of the structural pattern. */
 static List _sq_structure(List node, Map known) {
-  if (known.contains(node)) return known[node];
+  if (node in known) return known[node];
   List result = node;
   match (node) {
     case %(at ? ?body): result = _sq_structure(body, known);
@@ -455,10 +455,10 @@ static int _sq_binding(
 
 static int _sq_node_filter(
   SnapshotQuery &q, Map entity, List node, List parents, Map request) {
-  if (request.contains("node_where") &&
+  if ("node_where" in request &&
       !_sq_node_where(q, entity, node, parents,
         request["node_where"].map())) return 0;
-  if (request.contains("inside")) {
+  if ("inside" in request) {
     String wanted = request["inside"].str();
     int found = 0;
     foreach (Var head, parents) {
@@ -469,10 +469,10 @@ static int _sq_node_filter(
     }
     if (!found) return 0;
   }
-  if (request.contains("binding") &&
+  if ("binding" in request &&
       !_sq_binding(q, entity, node,
         request["binding"].str())) return 0;
-  if (request.contains("callee")) {
+  if ("callee" in request) {
     List callee = NULL;
     match (node) {
       case %(call ?function (args *)): callee = function;
@@ -490,7 +490,7 @@ static int _sq_node_filter(
       ? _sq_resolved(q, entity, type) : snapshot_text(type);
     if (!_sq_type_equal(actual, request[field].str())) return 0;
   }
-  if (request.contains("argument_type")) {
+  if ("argument_type" in request) {
     List arguments = NULL;
     match (node) {
       case %(call ? (args *args)): arguments = args;
@@ -610,9 +610,9 @@ static MatchPlan _sq_prepare_pattern(String text) {
 
 static Array _sq_match(
   SnapshotQuery &q, Map request, MatchPlan pattern) {
-  Map selector = request.contains("select")
+  Map selector = "select" in request
     ? request["select"].map() : {};
-  Map where = request.contains("where")
+  Map where = "where" in request
     ? request["where"].map() : {};
   Array rows = [];
   foreach (Map entity, _sq_select(q, selector)) {
@@ -629,7 +629,7 @@ static Array _sq_match(
 static Map _sq_name_ambiguity(SnapshotQuery &q, Map request) {
   if (!request.contains("select")) return NULL;
   Map selector = request["select"].map();
-  if (!selector.contains("name") || selector.contains("id")) return NULL;
+  if (!selector.contains("name") || "id" in selector) return NULL;
   Array candidates = _sq_select(q, selector);
   if (candidates.len() < 2) return NULL;
   Array rows = [];
@@ -703,7 +703,7 @@ static Map _sq_entity_index(Array entities) {
 static String _sq_declaration_key(Map entity, Map entities) {
   Array owners = [];
   String owner = entity.getdefault("owner", NULL);
-  while (owner && entities.contains(owner)) {
+  while (owner && owner in entities) {
     Map parent = entities[owner];
     owners.push([parent["kind"], parent["name"],
                  parent.getdefault("namespace", NULL),
@@ -718,9 +718,9 @@ static String _sq_declaration_key(Map entity, Map entities) {
 static Map _sq_declarations(Array entities, Map by_id) {
   Map indexed = {};
   foreach (Map entity, entities) {
-    if (entity.contains("canonical")) continue;
+    if ("canonical" in entity) continue;
     String key = _sq_declaration_key(entity, by_id);
-    if (indexed.contains(key)) indexed[key] = NULL;
+    if (key in indexed) indexed[key] = NULL;
     else indexed[key] = entity;
   }
   return indexed;
@@ -761,7 +761,7 @@ Map graph_snapshot_diff(Map before, Map after) {
   Array added = [], removed = [], changed = [];
   Array added_edges = [], removed_edges = [];
   foreach (Map entity, before["entities"].array()) {
-    if (entity.contains("canonical")) continue;
+    if ("canonical" in entity) continue;
     String key = _sq_declaration_key(entity, old_ids);
     if (!old.getdefault(key, NULL) || !current.getdefault(key, NULL))
       removed.push(_sq_summary(entity));
@@ -773,7 +773,7 @@ Map graph_snapshot_diff(Map before, Map after) {
     }
   }
   foreach (Map entity, after["entities"].array()) {
-    if (entity.contains("canonical")) continue;
+    if ("canonical" in entity) continue;
     String key = _sq_declaration_key(entity, new_ids);
     if (!old.getdefault(key, NULL) || !current.getdefault(key, NULL))
       added.push(_sq_summary(entity));
