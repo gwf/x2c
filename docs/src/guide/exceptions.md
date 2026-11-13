@@ -17,30 +17,20 @@ raise %(size-limit (operation "Block.reserve") (capacity $requested));
 ```
 
 The first item is a compact `Symbol` naming the cause. The remaining items are
-`(key value)` detail pairs. `Error` also records the source location. A code
-identifies a cause that a handler can branch on. Put the reporting mechanism
-and the module that found the cause in the details.
+`(key value)` detail pairs. `Error` also records the source location. The
+cause is what a handler branches on. Put the reporting mechanism and the
+module that found the failure in the details.
 
-Use the most specific shared cause. For example, `<bad-arity>` identifies an
+The runtime raises 31 *shared causes*; the
+[reference](../reference/language.md#errors-and-cleanup) lists them. Prefer
+the most specific shared cause. For example, `<bad-arity>` identifies an
 argument count, `<bad-types>` identifies unsupported dynamic operand types,
 `<not-found>` identifies a missing external resource, and `<invariant>`
 identifies an impossible internal state. A raiser may add any detail keys
-without changing the code. Detail values must be immutable data: `Null`,
+without changing the cause. Detail values must be immutable data: `Null`,
 numbers, enum values, `Symbol`s, `Atom`s, `String`s, and `List`s of those.
 The [reference](../reference/language.md#errors-and-cleanup) gives the full
 rule.
-
-When an Array failure reports both a type and a method action, `operation`
-is the Array type String, and `action` is the method Symbol. For example,
-a push to a null `ArrayInt` raises
-`(bad-arg (operation "ArrayInt") (action push))`. The action `<take-last>`
-means the public method `take_last`.
-
-When several codes seem to fit, choose in this order: callable shape,
-dynamic operation, resource or external operation, API contract, then
-`<invariant>` for an impossible internal state. The
-[reference](../reference/language.md#errors-and-cleanup) lists the 31
-shared codes.
 
 Every shared cause aborts by default and never returns to the raising call.
 It can transfer to a matching filtered `catch`, after the cleanup between
@@ -58,7 +48,7 @@ output.
 
 `try` requires a following `catch`, `finally`, or both. A bare `catch:`
 handles every cause. Filtered `catch` arms select the newest `Error` by
-matching `%(code *details)`:
+matching `%(cause *details)`:
 
 <!-- ignore: illustrative `Block` and reporting callbacks are omitted -->
 ```x2c,ignore
@@ -82,6 +72,10 @@ at a `match`, each arm's program is prepared once for the life of the
 process; an arm whose pattern interpolates a run-time value with `$` is
 prepared on every entry instead.
 
+An automatic local or parameter you assigned directly keeps its value when a
+`raise` transfers control to a `catch`. Your source needs no
+optimization-specific qualifiers for that.
+
 When no arm matches, the `Error` continues outward. Selecting an arm consumes
 the errors accumulated since that `catch` was registered. Older errors remain
 available to the enclosing handlers.
@@ -101,7 +95,7 @@ through that `catch` arm. If they must survive the arm, copy them first with
 `Error.snapshot`. If translation is unnecessary, omit an arm and let the
 original cause continue outward.
 
-A wildcard code binder handles any cause while retaining access to its
+A wildcard cause binder handles any cause while retaining access to its
 details. Snapshot the details inside the arm when they must survive it:
 
 ```x2c
@@ -119,9 +113,9 @@ printf("%s %s\n", code.str(), detail.repr());
 bad-arg ((operation "load"))
 ```
 
-A pattern in the code position selects several codes in one arm, and
-`raise` accepts the bound code as `$code`. This arm rewraps either cause
-under its own code and lets every other cause continue outward:
+A pattern in the cause position selects several causes in one arm, and
+`raise` accepts the bound cause as `$code`. This arm rewraps either cause
+under its own cause and lets every other cause continue outward:
 
 ```x2c
 try raise %(conv-range (value 300));
@@ -143,10 +137,10 @@ error raised by its own body.
 
 ## Handlers and policy
 
-A filtered `catch` transfers control out of the raising call. Embedders may
-also install observing handlers with `Error.push`. An observing handler runs
-inside the raising call, receives the errors accumulated since its registration,
-and returns:
+A filtered `catch` transfers control out of the raising call. Programs that
+embed x2c may also install observing handlers with `Error.push`. An observing
+handler runs inside the raising call, receives the errors accumulated since
+its registration, and returns:
 
 - `<handled>` to consume those errors and stop;
 - `<declined>` to leave the errors accumulated and continue outward;
@@ -165,7 +159,7 @@ including declined or collected `Error`s. Use
 caller's ordinary `Scope` and canonical `List` and `String` pools.
 `Error.since(mark)` also returns a snapshot in the caller's scope and pools.
 
-If every handler declines, the code's policy selects the result:
+If every handler declines, the cause's policy selects the result:
 
 | Policy | Result |
 | --- | --- |
@@ -175,14 +169,14 @@ If every handler declines, the code's policy selects the result:
 | `<ignore>` | consume the newest `Error` without rendering and continue |
 
 Every shared cause defaults to `<abort>` and cannot be reconfigured. A process
-may set policy for unknown and user-defined codes only. The code that raises
+may set policy for unknown and user-defined causes only. The code that raises
 chooses the cause; the embedding caller chooses the policy.
 
 `Error.policy_set` accepts only the four dispositions in the table. Passing
 another disposition raises `<bad-arg>` and leaves the previous policy
 unchanged. It also rejects `<log>`, `<collect>`, or `<ignore>` for every
-non-returning cause, leaving those policies at `<abort>`. Unknown `Error` codes
-remain legal and default to `<abort>`.
+non-returning cause, leaving those policies at `<abort>`. Unknown `Error`
+causes remain legal and default to `<abort>`.
 
 The default `Logger` registers an observing `Error` handler. An uncaught
 `Error`, one whose policy is `<abort>`, is reported as one line on standard
@@ -264,9 +258,9 @@ handler, never back into the cleanup that raised it. Cleanup runs at most
 once per exit path. If that cleanup was already running for an `Error`, the
 new `Error` replaces it: the pending one is discarded with its detail, and
 only the replacement reaches a `catch`. With no matching handler anywhere
-outward, the replacement terminates the program through the error floor like
-any other unhandled `Error`. This is why cleanup is for release, not
-recovery; handle a failure a finalizer can produce inside the finalizer.
+outward, the replacement terminates the program like any other unhandled
+`Error`. This is why cleanup is for release, not recovery; handle a failure
+that cleanup code can produce inside that cleanup code.
 
 ### Return expressions run before cleanup
 
