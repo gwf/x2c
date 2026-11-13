@@ -659,6 +659,32 @@ package directories. Compile providers for direct `#include` as ordinary
 sources with flat names, and consume package-compiled providers through
 `import`.
 
+`-D` and `-U` define and undefine a macro for
+x2c's optional [preprocessing](language.md#preprocessing) with `--cpp`, for
+requested host preprocessing, and for C compilation. `translate` accepts them
+too, and the C generated with them needs the same options. Optimization,
+debug, and `-Xcc` are compile-only; `-L`,
+`-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
+`-pthread` reaches both the compile and the link. Unknown options are
+rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
+shared libraries when it runs; a package bundle may include it.
+`-framework <name>` links a native framework on macOS.
+
+The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
+toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
+installed record, then `ar`. Project `meta` code runs inside the compiler's
+host, so it is built by `--meta-cc`, `X2C_META_CC`, `META_CC`, the installed
+record's `META_CC`, then `cc`, never by the target `--cc`; `translate`
+accepts `--meta-cc` too. `X2C_META_TIMEOUT` limits one `$` call in the
+project meta helper to that many seconds, 60 by default; `0` removes the
+limit. A call past the limit stops the helper and is reported at the
+call. Omitted optimization, debug, define, and undefine
+options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
+implicitly consumed.
+For every C compilation it runs, x2c selects signed plain `char`. The
+runtime requires an eight-bit signed `char`, even on hosts whose C compiler
+defaults to unsigned plain `char`.
+
 ## Packages
 
 `install`, `remove`, and `list` dispatch to the shipped package command.
@@ -717,32 +743,6 @@ compiler links `<home>/lib/libx2c.a` when it exists, and otherwise
 `<home>/builds/0/libx2c.a`, the stage 0 runtime whose headers a source
 checkout's `include/x2c` names.
 
-`-D` and `-U` define and undefine a macro for
-x2c's optional [preprocessing](language.md#preprocessing) with `--cpp`, for
-requested host preprocessing, and for C compilation. `translate` accepts them
-too, and the C generated with them needs the same options. Optimization,
-debug, and `-Xcc` are compile-only; `-L`,
-`-l`, `--rpath`, `-Wl,`, `-Xlinker`, and `-framework` are link-only.
-`-pthread` reaches both the compile and the link. Unknown options are
-rejected. `--rpath <dir>` records `<dir>` in the program as a place to find
-shared libraries when it runs; a package bundle may include it.
-`-framework <name>` links a native framework on macOS.
-
-The C compiler selection order is `--cc`, `X2C_CC`, `CC`, the installed
-toolchain record, then `cc`. The archiver follows `--ar`, `X2C_AR`, `AR`, the
-installed record, then `ar`. Project `meta` code runs inside the compiler's
-host, so it is built by `--meta-cc`, `X2C_META_CC`, `META_CC`, the installed
-record's `META_CC`, then `cc`, never by the target `--cc`; `translate`
-accepts `--meta-cc` too. `X2C_META_TIMEOUT` limits one `$` call in the
-project meta helper to that many seconds, 60 by default; `0` removes the
-limit. A call past the limit stops the helper and is reported at the
-call. Omitted optimization, debug, define, and undefine
-options preserve host defaults. `CFLAGS` and `LDFLAGS` are not shell-split or
-implicitly consumed.
-For every C compilation it runs, x2c selects signed plain `char`. The
-runtime requires an eight-bit signed `char`, even on hosts whose C compiler
-defaults to unsigned plain `char`.
-
 ## Commands
 
 The built-in commands are listed by `x2c help`. External commands are separate
@@ -755,6 +755,33 @@ The driver passes arguments after an external command name directly to its
 program, including arguments beginning with `@`. The external command owns
 its options and help, so `x2c help <name>` and `x2c <name> --help` run the
 program's `--help`. Built-in commands retain response-file expansion.
+
+`x2c bind` writes the mechanical part of a new package from a C header.
+The command is experimental and available in checkout builds; `make install`
+does not install it. Run `x2c help bind` for its options. It names a handle
+type for each opaque struct pointer that a function takes first, forwards
+those functions as inline methods, and adopts `Cleanup` for a release paired
+with an acquisition, such as `close` with `open`. Functions without a handle
+receiver remain C calls through the header. A later run replaces only the
+marked generated region of the package's entry unit. Generated parameters
+are positional, because collection records parameter types without names.
+The command does not write the ordinary x2c surface, Error conversion,
+dependency pins, or license files; see
+[Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
+
+`x2c graph` inspects x2c source graphs: it saves and queries snapshots of a
+build, or analyzes source files directly. It is experimental and available in
+checkout builds; an install does not include it. Run `x2c help graph` for its
+subcommands.
+
+`x2c lint` checks x2c source style and idioms. It is experimental and
+available in checkout builds; `make install` and release payloads do not
+install it. Run `x2c help lint` for its rules and rule-selection options.
+
+`x2c lint` reports an unreadable input's path and system error on standard
+error and exits `1`, while checking the other readable inputs. This also
+applies when checking formatting or showing formatting differences. The lint
+command treats `-` as an ordinary file name in these modes.
 
 `x2c test [options] [files-or-directories...]` builds and runs project test
 programs. Installed compilers include the command; a checkout builds it with
@@ -785,33 +812,6 @@ The command returns 2 if filters select no tests across the whole run,
 including when listing tests, or if discovery finds no files. Actual build or
 test failures return 1 even when other files have no matches. See
 [Testing](../guide/testing.md) for the test library and assertions.
-
-`x2c bind` writes the mechanical part of a new package from a C header.
-The command is experimental and available in checkout builds; `make install`
-does not install it. Run `x2c help bind` for its options. It names a handle
-type for each opaque struct pointer that a function takes first, forwards
-those functions as inline methods, and adopts `Cleanup` for a release paired
-with an acquisition, such as `close` with `open`. Functions without a handle
-receiver remain C calls through the header. A later run replaces only the
-marked generated region of the package's entry unit. Generated parameters
-are positional, because collection records parameter types without names.
-The command does not write the ordinary x2c surface, Error conversion,
-dependency pins, or license files; see
-[Wrapping a C Library](../guide/wrapping-c-libraries.md) for that work.
-
-`x2c graph` inspects x2c source graphs: it saves and queries snapshots of a
-build, or analyzes source files directly. It is experimental and available in
-checkout builds; an install does not include it. Run `x2c help graph` for its
-subcommands.
-
-`x2c lint` checks x2c source style and idioms. It is experimental and
-available in checkout builds; `make install` and release payloads do not
-install it. Run `x2c help lint` for its rules and rule-selection options.
-
-`x2c lint` reports an unreadable input's path and system error on standard
-error and exits `1`, while checking the other readable inputs. This also
-applies when checking formatting or showing formatting differences. The lint
-command treats `-` as an ordinary file name in these modes.
 
 ## Editors
 
