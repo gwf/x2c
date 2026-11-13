@@ -192,7 +192,9 @@ static Map _worker_receive(ReplWorker worker, int input) {
   return NULL;
 }
 
-/** Sends source or an inspection query to the worker; no native value crosses. */
+/** Sends source or an inspection query to the worker; no native value
+    crosses.
+*/
 Map repl_worker_call(ReplWorker worker, Map message, int input) {
   if (!worker) return NULL;
   worker.failure = NULL;
@@ -233,19 +235,22 @@ static String _worker_stats(ReplSession session, int verbose) {
   ScopeStats scope = Scope.stats();
   PoolStats pool = Pool.stats(Pool.current());
   text.printf("session: definitions=%u\n", session.names.len());
-  text.printf("scope (worker): live-allocation-objects=%zu "
-              "live-requested-bytes=%zu\n",
-              scope.live_allocations, scope.live_requested_bytes);
-  text.printf("pool (worker): backing-capacity-bytes=%zu active-bytes=%zu "
-              "depot-bytes=%zu\n",
-              pool.backing_bytes, pool.active_bytes, pool.depot_bytes);
+  text.printf(
+    "scope (worker): live-allocation-objects=%zu "
+    "live-requested-bytes=%zu\n",
+    scope.live_allocations, scope.live_requested_bytes);
+  text.printf(
+    "pool (worker): backing-capacity-bytes=%zu active-bytes=%zu "
+    "depot-bytes=%zu\n",
+    pool.backing_bytes, pool.active_bytes, pool.depot_bytes);
   if (verbose) {
-    text.printf("scope (worker): allocation-calls=%zu free-calls=%zu "
-                "reallocation-calls=%zu\n",
-                scope.allocation_calls, scope.free_calls,
-                scope.reallocation_calls);
-    text.printf("pool (worker): active-blocks=%zu depot-blocks=%zu\n",
-                pool.active_blocks, pool.depot_blocks);
+    text.printf(
+      "scope (worker): allocation-calls=%zu free-calls=%zu "
+      "reallocation-calls=%zu\n",
+      scope.allocation_calls, scope.free_calls, scope.reallocation_calls);
+    text.printf(
+      "pool (worker): active-blocks=%zu depot-blocks=%zu\n",
+      pool.active_blocks, pool.depot_blocks);
   }
   return text;
 }
@@ -253,23 +258,27 @@ static String _worker_stats(ReplSession session, int verbose) {
 static Map _worker_dispatch(ReplSession session, Map message) {
   Symbol operation = message[<operation>];
   String text = message[<text>];
-  if (operation == <submit>) return _worker_result(session, session.submit(text));
+  if (operation == <submit>)
+    return _worker_result(session, session.submit(text));
   if (operation == <inspect>)
-    return _worker_result(session, session.inspect_expression(
-      text, message[<depth>], message[<limit>]));
+    return _worker_result(
+      session,
+      session.inspect_expression(text, message[<depth>], message[<limit>]));
   if (operation == <complete>) {
     ReplCompletion c = session.complete(text, message[<cursor>]);
     Array candidates = auto [];
     foreach (List row, c.candidates) {
       Var description = void, declaration = void;
-      if (row.len() == 2 && session.descriptions.try_get(row.cadr(), description) &&
+      if (row.len() == 2 &&
+          session.descriptions.try_get(row.cadr(), description) &&
           description is <map> &&
           description.map().try_get("declaration", declaration) &&
           declaration is <string>)
         candidates.push(%(@row $declaration));
       else candidates.push(row);
     }
-    return {status: <ok>, start: c.start, end: c.end, candidates: candidates.list()};
+    return {status: <ok>, start: c.start, end: c.end,
+            candidates: candidates.list()};
   }
   String output = NULL;
   if (operation == <symbols>) {
@@ -280,7 +289,8 @@ static Map _worker_dispatch(ReplSession session, Map message) {
   if (operation == <info>) output = session.info(text);
   else if (operation == <source>) output = session.source(text);
   else if (operation == <members>) output = session.members(text);
-  else if (operation == <stats>) output = _worker_stats(session, message[<verbose>]);
+  else if (operation == <stats>)
+    output = _worker_stats(session, message[<verbose>]);
   else if (operation == <files>) {
     Buffer listing = auto Buffer.new();
     CliRequest request = session.frontend.request;
@@ -359,8 +369,9 @@ static void _worker_serve(
     session.program = program;
   }
   String retained = _worker_snapshot(program, start.snapshot);
-  if (!_worker_send(to, {status: <ready>, snapshot: retained,
-                        roots: program ? program.roots : start.roots})) {
+  if (!_worker_send(
+    to, {status: <ready>, snapshot: retained,
+         roots: program ? program.roots : start.roots})) {
     fputs("native program snapshot contains a non-data value\n", stderr);
     exit(1);
   }
