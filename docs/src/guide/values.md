@@ -205,9 +205,10 @@ containing only native arguments keep C's printf behavior.
 
 ## Null and void
 
-`Null` is the all-zero `Var`: the null pointer, or the external `nil`. It is
-ordinary data. You may store it in a `List`, an `Array`, or a `Map`, and
-iterating a collection can return it.
+`Null` is the all-zero `Var`, which holds the null pointer. Converted to a
+`List`, it is the empty `List`, `nil`; a boxed `nil` carries the `List` tag
+and is not `Null`. `Null` is ordinary data. You may store it in a `List`,
+an `Array`, or a `Map`, and iterating a collection can return it.
 
 `void` is the all-ones `Var`. APIs return it to report that no value is
 available: an index out of range, an absent key, or an exhausted iterator.
@@ -261,7 +262,8 @@ height is unset
 ```
 
 `Null` is a value that happens to be zero. `NULL` converts to the same value
-when an x2c crossing requires a `Var`:
+when an x2c crossing requires a `Var`. Below, `$(...)` builds a `List` from
+expressions; see [evaluated Lists](collections.md#evaluated-lists-and-maps).
 
 ```x2c
 Var absent = (Var) { .u64 = 0 };
@@ -400,7 +402,7 @@ NaN == NaN: 0  NaN === NaN: 1
 ## Handling dynamic-operation failures
 
 `Var.convert`, `Var.binary`, `Var.truth`, `Var.update`, and `Var.postfix`
-raise cause-specific `Error`s. Their default policies fail fast, and
+raise cause-specific `Error`s. An uncaught one aborts the program, and
 compiler-inserted conversions raise the same causes. Install a filtered
 `catch` where your code can recover from one of them.
 
