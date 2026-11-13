@@ -100,6 +100,7 @@ defer pixels.free();
 for (int index = 0; index < pixels.len(); index++)
   if (pixels[index].r < 96) pixels[index] = Color.rgba(0, 0, 0, 0);
 
+// An Image destination converts through pixels.image(), which copies.
 auto Image cleaned = pixels;
 ```
 
