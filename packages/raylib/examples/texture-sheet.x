@@ -111,7 +111,7 @@ int main(void) {
   Image backdrop = auto Image.checked(
     32, 32, 4, 4, Color.rgb(202, 212, 228), Color.rgb(248, 250, 253)
   );
-  Image knockout = auto pixels.image();
+  auto Image knockout = pixels;
 
   // The backdrop only exists so the transparent pixels read as transparent.
   Rectangle whole = { 0, 0, 32, 32 }, panel = { 36, 330, 220, 220 };

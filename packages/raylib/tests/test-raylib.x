@@ -166,7 +166,7 @@ static void raylib_pixels_read_filter_and_write_back(void) {
   }
   EXPECT_INT_EQ(changed, 10);
 
-  Image filtered = auto pixels.image();
+  auto Image filtered = pixels;
   EXPECT_INT_EQ(filtered.width, 4);
   EXPECT_INT_EQ(filtered.height, 3);
   EXPECT_TRUE(filtered.color_at(1, 1).equal(RED));
@@ -237,7 +237,7 @@ static void raylib_image_mutators_update_the_owned_image(void) {
   image.format(PIXELFORMAT_UNCOMPRESSED_R5G6B5);
   EXPECT_INT_EQ(image.color_at(0, 0).a, 255);
   ImagePixels converted = auto image.pixels();
-  Image rgba = auto converted.image();
+  auto Image rgba = converted;
   EXPECT_INT_EQ(rgba.format, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
   EXPECT_INT_EQ(rgba.color_at(0, 0).a, 255);
   image.format(PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
