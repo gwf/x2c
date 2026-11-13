@@ -5,6 +5,8 @@
 
 Source: `lib/list/list.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Linked list with `Var` elements.
 
 ## Primary API
@@ -22,8 +24,8 @@ Linked list with `Var` elements.
 | [`List.append`](#List.append) | Returns the concatenation of `a` and `b`. |
 | [`List.array`](#List.array) | Returns a new `Array` holding the elements of `lst` in order. |
 | [`List.concat`](#List.concat) | Returns the concatenation of the List arguments in order. |
-| [`List.concat_n`](#List.concat_n) | Returns the concatenation of exactly `list_count` `List` arguments. |
 | [`List.contains`](#List.contains) | Reports whether `lst` holds an element `==` to `key`. |
+| [`List.equal`](#List.equal) | Reports equality of canonical chains by exact head and tail identity. |
 | [`List.filter`](#List.filter) | Returns the elements `pred` accepts by ordinary `Var` truthiness. |
 | [`List.find`](#List.find) | Returns the first element `pred` accepts by ordinary `Var` truthiness, or `void`. |
 | [`List.foldl`](#List.foldl) | Folds `fn` over the elements of `lst` from the left, starting at `seed`. |
@@ -35,20 +37,18 @@ Linked list with `Var` elements.
 | [`List.iter`](#List.iter) | Initializes caller-owned `dest` as a forward iterator over `lst`. |
 | [`List.last`](#List.last) | Returns the last value in `lst`, or `void` when it is empty. |
 | [`List.len`](#List.len) | Returns the number of cells in `lst` in O(n) time. |
-| [`List.list_n`](#List.list_n) | Builds a `List` from exactly `element_count` `Var` arguments. |
 | [`List.map`](#List.map) | Returns a canonical `List` holding `fn` applied front to back. |
 | [`List.map2`](#List.map2) | Maps `fn` over aligned pairs from `a` and `b`, requiring `fn`. |
 | [`List.new`](#List.new) | Returns the List packed from the supplied values and explicit splices. |
+| [`List.repr`](#List.repr) | Returns syntax that can be read back in. |
 | [`List.reverse`](#List.reverse) | Returns a canonical `List` with `lst`'s elements reversed. |
 | [`List.sort`](#List.sort) | Returns a copy of `lst` ordered by `Var.compare`. |
 | [`List.sort_by`](#List.sort_by) | Returns a stable sorted copy using `Array.sort_by`'s callback contract. |
 | [`List.sort_with`](#List.sort_with) | Returns a stable sorted copy using `Array.sort_with`'s callback contract. |
+| [`List.str`](#List.str) | Returns the human-readable display spelling. |
 | [`List.tail`](#List.tail) | Returns the last `count` elements of `list`. |
 | [`List.try_next`](#List.try_next) | Writes the next element, advances `cursor`, and returns one. |
 | [`List.unique`](#List.unique) | Returns a copy of `lst` with later duplicates removed. |
-| [`List.unpack_n`](#List.unpack_n) | Writes at most `destination_count` elements through `List` pointers. |
-| [`List.unpack_vars_n`](#List.unpack_vars_n) | Writes at most `destination_count` elements through `Var` pointers. |
-| [`List.write_str`](#List.write_str) | Appends the display form using each element's `write_str`. |
 | [`List.zip_with`](#List.zip_with) | Combines aligned values from two `List`s with `fn`. |
 | [`Map.list`](#Map.list) | Returns the entries of `map` as a `List` of two-element `(key value)` `List`s, in the map's iteration order. |
 
@@ -209,20 +209,6 @@ preceding cells are rebuilt. Inputs are not modified.
 
 Source: `lib/list/building.x`
 
-<a id="List.concat_n"></a>
-#### List.concat_n
-
-`List List.concat_n(unsigned list_count, ...)`
-
-Returns the concatenation of exactly `list_count` `List` arguments.
-Nil is a valid argument, no sentinel is read, and the final nonempty `List`
-becomes the shared tail of the result.
-
-**Raises:** `<size-limit>` when `list_count` exceeds the supported index
-range, or `<alloc-fail>` while constructing the result.
-
-Source: `lib/list/building.x`
-
 <a id="List.contains"></a>
 #### List.contains
 
@@ -233,6 +219,21 @@ Elements compare as in `List.index`, so `%(1.0)` contains `1`, while a
 `Map` keyed by `1.0` does not.
 
 Source: `lib/list/traversal.x`
+
+<a id="List.equal"></a>
+#### List.equal
+
+`int List.equal(List a, List b)`
+
+Reports equality of canonical chains by exact head and tail identity.
+It matches `List.hash`, so the same elements decide it: content for a
+small number, `Symbol`, `Atom`, canonical `String`, or nested `List`, and
+identity for a wide number boxed in a `Scope`, an `Array`, or a `Map`.
+Two `List`s built from one `long` value hold two boxes and are unequal,
+while `List.compare` reads the values and calls them equal. Use
+`List.compare` where content has to decide.
+
+Source: `lib/list/cells.x`
 
 <a id="List.filter"></a>
 #### List.filter
@@ -380,20 +381,6 @@ Returns the number of cells in `lst` in O(n) time.
 
 Source: `lib/list/traversal.x`
 
-<a id="List.list_n"></a>
-#### List.list_n
-
-`List List.list_n(unsigned element_count, ...)`
-
-Builds a `List` from exactly `element_count` `Var` arguments.
-Every argument is data, so `void` raises instead of being read as a
-terminator. A zero count returns `nil`.
-
-**Raises:** `<void-op>` when an argument is `void`, or `<alloc-fail>` or
-`<size-limit>` while constructing the result.
-
-Source: `lib/list/building.x`
-
 <a id="List.map"></a>
 #### List.map
 
@@ -436,6 +423,23 @@ nil. The result has ordinary List identity and pool lifetime.
 
 Source: `lib/list/cells.x`
 
+<a id="List.repr"></a>
+#### List.repr
+
+`String List.repr(List lst)`
+
+Returns syntax that can be read back in.
+This is the `%(...)` spelling of the same data. Elements are rendered with
+their own `repr`, so `String`s come back quoted and `Atom`s print as bare
+names, and `nil` renders as `()`. Long nested structure wraps at about 80
+columns. The canonical result follows the active `String` pool chain, may
+already be owned by an ancestor, and remains live until that owner is
+released.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
+
+Source: `lib/list/rendering.x`
+
 <a id="List.reverse"></a>
 #### List.reverse
 
@@ -459,7 +463,9 @@ Returns a copy of `lst` ordered by `Var.compare`.
 the element tags involved, so a mixed-kind `List` still sorts. A `List` of
 fewer than two cells is returned as it stands.
 Comparisons follow `Array.sort`'s libc `qsort` contract, including its
-exception for nonlocal exits. Raises: `<alloc-fail>` while constructing
+exception for nonlocal exits.
+
+**Raises:** `<alloc-fail>` while constructing
 the result.
 
 Source: `lib/list/transformations.x`
@@ -471,7 +477,9 @@ Source: `lib/list/transformations.x`
 
 Returns a stable sorted copy using `Array.sort_by`'s callback contract.
 The key runs once per element in input order; an empty List invokes none.
-The input List is unchanged. Raises: allocation and the key's ordinary
+The input List is unchanged.
+
+**Raises:** allocation and the key's ordinary
 causes during key extraction. Key comparisons follow `Array.sort_by`'s
 libc `qsort` exception for nonlocal exits.
 
@@ -484,9 +492,28 @@ Source: `lib/list/transformations.x`
 
 Returns a stable sorted copy using `Array.sort_with`'s callback contract.
 The input List is unchanged. Fewer than two cells return unchanged without
-a callback. Raises: allocation and the comparator's ordinary causes.
+a callback.
+
+**Raises:** allocation and the comparator's ordinary causes.
 
 Source: `lib/list/transformations.x`
+
+<a id="List.str"></a>
+#### List.str
+
+`String List.str(List lst)`
+
+Returns the human-readable display spelling.
+Elements are rendered with their own `str`, so a `String` element appears
+unquoted. The writer pads inside parentheses and breaks nested structure
+across lines at about 80 columns. Nil renders as `()`. The canonical
+result follows the active `String` pool chain, may already be owned by an
+ancestor, and remains live until its owning pool is released. Use
+`List.repr` when the text has to read back in.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
+
+Source: `lib/list/rendering.x`
 
 <a id="List.tail"></a>
 #### List.tail
@@ -530,50 +557,6 @@ of fewer than two cells is returned as it stands.
 
 Source: `lib/list/transformations.x`
 
-<a id="List.unpack_n"></a>
-#### List.unpack_n
-
-`int List.unpack_n(List src, unsigned destination_count, ...)`
-
-Writes at most `destination_count` elements through `List` pointers.
-Returns the number written. Extra source cells are left unread, and a
-short source leaves remaining destinations untouched. Each source value is
-decoded as a `List`, so another tag writes `nil`; a null destination is
-skipped but still counted.
-
-**Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
-failure occurs before any destination is written.
-
-Source: `lib/list/traversal.x`
-
-<a id="List.unpack_vars_n"></a>
-#### List.unpack_vars_n
-
-`int List.unpack_vars_n(List src, unsigned destination_count, ...)`
-
-Writes at most `destination_count` elements through `Var` pointers.
-Returns the number written. Extra source cells are left unread, and a
-short source leaves remaining destinations untouched. A null destination
-is skipped but still counted.
-
-**Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
-failure occurs before any destination is written.
-
-Source: `lib/list/traversal.x`
-
-<a id="List.write_str"></a>
-#### List.write_str
-
-`Buffer List.write_str(List lst, Buffer out)`
-
-Appends the display form using each element's `write_str`.
-`List.str` calls this to build its result. The display form has one space
-inside each parenthesis, as in `( a b )`, including when nested in another
-container. Destination padding is set to one during the write, then
-restored.
-
-Source: `lib/list/rendering.x`
-
 <a id="List.zip_with"></a>
 #### List.zip_with
 
@@ -616,19 +599,21 @@ Source: `lib/list/building.x`
 | [`List.cddr`](#List.cddr) | Returns the tail after two cells, or `nil`. |
 | [`List.cdr`](#List.cdr) | Method form of `cdr`: the tail of `lst`, or `nil` when `lst` is `nil`. |
 | [`List.compare`](#List.compare) | Compares `a` and `b` lexicographically through `Var.compare`. |
+| [`List.concat_n`](#List.concat_n) | Returns the concatenation of exactly `list_count` `List` arguments. |
 | [`List.cons`](#List.cons) | Method form of `cons`, with the same identity, lifetime, and failures. |
 | [`List.cons_in`](#List.cons_in) | Returns the canonical cell for `head` and `tail` in `pool`'s chain. |
-| [`List.equal`](#List.equal) | Reports equality of canonical chains by exact head and tail identity. |
 | [`List.flatten`](#List.flatten) | Flattens one level of nested `List`s into a canonical result. |
 | [`List.flatten_all`](#List.flatten_all) | Recursively flattens every nested `List` into a canonical result. |
 | [`List.hash`](#List.hash) | Returns the stable hash of `List`'s exact head bits and tail identity. |
+| [`List.list_n`](#List.list_n) | Builds a `List` from exactly `element_count` `Var` arguments. |
 | [`List.nth_cdr`](#List.nth_cdr) | Returns the shared tail beginning `n` cells in. |
 | [`List.promote`](#List.promote) | Moves `lst` out of the innermost interning pool into its parent. |
-| [`List.repr`](#List.repr) | Returns syntax that can be read back in. |
-| [`List.str`](#List.str) | Returns the human-readable display spelling. |
 | [`List.sublis`](#List.sublis) | Recursively substitutes non-`List` nodes in `tree` from `alist`. |
 | [`List.subseq`](#List.subseq) | Returns every `step`th element from `start` up to exclusive `stop`. |
+| [`List.unpack_n`](#List.unpack_n) | Writes at most `destination_count` elements through `List` pointers. |
+| [`List.unpack_vars_n`](#List.unpack_vars_n) | Writes at most `destination_count` elements through `Var` pointers. |
 | [`List.write_repr`](#List.write_repr) | Appends the re-readable spelling to the existing output. |
+| [`List.write_str`](#List.write_str) | Appends the display form using each element's `write_str`. |
 | [`Var.caar`](#Var.caar) | Applies the `caar` selector chain to `Var`. |
 | [`Var.caddr`](#Var.caddr) | Applies the `caddr` selector chain to `Var`. |
 | [`Var.cadr`](#Var.cadr) | Applies the `cadr` selector chain to `Var`. |
@@ -718,6 +703,20 @@ Element comparison causes propagate.
 
 Source: `lib/list/cells.x`
 
+<a id="List.concat_n"></a>
+#### List.concat_n
+
+`List List.concat_n(unsigned list_count, ...)`
+
+Returns the concatenation of exactly `list_count` `List` arguments.
+Nil is a valid argument, no sentinel is read, and the final nonempty `List`
+becomes the shared tail of the result.
+
+**Raises:** `<size-limit>` when `list_count` exceeds the supported index
+range, or `<alloc-fail>` while constructing the result.
+
+Source: `lib/list/building.x`
+
 <a id="List.cons"></a>
 #### List.cons
 
@@ -742,21 +741,6 @@ remain live for at least as long as the result.
 new cell.
 
 Source: `lib/list/list.x`
-
-<a id="List.equal"></a>
-#### List.equal
-
-`int List.equal(List a, List b)`
-
-Reports equality of canonical chains by exact head and tail identity.
-It matches `List.hash`, so the same elements decide it: content for a
-small number, `Symbol`, `Atom`, canonical `String`, or nested `List`, and
-identity for a wide number boxed in a `Scope`, an `Array`, or a `Map`.
-Two `List`s built from one `long` value hold two boxes and are unequal,
-while `List.compare` reads the values and calls them equal. Use
-`List.compare` where content has to decide.
-
-Source: `lib/list/cells.x`
 
 <a id="List.flatten"></a>
 #### List.flatten
@@ -799,6 +783,20 @@ change this hash.
 
 Source: `lib/list/cells.x`
 
+<a id="List.list_n"></a>
+#### List.list_n
+
+`List List.list_n(unsigned element_count, ...)`
+
+Builds a `List` from exactly `element_count` `Var` arguments.
+Every argument is data, so `void` raises instead of being read as a
+terminator. A zero count returns `nil`.
+
+**Raises:** `<void-op>` when an argument is `void`, or `<alloc-fail>` or
+`<size-limit>` while constructing the result.
+
+Source: `lib/list/building.x`
+
 <a id="List.nth_cdr"></a>
 #### List.nth_cdr
 
@@ -832,40 +830,6 @@ it. A null `lst` returns itself unchanged.
 
 Source: `lib/list/cells.x`
 
-<a id="List.repr"></a>
-#### List.repr
-
-`String List.repr(List lst)`
-
-Returns syntax that can be read back in.
-This is the `%(...)` spelling of the same data. Elements are rendered with
-their own `repr`, so `String`s come back quoted and `Atom`s print as bare
-names, and `nil` renders as `()`. Long nested structure wraps at about 80
-columns. The canonical result follows the active `String` pool chain, may
-already be owned by an ancestor, and remains live until that owner is
-released.
-
-**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
-
-Source: `lib/list/rendering.x`
-
-<a id="List.str"></a>
-#### List.str
-
-`String List.str(List lst)`
-
-Returns the human-readable display spelling.
-Elements are rendered with their own `str`, so a `String` element appears
-unquoted. The writer pads inside parentheses and breaks nested structure
-across lines at about 80 columns. Nil renders as `()`. The canonical
-result follows the active `String` pool chain, may already be owned by an
-ancestor, and remains live until its owning pool is released. Use
-`List.repr` when the text has to read back in.
-
-**Raises:** `<alloc-fail>` or `<size-limit>` while constructing the result.
-
-Source: `lib/list/rendering.x`
-
 <a id="List.sublis"></a>
 #### List.sublis
 
@@ -897,12 +861,56 @@ constructing the result.
 
 Source: `lib/list/traversal.x`
 
+<a id="List.unpack_n"></a>
+#### List.unpack_n
+
+`int List.unpack_n(List src, unsigned destination_count, ...)`
+
+Writes at most `destination_count` elements through `List` pointers.
+Returns the number written. Extra source cells are left unread, and a
+short source leaves remaining destinations untouched. Each source value is
+decoded as a `List`, so another tag writes `nil`; a null destination is
+skipped but still counted.
+
+**Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
+failure occurs before any destination is written.
+
+Source: `lib/list/traversal.x`
+
+<a id="List.unpack_vars_n"></a>
+#### List.unpack_vars_n
+
+`int List.unpack_vars_n(List src, unsigned destination_count, ...)`
+
+Writes at most `destination_count` elements through `Var` pointers.
+Returns the number written. Extra source cells are left unread, and a
+short source leaves remaining destinations untouched. A null destination
+is skipped but still counted.
+
+**Raises:** `<size-limit>` when `destination_count` exceeds `INT_MAX`. The
+failure occurs before any destination is written.
+
+Source: `lib/list/traversal.x`
+
 <a id="List.write_repr"></a>
 #### List.write_repr
 
 `Buffer List.write_repr(List lst, Buffer out)`
 
 Appends the re-readable spelling to the existing output.
+
+Source: `lib/list/rendering.x`
+
+<a id="List.write_str"></a>
+#### List.write_str
+
+`Buffer List.write_str(List lst, Buffer out)`
+
+Appends the display form using each element's `write_str`.
+`List.str` calls this to build its result. The display form has one space
+inside each parenthesis, as in `( a b )`, including when nested in another
+container. Destination padding is set to one during the write, then
+restored.
 
 Source: `lib/list/rendering.x`
 

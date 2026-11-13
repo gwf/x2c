@@ -5,6 +5,8 @@
 
 Source: `lib/atom.x`
 
+Guide: [Symbols and Atoms](../../guide/symbols.md)
+
 Canonical exact names.
 
 ## Primary API

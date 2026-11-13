@@ -5,6 +5,8 @@
 
 Source: `lib/meta.x`
 
+Guide: [Generating Code](../../guide/generating-code.md)
+
 The compiler surface a `meta` function calls.
 
 Include it with `#include "meta.x"`.

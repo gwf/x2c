@@ -5,19 +5,37 @@
 
 Source: `lib/file.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 `File` I/O operations and stream handling.
 
 ## Primary API
 
+| Global | Type | Summary |
+| --- | --- | --- |
+| `Stdin` | `File` | Standard input, borrowed from the process. |
+| `Stdout` | `File` | Standard output, borrowed from the process. |
+| `Stderr` | `File` | Standard error, borrowed from the process. |
+
 | Function | Summary |
 | --- | --- |
 | [`File.cleanup`](#File.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
+| [`File.close`](#File.close) | Calls C's `fclose` on the `File`. |
 | [`File.copy_to`](#File.copy_to) | Copies the remaining bytes from `source` to `output`. |
-| [`File.iter`](#File.iter) | Returns an iterator over `File`. |
+| [`File.eof`](#File.eof) | Calls C's `feof` on the `File`. |
+| [`File.error`](#File.error) | Calls C's `ferror` on the `File`. |
+| [`File.fileno`](#File.fileno) | Calls C's `fileno` on the `File`. |
+| [`File.flush`](#File.flush) | Calls C's `fflush` on the `File`. |
+| [`File.getc`](#File.getc) | Calls C's `fgetc` on the `File`. |
+| [`File.iter`](#File.iter) | Returns an iterator over the lines of `file`. |
 | [`File.open`](#File.open) | Opens `path` with the requested stdio mode. |
-| [`File.path_error`](#File.path_error) | Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise, with `operation`, `path`, and `errno` details. |
+| [`File.printf`](#File.printf) | Formats values into `file`. |
+| [`File.puts`](#File.puts) | Writes a NUL-terminated C string. |
 | [`File.read_into`](#File.read_into) | Reads the remaining stream bytes into caller-owned storage. |
 | [`File.readline_into`](#File.readline_into) | Reads one raw line into caller-owned byte storage. |
+| [`File.rewind`](#File.rewind) | Calls C's `rewind` on the `File`. |
+| [`File.seek`](#File.seek) | Calls C's `fseek` on the `File`. |
+| [`File.tell`](#File.tell) | Calls C's `ftell` on the `File`. |
 | [`File.write_all`](#File.write_all) | Writes every requested byte unless the stream reports failure. |
 | [`String.open`](#String.open) | Opens the filesystem path named by `s`. |
 
@@ -29,6 +47,15 @@ Source: `lib/file.x`
 `void File.cleanup(File value)`
 
 Ends the owned lifetime when a managed local leaves its block.
+
+Source: `lib/file.x`
+
+<a id="File.close"></a>
+#### File.close
+
+`int File.close(File)`
+
+Calls C's `fclose` on the `File`.
 
 Source: `lib/file.x`
 
@@ -47,15 +74,60 @@ failure.
 
 Source: `lib/file.x`
 
+<a id="File.eof"></a>
+#### File.eof
+
+`int File.eof(File)`
+
+Calls C's `feof` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.error"></a>
+#### File.error
+
+`int File.error(File)`
+
+Calls C's `ferror` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.fileno"></a>
+#### File.fileno
+
+`int File.fileno(File)`
+
+Calls C's `fileno` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.flush"></a>
+#### File.flush
+
+`int File.flush(File)`
+
+Calls C's `fflush` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.getc"></a>
+#### File.getc
+
+`int File.getc(File)`
+
+Calls C's `fgetc` on the `File`.
+
+Source: `lib/file.x`
+
 <a id="File.iter"></a>
 #### File.iter
 
 `Iter File.iter(File file, Iter dest)`
 
-Returns an iterator over `File`.
-The caller supplies `dest`; each pull yields one `String` under the
-canonical pool-chain lifetime described above, including its newline when
-present.
+Returns an iterator over the lines of `file`.
+The caller supplies `dest`; each pull yields one line as a `String`,
+including its newline when present, with the canonical pool-chain
+lifetime that this module's design notes describe.
 The iterator borrows `file`, which must remain open through every pull.
 Clean EOF exhausts the iterator and releases its line storage. Abandoning
 it before exhaustion leaves that `Scope`-owned `Block` until its `Scope` is
@@ -81,13 +153,23 @@ and captured errno.
 
 Source: `lib/file.x`
 
-<a id="File.path_error"></a>
-#### File.path_error
+<a id="File.printf"></a>
+#### File.printf
 
-`void File.path_error(Var operation, String path, int error)`
+`int File.printf(File file, const char *format, ...)`
 
-Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
-with `operation`, `path`, and `errno` details.
+Formats values into `file`.
+Returns the character count or a negative value on failure.
+
+Source: `lib/file.x`
+
+<a id="File.puts"></a>
+#### File.puts
+
+`inline int File.puts(File file, const char *s)`
+
+Writes a NUL-terminated C string.
+Returns a nonnegative value on success or EOF on failure.
 
 Source: `lib/file.x`
 
@@ -125,6 +207,33 @@ instead, leaving its partial bytes in `dest`.
 
 Source: `lib/file.x`
 
+<a id="File.rewind"></a>
+#### File.rewind
+
+`void File.rewind(File)`
+
+Calls C's `rewind` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.seek"></a>
+#### File.seek
+
+`int File.seek(File, long, int)`
+
+Calls C's `fseek` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.tell"></a>
+#### File.tell
+
+`long File.tell(File)`
+
+Calls C's `ftell` on the `File`.
+
+Source: `lib/file.x`
+
 <a id="File.write_all"></a>
 #### File.write_all
 
@@ -159,31 +268,50 @@ Source: `lib/file.x`
 
 | Function | Summary |
 | --- | --- |
+| [`File.clearerr`](#File.clearerr) | Calls C's `clearerr` on the `File`. |
 | [`File.equal`](#File.equal) | Reports whether `x` and `y` are the same native stream handle. |
 | [`File.fdopen`](#File.fdopen) | Wraps an open file descriptor in a `File` stream. |
+| [`File.getpos`](#File.getpos) | Calls C's `fgetpos` on the `File`. |
 | [`File.gets`](#File.gets) | Reads a native line into `str` and returns `str`, or NULL at EOF or error. |
 | [`File.getw`](#File.getw) | Reads and returns one native `int`, or EOF when a full word is unavailable. |
 | [`File.hash`](#File.hash) | Returns a handle-identity hash consistent with `File.equal`. |
+| [`File.path_error`](#File.path_error) | Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise, with `operation`, `path`, and `errno` details. |
+| [`File.pclose`](#File.pclose) | Calls C's `pclose` on the `File`. |
 | [`File.popen`](#File.popen) | Opens a process pipe with the requested mode. |
-| [`File.printf`](#File.printf) | Formats values into `file`. |
+| [`File.purge`](#File.purge) | Calls C's `fflush` on the `File`. |
 | [`File.putc`](#File.putc) | Writes one byte and returns it as an unsigned char, or EOF on failure. |
-| [`File.puts`](#File.puts) | Writes a NUL-terminated C string. |
 | [`File.putw`](#File.putw) | Writes one native `int` and returns `w`, or EOF on a short write. |
 | [`File.read`](#File.read) | Reads up to `nitems` elements and returns the number read. |
 | [`File.reopen`](#File.reopen) | Reuses `file` for a newly opened path and mode. |
 | [`File.repr`](#File.repr) | Returns a readable handle and descriptor representation without reading. |
 | [`File.scanf`](#File.scanf) | Scans values from `file`, returning the assignment count or EOF. |
+| [`File.seeko`](#File.seeko) | Calls C's `fseeko` on the `File`. |
+| [`File.setbuf`](#File.setbuf) | Calls C's `setbuf` on the `File`. |
 | [`File.setbuffer`](#File.setbuffer) | Installs caller-supplied buffering, or disables buffering for a null `buf`. |
 | [`File.setlinebuf`](#File.setlinebuf) | Requests line buffering for `file` and returns zero. |
+| [`File.setpos`](#File.setpos) | Calls C's `fsetpos` on the `File`. |
+| [`File.setvbuf`](#File.setvbuf) | Calls C's `setvbuf` on the `File`. |
 | [`File.stat`](#File.stat) | Writes metadata for `file` into `buf`. |
 | [`File.str`](#File.str) | Returns the display `String` for `file`. |
 | [`File.string`](#File.string) | Reads the remaining stream into one canonical `String`. |
 | [`File.string_close`](#File.string_close) | Reads the remaining text, then closes `file` on return or transfer. |
+| [`File.tello`](#File.tello) | Calls C's `ftello` on the `File`. |
 | [`File.ungetc`](#File.ungetc) | Pushes one byte back and returns it, or EOF when it cannot be pushed. |
+| [`File.va_printf`](#File.va_printf) | Calls C's `vfprintf` on the `File`. |
+| [`File.va_scanf`](#File.va_scanf) | Calls C's `vfscanf` on the `File`. |
 | [`File.write`](#File.write) | Writes up to `nitems` elements and returns the number written. |
 | [`File.write_repr`](#File.write_repr) | Appends the readable pointer representation of `file` to `out`. |
 
 ### `File`
+
+<a id="File.clearerr"></a>
+#### File.clearerr
+
+`void File.clearerr(File)`
+
+Calls C's `clearerr` on the `File`.
+
+Source: `lib/file.x`
 
 <a id="File.equal"></a>
 #### File.equal
@@ -204,6 +332,15 @@ On success the returned stream owns `fildes`, which must be closed through
 the stream. On failure the caller still owns the descriptor. A host failure
 raises `<io-fail>` with the operation and captured errno; a null mode
 raises `<bad-arg>`.
+
+Source: `lib/file.x`
+
+<a id="File.getpos"></a>
+#### File.getpos
+
+`int File.getpos(File, fpos_t *)`
+
+Calls C's `fgetpos` on the `File`.
 
 Source: `lib/file.x`
 
@@ -238,6 +375,25 @@ Returns a handle-identity hash consistent with `File.equal`.
 
 Source: `lib/file.x`
 
+<a id="File.path_error"></a>
+#### File.path_error
+
+`void File.path_error(Var operation, String path, int error)`
+
+Raises `<not-found>` when `error` is `ENOENT` and `<io-fail>` otherwise,
+with `operation`, `path`, and `errno` details.
+
+Source: `lib/file.x`
+
+<a id="File.pclose"></a>
+#### File.pclose
+
+`int File.pclose(File)`
+
+Calls C's `pclose` on the `File`.
+
+Source: `lib/file.x`
+
 <a id="File.popen"></a>
 #### File.popen
 
@@ -252,13 +408,12 @@ to close the pipe and collect the child status. A host failure raises
 
 Source: `lib/file.x`
 
-<a id="File.printf"></a>
-#### File.printf
+<a id="File.purge"></a>
+#### File.purge
 
-`int File.printf(File file, const char *format, ...)`
+`int File.purge(File)`
 
-Formats values into `file`.
-Returns the character count or a negative value on failure.
+Calls C's `fflush` on the `File`.
 
 Source: `lib/file.x`
 
@@ -268,16 +423,6 @@ Source: `lib/file.x`
 `inline int File.putc(File file, int c)`
 
 Writes one byte and returns it as an unsigned char, or EOF on failure.
-
-Source: `lib/file.x`
-
-<a id="File.puts"></a>
-#### File.puts
-
-`inline int File.puts(File file, const char *s)`
-
-Writes a NUL-terminated C string.
-Returns a nonnegative value on success or EOF on failure.
 
 Source: `lib/file.x`
 
@@ -331,6 +476,24 @@ Scans values from `file`, returning the assignment count or EOF.
 
 Source: `lib/file.x`
 
+<a id="File.seeko"></a>
+#### File.seeko
+
+`int File.seeko(File, off_t, int)`
+
+Calls C's `fseeko` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.setbuf"></a>
+#### File.setbuf
+
+`void File.setbuf(File, char *)`
+
+Calls C's `setbuf` on the `File`.
+
+Source: `lib/file.x`
+
 <a id="File.setbuffer"></a>
 #### File.setbuffer
 
@@ -351,6 +514,24 @@ The underlying `setvbuf` result is intentionally not exposed.
 
 Source: `lib/file.x`
 
+<a id="File.setpos"></a>
+#### File.setpos
+
+`int File.setpos(File, const fpos_t *)`
+
+Calls C's `fsetpos` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.setvbuf"></a>
+#### File.setvbuf
+
+`int File.setvbuf(File, char *, int, size_t)`
+
+Calls C's `setvbuf` on the `File`.
+
+Source: `lib/file.x`
+
 <a id="File.stat"></a>
 #### File.stat
 
@@ -368,9 +549,9 @@ Source: `lib/file.x`
 
 Returns the display `String` for `file`.
 A nonnull file follows `File.string`. It advances through EOF, returns a
-canonical result under the pool-chain lifetime described above or NULL
-when empty, and transfers the same causes. A null handle returns its
-pointer representation without reading.
+canonical result with the pool-chain lifetime that this module's design
+notes describe, or NULL when empty, and transfers the same causes. A null
+handle returns its pointer representation without reading.
 
 Source: `lib/file.x`
 
@@ -402,12 +583,39 @@ stream and all of its aliases are invalid afterward.
 
 Source: `lib/file.x`
 
+<a id="File.tello"></a>
+#### File.tello
+
+`off_t File.tello(File)`
+
+Calls C's `ftello` on the `File`.
+
+Source: `lib/file.x`
+
 <a id="File.ungetc"></a>
 #### File.ungetc
 
 `inline int File.ungetc(File file, int c)`
 
 Pushes one byte back and returns it, or EOF when it cannot be pushed.
+
+Source: `lib/file.x`
+
+<a id="File.va_printf"></a>
+#### File.va_printf
+
+`int File.va_printf(File, const char *, va_list)`
+
+Calls C's `vfprintf` on the `File`.
+
+Source: `lib/file.x`
+
+<a id="File.va_scanf"></a>
+#### File.va_scanf
+
+`int File.va_scanf(File, const char *, va_list)`
+
+Calls C's `vfscanf` on the `File`.
 
 Source: `lib/file.x`
 

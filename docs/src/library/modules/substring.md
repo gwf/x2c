@@ -5,6 +5,8 @@
 
 Source: `lib/substring.x`
 
+Guide: [Iteration](../../guide/iteration.md)
+
 Borrowed immutable views of String bytes.
 
 Include it with `#include "substring.x"`.

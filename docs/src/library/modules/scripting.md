@@ -5,6 +5,8 @@
 
 Source: `lib/scripting.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 The modules every script unit includes.
 
 Include it with `#include "scripting.x"`.

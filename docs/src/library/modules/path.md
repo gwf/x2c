@@ -5,6 +5,8 @@
 
 Source: `lib/path.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 Filesystem locations and the operations on them.
 
 Include it with `#include "path.x"`.

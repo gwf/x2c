@@ -5,49 +5,41 @@
 
 Source: `lib/map/map.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Hash table mapping `Var` keys to `Var` values.
 
 ## Primary API
 
 | Function | Summary |
 | --- | --- |
-| [`Map.cleanup`](#Map.cleanup) | Destroys owned contents and frees the Map's record and backing Blocks. |
 | [`Map.contains`](#Map.contains) | Returns one when `key` is present, or zero for a null map. |
 | [`Map.copy`](#Map.copy) | Returns a fresh shallow copy in the current `Scope`. |
+| [`Map.del`](#Map.del) | Removes `key` and returns its value. |
 | [`Map.enumerate`](#Map.enumerate) | Initializes `dest` to yield canonical `(key value)` `List`s in bucket order. |
-| [`Map.get_hashed`](#Map.get_hashed) | Returns the value stored under `key`, or `void` when absent, probing with the caller's precomputed `key_hash`. |
+| [`Map.equal`](#Map.equal) | Reports key/value equality independent of bucket and insertion order. |
+| [`Map.get`](#Map.get) | Returns the value for `key`. |
 | [`Map.getdefault`](#Map.getdefault) | Returns the value for `key`, or `defval` without inserting it. |
+| [`Map.getindex`](#Map.getindex) | Returns the value selected by bracket indexing. |
 | [`Map.iter`](#Map.iter) | Initializes `dest` as a single-pass iterator over boxed values. |
 | [`Map.keys`](#Map.keys) | Initializes `dest` as a single-pass iterator over boxed keys. |
 | [`Map.len`](#Map.len) | Returns the number of entries, or zero for a null map. |
 | [`Map.merge`](#Map.merge) | Copies every entry of `other` into `map` and returns the destination. |
 | [`Map.merge_with`](#Map.merge_with) | Merges `other` into `map`, combines colliding values, and returns `map`. |
-| [`Map.move_to`](#Map.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`Map.new`](#Map.new) | Returns a fresh empty map owned by the current `Scope`. |
 | [`Map.postfixindex`](#Map.postfixindex) | Applies postfix `++` or `--` and returns the previous value. |
-| [`Map.scope`](#Map.scope) | Acquires the Map's scope for explicitly owned contents. |
+| [`Map.repr`](#Map.repr) | Returns the readable typed-Map representation. |
 | [`Map.set`](#Map.set) | Copies `key` and `val` into the table, replacing an existing value. |
 | [`Map.setdefault`](#Map.setdefault) | Returns the value for `key`, inserting `defval` when absent. |
 | [`Map.setindex`](#Map.setindex) | Stores `val` under `key` and returns `val`. |
+| [`Map.str`](#Map.str) | Returns the typed-Map display String. |
 | [`Map.truth`](#Map.truth) | Returns one when `map` contains an entry. |
 | [`Map.try_del`](#Map.try_del) | Removes `key`, writes its value to `out`, and returns one when present. |
 | [`Map.try_get`](#Map.try_get) | Writes the value for `key` to `out` and returns one when present. |
 | [`Map.try_next`](#Map.try_next) | Writes the next bucket's key and value, advances `cursor`, and returns one. |
 | [`Map.updateindex`](#Map.updateindex) | Applies `op` to the value for `key` and returns the stored result. |
-| [`Map.write_str`](#Map.write_str) | Appends the typed-Map display text in bucket order. |
 
 ### `Map`
-
-<a id="Map.cleanup"></a>
-#### Map.cleanup
-
-`meta native void Map.cleanup(Map value)`
-
-Destroys owned contents and frees the Map's record and backing Blocks.
-Referenced keys and values with independent owners remain unchanged.
-NULL does nothing. Every alias becomes invalid after destruction.
-
-Source: `lib/map/map.x`
 
 <a id="Map.contains"></a>
 #### Map.contains
@@ -68,6 +60,18 @@ The result has independent table storage but copies native key and value
 fields. A null input produces a fresh empty map.
 
 **Raises:** an allocation, size, or invariant cause while copying.
+
+Source: `lib/map/map.x`
+
+<a id="Map.del"></a>
+#### Map.del
+
+`Var Map.del(Map map, Var key)`
+
+Removes `key` and returns its value.
+Successful removal invalidates live cursors and iterators.
+Prefer `try_del` when absence is an ordinary outcome. Boxed families
+return `void` for absence; native families raise `<bad-arg>`.
 
 Source: `lib/map/map.x`
 
@@ -93,19 +97,24 @@ Shared causes do not return from the pull.
 
 Source: `lib/map/map.x`
 
-<a id="Map.get_hashed"></a>
-#### Map.get_hashed
+<a id="Map.equal"></a>
+#### Map.equal
 
-`meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash)`
+`int Map.equal(Map a, Map b)`
 
-Returns the value stored under `key`, or `void` when absent, probing with
-the caller's precomputed `key_hash`.
-`key_hash` must be `Var.hash` of `key`; another value reports the key as
-absent. This serves a caller that probes several `Map`s with one key,
-and is `Map.get` in every other respect. A null `Map` reports absence.
+Reports key/value equality independent of bucket and insertion order.
+Two null maps compare equal; a null and a nonnull map compare unequal.
 
-**Raises:** a cause raised by custom key equality. Hashing happens in the
-caller, so a `void` key raises there instead.
+Source: `lib/map/map.x`
+
+<a id="Map.get"></a>
+#### Map.get
+
+`Var Map.get(Map map, Var key)`
+
+Returns the value for `key`.
+Prefer `try_get` when absence is an ordinary outcome. Boxed families
+return `void` for absence; native families raise `<bad-arg>`.
 
 Source: `lib/map/map.x`
 
@@ -116,6 +125,17 @@ Source: `lib/map/map.x`
 
 Returns the value for `key`, or `defval` without inserting it.
 A null map is treated as an empty one.
+
+Source: `lib/map/map.x`
+
+<a id="Map.getindex"></a>
+#### Map.getindex
+
+`Var Map.getindex(Map map, Var key)`
+
+Returns the value selected by bracket indexing.
+This is the bracket-facing form of `Map.get`, with the same failure
+behavior. Prefer bracket indexing in ordinary code.
 
 Source: `lib/map/map.x`
 
@@ -195,20 +215,6 @@ failing callback leaves its entry unchanged. A null callback raises
 
 Source: `lib/map/map.x`
 
-<a id="Map.move_to"></a>
-#### Map.move_to
-
-`void Map.move_to(Map map, Scope *destination)`
-
-Moves the record, backing Blocks, and nullable owned contents together.
-Pointers and references remain unchanged. The destination slot acquires
-a scope if empty. NULL maps do nothing.
-
-**Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
-creating its scope. Those failures leave ownership unchanged.
-
-Source: `lib/map/map.x`
-
 <a id="Map.new"></a>
 #### Map.new
 
@@ -235,17 +241,12 @@ key, or a cause from `Var.postfix` for an unsupported value or operation.
 
 Source: `lib/map/map.x`
 
-<a id="Map.scope"></a>
-#### Map.scope
+<a id="Map.repr"></a>
+#### Map.repr
 
-`Scope Map.scope(Map map)`
+`String Map.repr(Map map)`
 
-Acquires the Map's scope for explicitly owned contents.
-Created lazily beneath the record's owner, this scope excludes the
-record and backing Blocks. Stored references remain borrowed unless
-explicitly moved into it. NULL returns NULL.
-
-**Raises:** `<alloc-fail>` when creating the scope.
+Returns the readable typed-Map representation.
 
 Source: `lib/map/map.x`
 
@@ -286,6 +287,15 @@ Source: `lib/map/map.x`
 Stores `val` under `key` and returns `val`.
 This is the bracket-facing form of `Map.set`, with the same cursor
 invalidation and failure behavior.
+
+Source: `lib/map/map.x`
+
+<a id="Map.str"></a>
+#### Map.str
+
+`String Map.str(Map map)`
+
+Returns the typed-Map display String.
 
 Source: `lib/map/map.x`
 
@@ -347,27 +357,31 @@ size, or invariant cause while inserting.
 
 Source: `lib/map/map.x`
 
-<a id="Map.write_str"></a>
-#### Map.write_str
-
-`Buffer Map.write_str(Map map, Buffer out)`
-
-Appends the typed-Map display text in bucket order.
-
-Source: `lib/map/map.x`
-
 ## Advanced and interop API
 
 | Function | Summary |
 | --- | --- |
+| [`Map.cleanup`](#Map.cleanup) | Destroys owned contents and frees the Map's record and backing Blocks. |
 | [`Map.compare`](#Map.compare) | Compares typed Maps by size and then sorted native key/value contents. |
-| [`Map.equal`](#Map.equal) | Reports key/value equality independent of bucket and insertion order. |
-| [`Map.repr`](#Map.repr) | Returns the readable typed-Map representation. |
-| [`Map.str`](#Map.str) | Returns the typed-Map display String. |
+| [`Map.get_hashed`](#Map.get_hashed) | Returns the value stored under `key`, or `void` when absent, probing with the caller's precomputed `key_hash`. |
+| [`Map.move_to`](#Map.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
+| [`Map.scope`](#Map.scope) | Acquires the Map's scope for explicitly owned contents. |
 | [`Map.update_n`](#Map.update_n) | Adds exactly `pair_count` key/value pairs to `map` in argument order. |
 | [`Map.write_repr`](#Map.write_repr) | Appends the readable typed-Map representation in bucket order. |
+| [`Map.write_str`](#Map.write_str) | Appends the typed-Map display text in bucket order. |
 
 ### `Map`
+
+<a id="Map.cleanup"></a>
+#### Map.cleanup
+
+`meta native void Map.cleanup(Map value)`
+
+Destroys owned contents and frees the Map's record and backing Blocks.
+Referenced keys and values with independent owners remain unchanged.
+NULL does nothing. Every alias becomes invalid after destruction.
+
+Source: `lib/map/map.x`
 
 <a id="Map.compare"></a>
 #### Map.compare
@@ -379,36 +393,54 @@ Identical handles compare equal and NULL sorts first. Neither Map is
 mutated. Comparisons while sorting temporary entries run inside libc
 `qsort` and must return normally. If an Error or another nonlocal exit
 crosses `qsort`, cleanup, memory safety, and container state are not
-guaranteed. Raises: `<alloc-fail>` while creating temporary storage, or
+guaranteed.
+
+**Raises:** `<alloc-fail>` while creating temporary storage, or
 key/value comparison causes during the final comparison after sorting.
 
 Source: `lib/map/map.x`
 
-<a id="Map.equal"></a>
-#### Map.equal
+<a id="Map.get_hashed"></a>
+#### Map.get_hashed
 
-`int Map.equal(Map a, Map b)`
+`meta native Var Map.get_hashed(Map map, Var key, unsigned key_hash)`
 
-Reports key/value equality independent of bucket and insertion order.
-Two null maps compare equal; a null and a nonnull map compare unequal.
+Returns the value stored under `key`, or `void` when absent, probing with
+the caller's precomputed `key_hash`.
+`key_hash` must be `Var.hash` of `key`; another value reports the key as
+absent. This serves a caller that probes several `Map`s with one key,
+and is `Map.get` in every other respect. A null `Map` reports absence.
 
-Source: `lib/map/map.x`
-
-<a id="Map.repr"></a>
-#### Map.repr
-
-`String Map.repr(Map map)`
-
-Returns the readable typed-Map representation.
+**Raises:** a cause raised by custom key equality. Hashing happens in the
+caller, so a `void` key raises there instead.
 
 Source: `lib/map/map.x`
 
-<a id="Map.str"></a>
-#### Map.str
+<a id="Map.move_to"></a>
+#### Map.move_to
 
-`String Map.str(Map map)`
+`void Map.move_to(Map map, Scope *destination)`
 
-Returns the typed-Map display String.
+Moves the record, backing Blocks, and nullable owned contents together.
+Pointers and references remain unchanged. The destination slot acquires
+a scope if empty. NULL maps do nothing.
+
+**Raises:** `<bad-arg>` for a NULL destination slot, or `<alloc-fail>` while
+creating its scope. Those failures leave ownership unchanged.
+
+Source: `lib/map/map.x`
+
+<a id="Map.scope"></a>
+#### Map.scope
+
+`Scope Map.scope(Map map)`
+
+Acquires the Map's scope for explicitly owned contents.
+Created lazily beneath the record's owner, this scope excludes the
+record and backing Blocks. Stored references remain borrowed unless
+explicitly moved into it. NULL returns NULL.
+
+**Raises:** `<alloc-fail>` when creating the scope.
 
 Source: `lib/map/map.x`
 
@@ -436,47 +468,12 @@ Appends the readable typed-Map representation in bucket order.
 
 Source: `lib/map/map.x`
 
-## Convenience API
+<a id="Map.write_str"></a>
+#### Map.write_str
 
-| Function | Summary |
-| --- | --- |
-| [`Map.del`](#Map.del) | Removes `key` and returns its value. |
-| [`Map.get`](#Map.get) | Returns the value for `key`. |
-| [`Map.getindex`](#Map.getindex) | Returns the value selected by bracket indexing. |
+`Buffer Map.write_str(Map map, Buffer out)`
 
-### `Map`
-
-<a id="Map.del"></a>
-#### Map.del
-
-`Var Map.del(Map map, Var key)`
-
-Removes `key` and returns its value.
-Successful removal invalidates live cursors and iterators.
-Prefer `try_del` when absence is an ordinary outcome. Boxed families
-return `void` for absence; native families raise `<bad-arg>`.
-
-Source: `lib/map/map.x`
-
-<a id="Map.get"></a>
-#### Map.get
-
-`Var Map.get(Map map, Var key)`
-
-Returns the value for `key`.
-Prefer `try_get` when absence is an ordinary outcome. Boxed families
-return `void` for absence; native families raise `<bad-arg>`.
-
-Source: `lib/map/map.x`
-
-<a id="Map.getindex"></a>
-#### Map.getindex
-
-`Var Map.getindex(Map map, Var key)`
-
-Returns the value selected by bracket indexing.
-This is the bracket-facing form of `Map.get`, with the same failure
-behavior. Prefer bracket indexing in ordinary code.
+Appends the typed-Map display text in bucket order.
 
 Source: `lib/map/map.x`
 
@@ -510,7 +507,9 @@ storage, and recorded `Scope` unchanged. Effects of callbacks that
 already completed, including nested exports, are not rolled back. Any
 failure while moving the rebuilt `Block`s occurs after the table has
 replaced the original. A null `Map`, callback, or `Scope` pointer does
-nothing. Raises: `<alloc-fail>`, `<size-limit>`, or `<invariant>` while
+nothing.
+
+**Raises:** `<alloc-fail>`, `<size-limit>`, or `<invariant>` while
 rebuilding, or any cause from export, key hashing, or moving the rebuilt
 `Block`s.
 

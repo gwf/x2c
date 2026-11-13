@@ -5,6 +5,8 @@
 
 Source: `lib/match/match.x`
 
+Guide: [Pattern Matching](../../guide/match.md)
+
 Pattern matching and transformation utilities for lists.
 
 ## Primary API

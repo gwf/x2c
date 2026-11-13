@@ -5,6 +5,8 @@
 
 Source: `lib/encoding.x`
 
+Guide: [Time, Random Values, and Encodings](../../guide/time-random-encodings.md)
+
 UTF-8 code points and base64, hex, and percent encodings.
 
 Include it with `#include "encoding.x"`.

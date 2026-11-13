@@ -5,6 +5,8 @@
 
 Source: `lib/digest.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 SHA-256 digests of Strings and streams.
 
 Include it with `#include "digest.x"`.

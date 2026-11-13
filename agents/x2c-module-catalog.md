@@ -1093,7 +1093,7 @@ Public functions:
 
 ### [lib/exception.x](../lib/exception.x)
 
-transfer frames for x2c `Error` unwinding and cleanup.
+the runtime behind `try`, `catch`, `finally`, and `defer`. Programs use those statements, which the guide chapter Errors and Cleanup describes, and do not call these functions.
 
 Public functions:
 

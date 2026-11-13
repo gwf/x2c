@@ -5,6 +5,8 @@
 
 Source: `lib/var/var.x`
 
+Guide: [Values and Var](../../guide/values.md)
+
 Variant type for dynamic typing.
 
 ## Primary API
@@ -12,13 +14,16 @@ Variant type for dynamic typing.
 | Function | Summary |
 | --- | --- |
 | [`Var.add`](#Var.add) | Adds dynamic values through numeric, `String`, or registered `add` behavior. |
+| [`Var.array`](#Var.array) | Extracts the `Array` payload of `value`. |
+| [`Var.as_iter`](#Var.as_iter) | Extracts the `Iter` payload of `value`. |
 | [`Var.binary`](#Var.binary) | Applies a dynamic arithmetic, bitwise, comparison, or logical operator. |
-| [`Var.box_record`](#Var.box_record) | Boxes a copy of the `size`-byte record at `record` as custom `tag`. |
+| [`Var.block`](#Var.block) | Extracts the `Block` payload of `value`. |
+| [`Var.buffer`](#Var.buffer) | Extracts the `Buffer` payload of `value`. |
+| [`Var.bytes`](#Var.bytes) | Extracts the `Bytes` payload of `value`. |
 | [`Var.convert`](#Var.convert) | Converts `value` to a numeric `target`, or returns exact-tag identity. |
-| [`Var.convert_at`](#Var.convert_at) | Converts `value` using `Var.convert` and records `site` on conversion failures for a void or nonnumeric source or a nonnumeric target. |
 | [`Var.div`](#Var.div) | Divides dynamic values through numeric or registered `div` behavior. |
-| [`Var.fallback_truth`](#Var.fallback_truth) | Returns built-in truthiness without consulting a registered descriptor. |
-| [`Var.is`](#Var.is) | Reports whether `value` has the requested runtime tag. |
+| [`Var.file`](#Var.file) | Extracts the `File` payload of `value`. |
+| [`Var.is`](#Var.is) | Reports whether `var` has the requested runtime tag. |
 | [`Var.is_floating`](#Var.is_floating) | Reports whether `v` belongs to the floating runtime family. |
 | [`Var.is_integer`](#Var.is_integer) | Reports whether `v` belongs to the integer runtime family. |
 | [`Var.is_nil`](#Var.is_nil) | Reports whether `v` is the typed empty `List`. |
@@ -27,21 +32,22 @@ Variant type for dynamic typing.
 | [`Var.is_pointer`](#Var.is_pointer) | Reports whether `v` holds a native pointer. |
 | [`Var.is_reference`](#Var.is_reference) | Reports whether `v` holds a pointer to a boxed handle. |
 | [`Var.is_void`](#Var.is_void) | Reports whether `v` is the absence sentinel `void`. |
+| [`Var.kind`](#Var.kind) | Returns the `Symbol` naming the coarse category of `v`'s payload. |
+| [`Var.list`](#Var.list) | Extracts the `List` payload of `value`. |
+| [`Var.map`](#Var.map) | Extracts the `Map` payload of `value`. |
 | [`Var.matmul`](#Var.matmul) | Multiplies matrices through a registered `matmul` behavior. |
 | [`Var.mod`](#Var.mod) | Computes dynamic remainder through integer or registered `mod` behavior. |
 | [`Var.mul`](#Var.mul) | Multiplies dynamic values through numeric or registered `mul` behavior. |
 | [`Var.neg`](#Var.neg) | Negates a dynamic value through registered `neg` or numeric subtraction. |
 | [`Var.new`](#Var.new) | Constructs a `Var` with `tag` from its tag-directed variadic payload. |
 | [`Var.null`](#Var.null) | Returns `Null`, the all-zero `Var` that stands for external `nil`. |
+| [`Var.parse`](#Var.parse) | Parses `str` as source text of kind `kind` and returns the boxed value. |
 | [`Var.postfix`](#Var.postfix) | Applies dynamic postfix `++` or `--` and returns the prior value. |
+| [`Var.string`](#Var.string) | Extracts the `String` payload of `value`. |
 | [`Var.sub`](#Var.sub) | Subtracts dynamic values through numeric or registered `sub` behavior. |
-| [`Var.tag_bottom`](#Var.tag_bottom) | Returns the bottom encoding field of built-in `tag`. |
-| [`Var.tag_top`](#Var.tag_top) | Returns the top encoding field of built-in `tag`. |
+| [`Var.tag`](#Var.tag) | Returns the `Symbol` naming the exact family of `v`'s payload. |
 | [`Var.truth`](#Var.truth) | Returns dynamic truthiness through registered dispatch or built-in rules. |
 | [`Var.update`](#Var.update) | Applies a failure-atomic dynamic compound update and returns the new value. |
-| [`X2CVarNumeric.f32`](#X2CVarNumeric.f32) | Converts a decoded numeric value to native `float` without boxing. |
-| [`X2CVarNumeric.f64`](#X2CVarNumeric.f64) | Converts a decoded numeric value to native `double` without boxing. |
-| [`X2CVarNumeric.ldouble`](#X2CVarNumeric.ldouble) | Converts a decoded numeric value to native `long double` without boxing. |
 
 ### `Var`
 
@@ -57,6 +63,32 @@ Numeric promotion, failure, and result ownership follow `Var.binary`;
 keeps the ownership chosen by its callback.
 
 Source: `lib/var/operators.x`
+
+<a id="Var.array"></a>
+#### Var.array
+
+`Array Var.array(Var value)`
+
+Extracts the `Array` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Array` uses `Var.array_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x`
+
+<a id="Var.as_iter"></a>
+#### Var.as_iter
+
+`Iter Var.as_iter(Var value)`
+
+Extracts the `Iter` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Iter` uses `Var.iter_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x`
 
 <a id="Var.binary"></a>
 #### Var.binary
@@ -82,19 +114,44 @@ A selected protocol, truth, or comparison callback may raise its own cause.
 
 Source: `lib/var/operators.x`
 
-<a id="Var.box_record"></a>
-#### Var.box_record
+<a id="Var.block"></a>
+#### Var.block
 
-`Var Var.box_record(Symbol tag, const void *record, size_t size)`
+`Block Var.block(Var value)`
 
-Boxes a copy of the `size`-byte record at `record` as custom `tag`.
-The copy is allocated in the active `Scope`. Once the direct custom rows
-are taken, the copy carries its descriptor in front of it.
+Extracts the `Block` payload of `value`.
 
-**Raises:** `<bad-target>` when `tag` names no declared class, or
-`<alloc-fail>` when the copy cannot be allocated.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Block` uses `Var.block_payload`, which reads the payload or
+NULL without raising.
 
-Source: `lib/var/classes.x`
+Source: `lib/var/conversion.x`
+
+<a id="Var.buffer"></a>
+#### Var.buffer
+
+`Buffer Var.buffer(Var value)`
+
+Extracts the `Buffer` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Buffer` uses `Var.buffer_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x`
+
+<a id="Var.bytes"></a>
+#### Var.bytes
+
+`Bytes Var.bytes(Var value)`
+
+Extracts the `Bytes` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Bytes` uses `Var.bytes_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x`
 
 <a id="Var.convert"></a>
 #### Var.convert
@@ -119,18 +176,6 @@ decoding, with the decoder's `<bad-types>` detail nested under
 
 Source: `lib/var/conversion.x`
 
-<a id="Var.convert_at"></a>
-#### Var.convert_at
-
-`Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site)`
-
-Converts `value` using `Var.convert` and records `site` on conversion
-failures for a void or nonnumeric source or a nonnumeric target.
-A null `site` records no source location. The site is borrowed only
-during the call; conversion and result ownership follow `Var.convert`.
-
-Source: `lib/var/conversion.x`
-
 <a id="Var.div"></a>
 #### Var.div
 
@@ -143,26 +188,25 @@ and NaN behavior. Other promotion, failure, and ownership follow
 
 Source: `lib/var/operators.x`
 
-<a id="Var.fallback_truth"></a>
-#### Var.fallback_truth
+<a id="Var.file"></a>
+#### Var.file
 
-`int Var.fallback_truth(Var value)`
+`File Var.file(Var value)`
 
-Returns built-in truthiness without consulting a registered descriptor.
-Numeric and `Symbol` zero and null pointer-bearing values are false; other
-supported built-ins are true. Container-specific truth comes from dispatch.
+Extracts the `File` payload of `value`.
 
-**Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
-`<bad-types>` when no truthiness rule exists.
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `File` uses `Var.file_payload`, which reads the payload or
+NULL without raising.
 
-Source: `lib/var/operators.x`
+Source: `lib/var/conversion.x`
 
 <a id="Var.is"></a>
 #### Var.is
 
 `int Var.is(Var var, Symbol tag)`
 
-Reports whether `value` has the requested runtime tag.
+Reports whether `var` has the requested runtime tag.
 This tests one family. For a `Var` holding an `unsigned char`, this returns
 0 for `<i32>` even though both are integers. When any integer will do, use
 `Var.is_integer`, or compare `Var.kind`.
@@ -284,6 +328,50 @@ This is the test that accepts a `void` argument.
 
 Source: `lib/var/encoding.x`
 
+<a id="Var.kind"></a>
+#### Var.kind
+
+`meta native Symbol Var.kind(Var v)`
+
+Returns the `Symbol` naming the coarse category of `v`'s payload.
+The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`,
+`<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly
+one. Use kind when a group of families is treated alike. This returns
+`<integer>` for all twelve integer widths and `<object>` for every builtin
+class handle such as `String`, `List`, `Map`, and `File`.
+
+`<pointer>` means a raw C pointer such as `<u8*>`, while `<reference>`
+means a pointer to an object handle such as `<string*>`. NaN and the
+infinities are `<floating>`. Only `void` is `<void>`.
+
+Source: `lib/var/encoding.x`
+
+<a id="Var.list"></a>
+#### Var.list
+
+`List Var.list(Var value)`
+
+Extracts the `List` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `List` uses `Var.list_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x`
+
+<a id="Var.map"></a>
+#### Var.map
+
+`Map Var.map(Var value)`
+
+Extracts the `Map` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. An implicit conversion
+from `Var` to `Map` uses `Var.map_payload`, which reads the payload or
+NULL without raising.
+
+Source: `lib/var/conversion.x`
+
 <a id="Var.matmul"></a>
 #### Var.matmul
 
@@ -374,6 +462,42 @@ Generated call adapters return it for a `void` target.
 
 Source: `lib/var/encoding.x`
 
+<a id="Var.parse"></a>
+#### Var.parse
+
+`meta native Var Var.parse(String str, Symbol kind)`
+
+Parses `str` as source text of kind `kind` and returns the boxed value.
+The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,
+`<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."`
+delimiters are removed; unquoted input is also accepted, and either form
+is unescaped. `<char>` expects `'a'` complete with its quotes and produces
+an `<i32>`. Both `<float>` and `<double>` produce an `<f64>`; there is no
+path here to `<f32>`.
+
+Integer and floating kinds require the whole input to parse, apart from
+surrounding whitespace. Malformed input, trailing text, a value outside
+the native reader's range, or an `<int>` outside `int` range returns
+`void`, so a parsed numeric zero remains distinguishable from failure.
+
+`<symbol>` accepts the leading atom or `<...>` `Symbol` literal and ignores
+trailing text; no recognized leading `Symbol` produces the zero `Symbol`. A
+kind this function does not handle returns `void`, and a bad character
+literal gives `<i32>` -1.
+
+```x2c
+~Var count = Var.parse("42", <int>);
+~Var broken = Var.parse("abc", <int>);
+~Var refused = Var.parse("3", <u8>);
+printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
+       broken.tag().str(), broken, refused is void);
+```
+
+**Raises:** `<alloc-fail>` while constructing `String` or quoted-`Symbol`
+output.
+
+Source: `lib/var/construction.x`
+
 <a id="Var.postfix"></a>
 #### Var.postfix
 
@@ -391,6 +515,19 @@ stored value unchanged.
 
 Source: `lib/var/operators.x`
 
+<a id="Var.string"></a>
+#### Var.string
+
+`String Var.string(Var value)`
+
+Extracts the `String` payload of `value`.
+
+**Raises:** `<no-convert>` for any other tag. A `String` destination converts
+a `Var` implicitly through `Var.as_string` instead, and
+`Var.string_payload` reads the payload or NULL without raising.
+
+Source: `lib/var/conversion.x`
+
 <a id="Var.sub"></a>
 #### Var.sub
 
@@ -402,21 +539,26 @@ protocol result keeps the ownership chosen by its callback.
 
 Source: `lib/var/operators.x`
 
-<a id="Var.tag_bottom"></a>
-#### Var.tag_bottom
+<a id="Var.tag"></a>
+#### Var.tag
 
-`meta native unsigned long Var.tag_bottom(Symbol tag)`
+`meta native Symbol Var.tag(Var v)`
 
-Returns the bottom encoding field of built-in `tag`.
+Returns the `Symbol` naming the exact family of `v`'s payload.
+The tag names one family: `<i32>`, `<string>`, `<f64>`, `<symbol>`, or a
+registered custom object tag. Built-in families have one row in the
+encoding table in this file. Use `Var.kind` for a group of
+families and `Var.is` to test one family.
 
-Source: `lib/var/encoding.x`
+Raw `Null`, the all-zero `Var` written `(Var) { .u64 = 0 }`, is a native
+null pointer. It decodes as `<p48>`; there is no dedicated null family.
+Test it with `Var.is_null`. An encoding matching no reserved row decodes
+as `<f64>`, since the shifted double range covers everything left over.
 
-<a id="Var.tag_top"></a>
-#### Var.tag_top
-
-`meta native unsigned long Var.tag_top(Symbol tag)`
-
-Returns the top encoding field of built-in `tag`.
+```x2c
+~Var raw = (Var) { .u64 = 0 };
+printf("%s %s\n", raw.tag().str(), void.tag().str());
+```
 
 Source: `lib/var/encoding.x`
 
@@ -456,38 +598,6 @@ unchanged.
 
 Source: `lib/var/operators.x`
 
-### `X2CVarNumeric`
-
-<a id="X2CVarNumeric.f32"></a>
-#### X2CVarNumeric.f32
-
-`float X2CVarNumeric.f32(X2CVarNumeric &value)`
-
-Converts a decoded numeric value to native `float` without boxing.
-Uses the target host cast, preserving its rounding behavior.
-
-Source: `lib/var/conversion.x`
-
-<a id="X2CVarNumeric.f64"></a>
-#### X2CVarNumeric.f64
-
-`double X2CVarNumeric.f64(X2CVarNumeric &value)`
-
-Converts a decoded numeric value to native `double` without boxing.
-Uses the target host cast, preserving its rounding behavior.
-
-Source: `lib/var/conversion.x`
-
-<a id="X2CVarNumeric.ldouble"></a>
-#### X2CVarNumeric.ldouble
-
-`long double X2CVarNumeric.ldouble(X2CVarNumeric &value)`
-
-Converts a decoded numeric value to native `long double` without boxing.
-Uses the target host cast, preserving its rounding behavior.
-
-Source: `lib/var/conversion.x`
-
 ## Advanced and interop API
 
 | Function | Summary |
@@ -515,42 +625,34 @@ Source: `lib/var/conversion.x`
 | [`x2c_var_update_ulong`](#x2c_var_update_ulong) | Applies a dynamic compound `op` to a native `ulong` lvalue. |
 | [`x2c_var_update_ulong_long`](#x2c_var_update_ulong_long) | Applies a dynamic compound `op` to a native `unsigned long long` lvalue. |
 | [`x2c_var_update_volatile`](#x2c_var_update_volatile) | Applies `Var.update` semantics to a volatile destination in generated code. |
-| [`Var.array`](#Var.array) | Extracts the `Array` payload of `value`. |
-| [`Var.as_iter`](#Var.as_iter) | Extracts the `Iter` payload of `value`. |
-| [`Var.block`](#Var.block) | Extracts the `Block` payload of `value`. |
 | [`Var.box_long`](#Var.box_long) | Boxes a `long` into a scope-owned `<long>` value. |
 | [`Var.box_long_double`](#Var.box_long_double) | Boxes a `long double` into a scope-owned `<ldouble>` value. |
 | [`Var.box_long_long`](#Var.box_long_long) | Boxes a native signed long-long value without losing precision. |
+| [`Var.box_record`](#Var.box_record) | Boxes a copy of the `size`-byte record at `record` as custom `tag`. |
 | [`Var.box_ulong`](#Var.box_ulong) | Boxes an `unsigned long` into a scope-owned `<ulong>` value. |
 | [`Var.box_ulong_long`](#Var.box_ulong_long) | Boxes a native unsigned long-long value without losing precision. |
-| [`Var.buffer`](#Var.buffer) | Extracts the `Buffer` payload of `value`. |
-| [`Var.bytes`](#Var.bytes) | Extracts the `Bytes` payload of `value`. |
 | [`Var.encoding_valid`](#Var.encoding_valid) | Reports whether `value` has a valid structural `Var` encoding. |
-| [`Var.file`](#Var.file) | Extracts the `File` payload of `value`. |
+| [`Var.fallback_truth`](#Var.fallback_truth) | Returns built-in truthiness without consulting a registered descriptor. |
 | [`Var.floating`](#Var.floating) | Returns `v`'s payload as a `double` when its tag is floating, or 0.0. |
 | [`Var.integer`](#Var.integer) | Returns `v`'s payload as a `long` when its tag is integral, or 0. |
 | [`Var.integer_box`](#Var.integer_box) | Boxes the low target-width bits of `raw` using integer `target`. |
 | [`Var.integer_compare`](#Var.integer_compare) | Orders the integer payloads of `a` and `b`, returning -1, 0, or 1. |
 | [`Var.integer_floating_compare`](#Var.integer_floating_compare) | Orders an integer-kinded `integer` against a floating `floating`. |
 | [`Var.integer_tag`](#Var.integer_tag) | Returns the integer tag selected by `rank` and signedness. |
-| [`Var.kind`](#Var.kind) | Returns the `Symbol` naming the coarse category of `v`'s payload. |
 | [`Var.known_tag`](#Var.known_tag) | Reports whether `tag` has a built-in encoding or declared custom class. |
-| [`Var.list`](#Var.list) | Extracts the `List` payload of `value`. |
 | [`Var.long_at`](#Var.long_at) | Returns `value` as a native `long` under the `Var.convert` rules. |
 | [`Var.long_double_at`](#Var.long_double_at) | Returns `value` as a native `long double` under the `Var.convert` rules. |
 | [`Var.long_double_value`](#Var.long_double_value) | Returns the payload of an `<ldouble>` box, or 0.0 if `v` has another tag. |
 | [`Var.long_long_at`](#Var.long_long_at) | Returns `value` as a native `long long` under the `Var.convert` rules. |
 | [`Var.long_long_value`](#Var.long_long_value) | Returns an `<llong>` box's signed payload, or 0 for another tag. |
 | [`Var.long_value`](#Var.long_value) | Returns the payload of a `<long>` box, or 0 if `v` has a different tag. |
-| [`Var.map`](#Var.map) | Extracts the `Map` payload of `value`. |
 | [`Var.numeric_decode`](#Var.numeric_decode) | Decodes a numeric `value` into caller-owned `out` storage. |
 | [`Var.numeric_info`](#Var.numeric_info) | Writes numeric-family metadata for `tag` and returns nonzero. |
-| [`Var.parse`](#Var.parse) | Parses `str` as source text of kind `kind` and returns the boxed value. |
 | [`Var.pointer`](#Var.pointer) | Returns the raw address stored in `v`, or NULL if it holds no address. |
 | [`Var.register_object_tag`](#Var.register_object_tag) | Declares custom boxed-object `tag` and returns 0. |
 | [`Var.signed_from_bits`](#Var.signed_from_bits) | Interprets the low `bits` of `raw` as a two's-complement signed value. |
-| [`Var.string`](#Var.string) | Extracts the `String` payload of `value`. |
-| [`Var.tag`](#Var.tag) | Returns the `Symbol` naming the exact family of `v`'s payload. |
+| [`Var.tag_bottom`](#Var.tag_bottom) | Returns the bottom encoding field of built-in `tag`. |
+| [`Var.tag_top`](#Var.tag_top) | Returns the top encoding field of built-in `tag`. |
 | [`Var.ulong_at`](#Var.ulong_at) | Returns `value` as a native `ulong` under the `Var.convert` rules. |
 | [`Var.ulong_long_at`](#Var.ulong_long_at) | Returns `value` as a native `unsigned long long` under the `Var.convert` rules. |
 | [`Var.ulong_long_value`](#Var.ulong_long_value) | Returns a `<ullong>` box's unsigned payload, or 0 for another tag. |
@@ -559,6 +661,9 @@ Source: `lib/var/conversion.x`
 | [`Var.wide_equal`](#Var.wide_equal) | Reports content equality for supported wide scalar boxes. |
 | [`Var.wide_hash`](#Var.wide_hash) | Returns a supported wide scalar box's content hash, excluding ABI padding, or 0 otherwise. |
 | [`Var.width_mask`](#Var.width_mask) | Returns a mask containing the low `bits` bits. |
+| [`X2CVarNumeric.f32`](#X2CVarNumeric.f32) | Converts a decoded numeric value to native `float` without boxing. |
+| [`X2CVarNumeric.f64`](#X2CVarNumeric.f64) | Converts a decoded numeric value to native `double` without boxing. |
+| [`X2CVarNumeric.ldouble`](#X2CVarNumeric.ldouble) | Converts a decoded numeric value to native `long double` without boxing. |
 
 ### Functions
 
@@ -899,45 +1004,6 @@ Source: `lib/var/operators.x`
 
 ### `Var`
 
-<a id="Var.array"></a>
-#### Var.array
-
-`Array Var.array(Var value)`
-
-Extracts the `Array` payload of `value`.
-
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `Array` uses `Var.array_payload`, which reads the payload or
-NULL without raising.
-
-Source: `lib/var/conversion.x`
-
-<a id="Var.as_iter"></a>
-#### Var.as_iter
-
-`Iter Var.as_iter(Var value)`
-
-Extracts the `Iter` payload of `value`.
-
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `Iter` uses `Var.iter_payload`, which reads the payload or
-NULL without raising.
-
-Source: `lib/var/conversion.x`
-
-<a id="Var.block"></a>
-#### Var.block
-
-`Block Var.block(Var value)`
-
-Extracts the `Block` payload of `value`.
-
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `Block` uses `Var.block_payload`, which reads the payload or
-NULL without raising.
-
-Source: `lib/var/conversion.x`
-
 <a id="Var.box_long"></a>
 #### Var.box_long
 
@@ -997,6 +1063,20 @@ initialization, allocation failure uses the raw fatal floor.
 
 Source: `lib/var/numbers.x`
 
+<a id="Var.box_record"></a>
+#### Var.box_record
+
+`Var Var.box_record(Symbol tag, const void *record, size_t size)`
+
+Boxes a copy of the `size`-byte record at `record` as custom `tag`.
+The copy is allocated in the active `Scope`. Once the direct custom rows
+are taken, the copy carries its descriptor in front of it.
+
+**Raises:** `<bad-target>` when `tag` names no declared class, or
+`<alloc-fail>` when the copy cannot be allocated.
+
+Source: `lib/var/classes.x`
+
 <a id="Var.box_ulong"></a>
 #### Var.box_ulong
 
@@ -1028,32 +1108,6 @@ initialization, allocation failure uses the raw fatal floor.
 
 Source: `lib/var/numbers.x`
 
-<a id="Var.buffer"></a>
-#### Var.buffer
-
-`Buffer Var.buffer(Var value)`
-
-Extracts the `Buffer` payload of `value`.
-
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `Buffer` uses `Var.buffer_payload`, which reads the payload or
-NULL without raising.
-
-Source: `lib/var/conversion.x`
-
-<a id="Var.bytes"></a>
-#### Var.bytes
-
-`Bytes Var.bytes(Var value)`
-
-Extracts the `Bytes` payload of `value`.
-
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `Bytes` uses `Var.bytes_payload`, which reads the payload or
-NULL without raising.
-
-Source: `lib/var/conversion.x`
-
 <a id="Var.encoding_valid"></a>
 #### Var.encoding_valid
 
@@ -1065,18 +1119,19 @@ type; wide encodings in particular require a readable `Scope`-owned box.
 
 Source: `lib/var/encoding.x`
 
-<a id="Var.file"></a>
-#### Var.file
+<a id="Var.fallback_truth"></a>
+#### Var.fallback_truth
 
-`File Var.file(Var value)`
+`int Var.fallback_truth(Var value)`
 
-Extracts the `File` payload of `value`.
+Returns built-in truthiness without consulting a registered descriptor.
+Numeric and `Symbol` zero and null pointer-bearing values are false; other
+supported built-ins are true. Container-specific truth comes from dispatch.
 
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `File` uses `Var.file_payload`, which reads the payload or
-NULL without raising.
+**Raises:** `<bad-enc>` for invalid `Var` bits, `<void-op>` for `void`, or
+`<bad-types>` when no truthiness rule exists.
 
-Source: `lib/var/conversion.x`
+Source: `lib/var/operators.x`
 
 <a id="Var.floating"></a>
 #### Var.floating
@@ -1190,24 +1245,6 @@ signedness. Ranks four through six select the 48-bit, `long`, and
 
 Source: `lib/var/conversion.x`
 
-<a id="Var.kind"></a>
-#### Var.kind
-
-`meta native Symbol Var.kind(Var v)`
-
-Returns the `Symbol` naming the coarse category of `v`'s payload.
-The categories are `<integer>`, `<floating>`, `<symbol>`, `<object>`,
-`<pointer>`, `<reference>`, and `<void>`, and every tag belongs to exactly
-one. Use kind when a group of families is treated alike. This returns
-`<integer>` for all twelve integer widths and `<object>` for every builtin
-class handle such as `String`, `List`, `Map`, and `File`.
-
-`<pointer>` means a raw C pointer such as `<u8*>`, while `<reference>`
-means a pointer to an object handle such as `<string*>`. NaN and the
-infinities are `<floating>`. Only `void` is `<void>`.
-
-Source: `lib/var/encoding.x`
-
 <a id="Var.known_tag"></a>
 #### Var.known_tag
 
@@ -1216,19 +1253,6 @@ Source: `lib/var/encoding.x`
 Reports whether `tag` has a built-in encoding or declared custom class.
 
 Source: `lib/var/var.x`
-
-<a id="Var.list"></a>
-#### Var.list
-
-`List Var.list(Var value)`
-
-Extracts the `List` payload of `value`.
-
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `List` uses `Var.list_payload`, which reads the payload or
-NULL without raising.
-
-Source: `lib/var/conversion.x`
 
 <a id="Var.long_at"></a>
 #### Var.long_at
@@ -1308,19 +1332,6 @@ A tag mismatch yields 0.
 
 Source: `lib/var/numbers.x`
 
-<a id="Var.map"></a>
-#### Var.map
-
-`Map Var.map(Var value)`
-
-Extracts the `Map` payload of `value`.
-
-**Raises:** `<no-convert>` for any other tag. An implicit conversion
-from `Var` to `Map` uses `Var.map_payload`, which reads the payload or
-NULL without raising.
-
-Source: `lib/var/conversion.x`
-
 <a id="Var.numeric_decode"></a>
 #### Var.numeric_decode
 
@@ -1346,42 +1357,6 @@ The special `<nan>`, `<-inf>`, and `<+inf>` tags report the `<f64>` family.
 A null `out` or nonnumeric tag returns zero and leaves storage untouched.
 
 Source: `lib/var/conversion.x`
-
-<a id="Var.parse"></a>
-#### Var.parse
-
-`meta native Var Var.parse(String str, Symbol kind)`
-
-Parses `str` as source text of kind `kind` and returns the boxed value.
-The kinds understood are `<int>`, `<float>`, `<double>`, `<string>`,
-`<symbol>`, and `<char>`. For `<string>`, matching `%"..."` or `"..."`
-delimiters are removed; unquoted input is also accepted, and either form
-is unescaped. `<char>` expects `'a'` complete with its quotes and produces
-an `<i32>`. Both `<float>` and `<double>` produce an `<f64>`; there is no
-path here to `<f32>`.
-
-Integer and floating kinds require the whole input to parse, apart from
-surrounding whitespace. Malformed input, trailing text, a value outside
-the native reader's range, or an `<int>` outside `int` range returns
-`void`, so a parsed numeric zero remains distinguishable from failure.
-
-`<symbol>` accepts the leading atom or `<...>` `Symbol` literal and ignores
-trailing text; no recognized leading `Symbol` produces the zero `Symbol`. A
-kind this function does not handle returns `void`, and a bad character
-literal gives `<i32>` -1.
-
-```x2c
-~Var count = Var.parse("42", <int>);
-~Var broken = Var.parse("abc", <int>);
-~Var refused = Var.parse("3", <u8>);
-printf("%s=%s %s=%s refused=%d\n", count.tag().str(), count,
-       broken.tag().str(), broken, refused is void);
-```
-
-**Raises:** `<alloc-fail>` while constructing `String` or quoted-`Symbol`
-output.
-
-Source: `lib/var/construction.x`
 
 <a id="Var.pointer"></a>
 #### Var.pointer
@@ -1430,39 +1405,21 @@ Interprets the low `bits` of `raw` as a two's-complement signed value.
 
 Source: `lib/var/conversion.x`
 
-<a id="Var.string"></a>
-#### Var.string
+<a id="Var.tag_bottom"></a>
+#### Var.tag_bottom
 
-`String Var.string(Var value)`
+`meta native unsigned long Var.tag_bottom(Symbol tag)`
 
-Extracts the `String` payload of `value`.
+Returns the bottom encoding field of built-in `tag`.
 
-**Raises:** `<no-convert>` for any other tag. A `String` destination converts
-a `Var` implicitly through `Var.as_string` instead, and
-`Var.string_payload` reads the payload or NULL without raising.
+Source: `lib/var/encoding.x`
 
-Source: `lib/var/conversion.x`
+<a id="Var.tag_top"></a>
+#### Var.tag_top
 
-<a id="Var.tag"></a>
-#### Var.tag
+`meta native unsigned long Var.tag_top(Symbol tag)`
 
-`meta native Symbol Var.tag(Var v)`
-
-Returns the `Symbol` naming the exact family of `v`'s payload.
-The tag names one family: `<i32>`, `<string>`, `<f64>`, `<symbol>`, or a
-registered custom object tag. Built-in families have one row in the
-encoding table in this file. Use `Var.kind` for a group of
-families and `Var.is` to test one family.
-
-Raw `Null`, the all-zero `Var` written `(Var) { .u64 = 0 }`, is a native
-null pointer. It decodes as `<p48>`; there is no dedicated null family.
-Test it with `Var.is_null`. An encoding matching no reserved row decodes
-as `<f64>`, since the shifted double range covers everything left over.
-
-```x2c
-~Var raw = (Var) { .u64 = 0 };
-printf("%s %s\n", raw.tag().str(), void.tag().str());
-```
+Returns the top encoding field of built-in `tag`.
 
 Source: `lib/var/encoding.x`
 
@@ -1573,6 +1530,38 @@ Zero yields zero and a width at least `unsigned long long` yields
 
 Source: `lib/var/conversion.x`
 
+### `X2CVarNumeric`
+
+<a id="X2CVarNumeric.f32"></a>
+#### X2CVarNumeric.f32
+
+`float X2CVarNumeric.f32(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `float` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/var/conversion.x`
+
+<a id="X2CVarNumeric.f64"></a>
+#### X2CVarNumeric.f64
+
+`double X2CVarNumeric.f64(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `double` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/var/conversion.x`
+
+<a id="X2CVarNumeric.ldouble"></a>
+#### X2CVarNumeric.ldouble
+
+`long double X2CVarNumeric.ldouble(X2CVarNumeric &value)`
+
+Converts a decoded numeric value to native `long double` without boxing.
+Uses the target host cast, preserving its rounding behavior.
+
+Source: `lib/var/conversion.x`
+
 ## Runtime-internal callables
 
 These callables connect runtime translation units. They are documented
@@ -1581,6 +1570,7 @@ for source readers but are not supported as user API.
 | Function | Summary |
 | --- | --- |
 | [`Var.clone_wide`](#Var.clone_wide) | Clones the wide numeric `value` into a new box in the active `Scope`. |
+| [`Var.convert_at`](#Var.convert_at) | Converts `value` using `Var.convert` and records `site` on conversion failures for a void or nonnumeric source or a nonnumeric target. |
 | [`Var.custom_descriptor_index`](#Var.custom_descriptor_index) | Returns a boxed custom object's row, or `-1` for another value. |
 | [`Var.move_wide_to`](#Var.move_wide_to) | Moves a wide numeric box into the destination `Scope` held by `scope`. |
 | [`Var.wide_owner`](#Var.wide_owner) | Returns the `Scope` owning a live wide numeric box, or NULL otherwise. |
@@ -1600,6 +1590,18 @@ tells the two apart. Returns `void` when `value` is not wide.
 if its address cannot be represented in a `Var`.
 
 Source: `lib/var/numbers.x`
+
+<a id="Var.convert_at"></a>
+#### Var.convert_at
+
+`Var Var.convert_at(Var value, Symbol target, const X2CErrorSite *site)`
+
+Converts `value` using `Var.convert` and records `site` on conversion
+failures for a void or nonnumeric source or a nonnumeric target.
+A null `site` records no source location. The site is borrowed only
+during the call; conversion and result ownership follow `Var.convert`.
+
+Source: `lib/var/conversion.x`
 
 <a id="Var.custom_descriptor_index"></a>
 #### Var.custom_descriptor_index

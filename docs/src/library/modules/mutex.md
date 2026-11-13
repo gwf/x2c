@@ -5,6 +5,8 @@
 
 Source: `lib/mutex.x`
 
+Guide: [Contexts and Threads](../../guide/contexts-and-threads.md)
+
 Shared mutable-state coordination.
 
 ## Primary API

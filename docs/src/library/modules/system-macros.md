@@ -5,6 +5,8 @@
 
 Source: `lib/system-macros.x`
 
+Guide: [Classes and System Macros](../../guide/system-macros.md)
+
 Convenience macros for text, timing, and processes.
 
 Include it with `#include "system-macros.x"`.

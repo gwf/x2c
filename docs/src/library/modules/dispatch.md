@@ -11,8 +11,10 @@ Typed descriptors for runtime `Var` behavior.
 
 | Function | Summary |
 | --- | --- |
+| [`Var.compare`](#Var.compare) | Compares `a` and `b` by runtime value group and registered ordering. |
 | [`Var.contains`](#Var.contains) | Tests dynamic membership through the receiver's registered protocol row. |
 | [`Var.enumerate`](#Var.enumerate) | Returns an iterator over what a two-name `foreach` destructures. |
+| [`Var.equal`](#Var.equal) | Applies the registered equality operation for `a` and `b`. |
 | [`Var.fallback_compare`](#Var.fallback_compare) | Compares without consulting a runtime descriptor. |
 | [`Var.fallback_equal`](#Var.fallback_equal) | Applies non-dispatch equality to `a` and `b`. |
 | [`Var.fallback_hash`](#Var.fallback_hash) | Returns the non-dispatch runtime hash of `Var`. |
@@ -24,11 +26,28 @@ Typed descriptors for runtime `Var` behavior.
 | [`Var.getindex`](#Var.getindex) | Reads a dynamic indexed value through the receiver's protocol row. |
 | [`Var.iter`](#Var.iter) | Returns an iterator over `Var`. |
 | [`Var.postfixindex`](#Var.postfixindex) | Applies a dynamic postfix update at `key` and returns its prior value. |
+| [`Var.repr`](#Var.repr) | Returns the readable representation of `Var`. |
+| [`Var.same`](#Var.same) | Reports whether `a` and `b` have identical `Var` bits. |
 | [`Var.setindex`](#Var.setindex) | Stores and returns a dynamic indexed value through its protocol row. |
+| [`Var.str`](#Var.str) | Returns the display `String` of `Var`. |
 | [`Var.updateindex`](#Var.updateindex) | Applies the registered dynamic compound update at `key` and returns its result. |
 | [`Var.write_str`](#Var.write_str) | Appends the display text of `Var` to a `Buffer`. |
 
 ### `Var`
+
+<a id="Var.compare"></a>
+#### Var.compare
+
+`meta native int Var.compare(Var a, Var b)`
+
+Compares `a` and `b` by runtime value group and registered ordering.
+The order is total, so sorting uses it: numbers order by value, NaN after
+every other number, and equal values of different types by type. The
+relational operators compare two numbers as C does instead.
+
+**Raises:** `<void-op>` when either operand is `void`.
+
+Source: `lib/dispatch.x`
 
 <a id="Var.contains"></a>
 #### Var.contains
@@ -53,6 +72,18 @@ any other value yields what `Var.iter` yields.
 
 **Raises:** `<void-op>` for `void`. A null `dest` returns NULL without
 raising.
+
+Source: `lib/dispatch.x`
+
+<a id="Var.equal"></a>
+#### Var.equal
+
+`int Var.equal(Var a, Var b)`
+
+Applies the registered equality operation for `a` and `b`.
+Two numbers are equal only with the same tag and the same bits, so this
+agrees with `Var.hash`; Map and Pool keys compare this way. The `==`
+operator compares two numbers as C does instead.
 
 Source: `lib/dispatch.x`
 
@@ -173,6 +204,25 @@ receiver's indexed update.
 
 Source: `lib/dispatch.x`
 
+<a id="Var.repr"></a>
+#### Var.repr
+
+`String Var.repr(Var v)`
+
+Returns the readable representation of `Var`.
+
+Source: `lib/dispatch.x`
+
+<a id="Var.same"></a>
+#### Var.same
+
+`meta native inline int Var.same(Var a, Var b)`
+
+Reports whether `a` and `b` have identical `Var` bits.
+Two boxes of one wide number differ here, although `===` holds for them.
+
+Source: `lib/dispatch.x`
+
 <a id="Var.setindex"></a>
 #### Var.setindex
 
@@ -182,6 +232,15 @@ Stores and returns a dynamic indexed value through its protocol row.
 
 **Raises:** `<bad-enc>`, `<void-op>`, `<no-member>`, or a cause from the
 receiver's indexed assignment.
+
+Source: `lib/dispatch.x`
+
+<a id="Var.str"></a>
+#### Var.str
+
+`String Var.str(Var v)`
+
+Returns the display `String` of `Var`.
 
 Source: `lib/dispatch.x`
 
@@ -226,14 +285,9 @@ Source: `lib/dispatch.x`
 | [`RenderPath.enter`](#RenderPath.enter) | Enters an object's recursive rendering, or returns zero for a cycle. |
 | [`RenderPath.leave`](#RenderPath.leave) | Restores the path after the last successful entry in this execution. |
 | [`Var.as_string`](#Var.as_string) | Returns what a `String` destination reads from `Var`: its `String` payload, the display `String` of any other value, or NULL for `void` and for `Null`, the null pointer. |
-| [`Var.compare`](#Var.compare) | Compares `a` and `b` by runtime value group and registered ordering. |
 | [`Var.dispatch_truth`](#Var.dispatch_truth) | Tries the registered truth callback for `value`. |
-| [`Var.equal`](#Var.equal) | Applies the registered equality operation for `a` and `b`. |
 | [`Var.hash`](#Var.hash) | Returns the runtime hash of `Var`. |
 | [`Var.pointer_string`](#Var.pointer_string) | Formats the fallback display `String` for a pointer-bearing `Var`. |
-| [`Var.repr`](#Var.repr) | Returns the readable representation of `Var`. |
-| [`Var.same`](#Var.same) | Reports whether `a` and `b` have identical `Var` bits. |
-| [`Var.str`](#Var.str) | Returns the display `String` of `Var`. |
 | [`Var.try_dispatch_binary`](#Var.try_dispatch_binary) | Tries one registered binary callback for `lhs`. |
 | [`Var.try_dispatch_unary`](#Var.try_dispatch_unary) | Tries the registered `<neg>` callback for `value`. |
 | [`Var.write_pointer_repr`](#Var.write_pointer_repr) | Writes the fallback readable form of a pointer-bearing `Var`. |
@@ -333,7 +387,9 @@ callbacks have the same process-wide lifetime as ordinary descriptors.
 Returns zero for a null tag or name, and one otherwise. A built-in tag or
 distinct names for one tag abort.
 Explicit names retain case; ordinary inferred-tag registration still
-requires lowercase names. Raises: `<bad-state>` after registration freezes.
+requires lowercase names.
+
+**Raises:** `<bad-state>` after registration freezes.
 
 Source: `lib/dispatch.x`
 
@@ -375,20 +431,6 @@ and for `Null`, the null pointer.
 
 Source: `lib/dispatch.x`
 
-<a id="Var.compare"></a>
-#### Var.compare
-
-`meta native int Var.compare(Var a, Var b)`
-
-Compares `a` and `b` by runtime value group and registered ordering.
-The order is total, so sorting uses it: numbers order by value, NaN after
-every other number, and equal values of different types by type. The
-relational operators compare two numbers as C does instead.
-
-**Raises:** `<void-op>` when either operand is `void`.
-
-Source: `lib/dispatch.x`
-
 <a id="Var.dispatch_truth"></a>
 #### Var.dispatch_truth
 
@@ -398,18 +440,6 @@ Tries the registered truth callback for `value`.
 A null `handled`, missing descriptor, or missing callback returns zero.
 Otherwise `handled` is set to one and the synchronous callback result is
 returned; an available `handled` is cleared before lookup.
-
-Source: `lib/dispatch.x`
-
-<a id="Var.equal"></a>
-#### Var.equal
-
-`int Var.equal(Var a, Var b)`
-
-Applies the registered equality operation for `a` and `b`.
-Two numbers are equal only with the same tag and the same bits, so this
-agrees with `Var.hash`; Map and Pool keys compare this way. The `==`
-operator compares two numbers as C does instead.
 
 Source: `lib/dispatch.x`
 
@@ -430,34 +460,6 @@ Source: `lib/dispatch.x`
 `String Var.pointer_string(Var v)`
 
 Formats the fallback display `String` for a pointer-bearing `Var`.
-
-Source: `lib/dispatch.x`
-
-<a id="Var.repr"></a>
-#### Var.repr
-
-`String Var.repr(Var v)`
-
-Returns the readable representation of `Var`.
-
-Source: `lib/dispatch.x`
-
-<a id="Var.same"></a>
-#### Var.same
-
-`meta native inline int Var.same(Var a, Var b)`
-
-Reports whether `a` and `b` have identical `Var` bits.
-Two boxes of one wide number differ here, although `===` holds for them.
-
-Source: `lib/dispatch.x`
-
-<a id="Var.str"></a>
-#### Var.str
-
-`String Var.str(Var v)`
-
-Returns the display `String` of `Var`.
 
 Source: `lib/dispatch.x`
 

@@ -5,6 +5,8 @@
 
 Source: `lib/diff.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 Line differences between two texts.
 
 Include it with `#include "diff.x"`.

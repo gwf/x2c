@@ -188,7 +188,9 @@ Evaluates one Lisp form in `lisp`.
 Evaluation is synchronous and may retain the expression or values it
 reaches in session globals, Lambdas, or captures as described by the module
 ownership rule. Effects completed before a later failure are not rolled
-back. Raises: `<bad-arg>` for a null session, or any evaluator, imported
+back.
+
+**Raises:** `<bad-arg>` for a null session, or any evaluator, imported
 operation, or called-procedure cause.
 
 Source: `lib/lisp/evaluate.x`

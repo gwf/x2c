@@ -361,7 +361,9 @@ Source: `lib/func/func.x`
 
 Rejects a value argument whose source type has no `Var` representation.
 Generated calls use this branch instead of compiling an impossible
-conversion. Raises: `<bad-types>`.
+conversion.
+
+**Raises:** `<bad-types>`.
 
 Source: `lib/func/func.x`
 

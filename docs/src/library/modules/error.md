@@ -5,9 +5,379 @@
 
 Source: `lib/error/error.x`
 
+Guide: [Errors and Cleanup](../../guide/exceptions.md)
+
 Handler stack and accumulated errors.
 
+## Primary API
+
+| Function | Summary |
+| --- | --- |
+| [`Error.mark`](#Error.mark) | Captures the current error-stack position. |
+| [`Error.policy_get`](#Error.policy_get) | Returns the default disposition for `code`. |
+| [`Error.policy_set`](#Error.policy_set) | Sets the default disposition for `code`. |
+| [`Error.pop`](#Error.pop) | Closes the observing handler on top of the handler stack. |
+| [`Error.push`](#Error.push) | Pushes an observing handler and returns its removal handle. |
+| [`Error.raise`](#Error.raise) | Raises one cause with optional structured detail. |
+| [`Error.since`](#Error.since) | Returns the accumulated errors at and after `mark`, oldest first. |
+| [`Error.snapshot`](#Error.snapshot) | Copies one admissible error value into the caller's ordinary owners. |
+
+### `Error`
+
+<a id="Error.mark"></a>
+#### Error.mark
+
+`int Error.mark(void)`
+
+Captures the current error-stack position.
+Pass the result to `Error.since` to inspect only later errors.
+
+Source: `lib/error/records.x`
+
+<a id="Error.policy_get"></a>
+#### Error.policy_get
+
+`Symbol Error.policy_get(Symbol code)`
+
+Returns the default disposition for `code`.
+Unknown codes and an unavailable `Error` runtime default to `<abort>`.
+
+Source: `lib/error/policy.x`
+
+<a id="Error.policy_set"></a>
+#### Error.policy_set
+
+`void Error.policy_set(Symbol code, Symbol disposition)`
+
+Sets the default disposition for `code`.
+Supported policy values are `<abort>`, `<collect>`, `<log>`, and
+`<ignore>`. Another value raises `<bad-arg>` and leaves the previous policy
+unchanged. Shared non-returning causes accept only `<abort>`; another
+disposition raises `<bad-arg>` and leaves their policy unchanged. The call
+is a no-op while `Error` is unavailable; failure to update `Error`-owned
+storage reaches the non-reentrant error floor.
+
+Source: `lib/error/policy.x`
+
+<a id="Error.pop"></a>
+#### Error.pop
+
+`void Error.pop(ErrorHandler handle)`
+
+Closes the observing handler on top of the handler stack.
+Closing truncates and reclaims every error above the handler's registration
+watermark, then unregisters it. `Error`s below the watermark remain.
+Handles must be popped in stack order. An out-of-order pop reaches the
+non-reentrant error floor; a null handle does nothing.
+
+Source: `lib/error/handlers.x`
+
+<a id="Error.push"></a>
+#### Error.push
+
+`ErrorHandler Error.push(ErrorHandlerFn fn, Var data)`
+
+Pushes an observing handler and returns its removal handle.
+The handler sees a borrowed view of errors raised after this registration;
+the view is valid only during the callback. Use `Error.snapshot` for any
+value that must escape. Returning `<handled>` consumes that slice,
+`<declined>` leaves it for outer handlers, and `<fatal>` reaches the error
+floor. For a shared non-returning cause, `<handled>` also reaches the
+floor. A null callback or unavailable runtime returns NULL without
+registering. Raises `<alloc-fail>` if registration storage cannot be
+allocated. `data` is retained by value without copying its referent, so
+any referenced storage must outlive the registration.
+
+Source: `lib/error/handlers.x`
+
+<a id="Error.raise"></a>
+#### Error.raise
+
+`Symbol Error.raise(Symbol code, List detail)`
+
+Raises one cause with optional structured detail.
+This functional entry records and dispatches like the `raise` statement
+but has no source-location record. A handled resumable error returns
+`<handled>`; a collected or policy-consumed resumable error returns
+`<declined>`. Shared non-returning causes may transfer to a matching
+filtered catch but never return from this call. Detail is recursively
+restricted to null/`nil`, numeric values, enums, `Symbol`s/`Atom`s,
+`String`s, and `List`s of those values. An invalid dynamic detail,
+unhandled abort-policy error, unavailable runtime, or reentrant failure
+reaches the non-reentrant error floor.
+
+Prefer the `raise` statement in source so generated location detail is
+retained.
+
+Source: `lib/error/dispatch.x`
+
+<a id="Error.since"></a>
+#### Error.since
+
+`List Error.since(int mark)`
+
+Returns the accumulated errors at and after `mark`, oldest first.
+Each entry has `code`, `detail`, and `location` fields; a location
+inside the runtime library also holds `(runtime 1)`. An invalid mark or
+an unavailable `Error` runtime returns `nil`. The snapshot enters the
+caller's outermost `Scope` and canonical pools and remains live until
+those owners are released. Failure to materialize it reaches the
+non-reentrant error floor.
+
+Source: `lib/error/records.x`
+
+<a id="Error.snapshot"></a>
+#### Error.snapshot
+
+`Var Error.snapshot(Var value)`
+
+Copies one admissible error value into the caller's ordinary owners.
+Handler slices and filtered-catch bindings are borrowed. Snapshot a value
+that must outlive its callback or selected arm; `String`s and `List`s enter
+the caller's outermost canonical pools and wide scalar boxes enter its
+outermost `Scope`, so nested caller brackets may be released safely.
+Invalid or identity-bearing values and failures while copying reach the raw
+error floor; they never re-enter handler dispatch.
+
+Source: `lib/error/records.x`
+
 ## Advanced and interop API
+
+| Function | Summary |
+| --- | --- |
+| [`Error.bound`](#Error.bound) | Returns the maximum number of errors that may remain accumulated. |
+| [`Error.bound_set`](#Error.bound_set) | Sets the accumulated-error bound when `bound` is positive. |
+| [`Error.count`](#Error.count) | Returns the number of errors currently accumulated. |
+| [`Error.depth`](#Error.depth) | Returns the current nested error-dispatch depth. |
+| [`Error.handler_depth`](#Error.handler_depth) | Returns the current thread's number of registered `Error` handlers. |
+| [`Error.handler_head`](#Error.handler_head) | Returns the current thread's borrowed top `Error`-handler pointer. |
+| [`Error.initialize_raw`](#Error.initialize_raw) | Initializes the current thread's `Error` runtime without lifecycle insertion. |
+| [`Error.note_rendered`](#Error.note_rendered) | Marks the current nested error dispatch as already rendered by `Logger`. |
+| [`Error.policy_adopt`](#Error.policy_adopt) | Adopts a policy capture on the calling thread and releases it. |
+| [`Error.policy_capture`](#Error.policy_capture) | Captures the calling thread's `Error` policy for another thread to adopt. |
+| [`Error.policy_release`](#Error.policy_release) | Releases a policy capture that no thread adopted. |
+| [`Error.raise_at`](#Error.raise_at) | Raises one cause with structured detail and an optional source location. |
+| [`Error.ready`](#Error.ready) | Reports whether the rich `Error` runtime can currently accept raises. |
+| [`Error.restore`](#Error.restore) | Discards handler and record growth after one cleanup callback. |
+| [`Error.restore_landing`](#Error.restore_landing) | Restores `Error` state after an exception frame lands. |
+| [`Error.shutdown_raw`](#Error.shutdown_raw) | Releases the current thread's `Error` storage without lifecycle insertion. |
+| [`Error.trim`](#Error.trim) | Trims `Error` state while an exception frame leaves. |
+| [`Error.unwind_head`](#Error.unwind_head) | Returns the handler head retained for the current `Error` transfer. |
+
+### `Error`
+
+<a id="Error.bound"></a>
+#### Error.bound
+
+`int Error.bound(void)`
+
+Returns the maximum number of errors that may remain accumulated.
+
+Source: `lib/error/policy.x`
+
+<a id="Error.bound_set"></a>
+#### Error.bound_set
+
+`void Error.bound_set(int bound)`
+
+Sets the accumulated-error bound when `bound` is positive.
+A zero or negative value leaves the current bound unchanged.
+
+Source: `lib/error/policy.x`
+
+<a id="Error.count"></a>
+#### Error.count
+
+`int Error.count(void)`
+
+Returns the number of errors currently accumulated.
+Returns zero before `Error` initialization and after shutdown.
+
+Source: `lib/error/records.x`
+
+<a id="Error.depth"></a>
+#### Error.depth
+
+`int Error.depth(void)`
+
+Returns the current nested error-dispatch depth.
+This is the nesting depth of error dispatch. `Error.count` returns the
+number of accumulated errors.
+
+Source: `lib/error/dispatch.x`
+
+<a id="Error.handler_depth"></a>
+#### Error.handler_depth
+
+`int Error.handler_depth(void)`
+
+Returns the current thread's number of registered `Error` handlers.
+
+Source: `lib/error/handlers.x`
+
+<a id="Error.handler_head"></a>
+#### Error.handler_head
+
+`void *Error.handler_head(void)`
+
+Returns the current thread's borrowed top `Error`-handler pointer.
+Exception frames use this opaque value as a restore watermark; it remains
+valid only while its registration remains live.
+
+Source: `lib/error/handlers.x`
+
+<a id="Error.initialize_raw"></a>
+#### Error.initialize_raw
+
+`void Error.initialize_raw(void)`
+
+Initializes the current thread's `Error` runtime without lifecycle
+insertion. Repeated calls after successful initialization and calls after
+shutdown do nothing. Initialization owns a private `Scope`, record stack,
+and policy `Map`; failure before the `Error` runtime becomes ready
+reaches the raw error floor.
+
+Source: `lib/error/runtime.x`
+
+<a id="Error.note_rendered"></a>
+#### Error.note_rendered
+
+`void Error.note_rendered(void)`
+
+Marks the current nested error dispatch as already rendered by `Logger`.
+This suppresses only `Error`'s fallback report for a `<log>` policy.
+Calling outside dispatch has no effect.
+
+Source: `lib/error/dispatch.x`
+
+<a id="Error.policy_adopt"></a>
+#### Error.policy_adopt
+
+`void Error.policy_adopt(void *capture)`
+
+Adopts a policy capture on the calling thread and releases it.
+Each captured code takes its captured disposition; codes the capture does
+not name keep the disposition this thread already has. A NULL capture, or
+one adopted while `Error` is unavailable, is released without effect.
+Failure to update `Error`-owned storage reaches the non-reentrant error
+floor.
+
+Source: `lib/error/policy.x`
+
+<a id="Error.policy_capture"></a>
+#### Error.policy_capture
+
+`void *Error.policy_capture(void)`
+
+Captures the calling thread's `Error` policy for another thread to adopt.
+Policy is per-thread state, so a worker starts with only the shared
+non-returning causes locked to `<abort>`; a capture carries the starting
+thread's dispositions across. `Error.policy_adopt` consumes the capture and
+`Error.policy_release` discards one that no thread adopted. An unavailable
+`Error` runtime captures nothing and returns NULL.
+
+**Raises:** `<alloc-fail>` when the capture cannot be allocated.
+
+Source: `lib/error/policy.x`
+
+<a id="Error.policy_release"></a>
+#### Error.policy_release
+
+`void Error.policy_release(void *capture)`
+
+Releases a policy capture that no thread adopted. A NULL capture is
+accepted and does nothing.
+
+Source: `lib/error/policy.x`
+
+<a id="Error.raise_at"></a>
+#### Error.raise_at
+
+`void Error.raise_at(const X2CErrorSite *site, Symbol code, List detail)`
+
+Raises one cause with structured detail and an optional source location.
+A null `site` records no location. Detail ownership, dispatch, and return
+behavior follow `Error.raise`; the runtime copies the site during the call.
+
+Source: `lib/error/dispatch.x`
+
+<a id="Error.ready"></a>
+#### Error.ready
+
+`int Error.ready(void)`
+
+Reports whether the rich `Error` runtime can currently accept raises.
+This is per-thread state and is false before initialization and after
+shutdown.
+
+Source: `lib/error/runtime.x`
+
+<a id="Error.restore"></a>
+#### Error.restore
+
+`void Error.restore(int handler_depth, int stack_height)`
+
+Discards handler and record growth after one cleanup callback.
+Registrations and records created by that callback are reclaimed toward
+the saved heights before the interrupted unwind continues. State the
+callback itself removed is not reconstructed.
+
+Source: `lib/error/handlers.x`
+
+<a id="Error.restore_landing"></a>
+#### Error.restore_landing
+
+`void Error.restore_landing(void *saved_head, int saved_depth)`
+
+Restores `Error` state after an exception frame lands.
+`saved_head` is a prior handler watermark and `saved_depth` is the dispatch
+depth captured when the frame was pushed. The saved head is restored only
+when the current handler head is still a suffix of its chain; dispatch
+bookkeeping is cleared.
+
+Source: `lib/error/handlers.x`
+
+<a id="Error.shutdown_raw"></a>
+#### Error.shutdown_raw
+
+`void Error.shutdown_raw(void)`
+
+Releases the current thread's `Error` storage without lifecycle insertion.
+The call reclaims all registrations, records, policies, and private storage
+and makes `Error.ready` false. Repeated calls do nothing; later raises
+reach the raw error floor.
+
+Source: `lib/error/runtime.x`
+
+<a id="Error.trim"></a>
+#### Error.trim
+
+`void Error.trim(void *saved_head, int stack_height)`
+
+Trims `Error` state while an exception frame leaves.
+Handlers newer than `saved_head` are reclaimed. Records at and above
+`stack_height` are also reclaimed; pass the current height on normal frame
+exit to preserve collected errors.
+
+Source: `lib/error/handlers.x`
+
+<a id="Error.unwind_head"></a>
+#### Error.unwind_head
+
+`void *Error.unwind_head(void)`
+
+Returns the handler head retained for the current `Error` transfer.
+During handler dispatch this is the head saved by the outermost dispatch,
+even though the running callbacks are temporarily hidden from nested
+raises. Exception frames store the opaque result as their landing
+watermark.
+
+Source: `lib/error/handlers.x`
+
+## Runtime-internal callables
+
+These callables connect runtime translation units. They are documented
+for source readers but are not supported as user API.
 
 | Function | Summary |
 | --- | --- |
@@ -18,34 +388,16 @@ Handler stack and accumulated errors.
 | [`x2c_error_catch_selected`](#x2c_error_catch_selected) | Returns the selected zero-based catch arm, or -1 before selection or for a null handle. |
 | [`x2c_error_catch_site_pending`](#x2c_error_catch_site_pending) | Reports whether one catch site still needs its patterns at registration. |
 | [`x2c_error_catch_site_push`](#x2c_error_catch_site_push) | Registers one compiler-generated transferring catch through its site. |
+| [`x2c_error_execution_free`](#x2c_error_execution_free) | Releases backing after Error.shutdown_raw ran with its state installed. |
+| [`x2c_error_execution_new`](#x2c_error_execution_new) | Allocates empty execution backing. |
+| [`x2c_error_execution_swap`](#x2c_error_execution_swap) | Exchanges mutable Error state and its readiness as one boundary action. |
 | [`x2c_error_raise`](#x2c_error_raise) | Raises one compiler-generated error from a prepared detail `List`. |
 | [`x2c_error_raise_n`](#x2c_error_raise_n) | Raises one compiler-generated error from native key-value arguments. |
-| [`Error.bound`](#Error.bound) | Returns the maximum number of errors that may remain accumulated. |
-| [`Error.bound_set`](#Error.bound_set) | Sets the accumulated-error bound when `bound` is positive. |
-| [`Error.count`](#Error.count) | Returns the number of errors currently accumulated. |
-| [`Error.depth`](#Error.depth) | Returns the current nested error-dispatch depth. |
-| [`Error.handler_depth`](#Error.handler_depth) | Returns the current thread's number of registered `Error` handlers. |
-| [`Error.handler_head`](#Error.handler_head) | Returns the current thread's borrowed top `Error`-handler pointer. |
-| [`Error.initialize_raw`](#Error.initialize_raw) | Initializes the current thread's `Error` runtime without lifecycle insertion. |
-| [`Error.mark`](#Error.mark) | Captures the current error-stack position. |
-| [`Error.note_rendered`](#Error.note_rendered) | Marks the current nested error dispatch as already rendered by `Logger`. |
-| [`Error.policy_adopt`](#Error.policy_adopt) | Adopts a policy capture on the calling thread and releases it. |
-| [`Error.policy_capture`](#Error.policy_capture) | Captures the calling thread's `Error` policy for another thread to adopt. |
-| [`Error.policy_get`](#Error.policy_get) | Returns the default disposition for `code`. |
-| [`Error.policy_release`](#Error.policy_release) | Releases a policy capture that no thread adopted. |
-| [`Error.policy_set`](#Error.policy_set) | Sets the default disposition for `code`. |
-| [`Error.pop`](#Error.pop) | Closes the observing handler on top of the handler stack. |
-| [`Error.push`](#Error.push) | Pushes an observing handler and returns its removal handle. |
-| [`Error.raise`](#Error.raise) | Raises one cause with optional structured detail. |
-| [`Error.raise_at`](#Error.raise_at) | Raises one cause with structured detail and an optional source location. |
-| [`Error.ready`](#Error.ready) | Reports whether the rich `Error` runtime can currently accept raises. |
-| [`Error.restore`](#Error.restore) | Discards handler and record growth after one cleanup callback. |
-| [`Error.restore_landing`](#Error.restore_landing) | Restores `Error` state after an exception frame lands. |
-| [`Error.shutdown_raw`](#Error.shutdown_raw) | Releases the current thread's `Error` storage without lifecycle insertion. |
-| [`Error.since`](#Error.since) | Returns the accumulated errors at and after `mark`, oldest first. |
-| [`Error.snapshot`](#Error.snapshot) | Copies one admissible error value into the caller's ordinary owners. |
-| [`Error.trim`](#Error.trim) | Trims `Error` state while an exception frame leaves. |
-| [`Error.unwind_head`](#Error.unwind_head) | Returns the handler head retained for the current `Error` transfer. |
+| [`x2c_error_raise_operation`](#x2c_error_raise_operation) | Raises an internal allocator error with native operation text. |
+| [`Error.context_close`](#Error.context_close) | Closes one `Context` `Error` overlay. |
+| [`Error.context_open`](#Error.context_open) | Opens the `Error` state owned by one `Context`. |
+| [`Error.since_in`](#Error.since_in) | Copies errors at and after `mark` into explicit owners, oldest first. |
+| [`Error.snapshot_in`](#Error.snapshot_in) | Copies one admissible error value into explicit runtime owners. |
 
 ### Functions
 
@@ -146,6 +498,30 @@ frame is not yet pushed, so it never sees its own failure.
 
 Source: `lib/error/handlers.x`
 
+#### x2c_error_execution_free
+
+`void x2c_error_execution_free(void *backing)`
+
+Releases backing after Error.shutdown_raw ran with its state installed.
+
+Source: `lib/error/runtime.x`
+
+#### x2c_error_execution_new
+
+`void *x2c_error_execution_new(void)`
+
+Allocates empty execution backing. Initialize Error after installing it.
+
+Source: `lib/error/runtime.x`
+
+#### x2c_error_execution_swap
+
+`void x2c_error_execution_swap(void *backing)`
+
+Exchanges mutable Error state and its readiness as one boundary action.
+
+Source: `lib/error/runtime.x`
+
 #### x2c_error_raise
 
 `void x2c_error_raise(Symbol code, List detail)`
@@ -172,375 +548,6 @@ here. Invalid detail or unavailable, reentrant, or failed `Error`
 machinery reaches the raw error floor.
 
 Source: `lib/error/dispatch.x`
-
-### `Error`
-
-<a id="Error.bound"></a>
-#### Error.bound
-
-`int Error.bound(void)`
-
-Returns the maximum number of errors that may remain accumulated.
-
-Source: `lib/error/policy.x`
-
-<a id="Error.bound_set"></a>
-#### Error.bound_set
-
-`void Error.bound_set(int bound)`
-
-Sets the accumulated-error bound when `bound` is positive.
-A zero or negative value leaves the current bound unchanged.
-
-Source: `lib/error/policy.x`
-
-<a id="Error.count"></a>
-#### Error.count
-
-`int Error.count(void)`
-
-Returns the number of errors currently accumulated.
-Returns zero before `Error` initialization and after shutdown.
-
-Source: `lib/error/records.x`
-
-<a id="Error.depth"></a>
-#### Error.depth
-
-`int Error.depth(void)`
-
-Returns the current nested error-dispatch depth.
-This is the nesting depth of error dispatch. `Error.count` returns the
-number of accumulated errors.
-
-Source: `lib/error/dispatch.x`
-
-<a id="Error.handler_depth"></a>
-#### Error.handler_depth
-
-`int Error.handler_depth(void)`
-
-Returns the current thread's number of registered `Error` handlers.
-
-Source: `lib/error/handlers.x`
-
-<a id="Error.handler_head"></a>
-#### Error.handler_head
-
-`void *Error.handler_head(void)`
-
-Returns the current thread's borrowed top `Error`-handler pointer.
-Exception frames use this opaque value as a restore watermark; it remains
-valid only while its registration remains live.
-
-Source: `lib/error/handlers.x`
-
-<a id="Error.initialize_raw"></a>
-#### Error.initialize_raw
-
-`void Error.initialize_raw(void)`
-
-Initializes the current thread's `Error` runtime without lifecycle
-insertion. Repeated calls after successful initialization and calls after
-shutdown do nothing. Initialization owns a private `Scope`, record stack,
-and policy `Map`; failure before the `Error` runtime becomes ready
-reaches the raw error floor.
-
-Source: `lib/error/runtime.x`
-
-<a id="Error.mark"></a>
-#### Error.mark
-
-`int Error.mark(void)`
-
-Captures the current error-stack position.
-Pass the result to `Error.since` to inspect only later errors.
-
-Source: `lib/error/records.x`
-
-<a id="Error.note_rendered"></a>
-#### Error.note_rendered
-
-`void Error.note_rendered(void)`
-
-Marks the current nested error dispatch as already rendered by `Logger`.
-This suppresses only `Error`'s fallback report for a `<log>` policy.
-Calling outside dispatch has no effect.
-
-Source: `lib/error/dispatch.x`
-
-<a id="Error.policy_adopt"></a>
-#### Error.policy_adopt
-
-`void Error.policy_adopt(void *capture)`
-
-Adopts a policy capture on the calling thread and releases it.
-Each captured code takes its captured disposition; codes the capture does
-not name keep the disposition this thread already has. A NULL capture, or
-one adopted while `Error` is unavailable, is released without effect.
-Failure to update `Error`-owned storage reaches the non-reentrant error
-floor.
-
-Source: `lib/error/policy.x`
-
-<a id="Error.policy_capture"></a>
-#### Error.policy_capture
-
-`void *Error.policy_capture(void)`
-
-Captures the calling thread's `Error` policy for another thread to adopt.
-Policy is per-thread state, so a worker starts with only the shared
-non-returning causes locked to `<abort>`; a capture carries the starting
-thread's dispositions across. `Error.policy_adopt` consumes the capture and
-`Error.policy_release` discards one that no thread adopted. An unavailable
-`Error` runtime captures nothing and returns NULL.
-
-**Raises:** `<alloc-fail>` when the capture cannot be allocated.
-
-Source: `lib/error/policy.x`
-
-<a id="Error.policy_get"></a>
-#### Error.policy_get
-
-`Symbol Error.policy_get(Symbol code)`
-
-Returns the default disposition for `code`.
-Unknown codes and an unavailable `Error` runtime default to `<abort>`.
-
-Source: `lib/error/policy.x`
-
-<a id="Error.policy_release"></a>
-#### Error.policy_release
-
-`void Error.policy_release(void *capture)`
-
-Releases a policy capture that no thread adopted. A NULL capture is
-accepted and does nothing.
-
-Source: `lib/error/policy.x`
-
-<a id="Error.policy_set"></a>
-#### Error.policy_set
-
-`void Error.policy_set(Symbol code, Symbol disposition)`
-
-Sets the default disposition for `code`.
-Supported policy values are `<abort>`, `<collect>`, `<log>`, and
-`<ignore>`. Another value raises `<bad-arg>` and leaves the previous policy
-unchanged. Shared non-returning causes accept only `<abort>`; another
-disposition raises `<bad-arg>` and leaves their policy unchanged. The call
-is a no-op while `Error` is unavailable; failure to update `Error`-owned
-storage reaches the non-reentrant error floor.
-
-Source: `lib/error/policy.x`
-
-<a id="Error.pop"></a>
-#### Error.pop
-
-`void Error.pop(ErrorHandler handle)`
-
-Closes the observing handler on top of the handler stack.
-Closing truncates and reclaims every error above the handler's registration
-watermark, then unregisters it. `Error`s below the watermark remain.
-Handles must be popped in stack order. An out-of-order pop reaches the
-non-reentrant error floor; a null handle does nothing.
-
-Source: `lib/error/handlers.x`
-
-<a id="Error.push"></a>
-#### Error.push
-
-`ErrorHandler Error.push(ErrorHandlerFn fn, Var data)`
-
-Pushes an observing handler and returns its removal handle.
-The handler sees a borrowed view of errors raised after this registration;
-the view is valid only during the callback. Use `Error.snapshot` for any
-value that must escape. Returning `<handled>` consumes that slice,
-`<declined>` leaves it for outer handlers, and `<fatal>` reaches the error
-floor. For a shared non-returning cause, `<handled>` also reaches the
-floor. A null callback or unavailable runtime returns NULL without
-registering. Raises `<alloc-fail>` if registration storage cannot be
-allocated. `data` is retained by value without copying its referent, so
-any referenced storage must outlive the registration.
-
-Source: `lib/error/handlers.x`
-
-<a id="Error.raise"></a>
-#### Error.raise
-
-`Symbol Error.raise(Symbol code, List detail)`
-
-Raises one cause with optional structured detail.
-This functional entry records and dispatches like the `raise` statement
-but has no source-location record. A handled resumable error returns
-`<handled>`; a collected or policy-consumed resumable error returns
-`<declined>`. Shared non-returning causes may transfer to a matching
-filtered catch but never return from this call. Detail is recursively
-restricted to null/`nil`, numeric values, enums, `Symbol`s/`Atom`s,
-`String`s, and `List`s of those values. An invalid dynamic detail,
-unhandled abort-policy error, unavailable runtime, or reentrant failure
-reaches the non-reentrant error floor.
-
-Prefer the `raise` statement in source so generated location detail is
-retained.
-
-Source: `lib/error/dispatch.x`
-
-<a id="Error.raise_at"></a>
-#### Error.raise_at
-
-`void Error.raise_at(const X2CErrorSite *site, Symbol code, List detail)`
-
-Raises one cause with structured detail and an optional source location.
-A null `site` records no location. Detail ownership, dispatch, and return
-behavior follow `Error.raise`; the runtime copies the site during the call.
-
-Source: `lib/error/dispatch.x`
-
-<a id="Error.ready"></a>
-#### Error.ready
-
-`int Error.ready(void)`
-
-Reports whether the rich `Error` runtime can currently accept raises.
-This is per-thread state and is false before initialization and after
-shutdown.
-
-Source: `lib/error/runtime.x`
-
-<a id="Error.restore"></a>
-#### Error.restore
-
-`void Error.restore(int handler_depth, int stack_height)`
-
-Discards handler and record growth after one cleanup callback.
-Registrations and records created by that callback are reclaimed toward
-the saved heights before the interrupted unwind continues. State the
-callback itself removed is not reconstructed.
-
-Source: `lib/error/handlers.x`
-
-<a id="Error.restore_landing"></a>
-#### Error.restore_landing
-
-`void Error.restore_landing(void *saved_head, int saved_depth)`
-
-Restores `Error` state after an exception frame lands.
-`saved_head` is a prior handler watermark and `saved_depth` is the dispatch
-depth captured when the frame was pushed. The saved head is restored only
-when the current handler head is still a suffix of its chain; dispatch
-bookkeeping is cleared.
-
-Source: `lib/error/handlers.x`
-
-<a id="Error.shutdown_raw"></a>
-#### Error.shutdown_raw
-
-`void Error.shutdown_raw(void)`
-
-Releases the current thread's `Error` storage without lifecycle insertion.
-The call reclaims all registrations, records, policies, and private storage
-and makes `Error.ready` false. Repeated calls do nothing; later raises
-reach the raw error floor.
-
-Source: `lib/error/runtime.x`
-
-<a id="Error.since"></a>
-#### Error.since
-
-`List Error.since(int mark)`
-
-Returns the accumulated errors at and after `mark`, oldest first.
-Each entry has `code`, `detail`, and `location` fields; a location
-inside the runtime library also holds `(runtime 1)`. An invalid mark or
-an unavailable `Error` runtime returns `nil`. The snapshot enters the
-caller's outermost `Scope` and canonical pools and remains live until
-those owners are released. Failure to materialize it reaches the
-non-reentrant error floor.
-
-Source: `lib/error/records.x`
-
-<a id="Error.snapshot"></a>
-#### Error.snapshot
-
-`Var Error.snapshot(Var value)`
-
-Copies one admissible error value into the caller's ordinary owners.
-Handler slices and filtered-catch bindings are borrowed. Snapshot a value
-that must outlive its callback or selected arm; `String`s and `List`s enter
-the caller's outermost canonical pools and wide scalar boxes enter its
-outermost `Scope`, so nested caller brackets may be released safely.
-Invalid or identity-bearing values and failures while copying reach the raw
-error floor; they never re-enter handler dispatch.
-
-Source: `lib/error/records.x`
-
-<a id="Error.trim"></a>
-#### Error.trim
-
-`void Error.trim(void *saved_head, int stack_height)`
-
-Trims `Error` state while an exception frame leaves.
-Handlers newer than `saved_head` are reclaimed. Records at and above
-`stack_height` are also reclaimed; pass the current height on normal frame
-exit to preserve collected errors.
-
-Source: `lib/error/handlers.x`
-
-<a id="Error.unwind_head"></a>
-#### Error.unwind_head
-
-`void *Error.unwind_head(void)`
-
-Returns the handler head retained for the current `Error` transfer.
-During handler dispatch this is the head saved by the outermost dispatch,
-even though the running callbacks are temporarily hidden from nested
-raises. Exception frames store the opaque result as their landing
-watermark.
-
-Source: `lib/error/handlers.x`
-
-## Runtime-internal callables
-
-These callables connect runtime translation units. They are documented
-for source readers but are not supported as user API.
-
-| Function | Summary |
-| --- | --- |
-| [`x2c_error_execution_free`](#x2c_error_execution_free) | Releases backing after Error.shutdown_raw ran with its state installed. |
-| [`x2c_error_execution_new`](#x2c_error_execution_new) | Allocates empty execution backing. |
-| [`x2c_error_execution_swap`](#x2c_error_execution_swap) | Exchanges mutable Error state and its readiness as one boundary action. |
-| [`x2c_error_raise_operation`](#x2c_error_raise_operation) | Raises an internal allocator error with native operation text. |
-| [`Error.context_close`](#Error.context_close) | Closes one `Context` `Error` overlay. |
-| [`Error.context_open`](#Error.context_open) | Opens the `Error` state owned by one `Context`. |
-| [`Error.since_in`](#Error.since_in) | Copies errors at and after `mark` into explicit owners, oldest first. |
-| [`Error.snapshot_in`](#Error.snapshot_in) | Copies one admissible error value into explicit runtime owners. |
-
-### Functions
-
-#### x2c_error_execution_free
-
-`void x2c_error_execution_free(void *backing)`
-
-Releases backing after Error.shutdown_raw ran with its state installed.
-
-Source: `lib/error/runtime.x`
-
-#### x2c_error_execution_new
-
-`void *x2c_error_execution_new(void)`
-
-Allocates empty execution backing. Initialize Error after installing it.
-
-Source: `lib/error/runtime.x`
-
-#### x2c_error_execution_swap
-
-`void x2c_error_execution_swap(void *backing)`
-
-Exchanges mutable Error state and its readiness as one boundary action.
-
-Source: `lib/error/runtime.x`
 
 #### x2c_error_raise_operation
 

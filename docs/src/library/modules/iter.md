@@ -5,6 +5,8 @@
 
 Source: `lib/iter.x`
 
+Guide: [Iteration](../../guide/iteration.md)
+
 Single-pass pull iterators.
 
 ## Primary API
@@ -244,7 +246,9 @@ printf("%s\n", squares.list().str());
 ```
 
 A null `dest` returns NULL. An empty source does not invoke or check
-`func`. Raises: whatever the source, `Func.apply`, or `func` raises while
+`func`.
+
+**Raises:** whatever the source, `Func.apply`, or `func` raises while
 pulling, including `<void-op>` when `func` returns `void` and the iterator
 rejects it as an element.
 

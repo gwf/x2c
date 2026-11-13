@@ -5,6 +5,8 @@
 
 Source: `lib/process.x`
 
+Guide: [Commands and Files](../../guide/scripting.md)
+
 Run commands and pipelines without a shell.
 
 Include it with `#include "process.x"`.

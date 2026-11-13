@@ -5,6 +5,8 @@
 
 Source: `lib/rewrite.x`
 
+Guide: [Generating Code](../../guide/generating-code.md)
+
 Pattern registration for compiler rewrites.
 
 Include it with `#include "rewrite.x"`.

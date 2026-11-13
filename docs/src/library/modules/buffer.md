@@ -5,6 +5,8 @@
 
 Source: `lib/buffer.x`
 
+Guide: [Strings, Lists, Arrays, and Maps](../../guide/collections.md)
+
 Growable text buffer with indentation support.
 
 ## Primary API
@@ -310,7 +312,9 @@ Source: `lib/buffer.x`
 
 Appends `length` bytes from `text` to `buf`.
 `text` may be a live range inside `buf.content`, including across growth.
-A zero length accepts a null source. Raises: `<bad-arg>` for a null
+A zero length accepts a null source.
+
+**Raises:** `<bad-arg>` for a null
 nonempty source or embedded NUL, or `<size-limit>` or `<alloc-fail>` when
 the `Buffer` cannot grow. Argument, allocation, and size failures leave the
 text and line state unchanged.
@@ -323,7 +327,9 @@ Source: `lib/buffer.x`
 `meta native Self Buffer.write_repeat(Self buf, char value, size_t count)`
 
 Appends `count` copies of the non-NUL byte `value` to `buf`.
-A zero count accepts any value. Raises: `<bad-arg>` when a nonzero write
+A zero count accepts any value.
+
+**Raises:** `<bad-arg>` when a nonzero write
 uses NUL, or `<size-limit>` or `<alloc-fail>` when the `Buffer` cannot
 grow. These failures leave text and line state unchanged.
 
