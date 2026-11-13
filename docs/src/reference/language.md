@@ -538,17 +538,19 @@ of a macro that x2c leaves to the C compiler. A member of an anonymous union
 or struct belongs to its enclosing
 aggregate, and `.` reaches it through a pointer like any other member. `.`
 reaches through one pointer level, so a pointer to a pointer typedef keeps
-`(*pointer).field`. x2c also recognizes method-style calls such as
-`list.len()`. The namespaced function is selected from the static receiver
-type. When that function declares its first parameter `T *` and the receiver
-is an addressable `T`, the receiver's address is passed, so `rec.bump(4)`
-reaches `void Rec.bump(Rec *rec, int by)` without an explicit `&`. A receiver
-that is a pointer to the declared parameter is one level too far and is a type
-error; write `(*pointer).method()`. Normal pointer conversion rules still
-apply, including preservation of `const` and other qualifiers. A qualifier on
-the receiver itself does not change which methods and operators the type has,
-so a `const String` has the same `len()` and `+` as a `String`. Method syntax
-does not make every value dynamically dispatchable; only registered callbacks
+`(*pointer).field`.
+
+x2c also recognizes method-style calls such as `list.len()`. The namespaced
+function is selected from the static receiver type. When that function
+declares its first parameter `T *` and the receiver is an addressable `T`, the
+receiver's address is passed, so `rec.bump(4)` reaches
+`void Rec.bump(Rec *rec, int by)` without an explicit `&`. A receiver that is
+a pointer to the declared parameter is one level too far and is a type error;
+write `(*pointer).method()`. Normal pointer conversion rules still apply,
+including preservation of `const` and other qualifiers. A qualifier on the
+receiver itself does not change which methods and operators the type has, so a
+`const String` has the same `len()` and `+` as a `String`. Method syntax does
+not make every value dynamically dispatchable; only registered callbacks
 define custom behavior.
 
 A receiver spelled `struct T` or `union T` uses the methods of the typedef
@@ -4845,7 +4847,9 @@ identity-bearing values are invalid. A value whose own type is invalid is a
 compiler error; invalid contents of a `List` or `Var` value raise
 `<bad-types>` when the `raise` runs. The compiler
 evaluates the converted code and values once each, left to right, and builds
-their literals when the `raise` runs. A `try` may have adjacent `catch` arms:
+their literals when the `raise` runs.
+
+A `try` may have adjacent `catch` arms:
 
 <!-- ignore: illustrative `Block` and reporting callbacks are omitted -->
 ```x2c,ignore
@@ -5270,18 +5274,22 @@ past them, and C applies them. A unit does not accept these two positions.
 
 `in` and `match` are keywords only where their x2c forms can occur: `in`
 between two operands, and `match` as `match (...)` followed by `case` or
-`{`. Elsewhere both are identifiers. A field of a foreign struct whose type
-x2c cannot resolve can be indexed; the C compiler alone types the result.
+`{`. Elsewhere both are identifiers.
+
+A field of a foreign struct whose type x2c cannot resolve can be indexed; the
+C compiler alone types the result.
 
 A public `struct tag { ... } name;` publishes the tag body and
 `extern struct tag name;` in the header and defines `name` in the source.
 A public prototype that uses `struct tag` is preceded in the header by
-`struct tag;` when the header has not declared the tag. A function body that
-follows the declarations keeps the conditional arm it was written in, and it
-can use a macro defined later in the file. It is emitted before a later
-`#undef` and before any conditional group that contains one, so the macro
-definitions in effect where it was written apply to it. A body written inside
-a conditional arm is also emitted before a later `#define` or `#include` and
+`struct tag;` when the header has not declared the tag.
+
+A function body that follows the declarations keeps the conditional arm it
+was written in, and it can use a macro defined later in the file. It is
+emitted before a later `#undef` and before any conditional group that
+contains one, so the macro definitions in effect where it was written apply to
+it. A body written inside a conditional arm is also emitted before a later
+`#define` or `#include` and
 before any conditional group that contains one. C therefore selects its arm
 with the macros in effect where it was written. For example, a body inside
 the include-guard idiom `#ifndef GUARD`, `#define GUARD`, ..., `#endif` stays
