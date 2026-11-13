@@ -261,7 +261,7 @@ postfix-part = ( ( "[" , expression , "]" ) |
     "++" |
     "--" ) ;
 arguments = ( argument , { ( "," , argument ) } , [ "," ] ) ;
-argument = ( assignment | argument-slot ) ;
+argument = ( map-entry | assignment | argument-slot ) ;
 member-name = ( identifier | name-slot ) ;
 primary = ( atomic |
     c-string-run |
@@ -346,7 +346,8 @@ unit-extension = ( class-declaration | unit-macro | decorator ) ;
 class-declaration = ( "class" , named-type ) ;
 statement-extension = ( foreach-statement | statement-macro | decorator ) ;
 foreach-statement = ( "foreach" , "(" , declaration-argument , ( "in" | "," ) , assignment , ")" , governed ) ;
-declaration-argument = ( specifiers , ( init-declarator | destructuring-targets ) ) ;
+declaration-argument = ( ( specifiers , ( init-declarator | destructuring-targets ) ) |
+    ( "(" , declaration-argument , { ( "," , declaration-argument ) } , ")" ) ) ;
 keyword-definition = ( [ "static" ] , "keyword" , identifier , macro-name , ";" ) ;
 macro-name = ( "$" , identifier , { ( "." , identifier ) } ) ;
 macro-definition = ( [ "static" ] , "macro" , result-kind , macro-name , macro-signature , macro-body ) ;
