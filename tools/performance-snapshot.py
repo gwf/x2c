@@ -461,6 +461,8 @@ def run_snapshot_locked(
   write_json(run_dir / "summary.json", summary)
 
   environment = os.environ.copy()
+  if not environment.get("X2C_CACHE_DIR"):
+    environment["X2C_CACHE_DIR"] = str(run_dir / "cache")
   for name in ("MAKEFLAGS", "MAKELEVEL", "MFLAGS"):
     environment.pop(name, None)
   environment.update({
@@ -470,6 +472,7 @@ def run_snapshot_locked(
   summary["configuration"].update({
     "build_jobs": environment["BUILD_JOBS"],
     "cc": environment.get("CC", "cc"),
+    "cache_dir": environment["X2C_CACHE_DIR"],
     "performance_environment": {
       name: environment[name] for name in PERFORMANCE_ENV if name in environment
     },
