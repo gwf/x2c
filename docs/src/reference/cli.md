@@ -40,17 +40,18 @@ This chapter has these sections:
   depfiles, build reuse, and external Make builds.
 - [Help, version, and status](#help-version-and-status): exit status.
 
-This chapter's examples use `./x2c` from the root of a source checkout, which
-selects `builds/0/x2c`, the development compiler, without using `PATH`.
+Examples write the installed compiler as `x2c`; in a source checkout, write
+`./x2c`. [Building the Compiler](../internals/building.md) describes how a
+checkout builds the compiler and its commands.
 
 The generated help is the short option reference:
 
 ```sh
-./x2c --help
-./x2c help translate
-./x2c build --help
-./x2c run --help
-./x2c script --help
+x2c --help
+x2c help translate
+x2c build --help
+x2c run --help
+x2c script --help
 ```
 
 ## Translate to C
@@ -61,14 +62,14 @@ each explicit `.x` input. The `.xi` file is the unit's
 place of its source when it is current:
 
 ```sh
-./x2c translate example.x
+x2c translate example.x
 ```
 
 Without `--out-dir`, output goes to the current directory. Use a named
 directory to keep generated files together:
 
 ```sh
-./x2c translate --out-dir /tmp/x2c-generated src/main.x src/parse/parse.x
+x2c translate --out-dir /tmp/x2c-generated src/main.x src/parse/parse.x
 ```
 
 x2c creates missing directories and parents after validating all inputs and
@@ -84,7 +85,7 @@ collected declarations the parent already read. `-j`, or `--jobs`, limits the
 number of workers:
 
 ```sh
-./x2c translate -j 8 --out-dir /tmp/x2c-generated src/*.x
+x2c translate -j 8 --out-dir /tmp/x2c-generated src/*.x
 ```
 
 Each unit is translated by exactly one worker and writes only its own files,
@@ -142,7 +143,7 @@ map. Combine source mapping with native debug information to set breakpoints,
 step through statements, and read backtraces in the original `.x` files:
 
 ```sh
-./x2c build --source-map -g -O0 --save-temps -o /tmp/example example.x
+x2c build --source-map -g -O0 --save-temps -o /tmp/example example.x
 lldb /tmp/example
 ```
 
@@ -169,7 +170,7 @@ retain intermediate files on either platform.
 Inspection modes print an intermediate result and stop translation:
 
 ```sh
-./x2c translate --dump-tokens source.x
+x2c translate --dump-tokens source.x
 ```
 
 - `--dump-tokens` prints the tokens the parser reads and stops. Without
@@ -261,7 +262,7 @@ input may include another through a directory, as in
 `#include "lib/inner.x"`, when both are operands:
 
 ```sh
-./x2c build examples/foreach.x
+x2c build examples/foreach.x
 ./a.out
 ```
 
@@ -277,8 +278,8 @@ The default product depends on the command and target kind:
 | Manifest build or run | `<project>/.x2c-build/<target-product>` | Retained per target |
 
 `-o <file>`, `-o<file>`, and `--output <file>` name the native product.
-For example, `./x2c build -o foreach examples/foreach.x` keeps `./foreach`.
-If the purpose is to execute the program, use `./x2c run examples/foreach.x`.
+For example, `x2c build -o foreach examples/foreach.x` keeps `./foreach`.
+If the purpose is to execute the program, use `x2c run examples/foreach.x`.
 Directory options place intermediate files; `-o` names the final artifact.
 
 `translate`, `build`, and `run` default to the host's online processor count
@@ -299,7 +300,7 @@ runtime's platform libraries. It also derives one object and dependency path
 per C source. `--kind static-library` uses the selected archiver:
 
 ```sh
-./x2c build --kind static-library \
+x2c build --kind static-library \
   --output /tmp/libwidget.a src/widget.x src/helper.c
 ```
 
@@ -311,8 +312,8 @@ compiler's content hash.
 `repl`, and repeats:
 
 ```sh
-./x2c build --kind meta-module --output helpers.so src/helpers.x
-./x2c run --native-module helpers.so src/helpers.x src/main.x
+x2c build --kind meta-module --output helpers.so src/helpers.x
+x2c run --native-module helpers.so src/helpers.x src/main.x
 ```
 
 Only the compiler that built a module loads it; any other compiler reports
@@ -343,8 +344,8 @@ writes `<input-stem>.o` into the working directory. One input may name its
 object with `-o`. Several inputs cannot share one `-o` destination.
 
 ```sh
-./x2c build -c first.x second.c
-./x2c build first.o second.o -o app
+x2c build -c first.x second.c
+x2c build first.o second.o -o app
 ```
 
 For several inputs with the same stem, select `--build-dir <dir>` to keep
@@ -375,7 +376,7 @@ refer to generated C for x2c inputs, so the option also retains and reuses
 intermediates. It does not override a named build directory.
 
 ```sh
-./x2c build --build-dir .x2c-build \
+x2c build --build-dir .x2c-build \
   --compile-commands .x2c-build/compile_commands.json examples/foreach.x
 ```
 
@@ -390,7 +391,7 @@ for an editor's C parser.
 `run` builds an executable and launches it after the build succeeds:
 
 ```sh
-./x2c run examples/foreach.x -- first -second input.x
+x2c run examples/foreach.x -- first -second input.x
 ```
 
 When a build is needed, a direct `run` prints one
@@ -432,7 +433,7 @@ and redirections also apply to the program; its output is not held until exit.
 ends in `.x`, or may be any name when the first line is a shebang:
 
 ```sh
-./x2c script tools/report.x -- first --second
+x2c script tools/report.x -- first --second
 ```
 
 The first run builds an executable into the per-user cache. Later runs
@@ -502,7 +503,7 @@ the cache is always safe. Different ordered input lists have separate
 Shell wildcards work because the shell expands them into explicit operands:
 
 ```sh
-./x2c build --output /tmp/tool src/*.x
+x2c build --output /tmp/tool src/*.x
 ```
 
 x2c does not expand wildcard operand text or recurse through directory
@@ -520,18 +521,13 @@ src/main.x
 src/parse/parse.x
 ```
 
-Invoke one as `./x2c @build.rsp`. Whitespace separates arguments;
+Invoke one as `x2c @build.rsp`. Whitespace separates arguments;
 single and double quotes preserve whitespace; backslash quotes the next
 character. A first-non-whitespace `#` begins a comment. Response files may
 include other response files, but cycles are rejected. `@@name` passes the
 literal operand `@name`.
 
 ## Start a project
-
-These commands use an installed compiler on `PATH`, because `cd hello`
-leaves the checkout. For a checkout-only walkthrough, first set
-`compiler="$PWD/x2c"` in the repository root and use `"$compiler"` instead
-of `x2c` after changing directories.
 
 `new` invokes the shipped `x2c-new` command to create a project that builds
 and runs as written:
@@ -542,6 +538,10 @@ cd hello
 x2c run -q            # Hello, world!
 x2c run -q -- Ada     # Hello, Ada!
 ```
+
+In a source checkout, `./x2c` no longer names the compiler after `cd hello`.
+Set `compiler="$PWD/x2c"` in the repository root first, and write
+`"$compiler"` in place of `x2c` after changing directories.
 
 It writes `x2c.toml`, `src/main.x`, and `.gitignore`, which ignores the
 default build directory `.x2c-build/`. The manifest has one executable target
@@ -880,7 +880,7 @@ with an LSP client can start it; the VS Code extension starts it for you.
 ### Language server
 
 Installed compilers include the language server. A checkout builds it with
-`make commands` for the matching `builds/0/x2c` compiler. Run `x2c lsp` from
+`make commands` for the matching `./x2c` compiler. Run `x2c lsp` from
 the workspace root to serve editors over stdio. The server uses LSP 3.17 with
 UTF-16 positions and full document synchronization. One process serves one
 workspace and keeps the compiler resident. It provides frontend diagnostics,
@@ -1027,7 +1027,7 @@ the patterns that avoid them.
 Lines instead of standard error:
 
 ```sh
-./x2c build --diagnostics-file /tmp/app.jsonl --output /tmp/app app.x
+x2c build --diagnostics-file /tmp/app.jsonl --output /tmp/app app.x
 ```
 
 x2c creates or truncates the file when the command starts, so a command with
@@ -1109,7 +1109,8 @@ External Make builds are supported. They can call `translate --out-dir`,
 include its `.d` files, and set their own C compiler and linker flags.
 A project can run its own native build instead of using the driver.
 
-For example, from the repository directory you can translate an example and
+For example, from the root of a source checkout, which supplies
+`include/x2c` and `builds/0/libx2c.a`, you can translate an example and
 compile its C output yourself:
 
 ```sh
