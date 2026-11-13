@@ -316,8 +316,6 @@ static int _save(struct ReplClient &client, String argument) {
   return 1;
 }
 
-static int _line(struct ReplClient &client, String line);
-
 static int _replay(struct ReplClient &client, String argument) {
   List paths = _paths(argument);
   if (paths.len() != 1) return 0;

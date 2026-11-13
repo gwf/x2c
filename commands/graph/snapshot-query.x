@@ -215,8 +215,6 @@ static int _sq_inward(Map request) =>
 static int _sq_depth(Map request) =>
   request.getdefault("depth", (int) INT_MAX);
 
-static int _sq_filter(SnapshotQuery &q, Map entity, Map filter);
-
 static Array _sq_select(SnapshotQuery &q, Map selector) {
   Array selected = [];
   Map seen = {};
@@ -454,9 +452,6 @@ static int _sq_binding(
   }
   return 0;
 }
-
-static int _sq_node_where(
-  SnapshotQuery &q, Map entity, List node, List parents, Map filter);
 
 static int _sq_node_filter(
   SnapshotQuery &q, Map entity, List node, List parents, Map request) {

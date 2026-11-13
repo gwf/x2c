@@ -17,9 +17,6 @@ void ReplSession.describe(ReplSession session, String name,
                           List syntax, String source);
 List repl_member_candidates(Compiler c, Type type);
 
-static String _eval_head(void);
-static void _tokenize(ReplSession session, String source, Scope scratch);
-
 static List _ledger_rows(String text) {
   Array rows = [];
   foreach (String line, text.split("\n"))
