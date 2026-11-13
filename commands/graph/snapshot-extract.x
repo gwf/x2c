@@ -311,7 +311,8 @@ static void _sx_declarations(
             _sx_type_edge(s, id, type, "aliases", 0);
           }
           else if (top_level || type.is_function()) {
-            Map entity = _sx_binding(s, binding, type,
+            Map entity = _sx_binding(
+              s, binding, type,
               type.is_function() ? "function" : "global", owner);
             if (entity["definition"].int() &&
                 (type.is_function() || <extern> in type)) continue;
@@ -341,8 +342,8 @@ static String _sx_reference(
     Var key = s.c.semantic_binding_facts()[%(src-key $binding)];
     match (key) case %(?symbols ?name): type = symbols.map()[name];
   }
-  Map entity = _sx_binding(s, binding, type,
-    type.is_function() ? "function" : "global", s.unit_id);
+  Map entity = _sx_binding(
+    s, binding, type, type.is_function() ? "function" : "global", s.unit_id);
   entity["definition"] = 0;
   return entity["id"];
 }
@@ -432,8 +433,8 @@ static void _sx_walk(
       _sx_walk(s, operand, owner, origin, "mutates"); return;
     }
     case %((!or index getindex) ?base *indices): {
-      _sx_walk(s, base, owner, origin,
-        access == "reads" ? "reads" : "mutates");
+      _sx_walk(
+        s, base, owner, origin, access == "reads" ? "reads" : "mutates");
       foreach (Var index, indices) _sx_walk(s, index, owner, origin, "reads");
       return;
     }
