@@ -280,10 +280,11 @@ inline-lisp example
   the appropriate `Error` cause on failure; `long`/`ulong`, `llong`/`ullong`,
   and `ldouble` name native `long`, `long long`, and `long double` families
   rather than fixed widths
-- Limits: numeric-to-`String` conversion remains partial; other nonnumeric
-  values use their declared conversions; helper-backed collection, enum, and
-  bit-field compound assignment are unsupported; the C compiler checks ordinary
-  C lvalue legality
+- Limits: `Var.convert` targets numeric tags; `convert(<string>)` returns a
+  `<string>` value unchanged and raises `<no-convert>` for every other source,
+  numeric or not. Other nonnumeric values use their declared conversions;
+  helper-backed collection, enum, and bit-field compound assignment are
+  unsupported; the C compiler checks ordinary C lvalue legality
 - Sentinel contract: equality, identity, exact `is void`, and rendering inspect
   `void`; hashing, ordering, truthiness, iteration, conversion, arithmetic, and
   updates retain `<void-op>` behavior
