@@ -55,7 +55,8 @@ is expected, and `String` methods apply to it directly: `"x2c".len()` is `3`.
 Parentheses in C group and call, so a plain `(a, b)` is a comma expression,
 whatever its destination. `$(a, b, ...)` builds a `List` instead: each
 element is one ordinary x2c expression, and its value is converted to one
-`Var` element. `$()` is the empty `List`. A trailing comma is allowed, as in
+`Var` element. `$()` is the empty `List`, also written `%()` and called
+`nil`; it is the null pointer. A trailing comma is allowed, as in
 an Array literal.
 
 A natural Map reads a bare identifier key as an `Atom`. `${key: value}` reads
@@ -134,8 +135,8 @@ printf("%s %s %s %s\n",
 ```
 
 The four forms print differently. `repr` is the readable representation for
-each type, and the `List` form round-trips through the same reader the Lisp
-showcase uses.
+each type, and the `List` form round-trips through the Lisp reader
+(`Lisp.read`).
 
 A number's `repr` prints its own value and, where C has one, the suffix that
 gives the width it was boxed at: `5u` for an `unsigned`, `5l` for a `long`,
