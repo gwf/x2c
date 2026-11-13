@@ -2316,6 +2316,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
+import time
 
 root, work, compiler = map(Path, sys.argv[1:])
 package = work / 'demo'
@@ -2386,6 +2387,8 @@ os.utime(older, (1, 1))
 make('older-compiler', choice=9, library=22, tool=older)
 assert len(calls.read_text()) > len(translations), 'compiler selection reused translation'
 translations = calls.read_text()
+# Make 3.81 compares whole seconds; replace the wrapper in a later second.
+time.sleep(1.01 - time.time() % 1)
 older.write_text(older.read_text() + '# replaced wrapper\n')
 make('replaced-compiler', choice=9, library=22, tool=older)
 assert len(calls.read_text()) > len(translations), 'compiler replacement reused translation'
