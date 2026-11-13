@@ -331,7 +331,8 @@ build disables. A macro such a branch defines stays for the C compiler. See
 
 ## Where to go next
 
-- [What x2c Adds to C Syntax](https://x2c-lang.dev/docs/guide/x2c-syntax-map.html) lists every addition.
+- [What x2c Adds to C Syntax](https://x2c-lang.dev/docs/guide/x2c-syntax-map.html) groups the additions into
+  twelve families.
 - [Values and Var](https://x2c-lang.dev/docs/guide/values.html) introduces the dynamic value type.
 - The [language reference](https://x2c-lang.dev/docs/reference/language.html) states the exact rules.
 
@@ -478,7 +479,7 @@ constructor obtains zeroed storage, passes it to `init` with the
 constructor's arguments, and returns it. A heap class obtains that storage
 from `alloc`, whose default is a zeroed Scope allocation. A heap class's
 `init` receives its bare handle. Prefer a reference receiver for a value
-class's `init`; the existing pointer receiver is also accepted. `new` takes
+class's `init`; a pointer receiver is also accepted. `new` takes
 the parameters after that receiver in the same order:
 
 ```x2c
@@ -801,8 +802,7 @@ $lock(mutex) { printf("held\n"); }
 ```
 
 This preserves Mutex's error behavior. It does not replace descriptor locks,
-file-stream locks, or a project's conditional-acquisition policy. Logger's
-private synchronized decorator keeps its own policy.
+file-stream locks, or a project's conditional-acquisition policy.
 
 ## Clean up an initialized local
 
@@ -1051,10 +1051,7 @@ resources, including when the record itself is a value.
 An active transaction or builder has one owner even when its record is a
 value. Copying it shares the saved maps or backing arrays; the copy is not a
 second transaction or an independently owned builder. Borrow the original
-through reference methods. `SymTxn` and `MachineBuilder` use this pattern;
-use their begin or `new` operation to prepare active storage. A `Job` keeps a
-shared handle because its recorded run and Scope finalizer must reach the
-same job, while its launch options live directly inside that job.
+through reference methods.
 
 ## Borrow required and optional outputs
 
@@ -1135,7 +1132,7 @@ maintenance cost.
 
 A `meta` function that returns code should show that code. A quotation
 shows the C that will land; a `%(...)` List of node tags hides it. Choose the
-first row that fits. [Meta Functions](https://x2c-lang.dev/docs/guide/generating-code.html#quoting-code-with-)
+first row that fits. [Generating Code](https://x2c-lang.dev/docs/guide/generating-code.html#quoting-code-with-)
 explains each form with examples.
 
 | To build | Write |
@@ -1428,7 +1425,10 @@ uses the package `import` described below.
 
 ### Contextual keywords
 
-C keywords and x2c's `defer` remain reserved. The x2c words `associated`,
+C keywords are reserved. x2c's `defer` is reserved in expressions: an
+object or function named `defer` can be declared, but a read or call of it
+is rejected, and `defer(f());` at statement start schedules cleanup. A field
+named `defer` remains usable. The x2c words `associated`,
 `catch`, `delegate`, `finally`, `import`, `protocol`, `raise`, `threaded`, and
 `try` are contextual. They can name objects, functions, parameters, fields,
 typedefs, and labels outside their keyword forms. C's `thread_local` and
@@ -1465,8 +1465,7 @@ Here `%` is modulo and `a+b` is an addition. `raise % (a+b)` also works because
 `%` is separated from `(`. For a comparison that could resemble an angle
 literal, write `(raise) < a`. Without that boundary, `raise %(a+b);` at statement
 start keeps the raise-payload interpretation even if `raise` is an ordinary
-binding. This exception preserves the existing literal and preprocessing
-rules without another tokenization pass.
+binding.
 
 `expand` is a predefined keyword alias with the same lexical treatment for
 following literals. It follows keyword-alias invocation precedence rather
@@ -1476,8 +1475,7 @@ Therefore `expand` is reserved in expressions: an object or function named
 named `expand` remains usable.
 
 `in` and `match` retain their existing contextual rules, described under
-[Directives in the generated C](https://x2c-lang.dev/docs/reference/language.html#directives-in-the-generated-c). `defer(f());` always schedules cleanup;
-it cannot call an ordinary function named `defer`.
+[Directives in the generated C](https://x2c-lang.dev/docs/reference/language.html#directives-in-the-generated-c).
 
 ### Module blocks
 
@@ -1606,8 +1604,7 @@ member is an ordinary file.
 Diagnostics, `--source-map` line directives, dump locations, and editor
 positions report the member's file and line. A unit that includes the entry
 collects the public declarations of every member. A unit that includes a
-member directly collects only that member, as it would any file. A file
-without a block reads exactly as before.
+member directly collects only that member, as it would any file.
 
 ### Script units
 
@@ -1916,8 +1913,8 @@ List List.map(List values, Func fn);
 
 For a `ListInt` receiver, dotted lookup treats the first two signatures as
 `ListInt -> ListInt` and requires a `ListInt` second argument to `append`.
-Ordinary conversion still applies, so a plain `List` reaches the existing
-validating `ListInt` converter. `map` remains `List -> List`; x2c never infers
+Ordinary conversion still applies, so a plain `List` reaches the validating
+`List`-to-`ListInt` converter. `map` remains `List -> List`; x2c never infers
 covariance for an unmarked method.
 
 `Self` is contextual syntax, valid only in a dotted method declaration or
@@ -1954,9 +1951,10 @@ typedef struct Counter { int value; } Counter;
 static void Counter.step(Counter &self) => self.value++;
 ```
 
-An expression is required; `=>;` is invalid. The rules for writing `return` in
-a `void` function are unchanged. Use a compound body when a function needs
-declarations, several statements, or a comment inside the body.
+An expression is required; `=>;` is invalid. A `void` expression body follows
+the ordinary rules for `return` in a `void` function. Use a compound body when
+a function needs declarations, several statements, or a comment inside the
+body.
 
 ### Statement expressions
 
@@ -2208,11 +2206,10 @@ values. Delegation emits the field access and direct call; it adds no wrapper,
 temporary, runtime check, symbol, or dispatch table.
 
 Ordinary [dot-call lookup](https://x2c-lang.dev/docs/reference/language.html#dot-call-lookup) runs first. Delegate fields are
-searched only if those lookups fail, and a member rewrite a program registers
-for the receiver's own type is tried before them. The shipped component
-`src/components/delegate-members.x` does this search. `$rewrite` registers
-it with the receiver pattern `%(expr <delegate> *)`. It runs only when the
-receiver's aggregate declares a delegate field. The search visits marked
+searched only if those lookups fail, and a member
+[rewrite rule](https://x2c-lang.dev/docs/library/modules/rewrite.html) that a program registers for the
+receiver's own type is tried before them. The search runs only when the
+receiver's aggregate declares a delegate field. It visits marked
 fields in source order to produce consistent diagnostics. One resolving path
 is used; two or more are an ambiguity error, regardless of field order. An
 explicit outer method therefore resolves an otherwise ambiguous pair.
@@ -2792,9 +2789,9 @@ int main(void) {
 3
 ```
 
-For source compatibility, the compiler also accepts the former `=> { ... }`
-braced form and a complete parenthesized expression body written as
-`=> (expression)` without a semicolon. New code should use the forms above.
+The compiler also accepts a braced `=> { ... }` body and a complete
+parenthesized expression body written as `=> (expression)` without a
+semicolon.
 
 ```x2c
 macro Stmt $legacy.guard(Expr $condition) => {
@@ -4136,7 +4133,7 @@ int main(void) {
 
 Compile-time code is written in x2c, and the compiler does not evaluate Lisp.
 In code, `$(...)` is an [evaluated List](https://x2c-lang.dev/docs/reference/language.html#evaluated-lists-and-maps), which is
-an expression, so a former Lisp form such as `$(import "file.xlisp")` at file
+an expression, so a Lisp form such as `$(import "file.xlisp")` at file
 scope reports `an evaluated collection is an expression, not a top-level
 form`. Ordinary `.x` modules
 containing macros and `meta` functions use `#include`, and `.xlisp` files are
@@ -4484,8 +4481,9 @@ the returned value for that position.
 
 Inside meta bodies, Unit and Stmt source macros used in expression
 positions construct deferred invocation Lists from computed arguments. Normal
-binding expands them when inserted into a program. Existing Expression macros
-still expand normally. See [source templates](https://x2c-lang.dev/docs/guide/generating-code.html#source-templates-from-meta-functions).
+binding expands them when inserted into a program. Expression macros expand
+normally. See
+[source templates](https://x2c-lang.dev/docs/guide/generating-code.html#source-templates-from-meta-functions).
 
 A `meta` body is ordinary x2c compiled as C, so every construct the unit
 can compile runs at compile time with its C meaning; see
@@ -4694,7 +4692,7 @@ allocation destination for the following statement or function body, and
 restores the previous destination on exit. It does not release the selected
 Scope. The argument is required: empty `auto()` is not accepted.
 
-These forms use the existing region operations and cleanup boundaries.
+These forms use the region operations and cleanup boundaries.
 `$scope()` and `$scope(pointer)` remain compatibility spellings. Variable
 declaration `auto` and initializer `auto` keep their distinct meanings below.
 
@@ -4765,7 +4763,7 @@ expression helper or expression-exit cleanup.
 
 ### Checked foreign aliases
 
-The reserved target macro `$x2c.foreign.alias` binds one top-level X2C
+The reserved target macro `$x2c.foreign.alias` binds one top-level x2c
 function name directly to an ABI-compatible C function:
 
 ```x2c
@@ -4777,7 +4775,7 @@ The target must be one fixed-arity function declaration without a body or
 initializer, and the argument must be one direct C identifier. Static aliases
 remain private; non-static aliases are published in the generated header like
 any other declaration. The generated C uses `_Static_assert` and `_Generic` to
-check the exact function-pointer type before defining the lowered X2C name as
+check the exact function-pointer type before defining the lowered x2c name as
 the native name. Calls and address-taking therefore use the native function
 itself; no wrapper object, thunk, argument mapping, or initializer is emitted.
 Variadic aliases are rejected.
@@ -4877,8 +4875,8 @@ evaluated-item := assignment-expression | '@' identifier | '@(' expression ')'
 
 Each assignment expression is one element, converted to `Var` and consed in
 source order. A comma expression needs its own parentheses to be one element,
-as in `$((prepare(), value), other)`. `$()` is the existing empty `List`, and a
-trailing comma is accepted. Existing `Var` conversion, `List` canonicalization,
+as in `$((prepare(), value), other)`. `$()` is the empty `List`, and a
+trailing comma is accepted. Ordinary `Var` conversion, `List` canonicalization,
 caching, and lifetime rules apply, and a value that `List` construction
 rejects, such as a `void` call, is rejected here too. A `List`-valued element
 stays one element. An `@name` or `@(expression)` item splices a `List`'s
@@ -5038,12 +5036,10 @@ the converted result, and returns to the literal grammar. In `%()`, `@` makes
 the same crossing but splices the evaluated `List`'s elements. Collection
 insertion converts to the representation required by the literal; `String`
 insertion accepts `String`, `Symbol`, declared converters, `Var`, aliases of
-`Var`, and supported numeric values under the existing conversion rules. The
-shipped component `src/components/interpolation.x` joins a `%""`
-literal's parts, a translator that `$rewrite(%(expr ("String") (segments *)))`
-registers on the literal's `segments` head. A program's rule for `String.join`
-receives only the calls that the program writes, including one inside a `$`
-insertion. It does not receive the call that the shipped rule writes.
+`Var`, and supported numeric values under the ordinary conversion rules. A
+program's rewrite rule for `String.join` receives only the calls the program
+writes, including one inside a `$` insertion, not the join the compiler
+generates for `%""`.
 
 The parentheses are part of the unquote and contain one complete x2c expression,
 including nested calls, indexing, casts, assignments, conditionals, comma
@@ -5069,7 +5065,8 @@ contexts do not change Lisp `quote` or
 `quasiquote`.
 
 Percent strings are byte strings: they may span physical lines and their
-`\x`, `\u`, and `\U` escapes consume one or two hexadecimal digits.
+`\x`, `\u`, and `\U` escapes consume one or two hexadecimal digits and
+produce one byte, so `%"\u4142"` is `A42`.
 Ordinary C string and character literals instead follow C escape widths,
 including exactly four digits for `\u`, eight for `\U`, and one or more for
 `\x`; an unescaped newline does not continue an ordinary C literal.
@@ -5200,8 +5197,7 @@ an open list, string, block comment, or symbol literal, a reader prefix without
 its form, or an escape cut off by end of input. `<malformed>` means the bytes
 already prove the form invalid, such as a bad escape, raw string newline,
 malformed number, invalid closed symbol literal, or stray closing parenthesis.
-The shared `Tokenizer` classifies lexemes; `Lisp.read` checks structural form
-balance and preserves the form-start cursor on either failure.
+On either failure, `Lisp.read` leaves its cursor at the start of the form.
 
 ### Atoms
 
@@ -5213,12 +5209,11 @@ balance and preserves the form-start cursor on either failure.
 - a private `<lsym>` whose payload is the canonical `String` pointer otherwise.
 
 `Atom.intern` is the only function that maps a spelling to a representation.
-Repeated construction of one spelling has identical `Var` bits. Long `Atom`
-equality therefore completes in the existing raw-`Var` fast path, and its hash
-is the `String`'s cached hash. `Atom.str` returns the exact bytes, and `Atom`
-representation escapes delimiters, numeric-looking prefixes, comment openers,
-whitespace, controls, and backslashes so both `%()` and `Lisp.read` recover the
-same value.
+Repeated construction of one spelling has identical `Var` bits. Two `Atom`s
+are equal exactly when their `Var` bits are equal. `Atom.str` returns the
+exact bytes, and `Atom` representation escapes delimiters, numeric-looking
+prefixes, comment openers, whitespace, controls, and backslashes so both `%()`
+and `Lisp.read` recover the same value.
 
 Long `Atom`s follow the canonical `String` pool lifetime, which is described in
 [scopes and lifetime](https://x2c-lang.dev/docs/guide/memory.html). Promoting a `List` also promotes
@@ -5324,8 +5319,8 @@ operand is evaluated exactly once. A `Symbol` expression on the right is also
 evaluated exactly once. A type selector is compile-time syntax and is not
 evaluated. `is not` has the same precedence and evaluation rules, then
 logically negates the exact-tag result. `is` and `not` remain ordinary
-identifiers in all other positions, so existing variables with either name
-and calls such as `value.is(<i32>)` are unchanged.
+identifiers in all other positions, so variables named `is` or `not` and
+calls such as `value.is(<i32>)` keep their meaning.
 
 The test compares exact `Var` tags. It does not test numeric convertibility,
 protocol ancestry, or C type identity. Qualifiers and aliases are resolved to
@@ -5433,10 +5428,8 @@ format specifiers convert it to the required promoted C type through
 static format literal. Automatic lowering covers numeric conversions, `%c`,
 `%s`, `*` width and precision, and the `hh`, `h`, `l`, `ll`, and `L` modifiers.
 Other modifiers, pointer and count conversions, wide strings and characters,
-and positional formats require explicit native arguments. This lowering is
-the compiler component `src/components/printf-format.x`, which registers a `$rewrite`
-call pattern for each family member. A project can register its own call
-pattern the same way, for example for its own logging function.
+and positional formats require explicit native arguments. A project can add
+its own function, such as a logging call, to this family with a rewrite rule.
 
 ### Dynamic truthiness and binary operators
 
@@ -5508,22 +5501,9 @@ For `+`, when each operand is a `String`, an alias reaching `String`, a
 the result is the `String` that `String.add` returns, so `path + ".o"`
 concatenates.
 
-`src/expressions/operators.x` resolves String addition and ordinary protocol
-operators. `src/transform/operators.x` lowers Var comparisons. The shipped
-component `src/components/dynamic-operators.x` supplies unresolved dynamic
-arithmetic, compound assignments, increments, and unary fallback rejection
-after protocol resolution. It registers
-each translator with `$rewrite` and a Match pattern typed `Var`, such as
-`%(expr ("Var") (op (!or + - (!quote *) / % ...) ? ?))`, which keys the rule
-by each operator the pattern names and `Var`. A pattern that types the
-operation or an operand `Var`, or an alias of it, takes the dynamic
-operations. They run after protocol operators resolve, only when an operand
-has `Var` identity, so native operands never reach them; each operation
-arrives typed `Var`. A program's rule registered for the same operator is
-tried first. The holes in a macro pattern select the operands that its rule
-receives, so a rule for `$!Money{...}` with `typedef Var Money` leaves other
-`Var` operands to the shipped rules. The same order applies to every shipped
-component: a program's rule for the same head is tried first.
+A program's rewrite rule for an operator is tried before the built-in dynamic
+operation; a rule whose pattern names a `Var` typedef such as `Money` receives
+only those operands.
 
 Direct runtime calls to `Var.binary` additionally accept comparisons and eager
 `&&`/`||`. The compiler does not use that eager logical path. It converts each
@@ -5654,8 +5634,7 @@ element the slice stops before, so -1 is the last element. The
 [collections guide](https://x2c-lang.dev/docs/guide/collections.html#indexing-and-slicing) shows the
 forward rule shared by `Array.setslice` and `Array.remslice`.
 
-`List` indexed updates and `String` character updates remain unsupported.
-`Array`-level and `Map`-level `+=` are also unsupported; update an element
+`Array`-level and `Map`-level `+=` are unsupported; update an element
 instead of the container binding.
 
 ## Iterator destination omission
@@ -5690,7 +5669,7 @@ An expression body parses through assignment precedence. An unparenthesized
 comma separates arguments of an enclosing call; write `(first, second)` when
 the comma expression itself is the lambda body.
 
-Current guarantees:
+Lambdas guarantee:
 
 - an expression body produces its value; a native C `void` expression runs
   once and produces `void`;
@@ -5858,12 +5837,6 @@ See [Classes and System Macros](https://x2c-lang.dev/docs/guide/system-macros.ht
 expansions.
 
 ### Temporary assignments with `with`
-
-> Migration: `$let(place, value)` became `with (place = value)`; give a
-> formerly unbraced body braces. The old expression alias
-> `with expression [as name] { ... }` became
-> `alias expression [as name] { ... }`, described in
-> [Expression aliases with `alias`](https://x2c-lang.dev/docs/reference/language.html#expression-aliases-with-alias).
 
 `with (destination = value, ...) { body }` assigns temporary values to
 storage and restores the previous values when the body exits:
@@ -6166,11 +6139,8 @@ after matching, with captures visible, and uses ordinary truth conversion.
 False tries the next arm; errors propagate normally. A successful guard runs
 the body once.
 
-The shipped component `src/components/pattern-match.x` lowers `match`.
-`$rewrite($matched)` registers it on the `match` statement head; a rule a
-program registers there runs first. A program's `switch` rule receives the
-statements in the arms. It does not receive the `switch` that the lowering
-writes.
+A program's rewrite rule for `match` runs first; a rule for `switch` does not
+see the `switch` that `match` lowering writes.
 
 ### Pattern conditions
 
@@ -6214,10 +6184,8 @@ Values are restricted recursively to `Null`/`nil`, numeric and enum values,
 `Symbol`s, `Atom`s, `String`s, and `List`s of permitted values. `void`,
 pointers, mutable containers, resources, custom objects, and other
 identity-bearing values are invalid. A value whose own type is invalid is a
-compiler error; invalid contents of a `List` or `Var` value reach `Error`'s
-`<bad-types>` raw floor when the `raise` runs. The shipped component
-`src/components/raise.x` performs the conversions and the check.
-`$rewrite($raised)` registers on the `raise` statement head. The compiler
+compiler error; invalid contents of a `List` or `Var` value raise
+`<bad-types>` when the `raise` runs. The compiler
 evaluates the converted code and values once each, left to right, and builds
 their literals when the `raise` runs. A `try` may have adjacent `catch` arms:
 
@@ -6346,8 +6314,9 @@ generated C calls an initializer that was compiled out.
 
 Other initialization statements and runtime-valued static assignments belong in
 the method body. Eligible file-static percent literals use the generated
-sequence described under [Values and literals](https://x2c-lang.dev/docs/reference/language.html#values-and-literals). Top-level
-decorators are rejected.
+sequence described under
+[Percent literals, quote, and unquote](https://x2c-lang.dev/docs/reference/language.html#percent-literals-quote-and-unquote).
+Top-level decorators are rejected.
 
 ### Type-owned shutdown
 
@@ -6370,7 +6339,7 @@ x2c accepts normal C type forms plus runtime types such as `Var`, `List`,
 
 Typedef declarations are supported at file scope and inside compound
 statements. Local aliases follow lexical scope and shadowing. Their uses are
-resolved while that scope is available, preserving the existing meaning of
+resolved while that scope is available, preserving the meaning of
 file-scope types, including their methods and converters. Local typedefs stay
 inside their C blocks and are not exported. A locally defined aggregate also
 stays in its block; it cannot supply a type to a lambda helper lifted outside
@@ -6388,7 +6357,7 @@ direction. An `Array` can therefore be used as a `Block`, and an `Ast` as a
 for each other this way: they may describe different contents despite sharing
 a C representation. Thus `ArrayInt counts = someArrayDbl;` is a type error
 whose message gives the required sibling converter, `ArrayDbl.arrayint`. The
-existing `Array.arrayint` instead converts from the common Array ancestor. A
+`Array.arrayint` converter instead converts from the common Array ancestor. A
 cast still permits reinterpretation.
 
 The compiler warns with code `conversion` when source spells a
@@ -6782,9 +6751,9 @@ cursor has no Lisp representation.
 
 The Lisp core keeps its own spellings for cons-cell and text work. `car`,
 `cdr`, `cons`, `length`, `reverse`, `string-append`, `substring`, `lower`,
-`str`, and `repr` are unchanged and reach the same code. Note that Lisp's
-`assoc` returns the matching pair while `List.assoc` returns its second
-value, as the library documents. Lisp `assoc` and `member` compare with
+`str`, and `repr` keep their Lisp names and call the same code. Note that
+Lisp's `assoc` returns the matching pair while `List.assoc` returns its
+second value, as the library documents. Lisp `assoc` and `member` compare with
 `Var.equal`; `List.assoc` and `List.contains` use `==`.
 
 An operation whose parameters or result have no `Var` representation is not
@@ -6843,13 +6812,14 @@ retaining storage, and already ended regions, including through helpers.
 # Command-Line Interface
 
 After [installation and PATH setup](https://x2c-lang.dev/docs/guide/installation.html), run the
-compiler as `x2c`. Every invocation begins with a command. `x2c help` lists
-`translate`, `build`, `run`, `new`, `script`, `env`, `install`, `remove`,
-`list`, and `help`. The driver runs some of them through
+compiler as `x2c`. Every invocation begins with a command, and `x2c help`
+lists every command the compiler has. An installed compiler has `translate`,
+`build`, `run`, `new`, `script`, `env`, `install`, `remove`, `list`, `help`,
+`lsp`, `package`, and `test`. The driver runs some of them through
 [external commands](https://x2c-lang.dev/docs/reference/cli.html#commands): `build`, `run`, and `script` through
 `x2c-build`, `new` through `x2c-new`, and `install`, `remove`, and `list`
-through `x2c-package`. An installed compiler also includes the external
-commands `test` and `lsp`.
+through `x2c-package`. A checkout can also build the experimental commands
+`bind`, `graph`, `lint`, and `repl`, which an install does not include.
 
 This chapter's examples use `./x2c` from the root of a source checkout, which
 selects `builds/0/x2c`, the development compiler, without using `PATH`. In a
@@ -6977,8 +6947,8 @@ companion directory with the executable to retain native debug information.
 Symbol assembly adds time only to these requested debug links. Its failure
 fails the build and retains intermediates for diagnosis. A later `-Xcc -g0`
 overrides an earlier `-g`, including one selected by a project profile.
-Linux keeps its existing debug output; `--build-dir` and `--save-temps` remain
-available for retaining intermediate files on either platform.
+Linux builds produce no companion directory. `--build-dir` and `--save-temps`
+retain intermediate files on either platform.
 
 Inspection modes print an intermediate result and stop translation:
 
@@ -7360,7 +7330,7 @@ and runs as written:
 x2c new hello
 cd hello
 x2c run -q            # Hello, world!
-x2c run -q -- Gary    # Hello, Gary!
+x2c run -q -- Ada     # Hello, Ada!
 ```
 
 It writes `x2c.toml`, `src/main.x`, and `.gitignore`, which ignores the
@@ -7614,6 +7584,12 @@ are relative to the working directory. Each file runs through
 lives under `.x2c-build/tests/scripts/`, with a separate entry named from
 each file's stem and path hash.
 
+`-j <n>` runs up to `<n>` test files concurrently, and `-q` suppresses
+successful test lines. `--profile <name>` uses that manifest profile, as for
+`build`. The options that select and list tests by name pass through to each
+test program; `x2c help test` lists them, and
+[Selecting tests](https://x2c-lang.dev/docs/guide/testing.html#selecting-tests) describes them.
+
 The final line reports passed and failed files and tests. With a test-name filter,
 files containing no matching tests are omitted from output and file counts.
 The command returns 2 if filters select no tests across the whole run,
@@ -7633,6 +7609,11 @@ are positional, because collection records parameter types without names.
 The command does not write the ordinary x2c surface, Error conversion,
 dependency pins, or license files; see
 [Wrapping a C Library](https://x2c-lang.dev/docs/guide/wrapping-c-libraries.html) for that work.
+
+`x2c graph` inspects x2c source graphs: it saves and queries snapshots of a
+build, or analyzes source files directly. It is experimental and available in
+checkout builds; an install does not include it. Run `x2c help graph` for its
+subcommands.
 
 `x2c lint` checks x2c source style and idioms. It is experimental and
 available in checkout builds; `make install` and release payloads do not
@@ -7711,7 +7692,7 @@ member calls use that binding.
 
 The server runs macros during analysis. Start it only for workspaces you
 trust. Formatting and native C compiler diagnostics are outside this server's
-current scope. Queued requests can be cancelled. A running request finishes
+scope. Queued requests can be cancelled. A running request finishes
 before the server handles another message, including a reference or rename
 request that analyzes several inputs.
 
@@ -7729,7 +7710,7 @@ Installed compilers include the server. To select a particular
 installation or a checkout build, set:
 
 ```json
-"x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
+"x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
 ```
 
 Selection order is an explicit `x2c.semantic.compilerPath`, executable
@@ -7767,10 +7748,8 @@ describes which errors are reported together.
 ### Warnings
 
 Ordinary translation reports warnings without stopping the build. Warnings
-do not count against `--max-errors`. The internal self-host stage option
-`--fatal-warnings` makes warnings fail those builds; it is not a public
-per-warning suppression or escalation control. A warning reports code that
-may be deliberate; leave the code unchanged when it is.
+do not count against `--max-errors`. A warning reports code that may be
+deliberate; leave the code unchanged when it is.
 
 Eight codes are reported as warnings:
 
@@ -7894,8 +7873,9 @@ cc -iquote include/x2c /tmp/x2c-example/foreach.c \
 
 ## Help, version, and status
 
-`--help` and `--version` write to standard output and return `0`. Source,
-host-tool, and link failures return `1`. Invalid commands, options, response
-files, manifests, and preflight state return `2`. After a successful `run`,
-the program's status is returned. Diagnostics and action output use standard
-error; requested dumps and program output use standard output.
+`--help` (`-h`) and `--version` (`-V`) write to standard output and return
+`0`. Source, host-tool, and link failures return `1`. Invalid commands,
+options, response files, manifests, and preflight state return `2`. After a
+successful `run`, the program's status is returned. Diagnostics and action
+output use standard error; requested dumps and program output use standard
+output.
