@@ -141,6 +141,10 @@ It reads `examples/services.json`, walks the services, prints which are
 down, and writes the list of failures back out as JSON. It is the shape most
 first uses of a JSON library take.
 
+The input path is relative to the package directory. From the repository
+root, run `make -C packages/yyjson run`, which runs both examples. To run
+only this one, change to `packages/yyjson` and run `./builds/service-health`.
+
 `examples/release-catalog.x` (`make example`) parses one release catalog,
 indexes and iterates borrowed views, aggregates exact
 unsigned values, observes duplicate ordered labels, applies a JSON Patch,

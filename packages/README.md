@@ -38,6 +38,9 @@ make packages
 ./packages/termbox2/builds/game-of-life
 ```
 
+Some examples read data files by paths relative to their package directory.
+Run those with `make -C packages/<name> run`, or from that directory.
+
 The first build fetches and prepares pinned dependencies in the shared cache.
 It downloads large archives, including libtorch (about 77 MB on macOS
 arm64), and builds OpenSSL from source for libcurl.
