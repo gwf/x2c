@@ -1,9 +1,14 @@
 # Channels
 
-A `Channel` communicates non-void `Var` values between threads. Ordinary `send`
-and receive preserve borrowed payload ownership. `send_owned` explicitly hands
-off one exclusively owned storage subtree. The application is responsible
-for independent nested lifetimes, aliases, and coordinated mutable access.
+A `Channel` passes `Var` values between threads or tasks. `send` puts a value
+in; `receive` or `foreach` takes values out until the channel is closed and
+drained. This chapter covers closing and draining, capacity and message types,
+handing off storage with `send_owned`, and stopping a blocked operation.
+
+Plain `send` lends the value: the sender keeps ownership and keeps the value
+alive while receivers use it. `send_owned` hands one container's storage to
+the receiver. The application is responsible for independent nested
+lifetimes, aliases, and coordinated mutable access.
 
 ## Send, close, and drain
 
@@ -89,9 +94,9 @@ results.send_owned(part);
 ```
 
 This is physical storage movement, not traversal of keys, elements, or
-referenced objects. The transport scope stays detached while queued. Queue
-records contain only the `Var` bits and an owned flag; the object's allocation
-header recovers that scope. Workers never adopt into a shared `Channel` scope.
+referenced objects. The transport scope stays detached while queued. Do not
+move a payload into `channel.scope()` yourself; that scope is not a shared
+destination for senders.
 
 On failed send, ordinary container records, buffers, and owned contents return
 to their original allocation owner. An owned-content scope also regains
@@ -104,16 +109,16 @@ must not be sent twice. Do not leave a separate initializer `auto` or deferred
 cleanup armed for it; sending cannot disarm cleanup that is already armed.
 Unrelated aliases do not disappear when ownership changes.
 
-Receipt moves ordinary `Map` or `Array` storage into the receiver's private
-active `Scope` and destroys the empty transport `Scope` before returning. The
+Receipt moves ordinary `Map` or `Array` storage into the receiver's active
+`Scope` and destroys the empty transport `Scope` before returning. The
 receiver may clean up the container directly or move its complete storage to
-another owner. If the receiver fails, private-scope teardown reclaims the
-received storage.
+another owner. If the receiver fails, cleanup of its active `Scope` reclaims
+the received storage.
 
-The automatic path handles ordinary `Map` and `Array` tags. Typed containers
-and custom roots require a caller-prepared exclusive inactive subtree
-containing their complete physical storage. For example, prepare a packed
-`ArrayInt` with `move_to`:
+The automatic path handles ordinary `Map` and `Array` tags. A typed container
+or other custom value needs a scope that the caller prepares: a scope that
+nothing else uses, that is not active, and that holds all of the value's
+storage. For example, prepare a packed `ArrayInt` with `move_to`:
 
 <!-- ignore: illustrative fragment with optional typed-array.x and a Channel -->
 ```x2c,ignore
@@ -126,29 +131,26 @@ results.send_owned(values);
 
 Until acceptance the caller owns this prepared scope. Failure restores its
 original parent; a prepared detached scope stays detached and caller-owned.
-After acceptance it belongs to the queue, then joins the receiver's private
-scope as a child. A custom root must be a live nonnull `Scope` allocation whose
-allocation owner is that exclusive inactive subtree. The operation does not
-discover pointer provenance or validate an object graph. Canonical Strings and
-Lists, ordinary scalars, borrowed buffers, and interior pointers do not meet
-that custom-root contract.
+After acceptance it belongs to the queue, then becomes a child of the
+receiver's active `Scope`. The value sent must be a live, nonnull pointer
+from a `Scope` allocator, and its allocation owner must be that prepared
+scope. The operation does not discover pointer provenance or validate an
+object graph. Canonical Strings and Lists, ordinary scalars, borrowed
+buffers, and interior pointers do not meet that requirement.
 
 Nested mutable values keep independent ownership unless explicitly moved into
 the container's owned contents before handoff. Calling `scope()` creates that
 owned-content scope lazily; it does not group the record or buffers. Move a
 nested container's complete storage with `move_to`, rather than moving only its
 content scope. Private-pool String keys do not become safe when their `Map`
-moves. Shared process-pool `String` values stay borrowable because the pool
-outlives all jobs.
+moves. Shared process-pool `String` values stay borrowable; see [Interned
+values outlive
+workers](contexts-and-threads.md#interned-values-outlive-workers).
 
-A `Channel`'s own storage scope, returned by `channel.scope()`, owns its native
-mutex and condition. Independent Channels do not share either object. Native
-threads wait on the `Channel`'s condition using its mutex. Tasks instead [park
-through their
-scheduler](contexts-and-threads.md#run-channel-jobs-on-one-native-thread).
-Queue nodes use native allocation independently of `Scope` allocation lists.
-Allocation/tree metadata belongs to exclusive private owners; no `Scope` or
-replacement tree mutex coordinates senders through a `Channel`.
+`channel.scope()` returns the `Channel`'s own storage scope, which owns its
+native mutex and condition. A native thread that waits on a `Channel` blocks.
+A [task](contexts-and-threads.md#run-channel-jobs-on-one-native-thread) that
+waits is suspended so another task can run.
 
 Finish every user and waiter before freeing a `Channel` or destroying its
 owner. Cleanup explicitly destroys undelivered owned subtrees and frees native
@@ -165,20 +167,24 @@ stops all remaining jobs before joining them, and preserves the triggering
 error. Blocked `Channel` operations wake on their own Thread's stop request and
 unwind after releasing queue locks. They do not report successful exhaustion.
 
-Acceptance and delivery have synchronized commitment points. A committed send
-or receive succeeds despite a later stop. A pending stop before commitment
-prevents that operation and raises the Thread stop cause. A stopped rendezvous
-participant cannot be matched by another operation.
+A send commits when the `Channel` accepts its value, and a receive commits
+when it takes a value. A committed send or receive succeeds despite a later
+stop. A pending stop before commitment prevents that operation and raises the
+[Thread stop cause](contexts-and-threads.md#cooperative-stopping). A stopped
+rendezvous participant cannot be matched by another operation.
 
-Thread stopping does not close Channels or stop unrelated users. Computation
-and arbitrary native I/O are cooperative. A cancelled client's request bytes
-must stay alive until the actual service borrower finishes. Keep them under an
-owner that survives the whole batch when that is the simplest arrangement.
+Thread stopping does not close Channels or stop unrelated users. A stop does
+not interrupt computation or arbitrary native I/O. A cancelled client's
+request bytes must stay alive until the actual service borrower finishes.
+Keep them under an owner that survives the whole batch when that is the
+simplest arrangement.
 
-Batch jobs use the shared process canonical pool by default. Interned `String`
-values there outlive the jobs, but stay until process shutdown. Explicit
-private pools keep their own lifetime obligations. Transport and wakeups use
-raw storage and native synchronization; they do not require interning.
+Batch jobs use the shared process canonical pool by default. Interned
+`String` values there outlive the jobs and stay until process shutdown, as
+[Interned values outlive
+workers](contexts-and-threads.md#interned-values-outlive-workers) describes.
+Explicit private pools keep their own lifetime obligations. Sending a value
+does not intern or copy its contents.
 
 ## Where to go next
 
