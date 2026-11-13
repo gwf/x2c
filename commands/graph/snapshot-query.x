@@ -72,10 +72,9 @@ static void _sq_validate_walk(Map request) {
 
 static void _sq_validate_filter(Map filter, int node) {
   foreach ((String key, Var value) in filter) {
-    if (key == "all" || key == "any") {
+    if (key == "all" || key == "any")
       foreach (Var child, _sq_array(value, key))
         _sq_validate_filter(_sq_object(child, key), node);
-    }
     else if (key == "not")
       _sq_validate_filter(_sq_object(value, key), node);
     else if (!node && key == "reachable_from") {
@@ -295,9 +294,7 @@ static int _sq_filter(SnapshotQuery &q, Map entity, Map filter) {
     else if (key == "reachable_from") {
       if (!_sq_reachable(q, entity, value)) return 0;
     }
-    else {
-      if (!entity.contains(key) || !_sq_equal(entity[key], value)) return 0;
-    }
+    else if (!entity.contains(key) || !_sq_equal(entity[key], value)) return 0;
   }
   return 1;
 }
@@ -525,9 +522,8 @@ static int _sq_node_where(
     else if (key == "not") {
       if (_sq_node_where(q, entity, node, parents, value)) return 0;
     }
-    else {
+    else
       simple[key] = value;
-    }
   }
   return _sq_node_filter(q, entity, node, parents, simple);
 }

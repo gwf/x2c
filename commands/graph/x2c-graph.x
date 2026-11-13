@@ -1156,14 +1156,13 @@ static List _parse_lifetime_units(
 }
 
 static void _index_public_functions(List units, Map public_functions) {
-  foreach (List unit, units) {
+  foreach (List unit, units)
     match (unit)
       case %(unit ?path ? ? (functions *functions)):
         foreach (List function, functions)
           match (function)
             case %(function ? ?name public ? (calls *)):
               project_add_public(public_functions, %(target $path $name));
-  }
 }
 
 static void _resolve_call(List raw, Map publics, Map resolved) {
