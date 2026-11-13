@@ -80,9 +80,11 @@ allocated by `getline` must use native `free`. Passing that buffer to `xfree`
 or `xrealloc`, or passing managed memory to native `free` or `realloc`, is
 undefined behavior.
 
-`Scope.open` opens a new region on the active scope slot;
-`Scope.close` frees everything allocated inside it. Between them, the
-allocation calls go into the open region:
+A *scope slot* is a variable of type `Scope`. New allocations go to the
+scope held by the active slot. `Scope.open` stores a new scope in the active
+slot, linked to the scope the slot held, and so opens a region;
+`Scope.close` frees everything allocated inside it and restores the earlier
+scope. Between them, the allocation calls go into the open region:
 
 ```x2c
 Scope.open();
@@ -98,7 +100,7 @@ surrounding work finishes.
 
 The runtime checks each close against the active slot. An empty open
 region closes normally. An extra close, or a close from a different
-pushed slot, raises `<bad-state>` and leaves the active region intact.
+pushed slot, raises `<bad-state>` and leaves the open region intact.
 A matching `catch` can handle the error. Without one, the default policy
 aborts the program.
 
@@ -157,9 +159,8 @@ root or a scope named by a slot still on the pushed stack. The scope is left
 intact. Uncaught, `<bad-state>` aborts the program.
 
 The caller must keep a scope alive while open regions or other users
-borrow it. Destroying an attached lower scope violates that lifetime contract;
-the runtime does not promise to detect it. A popped, detached chain can still
-be destroyed through its head.
+borrow it. Do not destroy a scope while a region opened on top of it is
+still open; the runtime does not detect that mistake.
 
 To close a region on every exit from a block, write it as `auto` or put
 the close in a `defer`. [Errors and
@@ -314,7 +315,7 @@ Feed Feed.open(void) {
 
 The finalizer runs exactly once with the record's pointer: on `Scope.free`,
 on a `Scope.realloc` to size zero, when the owning scope is closed or
-destroyed, or when shutdown destroys its owning root region. A detached
+destroyed, or when shutdown destroys its owning root scope. A detached
 `Scope` that is still live at shutdown is reported as a leak, and its
 finalizers do not run. The finalizer follows the record through `Scope.move`,
 and `Scope.realloc` keeps it and passes the resized pointer.
@@ -445,13 +446,8 @@ the region. A value leaves when it is:
   `Array.push`, that stores it in one of those places.
 
 The address of a local or parameter is reported the same way when it
-outlives the function. For an address into the current function's frame, a
-raw pointer store with an unknown destination lifetime does not, by itself,
-establish retention after return. Ordinary translation leaves that case to
-the C lifetime contract.
-The optional audit still reports the possible escape, and a `meta` function
-still rejects it. Known retaining stores remain checked through helpers,
-and this boundary does not exempt uses of already ended regions.
+outlives the function. [The Region Model](regions.md) gives the limits of
+that check.
 
 Two more warnings come from the same check.
 `after-free` reports a local read after `Scope.free`, `Scope.realloc`, or
@@ -515,10 +511,7 @@ while (walk.try_next(value)) printf("%ld\n", value.integer());
 ```
 
 `storage` is an automatic variable. Nothing here needs freeing or a scope;
-see [Iteration](iteration.md) for the protocol. An automatic local or
-parameter you assigned directly keeps its value when a `raise` transfers
-control to a `catch`. Your source needs no optimization-specific qualifiers
-for that.
+see [Iteration](iteration.md) for the protocol.
 
 ## Where to go next
 
