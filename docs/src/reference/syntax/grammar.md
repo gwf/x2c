@@ -470,6 +470,15 @@ External recognizers cover: native annotation contents, dynamic macro
 signatures, context-sensitive names, slots, and pattern recognition. The
 accompanying lexical specification covers raw source and layout spelling.
 
+These constructs have no production of their own:
+
+- `expand` is a predefined keyword alias read by the `decorator` recognizer.
+- A method-form decorator, `receiver.name(arguments) TARGET`, is read by
+  the `decorator` recognizer, which finds `$T.name` from the receiver's
+  type `T`.
+- Assignment destructuring, `(a, b) = values;`, derives as an ordinary
+  `assignment`; the parser recognizes its parenthesized targets.
+
 Source comparison, existing fixtures, and focused probes can establish
 specific correspondences. They do not prove that this grammar and the compiler
 accept exactly the same language. In particular, no independent parser has

@@ -153,6 +153,11 @@ lib/logger.x|advanced|log_should_log,log_trace,log_warn
 lib/logger.x|internal|Logger.error_handler
 lib/macrovalue/macrovalue.x|internal|Macro.binder
 lib/macrovalue/macrovalue.x|internal|MacroCaseSite,MacroFixedSlots,MacroPublishing
+lib/macrovalue/macrovalue.x|internal|Macro_case_capture_at,Macro_case_enter
+lib/macrovalue/macrovalue.x|internal|Macro_case_own,Macro_case_pattern
+lib/macrovalue/macrovalue.x|internal|Macro_case_root,Macro_case_shape
+lib/macrovalue/macrovalue.x|internal|Macro_case_start,Macro_case_symbol
+lib/macrovalue/macrovalue.x|internal|Macro_case_view
 lib/map/map.x|advanced|Map.compare,Map.equal,Map.repr,Map.str,Map.update_n
 lib/map/map.x|advanced|Map.write_repr
 lib/map/map.x|compatibility|Map.del,Map.get,Map.getindex

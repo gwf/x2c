@@ -21,7 +21,6 @@ static List _full_text(void) => %(
   "reference/cli.md")
 
 static int _optional_section(String heading) =>
-  heading == "Compiler API (provisional)" ||
   heading == "Compiler internals"
 
 /* Each section is `(heading rows)`, where rows is an Array of

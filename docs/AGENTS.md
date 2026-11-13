@@ -45,11 +45,16 @@ API, and public-type surfaces without adding pages to the book. It reads the
 same compiler projection, so signatures and names are the compiler's own.
 
 The generator also owns `docs/src/internals/compiler-api/`, its
-`# Compiler API (provisional)` section
-in `docs/src/SUMMARY.md`, and full pages for optional library modules. The
-provisional label means those pages describe current compiler behavior without
-promising API stability. Never hand-edit those pages or their table-of-contents
-entries.
+`Compiler API` entries at the end of the `# Compiler internals` part of
+`docs/src/SUMMARY.md`, and full pages for optional library modules. Those
+pages describe the compiler's own functions for readers of its source; a
+program cannot call them. Never hand-edit those pages or their
+table-of-contents entries.
+
+A library module page is titled by the type its file stem names, such as
+`String` for `lib/string/string.x`, and lists its source path under the
+title. The generator's title table names the modules whose stem names no
+type.
 
 Prose on generated pages comes from doc comments in compiler and runtime entry files, and
 the generic templates that own published definitions:

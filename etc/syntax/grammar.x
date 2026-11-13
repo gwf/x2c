@@ -806,7 +806,8 @@ List syntax_grammar(void) => %(grammar
         (repeat 0 (seq (token ",") (ref argument)))
         (optional (token ","))))
 
-    (rule argument (choice (ref assignment) (ref argument-slot)))
+    (rule argument
+      (choice (ref map-entry) (ref assignment) (ref argument-slot)))
 
     (rule member-name (choice (ref identifier) (ref name-slot)))
 
@@ -1109,9 +1110,15 @@ List syntax_grammar(void) => %(grammar
         (ref governed)))
 
     (rule declaration-argument
-      (seq
-        (ref specifiers)
-        (choice (ref init-declarator) (ref destructuring-targets))))
+      (choice
+        (seq
+          (ref specifiers)
+          (choice (ref init-declarator) (ref destructuring-targets)))
+        (seq
+          (token "(")
+          (ref declaration-argument)
+          (repeat 0 (seq (token ",") (ref declaration-argument)))
+          (token ")"))))
 
     (rule keyword-definition
       (seq

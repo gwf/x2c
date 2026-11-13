@@ -17,8 +17,8 @@ List syntax_extensions(void) => %(
       (summary "Import packages, assemble module members, and run script statements.")
       (grammar import-declaration import-member module-block script-unit type-reference identifier)
       (lexical c-tokens)
-      (grammar-note "import with aliases/member selection, package-qualified alias.Type/alias.member names, module member text splicing before parsing, and script statements outside an explicit main.")
-      (lexical-note "import is contextual; a leading shebang is handled before lexing.")
+      (grammar-note "`import` a package, optionally `as` an alias or `with` chosen members, and name its contents as `alias.Type`. A `module` block gathers members from several files, and a script can run statements outside `main`.")
+      (lexical-note "`import` is a keyword only where an import can start. A leading `#!` line is skipped before tokenizing.")
       (spellings "import" "as" "with" "module" "#!")
       (reference "../reference/language.md#source-files-and-visibility"))
     (feature layout
@@ -26,8 +26,8 @@ List syntax_extensions(void) => %(
       (summary "Write blocks and statement endings through indentation.")
       (grammar block governed statement)
       (lexical layout)
-      (grammar-note "The parser receives ordinary braces, parentheses, and semicolons.")
-      (lexical-note "In .xp or after #pragma indent, a token pass rewrites layout and colons.")
+      (grammar-note "Indentation opens and closes blocks and ends statements. The parser still receives ordinary `{`, `}`, and `;`.")
+      (lexical-note "In a `.xp` file or after `#pragma indent`, indentation and a trailing `:` become braces and semicolons.")
       (spellings ".xp" "#pragma indent" ":")
       (reference "../reference/language.md#indentation-syntax"))
     (feature declarations
@@ -38,8 +38,8 @@ List syntax_extensions(void) => %(
                typed-destructuring class-declaration named-type assignment
                init-declarator)
       (lexical c-tokens)
-      (grammar-note "Managed declarations and initializers, mixed-type rows, T.method names, & and &? parameters, delegate fields, destructuring, class/NamedType forms, and static type visibility.")
-      (lexical-note "delegate, threaded, and Self are contextual. Existing punctuation gains declaration roles.")
+      (grammar-note "Declare owned values with `auto`, mix types in one row (`int i, float x`), and unpack a List with `Var (a, b) = values`. Name methods `T.method`, take `&` and `&?` reference parameters, and declare `class` types, `delegate` fields, and file-private `static typedef` names.")
+      (lexical-note "`delegate`, `threaded`, and `Self` are keywords only in declarations. Existing punctuation such as `&` and `.` takes new roles there.")
       (spellings "auto T a = x, b = y" "T a = auto x" "T.method"
                  "&" "&?" "delegate" "threaded" "Self"
                  "class" "static typedef" "int i, float x"
@@ -52,8 +52,8 @@ List syntax_extensions(void) => %(
                alias-head alias-name alias-to named-alias alias-wrapper
                alias-statement field-alias enumerator-alias unalias)
       (lexical c-tokens)
-      (grammar-note "alias name to expression and alias expression as name declarations at file, module, block, aggregate, and enumerator positions; braced alias bodies whose omitted name defaults to _; file-private static alias; and unalias name, which removes an alias the current scope declares.")
-      (lexical-note "alias, unalias, as, and to are contextual words; an alias or unalias needs no comma among enumerators.")
+      (grammar-note "`alias name to e;` and `alias e as name;` name an expression for the rest of a scope, or for one braced body where `_` is the default name. `unalias name;` removes an alias.")
+      (lexical-note "`alias`, `unalias`, `as`, and `to` are keywords only in these forms. Inside an `enum`, an alias needs no comma.")
       (spellings "alias name to e;" "alias name to e { ... }"
                  "alias e as name;" "alias e as name { ... }"
                  "alias e { ... _ ... }" "static alias e as name;"
@@ -64,8 +64,8 @@ List syntax_extensions(void) => %(
       (summary "Declare a method contract and adopt it for a type.")
       (grammar protocol-form associated-type protocol-member)
       (lexical c-tokens)
-      (grammar-note "Protocol definitions/adoptions, associated types, member aliases, and as/tag adoption modifiers.")
-      (lexical-note "protocol, associated, as, and tag are contextual words.")
+      (grammar-note "`protocol` declares the methods a type must provide, with `associated` types and member aliases. An adoption makes a type satisfy a protocol, and `as` or `tag` chooses its `Var` tag.")
+      (lexical-note "`protocol`, `associated`, `as`, and `tag` are keywords only in these forms.")
       (spellings "protocol" "associated" "as" "tag")
       (reference "../reference/language.md#protocols"))
     (feature functions
@@ -73,8 +73,8 @@ List syntax_extensions(void) => %(
       (summary "Return an expression directly or construct a closure.")
       (grammar function-body lambda bare-parameters capture-list)
       (lexical percent-forms)
-      (grammar-note "Expression bodies use =>; lambdas permit typed or bare parameters and using captures.")
-      (lexical-note "%! is a lambda opener; => remains two tokens; using is contextual.")
+      (grammar-note "`int f(int x) => x + 1;` returns an expression directly. `%!(int x) => x + 1` builds a lambda; its parameters may omit types, and `using` names captured variables.")
+      (lexical-note "`%!` opens a lambda. `=>` is `=` followed by `>`, not a new token, and `using` is a keyword only in a lambda.")
       (spellings "=>" "%!" "using")
       (reference "../reference/language.md#lambdas"))
     (feature collections
@@ -82,8 +82,8 @@ List syntax_extensions(void) => %(
       (summary "Build Arrays and Maps from expressions.")
       (grammar primary array map map-entry initializer atomic arguments)
       (lexical c-tokens)
-      (grammar-note "Bare Array/Map literals, destination-typed brace expressions, void as a value, and trailing ordinary call-argument commas.")
-      (lexical-note "No new delimiter tokens: [], {}, commas, colons, and void acquire expression roles.")
+      (grammar-note "`[a, b]` builds an Array and `{key: value}` builds a Map; a brace list such as `return {a, b};` takes the destination's type. `void` is a value, and a call may end with a comma, as in `f(a,)`.")
+      (lexical-note "No new tokens: `[]`, `{}`, `,`, `:`, and `void` take new roles in expressions.")
       (spellings "[a, b]" "{key: value}" "return {a, b};" "void"
                  "f(a,)")
       (reference "../reference/language.md#array-and-map-literals"))
@@ -96,8 +96,8 @@ List syntax_extensions(void) => %(
       (lexical percent-forms data-prefix data-punctuation symbol string-segment
                x2c-escape byte-escape list-atom collection-atom set-atom signed-number
                octal-integer)
-      (grammar-note "List/data readers, interpolation, splicing, reader prefixes, typed pattern captures, Symbols, and SymbolSets.")
-      (lexical-note "Percent openers select reader modes; \$(...) interpolation and @(...) splicing re-enter code; angle Symbols, atom boundaries, byte escapes, signed data numbers, and explicit 0o octal extend scanning.")
+      (grammar-note "`%(...)` reads List data, and `%\"...\"` puts `\$name` and `\$(expr)` values into text. `@items` splices a sequence, `<name>` spells a Symbol, `%<...>` a SymbolSet, and `?(Type name)` a typed pattern capture.")
+      (lexical-note "Each `%` opener reads data until its closing bracket, and `\$(...)` and `@(...)` return to code inside it. Data also accepts signed numbers, byte escapes, and `0o17` octal.")
       (spellings "%(...)" "%[...]" "%{...}" "%\"...\"" "%<...>"
                  "<name>" "\$name" "\$(expr)" "@items" "@(expr)"
                  "?(Type name)" "'" "`" ",@" "0o17")
@@ -107,8 +107,8 @@ List syntax_extensions(void) => %(
       (summary "Test identity, membership, or type; slice a sequence.")
       (grammar equality relational type-selector postfix-part)
       (lexical c-tokens keyword-retag)
-      (grammar-note "=== and !==, ~= pattern conditions, in, is/is not, and [start:stop:step] extend the C expression ladder.")
-      (lexical-note "===, !==, and ~= are operator tokens; in is contextually retagged; is and not remain contextual words.")
+      (grammar-note "`===` and `!==` test identity, `x ~= pattern` tests a match, `x in xs` tests membership, and `x is T` and `x is not T` test a type. `xs[start:stop:step]` slices a sequence.")
+      (lexical-note "`===`, `!==`, and `~=` are new operator tokens. `in`, `is`, and `not` are keywords only in these expressions.")
       (spellings "===" "!==" "~=" "in" "is" "is not"
                  "[start:stop:step]")
       (reference "../reference/language.md#membership-with-in"))
@@ -118,8 +118,8 @@ List syntax_extensions(void) => %(
       (grammar foreach-statement declaration-argument match-statement
                match-row pattern)
       (lexical keyword-retag list-atom)
-      (grammar-note "foreach binders and match cases with patterns and optional guards; case/default otherwise remain C forms.")
-      (lexical-note "match is contextually retagged; foreach is a shipped keyword alias; pattern sigils are data-mode atom spellings.")
+      (grammar-note "`foreach (T x in xs)` loops over a sequence. `match` selects the first `case pattern:` that fits, with an optional `if (test)` guard; other `case` and `default` labels keep their C meaning.")
+      (lexical-note "`match` is a keyword only where a statement starts, and `foreach` is a `keyword` macro that ships with x2c. In a pattern, `?name` binds one value and `*rest` binds the remaining elements.")
       (spellings "foreach" "match" "case pattern if (test):"
                  "?name" "*rest")
       (reference "../reference/language.md#statements"))
@@ -130,8 +130,8 @@ List syntax_extensions(void) => %(
                with-statement with-entry statement try-statement catch-arm catch-payload
                catch-detail raise-statement raise-detail)
       (lexical c-tokens percent-forms list-atom)
-      (grammar-note "auto regions with optional nonempty destination, with blocks that assign and restore places, defer statements, try/catch/finally, and raise with structured details.")
-      (lexical-note "defer stays reserved; try, catch, finally, and raise are contextual; with requires a complete braced head; percent and angle forms keep lexical priority.")
+      (grammar-note "`auto { ... }` frees what a block allocates, `with (place = value)` sets places and restores them, and `defer` runs work at scope exit. `try`, `catch`, `finally`, and `raise` handle structured errors.")
+      (lexical-note "`defer` is reserved; `try`, `catch`, `finally`, and `raise` are keywords only in these statements. `catch %(...)` and `raise %(...)` describe an error as quoted data.")
       (spellings "auto { ... }" "auto (destination)"
                  "with (place = value, ...)"
                  "defer" "try" "catch" "finally" "raise")
@@ -149,8 +149,8 @@ List syntax_extensions(void) => %(
                block-extension statement-macro field-extension
                enumerator-extension entry-extension)
       (lexical code-reference named-reference data-prefix)
-      (grammar-note "Typed macro holes/results, @ sequence parameters and splices, aliases, decorators, source quotations, and meta/native functions.")
-      (lexical-note "\$ inserts one result; @ splices a sequence. \$! uses ordinary ! after \$; macro/keyword/meta/native are contextual.")
+      (grammar-note "`macro` and `keyword` define new syntax with typed holes, `@` parameters accept sequences, and quotations and decorators build source. `meta` functions run at compile time, and `meta native` lets compile-time code call the native copy of a function the compiler links.")
+      (lexical-note "`\$name` inserts one result and `@items` splices a sequence; `\$!` is `\$` followed by `!`. `macro`, `keyword`, `meta`, and `native` are keywords only where a definition starts.")
       (spellings "macro" "keyword" "\$name(...)" "\$!{...}"
                  "@items" "@name(...)" "@(expression)"
                  "meta" "native")
