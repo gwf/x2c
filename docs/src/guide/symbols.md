@@ -188,10 +188,8 @@ Choose the type by who wrote the names.
 Use a `Symbol` for a closed set of names that you wrote, such as outcome and
 lifecycle values. `Lisp.read` returns `<value>` or `<eof>` and raises
 `<incomplete>` or `<malformed>`, and `Error` causes include `<bad-sig>`,
-`<no-symbol>`, `<bad-arity>`, `<bad-types>`, and `<bad-result>`. A debugger shows each one by name, where an `enum` constant
-prints as `3`. The compiler uses symbols the same way: AST node heads and
-the match operator and predicate names are compact symbols, because the
-compiler chose them.
+`<no-symbol>`, `<bad-arity>`, `<bad-types>`, and `<bad-result>`. A debugger
+shows each one by name, where an `enum` constant prints as `3`.
 
 `Symbol`s also make good map keys for fixed configuration:
 
@@ -239,9 +237,10 @@ A `Symbol` literal is a compile-time constant. A `Symbol` needs no
 allocation, table, or lifetime management. `Symbol.str` and `Symbol.repr`
 are its only costly operations.
 
-`Atom.intern` canonicalizes the spelling through the `String` pool: a hash,
-a pool lookup, and an allocation the first time the spelling is seen. It
-then tries the compact encoding. Intern a name once and pass the atom
+`Atom.intern` canonicalizes the spelling through the `String` pool (see
+[Scopes and Lifetime](memory.md#bounding-temporary-canonical-lists)): a
+hash, a pool lookup, and an allocation the first time the spelling is seen.
+It then tries the compact encoding. Intern a name once and pass the atom
 around. After interning, equality and identity are one bit comparison.
 Hashing a `String`-backed atom reads the `String`'s cached hash. Interning
 uses the `String` pool and has no separate atom table.
