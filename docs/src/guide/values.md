@@ -200,8 +200,10 @@ The format must be a direct static literal whenever a variadic argument is a
 `Var`. Automatic lowering covers integer, floating, `%c`, `%s`, width, and
 precision arguments with the `hh`, `h`, `l`, `ll`, and `L` modifiers. Use an
 explicit native conversion for `j`, `z`, `t`, `%p`, `%n`, wide
-character/string conversions, positional formats, or a dynamic format. Calls
-containing only native arguments keep C's printf behavior.
+character/string conversions, positional formats, or a dynamic format. With
+a static format, `%s` prints the empty `String` as no text, and a `List`,
+`Array`, `Map`, or `Symbol` at `%s` is an error; pass its `.str()` or
+`.repr()`. Other native arguments keep C's printf behavior.
 
 ## Null and void
 

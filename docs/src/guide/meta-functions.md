@@ -307,7 +307,7 @@ at the declaration:
 sample.x:1:1: type: native meta function declaration does not match its target
   meta float sin(double);
   ^^^^
-  note: name: sin signature: ((func ((double))) float)
+  note: name: sin signature: float (double)
 ```
 
 Two kinds of function follow a rule. An iterator operation takes its
@@ -490,7 +490,7 @@ A module function may take or return a handle:
 helpers.x:3:1: type: unproved native meta lifetime
   meta Widget widget_wrap(Widget inner);
   ^^^^
-  note: name: widget_wrap signature: ((func (("Widget"))) "Widget") it might return or keep its argument; ownership cannot be inferred
+  note: name: widget_wrap signature: Widget (Widget) it might return or keep its argument; ownership cannot be inferred
 ```
 
 The compiler loads a module only when an option, a manifest or an import

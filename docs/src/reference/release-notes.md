@@ -34,6 +34,8 @@ conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
   `log_*` functions becomes `@values`, or separate arguments.
 - `$switch` becomes an ordinary `switch` with a block and `break` per case.
 - `x2c editor` becomes `x2c lsp`.
+- A `List`, `Array`, `Map`, or `Symbol` passed to a printf-family `%s` is an
+  error; pass its `.str()` or `.repr()`, or pass a `Var`.
 - `x2c repl` is not installed by releases; build it in a checkout with
   `make commands`.
 
@@ -243,6 +245,15 @@ conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
 
 ### Fixed defects
 
+- A printf-family `%s` with a static format prints the empty `String` as no
+  text; it printed `(null)`.
+- A `List`, `Array`, `Map`, or `Symbol` at a printf-family `%s` is a
+  compile-time error; it was passed as a raw pointer and printed garbage or
+  crashed.
+- Diagnostics spell types as declarations do, such as `int *` and
+  `double (int)`, name the method, function, or macro in argument-count
+  errors, and omit expansion notes that pointed into the compiler's own
+  definitions.
 - Regex matching checks the stack floor for sequential and nested groups,
   so excessive matching recursion raises a catchable size-limit error.
 - Calls through a pointer to a function typedef now convert arguments as

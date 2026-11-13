@@ -78,7 +78,7 @@ A missing nested method receives the ordinary compiler diagnostic.
 
 Pointer fields, including `char *`, fail at the invocation. For example,
 `typedef struct Bad { int *raw; } Bad;` followed by `$derive(Bad, <map>);`
-reports `derive: field 'raw' of Bad has pointer type (* int)`.
+reports `derive: field 'raw' of Bad has pointer type int *`.
 
 ## Program arguments
 
