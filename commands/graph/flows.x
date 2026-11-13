@@ -11,7 +11,6 @@
 #include "compiler/compiler.x"
 #include "targets.x"
 
-
 #include <string.h>
 
 /* One function's value-flow walk: the unit facts its calls resolve

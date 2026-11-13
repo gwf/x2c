@@ -7,7 +7,6 @@
 
 typedef struct Lifetime Lifetime;
 
-
 #include <string.h>
 
 typedef struct LifetimeFacts LifetimeFacts;
