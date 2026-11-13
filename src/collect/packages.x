@@ -55,15 +55,21 @@ static String _find_package(
     c, token, name, _package_search(name, c.package_dirs));
 }
 
-/* Where an unknown package was looked for. A root inside the working
-   directory is named relative to it, as diagnostics name sources. */
+/* Where an unknown package was looked for: the `src` and top directories
+   of the package under each root. A root inside the working directory is
+   named relative to it, as diagnostics name sources. */
 static String _package_search(String name, List roots) {
   if (!roots)
     return "no package roots are configured; add one with --package-dir";
   String here = %"$(Path.absolute("."))/";
-  List shown = roots.map(%!(root) => Path.absolute(root).remove_prefix(here));
-  String each = %"<root>/$name/src/$name.{x,xp} and <root>/$name/$name.{x,xp}";
-  return %"searched $each for each <root> of: $(", ".join(shown))";
+  Array directories = [];
+  foreach (String root in roots) {
+    String package = %"$(Path.absolute(root).remove_prefix(here))/$name";
+    directories.push(%"$package/src");
+    directories.push(package);
+  }
+  String searched = ", ".join(directories.list_free());
+  return %"searched for $name.x or $name.xp in $searched";
 }
 
 /* The package's files enter the cache from their entries, or from one cold

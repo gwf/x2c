@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/import-unknown-package.x:4:1: driver: unknown package 'nosuch'
   import "nosuch";
   ^^^^^^
-  note: searched <root>/nosuch/src/nosuch.{x,xp} and <root>/nosuch/nosuch.{x,xp} for each <root> of: unittest/compiler-fixtures/packages, packages
+  note: searched for nosuch.x or nosuch.xp in unittest/compiler-fixtures/packages/nosuch/src, unittest/compiler-fixtures/packages/nosuch, packages/nosuch/src, packages/nosuch
 
