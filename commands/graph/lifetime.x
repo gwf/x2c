@@ -311,7 +311,7 @@ static void _lifetime_unresolve(Lifetime &lifetime, int id, List cause) {
 static void _lifetime_replace_return_fact(
   Lifetime &lifetime, Var value, List replacement) {
   List binding = project_direct_binding(value);
-  if (binding && lifetime.facts.return_bindings.contains(binding)) {
+  if (binding && binding in lifetime.facts.return_bindings) {
     List fact = lifetime.facts.return_bindings[binding];
     match (fact)
       case %((!or kind call) *): lifetime.summary_unresolved = 1;
@@ -424,7 +424,7 @@ static void _lifetime_bind(Lifetime &lifetime, List binding, Var expression) {
   Type target = _lifetime_binding_type(lifetime, binding);
   List return_fact = _lifetime_typed_summary_fact(
     lifetime, expression, target);
-  if (lifetime.facts.return_bindings.contains(binding)) {
+  if (binding in lifetime.facts.return_bindings) {
     List previous = lifetime.facts.return_bindings[binding];
     if (!List.equal(previous, return_fact))
       match (previous)
@@ -459,7 +459,7 @@ static int _lifetime_owner_ended(List owner) {
 }
 
 static List _lifetime_owner(Lifetime &lifetime, int id) {
-  return id && lifetime.facts.regions.contains(id)
+  return id && id in lifetime.facts.regions
        ? lifetime.facts.regions[id].list() : %(none);
 }
 
@@ -495,7 +495,7 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
       match (owner) {
         case %(region ? ?kind ? ? ? ? ?ended): {
           if (!_lifetime_owner_ended(owner)) return;
-          if (lifetime.uncertain_allocations.contains(id)) {
+          if (id in lifetime.uncertain_allocations) {
             _lifetime_emit_unresolved(lifetime, id);
             return;
           }
@@ -512,7 +512,7 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
       return;
     }
     case %(allocation ? ?region ? unresolved ?): {
-      if (lifetime.facts.regions.contains(region) &&
+      if (region in lifetime.facts.regions &&
           _lifetime_owner_ended(lifetime.facts.regions[region]))
         _lifetime_emit_unresolved(lifetime, id);
       return;
@@ -522,7 +522,7 @@ static void _lifetime_return(Lifetime &lifetime, Type target, Var expression) {
       ?status ?allocated
     ): {
       List causes = lifetime.allocation_unresolved.getdefault(id, NULL);
-      Symbol final_status = lifetime.uncertain_allocations.contains(id)
+      Symbol final_status = id in lifetime.uncertain_allocations
                           ? <unresolved> : status.symbol();
       List pending = %(
         pending-return $(lifetime.path) $(lifetime.function)
@@ -802,7 +802,7 @@ static Map _lifetime_summaries(List functions, Map publics) {
 static Symbol _lifetime_resolved_kind(
   List raw_target, Map publics, Map summaries) {
   List target = resolve_project_target(raw_target, publics);
-  return target && summaries.contains(target)
+  return target && target in summaries
        ? summaries[target].symbol() : 0;
 }
 
