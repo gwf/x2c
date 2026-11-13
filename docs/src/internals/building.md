@@ -59,6 +59,13 @@ upstream configure scripts and compilers still check platform support.
    ./x2c run -q examples/foreach.x
    ```
 
+In a
+checkout, `make build-safe` builds the compiler and `x2c-build` only. Run
+`make commands` afterward to build `new`, `package`, `test`, and `lsp`, along
+with the experimental `bind`, `graph`, `lint`, and `repl`. `./bin/x2c`
+selects the bootstrap compiler until `make build-install` links it to an
+installed copy of the development compiler.
+
 ## Why a bootstrap exists
 
 The compiler and runtime are written in x2c. A fresh machine cannot translate
@@ -99,6 +106,9 @@ which [the self-host build](architecture.md#the-self-host-build) explains.
   - `docs/src/reference/syntax/x2c.ebnf` and
     `docs/src/reference/syntax/lexical-data.md`, which
     `tools/syntax-spec write` renders from `etc/syntax/`.
+ `tools/gen-linked-meta.sh` and
+`tools/gen-meta-queries.sh` select the compiler's linked copies and the
+helper's forwarders from these rows.
 
 Do not hand-edit any of them; regenerate them with their targets.
 
@@ -175,6 +185,17 @@ The feature records in `etc/syntax/extensions.x` connect each syntax family
 to grammar productions, lexical rules, example spellings, and a reference
 section. The table in [What x2c Adds to C Syntax](../guide/x2c-syntax-map.md)
 is generated from those records.
+
+## Build a compiler with package extensions
+
+From a built compiler
+checkout, include every compiler unit and both header search roots:
+
+```sh
+tools/sources.sh |
+  xargs ./x2c build --extension packages/tally \
+    --x-include-dir src --c-include-dir builds/0/src --output /tmp/x2c
+```
 
 ## Checking book samples
 

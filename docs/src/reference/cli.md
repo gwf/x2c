@@ -11,12 +11,7 @@ through `x2c-package`. A checkout can also build the experimental commands
 `bind`, `graph`, `lint`, and `repl`, which an install does not include.
 
 This chapter's examples use `./x2c` from the root of a source checkout, which
-selects `builds/0/x2c`, the development compiler, without using `PATH`. In a
-checkout, `make build-safe` builds the compiler and `x2c-build` only. Run
-`make commands` afterward to build `new`, `package`, `test`, and `lsp`, along
-with the experimental `bind`, `graph`, `lint`, and `repl`. `./bin/x2c`
-selects the bootstrap compiler until `make build-install` links it to an
-installed copy of the development compiler.
+selects `builds/0/x2c`, the development compiler, without using `PATH`.
 
 The generated help is the short option reference:
 
@@ -221,9 +216,7 @@ A bodied `meta` function the file spells prints a `meta` row after the
 definitions, `(meta (name NAME) (line LINE) (comptime N))`, where
 `N` is 1 when the function reaches a compiler operation and so has
 no runtime form. A compile-time-only function is not part of the
-translated unit and has no `function` row. `tools/gen-linked-meta.sh` and
-`tools/gen-meta-queries.sh` select the compiler's linked copies and the
-helper's forwarders from these rows.
+translated unit and has no `function` row.
 
 An inspection that does not write generated files does not need `--out-dir`.
 Only one inspection mode runs; the last option given wins.
@@ -306,15 +299,7 @@ library naming, and initialization rules.
 executable being built, which must be the compiler, and repeats. The
 package's `src/*.x` and `src/*.c` become inputs, and a generated unit
 registers its `meta` functions under the package's name. The resulting
-compiler imports the package without loading its module. From a built compiler
-checkout, include every compiler unit and both header search roots:
-
-```sh
-tools/sources.sh |
-  xargs ./x2c build --extension packages/tally \
-    --x-include-dir src --c-include-dir builds/0/src --output /tmp/x2c
-```
-[Native modules](../guide/meta-functions.md#native-modules) explains what a
+compiler imports the package without loading its module. [Native modules](../guide/meta-functions.md#native-modules) explains what a
 module contains.
 
 `-c`, or `--compile-only`, stops after compilation. By default, each input
