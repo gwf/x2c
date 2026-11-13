@@ -571,7 +571,7 @@ static List _walk_candidates(List functions) {
               List target = resolve_project_target(raw_target, publics);
               Map matched_groups = {};
               if (target && !List.equal(target, caller) &&
-                  walked.contains(target))
+                  target in walked)
                 foreach (List summary, walked[target].list()) {
                   int position = -1;
                   Var terminal_type = void;
@@ -604,7 +604,7 @@ static List _walk_candidates(List functions) {
                         $argument_identity $spelling $terminal_type
                         (path @combined) $display
                       );
-                      if (matched_groups.contains(key)) continue;
+                      if (key in matched_groups) continue;
                       matched_groups[key] = 1;
                       groups[key] = cons(
                         %(site $callee_name $location),
@@ -671,8 +671,8 @@ static List _site_value_summary(
   if (!node) return %(form);
   match (node) {
     case %(ident (!set ?binding (binding ? ?spelling))): {
-      if (parameters.contains(binding)) return %(parameter $spelling);
-      if (prior_writes.contains(binding)) {
+      if (binding in parameters) return %(parameter $spelling);
+      if (binding in prior_writes) {
         Array writes = [];
         foreach (List write, prior_writes[binding].list())
           writes.push(write);
@@ -1250,7 +1250,7 @@ static List _resolve_graph(List units, Map attributes) {
 
 static int _reachable(String from, String target, Map adjacency, Map seen) {
   if (from == target) return 1;
-  if (seen.contains(from)) return 0;
+  if (from in seen) return 0;
   seen[from] = 1;
   List next = adjacency.getdefault(from, NULL);
   foreach (String path, next)
@@ -1262,10 +1262,10 @@ static List _dependency_cycles(Array paths, Map adjacency) {
   Map assigned = {};
   Array cycles = [];
   foreach (String path, paths) {
-    if (assigned.contains(path)) continue;
+    if (path in assigned) continue;
     Array component = [];
     foreach (String candidate, paths) {
-      if (assigned.contains(candidate)) continue;
+      if (candidate in assigned) continue;
       if (_reachable(path, candidate, adjacency, {}) &&
           _reachable(candidate, path, adjacency, {}))
         component.push(candidate);
@@ -1495,7 +1495,7 @@ static List _architecture_reciprocal(List graph) {
 static void _record_boundary_function(
   Map seen, Map counts, List direction, String name) {
   List key = $(@direction, name);
-  if (seen.contains(key)) return;
+  if (key in seen) return;
   seen[key] = 1;
   project_count(counts, direction, 1);
 }
@@ -1503,7 +1503,7 @@ static void _record_boundary_function(
 static void _record_boundary_participant(
   Map seen, Map counts, String left, String right, String path, String name) {
   List key = $(left, right, path, name);
-  if (seen.contains(key)) return;
+  if (key in seen) return;
   seen[key] = 1;
   project_count(counts, $(left, right, path), 1);
 }
@@ -1617,7 +1617,7 @@ static Map _unit_adjacency(String path, List functions) {
 static void _collect_component(
   String name, String excluded, Map allowed, Map adjacency, Map seen,
   Array members) {
-  if (name == excluded || seen.contains(name) ||
+  if (name == excluded || name in seen ||
       !allowed.contains(name))
     return;
   seen[name] = 1;
@@ -1633,7 +1633,7 @@ static List _components(List names, Map adjacency, String excluded) {
   foreach (String name, names) allowed[name] = 1;
   Array groups = [];
   foreach (String name, names) {
-    if (name == excluded || seen.contains(name)) continue;
+    if (name == excluded || name in seen) continue;
     Array members = [];
     _collect_component(
       name, excluded, allowed, adjacency, seen, members);
@@ -1669,7 +1669,7 @@ static List _bridge_groups(String name, List components, Map adjacency) {
   foreach (List component, components)
     match (component)
       case %(group *members):
-        if (members.contains(name))
+        if (name in members)
           return _components(members, adjacency, name);
   return NULL;
 }
@@ -2035,7 +2035,7 @@ static List _compare_shortest(List start, List destination, Map by_target) {
           match (call)
             case %(call direct ?path ?name ?): {
               List next = %(target $path $name);
-              if (!by_target.contains(next) || seen.contains(next))
+              if (!by_target.contains(next) || next in seen)
                 continue;
               seen[next] = 1;
               predecessor[next] = current;
@@ -2329,7 +2329,7 @@ static void _certify_reach(List graph, Array roots, Map nodes,
       foreach (List call, calls)
         match (call) case %(call direct ?path ?name ?): {
           List target = %(target $path $name);
-          if (reached.contains(target)) continue;
+          if (target in reached) continue;
           reached[target] = 1;
           parent[target] = caller;
           queue.push(target);
@@ -2355,11 +2355,11 @@ static Map _certify_seed(String path, List graph, Map summaries) {
         foreach (List function, functions)
           match (function) case %(function ?name ? (calls *calls)): {
             List own = %(target $path $name);
-            if (summaries.contains(own)) seed[name] = summaries[own];
+            if (own in summaries) seed[name] = summaries[own];
             foreach (List call, calls)
               match (call) case %(call direct ?target_path ?target_name ?): {
                 List target = %(target $target_path $target_name);
-                if (summaries.contains(target))
+                if (target in summaries)
                   seed[target_name] = summaries[target];
               }
           }
@@ -2516,7 +2516,7 @@ static void _certify_scan(
         scan.compiler, scan.definitions, node, callee, arguments);
       List resolved = target
                     ? resolve_project_target(target, scan.publics) : NULL;
-      if (!resolved && callee && scan.contracts.contains(callee)) {
+      if (!resolved && callee && callee in scan.contracts) {
         foreach (String declared, scan.contracts.keys())
           if (declared == callee) {
             scan.assumptions[declared] = scan.contracts[declared];
@@ -2643,7 +2643,7 @@ static int _certify_coverage(Frontend frontend, Array inputs, List graph,
       /* Executable file-scope forms are roots, but the region walk does
          not model their process lifetime. */
       if (_certify_file_effect(node) &&
-          reached.contains(%(target $path "<top-level>")))
+          %(target $path "<top-level>") in reached)
         obstacles.push(context.export(%(obstacle
           (target $path "<top-level>")
           (location $path 0 0)
@@ -2708,8 +2708,8 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
       blocked[target] = 1;
   foreach (List finding, findings)
     match (finding) case %(finding ?target ?code ?location ?message ?notes)
-      if (reached.contains(target)): {
-        if (blocked.contains(target))
+      if (target in reached): {
+        if (target in blocked)
           obstacles.push(%(obstacle $target $location
             "region finding requires review with incomplete coverage"
             $message));
@@ -2724,7 +2724,7 @@ List certify_result(Frontend frontend, Array inputs, Array roots,
         $(_certify_path(target, parent)) $location $reason @rest));
   foreach (List target, reached.keys())
     match (target) case %(target ? ?name) if (name in roots &&
-        summaries.contains(target)): {
+        target in summaries): {
       List summary = summaries[target];
       int owner = summary.car().int();
       if (owner & 1)
