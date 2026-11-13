@@ -46,7 +46,7 @@ static void torch_creation_and_queries(void) {
 static void torch_integers_are_exact(void) {
   $test.scoped();
   long huge = 9007199254740993;
-  Tensor whole = Tensor.of($(huge), %(1), XT_INT64);
+  Tensor whole = Tensor.of(%(9007199254740993), %(1), XT_INT64);
   EXPECT_INT_EQ(whole.item().integer(), huge);
   EXPECT_INT_EQ(whole.to_values()[0].integer(), huge);
   EXPECT_INT_EQ(Tensor.scalar_integer(huge, XT_INT64).item().integer(), huge);
