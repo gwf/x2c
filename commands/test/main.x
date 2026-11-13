@@ -38,7 +38,10 @@ int main(int argc, char **argv) {
     Diagnostics.driver_error(option ? %"test: $why '$option'" : %"test: $why");
   }
   if (options["help"].integer()) {
-    fputs(Args.usage("x2c test", spec), stdout);
+    String about = "\nBuild and run test files, found below the nearest "
+                   "x2c.toml or\nthe current directory unless <inputs> "
+                   "name them.\n\nOptions:";
+    fputs(Args.usage("x2c test", spec).replace("\nOptions:", about), stdout);
     return 0;
   }
   Run run = _configure(options);
