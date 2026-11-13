@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-decorator-argument-count.x:10:6: parse: macro invocation has too few arguments
+unittest/compiler-fixtures/macro-decorator-argument-count.x:10:6: parse: macro '$tag' invocation has too few arguments
   $tag()
        ^
 

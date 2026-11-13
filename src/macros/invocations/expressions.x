@@ -274,11 +274,15 @@ static List _method_arguments(
       values.push(taken.list_free());
       continue;
     }
-    if (!rest) $fail.macros_macro_missing_args(c, c.token);
+    if (!rest)
+      $fail.macros_macro_missing_args(
+        c, c.token, "$" + definition.assoc(<name>).str());
     values.push(rest.car());
     rest = rest.cdr();
   }
-  if (rest) $fail.macros_macro_extra_args(c, c.token);
+  if (rest)
+    $fail.macros_macro_extra_args(
+      c, c.token, "$" + definition.assoc(<name>).str());
   return _template_arguments(c, definition, values.list_free(), c.token, 0);
 }
 

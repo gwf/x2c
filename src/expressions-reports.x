@@ -81,10 +81,11 @@ macro Stmt $fail.expressions_index_symbol(Expr $c, Expr $site) =>
     $site);
 
 macro Stmt $fail.expressions_call_arity(
-  Expr $c, Expr $origin, Expr $method, Expr $variadic, Expr $expected,
-  Expr $supplied) =>
+  Expr $c, Expr $origin, Expr $method, Expr $name, Expr $variadic,
+  Expr $expected, Expr $supplied) =>
   $c.report_error(
-    <type>, %"$($method ? "method" : "function") takes $(
+    <type>, %"$($method ? "method" : "function")$(
+            $name ? " '" + $name + "'" : "") takes $(
             $variadic ? "at least " : "")$($expected) argument$(
             $expected == 1 ? "" : "s"), not $($supplied)",
     $origin);

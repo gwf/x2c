@@ -21,7 +21,9 @@ module List _invocation_arguments(
   /* A method-form macro's receiver is its first explicit argument, as in
      `$T.name(receiver, ...)`. */
   if (receiver) {
-    if (!descriptors) $fail.macros_macro_extra_args(c, c.token);
+    if (!descriptors)
+      $fail.macros_macro_extra_args(
+        c, c.token, _invoked_spelling(definition, invocation));
     arguments.push(
       _capture_row_project(c, descriptors.car(), $(receiver), 0));
     descriptors = descriptors.cdr();
@@ -36,15 +38,27 @@ module List _invocation_arguments(
     /* Only a final Entry sequence follows a sequence; it takes the
        arguments from the first `key: value` row. */
     int before_entries = hole.assoc(<sequence>).int() && nodes.cdr();
+    if (c.peek(0) == <)> && !hole.assoc(<sequence>).int())
+      $fail.macros_macro_missing_args(
+        c, c.token, _invoked_spelling(definition, invocation));
     arguments.push(_argument_row(c, hole, kind, before_entries));
     if (nodes.cdr() && c.peek(0) != <)> &&
         !(before_entries && c.at_map_entry()))
       _argument_separator(c, kind);
   }
   if (c.test(<,>))
-    $fail.macros_macro_extra_args(c, c.token);
+    $fail.macros_macro_extra_args(
+      c, c.token, _invoked_spelling(definition, invocation));
   c.expect(<)>);
   return %(args @(arguments.list_free()));
+}
+
+/* The macro `definition` as `invocation` spells it: `$name`, or the
+   keyword that names it. */
+static String _invoked_spelling(List definition, Token invocation) {
+  if (invocation.type != <$>) return invocation.text;
+  String name = Diagnostics.macro_spelling(definition, invocation);
+  return name.startswith("$") ? name : "$" + name;
 }
 
 /* The arguments one hole captures: one, or a comma-separated sequence. A
@@ -53,8 +67,6 @@ static List _argument_row(
   Compiler c, List hole, Symbol kind, int before_entries) {
   int sequence = hole.assoc(<sequence>);
   Array captured = [];
-  if (c.peek(0) == <)> && !sequence)
-    $fail.macros_macro_missing_args(c, c.token);
   if (c.peek(0) != <)> && !(before_entries && c.at_map_entry())) loop {
     _row_directives(c, kind, captured);
     Token first = c.token;

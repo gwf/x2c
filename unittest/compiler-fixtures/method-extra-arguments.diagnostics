@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/method-extra-arguments.x:6:21: type: method takes 0 arguments, not 1
+unittest/compiler-fixtures/method-extra-arguments.x:6:21: type: method 'Var.split' takes 0 arguments, not 1
     items.last().split(", ");
                       ^
 

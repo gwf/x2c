@@ -251,14 +251,16 @@ static macro Stmt $fail.macros_macro_unbound(
   }
 }
 
-static macro Stmt $fail.macros_macro_extra_args(Expr $c, Expr $site) =>
+static macro Stmt $fail.macros_macro_extra_args(
+  Expr $c, Expr $site, Expr $spelling) =>
   $c.report_error(
-    <parse>, "macro invocation has too many arguments",
+    <parse>, %"macro '$($spelling)' invocation has too many arguments",
     $site);
 
-static macro Stmt $fail.macros_macro_missing_args(Expr $c, Expr $site) =>
+static macro Stmt $fail.macros_macro_missing_args(
+  Expr $c, Expr $site, Expr $spelling) =>
   $c.report_error(
-    <parse>, "macro invocation has too few arguments",
+    <parse>, %"macro '$($spelling)' invocation has too few arguments",
     $site);
 
 static macro Stmt $fail.macros_argument_contract(Expr $c, Expr $site) =>

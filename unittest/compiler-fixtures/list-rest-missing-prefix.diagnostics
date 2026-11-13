@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/list-rest-missing-prefix.x:3:30: type: function takes at least 1 argument, not 0
+unittest/compiler-fixtures/list-rest-missing-prefix.x:3:30: type: function 'count' takes at least 1 argument, not 0
   int main(void) { return count(); }
                                ^
 

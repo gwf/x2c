@@ -401,7 +401,23 @@ static void _check_arity(
     return;
   if (supplied < fixed && _call_rewritable(k.c, callee)) return;
   $fail.expressions_call_arity(
-    k.c, k.origin, method, variadic, fixed - method, supplied - method);
+    k.c, k.origin, method, _callee_name(k, callee, parameters, method),
+    variadic, fixed - method, supplied - method);
+}
+
+/* A method's `Owner.method` spelling, from its recorded owner or else its
+   receiver parameter's type, or a function's source name. Another callee
+   has no name. */
+static String _callee_name(
+  CallSite &k, List callee, List parameters, int method) {
+  List binding = NULL;
+  match (callee) case %(expr ? (ident ?named)): binding = named;
+  List owned = binding ? k.c.fact(%(method $binding)) : NULL;
+  if (owned) return %"$(owned.car()).$(owned.cadr())";
+  if (method)
+    return %"$(Type.spelling(type_base_suffix(parameters.car()))).$(
+      k.method)";
+  return binding ? Ast.binding_spelling(binding) : NULL;
 }
 
 /* Whether a call rewrite rule is registered for the spelling `callee`

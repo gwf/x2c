@@ -375,7 +375,8 @@ module List _typed_call(
    consumer completed is still one argument short. */
 static void _require_destination(Compiler c, List omitted, int supplied) {
   match (omitted) case %(?(List formal)) if (_iter_formal(formal)):
-    $fail.expressions_call_arity(c, NULL, 0, 0, supplied + 1, supplied);
+    $fail.expressions_call_arity(
+      c, NULL, 0, (String) NULL, 0, supplied + 1, supplied);
 }
 
 static int _iter_formal(Type formal) {

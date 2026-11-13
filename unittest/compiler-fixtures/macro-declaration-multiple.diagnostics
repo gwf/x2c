@@ -1,4 +1,4 @@
-unittest/compiler-fixtures/macro-declaration-multiple.x:8:21: parse: macro invocation has too many arguments
+unittest/compiler-fixtures/macro-declaration-multiple.x:8:21: parse: macro '$scoped' invocation has too many arguments
     $scoped(int left, right);
                       ^^^^^
 
