@@ -231,15 +231,19 @@ String Diagnostics.macro_spelling(List definition, Token invocation) {
 
 /** Returns the note naming the innermost source expansion and the place
     that defines it, with the path shown as diagnostic headings show it.
+    The compiler prelude's builtin constructs, such as `foreach`, are not
+    the user's definitions, so the note names the expansion around them.
 */
 String Compiler.macro_expansion_note(Compiler c) {
   foreach (List active in c.macro_stack) {
     (List definition, List input, Var bindings, Token invocation) = active;
     (void) input, (void) bindings;
     if (!invocation) continue;
-    String name = Diagnostics.macro_spelling(definition, invocation);
     List origin = definition.assoc(<origin>);
     String file = _shown_path(c, origin.assoc(<file>));
+    if (file.remove_prefix(%"$(c.root_dir)/") == "etc/compiler-prelude.x")
+      continue;
+    String name = Diagnostics.macro_spelling(definition, invocation);
     int line = origin.assoc(<line>), column = origin.assoc(<column>);
     return %"in expansion of '$name' defined at $file:$line:$column";
   }

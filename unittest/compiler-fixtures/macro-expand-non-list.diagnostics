@@ -1,5 +1,4 @@
 unittest/compiler-fixtures/macro-expand-non-list.x:2:3: macro: expand requires a compile-time List
     expand 12
     ^^^^^^
-  note: in expansion of 'expand' defined at etc/compiler-prelude.x:81:3
 

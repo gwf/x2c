@@ -1,5 +1,4 @@
 unittest/compiler-fixtures/with-empty.x:5:3: macro: with requires at least one assignment
     with () {
     ^^^^
-  note: in expansion of 'x2c.with' defined at etc/compiler-prelude.x:57:1
 

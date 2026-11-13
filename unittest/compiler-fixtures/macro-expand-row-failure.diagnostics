@@ -1,5 +1,4 @@
 unittest/compiler-fixtures/macro-expand-row-failure.x:3:3: macro: expand row 2 expects 1 argument; got 2
     expand %(1 (2 3))
     ^^^^^^
-  note: in expansion of 'expand' defined at etc/compiler-prelude.x:81:3
 

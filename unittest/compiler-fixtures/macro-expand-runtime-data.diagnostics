@@ -1,5 +1,4 @@
 unittest/compiler-fixtures/macro-expand-runtime-data.x:3:3: macro: captured code is not a compile-time constant
     expand rows
     ^^^^^^
-  note: in expansion of 'expand' defined at etc/compiler-prelude.x:81:3
 

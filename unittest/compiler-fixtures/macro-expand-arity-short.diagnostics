@@ -1,5 +1,4 @@
 unittest/compiler-fixtures/macro-expand-arity-short.x:2:3: macro: expand row 1 expects 2 arguments; got 1
     expand %((1))
     ^^^^^^
-  note: in expansion of 'expand' defined at etc/compiler-prelude.x:81:3
 

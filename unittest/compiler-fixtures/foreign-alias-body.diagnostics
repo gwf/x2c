@@ -1,5 +1,4 @@
 unittest/compiler-fixtures/foreign-alias-body.x:4:1: parse: foreign alias declaration cannot have a body
   $x2c.foreign.alias(abs)
   ^
-  note: in expansion of 'x2c.foreign.alias' defined at etc/compiler-prelude.x:27:1
 

@@ -1,5 +1,4 @@
 unittest/compiler-fixtures/macro-expand-decorator.x:2:3: macro: expand requires a code-producing macro
     expand %(1)
     ^^^^^^
-  note: in expansion of 'expand' defined at etc/compiler-prelude.x:81:3
 
