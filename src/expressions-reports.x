@@ -206,10 +206,23 @@ macro Stmt $fail.expressions_brace_anonymous(Expr $c, Expr $site) =>
     <type>, "a brace outside an initializer needs a named destination type",
     $site, "declare the destination with a struct tag or typedef");
 
-macro Stmt $fail.expressions_var_unresolved(Expr $c, Expr $origin) =>
+/* Names the first identifier without an x2c type in `$expression`. */
+macro Expression $note.expressions_untyped_identifier(Expr $expression) =>
+  ({
+    Var found = NULL;
+    List bindings = NULL;
+    String name = List.try_search(
+        $expression, %(expr () (ident ?)), found, bindings)
+      ? Ast.binding_spelling(((List) found).caddr().cadr()) : NULL;
+    name ? %("identifier: $name") : (List) NULL;
+  });
+
+macro Stmt $fail.expressions_var_unresolved(
+  Expr $c, Expr $origin, Expr $expression) =>
   $c.report_error(
-    <type>, "cannot convert an unresolved expression to Var",
-    $origin, "give the expression a declared x2c type before boxing it");
+    <type>, "cannot convert an unresolved expression to Var", $origin,
+    @($note.expressions_untyped_identifier($expression)),
+    "give the expression a declared x2c type before boxing it");
 
 macro Stmt $fail.expressions_ref_address(Expr $c, Expr $site) =>
   $c.report_error(

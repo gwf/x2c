@@ -1,5 +1,5 @@
 unittest/compiler-fixtures/lambda-unresolved-call.x:4:3: type: cannot convert an unresolved expression to Var
     Func f = %!() => puts("hi");
     ^^^^
-  note: give the expression a declared x2c type before boxing it
+  note: identifier: puts give the expression a declared x2c type before boxing it
 

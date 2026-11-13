@@ -105,7 +105,7 @@ static List _hole_local(Compiler c, Map holes, int position) {
   c.expect(<(>);
   Token origin = c.token;
   List value = c.parse_expression();
-  if (!value.cadr()) $fail.expressions_var_unresolved(c, origin);
+  if (!value.cadr()) $fail.expressions_var_unresolved(c, origin, value);
   c.expect(<)>);
   String name = c.fresh_name("hole");
   holes[%(expression $position)] = name;
