@@ -90,7 +90,8 @@ Long-form landing and About prose and the code samples are in `src/content/`.
 Structural labels, statistics, navigation, and calls to action remain in the
 Astro pages and components:
 
-- `home.md` is the hero copy; `title` and `kicker` are its frontmatter.
+- `home.md` is the hero copy; `titleSubject`, `titleOpening`, `titleEnding`,
+  and `kicker` are its frontmatter.
 - `about.md` is the About page copy.
 - `love.md`, `power.md`, and `magic.md` hold the three section introductions;
   each title is frontmatter and its overview is ordinary Markdown.
