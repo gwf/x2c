@@ -1,6 +1,6 @@
 /*  atom.x -- canonical exact names
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     An `Atom` preserves its spelling exactly. Compact spellings use immediate
     `Symbol`s when `Symbol` encoding round-trips every byte; all other

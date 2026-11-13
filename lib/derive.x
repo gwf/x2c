@@ -1,6 +1,6 @@
 /*  derive.x -- generate record mappings from declared fields
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 */
 
 #pragma once

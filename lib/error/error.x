@@ -1,6 +1,6 @@
 /*  error.x -- handler stack and accumulated errors
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Raising an error records it and calls registered handlers, innermost first.
     Each handler sees the errors raised since it was registered and decides

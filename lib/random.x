@@ -1,6 +1,6 @@
 /*  random.x -- pseudorandom numbers, system entropy, and UUIDs
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `Random` is a seedable generator whose sequence its seed fixes; it is
     fast and unsuitable for secrets. `Random.secure_fill` reads the

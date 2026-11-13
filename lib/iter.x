@@ -1,6 +1,6 @@
 /*  iter.x -- single-pass pull iterators
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `Iter` advances one element at a time and reports exhaustion separately.
     Lazy operations borrow their source iterators and callbacks. The caller

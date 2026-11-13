@@ -1,6 +1,6 @@
 /*  list-selectors.x -- optional compound `List` selectors
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     The prelude keeps car, cdr, caar, cadr, cddr, and caddr. Include this
     module for the remaining Common Lisp selector spellings through depth 4.

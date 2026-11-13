@@ -1,6 +1,6 @@
 /*  var.x -- variant type for dynamic typing
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Var owns the one-word encoding of dynamic values. Doubles keep their IEEE
     754 bits, and the special-value ranges carry tagged payloads, native

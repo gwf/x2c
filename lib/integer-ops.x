@@ -1,6 +1,6 @@
 /*  integer-ops.x -- shared native arithmetic templates
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `Var` operators and the compound updates of typed Arrays and typed Maps
     share these templates. The statement templates expand inline, so a

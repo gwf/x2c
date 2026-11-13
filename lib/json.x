@@ -1,6 +1,6 @@
 /*  json.x -- JSON text to and from ordinary x2c values
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Json owns the crossing between JSON text and ordinary x2c values: an
     object is a Map with String keys, an array an Array, null the all-zero

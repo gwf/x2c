@@ -1,6 +1,6 @@
 /*  scan.x -- character-level token scanners for x2c
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Allocation-free scanners return a positive matched length, zero when
     their token class does not start at the input, and -1 for malformed input.

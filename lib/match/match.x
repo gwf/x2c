@@ -1,6 +1,6 @@
 /*  match.x -- pattern matching and transformation utilities for lists
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Match owns the pattern vocabulary, capture layouts, and the execution of
     plans that `plan.x` prepares and `cache.x` retains. Core

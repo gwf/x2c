@@ -1,6 +1,6 @@
 /*  macrovalue.x -- macros as values that build and recognize code
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     A `Macro` is the canonical `macrodef` record of a definition. `$name`
     selects one and `macro Kind(...) => ...` creates one. Applying it returns

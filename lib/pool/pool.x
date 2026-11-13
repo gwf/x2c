@@ -1,6 +1,6 @@
 /*  pool.x -- nested interning pools with region-backed object storage
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Pool owns canonical identity for a stack of nested levels. Lookup walks
     outward and a miss lands in the innermost level; release returns empty

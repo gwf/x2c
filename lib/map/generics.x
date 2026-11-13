@@ -1,6 +1,6 @@
 /*  generics.x -- shared Map family operations
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Grouped storage owns probing, growth, deletion, and traversal. This file
     supplies Var hashing and equality plus shared public family operations.

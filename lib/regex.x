@@ -1,6 +1,6 @@
 /*  regex.x -- regular expressions over the bytes of a String
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A Regex is a compiled pattern, owned by the scope that compiled it. A
     RegexMatch and a RegexCapture are immutable Lists, so their Strings and

@@ -1,6 +1,6 @@
 /*  common.x -- the `Var` encoding every runtime module shares
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Every runtime module includes this one, so it owns what all of them
     share: the eight-byte `Var` encoding and its immediate boxing, and the

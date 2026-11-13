@@ -1,6 +1,6 @@
 /*  encoding.x -- UTF-8 code points and base64, hex, and percent encodings
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A `String` holds bytes. The UTF-8 operations read and write the code
     points those bytes encode, and the byte encodings turn any bytes into

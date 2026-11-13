@@ -1,6 +1,6 @@
 /*  autodiff.x -- reverse-mode differentiation recorded on a runtime tape
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     This optional module is included explicitly; it is not part of the
     implicit prelude. `AdTape` records every arithmetic operation on its

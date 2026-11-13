@@ -1,6 +1,6 @@
 /*  compiler-prelude.x -- the syntax every unit starts with
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     The compiler collects this source before the runtime prelude, so its
     macros and keyword aliases are visible to every unit, including the

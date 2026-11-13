@@ -1,6 +1,6 @@
 /*  dispatch.x -- typed descriptors for runtime `Var` behavior
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     A registered type supplies a descriptor of function pointers. Boxed `Var`
     operations find the descriptor by tag and call its registered functions;

@@ -1,6 +1,6 @@
 /*  buffer.x -- growable text buffer with indentation support
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `Buffer` is a text-only builder over `Block` storage. It tracks the byte
     position and leading indentation of the current line, supports nested

@@ -1,6 +1,6 @@
 /*  list.x -- linked list with `Var` elements
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     List owns canonical immutable cons chains. A car holds any non-void Var
     and a cdr is nil or another List; identity is the car's exact bits plus

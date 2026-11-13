@@ -1,6 +1,6 @@
 /*  datum.x -- values as Lisp reader text
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A datum is a value spelled in the Lisp reader grammar: proper Lists,
     bare Symbols and Atoms, Strings, and numbers. An interface file is plain

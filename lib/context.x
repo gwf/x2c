@@ -1,6 +1,6 @@
 /*  context.x -- bounded runtime state and value export
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Context owns one bounded unit of runtime work: a `Scope` lifetime with its
     `Error` and `Match` state and, when isolated, a nested canonical-value

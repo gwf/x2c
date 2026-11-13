@@ -1,6 +1,6 @@
 /*  cmath.x -- C99 <math.h> prototypes for the compiler
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Normal declaration collection does not expand system headers, so these
     prototypes are what let a `Var` argument unbox at a `<math.h>` call.

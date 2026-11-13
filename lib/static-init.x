@@ -1,6 +1,6 @@
 /*  static-init.x -- first-use storage for dynamic local statics
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A guard publishes native storage after the initializer succeeds. Pending
     owners and their wait edges share one lock; user initialization and Error

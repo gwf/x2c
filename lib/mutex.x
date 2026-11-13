@@ -1,6 +1,6 @@
 /*  mutex.x -- shared mutable-state coordination
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `Mutex` is an opaque native mutex. Its `Scope` owner must outlive every
     thread that can use it, and it may be freed only while unlocked.

@@ -1,6 +1,6 @@
 /*  typed-map.x -- typed `Map`s generated from shared storage
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     These optional families store keys and values in native record fields.
     Their static operations do not box through `Var`. Separate methods provide

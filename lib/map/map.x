@@ -1,6 +1,6 @@
 /*  map.x -- hash table mapping `Var` keys to `Var` values
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `Map` uses sixteen-byte control groups and parallel key/value records.
     Full 32-bit hashes share the control Block below 65536 buckets; larger

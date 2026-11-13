@@ -1,6 +1,6 @@
 /*  escape.x -- escaped spelling of canonical strings
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     This module translates between a `String`'s bytes and their escaped
     spelling inside a C or x2c string literal: `escape`, `repr`, and

@@ -1,6 +1,6 @@
 /*  type.x -- semantic type values and their structural operations
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     These operations inspect captured types without compiler state. Name
     resolution and translation-unit registrations belong to the compiler.

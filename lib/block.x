@@ -1,6 +1,6 @@
 /*  block.x -- checked dynamic storage for fixed-width elements
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `Block` maintains the length and capacity invariants for contiguous
     fixed-width storage. `Bytes` exposes the same allocation through its data

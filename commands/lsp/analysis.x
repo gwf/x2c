@@ -1,6 +1,6 @@
 /*  analysis.x -- resident editor source units and exported results
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 */
 
 #pragma once

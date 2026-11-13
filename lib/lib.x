@@ -1,6 +1,6 @@
 /*  lib.x -- disjoint sets with union-find
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     This module is aggregated into the x2c.x runtime and implicitly
     available through the prelude.

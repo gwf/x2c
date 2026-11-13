@@ -1,6 +1,6 @@
 /*  type-ledger.x -- the compiler's Var tag tables, projected from the ledger
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `lib/var-tags.x` holds the ledger. This unit is the one compiler
     unit that imports it, so the units that include `type.x` do not load

@@ -1,6 +1,6 @@
 /*  main.x -- x2c command dispatch
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 */
 
 #pragma once

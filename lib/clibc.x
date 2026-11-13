@@ -1,6 +1,6 @@
 /*  clibc.x -- a basic set of C library prototypes for the compiler
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Like `cmath.x`, these prototypes are marked `meta`, so the compiler links
     each function and compile-time code calls the native one. The set is

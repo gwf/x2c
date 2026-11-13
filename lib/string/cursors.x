@@ -1,6 +1,6 @@
 /*  cursors.x -- `String` field splitting and repeatable typed cursors
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     A Split description is immutable and `Scope`-owned. It keeps no position;
     the caller holds the cursor, so one Split supports repeated, nested, and

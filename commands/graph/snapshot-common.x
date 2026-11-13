@@ -1,6 +1,6 @@
 /*  snapshot-common.x -- portable analysis values
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 */
 
 #pragma once

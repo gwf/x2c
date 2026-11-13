@@ -1,6 +1,6 @@
 /*  snapshot.x -- full project analysis and explicit snapshot lifecycle
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 */
 
 #pragma once

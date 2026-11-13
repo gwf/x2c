@@ -1,6 +1,6 @@
 /*  process.x -- run commands and pipelines without a shell
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Job owns running a command or pipeline without a shell. A command is an
     ordinary `List` whose elements' `str`s become its arguments, and a `List`

@@ -1,6 +1,6 @@
 /*  typed-array.x -- packed typed `Array`s generated from shared methods
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Typed `Array`s own contiguous native storage over `Block`. Static
     element operations use native pointers. `Var` descriptors and `Iter` box a

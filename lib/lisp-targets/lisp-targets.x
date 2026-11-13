@@ -1,6 +1,6 @@
 /*  lisp-targets.x -- the native operations a Lisp session can bind
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `bind` resolves a name through the session callbacks `lisp.x` adapts and
     then through the table this unit builds: the library operations Lisp code

@@ -157,8 +157,9 @@ See the language reference for
 
 ## License and project policy
 
-x2c is available under the [Apache License 2.0](LICENSE). Forks are welcome.
-The project is not accepting external code contributions; see
+x2c is written by [Gary William Flake](https://flake.org/). It is available
+under the [Apache License 2.0](LICENSE). Forks are welcome. The project is
+not accepting external code contributions; see
 [CONTRIBUTING.md](CONTRIBUTING.md). Development follows the author's
 priorities, without a promised roadmap, release schedule, or support
 commitment.

@@ -1,6 +1,6 @@
 /*  protocols.x -- built-in runtime protocol declarations
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Declares `Block` storage views, `Iter` traversal, and `Var` boxing for
     built-in runtime types. Each declaration generates its static

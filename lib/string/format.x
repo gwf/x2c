@@ -1,6 +1,6 @@
 /*  format.x -- checked formatting of `Var` values into a `String`
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `String.format` parses a checked subset of C's format syntax itself,
     converts each `Var` value to the C type its conversion names, and prints

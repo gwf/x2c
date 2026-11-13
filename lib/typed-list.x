@@ -1,6 +1,6 @@
 /*  typed-list.x -- typed views over canonical List cells
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A typed list is a `List` whose car carries a `Var` tag accepted by its
     family. It shares `List`'s canonical pool: a typed chain and the plain

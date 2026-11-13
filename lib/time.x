@@ -1,6 +1,6 @@
 /*  time.x -- clocks, durations, and calendar time
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A `Time` is an instant counted in nanoseconds from the Unix epoch, and a
     `Duration` is a signed count of nanoseconds; each holds one 64-bit

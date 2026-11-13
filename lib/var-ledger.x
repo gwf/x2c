@@ -1,6 +1,6 @@
 /*  var-ledger.x -- the runtime tables projected from the Var tag ledger
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `var-tags.x` holds the ledger. This optional module is the one
     runtime unit that imports it. Other units include `var/var.x` without

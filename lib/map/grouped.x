@@ -1,6 +1,6 @@
 /*  grouped.x -- grouped storage for Map families
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Controls hold seven-bit fingerprints, 128 for empty, and 254 for deleted.
     Tiny tables pad controls to sixteen bytes. An unsigned tombstone count

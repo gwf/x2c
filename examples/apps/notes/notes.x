@@ -1,6 +1,6 @@
 /*  notes.x -- a SQLite-backed HTTP notes server
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 */
 #include "system-macros.x"
 

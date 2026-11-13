@@ -1,6 +1,6 @@
 /*  lisp-bindings.x -- native functions a Lisp session can call
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     These macros bind a native function into a runtime `Lisp` session under
     a Lisp name, one at a time or as a named group. The function stays an

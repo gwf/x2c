@@ -1,6 +1,6 @@
 /*  frontend.x -- configured compiler sessions and source units
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Shares source setup, collection, parsing, and unit lifetimes between the
     command-line compiler and internal tools. Adapters own printing and exit.

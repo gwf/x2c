@@ -1,6 +1,6 @@
 /*  tiny-lisp.max.x -- a small Lisp built from x2c values
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Programs and data share two immutable types: String atoms and proper
     Lists. The reader and evaluator below define the language; x2c supplies

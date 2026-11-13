@@ -1,6 +1,6 @@
 /*  flat-map.x -- benchmark specimen: MapIntInt with one combined array
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     These are the three layouts used to choose MapIntInt's current storage:
     a 12-byte combined bucket, a 16-byte padded bucket, and parallel 4-byte

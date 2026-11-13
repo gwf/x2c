@@ -1,6 +1,6 @@
 /*  digest.x -- SHA-256 digests of Strings and streams
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A digest is the 64-character lowercase hexadecimal `String` that
     `shasum -a 256` prints. A stream digest reads raw bytes, so a file that

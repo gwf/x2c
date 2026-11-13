@@ -1,6 +1,6 @@
 /*  format.x -- code formatting helpers for the x2c compiler
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Formats emitted token `Array`s as C text without changing token order.
     Parenthesis depth suppresses statement breaks within expressions, and

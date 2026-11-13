@@ -1,6 +1,6 @@
 /*  symbol.x -- immediate encoded names
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `Symbol` stores closed-vocabulary names directly in an integer. Restricted
     spellings use ten 5-bit characters; other spellings use seven 7-bit

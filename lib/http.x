@@ -1,6 +1,6 @@
 /*  http.x -- blocking HTTP/1.1 routing and worker-pool service
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 */
 #pragma once
 #include "net.x"

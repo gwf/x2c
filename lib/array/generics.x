@@ -1,6 +1,6 @@
 /*  generics.x -- fixed-width Array family generation
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     The core family generates storage and sequence algorithms that do not
     depend on an element's missing-value, update, boxing, or rendering

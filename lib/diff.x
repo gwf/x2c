@@ -1,6 +1,6 @@
 /*  diff.x -- line differences between two texts
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Diff owns line differences: a shortest edit script between two texts,
     found with the Myers algorithm after trimming the lines both share at

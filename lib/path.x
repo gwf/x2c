@@ -1,6 +1,6 @@
 /*  path.x -- filesystem locations and the operations on them
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     A `Path` is a `String` that names a filesystem location; its methods read
     and change the files it names. A failure raises `<not-found>` when a

@@ -1,6 +1,6 @@
 /*  logger.x -- owned structured event delivery
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Logger owns filtering, event timestamps, sink ordering, and sink lifetime.
     It is reentrant and serializes configuration, sequencing, and delivery.

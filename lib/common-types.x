@@ -1,6 +1,6 @@
 /*  common-types.x -- the types the compiler prelude declares first
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `common.x` builds on these types, and `etc/compiler-prelude.x` declares
     them before its meta prototypes, which take and return them.

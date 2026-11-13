@@ -1,6 +1,6 @@
 /*  meta.x -- the compiler surface a `meta` function calls
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Declares compiler-supplied operations on captured `Code` and semantic
     `Type` values, and the `x2c_` helpers without a captured receiver. Code

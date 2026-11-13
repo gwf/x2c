@@ -1,6 +1,6 @@
 /*  error_init.x -- initialization entry points for `Error`
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     This wrapper stays outside error.x so the compiler does not insert
     initialization into `Error.ready` or the emitter-facing raise entry point.

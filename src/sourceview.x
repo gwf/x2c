@@ -1,6 +1,6 @@
 /*  sourceview.x -- request-owned source overlays
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Logical paths keep their identity when an editor supplies unsaved text.
     Configure this view before opening a frontend unit; its immutable values

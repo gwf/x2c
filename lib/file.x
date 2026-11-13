@@ -1,6 +1,6 @@
 /*  file.x -- `File` I/O operations and stream handling
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     A `File` is a native stdio stream whose handle identity serves hashing,
     equality, and ordering. Raw reads and copies report status separately

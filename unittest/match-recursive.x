@@ -1,6 +1,6 @@
 /*  match-recursive.x -- test reference matcher
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     This direct matcher is the readable reference for differential tests.
     The prelude's public `Match` operations run the compiled machine in

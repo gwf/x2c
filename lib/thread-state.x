@@ -1,6 +1,6 @@
 /*  thread-state.x -- native per-thread runtime storage
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Keeps the release order independent of aggregate runtime initialization
     so `Scope` can still operate at the raw allocation floor. Also owns the

@@ -1,6 +1,6 @@
 /*  threaded-notes.x -- Notes with one database thread and reply Channels
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 */
 #include "notes-database.x"
 #include "http.x"

@@ -1,6 +1,6 @@
 /*  string.x -- canonical byte strings and core text operations
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     String owns canonical immutable byte strings. Equal nonempty contents in
     one pool chain share one pointer, the empty String is native zero, and a

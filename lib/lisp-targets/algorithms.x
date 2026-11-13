@@ -1,6 +1,6 @@
 /*  algorithms.x -- native standard algorithms for Lisp sessions
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `etc/init.xlisp` binds these operations in every session. They preserve
     Lisp's nil-only false value and report `<bad-types>` for invalid list,

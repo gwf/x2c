@@ -1,6 +1,6 @@
 /*  utils.x -- System utilities for environment discovery and workers
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Owns the environment the driver modules share: where the executable,
     home, stage, and packages are, which files are x2c source, the

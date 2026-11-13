@@ -1,6 +1,6 @@
 /*  literate-lisp.x -- a complete Lisp implementation in x2c
 
-    Copyright (c) 2026 Gary William Flake                                             #####                 #####
+    Copyright (c) 2026 Gary William Flake.                                            #####                 #####
                                                                                       ########           ########
     A recursive Lisp, generously commented in about 1,000 lines.                     ##########         ##########
     It follows the production Lisp's value and capture rules.                             #######     #######

@@ -1,6 +1,6 @@
 /*  scope.x -- memory allocation scope management
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     A `Scope` owns a group of individually managed allocations. Callers use
     the active scope, target an explicit scope slot, or open and close a

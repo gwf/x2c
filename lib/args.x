@@ -1,6 +1,6 @@
 /*  args.x -- parse program arguments against a declarative spec
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Args owns the reading of a command line against a spec: an ordinary
     List with one row per option or operand. The result is a Map from each

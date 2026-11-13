@@ -1,6 +1,6 @@
 /*  net.x -- blocking TCP sockets backed by File streams
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     Each socket owns separate input and output streams because stdio update
     streams require positioning between reading and writing. Listener.stop

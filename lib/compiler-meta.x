@@ -1,6 +1,6 @@
 /*  compiler-meta.x -- compiler-private meta operations and facts
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     The operator rows give shipped compiler sources their shared facts,
     and the functions after them are lookups those sources share. Bodyless

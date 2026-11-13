@@ -5,7 +5,7 @@
 
 /*  autodiff-macros.x -- dual-number families for forward-mode differentiation
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `$ad.dual` gives one caller-declared struct the arithmetic of a dual
     number: `value` carries the primal and `tangent` carries its derivative

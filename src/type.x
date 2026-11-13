@@ -1,6 +1,6 @@
 /*  type.x -- x2c semantic types
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     Converts compiler declaration syntax to semantic types and owns the
     translation unit's Var registrations. Structural Type operations live

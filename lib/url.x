@@ -1,6 +1,6 @@
 /*  url.x -- URL references and query strings
 
-    Copyright (c) 2026 Gary William Flake
+    Copyright (c) 2026 Gary William Flake.
 
     `Url.parse` splits a URL or a relative reference into the components
     RFC 3986 names and keeps each as written, percent-encoding included;

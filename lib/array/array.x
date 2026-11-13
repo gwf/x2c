@@ -1,6 +1,6 @@
 /*  array.x -- dynamic contiguous arrays of `Var` elements
 
-    Copyright (c) 2025 Gary William Flake
+    Copyright (c) 2025 Gary William Flake.
 
     `Array` is mutable, identity-bearing contiguous `Var` storage over `Block`.
     Every constructor returns an allocated object, including for an empty
