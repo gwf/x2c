@@ -2,7 +2,7 @@
 
     Copyright (c) 2026 Gary William Flake                                             #####                 #####
                                                                                       ########           ########
-    A recursive Lisp, generously commented in 1,000 lines.                           ##########         ##########
+    A recursive Lisp, generously commented in about 1,000 lines.                     ##########         ##########
     It follows the production Lisp's value and capture rules.                             #######     #######
     Block comments explain how Lisp is implemented. Right-margin                           ######     ######
     comments show how x2c combines native C with a dynamic runtime.                         ######   ######

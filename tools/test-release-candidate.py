@@ -231,12 +231,17 @@ class Candidates(unittest.TestCase):
         create = self.created_release('production', 'gwf/x2c')
         self.assertEqual(create[3], 'v1.2.3')
         self.assertEqual(create[create.index('--title') + 1], 'x2c 1.2.3')
+        notes = create[create.index('--notes') + 1]
+        self.assertIn('https://x2c-lang.dev/docs/reference/release-notes.html', notes)
+        self.assertIn('install.sh | sh -s -- --version 1.2.3', notes)
+        self.assertIn('Source gwf/x2c@', notes)
 
     def test_staging_release_is_titled_with_its_tag(self):
         create = self.created_release('staging', 'gwf/x2c-staging')
         tag = self.manifest['identity']
         self.assertEqual(create[3], tag)
         self.assertEqual(create[create.index('--title') + 1], tag)
+        self.assertTrue(create[create.index('--notes') + 1].startswith('Source gwf/x2c@'))
 
 
 if __name__ == '__main__':

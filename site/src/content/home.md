@@ -19,7 +19,7 @@ All of which makes x2c sound like a language with no values. It has three:
 *love*, *power*, and *magic*, and we know how that sounds.
 Nonetheless, see the panel for the values translated into code.
 
-Under the hood, x2c is a strict superset of C that compiles to C, so everything
+Under the hood, x2c is a superset of C that compiles to C, so everything
 stays close to native representations and works with the entire C ecosystem. If
 you know C, you already write x2c.
 

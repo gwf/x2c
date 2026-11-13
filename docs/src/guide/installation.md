@@ -136,6 +136,15 @@ debug information. [Source mapping](../reference/cli.md#source-mapping) gives
 the location rules. To use a C library through a package, see
 [packages](packages.md).
 
+## Set up an editor
+
+For VS Code, install the
+[x2c extension](https://marketplace.visualstudio.com/items?itemName=x2c-lang.x2c-syntax).
+It highlights x2c source and starts the language server, which reports
+compiler diagnostics and supplies definitions, hover, completion, and rename.
+Any other editor with a Language Server Protocol client can start `x2c lsp`;
+[Editors](../reference/cli.md#editors) gives the configuration.
+
 ## The x2c home
 
 An installed prefix and a source checkout share one layout, the x2c home:

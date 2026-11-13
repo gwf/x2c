@@ -32,6 +32,18 @@ BUNDLES = {**{package: tuple(PLATFORMS) for package in
 REPOSITORIES = {'staging': 'gwf/x2c-staging', 'production': 'gwf/x2c'}
 SITES = {'staging': 'https://staging.x2c-lang.dev',
          'production': 'https://x2c-lang.dev'}
+PRODUCTION_NOTES = """\
+Install this release:
+
+```sh
+curl -fsSL {site}/install.sh | sh -s -- --version {version}
+```
+
+The [release notes]({site}/docs/reference/release-notes.html) list what changed
+and how to upgrade. The [installation guide]({site}/docs/guide/installation.html)
+lists supported platforms.
+
+"""
 
 
 def run(*args, **kwargs):
@@ -369,9 +381,12 @@ def publish(args):
                                '--json', 'tagName'], capture_output=True, text=True)
     if existing.returncode:
         title = tag if args.destination == 'staging' else 'x2c ' + manifest['version']
+        notes = f"Source gwf/x2c@{manifest['source_sha']}; candidate {manifest['identity']}."
+        if args.destination == 'production':
+            notes = PRODUCTION_NOTES.format(site=SITES['production'],
+                                            version=manifest['version']) + notes
         command = ['gh', 'release', 'create', tag, '--repo', args.repository,
-                   '--draft', '--title', title, '--notes',
-                   f"Source gwf/x2c@{manifest['source_sha']}; candidate {manifest['identity']}."]
+                   '--draft', '--title', title, '--notes', notes]
         if args.destination == 'staging':
             command.append('--prerelease')
         else:

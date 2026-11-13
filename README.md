@@ -90,6 +90,10 @@ hook needs Python 3. To remove it, delete the `core.hooksPath` entry from
   networking, parsing, and other native libraries.
 - [Command-line reference](docs/src/reference/cli.md): compilation, projects,
   scripts, inspection, and build options. `./x2c --help` lists commands.
+- [Editor support](docs/src/reference/cli.md#editors): the
+  [VS Code extension](https://marketplace.visualstudio.com/items?itemName=x2c-lang.x2c-syntax)
+  highlights x2c source and starts the language server. Other editors start
+  `x2c lsp` themselves.
 - [Benchmarks Game suite](examples/shootout/README.md): official problems with
   idiomatic and tuned x2c, plus contributed C, Python, Rust, C++, Go, and
   Java references. See the
