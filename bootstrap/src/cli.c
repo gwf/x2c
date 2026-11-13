@@ -650,7 +650,7 @@ _x2c_gensym_initializer_choice_6D011170_0((0 < sizeof(cli_options) / sizeof(cli_
   247458062609318, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _73, NULL, "Print host-preprocessed tokens and stop", 0
 }
 ), (65ULL < sizeof(cli_options) / sizeof(cli_options[65ULL])), (cli_options[65ULL] =(CliOption){
-  320883068136, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _74, NULL, "Print the parsed AST and stop", 0
+  320883068136, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _74, NULL, "Print the expanded, bound AST and stop", 0
 }
 ), (66ULL < sizeof(cli_options) / sizeof(cli_options[66ULL])), (cli_options[66ULL] =(CliOption){
   405722918124454, (SymbolSet) "\001\000\000\000\001\000\000\000\000\000\000\000\025\174\112\177\271\171\067\236\000\000\000\012\015\154\272\040\051\000\000", 665445396138972, _75, NULL, "Print bound macro expansions and stop", 0
