@@ -225,7 +225,7 @@ module CliOption cli_options[] = {
   { <cpp-tokens>, %<translate>, <inspection>,
     "--dump-cpp-tokens", NULL, "Print host-preprocessed tokens and stop", 0 },
   { <dump-ast>, %<translate>, <inspection>, "--dump-ast", NULL,
-    "Print the parsed AST and stop", 0 },
+    "Print the expanded, bound AST and stop", 0 },
   { <expansions>, %<translate>, <inspection>,
     "--dump-expansions", NULL, "Print bound macro expansions and stop", 0 },
   { <transforms>, %<translate>, <inspection>,
