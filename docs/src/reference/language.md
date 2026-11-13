@@ -3268,6 +3268,9 @@ An included `meta` definition that has been edited, or that reaches an edited
 definition, is compiled with the unit's group like any other. The
 [compiler architecture](../internals/architecture.md#shallow-parse-and-global-environment-discovery)
 describes how definition hashes detect that change.
+`x2c_meta_definition_hashes()` returns a `Map` from the name of each function
+or initialized file-static value the unit has defined so far to a String hash
+of that definition's code tokens.
 
 A run-time call to a `meta` function that reaches a compiler query or a
 source-template constructor is diagnosed where it is written. The diagnostic

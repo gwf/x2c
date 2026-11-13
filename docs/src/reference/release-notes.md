@@ -102,7 +102,8 @@ conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
   typedef keeps a leading attribute, written or through such a macro, in its
   C and its header. A function-like wrapper such as `PUBLIC(const char *)`
   still contributes only its type. See
-  [Directives in the generated C](language.md#directives-in-the-generated-c).
+  [C headers and native declaration
+  macros](language.md#c-headers-and-native-declaration-macros).
 - `SymbolSet` literals are written `%<a b c>`; the 0.15.x `%<<a b c>>`
   spelling is an invalid token. An unescaped `>` closes the literal unless
   it belongs to a quoted or angle-form member, so `%<">" ">=" ">>">` holds
