@@ -450,6 +450,11 @@ inline int List.truth(List list) => list != NULL;
 */
 inline int String.truth(String string) => string != NULL && *string != '\0';
 
+/** Returns `string` as nonnull C text: "" for the empty String. A
+    printf-family `%s` reads a `String` value through it.
+*/
+inline const char *x2c_string_text(String string) => string ? string : "";
+
 /** Hashes an arbitrary byte block through the shared 64-bit mixer.
     `seed` distinguishes callers that hash the same bytes under different
     types; the byte width distinguishes a final partial word from zero

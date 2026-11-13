@@ -45,18 +45,25 @@
        (expr ("String") 
         (call (expr ((func ((void))) "String") (ident (binding 1 "suffix"))) 
          (args (expr (void) ()))))))))) 
-  (at 8 (stmnt 
-         (expr () 
-          (call (expr () (ident (binding 10 "printf"))) 
-           (args (expr (* char) (literal (* char) "\"%s %s %s\\n\"")) 
-            (expr ("String") (ident (binding 6 "joined"))) 
-            (expr ("String") (ident (binding 8 "mixed"))) 
-            (expr ("String") (ident (binding 9 "constant")))))))) 
+  (at 13 
+   (stmnt 
+    (expr () 
+     (call (expr () (ident (binding 10 "printf"))) 
+      (args (expr (* char) (literal (* char) "\"%s %s %s\\n\"")) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") (ident (binding 6 "joined")))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") (ident (binding 8 "mixed")))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") (ident (binding 9 "constant"))))))))))) 
   (at 9 (stmnt 
          (expr (void) 
           (call (expr ((func ((void))) void) (ident (binding 11 "Scope_close"))) 
            (args (expr (void) ())))))) 
-  (at 13 (return (expr (int) (literal (int) "0"))))))
+  (at 14 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "String") 
  (bind (binding 12 "_x2c_gensym_proto_string_add_update") 
@@ -67,7 +74,7 @@
        (*))) (param ("Symbol") (bind (binding 14 "_x2c_gensym_macro_op_0") ())) 
      (param ("String") (bind (binding 15 "rhs") ())))))) 
  (block 
-  (at 15 
+  (at 16 
    (stmnt 
     (expr (volatile "String") 
      (op = (expr (volatile "String") 
@@ -84,7 +91,7 @@
                  (ident (binding 13 "_x2c_gensym_macro_lhs_0"))) 
                 (expr (int) (literal (int) "0")))) 
          (expr ("String") (ident (binding 15 "rhs")))))))))) 
-  (at 16 
+  (at 17 
    (return 
     (expr (volatile "String") 
      (index 

@@ -45,7 +45,7 @@ int main(void){
   List direct = _8;
   List nested = _13;
   String text = _14;
-  printf("%d %d %d %d %d %d %d %s %s %s %s\n", 5, 7, 9, 41 + 1, 17, 19, 23, String_str(List_repr(first)), String_str(List_repr(other)), String_str(List_repr(nested)), String_str(text));
+  printf("%d %d %d %d %d %d %d %s %s %s %s\n", 5, 7, 9, 41 + 1, 17, 19, 23, x2c_string_text(String_str(List_repr(first))), x2c_string_text(String_str(List_repr(other))), x2c_string_text(String_str(List_repr(nested))), x2c_string_text(String_str(text)));
   return(void *) first !=(void *) second ||(void *) first !=(void *) direct ||(void *) Var_list(List_car(nested)) !=(void *) first;
 }
 

@@ -1082,12 +1082,12 @@ int main(void){
     Var _x2c_gensym_macro_cursor_output_0;
     while(List_try_next(_x2c_gensym_macro_object_0, &(_x2c_gensym_macro_cursor_0), &(_x2c_gensym_macro_cursor_output_0))){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_0);
-      printf("%s | %s\n", inline_raise(node), generic_raise(node));
+      printf("%s | %s\n", x2c_string_text(inline_raise(node)), x2c_string_text(generic_raise(node)));
     }
 
   }
   List pending = Macro_apply(raised, cons(List_var(_670), cons(List_var(NULL), NULL)));
-  printf("%s | %s\n", inline_raise(pending), generic_raise(pending));
+  printf("%s | %s\n", x2c_string_text(inline_raise(pending)), x2c_string_text(generic_raise(pending)));
   List expressions = _761;
   {
     List node;
@@ -1096,12 +1096,12 @@ int main(void){
     Var _x2c_gensym_macro_cursor_output_1;
     while(List_try_next(_x2c_gensym_macro_object_1, &(_x2c_gensym_macro_cursor_1), &(_x2c_gensym_macro_cursor_output_1))){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_1);
-      printf("%s | %s\n", inline_index(node), generic_index(node));
+      printf("%s | %s\n", x2c_string_text(inline_index(node)), x2c_string_text(generic_index(node)));
     }
 
   }
   List shelled = Macro_apply(indexed, cons(List_var(_718), cons(List_var(_763), NULL)));
-  printf("%s | %s\n", inline_index(shelled), generic_index(shelled));
+  printf("%s | %s\n", x2c_string_text(inline_index(shelled)), x2c_string_text(generic_index(shelled)));
   List returns = _781;
   {
     List node;
@@ -1110,12 +1110,12 @@ int main(void){
     Var _x2c_gensym_macro_cursor_output_2;
     while(List_try_next(_x2c_gensym_macro_object_2, &(_x2c_gensym_macro_cursor_2), &(_x2c_gensym_macro_cursor_output_2))){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_2);
-      printf("%s | %s\n", inline_return(node), generic_return(node));
+      printf("%s | %s\n", x2c_string_text(inline_return(node)), x2c_string_text(generic_return(node)));
     }
 
   }
   List returning = Macro_apply(returned, NULL);
-  printf("%s | %s\n", inline_return(returning), generic_return(returning));
+  printf("%s | %s\n", x2c_string_text(inline_return(returning)), x2c_string_text(generic_return(returning)));
   List tries = _825;
   {
     List node;
@@ -1124,7 +1124,7 @@ int main(void){
     Var _x2c_gensym_macro_cursor_output_3;
     while(List_try_next(_x2c_gensym_macro_object_3, &(_x2c_gensym_macro_cursor_3), &(_x2c_gensym_macro_cursor_output_3))){
       node = Var_list_payload(_x2c_gensym_macro_cursor_output_3);
-      printf("%s | %s\n", inline_try(node), generic_try(node));
+      printf("%s | %s\n", x2c_string_text(inline_try(node)), x2c_string_text(generic_try(node)));
     }
 
   }

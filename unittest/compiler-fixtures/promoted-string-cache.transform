@@ -260,13 +260,21 @@
                (ident (binding 39 "String_getindex"))) 
          (args (expr ("String") (ident (binding 17 "escaped"))) 
           (expr (int) (literal (int) "4"))))) 
-       (expr ("String") (ident (binding 15 "assigned"))) 
-       (expr ("String") (ident (binding 16 "direct"))) 
-       (expr ("String") (ident (binding 18 "dynamic"))) 
-       (expr ("String") 
-        (call (expr ((func (("Var"))) ("String")) 
-               (ident (binding 40 "Var_string"))) 
-         (args (expr ("Var") (ident (binding 21 "boxed"))))))))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") (ident (binding 15 "assigned")))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") (ident (binding 16 "direct")))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") (ident (binding 18 "dynamic")))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") 
+                (call (expr ((func (("Var"))) ("String")) 
+                       (ident (binding 40 "Var_string"))) 
+                 (args (expr ("Var") (ident (binding 21 "boxed")))))))))))))) 
   (at 46 
    (stmnt 
     (expr () 
@@ -294,21 +302,26 @@
              (expr ("size_t") 
               (op . (expr ("PoolStats") (ident (binding 30 "list_before"))) 
                ("interned")))))))))))))) 
-  (at 32 
+  (at 47 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 34 "printf"))) 
       (args (expr (* char) 
              (literal (* char) "\"calls %d parens %s nested %s\\n\"")) 
        (expr (int) (ident (binding 1 "dynamic_calls"))) 
-       (expr ("String") 
-        (call (expr ((func ((void))) "String") 
-               (ident (binding 6 "header_parens"))) (args (expr (void) ())))) 
-       (expr ("String") 
-        (call (expr ((func (("Var"))) ("String")) 
-               (ident (binding 40 "Var_string"))) 
-         (args (expr ("Var") 
-                (call (expr ((func (("List"))) ("Var")) 
-                       (ident (binding 41 "List_cadr"))) 
-                 (args (expr ("List") (ident (binding 24 "child_list")))))))))))))) 
-  (at 47 (return (expr (int) (literal (int) "0"))))))
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") 
+                (call (expr ((func ((void))) "String") 
+                       (ident (binding 6 "header_parens"))) 
+                 (args (expr (void) ()))))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") 
+                (call (expr ((func (("Var"))) ("String")) 
+                       (ident (binding 40 "Var_string"))) 
+                 (args (expr ("Var") 
+                        (call (expr ((func (("List"))) ("Var")) 
+                               (ident (binding 41 "List_cadr"))) 
+                         (args (expr ("List") (ident (binding 24 "child_list"))))))))))))))))) 
+  (at 48 (return (expr (int) (literal (int) "0"))))))

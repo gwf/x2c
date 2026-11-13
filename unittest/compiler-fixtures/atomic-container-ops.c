@@ -109,7 +109,7 @@ int main(void){
   native[0] += native[1];
   native[1] ++;
   printf("values=%d,%d,%d,%d,%d,%d,%d,%d,%d,%d\n", Var_int(value), Var_int(aa), Var_int(am), Var_int(ma), Var_int(mm), Var_int(complex), Var_int(casted), Var_int(same), Var_int(prefix), Var_int(postfix));
-  printf("direct=%d,%d,%d strings=%s,%s,%s native=%d,%d\n", Var_int(direct_prefix), Var_int(direct_postfix), Var_int(counter), Var_string(sum), Var_string(dynamic), text, native[0], native[1]);
+  printf("direct=%d,%d,%d strings=%s,%s,%s native=%d,%d\n", Var_int(direct_prefix), Var_int(direct_postfix), Var_int(counter), x2c_string_text(Var_string(sum)), x2c_string_text(Var_string(dynamic)), x2c_string_text(text), native[0], native[1]);
   printf("calls=%d,%d,%d\n", base_calls, selector_calls, rhs_calls);
   return 0;
 }

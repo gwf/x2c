@@ -29,8 +29,8 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   printf("depth  %d %d\n", 4, mi_depth(_0));
-  printf("dashed %s %s\n", _1, mi_dashed(_2));
-  printf("tag    %s\n", _3);
+  printf("dashed %s %s\n", x2c_string_text(_1), x2c_string_text(mi_dashed(_2)));
+  printf("tag    %s\n", x2c_string_text(_3));
   printf("next   %d\n", 1);
   return 0;
 }

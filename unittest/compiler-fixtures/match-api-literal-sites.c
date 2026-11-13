@@ -130,10 +130,10 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   printf("%d %d %d\n", bound(_33), bound(_35), sentinel(_9));
-  printf("%s\n", List_repr(renamed(_40)));
-  printf("%s\n", List_repr(retagged(_46)));
+  printf("%s\n", x2c_string_text(List_repr(renamed(_40))));
+  printf("%s\n", x2c_string_text(List_repr(retagged(_46))));
   printf("%d %d\n", first_call(_52), first_call(_53));
-  printf("%s\n", List_repr(dropped(_63, Symbol_var(2))));
+  printf("%s\n", x2c_string_text(List_repr(dropped(_63, Symbol_var(2)))));
   return 0;
 }
 

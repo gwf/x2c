@@ -110,7 +110,7 @@ int main(int argc, char * * argv){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   (void) argv;
-  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", _1, _2, _3, _4, _5, _4, _6);
+  printf("%s\n%s\n%s\n%s\n%s\n%s\n%s\n", x2c_string_text(_1), x2c_string_text(_2), x2c_string_text(_3), x2c_string_text(_4), x2c_string_text(_5), x2c_string_text(_4), x2c_string_text(_6));
   printf("%d %d\n", 63, heads(argc - 1));
   return 0;
 }

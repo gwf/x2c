@@ -100,14 +100,14 @@ __attribute__((constructor, noinline, cold)) static void _file_init_(void){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%s\n", path);
-  printf("%s\n", List_repr(values));
-  printf("%s\n", Array_repr(positions));
-  printf("%s\n", Map_repr(lookup));
-  printf("%s\n", Var_string(boxed_string));
-  printf("%s\n", List_repr(Var_list(boxed_list)));
-  printf("%s\n", Array_repr(Var_array(boxed_array)));
-  printf("%s\n", Map_repr(Var_map(boxed_map)));
+  printf("%s\n", x2c_string_text(path));
+  printf("%s\n", x2c_string_text(List_repr(values)));
+  printf("%s\n", x2c_string_text(Array_repr(positions)));
+  printf("%s\n", x2c_string_text(Map_repr(lookup)));
+  printf("%s\n", x2c_string_text(Var_string(boxed_string)));
+  printf("%s\n", x2c_string_text(List_repr(Var_list(boxed_list))));
+  printf("%s\n", x2c_string_text(Array_repr(Var_array(boxed_array))));
+  printf("%s\n", x2c_string_text(Map_repr(Var_map(boxed_map))));
   return 0;
 }
 

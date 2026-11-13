@@ -31,6 +31,11 @@ int main(void) {
   printf("joined=\x025" "i %s\n", key, answer);
   printf("backslash=\\\045i %s\n", key, answer);
   printf("width=\045*.\x2a" "f %s\n", width, precision, whole, answer);
+
+  String empty = "";
+  Var blank = empty;
+  printf("empty=[%s][%s]\n", empty, blank);
+  Stdout.printf("empty=[%s][%-2s]\n", empty, blank);
   buffer.free();
   return 0;
 }

@@ -9,7 +9,7 @@ int main(void){
   x2c_initialize();
   Pair pair = pair_make(3, 4);
   String name = String_new(pair_name(pair.left));
-  printf("%d %s %d\n", pair_sum(pair), name, (int) String_len(name));
+  printf("%d %s %d\n", pair_sum(pair), x2c_string_text(name), (int) String_len(name));
   printf("%d %d\n", pair_diff(pair), pair_max(pair));
   if(pair.left > pair.right) pair_abort(1);
   return 0;

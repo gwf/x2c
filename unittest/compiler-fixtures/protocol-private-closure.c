@@ -154,7 +154,7 @@ int main(void){
   box_value -> value = 23;
   Var boxed = PrivateBox_var(box_value);
   PrivateBox restored = Var_privatebox(boxed);
-  printf("%d %d %d %s %d\n", PrivateParticipant_read(private_value), PublicParticipant_bump(public_value) -> value, PrivateRight_shift(right_value) -> value, Var_str(boxed), restored -> value);
+  printf("%d %d %d %s %d\n", PrivateParticipant_read(private_value), PublicParticipant_bump(public_value) -> value, PrivateRight_shift(right_value) -> value, x2c_string_text(Var_str(boxed)), restored -> value);
   return 0;
 }
 

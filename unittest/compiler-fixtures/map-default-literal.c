@@ -25,7 +25,7 @@ int main(void){
   Map values = Map_update_n(Map_new(), 2, int_var(1), String_var(_0), String_var(_1), int_var(4));
   Map first = Map_new(), second = Map_new();
   size_t width = Bytes_block(values -> entries) -> width;
-  printf("%zu %d %s %ld %d\n", width, width == 2 * sizeof(Var), Var_string(Map_getindex(values, int_var(1))), Var_integer(Map_getindex(values, String_var(_2))), first != second);
+  printf("%zu %d %s %ld %d\n", width, width == 2 * sizeof(Var), x2c_string_text(Var_string(Map_getindex(values, int_var(1)))), Var_integer(Map_getindex(values, String_var(_2))), first != second);
   return 0;
 }
 

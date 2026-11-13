@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/printf-list.x:5:3: xform: %s cannot read type List as text; pass its .str() or .repr()
+    Stdout.printf("list: %s\n", items);
+    ^^^^^^
+  note: printf-family call: File_printf
+

@@ -40,13 +40,13 @@ int mi_next(void);
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("constant %s %s\n", _0, mi_constant(_1));
-  printf("accessor %s %s\n", _2, mi_accessor(_3));
+  printf("constant %s %s\n", x2c_string_text(_0), x2c_string_text(mi_constant(_1)));
+  printf("accessor %s %s\n", x2c_string_text(_2), x2c_string_text(mi_accessor(_3)));
   printf("depth    %d %d\n", 3, mi_depth(_4));
   printf("score    %d %d\n", 11, mi_score(_1));
-  printf("dashed   %s %s\n", _5, mi_dashed(_1));
+  printf("dashed   %s %s\n", x2c_string_text(_5), x2c_string_text(mi_dashed(_1)));
   printf("next     %d %d %d\n", 1, 2, mi_next());
-  printf("tag      %s\n", _6);
+  printf("tag      %s\n", x2c_string_text(_6));
   return 0;
 }
 

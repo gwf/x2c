@@ -39,7 +39,7 @@ int main(void){
   Var mapped = Map_var(Map_update_n(Map_new(), 1, Symbol_var(22), int_var(1)));
   Map map = Var_map_payload(mapped);
   void * raw = Var_pointer(list_valued);
-  printf("wrong=%d right=%d exact=%s not_a_list=%d map=%d raw=%d\n", wrong != NULL, right != NULL, exact, not_a_list != NULL, map != NULL, raw != NULL);
+  printf("wrong=%d right=%d exact=%s not_a_list=%d map=%d raw=%d\n", wrong != NULL, right != NULL, x2c_string_text(exact), not_a_list != NULL, map != NULL, raw != NULL);
   return 0;
 }
 

@@ -53,7 +53,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) InitializerFixture_initialize();
   InitializerFixture_initialize();
-  printf("%d %d %s\n", calls, ready, label);
+  printf("%d %d %s\n", calls, ready, x2c_string_text(label));
   return calls == 1 && ready == 42 && String_equal(label, _0) ? 0 : 1;
 }
 

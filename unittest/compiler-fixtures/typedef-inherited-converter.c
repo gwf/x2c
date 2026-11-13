@@ -58,7 +58,7 @@ int main(void){
   String interpolated = String_join(NULL, cons(String_var(List_str(values)), NULL));
   converter_inherit_Count count = converter_inherit_Base_converter_inherit_count(values);
   String exact = converter_inherit_Override_str(overridden);
-  printf("%s | %s | %d | %s\n", assigned, interpolated, count, exact);
+  printf("%s | %s | %d | %s\n", x2c_string_text(assigned), x2c_string_text(interpolated), count, x2c_string_text(exact));
   return 0;
 }
 

@@ -20,7 +20,7 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   String text = _0;
-  printf("%s\n", text);
+  printf("%s\n", x2c_string_text(text));
   return String_len(text) != 8;
 }
 

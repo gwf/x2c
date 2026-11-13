@@ -498,7 +498,7 @@
        (expr (int) 
         (call (expr ((func (("Var"))) (int)) (ident (binding 52 "Var_int"))) 
          (args (expr ("Var") (ident (binding 41 "postfix"))))))))))) 
-  (at 39 
+  (at 68 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 51 "printf"))) 
@@ -514,15 +514,21 @@
        (expr (int) 
         (call (expr ((func (("Var"))) (int)) (ident (binding 52 "Var_int"))) 
          (args (expr ("Var") (ident (binding 43 "counter")))))) 
-       (expr ("String") 
-        (call (expr ((func (("Var"))) ("String")) 
-               (ident (binding 53 "Var_string"))) 
-         (args (expr ("Var") (ident (binding 48 "sum")))))) 
-       (expr ("String") 
-        (call (expr ((func (("Var"))) ("String")) 
-               (ident (binding 53 "Var_string"))) 
-         (args (expr ("Var") (ident (binding 46 "dynamic")))))) 
-       (expr ("Text") (ident (binding 49 "text"))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") 
+                (call (expr ((func (("Var"))) ("String")) 
+                       (ident (binding 53 "Var_string"))) 
+                 (args (expr ("Var") (ident (binding 48 "sum"))))))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") 
+                (call (expr ((func (("Var"))) ("String")) 
+                       (ident (binding 53 "Var_string"))) 
+                 (args (expr ("Var") (ident (binding 46 "dynamic"))))))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("Text") (ident (binding 49 "text")))))) 
        (expr (int) 
         (index (expr ((dim ("2")) int) (ident (binding 50 "native"))) 
          (expr (int) (literal (int) "0")))) 
@@ -537,7 +543,7 @@
        (expr (int) (ident (binding 6 "base_calls"))) 
        (expr (int) (ident (binding 7 "selector_calls"))) 
        (expr (int) (ident (binding 8 "rhs_calls")))))))) 
-  (at 68 (return (expr (int) (literal (int) "0"))))))
+  (at 69 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "String") 
  (bind (binding 54 "_x2c_gensym_proto_string_add_update") 
@@ -548,7 +554,7 @@
        (*))) (param ("Symbol") (bind (binding 56 "_x2c_gensym_macro_op_0") ())) 
      (param ("String") (bind (binding 57 "rhs") ())))))) 
  (block 
-  (at 70 
+  (at 71 
    (stmnt 
     (expr (volatile "String") 
      (op = (expr (volatile "String") 
@@ -565,7 +571,7 @@
                  (ident (binding 55 "_x2c_gensym_macro_lhs_0"))) 
                 (expr (int) (literal (int) "0")))) 
          (expr ("String") (ident (binding 57 "rhs")))))))))) 
-  (at 71 
+  (at 72 
    (return 
     (expr (volatile "String") 
      (index 

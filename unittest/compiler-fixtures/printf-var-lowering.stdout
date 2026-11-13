@@ -10,3 +10,5 @@ hex=23 hello
 joined=23 hello
 backslash=\23 hello
 width=   7.0 hello
+empty=[][]
+empty=[][  ]

@@ -90,7 +90,7 @@ int main(void){
   Iter iter = callbacks[0].iter(boxed_values, & storage);
   Var item;
   int advanced = Iter_try_next(iter, &(item));
-  printf("%d %s %s %d %d %d\n", callbacks[0].owner == duplicate, callbacks[0].owner(boxed_text), callbacks[0].free(boxed_text), callbacks[0].symbol_compare(alpha, beta), callbacks[0].file_equal(raw_null, raw_null), advanced ? Var_int(item) : - 1);
+  printf("%d %s %s %d %d %d\n", callbacks[0].owner == duplicate, x2c_string_text(callbacks[0].owner(boxed_text)), x2c_string_text(callbacks[0].free(boxed_text)), callbacks[0].symbol_compare(alpha, beta), callbacks[0].file_equal(raw_null, raw_null), advanced ? Var_int(item) : - 1);
   Scope_close();
   return 0;
 }

@@ -97,7 +97,7 @@ int main(void){
   Row recovered_row = Var_row(boxed_row);
   Cell recovered_cell = Var_cell(boxed_cell);
   PlainRowChild recovered_child = Var_plainrow(boxed_child);
-  printf("%s %s %d %d %d %d %d %d %d\n", Row_summary(recovered_row), Var_str(boxed_row), recovered_cell -> value, Var_is_row(boxed_row, 9, 7, 4), Var_is_row(boxed_row, 9, 7, 4), Var_is_row(boxed_cell, 0, 0, 0), Var_is_row(boxed_cell, 0, 0, 0), Var_is(boxed_child, 1125368370158), List_len(recovered_child));
+  printf("%s %s %d %d %d %d %d %d %d\n", x2c_string_text(Row_summary(recovered_row)), x2c_string_text(Var_str(boxed_row)), recovered_cell -> value, Var_is_row(boxed_row, 9, 7, 4), Var_is_row(boxed_row, 9, 7, 4), Var_is_row(boxed_cell, 0, 0, 0), Var_is_row(boxed_cell, 0, 0, 0), Var_is(boxed_child, 1125368370158), List_len(recovered_child));
   return 0;
 }
 

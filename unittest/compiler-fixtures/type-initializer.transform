@@ -43,28 +43,31 @@
           (call (expr ((func ((void))) void) 
                  (ident (binding 7 "InitializerFixture_initialize"))) 
            (args (expr (void) ())))))) 
-  (at 6 (stmnt 
+  (at 9 (stmnt 
          (expr () 
           (call (expr () (ident (binding 9 "printf"))) 
            (args (expr (* char) (literal (* char) "\"%d %d %s\\n\"")) 
             (expr (int) (ident (binding 2 "calls"))) 
             (expr (int) (ident (binding 3 "ready"))) 
-            (expr ("String") (ident (binding 4 "label")))))))) 
-  (at 9 (return 
-         (expr (int) 
-          (op ? (expr (int) 
-                 (op && 
-                  (expr (int) 
-                   (op && 
-                    (expr (int) 
-                     (op == (expr (int) (ident (binding 2 "calls"))) 
-                      (expr (int) (literal (int) "1")))) 
-                    (expr (int) 
-                     (op == (expr (int) (ident (binding 3 "ready"))) 
-                      (expr (int) (literal (int) "42")))))) 
-                  (expr (int) 
-                   (call (expr ((func (("String") ("String"))) int) 
-                          (ident (binding 10 "String_equal"))) 
-                    (args (expr ("String") (ident (binding 4 "label"))) 
-                     (expr ("String") (cache 0))))))) 
-           (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))
+            (expr (* const char) 
+             (call "x2c_string_text" 
+              (args (expr ("String") (ident (binding 4 "label"))))))))))) 
+  (at 10 
+   (return 
+    (expr (int) 
+     (op ? (expr (int) 
+            (op && 
+             (expr (int) 
+              (op && 
+               (expr (int) 
+                (op == (expr (int) (ident (binding 2 "calls"))) 
+                 (expr (int) (literal (int) "1")))) 
+               (expr (int) 
+                (op == (expr (int) (ident (binding 3 "ready"))) 
+                 (expr (int) (literal (int) "42")))))) 
+             (expr (int) 
+              (call (expr ((func (("String") ("String"))) int) 
+                     (ident (binding 10 "String_equal"))) 
+               (args (expr ("String") (ident (binding 4 "label"))) 
+                (expr ("String") (cache 0))))))) 
+      (expr (int) (literal (int) "0")) (expr (int) (literal (int) "1"))))))))

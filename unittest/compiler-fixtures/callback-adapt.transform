@@ -138,7 +138,7 @@
         (args (expr ("Iter") (ident (binding 35 "iter"))) 
          (expr (opt-ref "Var") 
           (op & (parens (expr ("Var") (ident (binding 36 "item"))))))))))))) 
-  (at 18 
+  (at 27 
    (stmnt 
     (expr () 
      (call (expr () (ident (binding 39 "printf"))) 
@@ -151,22 +151,26 @@
                   (expr ((dim) "Callbacks") (ident (binding 12 "callbacks"))) 
                   (expr (int) (literal (int) "0")))) ("owner"))) 
          (expr ("StringCallback") (ident (binding 18 "duplicate"))))) 
-       (expr ("String") 
-        (call (expr ("StringCallback") 
-               (op . (expr ("Callbacks") 
-                      (index 
-                       (expr ((dim) "Callbacks") 
-                        (ident (binding 12 "callbacks"))) 
-                       (expr (int) (literal (int) "0")))) ("owner"))) 
-         (args (expr ("Var") (ident (binding 22 "boxed_text")))))) 
-       (expr ("String") 
-        (call (expr ("StringCallback") 
-               (op . (expr ("Callbacks") 
-                      (index 
-                       (expr ((dim) "Callbacks") 
-                        (ident (binding 12 "callbacks"))) 
-                       (expr (int) (literal (int) "0")))) ("free"))) 
-         (args (expr ("Var") (ident (binding 22 "boxed_text")))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") 
+                (call (expr ("StringCallback") 
+                       (op . (expr ("Callbacks") 
+                              (index 
+                               (expr ((dim) "Callbacks") 
+                                (ident (binding 12 "callbacks"))) 
+                               (expr (int) (literal (int) "0")))) ("owner"))) 
+                 (args (expr ("Var") (ident (binding 22 "boxed_text"))))))))) 
+       (expr (* const char) 
+        (call "x2c_string_text" 
+         (args (expr ("String") 
+                (call (expr ("StringCallback") 
+                       (op . (expr ("Callbacks") 
+                              (index 
+                               (expr ((dim) "Callbacks") 
+                                (ident (binding 12 "callbacks"))) 
+                               (expr (int) (literal (int) "0")))) ("free"))) 
+                 (args (expr ("Var") (ident (binding 22 "boxed_text"))))))))) 
        (expr (int) 
         (call (expr ("CompareCallback") 
                (op . (expr ("Callbacks") 
@@ -196,7 +200,7 @@
     (expr (void) 
      (call (expr ((func ((void))) void) (ident (binding 41 "Scope_close"))) 
       (args (expr (void) ())))))) 
-  (at 27 (return (expr (int) (literal (int) "0"))))))
+  (at 28 (return (expr (int) (literal (int) "0"))))))
 
 (function (static "String") 
  (bind (binding 13 "_x2c_gensym_callback_adapt_0") 

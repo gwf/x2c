@@ -2146,11 +2146,33 @@ Code match_condition_lowering(Code node) {
 
 static int _printf_is_var(Code value) => value.type().is_named("Var");
 
-static void _printf_fail(Code call, String message) {
+static int _printf_has_var(List values) {
+  foreach (Code value in values)
+    if (_printf_is_var(value)) return 1;
+  return 0;
+}
+
+static String _printf_shown(Code value) {
+  foreach (String name in %("List" "Array" "Map" "Symbol"))
+    if (value.type().is_named(name)) return name;
+  return NULL;
+}
+
+static int _printf_reads(Code value) =>
+  _printf_is_var(value) || value.type().is_named("String") ||
+    _printf_shown(value) != NULL;
+
+static void _printf_report(Code call, String message) {
   if (call ~= %(expr ? (call ?callee *)))
     x2c_diagnostic_fail_at(
       call, <xform>, message,
       %"printf-family call: $(Code.binding_spelling(callee))");
+}
+
+static void _printf_fail(Code call, String message) {
+  if (call ~= %(expr ? (call ? (args *given))))
+    if (!_printf_has_var(given)) raise %(c-format);
+  _printf_report(call, message);
 }
 
 static int _printf_valid(String length, int conversion) {
@@ -2177,10 +2199,16 @@ static Type _printf_type(String length, int conversion) {
   return NULL;
 }
 
+static Code _printf_text(Code text) =>
+  %(expr (* const char) (call "x2c_string_text" (args $text)));
+
 static Code _printf_read(Code value, String length, int conversion) {
-  if (!_printf_is_var(value)) return value;
-  if (conversion == 's' && length == "")
-    return %(expr ("String") (call "Var_str" (args $value)));
+  int text = conversion == 's' && length == "";
+  if (!_printf_is_var(value))
+    return text && value.type().is_named("String")
+      ? _printf_text(value) : value;
+  if (text)
+    return _printf_text(%(expr ("String") (call "Var_str" (args $value))));
   Type type = _printf_type(length, conversion);
   return type ? value.convert(type) : NULL;
 }
@@ -2229,6 +2257,9 @@ static void _printf_conversion(
     $fail.printf_conversion(call, spec);
   if (next >= arguments.len())
     $fail.printf_missing_argument(call, spec);
+  String shown = conversion == 's' ? _printf_shown(arguments[next]) : NULL;
+  if (shown)
+    $fail.printf_shown(call, shown);
   Code read = _printf_read(arguments[next], length, conversion);
   if (!read)
     $fail.printf_native_argument(call, spec);
@@ -2247,10 +2278,7 @@ static void _printf_scan(
   }
 }
 
-static Code _printf_lowered(Code code, Code format, List values) {
-  int has_var = 0;
-  foreach (Code value in values) has_var |= _printf_is_var(value);
-  if (!has_var) return code;
+static Code _printf_walked(Code code, Code format, List values) {
   String spelling = format.format();
   if (!spelling)
     $fail.printf_static_format(code);
@@ -2265,6 +2293,16 @@ static Code _printf_lowered(Code code, Code format, List values) {
     return %(expr $type (call $callee (args @(arguments.list_free()))));
   }
   return code;
+}
+
+static Code _printf_lowered(Code code, Code format, List values) {
+  int reads = 0;
+  foreach (Code value in values) reads |= _printf_reads(value);
+  if (!reads) return code;
+  Code lowered = code;
+  try lowered = _printf_walked(code, format, values);
+  catch %(c-format *): return code;
+  return lowered;
 }
 
 static Code _printf_library(Code code, Code format, List values) {
@@ -2890,15 +2928,21 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_match_condition", _match_condition);
   $linked.row(rows, "match_condition_lowering", match_condition_lowering);
   $linked.row(rows, "_printf_is_var", _printf_is_var);
+  $linked.row(rows, "_printf_has_var", _printf_has_var);
+  $linked.row(rows, "_printf_shown", _printf_shown);
+  $linked.row(rows, "_printf_reads", _printf_reads);
+  $linked.row(rows, "_printf_report", _printf_report);
   $linked.row(rows, "_printf_fail", _printf_fail);
   $linked.row(rows, "_printf_valid", _printf_valid);
   $linked.row(rows, "_printf_type", _printf_type);
+  $linked.row(rows, "_printf_text", _printf_text);
   $linked.row(rows, "_printf_read", _printf_read);
   $linked.row(rows, "_printf_position", _printf_position);
   $linked.row(rows, "_printf_count", _printf_count);
   $linked.row(rows, "_printf_length", _printf_length);
   $linked.row(rows, "_printf_conversion", _printf_conversion);
   $linked.row(rows, "_printf_scan", _printf_scan);
+  $linked.row(rows, "_printf_walked", _printf_walked);
   $linked.row(rows, "_printf_lowered", _printf_lowered);
   $linked.row(rows, "_printf_library", _printf_library);
   $linked.row(rows, "printf_values", printf_values);

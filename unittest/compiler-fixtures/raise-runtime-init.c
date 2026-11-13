@@ -25,7 +25,7 @@ int main(void){
   List _x2c_gensym_destructure_0 = nested;
   Symbol tag = Var_symbol(List_getindex(_x2c_gensym_destructure_0, 0));
   String value = Var_as_string(List_getindex(_x2c_gensym_destructure_0, 1));
-  printf("%s %s\n", Symbol_str(tag), value);
+  printf("%s %s\n", x2c_string_text(Symbol_str(tag)), x2c_string_text(value));
   return 0;
 }
 

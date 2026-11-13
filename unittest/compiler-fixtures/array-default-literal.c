@@ -23,7 +23,7 @@ int main(void){
   Array values = Array_update_n(Array_new(), 2, int_var(1), String_var(_0));
   Array empty = Array_new();
   if(Array_len(empty) != 0) return 1;
-  printf("%zu %d %s\n", values -> width, Var_int(Array_getindex(values, 0)), Var_string(Array_getindex(values, 1)));
+  printf("%zu %d %s\n", values -> width, Var_int(Array_getindex(values, 0)), x2c_string_text(Var_string(Array_getindex(values, 1))));
   return 0;
 }
 

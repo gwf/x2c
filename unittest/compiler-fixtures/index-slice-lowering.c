@@ -123,7 +123,7 @@ int main(void){
   List reverse = List_getslice(list, (-2147483647 - 1), (-2147483647 - 1), - 1);
   String suffix = String_getslice(text, 1, (-2147483647 - 1), 1);
   printf("native=%d,%d values=%d,%d,%c,%d writes=%d,%d,%c\n", native_read, raw[2], Var_int(array_read), Var_int(list_read), string_read, Var_int(map_read), Var_int(Array_getindex(saved_array, 2)), Var_int(Map_getindex(saved_map, Symbol_var(97761636))), String_getindex(saved_buffer, 0));
-  printf("slices=%s|%s|%s calls=%d,%d,%d,%d,%d,%d,%d\n", Array_repr(slice), List_repr(reverse), String_repr(suffix), array_base_calls, map_base_calls, buffer_base_calls, index_calls, key_calls, value_calls, bound_calls);
+  printf("slices=%s|%s|%s calls=%d,%d,%d,%d,%d,%d,%d\n", x2c_string_text(Array_repr(slice)), x2c_string_text(List_repr(reverse)), x2c_string_text(String_repr(suffix)), array_base_calls, map_base_calls, buffer_base_calls, index_calls, key_calls, value_calls, bound_calls);
   String_free(saved_buffer);
   return 0;
 }

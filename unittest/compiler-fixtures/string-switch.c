@@ -186,11 +186,11 @@ int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
   String built = _16;
-  File_printf(Stdout, "%s %s %s\n", classify(_17), classify(built), classify(_18));
-  File_printf(Stdout, "%s %s calls=%d\n", classify(_0), classify(NULL), calls);
+  File_printf(Stdout, "%s %s %s\n", x2c_string_text(classify(_17)), x2c_string_text(classify(built)), x2c_string_text(classify(_18)));
+  File_printf(Stdout, "%s %s calls=%d\n", x2c_string_text(classify(_0)), x2c_string_text(classify(NULL)), calls);
   File_printf(Stdout, "%d %d %d %d %d\n", tone(_19), tone(_20), tone(_21), shade(_20), shade(_21));
-  File_printf(Stdout, "%s %s %s\n", nested(_22, _21, 0), nested(_22, _23, 0), nested(_22, _24, 0));
-  File_printf(Stdout, "%s %s %s %s %s\n", nested(_12, _25, 1), nested(_12, _10, 0), nested(_12, _25, 0), nested(_26, _25, 0), nested(_27, _25, 0));
+  File_printf(Stdout, "%s %s %s\n", x2c_string_text(nested(_22, _21, 0)), x2c_string_text(nested(_22, _23, 0)), x2c_string_text(nested(_22, _24, 0)));
+  File_printf(Stdout, "%s %s %s %s %s\n", x2c_string_text(nested(_12, _25, 1)), x2c_string_text(nested(_12, _10, 0)), x2c_string_text(nested(_12, _25, 0)), x2c_string_text(nested(_26, _25, 0)), x2c_string_text(nested(_27, _25, 0)));
   String words[] ={
     _21, _28, _29, _0, _30, _24
   }

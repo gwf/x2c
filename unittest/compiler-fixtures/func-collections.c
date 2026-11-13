@@ -138,7 +138,7 @@ int main(void){
   }
   ));
   String mapped = String_map(_17, _x2c_gensym_func_handle_1);
-  printf("%s %s %s %s %s\n", List_repr(direct), Array_repr(dynamic), List_repr(captured), text, mapped);
+  printf("%s %s %s %s %s\n", x2c_string_text(List_repr(direct)), x2c_string_text(Array_repr(dynamic)), x2c_string_text(List_repr(captured)), x2c_string_text(text), x2c_string_text(mapped));
   return 0;
 }
 

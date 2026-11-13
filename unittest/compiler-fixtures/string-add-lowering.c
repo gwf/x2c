@@ -40,7 +40,7 @@ int main(void){
   String mixed = String_add(left, _3);
   String constant = _6;
   _x2c_gensym_proto_string_add_update(&(joined), 56, suffix());
-  printf("%s %s %s\n", joined, mixed, constant);
+  printf("%s %s %s\n", x2c_string_text(joined), x2c_string_text(mixed), x2c_string_text(constant));
   Scope_close();
   return 0;
 }

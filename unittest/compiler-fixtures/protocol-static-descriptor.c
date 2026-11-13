@@ -53,7 +53,7 @@ int main(void){
   StaticDescriptor value = xmalloc(sizeof(struct StaticDescriptor));
   value -> value = 42;
   Var boxed = StaticDescriptor_var(value);
-  printf("%s\n", Var_str(boxed));
+  printf("%s\n", x2c_string_text(Var_str(boxed)));
   return 0;
 }
 

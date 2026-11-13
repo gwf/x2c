@@ -4190,8 +4190,12 @@ format specifiers convert it to the required promoted C type through
 static format literal. Automatic lowering covers numeric conversions, `%c`,
 `%s`, `*` width and precision, and the `hh`, `h`, `l`, `ll`, and `L` modifiers.
 Other modifiers, pointer and count conversions, wide strings and characters,
-and positional formats require explicit native arguments. A project can add
-its own function, such as a logging call, to this family with a rewrite rule.
+and positional formats require explicit native arguments. With a static
+format, `%s` reads a `String` value, or the `String` that `Var.str` returns,
+as text that is never null, so the empty `String` prints as no text. A
+`List`, `Array`, `Map`, or `Symbol` value at `%s` is an error; pass its
+`.str()` or `.repr()`. A project can add its own function, such as a logging
+call, to this family with a rewrite rule.
 
 ### Dynamic truthiness and binary operators
 

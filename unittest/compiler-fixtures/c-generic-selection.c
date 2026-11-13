@@ -61,7 +61,7 @@ int main(void){
   int size = _Generic(sizeof(int), size_t : 5, default : 6);
   int field = _Generic(bits.small, default : 7);
   Var boxed = int_var((int) _Generic(names, List : 8, default : 9));
-  printf("%d %d %d %d %s\n", character, variable, size, field, Var_str(boxed));
+  printf("%d %d %d %d %s\n", character, variable, size, field, x2c_string_text(Var_str(boxed)));
   return 0;
 }
 

@@ -152,18 +152,18 @@ int main(void){
   }
   ;
   const method_self_RecordLeaf * chosen = method_self_Record_choose(&(low), & high);
-  printf("%s\n", method_inherit_Leaf_own(leaf));
-  printf("%s\n", method_inherit_Mid_level(leaf));
-  printf("%s\n", method_inherit_Base_root(leaf));
-  printf("%s\n", method_inherit_Base_shadow(leaf));
-  printf("%s\n", method_inherit_Override_level(override));
-  printf("%s\n", List_repr(leaf));
-  printf("%s\n", List_repr(List_cdr(leaf)));
-  printf("%s\n", Var_repr(List_car(leaf)));
-  printf("%s %s %s\n", method_inherit_Leaf_own(tail), List_repr(merged), List_repr(direct));
-  printf("%s\n", method_inherit_Leaf_own(decorated));
-  printf("%s\n", List_repr(mapped));
-  printf("%s\n", List_repr(method_inherit_Override_rest(override)));
+  printf("%s\n", x2c_string_text(method_inherit_Leaf_own(leaf)));
+  printf("%s\n", x2c_string_text(method_inherit_Mid_level(leaf)));
+  printf("%s\n", x2c_string_text(method_inherit_Base_root(leaf)));
+  printf("%s\n", x2c_string_text(method_inherit_Base_shadow(leaf)));
+  printf("%s\n", x2c_string_text(method_inherit_Override_level(override)));
+  printf("%s\n", x2c_string_text(List_repr(leaf)));
+  printf("%s\n", x2c_string_text(List_repr(List_cdr(leaf))));
+  printf("%s\n", x2c_string_text(Var_repr(List_car(leaf))));
+  printf("%s %s %s\n", x2c_string_text(method_inherit_Leaf_own(tail)), x2c_string_text(List_repr(merged)), x2c_string_text(List_repr(direct)));
+  printf("%s\n", x2c_string_text(method_inherit_Leaf_own(decorated)));
+  printf("%s\n", x2c_string_text(List_repr(mapped)));
+  printf("%s\n", x2c_string_text(List_repr(method_inherit_Override_rest(override))));
   printf("%d\n", chosen -> value);
   return 0;
 }

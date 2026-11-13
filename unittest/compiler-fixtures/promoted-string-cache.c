@@ -109,9 +109,9 @@ int main(void){
   child_list = header_list();
   PoolStats string_after = Pool_stats(string_pool), list_after = Pool_stats(list_pool);
   Pool_close();
-  printf("%d %d %d %d %d %d %d %d %d %d %s %s %s %s\n", String_equal(header_direct(), header_same()), String_equal(header_dual(), source_dual()), String_equal(before_string, child_string), List_equal(before_list, child_list), List_len(child_list), String_len(escaped), String_getindex(escaped, 0), (unsigned char) String_getindex(escaped, 1), String_getindex(escaped, 3), String_getindex(escaped, 4), assigned, direct, dynamic, Var_string(boxed));
+  printf("%d %d %d %d %d %d %d %d %d %d %s %s %s %s\n", String_equal(header_direct(), header_same()), String_equal(header_dual(), source_dual()), String_equal(before_string, child_string), List_equal(before_list, child_list), List_len(child_list), String_len(escaped), String_getindex(escaped, 0), (unsigned char) String_getindex(escaped, 1), String_getindex(escaped, 3), String_getindex(escaped, 4), x2c_string_text(assigned), x2c_string_text(direct), x2c_string_text(dynamic), x2c_string_text(Var_string(boxed)));
   printf("pool %lu %lu\n", (unsigned long)(string_after.interned - string_before.interned), (unsigned long)(list_after.interned - list_before.interned));
-  printf("calls %d parens %s nested %s\n", dynamic_calls, header_parens(), Var_string(List_cadr(child_list)));
+  printf("calls %d parens %s nested %s\n", dynamic_calls, x2c_string_text(header_parens()), x2c_string_text(Var_string(List_cadr(child_list))));
   return 0;
 }
 

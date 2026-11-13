@@ -45,12 +45,12 @@ int main(void){
     p.x, p.y, p.z
   }
   ;
-  printf("names    %s\n", _0);
+  printf("names    %s\n", x2c_string_text(_0));
   printf("count    %d\n", 3);
   printf("reads    %d %d %d\n", reads[0], reads[1], reads[2]);
   printf("total    %d\n", ms_total(p.x, p.y, p.z));
-  printf("spelling %s\n", _1);
-  printf("label    %s\n", ms_label(_2, 7));
+  printf("spelling %s\n", x2c_string_text(_1));
+  printf("label    %s\n", x2c_string_text(ms_label(_2, 7)));
   return 0;
 }
 

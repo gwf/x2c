@@ -4,9 +4,13 @@
     value the format consumes as the C type its conversion reads: a numeric
     conversion converts the value through `Var.convert`, `%c` and a `*`
     width or precision read an int, and `%s` displays it through `Var.str`.
-    The format is read once, left to right. A Var value that no conversion
-    consumes, or one at a conversion with no native reading, is an error.
-    Each family member is one call pattern, keyed by its callee.
+    `%s` reads a String, and a Var's display String, as nonnull text, so
+    the empty String prints as no text. A List, Array, Map, or Symbol at
+    `%s` is an error. The format is read once, left to right. A Var value
+    that no conversion consumes, or one at a conversion with no native
+    reading, is an error; a call with no Var keeps a format the walk cannot
+    read as written. Each family member is one call pattern, keyed by its
+    callee.
 
     Each definition precedes the definitions that call it: the compiler
     settles whether a linked copy reaches a compile-time operation when the
@@ -19,12 +23,40 @@
 
 meta static int _printf_is_var(Code value) => value.type().is_named("Var");
 
+meta static int _printf_has_var(List values) {
+  foreach (Code value in values)
+    if (_printf_is_var(value)) return 1;
+  return 0;
+}
+
+/* The type `value` has when it formats itself but `%s` cannot read it as
+   C text, or NULL. */
+meta static String _printf_shown(Code value) {
+  foreach (String name in %("List" "Array" "Map" "Symbol"))
+    if (value.type().is_named(name)) return name;
+  return NULL;
+}
+
+/* Whether the format walk may change or reject `value`. */
+meta static int _printf_reads(Code value) =>
+  _printf_is_var(value) || value.type().is_named("String") ||
+    _printf_shown(value) != NULL;
+
 /* Reports `message` about the printf-family call `call`. */
-meta static void _printf_fail(Code call, String message) {
+meta static void _printf_report(Code call, String message) {
   if (call ~= %(expr ? (call ?callee *)))
     x2c_diagnostic_fail_at(
       call, <xform>, message,
       %"printf-family call: $(Code.binding_spelling(callee))");
+}
+
+/* Reports `message` about a format walk over `call`. A call with no Var
+   keeps C's printf behavior, so its walk stops with `<c-format>`
+   instead. */
+meta static void _printf_fail(Code call, String message) {
+  if (call ~= %(expr ? (call ? (args *given))))
+    if (!_printf_has_var(given)) raise %(c-format);
+  _printf_report(call, message);
 }
 
 /* The linked meta copies include these diagnostics from this owner. */
@@ -55,6 +87,10 @@ macro Stmt $fail.printf_unused_argument(Expr $site) =>
   _printf_fail(
     $site, "Var argument has no corresponding format conversion");
 
+macro Stmt $fail.printf_shown(Expr $site, Expr $name) =>
+  _printf_report(
+    $site, %"%s cannot read type $name as text; pass its .str() or .repr()");
+
 meta static int _printf_valid(String length, int conversion) {
   if (strchr("diouxXn", conversion)) return length != "L";
   if (strchr("fFeEgGaA", conversion))
@@ -81,12 +117,20 @@ meta static Type _printf_type(String length, int conversion) {
   return NULL;
 }
 
+/* `text`, a String, as the nonnull C text `%s` reads. */
+meta static Code _printf_text(Code text) =>
+  %(expr (* const char) (call "x2c_string_text" (args $text)));
+
 /* `value` as `conversion` with `length` reads it, or NULL for a Var that no
-   native reading takes. A native value keeps C's calling semantics. */
+   native reading takes. Any other native value keeps C's calling
+   semantics. */
 meta static Code _printf_read(Code value, String length, int conversion) {
-  if (!_printf_is_var(value)) return value;
-  if (conversion == 's' && length == "")
-    return %(expr ("String") (call "Var_str" (args $value)));
+  int text = conversion == 's' && length == "";
+  if (!_printf_is_var(value))
+    return text && value.type().is_named("String")
+      ? _printf_text(value) : value;
+  if (text)
+    return _printf_text(%(expr ("String") (call "Var_str" (args $value))));
   Type type = _printf_type(length, conversion);
   return type ? value.convert(type) : NULL;
 }
@@ -144,6 +188,9 @@ meta static void _printf_conversion(
     $fail.printf_conversion(call, spec);
   if (next >= arguments.len())
     $fail.printf_missing_argument(call, spec);
+  String shown = conversion == 's' ? _printf_shown(arguments[next]) : NULL;
+  if (shown)
+    $fail.printf_shown(call, shown);
   Code read = _printf_read(arguments[next], length, conversion);
   if (!read)
     $fail.printf_native_argument(call, spec);
@@ -163,13 +210,10 @@ meta static void _printf_scan(
   }
 }
 
-/* The call `code` with each Var value its static `format` consumes read as
-   the C type the conversion selects. `values` are the arguments the format
-   may consume; a call with no Var among them is left alone. */
-meta static Code _printf_lowered(Code code, Code format, List values) {
-  int has_var = 0;
-  foreach (Code value in values) has_var |= _printf_is_var(value);
-  if (!has_var) return code;
+/* The call `code` with each value its static `format` consumes read as the
+   C type the conversion selects. `values` are the arguments the format may
+   consume. */
+meta static Code _printf_walked(Code code, Code format, List values) {
   String spelling = format.format();
   if (!spelling)
     $fail.printf_static_format(code);
@@ -184,6 +228,18 @@ meta static Code _printf_lowered(Code code, Code format, List values) {
     return %(expr $type (call $callee (args @(arguments.list_free()))));
   }
   return code;
+}
+
+/* `code` walked when one of `values` is read; a call with no Var whose
+   format the walk stops in stays as written. */
+meta static Code _printf_lowered(Code code, Code format, List values) {
+  int reads = 0;
+  foreach (Code value in values) reads |= _printf_reads(value);
+  if (!reads) return code;
+  Code lowered = code;
+  try lowered = _printf_walked(code, format, values);
+  catch %(c-format *): return code;
+  return lowered;
 }
 
 /* A C library member names only a function no declaration resolves. */

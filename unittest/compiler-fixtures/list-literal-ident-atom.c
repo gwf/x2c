@@ -67,7 +67,7 @@ static List reference(int n){
 int main(void){
   x2c_initialize();
   if(! _init_guard_) _file_init_();
-  printf("%s %s %s %s %s %d\n", String_str(List_repr(head_atom())), String_str(List_repr(nested_atom())), String_str(List_repr(tail_atom())), String_str(List_repr(bare_atom())), String_str(List_repr(reference(7))), List_equal(head_atom(), head_atom()));
+  printf("%s %s %s %s %s %d\n", x2c_string_text(String_str(List_repr(head_atom()))), x2c_string_text(String_str(List_repr(nested_atom()))), x2c_string_text(String_str(List_repr(tail_atom()))), x2c_string_text(String_str(List_repr(bare_atom()))), x2c_string_text(String_str(List_repr(reference(7)))), List_equal(head_atom(), head_atom()));
   return 0;
 }
 
