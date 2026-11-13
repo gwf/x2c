@@ -95,8 +95,8 @@ static Array _discover(List operands, Path root) {
   int explicit = !!operands;
   String root_prefix = %"$(root.rstrip("/"))/";
   if (!operands) operands = $(root);
-  foreach (Path path in operands) {
-    path = Path.absolute(path);
+  foreach (Path operand in operands) {
+    Path path = Path.absolute(operand);
     if (path.is_file()) unique[path] = 1;
     else if (path.is_dir()) {
       Path base = path == root || path.startswith(root_prefix) ? root : path;
@@ -104,7 +104,8 @@ static Array _discover(List operands, Path root) {
       int tests = explicit && path != root && path.basename() == "tests";
       _discover_directory(unique, path, prefix, tests);
     }
-    else Diagnostics.driver_error(%"test: no such file or directory '$path'");
+    else
+      Diagnostics.driver_error(%"test: no such file or directory '$operand'");
   }
   Array files = unique.keys();
   return files.sort();
