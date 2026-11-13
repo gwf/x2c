@@ -103,9 +103,11 @@ invoked, as in a global macro, unless the macro lists it with
 [`using`](#keep-a-file-scope-name-with-using). Names the caller writes in
 arguments resolve there too.
 
-The bare call shape belongs to the local macro before a file `keyword` alias or
+The bare call shape belongs to the local macro before a file `keyword` alias
+(see [local keyword spellings](#give-macros-local-keyword-spellings)) or
 ordinary function. A use without parentheses is an ordinary identifier, except
-for a local decorator with no explicit parameters. That decorator is applied
+for a local decorator (see [decorators](#decorators-transform-one-target))
+with no explicit parameters. That decorator is applied
 as `name TARGET`, like a keyword alias. `(scaled)(value)` explicitly calls a
 function. `$scaled(value)` uses only a global or imported macro, so local and
 global definitions may share a name.
@@ -233,6 +235,7 @@ The declared result kind determines where an invocation may appear:
 | `Entry` | `Map` literal row |
 | `Enumerator` | enum body |
 | `Unit` | translation unit |
+| `Declaration` | translation unit |
 | `Decorator` | as a prefix immediately before its target |
 
 An `Entry` macro can produce zero, one, or several comma-separated `Map` rows.
@@ -319,7 +322,9 @@ macro Stmt $project.swap(
 ~}
 ```
 
-The helper returns a type into the declaration's type slot. The same explicit
+The helper `project_type` is a `meta` function, explained under
+[Compute with meta functions](#compute-with-meta-functions). It returns a
+type into the declaration's type slot. The same explicit
 call form also supplies expressions and generated names in their own slots.
 
 Each invocation receives a compiler-private binding for `temporary`, so a
@@ -749,17 +754,18 @@ working through the generator. Keep unrelated outputs as direct source.
 
 ## Declare methods and converters before adoption
 
-Shallow collection loads included macro definitions and expands file-scope
-`Unit` macros. It applies preceding top-level definitions when the producer
-needs them. Generated private helpers stay available in their source
+Before the compiler reads a file in full, it first scans the file's includes
+and file-scope `Unit` macros; this scan loads included macro definitions,
+expands those macros, and applies preceding top-level definitions when the
+producer needs them. Generated private helpers stay available in their source
 module. Public declarations and protocol rows reach includers. The full parse
 binds the retained result without running its producer again.
 
 A generated public function definition can complete a preceding prototype in
 the same expansion when their canonical signature and ownership agree.
 
-Put converter and public method prototypes before an adoption so shallow
-collection can classify the conformance and downstream code can discover the
+Put converter and public method prototypes before an adoption so that first
+scan can classify the conformance and downstream code can discover the
 functions. Included macro definitions survive intervening preprocessor
 includes, so a definition can be included before the headers its invocations
 need.
