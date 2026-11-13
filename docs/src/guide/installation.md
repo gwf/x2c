@@ -48,9 +48,9 @@ rm -rf "$HOME/.local/x2c"
 
 ## Build from source
 
-A source build needs a C compiler, `ar`, GNU Make, Git, and `/bin/bash`. It
-does not need an existing x2c compiler, because the checkout contains
-generated C for the bootstrap:
+A source build needs a GCC- or Clang-compatible C compiler, `ar`, GNU Make,
+Git, and Bash. It does not need an existing x2c compiler, because the
+checkout contains generated C for the bootstrap:
 
 ```sh
 git clone https://github.com/gwf/x2c.git
@@ -79,72 +79,11 @@ written by the installed compiler, runnable examples, an empty package
 directory, and license. [Building the compiler](../internals/building.md)
 describes the build in detail.
 
-## The x2c home
-
-An installed prefix and a source checkout share one layout, the x2c home:
-
-```text
-<home>/bin/x2c           the compiler
-<home>/include/x2c/      runtime sources and generated headers
-<home>/lib/              the runtime archive and unit interfaces
-<home>/etc/              compiler prelude and runtime Lisp assets
-<home>/libexec/x2c/      external commands (installed prefix)
-<home>/packages/         installed packages, one directory each
-<home>/examples/         runnable examples (installed prefix)
-<home>/src/              language component sources (installed prefix);
-                         all compiler sources (checkout)
-```
-
-The compiler finds its home by walking up from its own executable, then from
-the current directory, to the nearest directory holding `include/` and
-`etc/compiler-prelude.x`. `X2C_HOME` sets the home explicitly and takes
-precedence.
-`x2c env` prints the resolved home, layout, package roots, and host tools;
-`x2c env home` prints one value. Every `import` searches `<home>/packages`
-after the explicit `--package-dir` and manifest directories, so a package
-placed there needs no build flags.
-
-`PREFIX` must be absolute and dedicated to x2c. Move or rename the complete
-prefix to relocate it. Keep `bin`, `include`, `lib`, `libexec`, `etc`, `src`,
-`packages`, and `licenses` together. Paths may contain spaces. Quote the
-compiler path when invoking it:
-
-```sh
-"/path with spaces/x2c/bin/x2c" build src/main.x -o hello
-```
-
-An upgrade stages a complete payload, replaces files owned by the previous
-installation, and removes obsolete owned files using its inventory. It leaves
-unrelated files alone and does not overwrite an unrelated file with the same
-name. Publication replaces individual files; do not run an installation while
-programs are compiling against it. Keep `.x2c-install-manifest` with the prefix
-so upgrades retain ownership and build identity information.
-
-For a packaging staging directory, use `DESTDIR` with the intended prefix:
-
-```sh
-make install PREFIX=/opt/x2c DESTDIR="$PWD/staging"
-```
-
-This writes `staging/opt/x2c`. Move that complete directory to its destination;
-the staging path is not embedded in the compiler's runtime configuration.
-`make dist PREFIX=/opt/x2c` stages the same installation under `dist/` and
-writes `dist/x2c-<version>-<platform>.tar.gz` with a `.sha256` beside it.
-
-`make uninstall PREFIX="$HOME/.local/x2c"` removes every file the inventory
-owns and any directory that becomes empty. Packages installed under
-`<prefix>/packages` are not owned by the compiler inventory: an upgrade keeps
-them, and an uninstall leaves the prefix in place when they remain.
-Installing these support directories directly into a shared tree such as
-`/usr` is not supported.
-
-An installed prefix records `cc` and `ar` in `lib/x2c/toolchain`;
-[Environment](../reference/cli.md#environment) gives the full tool selection
-order.
-
 ## Write a first program
 
-Start a project with [`x2c new`](../reference/cli.md#start-a-project):
+These steps assume `x2c` is on `PATH`, as after the release installer or
+`make install`. Start a project with
+[`x2c new`](../reference/cli.md#start-a-project):
 
 ```sh
 x2c new hello
@@ -195,6 +134,33 @@ debug information. [Source mapping](../reference/cli.md#source-mapping) gives
 the location rules. To use a C library through a package, see
 [packages](packages.md).
 
+## The x2c home
+
+An installed prefix and a source checkout share one layout, the x2c home:
+
+```text
+<home>/bin/x2c           the compiler (in a checkout, the bootstrap
+                         compiler until `make build-install`)
+<home>/include/x2c/      runtime sources and generated headers
+<home>/lib/              the runtime archive and unit interfaces
+<home>/etc/              compiler prelude and runtime Lisp assets
+<home>/libexec/x2c/      external commands (installed prefix)
+<home>/packages/         installed packages, one directory each
+<home>/examples/         runnable examples (installed prefix)
+<home>/src/              language component sources (installed prefix);
+                         all compiler sources (checkout)
+<home>/licenses/         license files (installed prefix)
+```
+
+The compiler finds its home by walking up from its own executable, then from
+the current directory, to the nearest directory holding `include/` and
+`etc/compiler-prelude.x`. `X2C_HOME` sets the home explicitly and takes
+precedence.
+`x2c env` prints the resolved home, layout, package roots, and host tools;
+`x2c env home` prints one value. Every `import` searches `<home>/packages`
+after the explicit `--package-dir` and manifest directories, so a package
+placed there needs no build flags.
+
 ## Compile C against the x2c runtime
 
 A C program can call x2c code through the generated header. Point `-I` at the
@@ -214,6 +180,46 @@ cc app.c -I "$HOME/.local/x2c/include" \
 To compile C generated by `x2c translate` by hand, see
 [external builds](../reference/cli.md#dependencies-and-external-builds). To
 build a package from a source archive, see [packages](packages.md).
+
+## Packaging and relocation
+
+The `PREFIX` given to `make install` must be absolute and dedicated to x2c.
+Move or rename the complete prefix to relocate it. Keep `bin`, `include`,
+`lib`, `libexec`, `etc`, `src`, `packages`, and `licenses` together. Paths
+may contain spaces. Quote the compiler path when invoking it:
+
+```sh
+"/path with spaces/x2c/bin/x2c" build src/main.x -o hello
+```
+
+An upgrade stages a complete payload, replaces files owned by the previous
+installation, and removes obsolete owned files using its inventory. It leaves
+unrelated files alone and does not overwrite an unrelated file with the same
+name. Publication replaces individual files; do not run an installation while
+programs are compiling against it. Keep `.x2c-install-manifest` with the prefix
+so upgrades retain ownership and build identity information.
+
+For a packaging staging directory, use `DESTDIR` with the intended prefix:
+
+```sh
+make install PREFIX=/opt/x2c DESTDIR="$PWD/staging"
+```
+
+This writes `staging/opt/x2c`. Move that complete directory to its destination;
+the staging path is not embedded in the compiler's runtime configuration.
+`make dist PREFIX=/opt/x2c` stages the same installation under `dist/` and
+writes `dist/x2c-<version>-<platform>.tar.gz` with a `.sha256` beside it.
+
+`make uninstall PREFIX="$HOME/.local/x2c"` removes every file the inventory
+owns and any directory that becomes empty. Packages installed under
+`<prefix>/packages` are not owned by the compiler inventory: an upgrade keeps
+them, and an uninstall leaves the prefix in place when they remain.
+Installing these support directories directly into a shared tree such as
+`/usr` is not supported.
+
+An installed prefix records `cc` and `ar` in `lib/x2c/toolchain`;
+[Environment](../reference/cli.md#environment) gives the full tool selection
+order.
 
 ## Windows
 
