@@ -163,8 +163,8 @@ static SnapshotQuery _sq_open(Map snapshot) {
   foreach (Map entity, q.entities) {
     q.entities_by_id[entity["id"]] = entity;
     if ("binding" in entity)
-      _sq_append(q.bindings, _sq_binding_key(entity, entity["binding"]),
-        entity);
+      _sq_append(
+        q.bindings, _sq_binding_key(entity, entity["binding"]), entity);
   }
   return q;
 }
@@ -329,8 +329,8 @@ static Map _sq_page(Map snapshot, Map request, Array rows) {
   return {"snapshot": snapshot["identity"],
     "coverage": snapshot["coverage"], "results": page,
     "total": ordered.len(), "offset": offset, "limit": limit,
-    "truncated": Json.bool(offset > 0 ||
-      offset + (int64_t) page.len() < ordered.len())};
+    "truncated": Json.bool(
+      offset > 0 || offset + (int64_t) page.len() < ordered.len())};
 }
 
 static Array _sq_find(SnapshotQuery &q, Map request) {
@@ -399,8 +399,7 @@ static Map _sq_path(SnapshotQuery &q, Map request) {
       edges = cons(step["edge"], edges);
       id = step["previous"];
     }
-    rows.push({"entities": nodes.array(),
-               "edges": edges.array()});
+    rows.push({"entities": nodes.array(), "edges": edges.array()});
   }
   Map result = _sq_page(q.snapshot, request, rows);
   result["status"] = rows.len() ? "found" : "no-recorded-path";
@@ -456,8 +455,8 @@ static int _sq_binding(
 static int _sq_node_filter(
   SnapshotQuery &q, Map entity, List node, List parents, Map request) {
   if ("node_where" in request &&
-      !_sq_node_where(q, entity, node, parents,
-        request["node_where"].map())) return 0;
+      !_sq_node_where(q, entity, node, parents, request["node_where"].map()))
+    return 0;
   if ("inside" in request) {
     String wanted = request["inside"].str();
     int found = 0;
@@ -470,16 +469,15 @@ static int _sq_node_filter(
     if (!found) return 0;
   }
   if ("binding" in request &&
-      !_sq_binding(q, entity, node,
-        request["binding"].str())) return 0;
+      !_sq_binding(q, entity, node, request["binding"].str())) return 0;
   if ("callee" in request) {
     List callee = NULL;
     match (node) {
       case %(call ?function (args *)): callee = function;
       case %(expr ? (call ?function (args *))): callee = function;
     }
-    if (!callee || !_sq_binding(q, entity, callee,
-          request["callee"].str())) return 0;
+    if (!callee || !_sq_binding(q, entity, callee, request["callee"].str()))
+      return 0;
   }
   foreach (String field, %("declared_type" "resolved_type")) {
     if (!request.contains(field)) continue;
@@ -499,8 +497,8 @@ static int _sq_node_filter(
     int found = 0;
     foreach (List argument, arguments)
       match (argument) case %(expr ?type ?):
-        if (_sq_type_equal(_sq_resolved(q, entity, type),
-              request["argument_type"].str())) {
+        if (_sq_type_equal(
+          _sq_resolved(q, entity, type), request["argument_type"].str())) {
           found = 1;
           break;
         }
@@ -639,7 +637,7 @@ static Map _sq_name_ambiguity(SnapshotQuery &q, Map request) {
   return result;
 }
 
-/** Executes one data-only query without opening a compiler or source file. */
+/* Executes one data-only query without opening a compiler or source file. */
 static Map _sq_execute(SnapshotQuery q, Map request) {
   String op = _sq_validate_query(request);
   MatchPlan pattern = auto op == "match"
@@ -705,14 +703,15 @@ static String _sq_declaration_key(Map entity, Map entities) {
   String owner = entity.getdefault("owner", NULL);
   while (owner && owner in entities) {
     Map parent = entities[owner];
-    owners.push([parent["kind"], parent["name"],
-                 parent.getdefault("namespace", NULL),
-                 parent.getdefault("file", NULL)]);
+    owners.push(
+      [parent["kind"], parent["name"], parent.getdefault("namespace", NULL),
+       parent.getdefault("file", NULL)]);
     owner = parent.getdefault("owner", NULL);
   }
-  return Var.json([entity.getdefault("domain", NULL),
-    entity.getdefault("unit", NULL), entity.getdefault("file", NULL),
-    entity["kind"], entity["name"], entity.getdefault("namespace", NULL), owners]);
+  return Var.json(
+    [entity.getdefault("domain", NULL), entity.getdefault("unit", NULL),
+     entity.getdefault("file", NULL), entity["kind"], entity["name"],
+     entity.getdefault("namespace", NULL), owners]);
 }
 
 static Map _sq_declarations(Array entities, Map by_id) {
@@ -768,8 +767,8 @@ Map graph_snapshot_diff(Map before, Map after) {
     else {
       Map replacement = current[key];
       if (!_sq_equal(_sq_signature(entity), _sq_signature(replacement)))
-        changed.push({"before": _sq_summary(entity),
-                      "after": _sq_summary(replacement)});
+        changed.push(
+          {"before": _sq_summary(entity), "after": _sq_summary(replacement)});
     }
   }
   foreach (Map entity, after["entities"].array()) {
