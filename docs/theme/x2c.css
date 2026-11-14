@@ -305,82 +305,44 @@ hr {
   inset-inline: 0;
 }
 
-.x2c-book-tools {
-  display: flex;
-  padding: 4px 20px;
-  border-top: 1px solid var(--hairline);
-  justify-content: space-between;
+.x2c-header #mdbook-searchbar-outer {
+  width: 300px;
+  min-width: 0;
+  margin: 0 0 0 8px;
 }
 
-.x2c-header-tools {
+.x2c-header .search-wrapper {
   display: flex;
   align-items: center;
-  gap: 6px;
+  /* Match the rendered input lettering to the wordmark's optical baseline. */
+  transform: translateY(0.75px);
 }
 
-.x2c-header-tools-right {
-  position: relative;
-}
-
-.x2c-header .icon-button {
-  display: inline-flex;
-  width: 32px;
-  height: 32px;
+.x2c-header #mdbook-searchbar {
+  display: block;
+  height: 28px;
   margin: 0;
-  padding: 0;
-  border: 0;
-  background: none;
+  padding: 0 10px 0 29px;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg), white 55%);
+  font: 12.5px/1.3 var(--mono-font);
+}
+
+.x2c-header #mdbook-searchbar::placeholder { color: var(--icons); opacity: 0.55; }
+.x2c-header #mdbook-searchbar:focus { outline: 2px solid var(--links); outline-offset: 2px; }
+.x2c-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(calc(-50% + 1px));
+  display: flex;
   color: var(--icons);
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+  opacity: 0.35;
+  pointer-events: none;
 }
-
-.x2c-header .icon-button:hover {
-  color: var(--icons-hover);
-}
-
-.x2c-header .icon-button .fa-svg {
-  width: 17px;
-  height: 17px;
-  line-height: 1;
-}
-
-.theme-popup {
-  left: auto;
-  right: 0;
-  top: 44px;
-  border-radius: 0;
-  font: 500 12px/1 var(--mono-font);
-}
-
-.theme-popup .theme {
-  padding: 10px 16px;
-  font: inherit;
-}
-
-@media (min-width: 1280px) {
-  .x2c-book-tools {
-    padding: 0;
-    border: 0;
-  }
-
-  .x2c-header-tools {
-    position: absolute;
-    top: 16px;
-    left: 8px;
-    gap: 0;
-  }
-
-  .x2c-header-tools-right {
-    right: 8px;
-    left: auto;
-  }
-
-  .x2c-header .icon-button {
-    width: 24px;
-  }
-}
+.x2c-search-icon .fa-svg,
+.x2c-search-icon .fa-svg svg { display: block; width: 12px; height: 12px; }
 
 /* Layout under the fixed header */
 .sidebar {
@@ -407,6 +369,14 @@ hr {
 }
 
 /* Sidebar */
+/* Keep the header fixed when the narrow-screen sidebar opens. */
+#mdbook-sidebar-toggle-anchor:checked ~ .page-wrapper { transform: none; }
+
+
+:root {
+  --sidebar-target-width: 300px;
+}
+
 .sidebar {
   font-family: var(--sans-font);
   font-size: 14px;
@@ -414,6 +384,14 @@ hr {
 
 .sidebar .sidebar-scrollbox {
   padding: 18px 18px 40px;
+}
+
+.chapter {
+  margin-block: 14px;
+}
+
+.chapter .section {
+  margin-block: 0;
 }
 
 .chapter li.chapter-item {
@@ -463,7 +441,10 @@ hr {
   flex: 0 0 28px;
   width: 28px;
   min-width: 28px;
-  padding: 4px 0;
+  height: 1.4em;
+  align-self: flex-start;
+  font: inherit;
+  padding: 0;
   border: 0;
   background: none;
   color: var(--sidebar-fg);
@@ -471,6 +452,8 @@ hr {
 }
 
 .chapter .chapter-fold-toggle div {
+  box-sizing: border-box;
+  flex: none;
   width: 7px;
   height: 7px;
   border-right: 2px solid currentColor;

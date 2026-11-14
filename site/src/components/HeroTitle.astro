@@ -4,41 +4,63 @@ const { subject, opening, ending } = Astro.props;
 
 <h1>
   <button class="hero-title" type="button"
-    aria-label={`${subject} ${opening} Click to change the title.`}
+    aria-label={`${subject} ${opening} ${ending} ${subject}!`}
+    aria-description="Activate to change the visible title."
     data-title data-subject={subject} data-opening={opening} data-ending={ending}>
-    <span class="title-text" aria-hidden="true">{subject} {opening}</span>
+    <span class="title-animation">
+      <span class="title-text" aria-hidden="true">{subject} {opening}</span>
+      <span class="title-exclamation" aria-hidden="true">!</span>
+      <span class="title-question" aria-hidden="true">?</span>
+    </span>
   </button>
 </h1>
 
 <script>
   const title = document.querySelector<HTMLButtonElement>("[data-title]")!;
+  const animation = title.querySelector<HTMLElement>(".title-animation")!;
   const text = title.querySelector<HTMLElement>(".title-text")!;
   const subject = title.dataset.subject!;
+  const exclamation = title.querySelector<HTMLElement>(".title-exclamation")!;
   const prefix = `${title.dataset.ending} `;
   const suffix = ` ${title.dataset.opening}`;
   const steps = prefix.length;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
-  const shotSpeed = 2000;
+  const duration = 400;
+  const shotDuration = 100;
+  const popDuration = 180;
   const shiftPause = 10;
   const letters = [...suffix].map((char) => {
     const letter = document.createElement("span");
     letter.textContent = char;
-    letter.className = char === "?" ? "title-falling-letter title-question" : "title-falling-letter";
+    letter.className = char === "."
+      ? "title-falling-letter title-period" : "title-falling-letter";
     letter.setAttribute("aria-hidden", "true");
-    title.append(letter);
+    animation.append(letter);
+    return letter;
+  });
+  const arrivals = [...prefix].map((char) => {
+    const letter = document.createElement("span");
+    letter.textContent = char;
+    letter.className = "title-falling-letter";
+    letter.setAttribute("aria-hidden", "true");
+    animation.append(letter);
     return letter;
   });
   type Spot = { x: number; width: number; fits: boolean };
   type Shot = { start: number; end: number; x: number; distance: number };
   let frames: Spot[][] = [];
   let shifts: number[] = [];
+  let arrivalDuration = 0;
+  let arrivalDistances: number[] = [];
   let shots: (Shot | undefined)[] = [];
   let elapsed = 0;
   let end = 0;
+  let popStart = 0;
   let forward = false;
   let frame = 0;
   let lastTime: number | null = null;
   let enteredAt = -Infinity;
+  let tilt = 18;
 
   const question = title.querySelector<HTMLElement>(".title-question")!;
   let inviting = false;
@@ -47,7 +69,7 @@ const { subject, opening, ending } = Astro.props;
   function scheduleDance() {
     danceTimer = window.setTimeout(() => {
       question.classList.add("is-dancing");
-    }, 6000 + Math.random() * 12000);
+    }, 2500 + Math.random() * 2500);
   }
 
   function setInvitation(active: boolean) {
@@ -63,11 +85,29 @@ const { subject, opening, ending } = Astro.props;
     question.classList.remove("is-dancing");
     if (inviting) scheduleDance();
   });
-  reducedMotion.addEventListener("change", () => setInvitation(!forward && elapsed === 0));
+  reducedMotion.addEventListener("change", () => {
+    if (reducedMotion.matches) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+      elapsed = forward ? end : 0;
+      render();
+    }
+    setInvitation(!forward && elapsed === 0);
+  });
 
   function measure() {
-    const bounds = title.getBoundingClientRect();
-    const right = bounds.right - parseFloat(getComputedStyle(title).paddingRight);
+    const progress = end ? elapsed / end : 0;
+    animation.style.transform = "none";
+    exclamation.style.transform = "none";
+    const bounds = animation.getBoundingClientRect();
+    const style = getComputedStyle(title);
+    const available = title.clientWidth
+      - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+    text.textContent = prefix + subject;
+    const textWidth = text.getBoundingClientRect().width;
+    const scale = available / (textWidth + exclamation.getBoundingClientRect().width);
+    exclamation.style.left = `${textWidth}px`;
+    const right = bounds.left + available / scale;
     frames = Array.from({ length: steps + 1 }, (_, step) => {
       const leading = prefix.slice(prefix.length - step);
       text.textContent = leading + subject + suffix;
@@ -80,26 +120,41 @@ const { subject, opening, ending } = Astro.props;
         return { x: rect.left - bounds.left, width: rect.width, fits: rect.right <= right };
       });
     });
-    const completed = elapsed === end;
     shifts = [0];
     shots = [];
-    end = 0;
+    // Give the first character a flight in; later arrivals overlap the exits.
+    end = shotDuration;
+    // Start each glyph just beyond the viewport, matching the right-hand exits.
+    arrivalDistances = arrivals.map(letter =>
+      bounds.left / scale + letter.getBoundingClientRect().width);
     for (let step = 1; step <= steps; step++) {
       end += shiftPause;
       shifts.push(end);
       // Finish each rejected letter's flight before the next shift or shot.
       for (let index = letters.length - 1; index >= 0; index--) {
-        if (shots[index] || frames[step][index].fits) continue;
+        if (shots[index] || (step < steps && frames[step][index].fits)) continue;
         const spot = frames[step][index];
-        const distance = Math.max(0, document.documentElement.clientWidth - bounds.left - spot.x + spot.width);
+        const distance = Math.max(0, (document.documentElement.clientWidth - bounds.left) / scale - spot.x + spot.width);
         const flight = suffix[index].trim()
-          ? distance / shotSpeed * 1000 : 0;
+          ? shotDuration : 0;
         shots[index] = { start: end, end: end + flight, x: spot.x, distance };
         end += flight;
       }
     }
-    if (!frame) elapsed = forward && completed ? end : 0;
-    else elapsed = Math.min(elapsed, end);
+    popStart = end;
+    end += popDuration;
+    const rate = duration / end;
+    arrivalDuration = shotDuration * rate;
+    shifts = shifts.map((time) => time * rate);
+    shots.forEach((shot) => {
+      if (!shot) return;
+      shot.start *= rate;
+      shot.end *= rate;
+    });
+    popStart *= rate;
+    end = duration;
+    elapsed = progress * end;
+    animation.style.transform = `scaleX(${scale})`;
     render();
   }
 
@@ -110,7 +165,21 @@ const { subject, opening, ending } = Astro.props;
     const atStart = !forward && elapsed === 0;
     if (atStart) step = 0;
     setInvitation(atStart);
-    text.textContent = prefix.slice(prefix.length - step) + subject;
+    const period = frames[0][suffix.length - 1];
+    question.style.left = `${Math.round(period.x)}px`;
+    text.textContent = prefix.slice(prefix.length - step)
+      + subject;
+    arrivals.forEach((letter, index) => {
+      const landing = shifts[steps - index];
+      const p = (elapsed - (landing - arrivalDuration)) / arrivalDuration;
+      letter.style.visibility = p >= 0 && p < 1 ? "visible" : "hidden";
+      // Reverse the outgoing acceleration: enter quickly, then settle at the left edge.
+      letter.style.left = `${-arrivalDistances[index] * (1 - Math.max(0, Math.min(1, p))) ** 2}px`;
+    });
+    const pop = Math.max(0, Math.min(1, (elapsed - popStart) / (end - popStart)));
+    exclamation.style.opacity = `${pop}`;
+    const wag = Math.sin(pop * Math.PI * 3) * (1 - pop) * tilt;
+    exclamation.style.transform = `translateY(${(1 - pop) ** 2 * 0.35}em) rotate(${wag}deg)`;
     letters.forEach((letter, index) => {
       const shot = shots[index];
       const fired = !atStart && shot && elapsed >= shot.start;
@@ -134,14 +203,15 @@ const { subject, opening, ending } = Astro.props;
 
   function toggle() {
     cancelAnimationFrame(frame);
+    frame = 0;
     forward = !forward;
+    tilt = (Math.random() < 0.5 ? -1 : 1) * (12 + Math.random() * 16);
     setInvitation(false);
-    title.setAttribute("aria-label", `${forward ? prefix + subject + "." : subject + suffix} Click to change the title.`);
     if (reducedMotion.matches) {
       elapsed = forward ? end : 0;
       render();
     } else {
-      lastTime = null;
+      lastTime = performance.now();
       frame = requestAnimationFrame(advance);
     }
   }

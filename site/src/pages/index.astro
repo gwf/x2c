@@ -243,7 +243,7 @@ const kickerHtml = await inlineMarkdown(home.kicker);
           <p class="package-note">
             Packages need their native libraries prepared first. Release
             bundles cover macOS and Linux on arm64 and x86_64; torch bundles
-            cover macOS arm64 and Linux x86_64 only. raylib and SQLite have
+            cover macOS arm64 and Linux x86_64 only. raylib, SQLite, and x2cui have
             no release bundle and build from a source checkout.
           </p>
         </div>
@@ -269,16 +269,19 @@ const kickerHtml = await inlineMarkdown(home.kicker);
             and look up its library. <a href="https://github.com/gwf/x2c"
               >Browse the source</a> to see how it works or make it your own.
           </p>
+          <div class="download-links install-actions">
+            <a class="button button-primary" href={local("x2c-cheatsheet.pdf")} download>Cheat sheet (PDF)</a>{" "}
+            <a class="button button-secondary" href={local("x2c-book.pdf")} download>Book (PDF)</a>
+          </div>
           <p class="repository-counts">
             Repository counts from <code>make stats</code>.
           </p>
         </header>
         <div class="docs-cards number-stats">
           <div class="docs-card stat-card">
-            <small>compiler</small>
+            <small>core compiler</small>
             <strong>{sourceLines("src")}</strong>
-            <p>code / comment lines in the compiler, including all nested modules
-              and language components. Command programs are counted separately.</p>
+            <p>code / comment lines in the core compiler.</p>
           </div>
           <div class="docs-card stat-card">
             <small>library</small>
@@ -289,15 +292,14 @@ const kickerHtml = await inlineMarkdown(home.kicker);
             <small>compiler commands</small>
             <strong>{sourceLines("commands")}</strong>
             <p>{number(statistics.inventory.commands)} command programs,
-              including build/run, lint, graph analysis, and the language server.
-              Code / comment lines; excludes command tests.</p>
+              including build/run, lint, graph analysis, and language server.</p>
           </div>
           <div class="docs-card stat-card">
             <small>language components</small>
             <strong>{sourceLines("components")}</strong>
             <p>{number(statistics.inventory.components)} components implementing
               language features with macros and rewrite rules. Code / comment
-              lines, already included in the compiler total.</p>
+              lines.</p>
           </div>
           <div class="docs-card stat-card">
             <small>tests</small>
@@ -316,9 +318,9 @@ const kickerHtml = await inlineMarkdown(home.kicker);
           </div>
           <div class="docs-card stat-card">
             <small>packages</small>
-            <strong><a href="#packages">{number(inSection("packages").length)}</a></strong>
+            <strong>{number(inSection("packages").length)}</strong>
             <p>
-              packages demonstrated with working examples in the gallery.
+              integrations with working examples.
             </p>
           </div>
         </div>

@@ -8,6 +8,9 @@ available. x2c compiles to C, and its compiler and runtime are written in x2c.
 This book explains how to use x2c and specifies its language and library.
 [Install a native compiler](guide/installation.md) explains setup.
 
+Keep the [cheat sheet (PDF)](../x2c-cheatsheet.pdf) nearby, or
+[download the complete book (PDF)](../x2c-book.pdf) for offline reading.
+
 ## What x2c adds
 
 x2c adds these features to C:

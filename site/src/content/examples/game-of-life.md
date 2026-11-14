@@ -3,7 +3,7 @@ slug: game-of-life
 navTitle: Game of Life in a TTY
 order: 3
 slide: game-of-life
-title: A little life in your terminal.
+title: A terminal case of Life.
 description: Conway's Game of Life, drawn in a terminal with the termbox2 package.
 source: packages/termbox2/examples/game-of-life.x
 codeLabel: Complete program

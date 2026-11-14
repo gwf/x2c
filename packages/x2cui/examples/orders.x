@@ -75,21 +75,27 @@ static void recent_orders(Ui ui, Dashboard &s) {
     }
 
     ui.table ("orders", sort: &s.sort, selectable: true,
-              columns: {"Order": 90, "Customer": fill, "Date": unsorted(90),
-                        "Status": 120, "Amount": right(110)})
+              columns: {"Order": 90, "Customer": fill,
+                        "Date": unsorted(90), "Status": 120,
+                        "Amount": right(110)})
     ui.each (Order o in shown, key: o.id)
     ui.table_row (row, selected: s.selected == o) {
-      if (row.clicked) s.selected = o;
+      if (row.clicked)
+        s.selected = o;
+
       ui.cell_text(o.id);
       ui.cell () {
         ui.avatar(o.customer, size: 28);
         ui.column (gap: 0, width: fill) {
           ui.text(o.customer, font: medium, nowrap: true);
-          ui.text(o.email, size: 12, color: text_secondary, nowrap: true);
+          ui.text(o.email, size: 12,
+                  color: text_secondary, nowrap: true);
         }
       }
+
       ui.cell_text(o.date);
-      ui.cell () ui.badge(o.status, tone: o.tone, dot: true);
+      ui.cell ()
+        ui.badge(o.status, tone: o.tone, dot: true);
       ui.cell_text(o.price);
     }
 

@@ -1,0 +1,293 @@
+.cheat-page {
+  width: min(100%, 1180px);
+  margin: 0 auto;
+  padding: clamp(32px, 4vw, 56px) clamp(16px, 2.5vw, 36px) 64px;
+  background: var(--paper);
+}
+
+.cheat-heading {
+  width: min(100%, 1100px);
+  margin: 0 auto 28px;
+}
+
+.cheat-heading h1 {
+  margin: 0 0 14px;
+  font: 400 clamp(36px, 4.4vw, 56px)/1 "Instrument Serif", Georgia, serif;
+  letter-spacing: -0.02em;
+}
+
+.cheat-intro {
+  margin: 0;
+  color: var(--muted-dark);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.cheat-intro a {
+  color: var(--red-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cheat-print {
+  margin-left: 12px;
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--dark);
+  font: 500 12px/1 "JetBrains Mono", monospace;
+  vertical-align: 1px;
+  cursor: pointer;
+}
+
+.cheat-print:hover {
+  background: var(--dark);
+  color: var(--paper);
+}
+
+/*
+ * The sheet is a US Letter page, and .sheet-page holds what prints. Its
+ * padding is the 0.35in print margin, plus 0.1in at the foot, so its content
+ * box is the 7.8in by 10.2in printed area. Sizes inside are fractions of
+ * that width, so the screen and the printout lay out alike: 1cqw prints as
+ * 5.6pt.
+ */
+.sheet {
+  container-type: inline-size;
+  width: min(100%, 1100px);
+  margin: 0 auto;
+  aspect-ratio: 8.5 / 11;
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: 0 1px 2px rgba(23, 23, 23, 0.08), 0 14px 36px rgba(23, 23, 23, 0.1);
+}
+
+.sheet-page {
+  container-type: inline-size;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  height: 100%;
+  padding: 4.118cqw 4.118cqw 5.294cqw;
+  color: var(--dark);
+  font-family: Archivo, Helvetica, sans-serif;
+  line-height: 1.25;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.sheet-page code {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: inherit;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9em;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: baseline;
+  gap: 2.2cqw;
+  padding-bottom: 1cqw;
+  border-bottom: 0.26cqw solid var(--red);
+}
+
+.sheet-wordmark {
+  color: var(--red-text);
+  font-size: 3.6cqw;
+}
+
+.sheet-title {
+  font: 400 2.9cqw/1 "Instrument Serif", Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+.sheet-site {
+  margin-left: auto;
+  color: var(--nav-muted);
+  font: 500 1.25cqw/1 "JetBrains Mono", monospace;
+}
+
+.sheet-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr);
+  column-gap: 2.4cqw;
+  padding-top: 1.8cqw;
+  font-size: 1.18cqw;
+}
+
+/*
+ * Each column is one two-track grid that its sections, lists, and rows share
+ * through subgrid, so every code cell in a column has the same width and the
+ * notes form one aligned column. Leftover height becomes stretch space
+ * between sections.
+ */
+.sheet-column {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-content: space-between;
+  column-gap: 1.2cqw;
+  row-gap: 1.5cqw;
+  min-width: 0;
+}
+
+.sheet-section,
+.sheet-section dl,
+.sheet-row {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+}
+
+.sheet-section h2 {
+  margin: 0;
+  padding-bottom: 0.32cqw;
+  grid-column: 1 / -1;
+  border-bottom: 0.18cqw solid var(--red);
+  color: var(--red-text);
+  font: 700 1.2cqw/1.2 "JetBrains Mono", monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sheet-section dl {
+  margin: 0;
+}
+
+.sheet-row {
+  padding: 0.36cqw 0;
+  border-top: 0.07cqw solid var(--line);
+}
+
+.sheet-row:first-child {
+  border-top: 0;
+}
+
+.sheet-row dt,
+.sheet-row dd {
+  margin: 0;
+  min-width: 0;
+}
+
+.sheet-row dt code {
+  color: var(--dark);
+  white-space: pre;
+}
+
+.sheet-row dd {
+  color: var(--muted-dark);
+}
+
+.sheet-row dd code {
+  color: var(--code-chip-ink);
+}
+
+.sheet-row.wide dt {
+  grid-column: 1 / -1;
+}
+
+.sheet-row.wide dd {
+  grid-column: 2;
+}
+
+
+
+@media screen and (max-width: 760px) {
+  .sheet {
+    aspect-ratio: auto;
+  }
+
+  .sheet-page {
+    display: block;
+    height: auto;
+    padding: 18px 16px;
+    line-height: 1.4;
+  }
+
+  .sheet-head {
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    padding-bottom: 10px;
+    border-bottom-width: 2px;
+  }
+
+  .sheet-wordmark { font-size: 24px; }
+  .sheet-title { order: 3; flex-basis: 100%; font-size: 22px; line-height: 1.1; }
+  .sheet-site { font-size: 12px; }
+
+  .sheet-columns {
+    display: block;
+    padding-top: 6px;
+    font-size: 14px;
+  }
+
+  .sheet-column,
+  .sheet-section { display: block; }
+
+  .sheet-section { margin-top: 22px; }
+
+  .sheet-section h2 {
+    padding-bottom: 4px;
+    border-bottom-width: 2px;
+    font-size: 13px;
+  }
+
+  .sheet-section dl { display: block; }
+
+  .sheet-row {
+    display: block;
+    padding: 7px 0;
+    border-top-width: 1px;
+  }
+
+  .sheet-row dt code { white-space: pre-wrap; }
+  .sheet-row dd { margin-top: 2px; padding-left: 14px; }
+
+}
+
+@media print {
+  @page {
+    size: letter portrait;
+    margin: 0.35in;
+  }
+
+  html,
+  body,
+  .cheat-page {
+    background: #fff;
+  }
+
+  .skip-link,
+  .landing-header,
+  .landing-footer,
+  .cheat-heading {
+    display: none;
+  }
+
+  .cheat-page {
+    width: 100%;
+    padding: 0;
+  }
+
+  /*
+   * The page margin replaces the sheet's padding. The sheet stops 0.1in
+   * short of the 10.3in printable height so rounding cannot push the footer
+   * onto a second page.
+   */
+  .sheet {
+    width: 100%;
+    margin: 0;
+    aspect-ratio: 7.8 / 10.2;
+    border: 0;
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .sheet-page {
+    padding: 0;
+  }
+}

@@ -1,15 +1,13 @@
 #include <assert.h>
 // Store documents once; words refer to them by ID.
-typedef struct Index { Array documents; Map words; } *Index;
+class Index { Array documents; Map words; } *;
 
-Index Index.new(void) {
-  Index index = xmalloc(sizeof(struct Index));
+void Index.init(Index index) {
   index.documents = []; index.words = {};
-  return index;
 }
 
 // Add each word once per document, regardless of case or repetition.
-void Index.add(Index index, String name, String text) {
+void Index.insert(Index index, String name, String text) {
   int id = index.documents.len();
   index.documents.push(name);
   foreach (String word in text.lower().words().iter().unique())
@@ -22,8 +20,8 @@ Array Index.find(Index index, String word)
 
 int main(void) {
   Index index = Index.new();
-  index.add("garden", "red roses red tulips");
-  index.add("kitchen", "red apples green pears");
+  index.insert("garden", "red roses red tulips");
+  index.insert("kitchen", "red apples green pears");
   assert(index.find("RED") == [0, 1]);
   assert(index.find("roses") == [0]);
   int words = index.words.len();

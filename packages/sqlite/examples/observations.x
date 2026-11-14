@@ -10,6 +10,7 @@ int main(void) {
 
   Prepared insert =
     auto db.prepare("INSERT INTO observation VALUES (?, ?, ?)");
+
   foreach(List reading, %(
     ("/guide" 200 12000)
     ("/reference" 503 40000)

@@ -2,9 +2,9 @@
 slug: imports
 section: power
 home: true
-order: 7
+order: 8
 tab: packages
-title: Bring a library into the language.
+title: Of great import.
 run: |
   ./configure --packages pcre2
   make -C packages/pcre2 builds/gallery-imports
@@ -14,6 +14,7 @@ run: |
 <!-- ignore: requires the linked package. -->
 ```x2c,ignore
 ~#include <assert.h>
+~#include "system-macros.x"
 // Import the package under a name you choose.
 import "pcre2" as rx;
 
@@ -23,13 +24,13 @@ auto rx.Regexp request = rx.Regexp.compile(
   "^(?<method>[A-Z]+) (?<path>/[^ ]+)$", 0);
 
 // Sample requests include lines the pattern will ignore.
-String text = %"\
-GET /docs
-POST /build
--- idle --
-DELETE /cache
-GET missing-slash
-";
+String text = $dedent(%"
+  GET /docs
+  POST /build
+  -- idle --
+  DELETE /cache
+  GET missing-slash
+");
 
 ~int matches = 0;
 foreach (String line in text.lines()) {

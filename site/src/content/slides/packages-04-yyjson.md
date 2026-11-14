@@ -2,7 +2,7 @@
 slug: yyjson
 section: packages
 tab: yyjson
-title: Turn JSON into a service report.
+title: Brace for the diagnosis.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/yyjson/examples/service-health.x
@@ -22,7 +22,8 @@ auto {
   foreach(Map service, services) {
     String mark = service["healthy"].truth() ? "ok" : "DOWN";
     printf("%s", %"  $(service["name"]):$(service["port"]) $mark\n");
-    if (!service["healthy"].truth()) unhealthy.push(service["name"]);
+    if (!service["healthy"].truth())
+      unhealthy.push(service["name"]);
   }
 
   Var report = unhealthy;

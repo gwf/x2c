@@ -31,7 +31,7 @@ const built = Object.values(import.meta.glob(
   "../../../builds/wasm/playground/programs.json",
   { import: "default", eager: true },
 ))[0] as string[] | undefined;
-const programs = new Set(import.meta.env.PROD ? built ?? [] : []);
+const programs = new Set(built ?? []);
 
 const sourceFor = (id: string) =>
   sources[`../../../examples/${id}.x`] as string | undefined;

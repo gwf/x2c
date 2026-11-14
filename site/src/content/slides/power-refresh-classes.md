@@ -5,40 +5,32 @@ section: power
 home: true
 order: 0
 tab: classes
-title: Your types join in.
+title: Class dismissed.
 ---
 
 ```x2c
 ~#include <assert.h>
 
-// A value class: construction, equality, hashing, and printing come free.
-class Point { int x; int y; };
-
-// A pointer class with your own init; new allocates in the current Scope.
-class Account { String owner; long cents; } *;
-
-void Account.init(Account account, String owner) {
-  account.owner = owner;
-  account.cents = 0;
-}
-
-void Account.deposit(Account account, long cents) => account.cents += cents;
-String Account.repr(Account account) =>
-  %"Account($(account.owner), $(account.cents) cents)";
+class Color { int red, green, blue; };
 
 ~int main(void) {
-  Point here = Point.new(3, 4), there = Point.new(3, 4);
-~  assert(here == there);
-  Map labels = {};
-  labels[here] = "home";
-  printf("%s is %s\n", there.repr(), labels[there]);
+  // Construction follows field order; equality compares every field.
+  Color coral = Color.new(255, 127, 80);
+  Color same = Color.new(255, 127, 80);
+  assert(coral == same);
 
-  Account ada = auto Account.new("Ada");
-  ada.deposit(1250);
-  ada.deposit(75);
-  printf("%s\n", ada.repr());
+  // Generated hashing and equality let equal colors share a Map entry.
+  Map names = {(coral): "coral"};
+  assert(names[same] == "coral");
+
+  // Colors also work as Array elements.
+  Array palette = [Color.new(255, 127, 80), Color.new(70, 130, 180)];
+  assert(palette[0] == coral);
+
+  // Printing includes the class name and each named field.
+  printf("%s: %s\n", names[same], coral.repr());
 ~  return 0;
 ~}
 ```
 
-Define the data and behavior of a Point or an Account. Constructors, methods, and generated operations let your own types participate in the same style of code as the built-ins.
+Declare three fields. Construction, fieldwise equality, hashing, and printing come free. Use a Color as a Map key: an independently constructed equal color finds the same entry. Store Color values in Arrays, too. No custom methods are needed.

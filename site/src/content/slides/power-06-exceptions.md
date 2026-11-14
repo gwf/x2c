@@ -4,7 +4,7 @@ section: power
 home: true
 order: 6
 tab: errors
-title: Cleanup and recovery belong together.
+title: Catch of the day.
 ---
 
 ```x2c

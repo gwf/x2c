@@ -4,7 +4,8 @@ import "pcre2" with Regexp, RegexpMatch;
 
 int main(void) {
   Regexp entry = auto Regexp.compile(
-    %"^(?<time>\\d\\d:\\d\\d:\\d\\d) (?<program>\\w+)\\[\\d+\\]: (?<text>.*)$$",
+    "^(?<time>\\d\\d:\\d\\d:\\d\\d) "
+    "(?<program>\\w+)\\[\\d+\\]: (?<text>.*)$",
     0
   );
   Regexp fields = auto Regexp.compile("\\s*\\|\\s*", 0);

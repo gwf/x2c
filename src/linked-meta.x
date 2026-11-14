@@ -264,6 +264,12 @@ List _derive_from_row(Type type, List value, List row) {
 
 /* --- lib/lisp-bindings.x ------------------------------------------------- */
 
+List _lisp_binding_callable(Code function) {
+  if (!(Code.type(function) ~= %((!or func inline) *))) return function;
+  List signature = Code.native_signature(function);
+  return $!Expression{ Func.new($function, %(@signature)) };
+}
+
 static List _lisp_native_declarations(void) =>
   %((preproc "extern Map lisp_native_targets(void);"));
 
@@ -2793,6 +2799,7 @@ Map linked_meta_targets(void) {
   $linked.row(rows, "_derive_columns", _derive_columns);
   $linked.row(rows, "_derive_row", _derive_row);
   $linked.row(rows, "_derive_from_row", _derive_from_row);
+  $linked.row(rows, "_lisp_binding_callable", _lisp_binding_callable);
   $linked.row(rows, "_lisp_native_declarations", _lisp_native_declarations);
   $linked.row(rows, "_selector_chain", _selector_chain);
   $linked.row(rows, "_selector_definitions", _selector_definitions);

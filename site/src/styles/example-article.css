@@ -1,0 +1,32 @@
+.example-article { --reading-width: 720px; }
+.example-article .example-prose { font-size: 16px; line-height: 1.8; }
+.example-article h2 { scroll-margin-top: calc(var(--landing-header-height, 69px) + 24px); }
+.example-article section { margin-top: 44px; scroll-margin-top: calc(var(--landing-header-height, 69px) + 24px); }
+.example-article .example-prose h2 { margin-top: 48px; }
+.example-article .example-prose pre {
+  margin: 24px 0;
+  padding: 20px;
+  overflow-x: auto;
+  background: var(--code);
+  color: #eee;
+  font: 12px/1.8 "JetBrains Mono", monospace;
+}
+.example-article pre code { font: inherit; background: none; padding: 0; }
+.example-article .article-table { overflow-x: auto; margin: 28px 0; }
+.example-article table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.example-article caption { text-align: left; font-weight: 500; color: var(--dark); margin-bottom: 12px; }
+.example-article th, .example-article td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; }
+.example-article th:first-child { text-align: left; padding-left: 0; }
+.example-article thead th { font-weight: 500; color: var(--dark); }
+.example-article tbody th { font-weight: 400; }
+.example-article .article-resources { border-top: 1px solid var(--line); padding-top: 10px; }
+@media (max-width: 600px) {
+  .example-article .example-prose { font-size: 15px; }
+  .example-article .example-prose pre { padding: 16px; }
+}
+.examples-reading .example-article .example-prose h2 {
+  margin: 48px 0 18px;
+  color: var(--dark);
+  font: 400 clamp(29px, 3.5vw, 38px)/1.12 "Instrument Serif", Georgia, serif;
+  letter-spacing: -0.015em;
+}

@@ -97,10 +97,6 @@
     "example": "power/exceptions"
   },
   {
-    "slide": "power-09a-generics.md",
-    "example": "power/generics"
-  },
-  {
     "slide": "power-10-imports.md",
     "source": "examples/power/imports.x",
     "optional": true
@@ -172,8 +168,8 @@
     "optional": false
   },
   {
-    "slide": "power-refresh-derive.md",
-    "example": "power/derive",
+    "slide": "magic-refresh-derive.md",
+    "example": "magic/derive",
     "optional": false
   },
   {
@@ -185,5 +181,17 @@
     "slide": "magic-refresh-fields.md",
     "example": "magic/fields",
     "optional": false
+  },
+  {
+    "slide": "power-refresh-destructuring.md",
+    "example": "power/destructuring"
+  },
+  {
+    "slide": "magic-refresh-extensions.md",
+    "source": "packages/x2cui/examples/counter.x"
+  },
+  {
+    "slide": "packages-08-x2cui.md",
+    "source": "packages/x2cui/examples/orders.x"
   }
 ]

@@ -2,7 +2,7 @@
 slug: sqlite
 section: packages
 tab: SQLite
-title: Find the requests that need attention.
+title: A SELECT few.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/sqlite/examples/observations.x
@@ -19,6 +19,7 @@ import "sqlite" with Database, Prepared;
 // The database and table are already open.
 Prepared insert =
   auto db.prepare("INSERT INTO observation VALUES (?, ?, ?)");
+
 foreach(List reading, %(
   ("/guide" 200 12000)
   ("/reference" 503 40000)

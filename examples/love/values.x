@@ -1,23 +1,20 @@
 #include <assert.h>
-#include <math.h>
+
+// One parameter and result type; behavior follows the contained value.
+Var twice(Var value) => value + value;
 
 int main(void) {
-  // Var holds different kinds of values.
-  Var count = 42, ratio = 2.5, name = "Ada";
+  // The same function adds numbers and joins text.
+  Var number = twice(21), text = twice("ha");
+  printf("%s %s\n", number, text);
 
-  // Ordinary operators work on Vars.
-  Var next = count + 1, full = name + " Lovelace";
+  // Test a contained type, or inspect its broader kind.
+  assert(number is int && text is String);
+  printf("%s %s\n", number.kind().str(), text.kind().str());
 
-  // Vars format themselves with %s.
-  printf("%s %s %s\n", next, ratio, full);
-
-  // Test Var properties at runtime.
-  assert(count is int && ratio is double && name is String);
-
-  // Types are checked statically and dynamically as needed.
-  int whole = count; double part = ratio;
-
-  // %d and %f also convert Vars.
-  printf("%d %f %f\n", count, ratio, sin(ratio));
+  // A Var can hold another kind of value later.
+  number = "sold out";
+  if (number is String)
+    printf("%s\n", number);
   return 0;
 }

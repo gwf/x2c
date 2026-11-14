@@ -2,9 +2,9 @@
 slug: match
 section: power
 home: true
-order: 3
+order: 4
 tab: matching
-title: Recognize a shape. Rebuild it.
+title: Match ado about nothing.
 ---
 
 ```x2c

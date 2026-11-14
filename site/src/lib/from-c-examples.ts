@@ -1,0 +1,15 @@
+export const fromCNavigation = [
+  { label: "The destination", anchor: "overview" },
+  { label: "V0: The C baseline", anchor: "baseline" },
+  { label: "V1: Automatic cleanup", anchor: "v1" },
+  { label: "V2: Borrowed words", anchor: "v2" },
+  { label: "V3: Top ten", anchor: "v3" },
+  { label: "V4: A count map", anchor: "v4" },
+  { label: "V5: One operation", anchor: "v5" },
+  { label: "V6: Directories", anchor: "v6" },
+  { label: "V7: Parallel work", anchor: "v7" },
+  { label: "V8: A reusable API", anchor: "v8" },
+  { label: "Measured performance", anchor: "performance" },
+  { label: "Run it locally", anchor: "run" },
+  { label: "Complete source", anchor: "compare" },
+];

@@ -2,7 +2,7 @@
 slug: libuv
 section: packages
 tab: libuv
-title: Put two processes to work.
+title: Spawn to be wild.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/libuv/examples/process-report.x
@@ -19,6 +19,7 @@ UvLoop loop = auto UvLoop.new();
 
 UvProcess normalized =
   auto loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
+
 normalized.write($dedent(%"
   alpha
   beta
@@ -30,7 +31,8 @@ UvProcess counted = auto loop.spawn(%("/usr/bin/wc" "-l"));
 loop.run(UV_RUN_DEFAULT);
 
 printf("normalized:\n");
-foreach(String line, normalized.stdout().lines()) printf("  %s\n", line);
+foreach(String line, normalized.stdout().lines())
+  printf("  %s\n", line);
 
 printf("line count: %s", counted.stdout());
 ```

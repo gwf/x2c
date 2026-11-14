@@ -2,9 +2,9 @@
 slug: literals
 section: love
 home: true
-order: 3
+order: 4
 tab: literals
-title: Data you can read.
+title: Literally speaking.
 ---
 
 ```x2c

@@ -2,7 +2,7 @@
 slug: pcre2
 section: packages
 tab: PCRE2
-title: Make sense of a log file.
+title: Log and behold.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/pcre2/examples/parse-log.x
@@ -15,7 +15,8 @@ links:
 import "pcre2" with Regexp, RegexpMatch;
 
 Regexp entry = auto Regexp.compile(
-  %"^(?<time>\\d\\d:\\d\\d:\\d\\d) (?<program>\\w+)\\[\\d+\\]: (?<text>.*)$$",
+  "^(?<time>\\d\\d:\\d\\d:\\d\\d) "
+  "(?<program>\\w+)\\[\\d+\\]: (?<text>.*)$",
   0
 );
 Regexp fields = auto Regexp.compile("\\s*\\|\\s*", 0);

@@ -28,11 +28,10 @@ x2c run -q examples/foreach.x
 
 ## Love: values, data, and methods
 
-- [Values](love/values.x): dynamic values, operators, type inspection, and
-  C calls.
-- [Strings](love/strings.x): transform, slice, parse, interpolate, and
-  iterate text.
-- [Symbols](love/symbols.x): a named state and an ordered vocabulary.
+- [Values](love/values.x): runtime-generic functions and contained-type inspection.
+- [Symbols](love/symbols.x): named values without declarations or C identifier conflicts.
+- [Strings](love/strings.x): content equality, immutable transformations,
+  slicing, and interpolation.
 - [Lists](love/lists.x): shared tails, transformations, and nested
   templates.
 - [Arrays](love/arrays.x): update scores, copy and rank them, then fold a
@@ -40,22 +39,25 @@ x2c run -q examples/foreach.x
 - [Maps](love/maps.x): stock quantities, missing keys, and stored zero
   values.
 - [Literals](love/literals.x): describe a workshop with nested collections.
+- [Loops](love/loops.x): walk collections, text lines and words, and file lines.
 - [Files](love/files.x): read a whole file, then stream and total its rows.
 - [Methods](love/methods.x): define, allocate, and move a Point.
 
+- [Memory](power/scopes.x): manage individual values, allocation regions,
+  and retained allocation destinations with `auto`.
+
 ## Power: put the pieces together
 
+- [Classes](power/classes.x): define a Color and use generated equality,
+  printing, Map keys, and Arrays of values.
 - [Counting](power/counting.x): count words and rank them by frequency.
 - [Indexing](power/indexing.x): build and query an index of document words.
-- [Scopes](power/scopes.x): reclaim each file's working storage and each
-  day's file list; verify cleanup on normal exit, return, and exception.
-  Set `X2C_SCOPE_ACCOUNTING=1` to also check the allocation counts.
+- [Destructuring](power/destructuring.x): name tuple fields and select orders with a pattern condition.
 - [Match](power/match.x): simplify nested code using patterns and templates.
 - [Threads](power/threads.x): square two copied batches and combine their
   sums.
 - [Exceptions](power/exceptions.x): close a file before handling a failed
   read.
-- [Generics](power/generics.x): count response codes with typed collections.
 - [Imports](power/imports.x): use PCRE2 to extract named request fields.
   This example needs the PCRE2 package; its header gives the commands.
 
@@ -69,18 +71,23 @@ x2c run -q examples/power/counting.x -- examples/data/docs-words.txt
 
 ## Magic: extend and evaluate the language
 
-- [Operators](magic/operators.x): define set union and intersection with a
-  Map.
-- [Macros](magic/macros.x): swap integers or strings with one typed macro.
+- [Runtime Lisp](magic/runtime.x): share x2c values and native functions
+  with editable Lisp policies.
+- [Shipped macros](magic/derive.x): derive nested record conversions,
+  equality, and printing.
+- [Templates](magic/macros.x): generate JSON writer and reader functions.
 - [Decorators](magic/decorators.x): trace a function's entry and exit.
 - [Keywords](magic/keywords.x): release a mutex when an exception leaves a
   block.
-- [Compile-time tables](magic/compile-time.x): generate two arrays from one
-  table.
-- [Runtime Lisp](magic/runtime.x): evaluate two policies using a native
-  binding.
-- [Agreement](magic/ways-to-agree.x): build the same List four different
-  ways.
+- [Extensions](../packages/x2cui/examples/counter.x): import UI notation from
+  x2cui, an optional source-only package.
+- [Meta](magic/fields.x): inspect fields and generate statements at compile time.
+- [Compile-time code](magic/compile-time.x): build array setup code
+  incrementally from one table.
+- [Autodiff](../packages/autodiff/examples/energy-gradient.x): generate
+  derivative code from a function.
+- [Operators](magic/operators.x): define set union and intersection with a Map.
+- [Agreement](magic/ways-to-agree.x): build the same List four different ways.
 - [Self-hosting](magic/selfhost.md): rebuild the compiler and inspect its
   syntax. These commands need a checkout.
 
@@ -93,7 +100,7 @@ x2c run -q examples/power/counting.x -- examples/data/docs-words.txt
   [List methods](love/list-methods.x).
 - Names and arguments: [bindings](power/bindings.x) names a value five ways;
   [List rest](power/list-rest.x) and [Map rest](power/map-rest.x) pass
-  variable and keyword arguments; [derive](power/derive.x) generates record
+  variable and keyword arguments; [derive](magic/derive.x) generates record
   mappings, equality, and representation.
 - Collections and execution:
   [collection indexing](power/collection-indexing.x),

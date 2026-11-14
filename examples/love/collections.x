@@ -1,24 +1,22 @@
 #include <assert.h>
 
 int main(void) {
-  // Lists are immutable and share structure; cons is constant time.
-  List prices = %(3 5 8), extended = cons(2, prices);
-  List doubled = extended.map(%!(price) => price * 2);
-  assert(extended.cdr() == prices && doubled == %(4 6 10 16));
+  // Immutable Lists share tails and mix value kinds.
+  List order = %("tea" 3 2.5), labeled = cons(<order>, order);
+  assert(labeled.cdr() == order);
 
-  // Arrays grow and mutate in place; copy first to keep the original.
-  Array scores = [7, 3, 9];
-  scores.push(5);
-  Array ranked = scores.copy().sort().reverse();
-  assert(scores == [7, 3, 9, 5] && ranked[:2] == [9, 7]);
+  // Arrays grow and change in place.
+  Array basket = ["tea", 3, 2.5];
+  basket[1] += 1;
+  basket.push(<packed>);
+  assert(basket == ["tea", 4, 2.5, <packed>]);
 
-  // Maps grow on write and tell absence from a stored zero.
-  Map stock = {tea: 12, sugar: 0};
-  stock[<tea>] -= 2;
-  stock[<cocoa>] = 4;
-  Var sugar;
-  assert(stock.try_get(<sugar>, sugar) && sugar == 0);
-  assert(stock.getdefault(<milk>, -1) == -1 && !stock.contains(<milk>));
-  printf("%s %s %s\n", doubled.repr(), ranked.repr(), stock[<tea>]);
+  // Maps find values by key.
+  Map details = {name: "tea", quantity: 3, price: 2.5};
+  details[<quantity>] += 1;
+  assert(basket[1] == details[<quantity>]);
+  printf("%s\n%s\n%s: %s\n",
+         labeled.repr(), basket.repr(),
+         details[<name>], details[<quantity>]);
   return 0;
 }

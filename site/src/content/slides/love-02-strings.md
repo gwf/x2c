@@ -2,41 +2,36 @@
 slug: strings
 section: love
 home: true
-order: 4
+order: 2
 tab: text
-title: Text is something you work with.
+title: Character development.
 ---
 
 ```x2c
 ~#include <assert.h>
+~#include <string.h>
 
 ~int main(void) {
-  String line = "  GET /docs/guide/values.html  ";
+  // Compare text with ==, whether literal or built at runtime.
+  String padded = "  hello  ", prefix = "hel";
+  String word = padded.strip(), same = prefix + "lo";
+  if (word == "hello" && word == same)
+    puts("same text");
 
-  // Slice, strip, split, and case-fold; the original is untouched.
-  String request = line.strip();
-  (String method, String path) = request.split(" ");
-~  assert(line.len() == 31 && method == "GET");
+  // Transformations produce new values; the original stays untouched.
+  String loud = word.upper();
+  String first = word[:1];
+~  assert(padded == "  hello  " && word == "hello" && loud == "HELLO");
 
-  // Interpolate values and expressions in place.
-  String title = path.split("/").last().str().replace(".html", "");
-  puts(%"$method $title ($(path.len()) bytes)");
+  // Interpolate text and expressions directly.
+  puts(%"$first: $loud ($(word.len()) bytes)");
 
-  // A switch on a String selects its case by content.
-  switch (method.lower()) {
-    case "get":  puts("read it");  break;
-    case "post": puts("write it"); break;
-    default:     puts("refuse it");
-  }
-
-  // Join and repeat build text; equality is one pointer compare.
-  String rule = "-".repeat(3) + " " + ", ".join(%("a" "b" "c"));
-~  assert(rule == "--- a, b, c");
-  puts(rule);
+  // Read-only C functions accept nonempty Strings directly.
+  printf("C sees %zu bytes\n", strlen(word));
 ~  return 0;
 ~}
 ```
 
-Split an HTTP request, select a path component, and format the result. Stripping, splitting, interpolation, and joining turn text processing into ordinary expressions.
+Strings compare by contents with `==`, so literals and independently constructed values agree without `strcmp`. Strip whitespace, change case, and take slices without changing the original. Interpolation puts values and expressions directly into the result.
 
-Strings are immutable values, so transformations produce a result without changing the original.
+Strings interoperate with C functions that read their bytes. Empty Strings are `NULL`, so respect the C function's null-pointer contract. Strings are immutable; never pass one as a writable destination.

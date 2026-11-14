@@ -2,9 +2,9 @@
 slug: iterators
 section: power
 home: true
-order: 4
+order: 5
 tab: iterators
-title: Connect operations without collecting every step.
+title: Lazy does it.
 ---
 
 ```x2c

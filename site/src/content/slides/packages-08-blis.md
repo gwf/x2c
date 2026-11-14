@@ -2,7 +2,7 @@
 slug: blis
 section: packages
 tab: BLIS
-title: Rank pages with a little linear algebra.
+title: Rank you very much.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/blis/examples/page-rank.x

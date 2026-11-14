@@ -31,7 +31,6 @@
     The implementation follows x2c Lisp, including its rules for capture                   ####          ######
     and errors; those rules sometimes differ from Scheme or Common Lisp.
 */
-
 #include <unistd.h>                                                              // C and POSIX headers work in x2c.
 
 /* Values, names, and memory -------------------------------------------------------------------------------------------
@@ -47,7 +46,8 @@
    remain available when its body is evaluated later.
 
    A Lisp macro is a closure that receives argument forms before evaluation.
-   The macro field tells the evaluator to use this calling rule. */
+   The macro field tells the evaluator to use this calling rule.
+*/
 typedef struct Fn {
   List params;                                                                   // Immutable parameter List.
   Var body;                                                                      // Var holds values of different types.
@@ -61,7 +61,8 @@ typedef struct LispEnv {                                                        
 } LispEnv;
 
 /* Globals persist across evaluations. The native registry maps names to host
-   functions. Special forms are recognized by their function values. */
+   functions. Special forms are recognized by their function values.
+*/
 typedef struct Interp {                                                          // Maps store Var keys and values.
   Map globals;                                                                   // Names -> global values.
   Map natives;                                                                   // Binding Strings -> native Funcs.
@@ -69,8 +70,8 @@ typedef struct Interp {                                                         
   Map specials;                                                                  // Callable Funcs -> special names.
 } Interp;
 
-/* $fail adds the operation name to an error. Its caller supplies the cause
-   and any additional key/value details. */
+/* $fail adds the operation; callers supply the cause and key/value details.
+*/
 macro Stmt $fail(Expr $cause, Expr $op, Expr @fields) {                          // Expr captures unevaluated syntax.
   raise %($cause (operation $($op)) @fields);                                    // Insert one form; splice @fields.
 }
@@ -96,7 +97,8 @@ typedef struct Reader {
 } Reader;
 
 /* Function conversion infers fixed signatures. A rest function receives all
-   arguments in one List; $rest supplies that signature at compile time. */
+   arguments in one List; $rest supplies that signature at compile time.
+*/
 macro Expression $rest(Expr $fn) =>                                              // Expand to a Func constructor call.
   Func.new_rest($fn, %((func (("List"))) "Var"));                                // Native signature as a List literal.
 
@@ -116,7 +118,6 @@ macro Expression $rest(Expr $fn) =>                                             
    to the global environment.                                                                     v
                                                                                         map / foldl / let / ...
 */
-
 static List _stdlib = %(                                                         // Initialize the static List once.
   (def nil ())                                                                   // Empty List is literal data here.
   (def true 'true)                                                               // Quote keeps true as a Symbol value.
@@ -223,14 +224,14 @@ static List _stdlib = %(                                                        
   (def len length)                                                               // Name binding preserves identity.
   (def reduce foldl)                                                             // Higher-order function as a value.
   (def lower string-downcase)                                                    // Alias reuses the native function.
-  (def List_sort sort)                                                          // Alias the standard sort operation.
+  (def List_sort sort)                                                           // Alias the standard sort operation.
 
-  (defun fib (value)                                                            // Recursive numeric example.
+  (defun fib (value)                                                             // Recursive numeric example.
     (if (or (= value 0) (= value 1))
         value
         (+ (fib (- value 2)) (fib (- value 1)))))
 
-  (defun subst (replacement target tree)                                        // Replace matching atoms recursively.
+  (defun subst (replacement target tree)                                         // Replace matching atoms recursively.
     (if (atom? tree)
         (if (equal? tree target) replacement tree)
         (cons (subst replacement target (car tree))
@@ -256,21 +257,19 @@ typedef struct Repl {
   int failed, incomplete, interactive, done;                                     // C integer flags coordinate the REPL.
 } Repl;
 
-
-
-/* Each special form gets its own function value before the library loads.
-   Saving that value under another name keeps the same behavior, even if
-   the original name is rebound. Maps connect names, functions, and forms. */
+/* Each special form has a callable before library loading. Aliases retain
+   behavior when names are rebound. Maps link names, functions, and forms.
+*/
 static Interp _interpreter(void) {
   Interp self = { {}, {}, {}, {} };                                              // Four independently allocated Maps.
   _install_natives(self);                                                        // Borrow the interpreter record.
-  foreach (Symbol name in %(quote quasiquote cond def lambda macro eval            // Typed iteration over literal data.
+  foreach (Symbol name in %(quote quasiquote cond def lambda macro eval          // Typed iteration over literal data.
                        apply bind import)) {                                     // Iterate literal Symbol values.
     Func fn = Func.new(_reserved, %((func ((void))) "Var"));                     // Give each special form its own Func.
     self.reserved[name] = fn;                                                    // Func implicitly boxes as Var.
     self.specials[fn] = name;                                                    // A callable can be a Map key.
   }
-  foreach (List form in _stdlib) self.eval(NULL, form);                            // Typed iteration; receiver call.
+  foreach (List form in _stdlib) self.eval(NULL, form);                          // Typed iteration; receiver call.
   return self;
 }
 
@@ -316,7 +315,7 @@ static void _install_natives(Interp &self) {
     (write-file      "lisp_write_file"       $(Func.var(_write_file)))
     (sort            "List_sort"             $(Func.var(List.sort)))
   );
-  foreach (List row in natives) {                                                  // Typed List traversal.
+  foreach (List row in natives) {                                                // Typed List traversal.
     (Var name, String symbol, Func fn) = row;                                    // Convert each positional binding.
     self.natives[symbol] = fn;                                                   // Func boxes as a Map value.
     if (!name.is_nil()) self.globals[name] = fn;                                 // Receiver-style Var predicate.
@@ -334,19 +333,12 @@ static Var _cdr(Var v) {                                                        
 }
 
 static Var _atom(Var v)      => _bool(v is not <list> || v.is_nil());            // Runtime tag plus receiver predicate.
-
 static Var _pair(Var v)      => _bool(v is <list> && !v.is_nil());               // C logic over Var predicates.
-
 static Var _list(Var v)      => _bool(v is <list>);                              // Constant-time Var tag inspection.
-
 static Var _number(Var v)    => _bool(_is_number(v));                            // Expression-bodied function.
-
 static Var _string(Var v)    => _bool(v is <string>);                            // Dynamic type test in an expression.
-
 static Var _symbol(Var v)    => _bool(v.kind() == <symbol>);                     // Runtime kind as a Symbol.
-
 static Var _procedure(Var v) => _bool(v is <func> || v is <lambda>);             // Two callable tags.
-
 static Var _eq(Var a, Var b) => _bool(a == b);                                   // Var equality follows value types.
 
 static Var _plus(List values) {
@@ -359,39 +351,34 @@ static Var _add(Var a, Var b) =>                                                
   a is <string> || b is <string> ? %"$a$b".var() : a.binary(<+>, b);             // Numbers use Var arithmetic.
 
 static Var _minus(List xs)  => _arithmetic(xs, <->, 0);                          // 0 promotes to Var.
-
 static Var _divide(List xs) => _arithmetic(xs, </>, 1);                          // 1 promotes to Var.
 
 /* + and * fold from 0 and 1. - and / require arguments; unary calls compute
-   0-x or 1/x. Integer / truncates. Longer calls fold left: (- 10 3 2) is 5. */
+   0-x or 1/x. Integer / truncates. Longer calls fold left: (- 10 3 2) is 5.
+*/
 static Var _arithmetic(List values, Symbol op, Var identity) {
   if (!values) $fail(<bad-arity>, op.str(), <expected>, 1, <actual>, 0);         // Macro constructs runtime errors.
   Var result = values.car();                                                     // List head is already a Var.
   if (!values.cdr()) return identity.binary(op, result);                         // Var arithmetic selected by Symbol.
-  foreach (Var value in values.cdr()) result = result.binary(op, value);           // Iterate a List suffix.
+  foreach (Var value in values.cdr()) result = result.binary(op, value);         // Iterate a List suffix.
   return result;
 }
 
 static Var _times(List xs)  => xs.foldl(1, %!(a, b) => a.binary(<*>, b));        // %! constructs a callable.
-
 static Var _eq_chain(List xs) => _chain(xs, "=",  0, 1);                         // Expression body returns directly.
-
 static Var _lt_chain(List xs) => _chain(xs, "<", -1, 1);                         // C literal promotes to String.
-
 static Var _le_chain(List xs) => _chain(xs, "<=", 1, 0);                         // Typed List in; dynamic Var out.
-
 static Var _gt_chain(List xs) => _chain(xs, ">",  1, 1);                         // Call the shared comparison helper.
-
 static Var _ge_chain(List xs) => _chain(xs, ">=", -1, 0);                        // One helper defines all comparisons.
 
-/* Comparisons test neighboring pairs: (< 1 2 3) means 1 < 2 and 2 < 3.
-   The first false comparison ends the test. Later values are not compared,
-   so a wrong type in those values cannot raise a comparison error. */
+/* Compare neighbors: (< 1 2 3) means 1 < 2 and 2 < 3. Stop at the first
+   false result; later values are not compared and cannot raise type errors.
+*/
 static Var _chain(List values, String op, int want, int expect) {
   int n = values.len();                                                          // List length walks the cons cells.
   if (n < 2) $fail(<bad-arity>, op, <expected>, 2, <actual>, n);                 // Values box into the error record.
   Var left = values.car();                                                       // Receiver access yields a Var.
-  foreach (Var right in values.cdr()) {                                            // Typed iteration over a suffix.
+  foreach (Var right in values.cdr()) {                                          // Typed iteration over a suffix.
     int order = _compare(left, right).integer();                                 // Chain a call and Var conversion.
     if (expect ? order != want : order == want) return _bool(0);                 // C ternary selects comparison logic.
     left = right;
@@ -408,15 +395,12 @@ static Var _compare(Var a, Var b) {
 
 static int _is_number(Var v) => v.is_integer() || v.is_floating();               // Accept integers and floating point.
 
-/* These return Var because the native signature appears in Lisp errors. */
+/* These return Var because the native signature appears in Lisp errors.
+*/
 static Var _str(Var v)                        => v.str();                        // String result boxes as Var.
-
 static Var _repr(Var v)                       => v.repr();                       // Readable formatting via receiver.
-
 static Var _string_append(String a, String b) => a + b;                          // String +; result boxes as Var.
-
 static Var _string_downcase(String s)         => s.lower();                      // Receiver call; result boxes as Var.
-
 static Var _substring(String s, int a, int b) => s.getslice(a, b, 1);            // String slice; result boxes as Var.
 
 static Var _match_replace(List input, Var pat, Var template) {
@@ -435,11 +419,10 @@ static Var _write_file(String path, String text) {
 }
 
 static Var _bool(int x)      => x ? <true>.var() : %().var();                    // => returns true or () as a Var.
-
 static Var _reserved(void) => Var.null();                                        // Expression body; void Var value.
 
 static int _repl(Interp &self) {
-  Buffer source = auto Buffer.new();                                            // Release Buffer on block exit.
+  Buffer source = auto Buffer.new();                                             // Release Buffer on block exit.
   Repl repl = { .source = source, .interactive = isatty(Stdin.fileno()) };       // Named fields; POSIX terminal check.
   defer repl.storage.destroy();                                                  // Destroy remaining tokens on exit.
   int failed = 0;                                                                // Written by catch, so kept apart.
@@ -472,7 +455,8 @@ static int _repl(Interp &self) {
 
    A Lisp macro receives argument forms before evaluation. Its body returns
    a replacement form, which eval evaluates in the caller's environment.
-   Thus a macro can choose which arguments run, and in what order. */
+   Thus a macro can choose which arguments run, and in what order.
+*/
 static Var Interp.eval(Interp &self, LispEnv *env, Var form) {
   if (form is void) $fail(<void-op>, "eval");                                    // Expand to code that raises an error.
   if (form.is_atom()) return self.lookup(env, form);                             // Dot syntax passes the receiver.
@@ -492,9 +476,9 @@ static Var Interp.eval(Interp &self, LispEnv *env, Var form) {
   return self.apply(fn, values);                                                 // Call with evaluated arguments.
 }
 
-/* Arguments are evaluated left to right into a List of values.
-   If evaluation defines globals, reads files, or raises an error, a later
-   failure leaves earlier effects intact. */
+/* Evaluate arguments left to right into a List. A later failure preserves
+   earlier effects, including global definitions and file reads.
+*/
 static List Interp.eval_args(Interp &self, LispEnv *env, List forms) {
   Array values = auto [];                                                        // Array literal; cleanup on exit.
   foreach (Var form in forms) {                                                  // Typed List iteration.
@@ -520,7 +504,8 @@ static List Interp.eval_args(Interp &self, LispEnv *env, List forms) {
                                                                                            v               v
    def always writes a global binding. eval first obtains a form, then                    body           next
    evaluates it globally. apply obtains a callable and argument values in a
-   List, then invokes it without evaluating those values again. */
+   List, then invokes it without evaluating those values again.
+*/
 static Var Interp.special(Interp &self, LispEnv *env, Symbol op, List args) {
   match (%($op @args)) {                                                         // $ inserts a value; @ splices a List.
     case %(quote ?form): return form;                                            // Pattern binds one value.
@@ -532,7 +517,7 @@ static Var Interp.special(Interp &self, LispEnv *env, Symbol op, List args) {
     case %(macro ?(List params) ?body):                                          // Check List type while binding.
       return self.closure(env, params, body, 1);                                 // Same receiver syntax for macros.
     case %(cond *clauses) if (clauses): {                                        // * binds the remaining elements.
-      foreach (Var clause in clauses) {                                            // Iterate without an index.
+      foreach (Var clause in clauses) {                                          // Iterate without an index.
         match (clause) {                                                         // Nested structural match.
           case %(?test ?body):                                                   // Require exactly two elements.
             if (!self.eval(env, test).is_nil()) return self.eval(env, body);     // Chain calls on returned values.
@@ -592,9 +577,9 @@ static Var Interp.apply(Interp &self, Var fn, List values) {
   return _native_call(fn, values);                                               // Implicit Var -> Func conversion.
 }
 
-/* Bind parameters to argument values; (first . rest) collects the remainder.
-   Lookup searches parameters, captures, globals, then reserved names.
-   The caller's local bindings are outside this chain. */
+/* Bind arguments; (first . rest) collects the rest. Lookup checks parameters,
+   captures, globals, then reserved names, never the caller's locals.
+*/
 static Var Interp.invoke(Interp &self, Fn closure, List values) {
   Map bindings = auto {};                                                        // Map literal; cleanup on exit.
   for (List params = closure.params; params; params = params.cdr()) {            // Walk parameters to the empty List.
@@ -630,7 +615,8 @@ static Var Interp.invoke(Interp &self, Fn closure, List values) {
 
    Nested quasiquote increments depth; nested unquote decrements it.
    Unquote evaluates only at depth zero; otherwise it stays in the returned
-   form. */
+   form.
+*/
 static Var Interp.quasiquote(Interp &self, LispEnv *env, Var form, int depth) {
   if (form is not <list> || form.is_nil()) return form;                          // Runtime tag inspection.
   List expr = form;                                                              // Implicit Var -> List conversion.
@@ -653,13 +639,13 @@ static Var Interp.quasiquote(Interp &self, LispEnv *env, Var form, int depth) {
 static List Interp.quoted_elements(
   Interp &self, LispEnv *env, List items, int depth) {
   Array values = auto [];                                                        // Collect values in a temporary Array.
-  foreach (Var item in items) {                                                    // Recurse only into nested forms.
+  foreach (Var item in items) {                                                  // Recurse only into nested forms.
     match (item) {
       case %(unquote-splicing ?argument) if (!depth): {
         Var value = self.eval(env, argument);                                    // Evaluate each splice once, in order.
         if (value is not <list>)
           $fail(<bad-types>, "quasiquote-splice", <actual>, value.kind());
-        foreach (Var part in value.list()) values.push(part);                      // Splice the contributed elements.
+        foreach (Var part in value.list()) values.push(part);                    // Splice the contributed elements.
       }
       default: values.push(self.quasiquote(env, item, depth));                   // An ordinary element adds one value.
     }
@@ -706,7 +692,6 @@ static Var _import_file(Interp &self, String path) {
    The values they refer to keep their ordinary ownership; immutable                             v
    Strings and Lists live in canonical pools.                                                 reserved
 */
-
 static Var Interp.lookup(Interp &self, LispEnv *env, Var name) {
   Var local;
   if (_local_value(env, name, local)) return local;                              // Use the nearest local binding.
@@ -719,14 +704,15 @@ static Var Interp.closure(
   Interp &self, LispEnv *env, List params, Var body, int macro) {
   Map captures = {};                                                             // Each closure owns a capture Map.
   self.capture(env, body, params, 0, captures);                                  // Capture before the call returns.
-  Fn closure = xmalloc(sizeof(struct Fn));                                  // Allocate in the current Scope.
+  Fn closure = xmalloc(sizeof(struct Fn));                                       // Allocate in the current Scope.
   *closure = (struct Fn) { params, body, captures, macro };                      // C dereference and compound literal.
   return Var.new(<lambda>, closure);                                             // Tag an already allocated pointer.
 }
 
 /* Capture local values that the body may read. Negative depth scans even
    data in calls whose behavior is unknown; positive depth tracks quasiquote.
-   Globals are looked up later. Borrowed objects must outlive the closure. */
+   Globals are looked up later. Borrowed objects must outlive the closure.
+*/
 static void Interp.capture(
   Interp &self, LispEnv *env, Var form, List bound, int depth, Map captures) {   // Borrow self; point to a local frame.
   if (form.is_atom()) {                                                          // Atoms include Symbols or long names.
@@ -740,7 +726,8 @@ static void Interp.capture(
   List items = form;                                                             // Implicit Var -> List conversion.
   Var head = items.car();                                                        // The head may be an expression.
   if (depth < 0) {                                                               // The call may treat data as code.
-    foreach (Var part in items) self.capture(env, part, bound, depth, captures);   // Typed iteration; recursive call.
+    foreach (Var part in items)                                                  // Typed iteration; recursive call.
+      self.capture(env, part, bound, depth, captures);
     return;
   }
   if (depth > 0) {                                                               // Skip names inside template data.
@@ -750,7 +737,8 @@ static void Interp.capture(
     if (head == <unquote> || head == Atom.intern("unquote-splicing")) {          // Intern the long splice name.
       inner--; parts = items.cdr();                                              // Unquote removes one nesting level.
     }
-    foreach (Var part in parts) self.capture(env, part, bound, inner, captures);   // Pass each child its nesting depth.
+    foreach (Var part in parts)                                                  // Pass each child its nesting depth.
+      self.capture(env, part, bound, inner, captures);
     return;
   }
   self.capture(env, head, bound, 0, captures);                                   // The call head may read a local.
@@ -767,8 +755,9 @@ static void Interp.capture(
   if (special == <lambda> || special == <macro>) {                               // lambda and macro introduce names.
     List rest = items.cdr();                                                     // Share the parameter and body tail.
     if (rest && rest.car() is <list>)                                            // C truth test, then List tag test.
-      foreach (Var name in rest.car().list()) bound = cons(name, bound);           // Add nested parameters to bound.
-    foreach (Var part in rest.cdr()) self.capture(env, part, bound, 0, captures);  // Parameters hide outer bindings.
+      foreach (Var name in rest.car().list()) bound = cons(name, bound);         // Add nested parameters to bound.
+    foreach (Var part in rest.cdr())                                             // Parameters hide outer bindings.
+      self.capture(env, part, bound, 0, captures);
     return;
   }
   int inner = special == <quasiquote> ? 1 :                                      // Start quasiquote at depth one.
@@ -776,7 +765,8 @@ static void Interp.capture(
   foreach (Var part in items.cdr()) self.capture(env, part, bound, inner, captures);
 }
 
-/* A local lookup shared by evaluation and capture. */
+/* A local lookup shared by evaluation and capture.
+*/
 static int _local_value(LispEnv *env, Var name, Var &value) {                    // Return the Var through a reference.
   for (; env; env = env.parent)                                                  // Walk borrowed frames by dot access.
     if (env.bindings.try_get(name, value)) return 1;                             // Success separates nil from absence.
@@ -796,7 +786,6 @@ static int _local_value(LispEnv *env, Var name, Var &value) {                   
    These details let callers inspect an error as data. The command-line                           v
    handler prints the same List for a person to read.                                        bound fields
 */
-
 static List _list_argument(Var value, String op) {
   if (value is not <list>)                                                       // Runtime type inspection.
     $fail(<bad-types>, op, <actual>, value.kind(), <want>, "List");              // op boxes as Var in the error List.
@@ -846,17 +835,17 @@ static Var _bad_form(Symbol name, List args) {
                                                                                                   v
                                                                                               C function
 */
-
 static Var _native_call(Func native, List values) {
-  FuncArg *args = xmalloc(values.len() * sizeof(FuncArg));                  // Allocate one FuncArg per value.
-  defer xfree(args);                                                        // Cleanup on every block exit.
+  FuncArg *args = xmalloc(values.len() * sizeof(FuncArg));                       // Allocate one FuncArg per value.
+  defer xfree(args);                                                             // Cleanup on every block exit.
   int count = 0;
-  foreach (Var value in values) args[count++] = FuncArg.value(value);              // Pack values into a native C array.
+  foreach (Var value in values) args[count++] = FuncArg.value(value);            // Pack values into a native C array.
   return native.apply(count, args);                                              // Checked native call through Func.
 }
 
 /* Read one form; void means none is ready, and done distinguishes EOF.
-   Batch storage owns tokens; the surrounding session owns parsed forms. */
+   Batch storage owns tokens; the surrounding session owns parsed forms.
+*/
 static Var Repl.read_unit(Repl &self) {
   if (!self.reader.tokens && !self.read_line()) return void;                     // Receiver-style function call.
   try {                                                                          // Structured exception boundary.
@@ -879,11 +868,11 @@ static Var Repl.read_unit(Repl &self) {
   return self.finish_batch();                                                    // Receiver call returns a void Var.
 }
 
-/* Tokens belong to one source batch. Parsed values outlive token storage:
-   a definition can save a body for a later call. */
+/* Batch tokens expire; saved bodies survive for later calls.
+*/
 static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   Reader reader = { .source = source, .base = base };                            // Named struct initializers.
-  auto (storage) {                                                             // Redirect Scope; restore on exit.
+  auto (storage) {                                                               // Redirect Scope; restore on exit.
     reader.tokens = Tokenizer.new(                                               // Ordinary runtime tokenizer.
       source ? source + base : NULL, <lisp>);                                    // C pointer offset; Symbol mode.
     reader.tokens.scan();                                                        // Receiver-style function call.
@@ -891,8 +880,8 @@ static Reader Reader.scan(String source, unsigned base, Scope *storage) {
   return reader;                                                                 // Return the ordinary struct by value.
 }
 
-/* Reader.read returns void at EOF; () is a valid form. Incomplete input
-   raises an error, and the REPL retains the text for the next line. */
+/* EOF returns void, not (). Incomplete input raises; the REPL keeps text.
+*/
 static Var Reader.read(Reader &self) {
   Token first = self.tokens.next();                                              // Receiver-style token access.
   if (!first || first.type == <eof>) return void;                                // void differs from the empty List.
@@ -990,14 +979,14 @@ static Var Repl.finish_batch(Repl &self) {
 }
 
 /* Command-line interface ----------------------------------------------------------------------------------------------
-   main converts argv to x2c Strings and matches the command line.
-   No arguments starts the REPL; -e evaluates an expression; --selftest
-   runs a small check; a path loads a Lisp file. Every mode first loads
-   the native functions and the Lisp definitions in _stdlib. */
+   main converts argv to Strings: no arguments starts the REPL; -e evaluates
+   an expression; --selftest runs a check; a path loads a Lisp file. All modes
+   first load native functions and the Lisp definitions in _stdlib.
+*/
 int main(int argc, char **argv) {                                                // Standard C argc/argv entry point.
-  auto {                                                                     // Session-wide allocation region.
+  auto {                                                                         // Session-wide allocation region.
     try {                                                                        // Structured exception boundary.
-      Array args = range(argc - 1)                                         // Lazy range iterator.
+      Array args = range(argc - 1)                                               // Lazy range iterator.
         .map(%!(int i) using &argv => String.new(argv[i]));                      // Capture &argv; convert each entry.
       Interp self = _interpreter();                                              // Session record returned by value.
       String source;                                                             // Immutable String held by a handle.

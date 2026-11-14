@@ -1,19 +1,24 @@
+#include <derive.x>
 #include <assert.h>
-macro Stmt $swap(Expr $left, Expr $right) {
-  $Code.type($left) temporary = $left;
-  $left = $right;
-  $right = temporary;
+
+// One template generates both directions of JSON conversion.
+macro Unit $json.record(Type $type, Expr $read) {
+  using $value, $text;
+  String $type.json($type $value) => ((Var) $value.to_map()).json();
+  $type $type.from_json(String $text) =>
+    $read(Json.parse($text).map());
 }
 
-int main(void) {
-  // The same macro works with different types.
-  int left = 20, right = 22;
-  $swap(left, right);
+// Apply the template to a type that already converts to and from Maps.
+class Point { int x, y; };
+$derive(Point, <map>);
+$json.record(Point, Point.from_map);
 
-  String first = "hello", last = "world";
-  $swap(first, last);
-  printf("%d %d; %s %s\n", left, right, first, last);
-  assert(left == 22 && right == 20);
-  assert(first == "world" && last == "hello");
+int main(void) {
+  Point start = Point.new(3, 4);
+  String text = start.json();
+  Point copy = Point.from_json(text);
+  printf("%s\nequal: %d\n", copy.repr(), start == copy);
+  assert(start == copy);
   return 0;
 }

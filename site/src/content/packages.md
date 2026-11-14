@@ -2,8 +2,8 @@
 title: Put packages to work
 ---
 
-Draw a chart, build a terminal app, query data, or train a model. Below is
-one working example from each of nine packages, with code, its result, and the
+Draw a chart, build a desktop or terminal app, query data, or train a model. Below is
+one working example from each of ten packages, with code, its result, and the
 complete source and setup instructions.
 
 Packages give libraries their own namespaces, so you can use them together

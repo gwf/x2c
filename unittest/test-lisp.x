@@ -1,6 +1,7 @@
 /*  test-lisp.x -- unit tests for the Lisp runtime */
 
 #include "test-support.x"
+#include "lisp-bindings.x"
 #include "test-macros.x"
 #include "datum.x"
 #include "path.x"
@@ -1332,6 +1333,15 @@ static void lisp_inferred_direct_binding(void) {
   EXPECT_STR_EQ(
     Var.string(lisp.eval(%(greet "Ada"))), "hello Ada"
   );
+  lisp.bind("method-greet", _lisp_bound_greet);
+  EXPECT_STR_EQ(Var.string(lisp.eval(%(method-greet "Ada"))), "hello Ada");
+  Lisp.bind(lisp, "typed-greet", _lisp_bound_greet);
+  EXPECT_STR_EQ(Var.string(lisp.eval(%(typed-greet "Ada"))), "hello Ada");
+  Func callable = _lisp_bound_greet;
+  int reads = 0;
+  lisp.bind("handle-greet", (reads++, callable));
+  EXPECT_INT_EQ(reads, 1);
+  EXPECT_STR_EQ(Var.string(lisp.eval(%(handle-greet "Ada"))), "hello Ada");
   lisp.destroy();
 }
 

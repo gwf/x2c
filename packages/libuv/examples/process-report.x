@@ -8,6 +8,7 @@ int main(void) {
 
   UvProcess normalized =
     auto loop.spawn(%("/usr/bin/tr" "[:lower:]" "[:upper:]"));
+
   normalized.write($dedent(%"
     alpha
     beta
@@ -26,7 +27,8 @@ int main(void) {
   loop.run(UV_RUN_DEFAULT);
 
   printf("normalized:\n");
-  foreach(String line, normalized.stdout().lines()) printf("  %s\n", line);
+  foreach(String line, normalized.stdout().lines())
+    printf("  %s\n", line);
 
   printf("line count: %s", counted.stdout());
   printf("exits: normalized=%ld counted=%ld\n",

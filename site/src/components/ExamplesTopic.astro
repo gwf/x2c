@@ -4,9 +4,13 @@ import { exampleEntries } from "../lib/example-catalog";
 import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 const { topic = "love" } = Astro.props;
+const cards = import.meta.glob<string>("../../assets/social/*.svg", { query: "?url", import: "default", eager: true });
 const entries = exampleEntries.filter(entry => entry.section === topic && topic !== "programs" && !entry.article);
 const titles = { love: "Everyday values and operations.", power: "Compose larger programs.", magic: "Extend the language.", programs: "Complete programs." };
 const descriptions = { love: "Values, text, and collections. Read down the page or choose an example from the index.", power: "Types, protocols, control flow, and concurrency, working together.", magic: "Operators, macros, and compile-time code that shape the language.", programs: "Longer examples bring the pieces together." };
+const programs = import.meta.env.DEV
+  ? `/@fs${import.meta.env.X2C_REPOSITORY_ROOT}builds/wasm/playground/`
+  : `${import.meta.env.BASE_URL}playground/programs/`;
 const json = value => JSON.stringify(value).replaceAll("<", "\u003c");
 const notes = await Promise.all(entries.map(async entry => {
   if (!entry.slide) return entry.description ?? "";
@@ -16,12 +20,15 @@ const notes = await Promise.all(entries.map(async entry => {
 }));
 ---
 <header class="examples-topic-heading"><h1>{titles[topic]}</h1><p>{descriptions[topic]}</p></header>
-{topic === "programs" && <ul class="examples-program-list">{exampleEntries.filter(entry => entry.section === "programs").map(entry => <li>
-  <h2><a href={`${import.meta.env.BASE_URL}examples/${entry.article?.frontmatter.slug ?? entry.id.split("/").pop()}/`}>{entry.label} <span aria-hidden="true">&rarr;</span></a></h2>
-  <p>{entry.article?.frontmatter.description ?? entry.description}</p>
-</li>)}</ul>}
-{entries.map((entry, i) => <article class="reading-example" id={entry.id.replaceAll("/", "-")} data-playground={entry.nativeReason ? undefined : ""} data-programs={entry.nativeReason ? undefined : `${import.meta.env.BASE_URL}playground/programs/`}>
-  <header>{entry.slide?.frontmatter.title && <p class="about-eyebrow">{entry.label}</p>}<h2>{entry.slide?.frontmatter.title ?? entry.label}</h2></header>
+{topic === "programs" && <ul class="program-cards">{exampleEntries.filter(entry => entry.section === "programs").map(entry => {
+  const slug = entry.article?.frontmatter.slug ?? entry.id.split("/").pop();
+  return <li><a href={`${import.meta.env.BASE_URL}examples/${slug}/`} aria-label={entry.label}>
+    <img src={cards[`../../assets/social/${slug}.svg`]} alt={entry.article?.frontmatter.title ?? entry.label}
+      width="1200" height="630" loading="lazy" />
+  </a></li>;
+})}</ul>}
+{entries.map((entry, i) => <article class="reading-example" data-playground={entry.nativeReason ? undefined : ""} data-programs={entry.nativeReason ? undefined : programs}>
+  <header id={entry.id.replaceAll("/", "-")}>{entry.slide?.frontmatter.title && <p class="about-eyebrow">{entry.label}</p>}<h2>{entry.slide?.frontmatter.title ?? entry.label}</h2></header>
   <div class="reading-example-prose" data-about-body set:html={notes[i]} />
   <div class="reading-source-bar"><span>{entry.path}</span><a href={`#${entry.id.replaceAll("/", "-")}`} aria-label={`Link to ${entry.label}`}>link</a></div>
   <div class="reading-source"><Code code={entry.source} lang={{...grammar, name:"x2c"}} theme={x2cDarkTheme} /></div>
@@ -46,3 +53,34 @@ const notes = await Promise.all(entries.map(async entry => {
   import { setupExampleRunner } from "../lib/example-runner";
   document.querySelectorAll<HTMLElement>(".reading-example[data-playground]").forEach(root => setupExampleRunner(root));
 </script>
+
+<style>
+  .program-cards {
+    --card-sidebar-offset: 0px;
+    --column-width: min(var(--reading-width), calc(100vw - var(--card-sidebar-offset) - 2 * var(--reading-gutter)));
+    list-style: none;
+    padding: 0;
+    margin-block: 0;
+    margin-left: max(0px, calc((100% - var(--reading-width)) / 2));
+    margin-right: 0;
+    width: calc(var(--column-width) / 2 + min(50vw, 590px)
+      - var(--card-sidebar-offset) / 2 - clamp(40px, 3.2vw, 44px));
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+  }
+  @media (min-width: 620px) {
+    :global(html.sidebar-visible) .program-cards {
+      --card-sidebar-offset: var(--reading-sidebar-offset);
+    }
+  }
+  @media (max-width: 700px) {
+    .program-cards { width: 100%; grid-template-columns: 1fr; }
+  }
+  .program-cards li { min-width: 0; }
+  .program-cards a { display: block; }
+  .program-cards img { display: block; width: 100%; height: auto; }
+  .program-cards a:hover { opacity: .9; }
+  .program-cards a:focus-visible { outline: 2px solid var(--red-text); outline-offset: 5px; }
+</style>

@@ -119,3 +119,9 @@ __pycache__/
 # Local build-mode switch written by `make config-debug` or
 # `make config-optimize`
 etc/build-mode.local
+
+# Local site build outputs and generated PDF previews
+/.astro/
+/node_modules/
+/site/public/x2c-book.pdf
+/site/public/x2c-cheatsheet.pdf

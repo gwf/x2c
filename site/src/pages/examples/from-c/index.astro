@@ -1,0 +1,94 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import ExamplesShell from "../../../components/ExamplesShell.astro";
+import CoreSetup from "../../../components/CoreSetup.astro";
+import { Content } from "../../../content/from-c-article.md";
+import measurements from "../../../../public/benchmarks/from-c-2026-11-14.json";
+import "../../../styles/example-pages.css";
+import "../../../styles/example-article.css";
+const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const repository = "https://github.com/gwf/x2c/tree/dev/examples/c2x2c";
+const lines = [183, 143, 108, 101, 44, 42, 59, 59, 103];
+const ms = (seconds: number) => (seconds * 1000).toFixed(2);
+---
+<BaseLayout title="From C to x2c" description="Rewrite a word-frequency program in eight steps, from 183 lines of C to a reusable parallel API.">
+  <Fragment slot="header"><SiteHeader examples /></Fragment>
+  <ExamplesShell current="from-c">
+    <article class="example-page example-article">
+      <header class="example-heading" id="overview">
+        <p class="example-eyebrow">A program, rewritten</p>
+        <h1>From C to x2c</h1>
+        <p class="example-premise">A word counter gets shorter as the library takes over its bookkeeping.</p>
+      </header>
+      <div class="example-prose"><Content /></div>
+      <section id="performance" class="example-prose">
+        <h2>Less source. What about runtime?</h2>
+        <p>These are seven-sample medians from 14 November 2026 on an Apple M4 Max,
+          macOS 15.7.9. The single-file input contains 377,247 bytes.
+          Source counts include comments and blank lines; V8 includes its 27-line driver
+          and 76-line module. Library implementations are outside those counts.</p>
+        <div class="article-table" tabindex="0" role="region" aria-label="Single-file measurements">
+          <table>
+            <caption>One file: source size and runtime</caption>
+            <thead><tr><th>Version</th><th>Lines</th><th>Wall ms</th><th>CPU ms</th><th>RSS MiB</th></tr></thead>
+            <tbody>{measurements.summary.filter(row => row.workload === "file").map(row => <tr>
+              <th scope="row">{row.version === 0 ? "C (V0)" : `V${row.version}`}</th>
+              <td>{lines[row.version]}</td><td>{ms(row.wall_s)}</td><td>{ms(row.cpu_s)}</td><td>{row.peak_rss_mib.toFixed(2)}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+        <p>C took 4.40 milliseconds of wall time; V5 took 4.20 and V8 took 5.25.
+          At this scale, process startup matters. The small V5 difference does not
+          establish a general speed advantage.</p>
+        <p>The directory input contains 175 files from <code>docs/src</code>, totaling
+          2,756,154 bytes. The C baseline discovers the files and counts them into one
+          aggregate, rather than launching one counter per file.</p>
+        <div class="article-table" tabindex="0" role="region" aria-label="Directory measurements">
+          <table>
+            <caption>One directory: sequential and parallel counting</caption>
+            <thead><tr><th>Version</th><th>Wall ms</th><th>CPU ms</th><th>RSS MiB</th></tr></thead>
+            <tbody>{measurements.summary.filter(row => row.workload === "directory").map(row => <tr>
+              <th scope="row">{row.version === 0 ? "C aggregate" : `V${row.version}`}</th>
+              <td>{ms(row.wall_s)}</td><td>{ms(row.cpu_s)}</td><td>{row.peak_rss_mib.toFixed(2)}</td>
+            </tr>)}</tbody>
+          </table>
+        </div>
+        <p>V8 reduces elapsed time from C's 29.80 milliseconds to 12.47, while using more
+          total CPU time: 30.94 milliseconds against 29.05. Peak resident memory rises
+          from 3.12 MiB to 14.73 MiB. Parallel counting trades resources for latency.</p>
+        <p>The runner freezes both inputs before timing. Native and generated C use
+          <code>-O2 -DNDEBUG</code>; compilation is excluded. The runtime uses the existing
+          build configuration. All 91 timed runs passed an independent top-ten check,
+          including each version's ranking rules. That check does not compare every internal count.</p>
+        <p>CPU time counts work across threads; wall time measures command latency.
+          These results describe this corpus and machine.
+          <a href={local("benchmarks/from-c-2026-11-14.json")}>Download the samples and source hashes.</a></p>
+      </section>
+      <section id="run" class="example-run example-prose">
+        <h2>Try the steps yourself.</h2>
+        <p>Start with V5 for the single-file program. Build V8 with <code>frequencies.x</code>
+          to try the reusable API. Run these commands from the repository root.</p>
+        <CoreSetup run={`cc -std=gnu11 examples/c2x2c/words-v0.c -o /tmp/c2x2c-v0
+/tmp/c2x2c-v0 examples/c2x2c/input/sample.txt
+
+./x2c run examples/c2x2c/words-v5.x -- examples/c2x2c/input/sample.txt
+
+./x2c build -O2 -I lib examples/c2x2c/words-v8.x \\
+  examples/c2x2c/frequencies.x --output /tmp/c2x2c-v8 \\
+  --build-dir /tmp/c2x2c-v8-build
+/tmp/c2x2c-v8 docs/src`} />
+        <p>To repeat the measured comparison, use the source directory explicitly:</p>
+        <pre><code>make bm-c2x2c C2X2C_BENCHMARK_ARGS="--all-versions --samples 7 --directory docs/src"</code></pre>
+      </section>
+      <section id="compare" class="example-prose article-resources">
+        <h2>Follow a change into the source.</h2>
+        <p>The article shows the decisions; the full comparison shows every edit.
+          <a href={local("examples/from-c/viewer/index.html")}>Open the version comparison</a>,
+          or read the <a href={repository}>complete programs and behavior notes</a>.</p>
+      </section>
+    </article>
+  </ExamplesShell>
+  <SiteFooter slot="footer" />
+</BaseLayout>

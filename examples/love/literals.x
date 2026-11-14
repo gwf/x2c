@@ -36,5 +36,8 @@ int main(void) {
   assert(pricing[<student>] == 15.0 && pricing[<currency>] == "GBP");
   assert(project[<width>] == 320 && audio[<volume>] == 0.75);
   assert(workshop[<topics>] == %(graphics sound games));
+  printf("%s at %s, %s\n", workshop[<title>], venue[<name>], address[<city>]);
+  printf("%s teaches %s\n", host[<name>], first[<title>]);
+  printf("student ticket: %.2f %s\n", (double) pricing[<student>], pricing[<currency>]);
   return 0;
 }

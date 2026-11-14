@@ -2,7 +2,7 @@
 slug: torch
 section: packages
 tab: torch
-title: Compose a model. Train it. Save it.
+title: Weight for it.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/torch/examples/mlp.x

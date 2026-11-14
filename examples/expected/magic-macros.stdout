@@ -1,1 +1,2 @@
-22 20; world hello
+Point { x: 3, y: 4 }
+equal: 1

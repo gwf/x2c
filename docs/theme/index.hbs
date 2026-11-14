@@ -109,20 +109,23 @@
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            let sidebar = null;
+            /* Sidebar bootstrap */
+            document.documentElement.classList.add('js');
+            let sidebar = 'hidden';
             const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
-                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
-                sidebar = sidebar || 'visible';
-            } else {
-                sidebar = 'hidden';
-                sidebar_toggle.checked = false;
+                try { sidebar = localStorage.getItem('mdbook-sidebar') || 'visible'; }
+                catch { sidebar = 'visible'; }
             }
-            if (sidebar === 'visible') {
-                sidebar_toggle.checked = true;
-            } else {
-                html.classList.remove('sidebar-visible');
-            }
+            try {
+                const width = Number(localStorage.getItem('mdbook-sidebar-width'));
+                if (width >= 150) {
+                    document.documentElement.style.setProperty('--sidebar-target-width', width + 'px');
+                }
+            } catch {}
+            sidebar_toggle.checked = sidebar === 'visible';
+            document.documentElement.classList.toggle('sidebar-visible', sidebar_toggle.checked);
+            /* End sidebar bootstrap */
         </script>
 
         <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
@@ -141,13 +144,28 @@
             <div class="page">
                 <div id="mdbook-menu-bar" class="hidden"></div>
                 <header class="landing-header x2c-header">
+                    <label id="mdbook-sidebar-toggle" class="sidebar-toggle" tabindex="0" role="button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M1 3h14M1 8h14M1 13h14" fill="none" stroke="currentColor" /></svg>
+                            </label>
                     <div class="landing-header-inner">
                         <div class="landing-branding">
                             <a class="landing-brand" href="{{ path_to_root }}../" aria-label="x2c home">
                                 <svg viewBox="0 0 100 100" width="22" height="22" aria-hidden="true"><g fill="none" stroke="#da291c" stroke-width="17" stroke-linecap="butt"><path d="M9 16 A34.5 34.5 0 0 1 9 84"></path><path d="M91 16 A34.5 34.5 0 0 0 91 84"></path></g></svg>
                                 <span class="x2c-wordmark landing-wordmark">x2c</span>
                             </a>
-                            <button class="landing-tagline menu-title" type="button" title="Scroll to top">{{ book_title }}</button>
+                            {{#if search_enabled}}
+                            <form id="mdbook-searchbar-outer" class="searchbar-outer" role="search">
+                                <div class="search-wrapper">
+                                    <span class="x2c-search-icon" aria-hidden="true">{{fa "solid" "magnifying-glass"}}</span>
+                                    <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="search the docs" aria-controls="mdbook-searchresults-outer" aria-label="Search The x2c Book" aria-describedby="mdbook-searchresults-header">
+                                    <div class="spinner-wrapper">
+                                        {{fa "solid" "spinner" "fa-spin"}}
+                                    </div>
+                                </div>
+                            </form>
+                            {{else}}
+                            <span class="landing-tagline">{{ book_title }}</span>
+                            {{/if}}
                         </div>
                         <nav class="landing-nav" aria-label="x2c website">
                             <div class="landing-site-nav">
@@ -156,24 +174,16 @@
                             </div>
                             <div class="landing-reference-nav">
                                 <a href="{{ path_to_root }}../examples/">examples</a>
-                                <a href="{{ path_to_root }}../about/">about</a>
                                 <a href="{{ path_to_root }}" aria-current="page">docs</a>
+                                <a href="{{ path_to_root }}../about/">about</a>
                                 <a href="https://github.com/gwf/x2c">source</a>
                             </div>
                         </nav>
                     </div>
-                    <div class="x2c-book-tools">
-                        <div class="x2c-header-tools">
-                            <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
-                                {{fa "solid" "bars"}}
-                            </label>
-                        </div>
-                        <div class="x2c-header-tools x2c-header-tools-right">
-                            {{#if search_enabled}}
-                            <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
-                                {{fa "solid" "magnifying-glass"}}
-                            </button>
-                            {{/if}}
+                </header>
+                <!-- mdBook requires these hooks for its built-in controls. -->
+                <div hidden>
+                    <span class="menu-title">{{ book_title }}</span>
                             <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
                                 {{fa "solid" "circle-half-stroke"}}
                             </button>
@@ -182,15 +192,13 @@
                                 <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
                                 <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Dark</button></li>
                             </ul>
-                            {{#if git_repository_edit_url}}
-                            <a href="{{git_repository_edit_url}}" title="Suggest an edit" aria-label="Suggest an edit" rel="edit" class="icon-button">
-                                {{fa "solid" "pencil" "git-edit-button"}}
-                            </a>
-                            {{/if}}
-                        </div>
-                    </div>
-                </header>
+                    <button id="mdbook-search-toggle" type="button" tabindex="-1" aria-expanded="false" aria-controls="mdbook-searchbar"></button>
+                </div>
                 <script>
+                    document.getElementById('mdbook-searchbar')?.addEventListener('focus', () => {
+                        if (document.getElementById('mdbook-search-wrapper').classList.contains('hidden'))
+                            document.getElementById('mdbook-search-toggle').click();
+                    });
                     const bookHeader = document.querySelector('.x2c-header');
                     new ResizeObserver(() => {
                         document.documentElement.style.setProperty(
@@ -200,14 +208,6 @@
 
                 {{#if search_enabled}}
                 <div id="mdbook-search-wrapper" class="hidden">
-                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
-                        <div class="search-wrapper">
-                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
-                            <div class="spinner-wrapper">
-                                {{fa "solid" "spinner" "fa-spin"}}
-                            </div>
-                        </div>
-                    </form>
                     <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
                         <div id="mdbook-searchresults-header" class="searchresults-header"></div>
                         <ul id="mdbook-searchresults">
@@ -322,6 +322,7 @@
         <script src="{{ resource "book.js" }}"></script>
 
         <script>
+            /* Sidebar interactions */
             document.addEventListener('DOMContentLoaded', () => {
                 const sidebar = document.querySelector('#mdbook-sidebar');
                 sidebar.querySelectorAll('ol').forEach(list => {
@@ -331,6 +332,51 @@
                         const width = Math.max(...Array.from(numbers,
                             number => number.textContent.trim().length));
                         list.style.setProperty('--chapter-number-width', width + 'ch');
+                    }
+                });
+                const revealChapter = link => {
+                    let item = link.closest('li');
+                    while (item && sidebar.contains(item)) {
+                        item.classList.add('expanded');
+                        item.querySelector(':scope > .chapter-link-wrapper > .chapter-fold-toggle')
+                            ?.setAttribute('aria-expanded', 'true');
+                        item = item.parentElement.closest('li');
+                    }
+                };
+                sidebar.querySelectorAll('a.active').forEach(revealChapter);
+                const scrollbox = sidebar.querySelector('.sidebar-scrollbox');
+                let followedLink;
+                const followCurrentSection = () => {
+                    const link = sidebar.querySelector('a.current-header') ||
+                        sidebar.querySelector('a.active');
+                    if (!link || link === followedLink || !link.getClientRects().length) return;
+                    followedLink = link;
+                    const bounds = scrollbox.getBoundingClientRect();
+                    const row = link.getBoundingClientRect();
+                    const padding = 12;
+                    if (row.top < bounds.top + padding) {
+                        scrollbox.scrollTop += row.top - bounds.top - padding;
+                    } else if (row.bottom > bounds.bottom - padding) {
+                        scrollbox.scrollTop += row.bottom - bounds.bottom + padding;
+                    }
+                };
+                new MutationObserver(followCurrentSection).observe(sidebar, {
+                    subtree: true, attributes: true, attributeFilter: ['class'],
+                });
+                requestAnimationFrame(followCurrentSection);
+
+                sidebar.addEventListener('click', event => {
+                    const link = event.target.closest('a');
+                    if (!link || link.classList.contains('chapter-fold-toggle')) return;
+                    const target = new URL(link.href);
+                    const pagePath = path => path.replace(/index\.html$/, '').replace(/\/$/, '');
+                    const toggle = link.parentElement.querySelector('.chapter-fold-toggle');
+                    if (toggle && !target.hash && target.origin === location.origin &&
+                        pagePath(target.pathname) === pagePath(location.pathname)) {
+                        event.preventDefault();
+                        toggle.click();
+                    } else {
+                        revealChapter(link);
                     }
                 });
                 const chapter = sidebar.querySelector('a.active');
@@ -368,7 +414,55 @@
                         });
                     }
                 });
+                const checkbox = document.getElementById('mdbook-sidebar-toggle-anchor');
+                const button = document.getElementById('mdbook-sidebar-toggle');
+                const resize = document.getElementById('mdbook-sidebar-resize-handle');
+                button.tabIndex = 0;
+                button.setAttribute('role', 'button');
+                button.addEventListener('keydown', event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        button.click();
+                    }
+                });
+                const updateFocus = () => {
+                    const visible = checkbox.checked;
+                    sidebar.setAttribute('aria-hidden', String(!visible));
+                    if (visible) {
+                        followedLink = null;
+                        requestAnimationFrame(followCurrentSection);
+                    }
+                    button.setAttribute('aria-expanded', String(visible));
+                    sidebar.querySelectorAll('a, button').forEach(control => {
+                        control.tabIndex = visible ? 0 : -1;
+                    });
+                };
+                checkbox.addEventListener('change', updateFocus);
+                updateFocus();
+                sidebar.addEventListener('click', event => {
+                    if (!event.defaultPrevented && innerWidth < 1080 &&
+                        event.target.closest('a:not(.chapter-fold-toggle)') && checkbox.checked) {
+                        button.click();
+                    }
+                });
+                addEventListener('keydown', event => {
+                    if (event.key === 'Escape' && checkbox.checked) {
+                        button.click();
+                        button.focus();
+                    }
+                });
+                resize.addEventListener('mousedown', () => {
+                    window.addEventListener('mouseup', () => {
+                        checkbox.checked = document.documentElement.classList.contains('sidebar-visible');
+                        updateFocus();
+                        const width = parseFloat(document.documentElement.style.getPropertyValue('--sidebar-target-width'));
+                        if (width >= 150) {
+                            try { localStorage.setItem('mdbook-sidebar-width', String(width)); } catch {}
+                        }
+                    }, { once: true });
+                });
             });
+            /* End sidebar interactions */
         </script>
 
         <!-- Custom JS scripts -->

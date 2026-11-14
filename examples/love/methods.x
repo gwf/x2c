@@ -18,7 +18,9 @@ int main(void) {
   // Create and move a Point with compact dot calls.
   Point point = Point.new(1, 2);
   assert(point.x == 1 && point.y == 2);
+  printf("start: (%d, %d)\n", point.x, point.y);
   point.move(3, 4);
   assert(point.x == 4 && point.y == 6);
+  printf("moved: (%d, %d)\n", point.x, point.y);
   return 0;
 }

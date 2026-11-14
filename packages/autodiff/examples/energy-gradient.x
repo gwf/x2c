@@ -8,7 +8,8 @@ $ad.reverse()
 static double energy(double x, double y, int n) {
   double s = 0.0;
   for (int i = 0; i < n; i++) {
-    if (i == 2) continue;
+    if (i == 2)
+      continue;
     s += x * x * (double) i;
   }
   return sin(s) / x - exp(y);

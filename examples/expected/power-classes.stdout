@@ -1,2 +1,1 @@
-Point { x: 3, y: 4 } is home
-Account(Ada, 1325 cents)
+coral: Color { red: 255, green: 127, blue: 80 }

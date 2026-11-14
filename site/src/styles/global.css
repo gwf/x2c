@@ -88,7 +88,7 @@ code:not(pre code) {
 .section-overview a,
 .section-exit a,
 .feature-copy a,
-.docs-copy a,
+.docs-copy a:not(.button),
 .deal-copy>p a,
 .about-copy a {
   text-decoration-line: underline;
@@ -365,7 +365,7 @@ main:focus {
   margin: 0 0 24px;
   color: var(--dark);
   font:
-    400 12.541cqw / 0.92 "Instrument Serif",
+    400 12cqw / 0.92 "Instrument Serif",
     Georgia,
     serif;
   letter-spacing: -0.02em;
@@ -397,6 +397,12 @@ main:focus {
   outline-offset: 10px;
 }
 
+.title-animation {
+  display: block;
+  position: relative;
+  transform-origin: left top;
+}
+
 .title-text {
   display: inline-block;
   white-space: pre;
@@ -410,17 +416,39 @@ main:focus {
   pointer-events: none;
 }
 
-/* The question mark invites interaction only while the opening title rests. */
-.title-question.is-dancing {
+.title-exclamation {
   transform-origin: 50% 80%;
-  animation: title-question-dance 1200ms ease-in-out;
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* A small gust raises the question mark; the period returns as it settles. */
+.title-question {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  transform: translateX(-0.016em) scaleY(0.12);
+  /* Instrument Serif: pivot at the dot, aligned with the period. */
+  transform-origin: 0.122em 0.856em;
+  pointer-events: none;
+}
+
+.title-question.is-dancing {
+  animation: title-question-dance 900ms ease-in-out;
+}
+
+.title-animation:has(.title-question.is-dancing) .title-period {
+  visibility: hidden !important;
 }
 
 @keyframes title-question-dance {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(-5deg); }
-  50% { transform: rotate(6deg); }
-  75% { transform: rotate(-2deg); }
+  0%, 100% { opacity: 0; transform: translateX(-0.016em) scaleY(0.12); }
+  18% { opacity: 1; transform: translateX(-0.016em) scaleY(0.95) skewX(-3deg); }
+  40% { opacity: 1; transform: translateX(-0.016em) scaleY(1) skewX(3deg); }
+  62% { opacity: 1; transform: translateX(-0.016em) scaleY(0.96) skewX(-2deg); }
+  80% { opacity: 1; transform: translateX(-0.016em) scaleY(0.9) skewX(1deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -525,7 +553,7 @@ main:focus {
 .idea-list .idea-tagline {
   color: var(--dark);
   opacity: 0.5;
-  font-style: italic;
+  font: italic 400 14px "Instrument Serif", Georgia, serif;
 }
 
 .idea-detail {
@@ -561,6 +589,10 @@ main:focus {
 .hero-prose strong {
   color: var(--red-text);
   font-weight: 700;
+}
+
+.hero-prose strong:not(.idea-title) {
+  font-weight: 500;
 }
 
 .hero-prose em {
@@ -909,6 +941,11 @@ html:has(.landing-header) {
 }
 
 #packages .feature-code pre,
+#example-x2cui .feature-result-image {
+  width: 100%;
+  max-height: none;
+}
+
 #packages .feature-copy pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -961,6 +998,11 @@ html:has(.landing-header) {
   max-height: 220px;
   margin-inline: auto;
   object-fit: contain;
+}
+
+#example-x2cui .feature-result-image {
+  width: 100%;
+  max-height: none;
 }
 
 #packages .feature-copy pre {
@@ -1086,11 +1128,11 @@ html:has(.landing-header) {
   color: var(--coral);
 }
 
-.landing-section:nth-of-type(odd) .docs-copy a {
+.landing-section:nth-of-type(odd) .docs-copy a:not(.button) {
   color: var(--coral);
 }
 
-.landing-section:nth-of-type(odd) .docs-copy a:hover {
+.landing-section:nth-of-type(odd) .docs-copy a:not(.button):hover {
   color: var(--paper);
 }
 
@@ -1213,6 +1255,10 @@ a.docs-card:hover {
   gap: 16px 24px;
 }
 
+.download-links {
+  margin: 20px 0;
+}
+
 .install-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1300,7 +1346,7 @@ a.docs-card:hover {
   display: grid;
   width: min(100%, 1180px);
   margin-inline: auto;
-  padding: 28px clamp(20px, 3.2vw, 44px) 44px;
+  padding: 24px clamp(20px, 3.2vw, 44px) 2px;
   color: var(--nav-muted);
   font-size: 13px;
   grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1453,13 +1499,15 @@ a.docs-card:hover {
 .idea-heading {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr);
-  align-items: start;
+  align-items: end;
   column-gap: clamp(20px, calc(4.5vw - 16px), 64px);
   margin-bottom: clamp(28px, 3.5vw, 44px);
 }
 
 .idea-heading .section-overview {
   margin: 0;
+  font: italic 400 18px / 1.65 "Instrument Serif", Georgia, serif;
+  text-align: right;
 }
 
 .section-lede {
@@ -1533,6 +1581,7 @@ a.docs-card:hover {
 @media (max-width: 980px) {
   .idea-heading {
     grid-template-columns: minmax(0, 1fr);
+    align-items: start;
     row-gap: 18px;
   }
 }

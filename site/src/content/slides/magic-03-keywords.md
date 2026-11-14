@@ -2,9 +2,9 @@
 slug: keywords
 section: magic
 home: true
-order: 3
+order: 4
 tab: keywords
-title: Give a convention its own syntax.
+title: Lock of the draw.
 ---
 
 ```x2c
@@ -32,3 +32,5 @@ keyword with_lock $control.with_lock;
 ```
 
 Turn locking and cleanup into a statement. The decorator introduces the held lock and its deferred release, so the body can concentrate on the operation being protected.
+
+`keyword` gives a macro an ordinary word spelling. This is, in fact, how some of the built-ins of the language are implemented. The compiler prelude defines `class` and `foreach` through keyword aliases backed by compiler helpers. Your program can use the same mechanism.

@@ -59,6 +59,5 @@ The image shows the first twelve test cases, including a 5 it mistakes for
 a 6. Predictions were recorded from the x2c program; none of these images
 were used to update its weights. Results can vary across machines.
 
-[Full example](https://github.com/gwf/x2c/blob/main/packages/torch/examples/mnist.x)
 
 </section>

@@ -38,14 +38,18 @@ static void _advance(ArrayChar cells, ArrayChar next, int width, int height) {
     }
 }
 
-static void _draw(Termbox terminal, ArrayChar cells, int width, int height) {
+static void _draw(Termbox terminal, ArrayChar cells,
+                  int width, int height) {
   terminal.clear();
   for (int y = 0; y < height; y++)
     for (int x = 0; x < width; x++) {
-      if (!cells[y * width + x]) continue;
+      if (!cells[y * width + x])
+        continue;
       int run = 1;
-      while (x + run < width && cells[y * width + x + run]) run++;
-      terminal.fill(x, y, run, 1, "#", TB_GREEN | TB_BOLD, TB_DEFAULT);
+      while (x + run < width && cells[y * width + x + run])
+        run++;
+      terminal.fill(x, y, run, 1, "#",
+                    TB_GREEN | TB_BOLD, TB_DEFAULT);
       x += run - 1;
     }
   terminal.present();
@@ -101,7 +105,7 @@ a sparser starting population.
 
 </section>
 
-<section class="code-note" data-code-line="40">
+<section class="code-note" data-code-line="44">
 
 ### Keep the world running.
 
@@ -117,6 +121,6 @@ A keypress leaves the loop. Otherwise, the program calculates the next
 generation and swaps the arrays. Lower the timeout for a faster simulation,
 or raise it to watch patterns evolve more slowly.
 
-[Full example](https://github.com/gwf/x2c/blob/main/packages/termbox2/examples/game-of-life.x) / [Package guide](https://github.com/gwf/x2c/blob/main/packages/termbox2/README.md)
+[Package guide](https://github.com/gwf/x2c/blob/main/packages/termbox2/README.md)
 
 </section>

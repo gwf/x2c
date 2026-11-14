@@ -10,21 +10,20 @@ love/literals|showcase|run||expected/love-literals.stdout|Describe a workshop wi
 love/maps|showcase|run||expected/love-maps.stdout|Stock quantities, missing keys, and stored zero values.
 love/methods|showcase|run||expected/love-methods.stdout|Define, allocate, and move a Point.
 love/string-concatenation|showcase|run||expected/love-string-concatenation.stdout|String concatenation.
-love/strings|showcase|run||expected/love-strings.stdout|Transform, slice, parse, interpolate, and iterate text.
+love/strings|showcase|run||expected/love-strings.stdout|Content equality, immutable transformations, slicing, and interpolation.
 love/symbol-forms|showcase|run||expected/love-symbol-forms.stdout|Symbol forms, identity, length, and Map keys.
 love/symbol-sets|showcase|run||expected/love-symbol-sets.stdout|Ordered Symbol set membership, dense index, and table dispatch.
-love/symbols|showcase|run||expected/love-symbols.stdout|A named state and an ordered vocabulary.
-love/values|showcase|run||expected/love-values.stdout|Dynamic values, operators, type inspection, and C calls.
+love/symbols|showcase|run||expected/love-symbols.stdout|Named values without declarations or C identifier conflicts.
+love/values|showcase|run||expected/love-values.stdout|Runtime-generic functions and contained-type inspection.
 power/bindings|showcase|run||expected/power-bindings.stdout|Delegate fields, Self results, reference parameters, destructuring assignment, and alias.
 power/channel-service|showcase|run||expected/power-channel-service.stdout|One request/reply service runs with both Thread.run and Task.run.
 power/channel-word-count|showcase|run|words|expected/power-channel-word-count.stdout|Bounded channels and a supervised word-count batch using shared canonical Strings.
 power/collection-indexing|showcase|run||expected/power-collection-indexing.stdout|Ordinary and packed indexing, checked reads, and slicing.
 power/contexts|showcase|run||expected/power-contexts.stdout|Isolated Context cleanup and cyclic result export.
 power/counting|showcase|run|words.txt|expected/power-counting.stdout|Count words and rank them by frequency.
-power/derive|showcase|run||expected/power-derive.stdout|Generated record mappings, equality, and representation.
+magic/derive|showcase|run||expected/magic-derive.stdout|Derive nested record mappings, equality, representation, and JSON.
 power/exceptions|showcase|run|.|expected/power-exceptions.stdout|Close a file before handling a failed read.
 power/finance|showcase|run||expected/power-finance.stdout|Running balances, loan payments, and compounded growth.
-power/generics|showcase|run||expected/power-generics.stdout|Count response codes with typed collections.
 power/greet-client|showcase|run||expected/power-greet-client.stdout|Package import: alias-qualified names and a linked package archive.
 power/imports|optional|none||-|PCRE2 named request captures; checked with optional packages.
 power/indexing|showcase|run||expected/power-indexing.stdout|Build and query an index of document words.
@@ -33,17 +32,17 @@ power/list-rest|showcase|run||expected/power-list-rest.stdout|List rest paramete
 power/map-rest|showcase|run||expected/power-map-rest.stdout|Map rest parameters: keyword arguments, Map splices, and Func calls.
 power/match|showcase|run||expected/power-match.stdout|Simplify nested code using patterns and templates.
 power/math|showcase|run||expected/power-math.stdout|Lazy numeric filtering, pairing, folding, and products.
-power/scopes|showcase|run||expected/power-scopes.stdout|Reclaim working storage per file and per day with auto regions.
+power/scopes|showcase|run||expected/power-scopes.stdout|Manage values, regions, and retained allocation destinations with auto.
 power/shared-threads|showcase|run||expected/power-shared-threads.stdout|Isolated workers, joined results, logging, and Mutex-coordinated shared state.
 power/threads|showcase|run||expected/power-threads.stdout|Square two copied batches and combine their sums.
 power/word-count-summary|showcase|run|../../data/docs-words.txt|expected/power-word-count-summary.stdout|Task-oriented file and collection tutorial.
-magic/compile-time|showcase|run||expected/magic-compile-time.stdout|Generate two arrays from one compile-time table.
+magic/compile-time|showcase|run||expected/magic-compile-time.stdout|Build array setup code incrementally from one compile-time table.
 magic/decorators|showcase|run||expected/magic-decorators.stdout|Trace a function's entry and exit.
 magic/file-policy|showcase|run|../../../examples/magic/policy.xlisp|expected/magic-file-policy.stdout|Inline Lisp policy with inferred native bindings and typed results.
 magic/imported-macros|showcase|run||expected/magic-imported-macros.stdout|Imported x2c macros with a shared meta function helper.
 magic/keywords|showcase|run||expected/magic-keywords.stdout|Release a mutex when an exception leaves a block.
 magic/lambdas|showcase|run||expected/magic-lambdas.stdout|Expression lambdas, captured values, and inferred Var results.
-magic/macros|showcase|run||expected/magic-macros.stdout|Swap integers or strings with one typed macro.
+magic/macros|showcase|run||expected/magic-macros.stdout|Generate JSON writer and reader functions from one macro template.
 magic/meta-functions|showcase|run||expected/magic-meta-functions.stdout|Meta functions implementing a macro in x2c through the Meta surface.
 magic/operators|showcase|run||expected/magic-operators.stdout|Define set union and intersection with a Map.
 magic/protocols|showcase|run||expected/magic-protocols.stdout|Protocol declaration, adoption, base defaults, and an override.
@@ -82,9 +81,10 @@ apps/notes/bench/threaded-notes|probe|none||-|Optional Notes comparison with one
 apps/notes/notes|optional|none||-|SQLite-backed notes server; make -C examples/apps/notes check.
 
 love/two-kinds|showcase|run||expected/love-two-kinds.stdout|Gallery: canonical values versus objects with identity.
-love/collections|showcase|run||expected/love-collections.stdout|Gallery: Lists, Arrays, and Maps through one bracket syntax.
-love/loops|showcase|run||expected/love-loops.stdout|Gallery: foreach, destructuring, pattern conditions, lambdas, keyword arguments.
-power/classes|showcase|run||expected/power-classes.stdout|Gallery: a value class and a pointer class with its own init.
+love/collections|showcase|run||expected/love-collections.stdout|Gallery: shared List tails, growable Arrays, and keyed Map lookup.
+love/loops|showcase|run||expected/love-loops.stdout|Gallery: iterate collections, text lines and words, and file lines.
+power/classes|showcase|run||expected/power-classes.stdout|Gallery: a value class with generated operations as a Map key.
 power/protocols|showcase|run||expected/power-protocols.stdout|Gallery: set union and intersection as + and * through a protocol.
 power/channels|showcase|run||expected/power-channels.stdout|Gallery: two threads share a bounded channel under Thread.run.
 magic/fields|showcase|run||expected/magic-fields.stdout|Gallery: a meta function generates code from a struct's fields.
+power/destructuring|showcase|run||expected/power-destructuring.stdout|Typed destructuring and pattern conditions.

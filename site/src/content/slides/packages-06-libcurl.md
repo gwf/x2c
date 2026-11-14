@@ -2,7 +2,7 @@
 slug: libcurl
 section: packages
 tab: libcurl
-title: Three pages, one batch.
+title: Page turners.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/libcurl/examples/page-titles.x

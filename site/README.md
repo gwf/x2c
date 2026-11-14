@@ -169,3 +169,16 @@ These options do not activate workflows or change live routing.
 
 [BENCHMARKS.md](BENCHMARKS.md) describes the versioned results/charts archive,
 portable public exports, future Astro integration, and measurement caveats.
+
+## Cheat-sheet PDF
+
+`npm run build` generates `dist/x2c-cheatsheet.pdf` from the built
+`/cheatsheet/` page using headless Chromium. The page's HTML, fonts, and print
+CSS are the only layout source. The renderer waits for fonts, uses the CSS
+page size and margins, includes background graphics, and omits browser headers
+and footers.
+
+After `npm ci`, install the browser once with `npx playwright install chromium`.
+On Linux CI, use `npx playwright install --with-deps chromium`; the candidate
+workflow does this automatically. To regenerate only the PDF after an Astro
+build, run `npm run pdf:cheatsheet`.

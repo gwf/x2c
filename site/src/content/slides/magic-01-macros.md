@@ -2,31 +2,36 @@
 slug: macros
 section: magic
 home: true
-order: 1
-tab: macros
-title: Make a repeated pattern a construct.
+order: 2
+tab: templates
+title: Just my prototype.
 ---
 
 ```x2c
+~#include <derive.x>
 ~#include <assert.h>
-macro Stmt $swap(Expr $left, Expr $right) {
-  $Code.type($left) temporary = $left;
-  $left = $right;
-  $right = temporary;
+
+// One template generates both directions of JSON conversion.
+macro Unit $json.record(Type $type, Expr $read) {
+  using $value, $text;
+  String $type.json($type $value) => ((Var) $value.to_map()).json();
+  $type $type.from_json(String $text) =>
+    $read(Json.parse($text).map());
 }
 
-~int main(void) {
-  // The same macro works with different types.
-  int left = 20, right = 22;
-  $swap(left, right);
+// Apply the template to a type that already converts to and from Maps.
+class Point { int x, y; };
+$derive(Point, <map>);
+$json.record(Point, Point.from_map);
 
-  String first = "hello", last = "world";
-  $swap(first, last);
-  printf("%d %d; %s %s\n", left, right, first, last);
-~  assert(left == 22 && right == 20);
-~  assert(first == "world" && last == "hello");
+~int main(void) {
+  Point start = Point.new(3, 4);
+  String text = start.json();
+  Point copy = Point.from_json(text);
+  printf("%s\nequal: %d\n", copy.repr(), start == copy);
+~  assert(start == copy);
 ~  return 0;
 ~}
 ```
 
-A macro receives syntax and returns syntax. This swap works with different types because it expands into the surrounding program, where the compiler resolves those types.
+A macro template receives syntax and produces declarations. Supply a type and its Map reader to generate a pair of ordinary functions. This example adapts the JSON conversion template used by [`$derive`](https://github.com/gwf/x2c/blob/main/lib/derive.x). `using` gives the generated parameter names fresh private identities.

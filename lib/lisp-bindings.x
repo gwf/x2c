@@ -31,8 +31,19 @@ Lisp x2c_lisp_exchange(Lisp lisp) {
 macro Stmt $lisp.bind(Expr $lisp, Expr $name, Expr $function) {
   Func callable = Func.new(
     $function, $_x2c_literal_list($Code.native_signature($function)));
-  Lisp.bind($lisp, $name, callable);
+  Lisp_bind($lisp, $name, callable);
 }
+
+meta List _lisp_binding_callable(Code function) {
+  if (!(Code.type(function) ~= %((!or func inline) *))) return function;
+  List signature = Code.native_signature(function);
+  return $!Expression{ Func.new($function, %(@signature)) };
+}
+
+/** Binds a native function through method syntax, preserving Func values. */
+macro Expression $Lisp.bind(Expr $lisp, Expr $name, Expr $function)
+  using _lisp_binding_callable =>
+  $lisp.bind($name, $_lisp_binding_callable($function));
 
 /** Records the decorated function as `name` in the binding group `group`,
     which `$lisp.install` binds into a session.

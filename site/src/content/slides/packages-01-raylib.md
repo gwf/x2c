@@ -2,7 +2,7 @@
 slug: raylib
 section: packages
 tab: raylib
-title: Draw a week of weather.
+title: Weather or not.
 image: packages/climate-trends.png
 imageAlt: Line chart of Seattle daily high temperatures from Monday to Sunday.
 imageWidth: 1440

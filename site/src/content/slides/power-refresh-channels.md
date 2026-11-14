@@ -3,9 +3,9 @@ slug: channels
 aliases: [threads]
 section: power
 home: true
-order: 8
+order: 7
 tab: channels
-title: Give each worker a job.
+title: Queue the workers.
 ---
 
 ```x2c

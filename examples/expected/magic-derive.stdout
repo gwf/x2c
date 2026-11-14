@@ -1,0 +1,3 @@
+equal: 1
+Person{ name: "Ada", home: Point { x: 3, y: 4 } }
+JSON equal: 1

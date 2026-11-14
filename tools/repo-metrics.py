@@ -291,9 +291,10 @@ def generated(path: pathlib.Path) -> bool:
 
 
 def summary_paths(name: str, files: set[str], root: pathlib.Path = ROOT):
-    """Count authored source recursively, excluding command test material."""
+    """Count disjoint authored groups; src is the core outside components."""
     return [path for path in source_paths(SUMMARY_GROUPS[name], files, root)
             if not generated(path)
+            and not (name == "src" and path.is_relative_to(root / "src/components"))
             and not (name == "commands" and "tests" in path.relative_to(root).parts)]
 
 
@@ -344,14 +345,13 @@ def render_summary(record: dict, color: bool) -> str:
     """Render the concise inventory, optionally with ANSI presentation."""
     source = record["source"]
     tests = record["tests"]
-    code_total = sum(group["code"] for name, group in source.items()
-                     if name != "components")
-    comment_total = sum(group["comments"] for name, group in source.items()
-                        if name != "components")
+    code_total = sum(group["code"] for group in source.values())
+    comment_total = sum(group["comments"] for group in source.values())
     lines = [
         f"{_paint('Source        ', CYAN, color)}  Code  Comments",
     ]
-    for name, title in (("src", "src/"), ("lib", "lib/"),
+    for name, title in (("src", "core compiler"),
+                        ("components", "components"), ("lib", "lib/"),
                         ("commands", "commands/"),
                         ("xlisp", "X Lisp"), ("etc", "etc/")):
         label = _paint(title.ljust(14), CYAN, color)

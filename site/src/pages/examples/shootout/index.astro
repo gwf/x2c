@@ -1,0 +1,142 @@
+---
+import { codeToHtml } from "shiki";
+import Charts from "../../../components/ShootoutCharts.astro";
+import grammar from "../../../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cDarkTheme } from "../../../../shiki-x2c-theme.mjs";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import SiteHeader from "../../../components/SiteHeader.astro";
+import SiteFooter from "../../../components/SiteFooter.astro";
+import ExamplesShell from "../../../components/ExamplesShell.astro";
+import { shootoutExamples } from "../../../lib/shootout-examples";
+import "../../../styles/example-pages.css";
+import "../../../styles/example-article.css";
+
+const sources = import.meta.glob<string>("../../../../../examples/shootout/benchmarks/*/*.x", {
+  query: "?raw", import: "default", eager: true,
+});
+const repository = "https://github.com/gwf/x2c/blob/dev/examples/shootout";
+const languageNames: Record<string, string> = {
+  "main.c": "C", "main.cpp": "C++", "main.rs": "Rust",
+  "main.py": "Python", "main.go": "Go", "main.java": "Java",
+};
+const examples = await Promise.all(shootoutExamples.map(async problem => ({
+  ...problem,
+  variants: await Promise.all([
+    { file: "main.x", label: "Idiomatic x2c" },
+    { file: "tuned.x", label: "Tuned x2c" },
+  ].map(async variant => ({
+    ...variant,
+    html: await codeToHtml(sources[`../../../../../examples/shootout/benchmarks/${problem.name}/${variant.file}`], {
+      lang: { ...grammar, name: "x2c" }, theme: x2cDarkTheme,
+    }),
+  }))),
+})));
+---
+<BaseLayout title="Programming language shootout — x2c" description="What ten benchmark programs reveal about data representation, runtime, and source size in x2c.">
+  <Fragment slot="header"><SiteHeader examples /></Fragment>
+  <ExamplesShell current="shootout">
+    <article class="example-page example-article shootout-page" data-example="shootout">
+      <header class="example-heading">
+        <p class="example-eyebrow">Complete programs</p>
+        <h1>Programming language shootout.</h1>
+        <p class="example-premise">Ten problems, two styles, and the choices behind the measurements.</p>
+        <nav class="example-actions" aria-label="Shootout resources">
+          <a href="#run">Run the checks</a>
+          <a href={`${repository}/README.md`}>Suite guide</a>
+          <a href={`${repository}/results/README.md`}>Recorded results</a>
+        </nav>
+      </header>
+      <p class="snapshot-note">Recorded on an Apple M4 Max, 12 November 2026 UTC.
+        Local inputs, twelve x2c samples; foreign results use an earlier calibration.
+        These are local comparisons, not published Benchmarks Game results.</p>
+      <Charts />
+      <section id="programs" class="example-prose">
+        <h2>Read the complete programs.</h2>
+        <p>These are the current sources. Open a problem to read either version or compare both.
+          The article above explains the recorded snapshot.</p>
+      </section>
+      {examples.map((problem, index) => <section id={problem.anchor} class="problem" aria-labelledby={`${problem.name}-heading`}>
+        <header class="problem-heading">
+          <p class="example-eyebrow">{String(index + 1).padStart(2, "0")} / 10</p>
+          <h2 id={`${problem.name}-heading`}>{problem.label}</h2>
+          <p>{problem.description}</p>
+          <a href={problem.specification}>Problem specification</a>
+        </header>
+        <details class="source-disclosure">
+        <summary>Read and compare source</summary>
+        <fieldset class="source-selection">
+          <legend>Read {problem.label} source</legend>
+          <input type="radio" name={`${problem.name}-view`} id={`${problem.name}-idiomatic`} value="idiomatic" checked />
+          <label for={`${problem.name}-idiomatic`}>Idiomatic x2c</label>
+          <input type="radio" name={`${problem.name}-view`} id={`${problem.name}-tuned`} value="tuned" />
+          <label for={`${problem.name}-tuned`}>Tuned x2c</label>
+          <input type="radio" name={`${problem.name}-view`} id={`${problem.name}-compare`} value="compare" />
+          <label for={`${problem.name}-compare`}>Compare both</label>
+          <div class="source-views">
+            {problem.variants.map((variant, variantIndex) => <div class:list={["source-view", variantIndex === 0 ? "idiomatic" : "tuned"]}>
+              <div class="source-caption"><span>{variant.label} / {variant.file}</span>
+                <a href={`${repository}/benchmarks/${problem.name}/${variant.file}`}>Repository source</a></div>
+              <div class="source-scroll" tabindex="0" role="region"
+                aria-label={`${problem.label}: ${variant.label} source; scroll horizontally`} set:html={variant.html} />
+            </div>)}
+          </div>
+        </fieldset>
+        </details>
+        <nav class="reference-links" aria-label={`${problem.label} reference programs`}>
+          <span>Other languages</span>
+          {problem.references.map(file => <a href={`${repository}/benchmarks/${problem.name}/${file}`}>{languageNames[file] ?? file}</a>)}
+        </nav>
+      </section>)}
+      <section id="run" class="example-run" aria-labelledby="run-heading">
+        <p class="example-eyebrow">Run the suite</p>
+        <h2 id="run-heading">Check the programs locally.</h2>
+        <p>From a repository checkout with the compiler built, run all official fixtures
+          and quick-profile comparisons, or select individual problems.</p>
+        <pre><code>{`make shoot-check
+
+# Check two selected problems.
+python3 examples/shootout/tools/shootout.py check --profile quick \\\n  --only mandelbrot --only binarytrees`}</code></pre>
+        <p>The full reference suite needs the language toolchains, PCRE2, and GMP.
+          The <a href={`${repository}/README.md`}>suite guide</a> lists dependencies,
+          build options, input sizes, and measurement methods.</p>
+      </section>
+    </article>
+  </ExamplesShell>
+  <SiteFooter slot="footer" />
+</BaseLayout>
+<style>
+  .shootout-page { --reading-width: 720px; }
+  .snapshot-note { color: var(--muted-dark); font-size: 13px; line-height: 1.6; margin: 0 0 32px; }
+  a { text-underline-offset: 3px; }
+  .problem { border-top: 1px solid #c9c3bb; margin-top: 50px; padding-top: 28px; scroll-margin-top: 100px; min-width: 0; }
+  .problem-heading { margin-bottom: 24px; }
+  .problem-heading .example-eyebrow { margin-bottom: 10px; }
+  h2 { margin: 0 0 12px; font: 400 clamp(30px, 3.5vw, 42px)/1.12 "Instrument Serif", Georgia, serif; }
+  .problem-heading p:not(.example-eyebrow), .example-run p { color: var(--muted-dark); line-height: 1.7; }
+  .problem-heading > a { font-size: 13px; }
+  .source-disclosure > summary { cursor: pointer; padding: 10px 0 18px; font-size: 14px; }
+  .source-selection { border: 0; padding: 0; margin: 0; min-width: 0; }
+  legend { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .source-selection > input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .source-selection > label { display: inline-block; padding: 11px 14px; margin: 0 2px 10px 0; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; }
+  .source-selection > input:checked + label { border-color: var(--red-text); color: var(--red-text); }
+  .source-selection > input:focus-visible + label { outline: 2px solid var(--red-text); outline-offset: 2px; }
+  .source-views { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+  .source-view { min-width: 0; display: none; }
+  input[value="idiomatic"]:checked ~ .source-views .idiomatic,
+  input[value="tuned"]:checked ~ .source-views .tuned,
+  input[value="compare"]:checked ~ .source-views .source-view { display: block; }
+  input[value="compare"]:checked ~ .source-views { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .source-caption { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; background: #dedbd5; padding: 12px 16px; font: 11px/1.6 "JetBrains Mono", monospace; }
+  .source-scroll { max-height: 650px; overflow: auto; background: var(--code); }
+  .source-scroll:focus-visible { outline: 2px solid var(--red-text); outline-offset: 2px; }
+  .source-scroll :global(pre) { margin: 0; padding: 20px; width: max-content; min-width: 100%; box-sizing: border-box; font: 12px/1.8 "JetBrains Mono", monospace; }
+  .reference-links { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-top: 18px; font-size: 13px; }
+  .reference-links > span { color: var(--muted-dark); }
+  .example-run { margin-top: 60px; }
+  .example-run > pre { overflow: auto; padding: 20px; background: var(--code); color: #eee; font: 12px/1.8 "JetBrains Mono", monospace; }
+  @media (max-width: 750px) {
+    input[value="compare"]:checked ~ .source-views { grid-template-columns: minmax(0, 1fr); }
+    .source-selection > label { padding-inline: 8px; }
+  }
+</style>

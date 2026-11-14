@@ -6,6 +6,7 @@
 */
 
 #include <assert.h>
+#include "system-macros.x"
 // Import the package under a name you choose.
 import "pcre2" as rx;
 
@@ -15,13 +16,13 @@ int main(void) {
     "^(?<method>[A-Z]+) (?<path>/[^ ]+)$", 0);
 
   // Sample requests include lines the pattern will ignore.
-  String text = %"\
-GET /docs
-POST /build
--- idle --
-DELETE /cache
-GET missing-slash
-";
+  String text = $dedent(%"
+    GET /docs
+    POST /build
+    -- idle --
+    DELETE /cache
+    GET missing-slash
+  ");
 
   int matches = 0;
   foreach (String line in text.lines()) {

@@ -12,7 +12,8 @@ int main(void) {
     foreach(Map service, services) {
       String mark = service["healthy"].truth() ? "ok" : "DOWN";
       printf("%s", %"  $(service["name"]):$(service["port"]) $mark\n");
-      if (!service["healthy"].truth()) unhealthy.push(service["name"]);
+      if (!service["healthy"].truth())
+        unhealthy.push(service["name"]);
     }
 
     Var report = unhealthy;

@@ -58,6 +58,12 @@ export default defineConfig({
     },
     server: {
       proxy: docsDevProxy,
+      fs: {
+        allow: [
+          fileURLToPath(new URL(".", import.meta.url)),
+          fileURLToPath(new URL("../builds/wasm/playground", import.meta.url))
+        ]
+      },
       watch: {
         usePolling: true,
         interval: 100

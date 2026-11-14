@@ -1,0 +1,99 @@
+---
+import { Code } from "astro:components";
+import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
+const x2cLang = { ...grammar, name: "x2c" };
+const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
+const recorded = "https://github.com/gwf/x2c/tree/ccc7e475869cf93f91637f283761a57dfd92715b/examples/shootout/benchmarks";
+---
+<div class="example-prose shootout-story">
+<p>A small numerical loop and a DNA-processing pipeline ask different things of a language. One spends its time on arithmetic. Another creates strings, looks up keys, and moves bytes between buffers. A single score hides those differences.</p>
+
+<p>This experiment starts with ten Computer Language Benchmarks Game problems. Each has two x2c implementations: an <strong>idiomatic</strong> version built with ordinary collections and APIs, and a <strong>tuned</strong> version that specializes the work where it matters. The question is what changes when we move between those styles, and how much code that change needs.</p>
+
+<p>In the recorded November 2026 local-input snapshot, across the eight problems shared by all eight implementation columns, tuned x2c takes <strong>1.20 times the C elapsed time</strong>, with <strong>0.89 times the C source lines</strong>. Those are geometric means of matched problem ratios. The individual programs tell a more useful story than that summary.</p>
+
+<h2 id="charts">Start with the individual problems</h2>
+
+<figure class="story-chart">
+  <a href={local("charts/shootout/runtime.svg")} aria-label="Open full-size chart: Elapsed time relative to C for ten problems, comparing idiomatic and tuned x2c.">
+    <img src={local("charts/shootout/runtime.svg")} alt="Elapsed time relative to C for ten problems, comparing idiomatic and tuned x2c." loading="lazy" width="900" height="720" />
+  </a>
+  <figcaption>Ten problems; lower is faster. The dashed line is the C time for each problem. Ratios use a logarithmic scale.</figcaption>
+</figure>
+
+<p>Tuning makes its largest differences in the text-processing programs. On k-nucleotide, elapsed time falls from 102.8 ms to 17.4 ms. FASTA falls from 22.6 ms to 4.4 ms, and reverse-complement from 12.4 ms to 2.5 ms. Each pair solves the same problem specification, but changes how the program represents or moves its data.</p>
+
+<p>Other pairs barely move. The two binary-trees sources are identical; their 26.6 ms and 26.8 ms medians are separate measurements of that same source. Pi digits also changes little: 281.5 ms becomes 269.2 ms. There is no single transformation that explains every row.</p>
+
+<p>These are small local inputs. Mandelbrot&#x27;s C baseline is 2.8 ms, while pi digits takes 263.4 ms. A ratio should be read with its absolute time; it does not tell us how much time a larger application would save.</p>
+
+<h2 id="representation">Put the representation where the work is</h2>
+
+<p>The n-body simulation keeps five bodies moving under mutual gravity. The idiomatic implementation uses heap objects and an Array of body pairs. The tuned version keeps the five bodies in a native array of structs and visits each pair with two loops. It still uses Vec3 methods and required reference parameters for the physics.</p>
+
+<p>On this input, n-body goes from <strong>72.9 ms in 102 source lines</strong> to <strong>33.2 ms in 82 lines</strong>. The C program takes 32.8 ms. Here, making the fixed shape explicit also removes code: the tuned program does not need a separate collection of pair objects.</p>
+
+<p>K-nucleotide makes a different representation choice. Both implementations count all sliding windows for their requested lengths. The idiomatic program creates a String key for each window and updates a general Map. The tuned program uses MapSubInt, whose keys borrow spans of the original sequence:</p>
+
+<Code code={"MapSubInt counts = MapSubInt.new();\nfor (int i = 0; i + width <= sequence.len(); i++)\n  counts.increment(sequence.substring(i, width));"} lang={x2cLang} theme={x2cDarkTheme} />
+
+<p>The tuned program retains the sequence while those views are in use. It materializes strings where the frequency report needs them. This removes repeated key creation from the counting loop without replacing the required growing-map algorithm. Its 17.4 ms still exceeds the C baseline&#x27;s 9.3 ms; the shorter implementation does not erase every cost.</p>
+
+<h2 id="buffers">Move bytes in batches</h2>
+
+<p>The idiomatic reverse-complement program reads FASTA lines, collects each sequence in a Buffer, and builds its output one line at a time. The tuned program reads 16 KiB chunks with fread, uses a complement lookup table, transforms its typed character buffer in place, and batches output before calling write_all.</p>
+
+<p>That version grows from <strong>47 to 67 source lines</strong>, while its measured time falls from <strong>12.4 to 2.5 ms</strong>. The added code handles chunk boundaries, headers, and output buffering. It is useful code to write when this work matters; it is also more code to understand and maintain.</p>
+
+<p>FASTA follows a similar route. The ordinary version builds output lines with a Buffer and stores probability choices as objects. The tuned version uses typed probability storage and a native output buffer. It grows from 65 to 82 lines and drops from 22.6 to 4.4 ms. These comparisons change several implementation details together. They do not isolate the contribution of each change.</p>
+
+<h2 id="source-size">Speed does not have one source-size cost</h2>
+
+<figure class="story-chart">
+  <a href={local("charts/shootout/source.svg")} aria-label="Open full-size chart: Source lines for ten problems, comparing idiomatic and tuned x2c.">
+    <img src={local("charts/shootout/source.svg")} alt="Source lines for ten problems, comparing idiomatic and tuned x2c." loading="lazy" width="900" height="720" />
+  </a>
+  <figcaption>The same ten problems in the same order. Counts exclude blank lines and comments; the axis is linear.</figcaption>
+</figure>
+
+<p>Tuned n-body and spectral-norm are both shorter than their idiomatic counterparts. The text-processing variants usually add code. Regex-redux grows from 61 to 97 lines: it keeps PCRE2 and independent pattern-counting threads, but uses borrowed match-data blocks instead of constructing capture Lists, plus typed buffers for substitutions. Its time falls from 26.4 to 13.3 ms.</p>
+
+<p>Pi digits already delegates arbitrary-precision arithmetic to GMP in both versions. The tuned version uses fused multiply-add and multiply-subtract operations to avoid intermediate products; it retains both extracts required by the problem. This is a smaller change, and the measured difference is smaller too.</p>
+
+<p>Source lines here mean nonblank lines after language-aware comment removal. They are a way to inspect the amount of source, not a measurement of clarity. The recorded dataset also includes normalized gzip bytes. On the shared cohort, tuned x2c uses 0.89 times C&#x27;s source lines but 1.11 times its compressed source bytes. The answer changes with the measure.</p>
+
+<h2 id="languages">Place the results beside the other programs</h2>
+
+<figure class="story-chart">
+  <a href={local("charts/shootout/summary.svg")} aria-label="Open full-size chart: Eight-implementation summary of elapsed time relative to C and source lines relative to Python.">
+    <img src={local("charts/shootout/summary.svg")} alt="Eight-implementation summary of elapsed time relative to C and source lines relative to Python." loading="lazy" width="900" height="560" />
+  </a>
+  <figcaption>Geometric means across the eight shared problems. Runtime uses a log scale; source size uses a linear scale. Lower values mean less time or fewer lines.</figcaption>
+</figure>
+
+<p>This view includes only the eight problems with an admitted contribution in every column. Tuned x2c&#x27;s elapsed-time ratio is 1.20; Rust&#x27;s is 1.17. Idiomatic x2c is 2.82 relative to C, with 1.19 times Python&#x27;s source lines; tuned x2c uses 1.29 times Python&#x27;s lines.</p>
+
+<p>These are selected implementations, not rankings of what each language can do. The source choices, libraries, process model, and input sizes all matter. Java starts a fresh JVM for each sample, including startup and JIT compilation; the warmup process does not warm the next JVM. Its number is not a steady-state server measurement.</p>
+
+<p>The missing contributions also matter. K-nucleotide has no admitted Rust, C++, Go, or Java entry in this environment. Binary-trees has no admitted Python entry. Those problems remain visible in the x2c comparisons above, but are excluded from the shared summary rather than silently given substitute scores.</p>
+
+<h2 id="method">What was measured</h2>
+
+<p>The figures use the recorded <strong>12 November 2026 UTC</strong> snapshot on an <strong>Apple M4 Max</strong>, with the suite&#x27;s <strong>local</strong> input profile. Each x2c result is the median of twelve fresh processes after one warmup. Foreign-language measurements come from the pinned earlier calibration; they were not rerun alongside these x2c samples. The canonical-size suite remains unrun.</p>
+
+<p>The measured source revision is <code>ccc7e475869cf93f91637f283761a57dfd92715b</code>. The explanations above describe those measured sources. Some current example sources have since changed. The downloadable results, measurements, and provenance identify the snapshot, its inputs, and admitted contributions.</p>
+
+<p>The useful next step is to read a pair of implementations for a workload you recognize. Below are the complete current programs, followed by commands for checking them locally. The charts describe the recorded snapshot, not a new run of those current files.</p>
+<p class="story-links"><a href={recorded}>Measured source revision</a>
+  <a href={local("charts/shootout/provenance.json")}>Figure provenance</a>
+  <a href="https://github.com/gwf/x2c/blob/dev/examples/shootout/results/current.md">Full results and inputs</a>
+  <a href="https://github.com/gwf/x2c/blob/dev/examples/shootout/results/charts/measurements.csv">Measurements CSV</a></p>
+</div>
+<style>
+  .story-chart { margin: 28px 0 32px; }
+  .story-chart a { display: block; overflow-x: auto; }
+  .story-chart img { display: block; width: 100%; min-width: 560px; height: auto; }
+  .story-chart figcaption { margin-top: 12px; font-size: 13px; line-height: 1.6; color: var(--muted-dark); }
+  .story-links { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13px; }
+</style>

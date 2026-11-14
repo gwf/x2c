@@ -1,16 +1,18 @@
-#set document(title: "The x2c Book", author: "The x2c authors", date: none)
+#set document(title: "The x2c Book", author: "Gary William Flake", date: none)
 #set page(paper: "a4", margin: (x: 22mm, top: 22mm, bottom: 23mm))
-#set text(font: "Libertinus Serif", size: 10.5pt, lang: "en")
+#set text(font: "Libertinus Serif", size: 10.5pt, lang: "en", costs: (runt: 200%))
 #set par(justify: true, leading: 0.65em, spacing: 0.8em)
 #set heading(numbering: none)
 #show raw: set text(font: "DejaVu Sans Mono", size: 8pt)
-#set table(inset: 5pt, stroke: (bottom: 0.3pt + luma(85%)))
+#set table(inset: 5pt)
 #set terms(hanging-indent: 1em)
 #let horizontalRule = line(length: 100%, stroke: 0.4pt + luma(75%))
 #let divider = horizontalRule
 #show link: set text(fill: rgb("254c65"))
 #show raw: set text(hyphenate: false)
-#show raw.where(block: true): set block(breakable: true, inset: (y: 5pt))
+#show raw.where(block: true): set block(
+  breakable: true, width: 100%, fill: luma(95%), inset: (x: 8pt, y: 6pt),
+)
 #show raw.where(block: true): set par(justify: false, leading: 0.45em)
 #show figure: set block(breakable: true)
 #show table: set text(size: 8.5pt)
@@ -37,7 +39,7 @@ $if(version)$
   #text(size: 11pt)[Version $version$]
   #v(3mm)
 $endif$
-  #text(size: 11pt)[The x2c authors]
+  #text(size: 11pt)[Gary William Flake]
   #v(3mm)
   #link("https://x2c-lang.dev")[x2c-lang.dev]
 ]

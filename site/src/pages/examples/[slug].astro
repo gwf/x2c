@@ -30,8 +30,7 @@ const panels = [panel, ...(page.extraPanels ?? []).map((name: string) =>
   detailPanels[`../../content/examples/panels/${name}.md`])];
 const source = page.source;
 const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
-const sourceUrl = page.sourceDownload ? local(page.sourceDownload)
-  : `https://github.com/gwf/x2c/blob/main/${source}`;
+const sourceUrl = `https://github.com/gwf/x2c/blob/main/${source}`;
 const outputs = import.meta.glob([
   "../../../../examples/expected/*.stdout",
   "../../../../packages/*/examples/expected/*.stdout",

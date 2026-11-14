@@ -1,23 +1,32 @@
-#include <assert.h>
+#include "path.x"
 
-int main(void) {
-  Array orders = [%(tea 2 "Ada"), %(coffee 1 "Grace"), %(tea 1 "Linus")];
+String example_data(String name) {
+  Path source = String.new(__FILE__);
+  return source.dirname().join("../data", name);
+}
 
-  // foreach walks anything with elements; destructure as you go.
-  foreach (List order in orders) {
-    (Symbol item, int count, String who) = order;
-    printf("%s wants %d %s\n", who, count, item.str());
-  }
+int main(int argc, char **argv) {
+  Path directory = argc > 1 ? argv[1] : example_data("love-files");
+  Path path = directory.join("quantities.txt");
 
-  // A pattern condition binds names right where you test them.
-  foreach (List order in orders)
-    if (order ~= %(tea ?(int n) ?(String who)) && n > 1)
-      puts(%"$who is thirsty");
+  // Walk collection elements and Map values.
+  foreach (int score in [3, 4, 5])
+    printf("score: %d\n", score);
+  foreach (String name in %("Ada" "Grace"))
+    puts(name);
+  foreach (int count in {"tea": 2})
+    printf("stock: %d\n", count);
 
-  // Lambdas and iterator chains read left to right.
-  Var total = orders.iter().map(%!(List order) => order[1])
-    .foldl(0, %!(sum, count) => sum + count);
-  assert(total == 4);
+  // Split text into lines, then words.
+  String text = "tea and cake\ncoffee and biscuits";
+  foreach (String line in text.lines())
+    foreach (String word in line.words())
+      puts(word);
 
+  // Read file lines and walk their words.
+  auto File input = path.open("r");
+  foreach (String line in input)
+    foreach (String word in line.words())
+      puts(word);
   return 0;
 }

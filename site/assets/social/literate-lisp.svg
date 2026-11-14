@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<rect width="1200" height="630" fill="#f4f1ec"/>
+<rect width="1200" height="12" fill="#da291c"/>
+<g fill="none" stroke="#da291c" stroke-width="17" transform="translate(62 55) scale(.5)">
+<path d="M9 16 A34.5 34.5 0 0 1 9 84"/><path d="M91 16 A34.5 34.5 0 0 0 91 84"/>
+</g>
+<text x="129" y="94" font-family="Arial, sans-serif" font-size="43" font-weight="700" fill="#191919">x2c</text>
+<text x="1136" y="85" text-anchor="end" font-family="Arial, sans-serif" font-size="18" fill="#69645e">examples / literate lisp</text>
+<text x="64" y="195" font-family="Georgia, serif" font-size="63" fill="#191919">Build a Lisp. Read every line.</text>
+<text x="66" y="246" font-family="Arial, sans-serif" font-size="26" fill="#625c56">Values, closures, macros, and a recursive evaluator.</text>
+<rect x="64" y="291" width="1072" height="237" fill="#191919"/>
+<g font-family="Menlo, monospace" font-size="28" fill="#e4e0da">
+<text x="96" y="346" fill="#f2a18b">(+ 1 2)</text><text x="620" y="346">3</text>
+<text x="96" y="410" fill="#f2a18b">'(a b c)</text><text x="620" y="410">(a b c)</text>
+<text x="96" y="474" fill="#f2a18b">(eval '(+ 1 2))</text><text x="620" y="474">3</text>
+</g>
+<path d="M510 336h60m-10-10 10 10-10 10 M510 400h60m-10-10 10 10-10 10 M510 464h60m-10-10 10 10-10 10" fill="none" stroke="#69645e" stroke-width="2"/>
+<text x="64" y="585" font-family="Menlo, monospace" font-size="21" font-weight="700" fill="#da291c">x2c-lang.dev</text></svg>

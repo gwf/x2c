@@ -7,9 +7,9 @@ links:
     href: https://github.com/gwf/x2c/blob/main/packages/autodiff/examples/autodiff.x
 section: magic
 home: true
-order: 5
+order: 8
 tab: autodiff
-title: Differentiate the program.
+title: Derive another day.
 run: |
   make -C packages/autodiff builds/example-energy-gradient
   ./packages/autodiff/builds/example-energy-gradient
@@ -25,7 +25,8 @@ $ad.reverse()
 static double energy(double x, double y, int n) {
   double s = 0.0;
   for (int i = 0; i < n; i++) {
-    if (i == 2) continue;
+    if (i == 2)
+      continue;
     s += x * x * (double) i;
   }
   return sin(s) / x - exp(y);
@@ -43,4 +44,4 @@ double value = energy_grad(1.0, 2.0, 5, &dx, &dy);
 ~}
 ```
 
-Automatic differentiation transforms a function into code that computes derivatives: `$ad.reverse()` generates `energy_grad`, which returns the value and writes both partial derivatives. The example combines syntax transformation with ordinary numeric code; the linked full source includes executable checks.
+At compile time, `$ad.reverse()` transforms this function into `energy_grad`: native code that computes the value and both partial derivatives. The transformation handles the loop, branch, and mathematical operations together. Write the calculation once; the package generates its derivative code. The complete example checks the result against a finite difference.

@@ -2,9 +2,9 @@
 slug: fields
 section: magic
 home: true
-order: 4
-tab: reflection
-title: The compiler can describe your types.
+order: 6
+tab: meta
+title: A field day.
 ---
 
 ```x2c
@@ -33,4 +33,4 @@ macro Stmt $show(Expr $value) => $show_fields($value, $value);
 ~}
 ```
 
-Inspect a type's fields at compile time and generate code that visits them. This is the same general technique behind derived operations: the declaration supplies the information instead of a second handwritten field list.
+A `meta` function runs ordinary x2c during translation. It can inspect types and captured syntax, use ordinary runtime operations, and construct the code the compiler inserts. Here, the macro captures an expression and the meta function generates statements from its fields.

@@ -1,6 +1,6 @@
 ---
 titleSubject: Programming
-titleOpening: is Dead?
+titleOpening: Is Dead.
 titleEnding: Long Live
 kicker: "x2c is a language for people who love to code."
 ---
@@ -47,7 +47,7 @@ foreach (String word in words)
 Power is C made composable. Complex things are possible. Iterators, `match`,
 scopes, exceptions, and threads all work with the built-in types and with each
 other, and the protocols behind those types are open to your own. No framework
-is needed to hold it together. The pieces are small, and they compound.
+is needed to hold it together.
 
 <!-- ignore: Illustrative pipeline; count_file and add_counts are application functions. -->
 ```x2c,ignore
@@ -59,8 +59,7 @@ Map totals = Path.new("src").walk().filter(Path.is_file)
 
 Magic is C made reflective. It insists upon itself. Macros and decorators
 rewrite the program's syntax as it compiles, meta functions run ordinary x2c at
-compile time, and the compiler is itself written in x2c. When a problem resists,
-you can change the language instead.
+compile time, and the compiler is itself written in x2c.
 
 <!-- ignore: Decorator usage assumes application-provided mutex, balance, and deposit. -->
 ```x2c,ignore
@@ -77,5 +76,6 @@ with_lock (mutex) balance += deposit;
 
 Why bother? Because **programming is not about making computers do things;
 it is about helping brains think things**, and x2c is a language for thinking in code.
+
 Some users report heightened expressiveness, a sense of universality, and a
 touch of transcendence. Be sure to drink plenty of water.

@@ -2,9 +2,9 @@
 slug: decorators
 section: magic
 home: true
-order: 2
+order: 3
 tab: decorators
-title: Transform a function at its definition.
+title: You trace yourself.
 ---
 
 ```x2c
@@ -26,4 +26,4 @@ int answer(void) => 42;
 ~}
 ```
 
-A decorator adds tracing around a function body. The function keeps its ordinary calling interface while the transformation supplies the repeated entry and exit work.
+A decorator is a macro that receives the declaration, statement, or expression that follows it. Here it adds tracing around a function body. The function keeps its ordinary calling interface while the transformation supplies the repeated entry and exit work.

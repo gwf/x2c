@@ -85,7 +85,10 @@ hook needs Python 3. To remove it, delete the `core.hooksPath` entry from
   can run and modify.
 - [The book](docs/src/index.md): language guide, reference, standard library,
   and compiler internals. Start with [values](docs/src/guide/values.md) and
-  [idioms](docs/src/guide/idioms.md).
+  [idioms](docs/src/guide/idioms.md), or download the
+  [book PDF](https://x2c-lang.dev/x2c-book.pdf).
+- Cheat sheet: [printable PDF](https://x2c-lang.dev/x2c-cheatsheet.pdf) /
+  [web version](https://x2c-lang.dev/cheatsheet/).
 - [C libraries](packages/README.md): optional packages for databases, graphics,
   networking, parsing, and other native libraries.
 - [Command-line reference](docs/src/reference/cli.md): compilation, projects,

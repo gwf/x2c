@@ -2,9 +2,9 @@
 slug: files
 section: love
 home: true
-order: 7
+order: 6
 tab: files
-title: Read the file. Use its contents.
+title: Read between the files.
 ---
 
 ```x2c
@@ -29,13 +29,9 @@ title: Read the file. Use its contents.
   auto File input = path.open("r");
   long total = 0;
 
-  // Skip blank lines; each remaining row has three valid longs.
-  foreach (String line in input) {
-    if (!line.strip()) continue;
-    String (a, b, c) = line.words().iter().list();
-    long x = atol(a), y = atol(b), z = atol(c);
-    total += x + y + z;
-  }
+  foreach (String line in input)
+    foreach (String word in line.words())
+      total += atol(word);
   printf("total: %ld\n", total);
 ~  return 0;
 ~}

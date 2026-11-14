@@ -2,4 +2,4 @@
 title: Code is Magic
 ---
 
-Change the language when the problem calls for it. Compute at compile time, transform syntax, inspect types, and keep selected rules editable in the running program.
+Keep the values. Change how you program. Evaluate Lisp alongside compiled code, use macros to generate repeated definitions, and add constructs that fit your problem. One language. One data model. New ways to program.

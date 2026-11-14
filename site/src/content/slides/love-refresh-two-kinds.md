@@ -2,9 +2,9 @@
 slug: two-kinds
 section: love
 home: true
-order: 1
-tab: two kinds
-title: Equal contents. Distinct identities.
+order: 5
+tab: two tests
+title: Equal rites.
 ---
 
 ```x2c
@@ -32,4 +32,4 @@ title: Equal contents. Distinct identities.
 
 Strings, Lists, and Symbols share equal values. Arrays and Maps are mutable objects: two separate Arrays can have equal contents without being the same Array.
 
-`==` compares contents; `===` compares identity. String and List keys let you retrieve a Map entry using an independently constructed equal value.
+Use `==` to test contents and `===` to test identity. String and List keys let you retrieve a Map entry using an independently constructed equal value.

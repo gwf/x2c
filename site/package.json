@@ -4,13 +4,17 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "node scripts/playground-programs.mjs compile && astro build && node scripts/playground-programs.mjs install && node scripts/build-book.mjs",
+    "build": "node scripts/playground-programs.mjs compile && astro build && node scripts/playground-programs.mjs install && node scripts/build-book.mjs && node scripts/build-cheatsheet.mjs",
     "preview": "astro preview",
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "pdf:cheatsheet": "node scripts/build-cheatsheet.mjs"
   },
   "dependencies": {
     "astro": "7.3.3",
     "satteri": "0.9.5",
     "shiki": "4.4.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
   }
 }

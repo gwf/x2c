@@ -1000,7 +1000,7 @@ static const char *evidence_rows[][3] = {
    "power/channel-word-count power/channel-service"},
   {"common", "unittest/test-var.x unittest/test-varops.x", ""},
   {"context", "unittest/test-context.x", ""},
-  {"derive", "unittest/test-derive.x", "power/derive"},
+  {"derive", "unittest/test-derive.x", "magic/derive"},
   {"diff", "unittest/test-diff.x", ""},
   {"digest", "unittest/test-digest.x", ""},
   {"encoding", "unittest/test-encoding.x", ""},

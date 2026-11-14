@@ -2,35 +2,40 @@
 slug: loops
 section: love
 home: true
-order: 6
+order: 7
 tab: loops
-title: Walk the data, name its parts.
+title: Loop, there it is!
 ---
 
 ```x2c
-~#include <assert.h>
+~#include "path.x"
 
-~int main(void) {
-  Array orders = [%(tea 2 "Ada"), %(coffee 1 "Grace"), %(tea 1 "Linus")];
+~int main(int argc, char **argv) {
+~  Path source = String.new(__FILE__);
+~  String path = argc > 1 ? argv[1]
+~    : source.dirname().join("../data/love-files/quantities.txt");
 
-  // foreach walks anything with elements; destructure as you go.
-  foreach (List order in orders) {
-    (Symbol item, int count, String who) = order;
-    printf("%s wants %d %s\n", who, count, item.str());
-  }
+  // Walk collection elements and Map values.
+  foreach (int score in [3, 4, 5])
+    printf("score: %d\n", score);
+  foreach (String name in %("Ada" "Grace"))
+    puts(name);
+  foreach (int count in {"tea": 2})
+    printf("stock: %d\n", count);
 
-  // A pattern condition binds names right where you test them.
-  foreach (List order in orders)
-    if (order ~= %(tea ?(int n) ?(String who)) && n > 1)
-      puts(%"$who is thirsty");
+  // Split text into lines, then words.
+  String text = "tea and cake\ncoffee and biscuits";
+  foreach (String line in text.lines())
+    foreach (String word in line.words())
+      puts(word);
 
-  // Lambdas and iterator chains read left to right.
-  Var total = orders.iter().map(%!(List order) => order[1])
-    .foldl(0, %!(sum, count) => sum + count);
-~  assert(total == 4);
-
+  // Read file lines and walk their words.
+  auto File input = path.open("r");
+  foreach (String line in input)
+    foreach (String word in line.words())
+      puts(word);
 ~  return 0;
 ~}
 ```
 
-`foreach` walks a container while destructuring gives each part a name. Pattern conditions select the orders that matter, and an iterator chain totals their quantities.
+The same `foreach` walks Array and List elements, Map values, and file lines. Walk the lines and words of a String directly, without first collecting them into another container.

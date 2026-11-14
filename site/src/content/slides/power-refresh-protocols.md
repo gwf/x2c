@@ -5,7 +5,7 @@ section: power
 home: true
 order: 1
 tab: protocols
-title: Small contracts, useful combinations.
+title: Sets appeal.
 ---
 
 ```x2c

@@ -4,7 +4,7 @@ navTitle: Recognize digits
 order: 2
 slide: torch
 title: Recognize handwritten digits.
-description: Train a convolutional network in x2c with the Torch package, then test it on handwriting it has never seen.
+description: Train a digit classifier with Torch, then test it on unseen handwriting.
 source: packages/torch/examples/mnist.x
 codeLabel: Model and training loop from mnist.x
 extraPanels:
