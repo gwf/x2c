@@ -7,13 +7,15 @@ import os
 from pathlib import Path
 import platform
 import subprocess
+import sys
 import tarfile
 import tempfile
 
 # The release helper owns candidate identity, destinations and bundles.
+tools = Path(__file__).resolve().parents[2] / "tools"
+sys.path.insert(0, str(tools))
 spec = importlib.util.spec_from_file_location(
-    "release",
-    Path(__file__).resolve().parents[2] / "tools/release-candidate.py")
+    "release", tools / "release-candidate.py")
 release = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(release)
 digest = release.digest

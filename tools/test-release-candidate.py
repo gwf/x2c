@@ -4,6 +4,8 @@ import argparse
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -15,6 +17,14 @@ spec.loader.exec_module(c)
 
 
 class Candidates(unittest.TestCase):
+    def test_live_verifier_starts_outside_tools_directory(self):
+        verifier = Path(__file__).resolve().parents[1] / 'etc/release/verify-live.py'
+        with tempfile.TemporaryDirectory() as directory:
+            result = subprocess.run([sys.executable, '-I', str(verifier), '--help'],
+                                    cwd=directory, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('--identity', result.stdout)
+
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
