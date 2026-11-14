@@ -59,6 +59,33 @@ X2C_RELEASE_TAG=candidate-one sh "$ROOT/site/public/install.sh" \
   --version "$version" >/dev/null
 [[ "$(cat "$WORK/prefix/candidate-test.txt")" == candidate-one ]] || exit 1
 
+# A checksum-valid but unusable compiler must leave the installation intact.
+mkdir -p "$WORK/unusable-tree/x2c/bin" "$WORK/releases/unusable"
+printf 'unusable\n' >"$WORK/unusable-tree/x2c/.x2c-install-manifest"
+printf '#!/bin/sh\necho unsupported-host >&2\nexit 1\n' \
+  >"$WORK/unusable-tree/x2c/bin/x2c"
+chmod +x "$WORK/unusable-tree/x2c/bin/x2c"
+tar -czf "$WORK/releases/unusable/$asset" -C "$WORK/unusable-tree" x2c
+(cd "$WORK/releases/unusable" && shasum -a 256 "$asset" >"$asset.sha256")
+if X2C_RELEASE_TAG=unusable sh "$ROOT/site/public/install.sh" \
+    --version "$version" >/dev/null 2>"$WORK/unusable.stderr"; then
+  echo "install.sh accepted an unusable compiler" >&2
+  exit 1
+fi
+grep -q "unsupported-host" "$WORK/unusable.stderr"
+[[ "$(x2c --version)" == "x2c $version" ]] || exit 1
+[[ "$(cat "$WORK/prefix/candidate-test.txt")" == candidate-one ]] || exit 1
+[[ "$(x2c list)" == "greet - source" ]] || exit 1
+x2c run -q "$ROOT/examples/power/greet-client.x" >"$WORK/preserved-greet.stdout"
+grep -q "ping ping ping" "$WORK/preserved-greet.stdout"
+# A failed fresh install must not leave an unusable installation behind.
+if X2C_RELEASE_TAG=unusable sh "$ROOT/site/public/install.sh" \
+    --version "$version" --prefix "$WORK/fresh" >/dev/null 2>&1; then
+  echo "install.sh accepted an unusable compiler for a fresh install" >&2
+  exit 1
+fi
+[[ ! -e "$WORK/fresh" ]] || exit 1
+
 # A bad checksum is refused before anything is replaced.
 printf 'bad\n' >"$WORK/releases/v$version/$asset.sha256"
 if sh "$ROOT/site/public/install.sh" --version "$version" \

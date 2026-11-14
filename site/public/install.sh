@@ -131,6 +131,9 @@ staged="$prefix.new.$$"
 previous="$prefix.previous.$$"
 trap 'rm -rf "$work" "$staged"' EXIT
 mv "$extracted" "$staged"
+installed="$("$staged/bin/x2c" --version 2>&1)" ||
+  fail "'$staged/bin/x2c --version' failed:" \
+    "$installed; this system may be older than the release supports"
 if [ -d "$prefix" ]; then
   if [ -d "$prefix/packages" ]; then
     rm -rf "$staged/packages"
@@ -148,9 +151,6 @@ else
   mv "$staged" "$prefix"
 fi
 
-installed="$("$prefix/bin/x2c" --version 2>&1)" ||
-  fail "unpacked into $prefix, but '$prefix/bin/x2c --version' failed:" \
-    "$installed; this system may be older than the release supports"
 echo "x2c: installed $installed at $prefix"
 case ":$PATH:" in
   *":$prefix/bin:"*) ;;
