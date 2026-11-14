@@ -58,6 +58,8 @@ List _derive_row(Type type, List value);
 
 List _derive_from_row(Type type, List value, List row);
 
+List _lisp_binding_callable(Code function);
+
 List _scalar_access_record(Type type);
 
 Code register_rewrite(Code function, Code pattern, List holes);
