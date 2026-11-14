@@ -596,8 +596,7 @@ stderr. The caller includes `<time.h>`:
 ~#include "system-macros.x"
 int main(void) {
   long total = 0;
-  $time("sum")
-  {
+  $time("sum") {
     for (int i = 0; i < 1000; i++) total += i;
   }
   return total == 499500 ? 0 : 1;

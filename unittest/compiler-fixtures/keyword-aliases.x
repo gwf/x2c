@@ -122,8 +122,7 @@ int main(void) {
 }
 
 static void direct_captured_raise(void) {
-  $fixture.once()
-  {
+  $fixture.once() {
     if (0)
       raise %(invariant);
   }

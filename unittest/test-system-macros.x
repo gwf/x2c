@@ -84,8 +84,7 @@ static void system_macro_assert_passes_a_true_check(void) {
 
 static void system_macro_time_runs_its_target(void) {
   long total = 0;
-  $time("unit")
-  {
+  $time("unit") {
     for (int i = 0; i < 1000; i++) total += i;
   }
   EXPECT_TRUE(total == 499500);
