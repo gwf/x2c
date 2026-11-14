@@ -14,6 +14,7 @@ export function viewerAsset(asset: string) {
     body = `window.TUTORIAL_SNAPSHOTS = ${JSON.stringify(manifest)};`;
   } else {
     body = read(`tools/version-viewer/${asset}`);
+    if (asset === "index.html") body = body.replace("</head>", '<meta name="robots" content="noindex">\n</head>');
     if (asset === "style.css") body += "\n" + galleryStyle;
     if (asset === "app.js") body = body
       .replace("selected = versions.length - 1;", "selected = Math.min(1, versions.length - 1);")
