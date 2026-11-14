@@ -178,4 +178,3 @@ class Frequencies MapStringInt;
 This step grows the code: a 27-line driver plus a 76-line module. A reusable operation cannot keep all of its temporary file contents until program shutdown. The module now releases that working storage before returning, while keeping the final counts and words available to its caller. Invalid paths report an error to the caller instead of terminating the process.
 
 The extra lines define a reusable operation and its result lifetime, rather than relying on program shutdown for cleanup.
-

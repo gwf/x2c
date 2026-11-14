@@ -131,7 +131,11 @@ static void _check_links(void):
         continue
       target = target.partition("#").car()
       String joined = directory ? %"$directory/$target" : target
-      if !target || !root.join(_normalized(joined)).exists():
+      String resolved = _normalized(joined)
+      // Published PDFs are built from these sources, outside the book tree.
+      if resolved == "docs/x2c-cheatsheet.pdf": resolved = "site/src/pages/cheatsheet.astro"
+      if resolved == "docs/x2c-book.pdf": resolved = "docs/book.typ"
+      if !target || !root.join(resolved).exists():
         errors.push(%"$(_where(relative, text, _start(found))): " +
                     %"missing link $target")
 

@@ -28,6 +28,8 @@ lookup = {(r['problem'], r['implementation']): r for r in rows}
 def finish(fig, name):
     for ext in ['svg', 'png']:
         fig.savefig(output / f'{name}.{ext}', dpi=180, facecolor='#f3f0e9')
+    svg = output / f'{name}.svg'
+    svg.write_text('\n'.join(line.rstrip() for line in svg.read_text().splitlines()) + '\n')
     plt.close(fig)
 
 
