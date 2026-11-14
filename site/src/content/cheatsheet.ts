@@ -135,7 +135,7 @@ export const sheet: Section[] = [
   ] },
   { column: 3, title: "Commands", rows: [
     ["x2c translate --dump-ast a.x", "Print the expanded, bound AST; omit flag to emit C."],
-    ["new  repl  lsp", "Project, REPL, editor server."],
+    ["new  repl  lsp", "Project, REPL (checkout only), editor server."],
     ["install  remove  list", "Packages; `env` shows paths."],
   ] },
 ];

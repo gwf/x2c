@@ -21,7 +21,7 @@ This is the core of the word-counting algorithm rewritten in x2c: read a file, r
 
 The baseline reads one file with `getline`. It splits each line into whitespace-separated words, removes punctuation, and lowercases what remains. A chained hash table stores one copied string and an integer count for each distinct word. Finally, the program gathers pointers to all entries, sorts them with `qsort`, prints ten, and frees its storage.
 
-Those 183 lines include two structures and ten helper functions, handling allocation, hashing, table growth, normalization, comparison, errors, and cleanup. [Read the C baseline.](https://github.com/gwf/x2c/blob/dev/examples/c2x2c/words-v0.c)
+Those 183 lines include two structures and ten helper functions, handling allocation, hashing, table growth, normalization, comparison, errors, and cleanup. [Read the C baseline.](https://github.com/gwf/x2c/blob/main/examples/c2x2c/words-v0.c)
 
 These are whitespace-delimited words with punctuation removed, not linguistic tokens. `don't` becomes `dont`; `well-known` becomes `wellknown`. Every aggregate count must fit in an `int`.
 

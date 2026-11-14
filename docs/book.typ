@@ -49,7 +49,8 @@ $endif$
 #pagebreak()
 #counter(page).update(1)
 #set page(numbering: "1", header: context {
-  let chapters = query(heading.where(level: 2).before(here()))
+  let chapters = query(heading.where(level: 2))
+    .filter(chapter => chapter.location().page() <= here().page())
   set text(size: 8pt, fill: luma(40%))
   if chapters.len() > 0 { chapters.last().body } else { [The x2c Book] }
   line(length: 100%, stroke: 0.3pt + luma(80%))
