@@ -18,6 +18,6 @@ protocol Iter(DelegateIterable);
 int main(void) {
   DelegateNotIterable value = { { 1 } };
   int total = 0;
-  foreach(int item, value) total += item;
+  foreach (int item, value) total += item;
   return total;
 }

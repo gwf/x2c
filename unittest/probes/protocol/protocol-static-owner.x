@@ -47,6 +47,6 @@ double static_owner_reading(StaticFeet value) {
 
 int static_owner_total(StaticItemsChild values) {
   int total = 0;
-  foreach(int value, values) total += value;
+  foreach (int value, values) total += value;
   return total;
 }

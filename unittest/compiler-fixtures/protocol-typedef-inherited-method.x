@@ -18,7 +18,7 @@ int main(void) {
   Domain same = %(1 2 3);
   Domain tail = values.cdr();
   int total = 0;
-  foreach(int value, values) total += value;
+  foreach (int value, values) total += value;
   int equal = values.equal(same);
   printf("%d %d %d\n", total, tail.car().int(), equal);
   return total == 6 && tail.car().int() == 2 && equal ? 0 : 1;

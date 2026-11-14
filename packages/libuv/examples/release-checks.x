@@ -94,7 +94,7 @@ static String _sandbox(String work) {
 */
 static int _report_finished(Array checks, int &passed, int &expired) {
   int settled = 0;
-  foreach(Var value, checks) {
+  foreach (Var value, checks) {
     Check check = value.pointer();
     if (check.reported) settled++;
     if (check.reported || !check.process.exited()) continue;
@@ -155,7 +155,7 @@ int main(void) {
       let the loop reap it; no child outlives this program. The watcher
       also lags the children, so give it time to name the last artifacts.
   */
-  foreach(Var value, checks) {
+  foreach (Var value, checks) {
     Check check = value.pointer();
     if (!check.process.exited()) check.process.kill(SIGKILL);
   }
@@ -169,7 +169,7 @@ int main(void) {
   loop.run(UV_RUN_DEFAULT);
 
   Array contents = [];
-  foreach(String name, artifacts) {
+  foreach (String name, artifacts) {
     Artifact artifact = xcalloc(1, sizeof(struct Artifact));
     artifact.name = name;
     contents.push((void *) artifact);
@@ -179,7 +179,7 @@ int main(void) {
     );
   }
   loop.run(UV_RUN_DEFAULT);
-  foreach(Var value, contents) {
+  foreach (Var value, contents) {
     Artifact artifact = value.pointer();
     printf(
       "  artifact     %-12s %.*s", artifact.name,
@@ -187,6 +187,6 @@ int main(void) {
     );
   }
   printf("%s", %"$passed passed, $expired timed out\n");
-  foreach(Var value, checks) ((Check) value.pointer()).process.free();
+  foreach (Var value, checks) ((Check) value.pointer()).process.free();
   return 0;
 }

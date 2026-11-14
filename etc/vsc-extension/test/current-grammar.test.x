@@ -271,7 +271,7 @@ unalias += 1;
 //       ^ punctuation.section.parens.begin.destructuring.x2c
   call((first, second) = values);
 //     ^ punctuation.section.parens.begin.destructuring.x2c
-foreach(Var (key, value), map) {
+foreach (Var (key, value), map) {
 // <------ keyword.control.foreach.x2c
 //      ^^^ support.type.prelude.x2c
 //          ^ punctuation.section.parens.begin.destructuring.x2c

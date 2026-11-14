@@ -292,7 +292,7 @@ static void error_stack_bound_is_configurable(void) {
 static void error_default_policies_match_contract(void) {
   Error.initialize();
   EXPECT_INT_EQ(nonreturning_error_causes.len(), 31);
-  foreach(Symbol code, nonreturning_error_causes)
+  foreach (Symbol code, nonreturning_error_causes)
     EXPECT_TRUE(Error.policy_get(code) == <abort>);
   EXPECT_TRUE(Error.policy_get(<join-fail>) == <abort>);
   EXPECT_TRUE(<call-stack> in nonreturning_error_causes);
@@ -316,7 +316,7 @@ static void error_policy_locks_nonreturning_causes(void) {
   Error.initialize();
   int caught = 0;
   Symbol dispositions[] = { <collect>, <log>, <ignore> };
-  foreach(Symbol code, nonreturning_error_causes) {
+  foreach (Symbol code, nonreturning_error_causes) {
     size_t count = sizeof dispositions / sizeof dispositions[0];
     for (size_t i = 0; i < count; i++) {
       try Error.policy_set(code, dispositions[i]);

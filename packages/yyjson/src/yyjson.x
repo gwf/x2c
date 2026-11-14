@@ -334,14 +334,14 @@ static yyjson_mut_val *_json_to_value(
     yyjson_mut_val *result = yyjson_mut_arr(document);
     if (!result) return NULL;
     if (value is <array>) {
-      foreach(Var child, value.array()) {
+      foreach (Var child, value.array()) {
         yyjson_mut_val *converted = _json_to_value(document, child, depth + 1);
         if (!converted || !yyjson_mut_arr_append(result, converted))
           return NULL;
       }
     }
     else {
-      foreach(Var child, value.list()) {
+      foreach (Var child, value.list()) {
         yyjson_mut_val *converted = _json_to_value(document, child, depth + 1);
         if (!converted || !yyjson_mut_arr_append(result, converted))
           return NULL;
@@ -352,7 +352,7 @@ static yyjson_mut_val *_json_to_value(
   if (value is <map>) {
     yyjson_mut_val *result = yyjson_mut_obj(document);
     if (!result) return NULL;
-    foreach(Var (key, child), value.map()) {
+    foreach (Var (key, child), value.map()) {
       if (key is not <string>) {
         Symbol tag = key.tag();
         raise %(bad-types (library "yyjson") (operation "stringify")
@@ -906,12 +906,12 @@ static Var _json_to_lisp(Var value) {
   if (value is <yyjson--bo> && !value.boolean().truth()) return %();
   if (value is <array>) {
     Array result = [];
-    foreach(Var child, value.array()) result.push(_json_to_lisp(child));
+    foreach (Var child, value.array()) result.push(_json_to_lisp(child));
     return result;
   }
   if (value is <map>) {
     Map result = {};
-    foreach(Var (key, child), value.map())
+    foreach (Var (key, child), value.map())
       result[key] = _json_to_lisp(child);
     return result;
   }
@@ -923,18 +923,18 @@ static Var _json_from_lisp(Var value) {
   if (value.is_nil()) return Json.bool(0);
   if (value is <array>) {
     Array result = [];
-    foreach(Var child, value.array()) result.push(_json_from_lisp(child));
+    foreach (Var child, value.array()) result.push(_json_from_lisp(child));
     return result;
   }
   if (value is <map>) {
     Map result = {};
-    foreach(Var (key, child), value.map())
+    foreach (Var (key, child), value.map())
       result[key] = _json_from_lisp(child);
     return result;
   }
   if (value is <list>) {
     List result = NULL;
-    foreach(Var child, value.list())
+    foreach (Var child, value.list())
       result = cons(_json_from_lisp(child), result);
     return result.reverse();
   }
@@ -998,7 +998,7 @@ static List _lisp_json_keys(Var value) {
     raise %(bad-types (library "yyjson") (operation "json-keys") (tag $tag));
   }
   List keys = NULL;
-  foreach(Var (key, child), value.map()) keys = cons(key, keys);
+  foreach (Var (key, child), value.map()) keys = cons(key, keys);
   return keys.reverse();
 }
 
@@ -1009,7 +1009,7 @@ static List _lisp_json_list(Var value) {
     raise %(bad-types (library "yyjson") (operation "json-list") (tag $tag));
   }
   List items = NULL;
-  foreach(Var item, value.array()) items = cons(item, items);
+  foreach (Var item, value.array()) items = cons(item, items);
   return items.reverse();
 }
 

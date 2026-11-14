@@ -54,9 +54,9 @@ int main(void) {
     "gemm: C := %.1f*C + %.6f*A*X, computation %s\n",
     beta, alpha, risk.computation_precision()
   );
-  foreach(Array row, risk.to_rows()) {
+  foreach (Array row, risk.to_rows()) {
     printf("  ");
-    foreach(Var value, row) printf("%10.6f", value.double());
+    foreach (Var value, row) printf("%10.6f", value.double());
     printf("\n");
   }
   return 0;

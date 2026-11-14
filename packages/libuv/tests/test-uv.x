@@ -56,7 +56,7 @@ static void process_stdin_and_concurrent_children(void) {
   EXPECT_INT_EQ(lines.exit_status(), 0);
 
   int count = 0;
-  foreach(String line, upper.stdout().lines()) count++;
+  foreach (String line, upper.stdout().lines()) count++;
   EXPECT_INT_EQ(count, 2);
 }
 

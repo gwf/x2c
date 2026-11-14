@@ -16,12 +16,12 @@ auto int main(void) {
     auto json.JsonDocument.read_file("releases.json");
   json.JsonObject root = document.root().object();
 
-  foreach(json.JsonValue item in root["releases"].array()) {
+  foreach (json.JsonValue item in root["releases"].array()) {
     json.JsonObject release = item.object();
     printf("%s\n", release["version"].string());
   }
 
-  foreach(json.JsonMember member in root["labels"].object())
+  foreach (json.JsonMember member in root["labels"].object())
     printf("%s=%s\n", member.key(), member.value().string());
   return 0;
 }

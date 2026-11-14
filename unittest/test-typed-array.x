@@ -219,7 +219,7 @@ static void typed_array_copy_slice_and_iteration(void) {
   EXPECT_INT_EQ(reverse[2], 1);
 
   int total = 0;
-  foreach(int value, values) total += value;
+  foreach (int value, values) total += value;
   EXPECT_INT_EQ(total, 15);
 
   struct Iter storage;

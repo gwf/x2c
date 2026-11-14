@@ -19,7 +19,7 @@ auto {
   Array services = config["services"];
   Array unhealthy = [];
 
-  foreach(Map service, services) {
+  foreach (Map service, services) {
     String mark = service["healthy"].truth() ? "ok" : "DOWN";
     printf("%s", %"  $(service["name"]):$(service["port"]) $mark\n");
     if (!service["healthy"].truth())

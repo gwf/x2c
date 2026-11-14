@@ -117,12 +117,12 @@ static void typed_list_iterates_as_elements(void) {
   ListInt values = %(2 4 6);
 
   int total = 0;
-  foreach(int value, values) total += value;
+  foreach (int value, values) total += value;
   EXPECT_INT_EQ(total, 12);
 
   ListDbl reals = %(0.5 1.5);
   double sum = 0.0;
-  foreach(double value, reals) sum += value;
+  foreach (double value, reals) sum += value;
   EXPECT_TRUE(sum == 2.0);
 }
 

@@ -236,7 +236,7 @@ Example:
 ```x2c
 if (!out) return 0;
 if (head is List) normalized_head = _normalize_pattern(head);
-foreach(Var part, parts) if (!_collect(part)) return 0;
+foreach (Var part, parts) if (!_collect(part)) return 0;
 ```
 
 Example:

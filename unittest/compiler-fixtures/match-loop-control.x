@@ -3,7 +3,7 @@
 int main(void) {
   List break_inputs = %( ((ok)) ((ok)) );
   int matched = 0, after = 0;
-  foreach(Var item, break_inputs) {
+  foreach (Var item, break_inputs) {
     List value = item;
     match (value) {
       case %( (ok) ): {
@@ -16,7 +16,7 @@ int main(void) {
 
   List continue_inputs = %( ((skip)) ((keep)) ((skip)) );
   int visited = 0, accepted = 0;
-  foreach(Var item, continue_inputs) {
+  foreach (Var item, continue_inputs) {
     List value = item;
     visited++;
     match (value) {

@@ -23,7 +23,7 @@ defer chart.free();
 // ... draw the title and the temperature grid ...
 Vector2 origin = { 84, 252 }, previous = { 0 };
 int index = 0;
-foreach(int high, highs) {
+foreach (int high, highs) {
   Vector2 offset = { index * 94, -(high - 60) * 6 };
   Vector2 point = origin + offset;
   if (index) {

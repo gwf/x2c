@@ -24,7 +24,7 @@ auto int main(void) {
   Map downloads = {};
 
   printf("%s", %"service: $(service["name"].string())\n");
-  foreach(json.JsonValue item, releases) {
+  foreach (json.JsonValue item, releases) {
     json.JsonObject release = item.object();
     String version = release["version"].string();
     String channel = release["channel"].string();
@@ -36,7 +36,7 @@ auto int main(void) {
   }
 
   json.JsonObject labels = root["labels"].object();
-  foreach(json.JsonMember member, labels)
+  foreach (json.JsonMember member, labels)
     printf("%s", %"label $(member.key())=$(member.value().string())\n");
   printf("%s", %"region entries: $(labels.all("region").len())\n");
 

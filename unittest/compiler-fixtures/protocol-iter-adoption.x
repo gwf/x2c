@@ -14,20 +14,20 @@ int main(void) {
   Bag bag = xmalloc(sizeof(struct Bag));
   bag.values = %(1 2 3);
   int total = 0;
-  foreach(int value, bag)
+  foreach (int value, bag)
     total += value;
 
-  foreach(int value, %[4, 5])
+  foreach (int value, %[4, 5])
     total += value;
 
-  foreach(int byte, %"A")
+  foreach (int byte, %"A")
     total += byte;
 
   Map one = %{"x": 6};
-  foreach(Var value, one)
+  foreach (Var value, one)
     total += value.integer();
 
-  foreach(String word, %"aa bbb".words())
+  foreach (String word, %"aa bbb".words())
     total += word.len();
 
   printf("%d\n", total);

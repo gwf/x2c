@@ -19,8 +19,8 @@ int main(void) {
     .map2(range(10, 12, 1), add_pair).sum();
 
   int nested = 0;
-  foreach(int left, range(1, 2, 1).map(double_value))
-    foreach(int right, range(10, 11, 1).head(1))
+  foreach (int left, range(1, 2, 1).map(double_value))
+    foreach (int right, range(10, 11, 1).head(1))
       nested += left + right;
 
   struct Iter mixed_source_storage;

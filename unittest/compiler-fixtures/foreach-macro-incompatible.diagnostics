@@ -1,4 +1,4 @@
 unittest/compiler-fixtures/foreach-macro-incompatible.x:9:3: type: cannot convert Var to Pair
-    foreach(Pair value, values) (void) value;
+    foreach (Pair value, values) (void) value;
     ^^^^^^^
 

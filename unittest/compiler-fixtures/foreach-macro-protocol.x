@@ -14,7 +14,7 @@ int main(void) {
   Bag bag = xmalloc(sizeof(struct Bag));
   bag.values = %(1 2 3);
   int total = 0;
-  foreach(int value, bag) total += value;
+  foreach (int value, bag) total += value;
   printf("%d\n", total);
   return total == 6 ? 0 : 1;
 }

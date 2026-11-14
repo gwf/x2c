@@ -35,60 +35,60 @@ int main(void) {
 
   List values = %(1 2 3);
   int existing = 0, existing_total = 0;
-  foreach(int current, values) {
+  foreach (int current, values) {
     existing = current;
     existing_total += existing;
   }
 
   int value_total = 0;
-  foreach(Var value, counts) value_total += value.integer();
+  foreach (Var value, counts) value_total += value.integer();
 
   int typed_total = 0;
-  foreach(int value = initial_value(), counted_map(counts))
+  foreach (int value = initial_value(), counted_map(counts))
     typed_total += value;
 
   Var entry = void;
   int existing_map_total = 0;
-  foreach(Var current, counts) {
+  foreach (Var current, counts) {
     entry = current;
     existing_map_total += entry.integer();
   }
 
   int key_bytes = 0, destructured_total = 0;
-  foreach(Var (name, count), counts) {
+  foreach (Var (name, count), counts) {
     key_bytes += name.string().len();
     destructured_total += count.integer();
   }
 
   Map numbers = %{1: 10, 2: 20};
   int converted_total = 0, key_total = 0;
-  foreach(int (key, count), numbers) converted_total += key + count;
-  foreach(int key, numbers.keys()) key_total += key;
+  foreach (int (key, count), numbers) converted_total += key + count;
+  foreach (int key, numbers.keys()) key_total += key;
 
   int skipped = 0, stopped = 0;
-  foreach(Var value, counts) {
+  foreach (Var value, counts) {
     if (value.integer() == 2) continue;
     skipped += value.integer();
   }
-  foreach(Var value, counts) {
+  foreach (Var value, counts) {
     if (value) stopped++;
     break;
   }
 
   int deferred_keys = 0;
-  foreach(Var (name, value), counts) {
+  foreach (Var (name, value), counts) {
     defer record_cleanup();
     if (name.string() && value) deferred_keys++;
   }
 
   int nested = 0;
-  foreach(Var outer, counts)
-    foreach(Var inner, counts)
+  foreach (Var outer, counts)
+    foreach (Var inner, counts)
       nested += outer.integer() * inner.integer();
 
   int caught = 0;
   try {
-    foreach(Var value, counts) {
+    foreach (Var value, counts) {
       defer record_cleanup();
       if (value) raise %(invariant);
     }
@@ -96,55 +96,55 @@ int main(void) {
   catch %(invariant): caught = 1;
 
   int word_bytes = 0;
-  foreach(String word, %"  alpha beta  gamma ".words())
+  foreach (String word, %"  alpha beta  gamma ".words())
     word_bytes += word.len();
 
   int line_count = 0, line_bytes = 0;
-  foreach(String line, %"one\ntwo\r\nthree\n".lines()) {
+  foreach (String line, %"one\ntwo\r\nthree\n".lines()) {
     line_count++;
     line_bytes += line.len();
   }
 
   int fields = 0, empty_fields = 0;
-  foreach(String field, %"a::b:".splits(%":")) {
+  foreach (String field, %"a::b:".splits(%":")) {
     fields++;
     if (!field.len()) empty_fields++;
   }
 
   String word = NULL;
   int scanned_bytes = 0;
-  foreach(String current, counted_words(%"one two three")) {
+  foreach (String current, counted_words(%"one two three")) {
     word = current;
     scanned_bytes += word.len();
   }
 
   int pairs = 0;
-  foreach(String left, %"a b".words())
-    foreach(String right, %"1 2 3".words())
+  foreach (String left, %"a b".words())
+    foreach (String right, %"1 2 3".words())
       if (left && right) pairs++;
 
   int boxed = 0;
-  foreach(Var field, %"x y".words()) boxed += field.string().len();
+  foreach (Var field, %"x y".words()) boxed += field.string().len();
 
   struct Iter zip_left_storage, zip_right_storage, zip_storage;
   Iter zip_left = %("a" "bb").iter(&zip_left_storage);
   Iter zip_right = range(1, 2, 1, &zip_right_storage);
   Iter zipped = zip_left.zip(zip_right, &zip_storage);
   int zipped_total = 0;
-  foreach(Var (text, number), zipped)
+  foreach (Var (text, number), zipped)
     zipped_total += text.string().len() * number.integer();
 
   MapIntInt counted = MapIntInt.new();
   counted.set(1, 10);
   counted.set(2, 20);
   int native_values = 0, native_pairs = 0;
-  foreach(int value, counted) native_values += value;
-  foreach(int (key, value), counted) native_pairs += key * value;
+  foreach (int value, counted) native_values += value;
+  foreach (int (key, value), counted) native_pairs += key * value;
 
   MapStringString named = MapStringString.new();
   named.set(%"ada", %"lovelace");
   int native_bytes = 0;
-  foreach(String value, named) native_bytes += value.len();
+  foreach (String value, named) native_bytes += value.len();
 
   // Reusing a loop declaration spelling after expansion must remain legal.
   int value = 7;

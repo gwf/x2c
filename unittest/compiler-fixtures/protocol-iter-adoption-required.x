@@ -11,7 +11,7 @@ Iter Bag.iter(Bag bag, Iter dest) {
 int main(void) {
   Bag bag = xmalloc(sizeof(struct Bag));
   bag.values = %(1 2 3);
-  foreach(int value, bag)
+  foreach (int value, bag)
     (void) value;
   return 0;
 }

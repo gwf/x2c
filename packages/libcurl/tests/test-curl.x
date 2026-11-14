@@ -224,7 +224,7 @@ static void curl_batch_path_distinguishes_outcomes(void) {
   List paths = %("/ok" "/redirect" "/empty" "/missing" "/large" "/close");
   int responses = 0, size_failures = 0, transfer_failures = 0;
 
-  foreach(String path, paths) {
+  foreach (String path, paths) {
     try {
       CurlResponse response = auto easy.get(fixture_url + path);
       responses++;

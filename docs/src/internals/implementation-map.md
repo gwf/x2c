@@ -29,7 +29,7 @@ that stage. Take a `foreach` loop:
 ```x2c
 int sum(List numbers) {
   int total = 0;
-  foreach(int n in numbers) total += n;
+  foreach (int n in numbers) total += n;
   return total;
 }
 ```

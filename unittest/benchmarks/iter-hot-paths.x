@@ -169,7 +169,7 @@ int main(void) {
   Split words = word_text.words();
   start = now_ns();
   for (int r = 0; r < word_repeats; r++)
-    foreach(String word, words)
+    foreach (String word, words)
       sink += word.len();
   result("split-foreach", now_ns() - start,
          (long) words_per_scan * word_repeats);
@@ -188,7 +188,7 @@ int main(void) {
   for (int i = 0; i < width; i++) entries[i] = i + 1;
   start = now_ns();
   for (int r = 0; r < repeats; r++)
-    foreach(Var (key, map_value), entries)
+    foreach (Var (key, map_value), entries)
       sink += map_value.integer();
   result("map-foreach", now_ns() - start, (long) width * repeats);
 

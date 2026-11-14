@@ -2734,7 +2734,7 @@ UvProcess UvLoop.command(UvLoop loop, List arguments) {
   }
   char **argv = xcalloc(count + 1, sizeof(char *));
   size_t index = 0;
-  foreach(Var argument, arguments) {
+  foreach (Var argument, arguments) {
     if (argument is not <string>) {
       $error.command.types();
     }
@@ -2798,7 +2798,7 @@ UvProcess UvProcess.environment(UvProcess process, Map variables) {
   }
   char **environment = xcalloc(variables.len() + 1, sizeof(char *));
   size_t index = 0;
-  foreach(Var (name, value), variables) {
+  foreach (Var (name, value), variables) {
     if (name is not <string> || value is not <string>) {
       $error.command.env.types();
     }

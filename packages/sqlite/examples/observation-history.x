@@ -18,7 +18,7 @@ static void ingest(String filename, String database) {
 
   /* The input is a whitespace-separated URL, status, and latency per row. */
   db.transaction(%!() => {
-    foreach(String line, input) {
+    foreach (String line, input) {
       if (!line.strip(NULL)) continue;
       String (url, status, us) = line.words().iter().list();
       long status_code = atol(status), elapsed = atol(us);
@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
       ORDER BY url
     ")
   );
-  foreach(List row, report)
+  foreach (List row, report)
     printf("%s", %"$(row[0]): $(row[1]) readings, $(row[2]) failures, " +
                   %"$(row[3]) us average, $(row[4]) us maximum\n");
   return 0;

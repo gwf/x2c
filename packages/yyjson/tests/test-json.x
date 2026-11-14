@@ -192,7 +192,7 @@ static void json_document_preserves_duplicate_member_order(void) {
   EXPECT_INT_EQ(second.uint(), 2);
 
   Array keys = [];
-  foreach(json.JsonMember member, object) keys.push(member.key());
+  foreach (json.JsonMember member, object) keys.push(member.key());
   EXPECT_STR_EQ(keys[0].string(), "key");
   EXPECT_STR_EQ(keys[1].string(), "key");
   EXPECT_STR_EQ(keys[2].string(), "last");
@@ -206,8 +206,8 @@ static void json_empty_collections_and_required_members_are_explicit(void) {
   EXPECT_INT_EQ(array.len(), 0);
   EXPECT_INT_EQ(map.len(), 0);
   int count = 0;
-  foreach(Var value, array) count++;
-  foreach(Var entry, map) count++;
+  foreach (Var value, array) count++;
+  foreach (Var entry, map) count++;
   EXPECT_INT_EQ(count, 0);
 
   json.JsonDocument document =
@@ -244,7 +244,7 @@ static void json_document_preserves_numeric_intent(void) {
   EXPECT_TRUE(values[3].uint() == ULLONG_MAX);
 
   int count = 0;
-  foreach(json.JsonValue value, values) count++;
+  foreach (json.JsonValue value, values) count++;
   EXPECT_INT_EQ(count, 4);
   EXPECT_STR_EQ(values[-1].json(), "18446744073709551615");
 }

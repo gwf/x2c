@@ -956,7 +956,7 @@ List CurlResponseBlock.headers(CurlResponseBlock block) =>
 
 List CurlResponseBlock.values(CurlResponseBlock block, String name) {
   List values = NULL;
-  foreach(CurlHeader header, block.headers()) {
+  foreach (CurlHeader header, block.headers()) {
     String header_name = header.name();
     if (!header.parsed() || header_name.len() != name.len() ||
         strncasecmp(header_name, name, name.len())) continue;
@@ -1011,7 +1011,7 @@ static List _lisp_http_headers(String url) {
   CurlResponse response = auto easy.request("HEAD", url);
   CurlResponseBlock block = response.blocks().last();
   List lines = NULL;
-  foreach(CurlHeader header, block.headers())
+  foreach (CurlHeader header, block.headers())
     lines = cons(header.line(), lines);
   return lines.reverse();
 }

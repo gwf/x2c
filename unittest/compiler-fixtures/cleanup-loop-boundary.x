@@ -44,7 +44,7 @@ static void break_inside_switch(void) {
 static int continue_inside_foreach(void) {
   int caught = 0;
   try {
-    foreach(Var item, %( 1 2 3 )) {
+    foreach (Var item, %( 1 2 3 )) {
       if (item.int() == 1) continue;
       if (item.int() == 2) raise %(invariant);
     }

@@ -31,7 +31,7 @@ static void benchmark_lines(const char *name, File file, int count) {
   volatile unsigned long sink = 0;
   ScopeStats before = Scope.stats();
   uint64_t start = now_ns();
-  foreach(String line, file) sink += line.len();
+  foreach (String line, file) sink += line.len();
   uint64_t elapsed = now_ns() - start;
   ScopeStats after = Scope.stats();
   line_result(name, elapsed, count, before, after);

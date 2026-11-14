@@ -554,15 +554,15 @@ static void typed_map_iterates_values_keys_and_pairs(void) {
   counts.set(3, 30);
 
   int values = 0, keys = 0, pair_keys = 0, pair_values = 0, counted = 0;
-  foreach(int value, counts) values += value;
-  foreach(int (key, value), counts) {
+  foreach (int value, counts) values += value;
+  foreach (int (key, value), counts) {
     pair_keys += key;
     pair_values += value;
     counted++;
   }
 
   struct Iter key_storage;
-  foreach(Var key, counts.keys(&key_storage)) keys += key.integer();
+  foreach (Var key, counts.keys(&key_storage)) keys += key.integer();
 
   EXPECT_INT_EQ(counted, 3);
   EXPECT_INT_EQ(values, 60);
@@ -574,7 +574,7 @@ static void typed_map_iterates_values_keys_and_pairs(void) {
   names.set("ada", "lovelace");
   names.set("grace", "hopper");
   int lengths = 0;
-  foreach(String value, names) lengths += value.len();
+  foreach (String value, names) lengths += value.len();
   EXPECT_INT_EQ(lengths, 14);
 
   MapStringInt counts_by_name = {"ada": 3, "grace": 5};

@@ -16,7 +16,7 @@ int main(void) {
   Error.policy_set(<caploc>, <collect>);
   int mark = Error.mark(), generated = 0, captured = 0;
   decorated();
-  foreach(Var item, Error.since(mark)) {
+  foreach (Var item, Error.since(mark)) {
     List entry = item;
     Symbol code = entry.assoc(<code>);
     int line = entry.assoc(<location>).list().assoc(<line>).integer();

@@ -37,7 +37,7 @@ static void symbolset_iteration_yields_source_order(void) {
   Symbol expected[] = { <red>, <green>, <blue>, <violet> };
   int position = 0;
 
-  foreach(Symbol member, colors) {
+  foreach (Symbol member, colors) {
     EXPECT_TRUE(position < 4);
     if (position < 4) EXPECT_TRUE(member == expected[position]);
     position++;
@@ -52,7 +52,7 @@ static void symbolset_empty_set_has_no_members(void) {
   EXPECT_TRUE(empty_set.getindex(0) == 0);
   EXPECT_TRUE(empty_set.getindex(-1) == 0);
   int visited = 0;
-  foreach(Symbol member, empty_set) {
+  foreach (Symbol member, empty_set) {
     (void) member;
     visited++;
   }
@@ -78,7 +78,7 @@ static void symbolset_mixed_entries_keep_source_order(void) {
   int position = 0;
 
   EXPECT_INT_EQ(mixed.len(), 4);
-  foreach(Symbol member, mixed) {
+  foreach (Symbol member, mixed) {
     EXPECT_TRUE(position < 4);
     if (position < 4) EXPECT_TRUE(member == expected[position]);
     position++;

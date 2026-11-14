@@ -327,7 +327,7 @@ Recognize special node forms separately from visiting their children:
 match (ast)
   case %(SPECIAL-SHAPE ...): ...
 
-foreach(Var child, ast)
+foreach (Var child, ast)
   if (child is <list>) visit(child.list());
 ```
 

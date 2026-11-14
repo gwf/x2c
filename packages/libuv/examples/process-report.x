@@ -27,7 +27,7 @@ int main(void) {
   loop.run(UV_RUN_DEFAULT);
 
   printf("normalized:\n");
-  foreach(String line, normalized.stdout().lines())
+  foreach (String line, normalized.stdout().lines())
     printf("  %s\n", line);
 
   printf("line count: %s", counted.stdout());

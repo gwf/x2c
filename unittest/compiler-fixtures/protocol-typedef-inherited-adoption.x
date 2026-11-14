@@ -40,8 +40,8 @@ int main(void) {
   struct Iter delegated_storage;
   (void) delegated.iter(&delegated_storage);
   int inherited_total = 0, overridden_total = 0;
-  foreach(int value, inherited) inherited_total += value;
-  foreach(int value, overridden) overridden_total += value;
+  foreach (int value, inherited) inherited_total += value;
+  foreach (int value, overridden) overridden_total += value;
   printf("%d %d %d %d %d\n", inherited_total, overridden_total,
          parent_calls, inherited_calls, override_calls);
   return inherited_total == 6 && overridden_total == 6 &&

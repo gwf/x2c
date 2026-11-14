@@ -85,7 +85,7 @@ int main(void) {
   );
 
   int column = 0;
-  foreach(String caption, captions) {
+  foreach (String caption, captions) {
     Image tile = Image.load(_tile_path(column));
     _place(
       sheet, tile, 36 + column * (tile_size + 22), 112, tile_size, caption

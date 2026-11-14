@@ -2,7 +2,7 @@
 
 int static_consumer_total(StaticItemsChild values) {
   int total = 0;
-  foreach(int value, values) total += value;
+  foreach (int value, values) total += value;
   return total;
 }
 

@@ -291,7 +291,7 @@ skips to the next iteration of the enclosing loop:
 ```x2c
 List items = %((skip) (keep) (skip));
 int seen = 0, kept = 0;
-foreach(List item in items) {
+foreach (List item in items) {
   seen++;
   match (item) {
     case %(skip): continue;
@@ -378,7 +378,7 @@ A loop can find candidate values, then match each candidate:
 ```x2c
 List program = %((set x 1) (call print x) (set y 2));
 int assignments = 0;
-foreach(List node in program) {
+foreach (List node in program) {
   match (node) {
     case %(set ?name ?value):
       assignments++;

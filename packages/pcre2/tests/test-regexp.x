@@ -31,7 +31,7 @@ static void regexp_named_and_optional_captures(void) {
   EXPECT_INT_EQ(empty.start(), empty.end());
 
   int captures = 0;
-  foreach(RegexpCapture capture, found) captures++;
+  foreach (RegexpCapture capture, found) captures++;
   EXPECT_INT_EQ(captures, 3);
 }
 

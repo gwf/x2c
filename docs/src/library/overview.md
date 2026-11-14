@@ -72,7 +72,7 @@ Use [Symbol](modules/symbol.md) for compact immediate tags and
 ~File input = tmpfile();
 ~input.puts("first\nsecond\n");
 ~input.rewind();
-foreach(String line in input)
+foreach (String line in input)
   printf("%s", line);
 ~input.close();
 ```
@@ -87,7 +87,7 @@ Every collection supports iteration. Use `foreach` to walk one:
 
 ```x2c
 List values = %(1 2 3);
-foreach(int value in values)
+foreach (int value in values)
   printf("%d\n", value);
 ```
 

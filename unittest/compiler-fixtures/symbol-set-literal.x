@@ -24,7 +24,7 @@ int main(void) {
   int atoms = ordinary.getindex(0).is_atom() &&
               ordinary.getindex(1).is_atom();
   int iteration = 0;
-  foreach(Symbol symbol, values)
+  foreach (Symbol symbol, values)
     iteration += values.index(symbol) + 1;
   printf("%d %d %d %d\n", ordered, membership, atoms, iteration);
   return ordered && membership && atoms && iteration == 10 ? 0 : 1;

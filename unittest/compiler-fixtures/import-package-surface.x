@@ -19,7 +19,7 @@ double first_component(double x, double y) {
   Packed boxed = v;
   g.Vec roundtrip = boxed.vec();
   double total = roundtrip.x;
-  foreach(Var part, v) total += part.floating();
+  foreach (Var part, v) total += part.floating();
   return total;
 }
 

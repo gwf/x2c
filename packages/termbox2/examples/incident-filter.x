@@ -11,7 +11,7 @@ static List _read_incidents(String path) {
 
   List incidents = NULL;
   int line_number = 0;
-  foreach(String line, input) {
+  foreach (String line, input) {
     line_number++;
     List fields = line.strip("\r\n").split("|");
     if (fields.len() != 4) {
@@ -37,7 +37,7 @@ static int _matches(List incident, String filter) {
 
 static List _matching(List incidents, String filter) {
   List matched = NULL;
-  foreach(List incident, incidents)
+  foreach (List incident, incidents)
     if (_matches(incident, filter)) matched = cons(incident, matched);
   return matched.reverse();
 }
@@ -68,7 +68,7 @@ static void _draw(Termbox terminal, List matched, String filter, int chosen) {
   );
 
   int row = 0;
-  foreach(List incident, matched) {
+  foreach (List incident, matched) {
     if (row >= height - 4) break;
     String severity = incident[1];
     String service = incident[2];

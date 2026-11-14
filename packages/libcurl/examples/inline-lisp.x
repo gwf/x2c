@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
         (substring page 13 (- (string-length page) 15)))
   ));
   List pages = $(base + "/guide", base + "/reference");
-  foreach(String found, lisp.eval(%( map title '$pages )).list())
+  foreach (String found, lisp.eval(%( map title '$pages )).list())
     printf("%s", %"title: $found\n");
 
   /*  url-escape composes into a request the session builds itself, and a

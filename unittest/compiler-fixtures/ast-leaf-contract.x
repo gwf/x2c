@@ -66,7 +66,7 @@ int main(void) {
     ast_phase1_apply(callback, left_value.int()),
     right_value.int()
   );
-  foreach(Var value, values) {
+  foreach (Var value, values) {
     defer count += value.int();
   }
   match (values) {

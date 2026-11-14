@@ -365,7 +365,7 @@ compile-time duplicate error.
 `index` maps a `Symbol` to its source-order integer and returns `-1` for a
 nonmember. `contains` is the corresponding membership test. `getindex` maps an
 integer back to its `Symbol`, accepts negative indexes, and returns zero when
-out of range. A `SymbolSet` also supports `foreach(Symbol value in colors)` in
+out of range. A `SymbolSet` also supports `foreach (Symbol value in colors)` in
 source order. `<blue> in colors` is the operator spelling of that test: a
 `SymbolSet` adopts the one-member `Contains(T)` protocol, so the
 [`in` operator](../reference/language.md#membership-with-in) reaches it
@@ -921,7 +921,7 @@ four spaces.
 
 ```x2c
 Buffer out = Buffer.new();
-foreach(int item in [1, 2, 3]) {
+foreach (int item in [1, 2, 3]) {
   out.write("item ");
   out.printf("%d", item);
   out.newline();
@@ -1126,7 +1126,7 @@ The other members keep their checks. `push`, `insert`, `remove`,
 `take_last`, `shift`, and the slicing operations raise on a bad argument or
 an empty receiver, and the slice bounds normalize negatives. Only the bracket
 is raw. A typed `Array` boxes into a `Var` and iterates, so
-`foreach(Var item in numbers)` and dynamic indexing through a `Var` receiver
+`foreach (Var item in numbers)` and dynamic indexing through a `Var` receiver
 both work. The dynamic bracket reaches the same raw member.
 
 Packed `Array`s cross a `Context` or `Thread` boundary like other values;
@@ -1157,7 +1157,7 @@ Keys and values are both `Var`, so a `Map` can be heterogeneous.
 ```x2c
 Map counts = {};
 List words = %("to" "be" "or" "not" "to" "be");
-foreach(String w in words)
+foreach (String w in words)
   counts[w] += 1;
 printf("%s\n", counts.repr());
 ```
@@ -1267,7 +1267,7 @@ the value. With native loop types, the loop does not allocate:
 
 ```x2c
 Map ages = {"ada": 36, "grace": 45};
-foreach((String key, int value) in ages)
+foreach ((String key, int value) in ages)
   printf("%s -> %d\n", key, value);
 ```
 
@@ -1489,16 +1489,16 @@ carry each entry.
 String text = "the quick the lazy the end";
 
 Map counts = {};
-foreach(String word in text.words())
+foreach (String word in text.words())
   counts[word] += 1;
 
 Array ranked = [];
-foreach((String word, int count) in counts)
+foreach ((String word, int count) in counts)
   ranked.push($(count, word));
 ranked.sort();
 ranked.reverse();
 
-foreach(List entry in ranked) {
+foreach (List entry in ranked) {
   Var (count, word) = entry;
   printf("%s %s\n", count, word);
 }

@@ -35,7 +35,7 @@ Image chart_image(int *series) {
   Vector2 origin = { 120, 555 };
   float x_step = 142.0f, y_scale = 8.0f;
 
-  foreach(int temperature, ticks) {
+  foreach (int temperature, ticks) {
     float y = origin.y - (temperature - 50) * y_scale;
     Vector2 left = { origin.x, y }, right = { origin.x + x_step * 6, y };
     chart.draw_thin_line(left, right, Color.from_hex(0xe6e9efff));
@@ -46,14 +46,14 @@ Image chart_image(int *series) {
   }
 
   int day_index = 0;
-  foreach(String day, days) {
+  foreach (String day, days) {
     int x = (int) (origin.x + day_index * x_step);
     chart.draw_text(day, x - 18, 578, 18, DARKGRAY);
     day_index++;
   }
 
   int city_index = 0;
-  foreach(List city, cities) {
+  foreach (List city, cities) {
     String name = city[0];
     unsigned int rgba = city[1];
     List readings = city[2];
@@ -61,7 +61,7 @@ Image chart_image(int *series) {
     Vector2 previous = { 0 };
     int reading_index = 0;
 
-    foreach(int temperature, readings) {
+    foreach (int temperature, readings) {
       Vector2 offset = {
         reading_index * x_step,
         -(temperature - 50) * y_scale

@@ -600,7 +600,7 @@ static Vector2 *_raylib_vertices(List points, String operation, int &count) {
 
   Vector2 *vertices = xmalloc((size_t) total * sizeof(Vector2));
   int index = 0;
-  foreach(List point, points) {
+  foreach (List point, points) {
     if (point.len() != 2) {
       raise %(bad-arg (library "raylib") (operation $operation)
               (reason "each polygon point is an (x y) pair"));

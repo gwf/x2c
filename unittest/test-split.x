@@ -8,7 +8,7 @@ static void expect_split_item(List strings, int index, String expected) {
 
 static List collect_split_cursor(Split cursor) {
   Array items = [];
-  foreach(String item, cursor) items.push(item);
+  foreach (String item, cursor) items.push(item);
   List result = items.list_free();
   return result;
 }
@@ -210,7 +210,7 @@ static void split_cursor_allocation_and_nesting(void) {
   Pool pool = Pool.open_named("string-cursor-probe");
   String value = String.new(raw);
   int count = 0;
-  foreach(String word, value.words()) {
+  foreach (String word, value.words()) {
     EXPECT_TRUE(word.len() > 0);
     count++;
   }
@@ -218,7 +218,7 @@ static void split_cursor_allocation_and_nesting(void) {
   PoolStats after_first = pool.stats();
 
   count = 0;
-  foreach(String word, value.words()) count++;
+  foreach (String word, value.words()) count++;
   EXPECT_INT_EQ(count, 3);
   PoolStats after_repeat = pool.stats();
   EXPECT_INT_EQ((int) after_repeat.interned, (int) after_first.interned);
@@ -238,8 +238,8 @@ static void split_cursor_allocation_and_nesting(void) {
   EXPECT_TRUE(item.string() == "cursor_beta");
 
   int pairs = 0;
-  foreach(String left, "a b".words())
-    foreach(String right, "1 2".words())
+  foreach (String left, "a b".words())
+    foreach (String right, "1 2".words())
       if (left && right) pairs++;
   EXPECT_INT_EQ(pairs, 4);
   Pool.close();

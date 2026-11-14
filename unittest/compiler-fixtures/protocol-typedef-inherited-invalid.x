@@ -18,6 +18,6 @@ protocol Iter(InvalidChild);
 
 int main(void) {
   InvalidChild values = %(1 2 3);
-  foreach(int value, values) (void) value;
+  foreach (int value, values) (void) value;
   return 0;
 }

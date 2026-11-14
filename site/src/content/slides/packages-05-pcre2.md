@@ -22,7 +22,7 @@ Regexp entry = auto Regexp.compile(
 Regexp fields = auto Regexp.compile("\\s*\\|\\s*", 0);
 
 Map counts = {};
-foreach(String line, %(
+foreach (String line, %(
   "09:14:02 sshd[441]: accepted key | user=ada | port=22"
   "09:14:07 cron[88]: ran backup | status=ok"
   "09:15:31 sshd[512]: refused password | user=root | port=22"
@@ -35,7 +35,7 @@ foreach(String line, %(
   counts.try_get(found[<program>], seen);
   counts[found[<program>]] = seen + 1;
   printf("%s %s\n", found[<time>], found[<program>]);
-  foreach(String field, fields.split(found[<text>]))
+  foreach (String field, fields.split(found[<text>]))
     printf("    %s\n", field);
 }
 ```

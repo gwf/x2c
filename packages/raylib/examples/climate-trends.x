@@ -33,7 +33,7 @@ int main(void) {
   _label(chart, font, "TEMPERATURE / F", 514, 38, 12, muted);
 
   Vector2 origin = { 84, 252 }, previous = { 0 };
-  foreach(int tick, %(60 70 80)) {
+  foreach (int tick, %(60 70 80)) {
     int y = (int) origin.y - (tick - 60) * 6;
     _label(chart, font, %"$tick", 40, y - 7, 14, muted);
     chart.draw_line(
@@ -42,7 +42,7 @@ int main(void) {
     );
   }
   int index = 0;
-  foreach(int high, highs) {
+  foreach (int high, highs) {
     Vector2 offset = { index * 94, -(high - 60) * 6 };
     Vector2 point = origin + offset;
     if (index) {
@@ -60,7 +60,7 @@ int main(void) {
     index++;
   }
   index = 0;
-  foreach(int high, highs) {
+  foreach (int high, highs) {
     Vector2 point = origin + (Vector2) { index * 94, -(high - 60) * 6 };
     chart.draw_circle(point.scale(3), 18, paper);
     chart.draw_circle(point.scale(3), 12, teal);

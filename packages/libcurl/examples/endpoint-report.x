@@ -27,9 +27,9 @@ static void survey(CurlBatch batch, int index, String path) {
     CurlResponse response = batch.response(index);
     summarize(response);
     int number = 0;
-    foreach(CurlResponseBlock block, response.blocks()) {
+    foreach (CurlResponseBlock block, response.blocks()) {
       printf("%s", %"  block $number: $(block.status_line())\n");
-      foreach(CurlHeader header, block.headers())
+      foreach (CurlHeader header, block.headers())
         printf("%s", %"    $(header.line())\n");
       number++;
     }

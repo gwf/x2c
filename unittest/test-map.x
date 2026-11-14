@@ -719,13 +719,13 @@ static void map_iterates_values_keys_and_pairs(void) {
   long values = 0, keys = 0, pair_keys = 0, pair_values = 0;
   int counted = 0;
 
-  foreach(Var value, map) values += value.integer();
+  foreach (Var value, map) values += value.integer();
 
   struct Iter key_storage;
-  foreach(Var key, map.keys(&key_storage)) keys += key.str().len();
+  foreach (Var key, map.keys(&key_storage)) keys += key.str().len();
 
   struct Iter pair_storage;
-  foreach(Var entry, map.enumerate(&pair_storage)) {
+  foreach (Var entry, map.enumerate(&pair_storage)) {
     List pair = entry;
     (String pair_key, long pair_value) = pair;
     pair_keys += pair_key.len();
@@ -773,7 +773,7 @@ static void map_growth_survives_a_nested_region(void) {
 static void map_boxed_two_name_foreach(void) {
   Var boxed = {"a": 1, "b": 2};
   long keys = 0, values = 0;
-  foreach(Var (key, value), boxed) {
+  foreach (Var (key, value), boxed) {
     keys += key.str().len();
     values += value.integer();
   }

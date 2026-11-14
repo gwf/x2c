@@ -100,7 +100,7 @@ static void match_loop_break_semantics(void) {
   $test.scoped();
   List inputs = %( ((ok)) ((ok)) );
   int matched = 0, after = 0;
-  foreach(Var item, inputs) {
+  foreach (Var item, inputs) {
     List seq = Var_list(item);
     match (seq) {
       case %( (ok) ): {
@@ -118,7 +118,7 @@ static void match_loop_continue_semantics(void) {
   $test.scoped();
   List inputs = %( ((skip)) ((keep)) ((skip)) );
   int visited = 0, accepted = 0;
-  foreach(Var item, inputs) {
+  foreach (Var item, inputs) {
     List seq = Var_list(item);
     visited++;
     match (seq) {

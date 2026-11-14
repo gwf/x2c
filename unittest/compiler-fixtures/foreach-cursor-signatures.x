@@ -176,12 +176,12 @@ int main(void) {
   DirectOne direct_one = xmalloc(sizeof(struct DirectOne));
   direct_one.values = %(1 2 3);
   long one_total = 0;
-  foreach(long value, direct_one) one_total += value;
+  foreach (long value, direct_one) one_total += value;
 
   DirectTwo direct_two = xmalloc(sizeof(struct DirectTwo));
   direct_two.values = %(10 20 30);
   int two_total = 0;
-  foreach(int (key, value), direct_two) two_total += key + value;
+  foreach (int (key, value), direct_two) two_total += key + value;
 
   ValueCursor value_cursor = xmalloc(sizeof(struct ValueCursor));
   value_cursor.values = %(1 2 3);
@@ -199,15 +199,15 @@ int main(void) {
   DirectThree direct_three = xmalloc(sizeof(struct DirectThree));
   direct_three.values = %(7 8 9);
   int three_total = 0;
-  foreach(int value, direct_three) three_total += value;
+  foreach (int value, direct_three) three_total += value;
 
   int fallback_total = 0;
-  foreach(int value, value_cursor) fallback_total += value;
-  foreach(int value, float_cursor) fallback_total += value;
-  foreach(int value, string_cursor) fallback_total += value;
-  foreach(int value, void_cursor) fallback_total += value;
-  foreach(int value, value_output) fallback_total += value;
-  foreach(int value, wrong_return) fallback_total += value;
+  foreach (int value, value_cursor) fallback_total += value;
+  foreach (int value, float_cursor) fallback_total += value;
+  foreach (int value, string_cursor) fallback_total += value;
+  foreach (int value, void_cursor) fallback_total += value;
+  foreach (int value, value_output) fallback_total += value;
+  foreach (int value, wrong_return) fallback_total += value;
 
   printf("%ld %d %d %d %d %d\n", one_total, two_total,
          fallback_total, direct_one_calls, direct_two_calls, invalid_calls);
