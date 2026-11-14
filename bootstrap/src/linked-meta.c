@@ -16024,7 +16024,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_25(void
   _12884 = List_var(_12883);
   _12885 = String_new("lib/string/cursors.x");
   _12886 = String_var(_12885);
-  _12887 = String_new("ba6192fe");
+  _12887 = String_new("e7426c44");
   _12888 = String_var(_12887);
   _12889 = cons(_12888, NULL);
   _12890 = cons(_12886, _12889);
