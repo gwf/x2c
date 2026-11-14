@@ -10,7 +10,7 @@
     "pdf:cheatsheet": "node scripts/build-cheatsheet.mjs"
   },
   "dependencies": {
-    "astro": "7.3.3",
+    "astro": "7.4.7",
     "satteri": "0.9.5",
     "shiki": "4.4.1"
   },
