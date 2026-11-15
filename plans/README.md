@@ -67,18 +67,12 @@ retains its prior scope; completed and superseded work is recorded in history.
   probe fails without `--cpp`. Trace header visibility through
   [type parsing](../src/parse/types.x) before classifying the gap or choosing
   a compatibility change.
-- Linux REPL: Ubuntu 24.04 with GNU ld 2.42 records shared-library paths,
-  detects atomic library replacement, and refuses stale snapshot restore.
-  The suspected trace-parsing defect was not reproduced. A separate header-only
-  weak-provider case loses its callable address with default linker retention;
-  `-Wl,--no-as-needed` makes the same case callable. Decide a bounded provider
-  retention repair separately; see the release-plan evidence and scope.
-- CPP arithmetic: six real `--cpp` probes reproduce undefined signed addition,
-  subtraction, multiplication, negation, and left shifts under UBSan. Normal
-  builds complete those probes; no ordinary-build failure is established.
-  A bounded proposed repair would leave unsupported intermediate arithmetic
-  undecided, matching existing division and shift-count guards. This policy
-  change is not yet selected. See the release-plan investigation record.
+
+The CPP overflow and Linux weak-provider findings are now selected repairs,
+not deferrals. CPP arithmetic leaves unsupported intermediate results undecided.
+Linux REPL linking retains selected shared-library providers while preserving
+weak declarations and missing-provider inspection. The release plan records
+focused evidence and candidate validation requirements.
 
 Dormant feasibility studies and unselected optimization ideas are historical,
 not active work. No broad null audit, public-API deletion, extra gate, or new

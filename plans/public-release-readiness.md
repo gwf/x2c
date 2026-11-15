@@ -363,14 +363,17 @@ PRs #649 and #650 are merged. The release notes include Regex, and the
 upgrade instructions cover the source/ABI changes, including `$let`/`with`
 and alias migration. Keep `0.16.0 (unreleased)` until publication is approved.
 
-As of 2026-11-15, candidate
-`candidate-5d7ffb4b0d790384178df3859ebbc8cefb42aff9-43651932463-1`
-was assembled by [run 43651932463](https://github.com/gwf/x2c/actions/runs/43651932463)
+The earlier candidate
+`candidate-9889b2cf88f141d3d4d63c78193a1d4618703c01-43732772269-1`
+was assembled by [run 43732772269](https://github.com/gwf/x2c/actions/runs/43732772269)
 and passed four-platform staging verification in
-[run 43653633222](https://github.com/gwf/x2c/actions/runs/43653633222).
-Those installed-package checks cover PCRE2 and the supported Torch targets;
-they do not complete the twenty cases below. Website-only staging updates
-preserve those native archives and do not validate a newer compiler candidate.
+[run 43734774455](https://github.com/gwf/x2c/actions/runs/43734774455).
+All twenty additional installed-package cases passed in
+[run 43735057394](https://github.com/gwf/x2c/actions/runs/43735057394), with
+per-case archive hashes and license contents checked. The aggregate results
+are retained as `installed-package-checks-43735057394.json` with that candidate.
+This evidence belongs to those exact archives. The CPP and Linux REPL repairs
+below require a fresh candidate and matching receipts before release.
 
 Gary authorized dev integration and staging updates. Official publication
 remains held: do not advance `main`, create a release tag, or promote without
@@ -420,9 +423,9 @@ in these actual archives as well. Any failed case needs diagnosis against the
 same bytes; rebuilding creates a new candidate and invalidates the old
 candidate's verification. A missing platform remains explicitly unverified.
 
-No package/platform row is marked passed yet. Execute this procedure after
-candidate assembly; existing four-platform staging proof and final promotion
-remain separate steps under the hold above.
+All twenty rows passed for the candidate named above. New candidates retain
+their own per-platform and installed-package receipts; prior results do not
+validate rebuilt archives. Final promotion remains a separate held step.
 
 ## Deferred work
 
@@ -436,10 +439,10 @@ The file-scope diagnostic now selects the declaration's existing token span.
 The five-line reproducer reports `3:1`, rather than EOF `6:1`; nested-origin
 fixtures retain their locations.
 
-Deep List rendering, CPP overflow policy, included-header attribute
-compatibility, and optional structured lint output remain deferred.
-Linux REPL dependency identity passed the bounded Ubuntu probe below; a
-separate header-provider retention issue remains open.
+Deep List rendering, included-header attribute compatibility, and optional
+structured lint output remain deferred. CPP overflow and Linux header-provider
+retention are selected for repair in the follow-up below. Linux dependency
+identity already passed the bounded Ubuntu probe.
 These are separate findings or improvements, not universal safety obligations.
 No computed-slot staging redesign or broader native ownership proof is part
 of this plan.
@@ -482,6 +485,31 @@ missing-provider inspection. [The failing default-link run](https://github.com/g
 retains the evidence. No production REPL source was changed during investigation.
 The two earlier harness attempts failed before this minimal test was established;
 they are not evidence of dependency invalidation failure.
+
+## CPP and Linux REPL repairs, 2026-11-15
+
+Gary authorized both repairs after the investigations above. CPP uses the
+existing compiler overflow builtins for addition, subtraction, and
+multiplication, guards `LONG_MIN` negation, and evaluates left shifts only
+when the signed result is representable. Unsupported results remain undecided;
+no wrapping arithmetic is introduced. The reference and a focused AST fixture
+cover unsupported cases and valid boundary results.
+
+The Linux REPL retains explicitly selected shared-library providers within its
+module link. Weak header exports remain available for declarations whose
+providers are missing; no global compiler linking policy changes. Linker state
+is scoped to the native provider arguments and restored afterward.
+
+All six original CPP sanitizer failures complete cleanly with the repaired
+evaluator. The new boundary fixture also passes under UBSan. Eight alternating
+valid `--cpp` translations of `cpp-include-group.x`, excluding warmups, measured
+mean retired instructions of 10,452,297,042 before and 10,485,395,881 after
+(+0.32%). This is a bounded workload, not a general throughput claim.
+
+The combined tree receives the existing publication gate and fresh four-platform
+candidate validation. Candidate receipts, rather than the earlier candidate's
+success, establish verification of the rebuilt archives. Official release is
+still held.
 
 ## Diagnostic repair verification, 2026-11-15
 

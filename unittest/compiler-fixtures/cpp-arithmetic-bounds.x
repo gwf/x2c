@@ -71,4 +71,3 @@ int shift_zero_yes;
 #else
 int shift_zero_no;
 #endif
-

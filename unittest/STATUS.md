@@ -1,5 +1,16 @@
 # Status
 
+## CPP arithmetic and Linux REPL providers, 2026-11-15
+
+CPP arithmetic no longer executes overflowing signed operations while deciding
+conditions. Unsupported results remain undecided for the native compiler;
+`cpp-arithmetic-bounds` checks both retained arms and valid boundary results.
+
+Linux REPL module linking retains explicitly selected shared-library providers.
+Header declarations remain weak so missing providers can still be inspected.
+The existing program API tests cover shared providers and missing providers;
+their Linux host exports the runtime needed by retained modules.
+
 ## Resolved file-scope initializer diagnostic location on 2026-11-15
 
 Transform diagnostics for an unanchored file-scope initializer used the parser's
