@@ -102,6 +102,7 @@ typedef struct Compiler{
   Map adoptions;
   Map macro_holes;
   int alias_level;
+  int alias_member_level;
   Map local_macro_captures;
   int macro_application;
   List lambda_scopes;
