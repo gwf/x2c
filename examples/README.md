@@ -13,18 +13,24 @@ x2c run -q examples/foreach.x
 
 ## Start here
 
-1. [tours/field-guide.x](tours/field-guide.x) introduces x2c to C
-   programmers one small feature at a time. It is a script, so it needs
-   no `main`:
+1. [tours/language.x](tours/language.x) walks from `Var` through collections,
+   functions, types, classes, protocols, operators, patterns, cleanup, macros,
+   and threads. Read the numbered sections in order; `main` runs them all.
+2. [tours/essentials.x](tours/essentials.x) revisits the same examples with
+   fewer details, emphasizing values versus objects, quoting, conversions,
+   ownership, and compile-time code.
 
-   ```sh
-   x2c script examples/tours/field-guide.x
-   ```
+Both are self-contained programs with concise explanations and deterministic
+output. Neither needs input files or optional packages:
 
-2. [tours/language.x](tours/language.x) is a broader, executable
-   fifteen-minute tour of the language.
-3. The Love, Power, and Magic programs below hold the code from the
-   website's gallery, including its normally hidden setup and assertions.
+```sh
+x2c run examples/tours/language.x
+x2c run examples/tours/essentials.x
+```
+
+The [book's language guide](../docs/src/SUMMARY.md) supplies the full rules,
+including source organization and optional indentation syntax. The Love,
+Power, and Magic examples below explore individual features in more detail.
 
 ## Love: values, data, and methods
 
@@ -123,9 +129,6 @@ x2c run -q examples/power/counting.x -- examples/data/docs-words.txt
   [parallel jobs](scripts/parallel-jobs.x) caps concurrency with
   `Job.wait_any` and reports failing commands; [wc](programs/wc) prints the
   ten most frequent words in a file.
-- Tours: [hello-worlds](tours/hello-worlds.x) finds twelve ways to say
-  hello; [indentation](tours/indentation.xp) writes x2c in the indentation
-  syntax.
 
 ```sh
 x2c run -q examples/power/word-count-summary.x -- examples/data/docs-words.txt

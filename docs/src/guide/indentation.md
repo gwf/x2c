@@ -130,7 +130,7 @@ statement an `else` or a body belongs to. `--check` reports without writing.
 
 A `.xp` file writes macros the same way. The
 [language reference](../reference/language.md#indentation-syntax) lists
-every layout rule. `examples/tours/indentation.xp` is a complete program.
+every layout rule. The complete programs above show the notation in use.
 
 ## Where to go next
 

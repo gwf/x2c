@@ -55,10 +55,8 @@ magic/tic-tac-toe|external-input|build||-|Interactive game whose Lisp opponent i
 magic/ways-to-agree|showcase|run||expected/magic-ways-to-agree.stdout|Four paths to the same List, including a meta function and runtime Lisp.
 scripts/line-counts|showcase|run||expected/scripts-line-counts.stdout|Parallel commands, pipelines, globbing, and file operations with process.x and path.x.
 scripts/parallel-jobs|showcase|run||expected/scripts-parallel-jobs.stdout|Bounded job concurrency with Job.wait_any, captured output, and a failing command.
-tours/field-guide|showcase|run||expected/tours-field-guide.stdout|Script-sized first steps from C through strings and collections.
-tours/hello-worlds|showcase|run||expected/tours-hello-worlds.stdout|Twelve idiomatic paths to Hello, World.
-tours/indentation|showcase|run||expected/tours-indentation.stdout|The indentation syntax in a .xp source.
-tours/language|showcase|run||expected/tours-language.stdout|Executable fifteen-minute language tour.
+tours/language|showcase|run||expected/tours-language.stdout|Progressive language walkthrough from Var through types, macros, and threads.
+tours/essentials|showcase|run||expected/tours-essentials.stdout|Short walkthrough of x2c concepts, distinctions, and gotchas.
 programs/lisp|showcase|run|--init ../../../etc/init.xlisp --selftest|expected/programs-lisp.stdout|Bootstrapped Lisp command-line shell.
 programs/literate-lisp|showcase|run|../../../examples/data/reference-lisp/showcase.xlisp|expected/programs-literate-lisp.stdout|Independent recursive Lisp with symbolic differentiation.
 programs/mandelbrot|showcase|run||expected/programs-mandelbrot.stdout|Deep Mandelbrot zoom rendered on native threads.

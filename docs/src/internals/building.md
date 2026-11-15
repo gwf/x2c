@@ -142,9 +142,9 @@ Emscripten and Node separately, then run from the checkout root:
 
 ```sh
 make wasm-runtime
-tools/wasm-build examples/tours/language.x /tmp/language
+tools/wasm-build examples/foreach.x /tmp/foreach
 node --input-type=module -e \
-  'import("file:///tmp/language.js").then(m => m.default())'
+  'import("file:///tmp/foreach.js").then(m => m.default())'
 ```
 
 `make wasm-runtime` builds stage zero, compiles its generated runtime C, and
