@@ -64,16 +64,18 @@ grep -q 'unowned file' "$WORK/err"
 grep -q mine "$PREFIX/private-file"
 rm "$PREFIX/private-file"
 # Binary package incompatibility is reported before replacing the compiler.
-printf '{"x2c_version":"1.2.3"}\n' >"$PREFIX/packages/local/BUNDLE.json"
+printf '{"x2c_version":"x2c 1.2.3"}\n' >"$PREFIX/packages/local/BUNDLE.json"
+sh "$INSTALL" --update --prefix "$PREFIX" --version 1.2.3 >"$WORK/out"
+[ -f "$PREFIX/packages/local/BUNDLE.json" ]
 reject sh "$INSTALL" --update --prefix "$PREFIX" --version 1.10.0
 grep -q 'native package local' "$WORK/err"
 [ "$("$PREFIX/bin/x2c" --version)" = 'x2c 1.2.3' ]
-printf '{"x2c_version":"1.2.3","x2c_version":"1.10.0"}\n' >"$PREFIX/packages/local/BUNDLE.json"
+printf '{"x2c_version":"x2c 1.2.3","x2c_version":"x2c 1.10.0"}\n' >"$PREFIX/packages/local/BUNDLE.json"
 reject sh "$INSTALL" --update --prefix "$PREFIX" --version 1.10.0
 grep -q 'native package local' "$WORK/err"
 printf '{}\n' >"$PREFIX/packages/local/BUNDLE.json"
 reject sh "$INSTALL" --update --prefix "$PREFIX" --version 1.10.0
-grep -q 'x2c unknown' "$WORK/err"
+grep -q 'unknown compiler' "$WORK/err"
 rm "$PREFIX/packages/local/BUNDLE.json"
 # Origin is explicit; source and legacy installations are never guessed.
 printf 'kind=source\nsource=/a checkout/it\047s source\n' >"$PREFIX/.x2c-install-origin"

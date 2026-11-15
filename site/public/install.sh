@@ -266,7 +266,7 @@ for bundle in "$prefix"/packages/*/BUNDLE.json; do
   [ -f "$bundle" ] || continue
   built="$(grep -o '"x2c_version"[[:space:]]*:[[:space:]]*"[^"]*"' "$bundle" |
     sed 's/^[^:]*:[[:space:]]*"//; s/"$//')"
-  [ "$built" = "$version" ] || fail "native package $(basename "$(dirname "$bundle")") was built for x2c ${built:-unknown}; remove it with x2c remove, update, then reinstall or rebuild it for $version"
+  [ "$built" = "x2c $version" ] || fail "native package $(basename "$(dirname "$bundle")") was built for ${built:-an unknown compiler}; remove it with x2c remove, update, then reinstall or rebuild it for $version"
 done
 
 echo "x2c: downloading $asset"
