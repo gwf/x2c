@@ -65,6 +65,6 @@ printf 'extern int dependency_value(void); int main(void) { return dependency_va
 cc "$probe/trace.c" -L"$probe" -lplayground -Wl,-t -o "$probe/trace" >"$probe/link-trace.log" 2>&1
 cat "$probe/link-trace.log"
 LD_LIBRARY_PATH="$probe${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" REPL_PROGRAM_REMOVE_NATIVE="$probe/libplayground.so" \
- "$probe/program-api" "$probe/library.h" -L"$probe" -lplayground \
+ "$probe/program-api" "$probe/library.h" -Wl,--no-as-needed -L"$probe" -lplayground \
  >"$probe/repl.log" 2>&1 || { cat "$probe/repl.log"; exit 1; }
 cat "$probe/repl.log"
