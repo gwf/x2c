@@ -68,14 +68,14 @@ jobs:
         run: |
           make build-safe
           make wasm-runtime
-      - name: Run the language tour under Node
+      - name: Run the foreach example under Node
         run: |
-          mkdir -p /tmp/x2c-wasm-tour
-          tools/wasm-build examples/tours/language.x /tmp/x2c-wasm-tour/language
+          mkdir -p /tmp/x2c-wasm-example
+          tools/wasm-build examples/foreach.x /tmp/x2c-wasm-example/foreach
           node --input-type=module -e \
-            'import("file:///tmp/x2c-wasm-tour/language.js").then(m => m.default())' \
-            > /tmp/x2c-wasm-tour/stdout
-          diff -u examples/expected/tours-language.stdout /tmp/x2c-wasm-tour/stdout
+            'import("file:///tmp/x2c-wasm-example/foreach.js").then(m => m.default())' \
+            > /tmp/x2c-wasm-example/stdout
+          diff -u examples/expected/foreach.stdout /tmp/x2c-wasm-example/stdout
 
   release-validation:
     if: inputs.release_validation
