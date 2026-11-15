@@ -960,10 +960,14 @@ installation or a checkout build, set:
 "x2c.semantic.compilerPath": "/path/to/x2c/bin/x2c"
 ```
 
-Selection order is an explicit `x2c.semantic.compilerPath`, executable
-`./x2c` in the trusted workspace, then `x2c` on `PATH`. An explicit
-selection never switches to another compiler. Setup errors appear in the
-**x2c** Output channel. The extension does not build or install the compiler.
+Selection order is an explicit `x2c.semantic.compilerPath`, `x2c` on
+`PATH`, then `~/.local/x2c/bin/x2c`. The extension does not automatically
+select a workspace's `./x2c`; select a development compiler explicitly.
+An explicit selection never switches to another compiler. The **x2c** Output
+channel shows the selected executable, selection reason, and server errors.
+Startup failures show a notification with **Show Output**. After repairing
+an installation, reload the window or change the x2c settings to retry.
+The extension does not build or install the compiler.
 
 Configure the server with ordinary compiler arguments:
 

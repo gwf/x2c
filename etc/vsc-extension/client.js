@@ -1,10 +1,11 @@
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 
 function findExecutable(command, cwd, searchPath = process.env.PATH || "") {
   const candidates = command.includes("/") || command.includes("\\")
     ? [path.resolve(cwd, command)]
-    : searchPath.split(path.delimiter).map((directory) => path.resolve(cwd, directory, command));
+    : (searchPath ? searchPath.split(path.delimiter) : []).map((directory) => path.resolve(cwd, directory, command));
   for (const candidate of candidates) {
     try {
       fs.accessSync(candidate, fs.constants.X_OK);
@@ -15,11 +16,15 @@ function findExecutable(command, cwd, searchPath = process.env.PATH || "") {
   return null;
 }
 
-function selectCompiler(settings, workspace) {
+function selectCompiler(settings, cwd, searchPath = process.env.PATH || "", home = os.homedir()) {
   const explicit = settings.get("semantic.compilerPath", "");
-  if (explicit) return explicit;
-  const local = workspace && path.join(workspace, "x2c");
-  return local && findExecutable(local, workspace) ? local : "x2c";
+  if (explicit) return { command: findExecutable(explicit, cwd, searchPath),
+    selected: explicit, reason: "x2c.semantic.compilerPath" };
+  const command = findExecutable("x2c", cwd, searchPath);
+  if (command) return { command, selected: command, reason: "PATH" };
+  const installed = path.join(home, ".local", "x2c", "bin", "x2c");
+  return { command: findExecutable(installed, cwd), selected: installed,
+    reason: "default installation" };
 }
 
 

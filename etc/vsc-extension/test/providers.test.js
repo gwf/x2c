@@ -5,7 +5,8 @@ const test = require("node:test");
 const vm = require("node:vm");
 
 function setup() {
-  const handlers = {}, clients = [], messages = [];
+  const handlers = {}, clients = [], messages = [], notifications = [];
+  let shown = false;
   const uri = (name) => ({ scheme: "file", fsPath: name, toString: () => `file://${name}` });
   const folder = { uri: uri("/project"), name: "project", index: 0 };
   const document = { uri: uri("/project/app.x"), languageId: "x2c", version: 7,
@@ -28,7 +29,11 @@ function setup() {
       createFileSystemWatcher: (pattern) => ({ pattern, disposed: false,
         dispose() { this.disposed = true; } })
     },
-    window: { createOutputChannel: () => ({ appendLine: (text) => messages.push(text), dispose() {} }) },
+    window: {
+      showErrorMessage: async (message, action) => { notifications.push(message); return action; },
+      createOutputChannel: () => ({ appendLine: (text) => messages.push(text),
+        show: () => { shown = true; }, dispose() {} })
+    },
     RelativePattern: class { constructor(base, pattern) { Object.assign(this, { base, pattern }); } }
   };
   class LanguageClient {
@@ -36,6 +41,7 @@ function setup() {
       Object.assign(this, { id, name, server, options, notifications: [], started: 0, disposed: 0 });
       clients.push(this);
     }
+    createDefaultErrorHandler() { return { error: () => ({ action: 1 }), closed: () => ({ action: 2 }) }; }
     onDidChangeState(handler) { this.stateHandler = handler; return { dispose() {} }; }
     async start() {
       if (failStartup) throw new Error("server initialize failed");
@@ -55,13 +61,13 @@ function setup() {
   const module = { exports: {} };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "extension.js"), "utf8"), {
     module, require: (name) => name === "vscode" ? vscode :
-      name === "vscode-languageclient/node" ? { LanguageClient, State: { Running: 2 } } :
+      name === "vscode-languageclient/node" ? { LanguageClient, State: { Running: 2 }, CloseAction: { DoNotRestart: 1 } } :
       name === "./client" ? {
         uriConverters: (cwd) => ({ cwd }),
-        selectCompiler: () => settings["semantic.compilerPath"],
-        findExecutable: () => available ? "/selected/x2c" : null } : require(name)
+        selectCompiler: () => ({ selected: settings["semantic.compilerPath"],
+          command: available ? "/selected/x2c" : null, reason: "x2c.semantic.compilerPath" }) } : require(name)
   });
-  return { extension: module.exports, handlers, clients, messages, vscode, document, header,
+  return { extension: module.exports, handlers, clients, messages, notifications, outputShown: () => shown, vscode, document, header,
     settings, context: { subscriptions: [] }, unavailable: () => { available = false; },
     failStartup: () => { failStartup = true; } };
 }
@@ -74,6 +80,8 @@ test("trusted workspace starts one stdio client with compiler arguments and full
   await s.handlers.trust();
   const client = s.clients[0];
   assert.equal(client.started, 1);
+  assert.equal(client.options.errorHandler.closed().action, 2, "running server retains normal restart policy");
+  assert.match(s.messages[0], /Starting .*selected\/x2c lsp .*compilerPath/);
   assert.equal(client.server.command, "/selected/x2c");
   assert.deepEqual(Array.from(client.server.args), ["lsp"]);
   // An explicit stdio transport makes vscode-languageclient 9 append --stdio.
@@ -129,8 +137,15 @@ test("failed startup reports the original server error when client disposal also
   s.vscode.workspace.isTrusted = true;
   s.failStartup();
   await s.extension.activate(s.context);
-  assert.equal(s.messages.length, 1);
-  assert.match(s.messages[0], /server initialize failed/);
+  assert.equal(s.messages.length, 2);
+  assert.match(s.messages[1], /server initialize failed/);
+  assert.equal(s.notifications.length, 1);
+  assert.equal(s.outputShown(), true);
+  assert.equal(s.clients[0].options.errorHandler.closed().action, 1);
+  await s.handlers.open(s.document);
+  assert.equal(s.clients.length, 1, "failed workspace is not retried on document open");
+  await s.handlers.configuration({ affectsConfiguration: () => true });
+  assert.equal(s.clients.length, 2, "configuration change allows a new attempt");
   assert.equal(s.clients[0].disposed, 1);
   assert.equal(s.clients[0].options.synchronize.fileEvents.disposed, true);
   await s.extension.deactivate();

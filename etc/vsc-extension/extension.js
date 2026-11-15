@@ -1,7 +1,7 @@
 const vscode = require("vscode");
 const path = require("path");
-const { LanguageClient, State } = require("vscode-languageclient/node");
-const { selectCompiler, findExecutable, uriConverters } = require("./client");
+const { LanguageClient, State, CloseAction } = require("vscode-languageclient/node");
+const { selectCompiler, uriConverters } = require("./client");
 
 let active;
 
@@ -9,8 +9,18 @@ function activate(context) {
   const output = vscode.window.createOutputChannel("x2c");
   const clients = new Map();
   const reported = new Set();
+  const failed = new Set();
   let pending = Promise.resolve();
   let disposed = false;
+
+  function report(message) {
+    if (reported.has(message)) return;
+    reported.add(message);
+    output.appendLine(message);
+    void vscode.window.showErrorMessage(message, "Show Output").then((choice) => {
+      if (choice) output.show(true);
+    });
+  }
 
   function rootFor(document) {
     const folder = vscode.workspace.getWorkspaceFolder(document.uri);
@@ -38,25 +48,30 @@ function activate(context) {
     const settings = vscode.workspace.getConfiguration("x2c", document.uri);
     if (!settings.get("semantic.enabled", true)) return;
     const { folder, cwd } = rootFor(document);
-    if (clients.has(cwd)) return;
-    const selected = selectCompiler(settings, folder?.uri.fsPath);
-    const command = findExecutable(selected, cwd);
+    if (clients.has(cwd) || failed.has(cwd)) return;
+    const { command, selected, reason } = selectCompiler(settings, cwd);
     if (!command) {
-      const message = `Cannot execute '${selected}'. Install x2c and set x2c.semantic.compilerPath ` +
-        "to its executable, or place x2c on PATH.";
-      if (!reported.has(message)) output.appendLine(message);
-      reported.add(message);
+      failed.add(cwd);
+      report(`Cannot execute '${selected}' (${reason}). Install x2c or set ` +
+        "x2c.semantic.compilerPath to its executable, then reload the window.");
       return;
     }
+    output.appendLine(`Starting ${command} lsp (${reason}); workspace: ${cwd}`);
     const watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(
       cwd, "**/*.{x,xh,xc,x2c,xp,xlisp,toml,h}"));
-    let initialOverlays;
+    let initialOverlays, defaultErrorHandler;
+    let running = false;
     const client = new LanguageClient("x2c", "x2c", {
       command, args: ["lsp"], options: { cwd }
     }, {
       documentSelector: [{ language: "x2c", scheme: "file",
         pattern: new vscode.RelativePattern(cwd, "**/*") }],
       workspaceFolder: folder,
+      errorHandler: {
+        error: (...args) => defaultErrorHandler.error(...args),
+        closed: () => running ? defaultErrorHandler.closed() :
+          { action: CloseAction.DoNotRestart, handled: true }
+      },
       uriConverters: uriConverters(cwd, vscode.Uri),
       initializationOptions: { arguments: settings.get("semantic.arguments", []) },
       synchronize: { fileEvents: watcher }, outputChannel: output,
@@ -68,8 +83,10 @@ function activate(context) {
         return next(open);
       } }
     });
+    defaultErrorHandler = client.createDefaultErrorHandler();
     const state = client.onDidChangeState(({ newState }) => {
-      if (newState === State.Running) initialOverlays = undefined;
+      running = newState === State.Running;
+      if (running) initialOverlays = undefined;
     });
     clients.set(cwd, { client, watcher, state });
     try {
@@ -77,9 +94,12 @@ function activate(context) {
     }
     catch (error) {
       clients.delete(cwd);
+      failed.add(cwd);
       state.dispose();
       watcher.dispose();
-      output.appendLine(`Cannot start x2c lsp: ${error.message}`);
+      report(`Cannot start '${command} lsp': ${error.message}. ` +
+        "See x2c Output for the server error. Install matching x2c commands, " +
+        "or run make commands for a checkout, then reload the window.");
       // The client rejects stop() when startup never reached Running.
       try { await client.dispose(); }
       catch { /* The original startup error is already reported. */ }
@@ -105,6 +125,7 @@ function activate(context) {
     return enqueue(async () => {
       await stop();
       reported.clear();
+      failed.clear();
       for (const document of vscode.workspace.textDocuments) await start(document);
     });
   }
