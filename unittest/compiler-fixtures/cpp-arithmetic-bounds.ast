@@ -1,0 +1,108 @@
+
+(preproc "#if 9223372036854775807 + 1")
+
+(declare (int) (bindings (bind (binding 1 "add_overflow_yes") ())))
+
+(preproc "#else")
+
+(declare (int) (bindings (bind (binding 2 "add_overflow_no") ())))
+
+(preproc "#endif")
+
+(preproc "#if (-9223372036854775807 - 1) - 1")
+
+(declare (int) (bindings (bind (binding 3 "subtract_overflow_yes") ())))
+
+(preproc "#else")
+
+(declare (int) (bindings (bind (binding 4 "subtract_overflow_no") ())))
+
+(preproc "#endif")
+
+(preproc "#if 9223372036854775807 * 2")
+
+(declare (int) (bindings (bind (binding 5 "multiply_overflow_yes") ())))
+
+(preproc "#else")
+
+(declare (int) (bindings (bind (binding 6 "multiply_overflow_no") ())))
+
+(preproc "#endif")
+
+(preproc "#if -(-9223372036854775807 - 1)")
+
+(declare (int) (bindings (bind (binding 7 "negate_overflow_yes") ())))
+
+(preproc "#else")
+
+(declare (int) (bindings (bind (binding 8 "negate_overflow_no") ())))
+
+(preproc "#endif")
+
+(preproc "#if 1 << 63")
+
+(declare (int) (bindings (bind (binding 9 "shift_overflow_yes") ())))
+
+(preproc "#else")
+
+(declare (int) (bindings (bind (binding 10 "shift_overflow_no") ())))
+
+(preproc "#endif")
+
+(preproc "#if -1 << 1")
+
+(declare (int) (bindings (bind (binding 11 "shift_negative_yes") ())))
+
+(preproc "#else")
+
+(declare (int) (bindings (bind (binding 12 "shift_negative_no") ())))
+
+(preproc "#endif")
+
+(preproc "#if 9223372036854775806 + 1 == 9223372036854775807")
+
+(declare (int) (bindings (bind (binding 13 "add_max_yes") ())))
+
+(preproc "#else")
+
+(preproc "#endif")
+
+(preproc "#if -9223372036854775807 - 1 < -9223372036854775807")
+
+(declare (int) (bindings (bind (binding 14 "subtract_min_yes") ())))
+
+(preproc "#else")
+
+(preproc "#endif")
+
+(preproc "#if -4611686018427387904 * 2 == (-9223372036854775807 - 1)")
+
+(declare (int) (bindings (bind (binding 15 "multiply_min_yes") ())))
+
+(preproc "#else")
+
+(preproc "#endif")
+
+(preproc "#if -(-9223372036854775807) == 9223372036854775807")
+
+(declare (int) (bindings (bind (binding 16 "negate_max_yes") ())))
+
+(preproc "#else")
+
+(preproc "#endif")
+
+(preproc "#if 1 << 62 == 4611686018427387904")
+
+(declare (int) (bindings (bind (binding 17 "shift_fits_yes") ())))
+
+(preproc "#else")
+
+(preproc "#endif")
+
+(preproc "#if 0 << 63 == 0")
+
+(declare (int) (bindings (bind (binding 18 "shift_zero_yes") ())))
+
+(preproc "#else")
+
+(preproc "#endif")

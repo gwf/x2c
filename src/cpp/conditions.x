@@ -212,14 +212,13 @@ static int _level(String op) {
   return 0;
 }
 
-/* `&&` and `||` decide from one known side as C's short circuit does. A
-   shift by a count outside 0 to 63 and a quotient that does not fit are
-   left to the C compiler, which may evaluate them differently. */
+/* `&&` and `||` decide from one known side as C's short circuit does.
+   Arithmetic outside signed long range stays undecided for C to evaluate. */
 static CppValue _apply(String op, CppValue left, CppValue right) {
   if (op == "&&") return _logical(left, right, 0);
   if (op == "||") return _logical(left, right, 1);
   if (!left.known || !right.known) return (CppValue) {0};
-  long a = left.value, b = right.value;
+  long a = left.value, b = right.value, result;
   int shifts = (unsigned long) b < 64;
   int divides = b && !(a == LONG_MIN && b == -1);
   switch (op) {
@@ -232,11 +231,16 @@ static CppValue _apply(String op, CppValue left, CppValue right) {
     case ">": return _known(a > b);
     case "<=": return _known(a <= b);
     case ">=": return _known(a >= b);
-    case "<<": return shifts ? _known(a << b) : (CppValue) {0};
+    case "<<":
+      return shifts && a >= 0 && a <= (LONG_MAX >> b)
+        ? _known(a << b) : (CppValue) {0};
     case ">>": return shifts ? _known(a >> b) : (CppValue) {0};
-    case "+": return _known(a + b);
-    case "-": return _known(a - b);
-    case "*": return _known(a * b);
+    case "+":
+      return __builtin_add_overflow(a, b, &result) ? (CppValue) {0} : _known(result);
+    case "-":
+      return __builtin_sub_overflow(a, b, &result) ? (CppValue) {0} : _known(result);
+    case "*":
+      return __builtin_mul_overflow(a, b, &result) ? (CppValue) {0} : _known(result);
     case "/": return divides ? _known(a / b) : (CppValue) {0};
     case "%": return divides ? _known(a % b) : (CppValue) {0};
   }
@@ -264,7 +268,8 @@ static CppValue _unary(CppEval &e) {
   if (!operand.known) return operand;
   switch (op) {
     case "!": return _known(!operand.value);
-    case "-": return _known(-operand.value);
+    case "-":
+      return operand.value == LONG_MIN ? (CppValue) {0} : _known(-operand.value);
     case "~": return _known(~operand.value);
   }
   return operand;
