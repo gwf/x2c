@@ -1,0 +1,5 @@
+unittest/compiler-fixtures/alias-wrapped-field-conflict.x:8:15: parse: declaration 'size' is already bound
+        int size;
+                ^
+  note: prior binding: 'size'
+

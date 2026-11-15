@@ -479,15 +479,14 @@ static Var _method_spelling(
 
 /* An exact spelling, or a name a parameter holds, may be declared again only
    as another prototype of a function. An alias's name is not declared again
-   in its scope. A field conflicts with an alias of the body that holds it;
-   any other declaration joins its Sym scope through the bodies around it,
-   so it conflicts with theirs too. */
+   in its scope. A field conflicts with aliases from its aggregate body
+   through the wrappers that hold it. Other declarations join their Sym
+   scope through those bodies and conflict with their aliases too. */
 static void _check_rebinding(
   Compiler c, List context, String exact, int exact_name,
   List declaration) {
   int field = context && !(context === %(typedef));
-  if (exact && (field ? c.scope_declares_alias(exact)
-                      : _names_alias(c, exact)))
+  if (exact && _names_alias(c, exact, field ? c.alias_member_level : 0))
     $fail.parse_decl_bound(c, c.token, exact);
   List existing = exact ? c.sym.current_binding($(exact)) : NULL;
   if (exact_name || (existing &&

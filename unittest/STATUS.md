@@ -485,3 +485,12 @@ describes these native boundaries.
   publishing them. Allocation failure during expansion is not forcibly
   injected. That coverage limitation does not justify adding a production
   allocator hook or another recurring test requirement solely for this note.
+
+### Aliases and wrapped aggregate fields (repaired)
+
+A field inside nested alias wrappers now rejects an alias with the same name
+in its containing aggregate. The aggregate's alias-body boundary is restored
+when nested aggregates finish, so outer/file aliases do not reserve their
+field names. `alias-wrapped-field-conflict` checks rejection;
+`alias-field-scopes` covers file aliases, nested aggregates, and a macro-built
+aggregate field. The existing included-alias collision fixtures remain valid.

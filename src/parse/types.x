@@ -55,8 +55,10 @@ List Compiler.parse_named_type(Compiler c) {
 List Compiler.parse_members(Compiler c, Symbol position, List context) {
   Map aliases = c.enter_alias_body();
   defer c.leave_alias_body(aliases);
-  return position == <enumerator> ? c.parse_enumerators(context)
-                                  : c.parse_fields(context);
+  with (c.alias_member_level = c.alias_level) {
+    return position == <enumerator> ? c.parse_enumerators(context)
+                                    : c.parse_fields(context);
+  }
 }
 
 /** Parses aggregate fields in source order up to the current closing brace.
@@ -674,7 +676,7 @@ module List _publish_enumerator(
   String spelling = exact ? exact : Ast.binding_spelling(binding);
   if (!spelling)
     $fail.parse_syntax_position(c, origin);
-  if (exact && _names_alias(c, exact))
+  if (exact && _names_alias(c, exact, 0))
     $fail.parse_decl_bound(c, origin, exact);
   List key = $(spelling);
   if (exact) key = c.sym.declared_key(NULL, key, context);
@@ -696,8 +698,8 @@ module List _publish_enumerator(
    that a file-scope alias wraps keeps its file scope. The bodies between
    that scope and the name keep their aliases visible there, so an alias
    that any of them declares already names it. */
-module int _names_alias(Compiler c, String spelling) {
-  for (int level = c.alias_level; level >= 0; level--)
+module int _names_alias(Compiler c, String spelling, int first_level) {
+  for (int level = c.alias_level; level >= first_level; level--)
     with (c.alias_level = level) {
       if (c.scope_declares_alias(spelling)) return 1;
     }
@@ -879,7 +881,7 @@ static List _finish_aggregate_type(
   List type = $(tag, name);
   Array bound = [];
   Symbol position = tag == <enum> ? <enumerator> : <field>;
-  with (c.aggregate_type = type) {
+  with (c.aggregate_type = type, c.alias_member_level = c.alias_level) {
     foreach (List member in members)
       foreach (Var row in c.evaluate_macro_rows(member))
         _push_items(bound, c.bind_syntax(row, position, c.return_type));

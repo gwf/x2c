@@ -196,6 +196,8 @@ typedef struct Compiler {
   Map macro_holes;
   // Open declaration bodies whose aliases end at their closing brace.
   int alias_level;
+  // First alias body whose names share the current aggregate field scope.
+  int alias_member_level;
   Map local_macro_captures;
   /* Depth of macro value applications being bound; their transactions
      also cover effects and code-value carriers are consumed. */
