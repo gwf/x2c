@@ -95,8 +95,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        revision: [9889b2cf88f141d3d4d63c78193a1d4618703c01, 42a3ec24e10c3078a7dd7eed8aaf7b808310c7e4]
-    runs-on: ubuntu-24.04
+        revision: [aa02ed22468b7d6d741bf7fd97169f836efa1224, 53361eafbcef9c55830e63adeddc8477a9fd5bec]
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v5
@@ -112,11 +113,11 @@ jobs:
           mkdir -p debug
           make build-safe >debug/bootstrap.log 2>&1
           make commands >debug/commands.log 2>&1
-          python3 ../harness/tools/one-time-manifest-probe.py
+          bash ../harness/tools/one-time-repl-compare.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: manifest-${{ matrix.revision }}
+          name: manifest-${{ matrix.revision }}-${{ matrix.runner }}
           path: |
             /tmp/x2c-repl-manifest-*/*.log
             /tmp/x2c-repl-manifest-*/*.ps
