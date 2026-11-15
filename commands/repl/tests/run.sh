@@ -27,7 +27,7 @@ done
 builds/0/x2c build --plain ${BUILD_JOBS:+-j "$BUILD_JOBS"} \
   --build-dir "$tmp/inspect-cc" --output "$tmp/inspect-check" \
   --x-include-dir commands/repl --x-include-dir src \
-  --c-include-dir builds/0/src \
+  --c-include-dir builds/0/src $native_link \
   commands/repl/tests/inspect-check.x commands/repl/repl-types.x \
   commands/repl/repl-inspect.x commands/repl/repl-native.x \
   builds/0/libx2c-dev.a
