@@ -6561,7 +6561,9 @@ ordinary source tokens.
 
 Within signed `long` arithmetic, a condition is decided when every name it
 tests is visible, is known never to be defined, or is a literal. Unsigned
-operands and integer magnitudes outside that range remain undecided.
+operands, integer magnitudes, and intermediate results outside that range
+remain undecided. Left shifts of negative values, left shifts whose results
+do not fit, and shift counts outside 0 to 63 also remain undecided.
 `defined NAME` fails after `#undef NAME`. x2c output is compiled as C by a
 GNU-style compiler, so with `--cpp`, `__GNUC__` is always defined. The
 never-defined names of ordinary translation stay never defined. Only
