@@ -437,6 +437,8 @@ ReplWorker repl_worker_start(ReplWorkerStart start) {
         if (start.previous.terminal >= 0) close(start.previous.terminal);
       }
       start.input.discard_inherited();
+      // Do not let freopen seek the supervisor's buffered input backward.
+      close(STDIN_FILENO);
       setsid();
       if (master >= 0) {
         close(master);
