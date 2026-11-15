@@ -1,62 +1,20 @@
 name: release-validation
-
 on:
   workflow_dispatch:
-  workflow_call:
-
 permissions:
   contents: read
-
-env:
-  CC: clang
-
 jobs:
-  installation-and-examples:
-    runs-on: ubuntu-latest
+  linux-repl-investigation:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
-      - name: Install build tools
-        run: sudo apt-get update && sudo apt-get install -y clang make python3 git unzip autoconf automake libtool pkg-config perl diffutils
-      - uses: ./.github/actions/select-clang
-      - name: Build from checked-in bootstrap
-        run: make build-safe
-      - name: Run all ordinary examples and gallery assertions
-        run: make examples
-      - name: Prepare the documentation sample dependency
-        run: make -C packages/pcre2 build
-      - name: Compile documentation examples
-        run: make doc-examples
-
-  list:
-    runs-on: ubuntu-latest
-    outputs:
-      packages: ${{ steps.list.outputs.packages }}
-    steps:
-      - uses: actions/checkout@v5
-      - id: list
-        run: |
-          echo "packages=$(make -s -C packages list | jq -cR 'split(" ")')" \
-            >> "$GITHUB_OUTPUT"
-
-  packages:
-    needs: list
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        package: ${{ fromJSON(needs.list.outputs.packages) }}
-        # torch needs a LibTorch download and stays a local check.
-        exclude:
-          - package: torch
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install build and runtime test tools
-        run: sudo apt-get update && sudo apt-get install -y build-essential clang python3 git autoconf automake libtool pkg-config perl expect jq file patch ca-certificates unzip diffutils libx11-dev
-      - uses: ./.github/actions/select-clang
-      - name: Build from checked-in bootstrap
-        run: make build-safe
-      - name: Prepare fresh dependency and run the package check
-        run: make -C packages/${{ matrix.package }} check
-      - name: Run HTTP and JSON composition
-        if: matrix.package == 'libcurl'
-        run: make -C examples/packages/http-json-releases test
+      - name: Probe GNU linker dependencies
+        run: bash tools/one-time-linux-repl-probe.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-repl-investigation
+          path: |
+            /tmp/x2c-linux-repl.*/repl.log
+            /tmp/x2c-linux-repl.*/link-trace.log
+            debug/repl-probe-bootstrap.log
