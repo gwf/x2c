@@ -623,3 +623,15 @@ and result 22 (workflow 43751555164). That run exposed a subsequent fixture
 loader-path omission: the temporary `-lplayground` provider now receives its
 fixture directory through `LD_LIBRARY_PATH`. The full macOS REPL suite passed.
 Final combined publication and Linux suite results are retained with delivery.
+
+The final baseline comparison (workflow 43752456676) reproduced the separate
+`:info next()` worker crash on both Linux architectures before and after this
+repair. ARM also reproduced duplicate `arm_neon.h` compiler pragmas across
+generated native headers before and after the repair; that can prevent the
+reload program from compiling. These remain independent Linux REPL defects.
+The x86-64 comparison changed the redirected manifest case from repeated
+commands and timeout to one result and clean EOF. Program and terminal tests
+passed there. The earlier ARM run completed the same manifest regression;
+the minimal descriptor probe passed on both architectures. A successful
+comparison workflow records evidence, not a claim that every REPL test passed.
+The full macOS REPL suite and the existing publication gate passed.
