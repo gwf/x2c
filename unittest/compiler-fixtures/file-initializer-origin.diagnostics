@@ -1,0 +1,4 @@
+unittest/compiler-fixtures/file-initializer-origin.x:3:1: type: function takes 4 arguments, not 3
+  Iter kept = range(1, 4, 1);
+  ^^^^
+

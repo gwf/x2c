@@ -164,15 +164,19 @@ static Ast _sequence(Compiler c, Ast ast, int value_tail) {
 }
 
 static Ast _sequence_item(Compiler c, Ast value, int value_tail) {
-  Ast lowered;
-  match (Ast.without_origin(value)) {
-    case %(stmnt ?expr) if (value_tail):
-      lowered = _statement_value(c, value, expr);
-    case %(defer ?): lowered = value;
-    default: lowered = _step(c, value);
+  List span = c.fn_name ? NULL : c.fact(%(definition-span $value));
+  Token site = span ? (Token) c.tokenizer.tokens + (int) span.car() : c.token;
+  with (c.token = site) {
+    Ast lowered;
+    match (Ast.without_origin(value)) {
+      case %(stmnt ?expr) if (value_tail):
+        lowered = _statement_value(c, value, expr);
+      case %(defer ?): lowered = value;
+      default: lowered = _step(c, value);
+    }
+    if (!c.fn_name) lowered = c.lower_cleanup(lowered);
+    return lowered;
   }
-  if (!c.fn_name) lowered = c.lower_cleanup(lowered);
-  return lowered;
 }
 
 static Ast _statement_value(Compiler c, Ast value, Var expression) {

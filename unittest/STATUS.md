@@ -1,5 +1,15 @@
 # Status
 
+## Resolved file-scope initializer diagnostic location on 2026-11-15
+
+Transform diagnostics for an unanchored file-scope initializer used the parser's
+end-of-file cursor. The transform now selects the declaration's existing token
+span while lowering it. Nested recorded origins still take precedence.
+
+The `file-initializer-origin` fixture checks the declaration location and source
+underline. The existing iterator-call, postfix-origin, and statement-expression
+origin fixtures preserve their diagnostics.
+
 ## Resolved helper-cache path deadlock on 2026-10-31
 
 The support-unit guard compared a physical input path with the cache root as
