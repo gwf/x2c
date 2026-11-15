@@ -134,13 +134,14 @@ Repeat this loop without routine user approval:
 
 An upstream commit does not by itself invalidate compiler validation. The
 existing `gate-state.py ensure agent-pr-check` compares actual file contents
-and build configuration. After ordinary Markdown or independent external
-command changes, it retains compiler proof and runs the applicable existing
-documentation, command, and CLI checks. It records the resulting exact tree
-only after those checks pass. Changes to compiler/runtime/bootstrap inputs,
-shared build tools, the built-in build command, or toolchain configuration
-still require full validation. Do not fabricate receipts or classify all
-command changes as independent merely by their name.
+and build configuration. After ordinary Markdown, website-source, or
+independent external command changes, it retains compiler proof and runs the
+applicable existing documentation, command, and CLI checks. It records the
+resulting exact tree only after those checks pass. Changes to
+compiler/runtime/bootstrap inputs, shared build tools, the built-in build
+command, or toolchain configuration still require full validation. Do not
+fabricate receipts or classify all command changes as independent merely by
+their name.
 
 Keep the batch, source review, generated review, repairs, and performance
 results unless the actual delta affects them. Review a conflict resolution or
@@ -297,7 +298,8 @@ code brought in by that integration. Validate the final tree:
 
 - Code, runtime, build, test, tool, executable-example, or generated-artifact
   changes: `tools/gate-state.py ensure agent-pr-check`.
-- Documentation-only changes: `tools/gate-state.py ensure doc-check`.
+- Documentation-only changes, meaning ordinary Markdown and website sources
+  under `site/src/`: `tools/gate-state.py ensure doc-check`.
 
 For example, after rebasing a plans-only edit onto a newer `dev` that changed
 compiler code, run `doc-check`; do not run `agent-pr-check` just because the
@@ -308,14 +310,14 @@ and verify that its diff contains only documentation.
 The code command reuses valid evidence or runs `precommit` and the remaining
 extended checks. It owns bootstrap refresh, safe rebuild, and self-host
 comparison; do not run its broad components separately merely to publish.
-Review every resulting artifact delta. Edits, regeneration, or integration
-that change the validated tree require ensuring the command again. The helper
-retains compiler validation when only ordinary Markdown or independent external
-commands changed, and runs their applicable existing checks. Upstream movement
-alone is not a reason to repeat compiler validation. Shared build/toolchain,
-compiler, runtime, bootstrap, and built-in build-command changes still require
-the full gate. A commit,
-review, push, or elapsed time does not invalidate an unchanged result.
+Review every resulting artifact delta. Edits, regeneration, or integration that
+change the validated tree require ensuring the command again. The helper
+retains compiler validation when only ordinary Markdown, website sources, or
+independent external commands changed, and runs their applicable existing
+checks. Upstream movement alone is not a reason to repeat compiler validation.
+Shared build/toolchain, compiler, runtime, bootstrap, and built-in
+build-command changes still require the full gate. A commit, review, push, or
+elapsed time does not invalidate an unchanged result.
 
 Performance evidence stays outside these correctness gates. Follow
 [performance checkpoints](../../performance-checkpoints.md) for the

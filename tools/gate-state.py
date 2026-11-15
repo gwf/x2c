@@ -15,11 +15,11 @@ It exits 0 for valid and 1 for stale, so a shell can branch on it.
 
 `ensure` accepts the two publication gates, reuses a valid record, or runs the
 corresponding Make target with live output. For a prior agent-pr-check proof,
-Markdown and independent external-command changes run only existing consumer
-checks while retaining compiler proof. Those checks and doc-check run the
-book's output samples only when a changed page under docs/src has an x2c
-sample; doc-check counts a page as changed unless a record of either gate
-holds it. It records the resulting exact tree only after success, and only
+Markdown, website-source, and independent external-command changes run only
+existing consumer checks while retaining compiler proof. Those checks and
+doc-check run the book's output samples only when a changed page under docs/src
+has an x2c sample; doc-check counts a page as changed unless a record of either
+gate holds it. It records the resulting exact tree only after success, and only
 when nothing but the gate's own regenerated outputs changed while it ran.
 `check` remains available for direct inspection. Records are in untracked
 `debug/`, so they belong to this workspace and never travel with a commit.
@@ -313,10 +313,13 @@ def documentation(path: str) -> bool:
     """Whether doc-check covers a change to this ordinary, non-executable file.
 
     Markdown under commands/ is command input, such as an expected-output
-    fixture, so its command tests consume it instead.
+    fixture, so its command tests consume it instead. The website's sources
+    under site/src/ feed only the site build, which neither gate runs, so
+    the compiler gate proves nothing about them.
     """
     return (not path.startswith("commands/") and
-            (path.endswith(".md") or path in LLMS_FILES))
+            (path.endswith(".md") or path in LLMS_FILES or
+             path.startswith("site/src/")))
 
 
 def documentation_steps(root: pathlib.Path, paths) -> list[list[str]]:
