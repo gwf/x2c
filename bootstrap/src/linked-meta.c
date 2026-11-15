@@ -21260,7 +21260,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_35(void
   _18090 = List_var(_18089);
   _18091 = String_new("src/transform/traversal.x");
   _18092 = String_var(_18091);
-  _18093 = String_new("902ec7b7");
+  _18093 = String_new("1287394d");
   _18094 = String_var(_18093);
   _18095 = cons(_18094, NULL);
   _18096 = cons(_18092, _18095);
