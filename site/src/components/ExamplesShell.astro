@@ -5,8 +5,10 @@ import { fromCNavigation } from "../lib/from-c-examples";
 import { shootoutNavigation } from "../lib/shootout-examples";
 import { mdbookSidebarAssets } from "../../mdbook-sidebar.mjs";
 const sidebar = mdbookSidebarAssets();
-const { current = "love" } = Astro.props;
+const { current = "essentials" } = Astro.props;
+const tours = exampleEntries.filter(entry => entry.section === "tours");
 const sidebarGroups = [
+  { title: "Start here", sections: tours.map(entry => entry.article.frontmatter.slug) },
   { title: "Language examples", sections: exampleSections.filter(section => section !== "programs") },
   { title: "Complete programs", sections: ["programs"] },
   { title: "Progressions and comparisons", sections: ["from-c", "shootout"] },
@@ -15,7 +17,7 @@ const sectionNumbers = new Map(sidebarGroups.flatMap(group => group.sections)
   .map((section, index) => [section, index + 1]));
 const base = import.meta.env.BASE_URL;
 const href = (entry) => `${base}examples/${exampleRoute(entry)}`;
-const sectionLabel = (section: string) => ({
+const sectionLabel = (section: string) => tours.find(entry => entry.article.frontmatter.slug === section)?.label ?? ({
   "from-c": "From C to x2c", shootout: "Programming language shootout",
 }[section] ?? section[0].toUpperCase() + section.slice(1));
 const sectionLinks = (section: string) => {
@@ -39,7 +41,7 @@ const sectionLinks = (section: string) => {
         {sidebarGroups.map(group => <>
         <li class="part-title">{group.title}</li>
         {group.sections.map(section => <li class:list={["chapter-item", {expanded: section === "programs"}]} data-example-section={section} data-track-example-sections={current === section ? "" : undefined}>
-          <span class="chapter-link-wrapper"><a href={`${base}examples/${section}/`} class:list={{active: current === section}}><strong>{sectionNumbers.get(section)}.</strong> {sectionLabel(section)}</a><button class="chapter-fold-toggle" aria-label={`Toggle ${sectionLabel(section)}`} aria-expanded={String(section === "programs")} type="button"><div aria-hidden="true">&#10097;</div></button></span>
+          <span class="chapter-link-wrapper"><a href={`${base}examples/${section}/`} class:list={{active: current === section}}><strong>{sectionNumbers.get(section)}.</strong> {sectionLabel(section)}</a>{sectionLinks(section).length > 0 && <button class="chapter-fold-toggle" aria-label={`Toggle ${sectionLabel(section)}`} aria-expanded={String(section === "programs")} type="button"><div aria-hidden="true">&#10097;</div></button>}</span>
           <ol class="section">{sectionLinks(section).map((entry, index) =>
             <li class="chapter-item"><a href={entry.href} data-index-link class:list={{active: entry.active}}><strong>{sectionNumbers.get(section)}.{index + 1}.</strong> {entry.label}</a></li>)}</ol>
         </li>)}
@@ -65,7 +67,7 @@ const sectionLinks = (section: string) => {
         const saved = sessionStorage.getItem(key);
         if (saved !== null) item.classList.toggle("expanded", saved === "open");
       } catch {}
-      item.querySelector(".chapter-fold-toggle").setAttribute(
+      item.querySelector(".chapter-fold-toggle")?.setAttribute(
         "aria-expanded", String(item.classList.contains("expanded")));
     }
   </script>

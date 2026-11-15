@@ -136,6 +136,14 @@ to their linked program. Gallery links use the same routes as the Examples
 index. The former `/playground/?example=...` interface redirects to those
 routes; `/playground/programs/` still holds the shared WebAssembly assets.
 
+Complete-example pages use `src/content/examples/*.md` metadata and the shared
+article layout. The two introductory walkthroughs set `section: tours` and
+`fullSource: true`; their `order` puts Essentials before Language. Their source
+and expected output come directly from the checked-in examples. The numbered
+source comments supply the linked section index, so editing a walkthrough
+updates its page without a second copy of the code. `/examples/` opens Essentials.
+
+
 A sample that genuinely cannot compile must
 be tagged ```` ```x2c,ignore ```` with an `<!-- ignore: reason -->` comment
 above it.
