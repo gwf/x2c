@@ -580,13 +580,10 @@ clean-all: clean					## Also remove bootstrap objects
 
 ###############################################################################
 # Installation.
-ifeq ($(strip $(PREFIX)),)
-install: build-install					## Install the built toolchain
-else
-install: commands
+PREFIX ?= $(HOME)/.local/x2c
+install: commands					## Install the built toolchain in PREFIX
 	$(STAGE0_X2C) script etc/x2c-payload.x install --prefix "$(PREFIX)" \
 	  --destdir "$(DESTDIR)"
-endif
 
 uninstall: build					## Remove the installation under PREFIX
 	$(STAGE0_X2C) script etc/x2c-payload.x uninstall --prefix "$(PREFIX)"
@@ -597,7 +594,7 @@ DIST_VERSION = $(shell builds/0/x2c --version | cut -d' ' -f2)
 dist: commands						## Package the PREFIX installation under dist/
 	rm -rf dist/stage
 	$(STAGE0_X2C) script etc/x2c-payload.x install --prefix "$(PREFIX)" \
-	  --destdir "$(CURDIR)/dist/stage"
+	  --destdir "$(CURDIR)/dist/stage" --distribution
 	tar -C "dist/stage$(dir $(PREFIX))" -czf \
 	  "dist/x2c-$(DIST_VERSION)-$(DIST_PLATFORM).tar.gz" \
 	  "$(notdir $(PREFIX))"

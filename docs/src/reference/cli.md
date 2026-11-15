@@ -4,11 +4,12 @@ After [installation and PATH setup](../guide/installation.md), run the
 compiler as `x2c`. Every invocation begins with a command, and `x2c help`
 lists every command the compiler has. An installed compiler has `translate`,
 `build`, `run`, `new`, `script`, `env`, `install`, `remove`, `list`, `help`,
-`lsp`, `package`, and `test`. The driver runs some of them through
+`lsp`, `package`, `test`, and `update`. The driver runs some of them through
 [external commands](#commands): `build`, `run`, and `script` through
 `x2c-build`, `new` through `x2c-new`, `install`, `remove`, `list`, and
 `package` through `x2c-package`, `lsp` through `x2c-lsp`, and `test` through
-`x2c-test`. A checkout can also build the experimental commands
+`x2c-test`; `update` runs through `x2c-update`. A checkout can also build the
+experimental commands
 `bind`, `graph`, `lint`, and `repl`, which an install does not include.
 
 This chapter has these sections:
@@ -29,6 +30,7 @@ This chapter has these sections:
 - [C compiler and linker options](#c-compiler-and-linker-options): defines,
   optimization, linking, and C compiler selection.
 - [Packages](#packages): `install`, `remove`, and `list`.
+- [Compiler updates](#compiler-updates): check and update an official compiler.
 - [Environment](#environment): `x2c env`, the home, and environment
   variables.
 - [Commands](#commands): every command `x2c help` lists, external commands,
@@ -54,6 +56,45 @@ x2c build --help
 x2c run --help
 x2c script --help
 ```
+
+## Compiler updates
+
+`install`, `remove`, and `list` manage packages. `update` manages an official
+compiler installation:
+
+```sh
+x2c update --check
+x2c update
+x2c update --version 0.16.0
+```
+
+The check reports the installed and available versions without changing the
+installation or downloading a compiler archive. Ordinary updates install only
+a newer version. An explicit version can select an older release deliberately.
+The target is the invoked executable's installation, not `X2C_HOME`, the
+working directory, or another executable on `PATH`. The recorded release
+source supplies update metadata; ambient installer variables do not change it.
+Candidate installations pinned to a staging tag require their release
+installer to select another candidate; a version number alone does not select
+candidate bytes. A successful check returns 0 whether an update is available
+or not. Errors return 1 and invalid options return 2.
+
+Source installations report the `make install` command for their checkout.
+Unknown-origin installations require an explicit reinstall to establish their
+origin. A release update does not switch a source installation to releases.
+
+Stop builds and other installation work before updating. Native packages built
+for a different compiler version block replacement; remove those packages with
+`x2c remove`, update, and reinstall compatible packages. Source packages are
+retained. Unrelated files outside `packages/` also block release replacement.
+Move those files outside the prefix before retrying.
+
+The installer stages and checks the replacement before changing the prefix.
+It excludes concurrent installers and restores the old prefix after a handled
+replacement failure. An unhandled interruption can leave a backup and a lock;
+the next attempt reports recovery instructions. Do not delete those files
+before restoring the installation. Replacement is not atomic for concurrent
+compilation, and there is no retained-version rollback command.
 
 ## Translate to C
 

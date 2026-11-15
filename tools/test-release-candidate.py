@@ -83,7 +83,7 @@ class Candidates(unittest.TestCase):
                          self.manifest['assets']['x2c-1.2.3-linux-x86_64.tar.gz']['sha256'])
         self.assertIn('/v1.2.3/', files['index.txt'].read_text())
         staging = (self.directory / 'staging/install.sh').read_text()
-        self.assertIn('${X2C_RELEASE_TAG:-' + self.manifest['identity'] + '}', staging)
+        self.assertIn('${release_tag:-' + self.manifest['identity'] + '}', staging)
         self.assertIn('gwf/x2c-staging/releases/download', staging)
 
     def test_missing_archive_blocks_promotion(self):

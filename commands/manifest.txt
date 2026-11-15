@@ -7,3 +7,4 @@ new|shipped|Create a project that builds and runs
 package|shipped|Install, remove, and list packages
 repl|experimental|Explore C and x2c libraries in a native playground
 test|shipped|Build and run project tests
+update|shipped|Check for and install compiler releases
