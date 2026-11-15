@@ -1,0 +1,22 @@
+---
+import { Code } from "astro:components";
+import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
+const { source, path } = Astro.props;
+// The executable walkthrough owns its section names and reading order.
+const sections = source.split("\n").flatMap((line: string, index: number) => {
+  const heading = line.match(/^\/\* (\d+)\. (.+)$/);
+  return heading ? [{ title: heading[2], line: index + 1 }] : [];
+});
+---
+<nav class="example-prose" aria-label="Walkthrough sections">
+  <h2>In this walkthrough</h2>
+  <ol>{sections.map(section => <li><a href={`#line-${section.line}`}>{section.title}</a></li>)}</ol>
+</nav>
+<section id="source" aria-label="Complete walkthrough source">
+  <div class="reading-source-bar"><span>{path}</span></div>
+  <div class="reading-source" tabindex="0" role="region" aria-label="Source code; scroll horizontally on narrow screens">
+    <Code code={source} lang={{...grammar, name: "x2c"}} theme={x2cDarkTheme}
+      transformers={[{ line(node, line) { node.properties.id = `line-${line}`; } }]} />
+  </div>
+</section>

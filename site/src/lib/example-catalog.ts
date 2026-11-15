@@ -62,7 +62,7 @@ const programEntries = articles.map((article) => {
   const page = article.frontmatter;
   const source = read(page.source);
   return {
-    id: `programs/${page.slug}`, section: "programs", path: page.source,
+    id: `${page.section ?? "programs"}/${page.slug}`, section: page.section ?? "programs", path: page.source,
     source,
     label: page.navTitle, program: false,
     output: outputFor(page.source, page.output), article,
@@ -76,7 +76,8 @@ export const exampleEntries: {
   nativeReason?: string; program: boolean; output?: string;
   slide?: ExampleMarkdown;
   article?: ExampleMarkdown; recipe?: string; description?: string;
-}[] = [...galleryEntries, ...programEntries];
+}[] = [...programEntries.filter(entry => entry.section === "tours"),
+  ...galleryEntries, ...programEntries.filter(entry => entry.section !== "tours")];
 export const exampleSections = ["love", "power", "magic", "programs"];
 
 // All entry points use the same complete-example destination.
