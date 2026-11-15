@@ -46,6 +46,7 @@ for candidate in candidate-one candidate-two; do
   tar -xzf "$ROOT/dist/$asset" -C "$WORK/candidate-tree"
   tree=$(find "$WORK/candidate-tree" -mindepth 1 -maxdepth 1 -type d)
   printf '%s\n' "$candidate" >"$tree/candidate-test.txt"
+  printf '0 0 candidate-test.txt\n' >>"$tree/.x2c-install-manifest"
   tar -czf "$WORK/releases/$candidate/$asset" \
     -C "$WORK/candidate-tree" "$(basename "$tree")"
   (cd "$WORK/releases/$candidate" && shasum -a 256 "$asset" >"$asset.sha256")
