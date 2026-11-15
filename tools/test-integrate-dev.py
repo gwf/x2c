@@ -860,6 +860,16 @@ class IntegrationProbe(unittest.TestCase):
         batch=self.prepare(); self.land(batch)
         self.assertEqual([g['target'] for g in self.state()['gates']],['doc-check'])
 
+    def test_website_source_uses_doc_gate(self):
+        self.pr(1,'site/src/pages/index.astro','new landing page\n')
+        batch=self.prepare(); self.land(batch)
+        self.assertEqual([g['target'] for g in self.state()['gates']],['doc-check'])
+
+    def test_site_installer_uses_code_gate(self):
+        self.pr(1,'site/public/install.sh','echo installer\n')
+        batch=self.prepare(); self.land(batch)
+        self.assertEqual([g['target'] for g in self.state()['gates']],['agent-pr-check'])
+
     def test_command_markdown_fixture_uses_code_gate(self):
         self.pr(1,'commands/bind/tests/expected/README.md','new fixture\n')
         batch=self.prepare(); self.land(batch)

@@ -108,6 +108,10 @@ class ScopedEvidence(unittest.TestCase):
         for path, expected in (("plans/design.md", True),
                                ("examples/README.md", True),
                                ("site/public/llms.txt", True),
+                               ("site/src/pages/index.astro", True),
+                               ("site/src/lib/carousel.ts", True),
+                               ("site/public/install.sh", False),
+                               ("site/astro.config.mjs", False),
                                ("commands/repl/README.md", False),
                                ("docs/src/reference/syntax/x2c.ebnf", False),
                                ("src/emit.x", False)):
