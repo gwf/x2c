@@ -20,7 +20,7 @@ p.add_argument('--source-sha', required=True)
 p.add_argument('--target', required=True)
 a = p.parse_args()
 root = Path.cwd()
-work = Path(tempfile.mkdtemp(prefix='x2c-twenty-' + a.target + '-'))
+work = Path(tempfile.mkdtemp(prefix='x2c-twenty-' + a.target + '-', dir='/tmp'))
 print('ARTIFACT_DIRECTORY=' + str(work), flush=True)
 rows = []
 manifest = {}
