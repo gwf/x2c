@@ -617,9 +617,6 @@ static String _program_native_build(
     command.push("-Wl,--push-state,--no-as-needed");
 #endif
     foreach (String option, request.ld_args) command.push(option);
-#ifdef __linux__
-    command.push("-Wl,--pop-state");
-#endif
 #ifdef __APPLE__
     foreach (List row, b.exports)
       if (row.len() >= 3 && row[2] == <dynamic>) {
@@ -639,8 +636,16 @@ static String _program_native_build(
       command.push("-Xlinker"); command.push("--no-whole-archive");
 #endif
     }
-    else command.push(source);
+    else {
+#ifdef __linux__
+      if (kind == <module> && source.endswith(".so")) command.push("-Xlinker");
+#endif
+      command.push(source);
+    }
   }
+#ifdef __linux__
+  if (kind == <module>) command.push("-Wl,--pop-state");
+#endif
   String captured = NULL, errors = NULL;
   int status = tool_capture(command, captured, errors);
   if (status) return errors ? errors : %"native build exited with status $status";

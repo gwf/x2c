@@ -81,6 +81,7 @@ case "$(uname -s)" in
   *) shared="$tmp/libplayground.so"; cc -shared -fPIC \
     commands/repl/tests/library/playground.c -o "$shared" ;;
 esac
+"$tmp/program-api" "$PWD/commands/repl/tests/library/playground.h" "$shared"
 REPL_PROGRAM_REMOVE_NATIVE="$shared" "$tmp/program-api" \
   "$PWD/commands/repl/tests/library/playground.h" -L"$tmp" -lplayground
 
