@@ -1,0 +1,35 @@
+name: one-time-manifest-comparison
+on: workflow_dispatch
+permissions:
+  contents: read
+jobs:
+  compare:
+    strategy:
+      fail-fast: false
+      matrix:
+        revision: [9889b2cf88f141d3d4d63c78193a1d4618703c01, 42a3ec24e10c3078a7dd7eed8aaf7b808310c7e4]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: harness
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ matrix.revision }}
+          path: candidate
+      - name: Build and compare bounded REPL cases
+        working-directory: candidate
+        run: |
+          mkdir -p debug
+          make build-safe >debug/bootstrap.log 2>&1
+          make commands >debug/commands.log 2>&1
+          python3 ../harness/tools/one-time-manifest-probe.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: manifest-${{ matrix.revision }}
+          path: |
+            /tmp/x2c-repl-manifest-*/*.log
+            /tmp/x2c-repl-manifest-*/*.ps
+            candidate/debug/*.log
