@@ -16,7 +16,6 @@ the field query below. Complete captures also retain their source information
 for text and location queries; constructed subtrees do not acquire it.
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 typedef struct Point { int x, y, z; } Point;
@@ -67,7 +66,6 @@ A `Stmt` macro can use the same arrow form. Its body is then the statement
 the macro is invoked, not only an expression:
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 meta static List repeated(List code) => %(block $code $code);
@@ -197,7 +195,6 @@ A decorator can make that choice from the function it captures. Here the
 inserts the selected invocation into the function body:
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 static int calls = 0;
@@ -266,7 +263,6 @@ number, String, or Symbol as a literal. `@name` splices a `List` local.
 determines what it fills.
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 meta static List numbered(List subject, List arms) {
@@ -332,7 +328,6 @@ A `$name` hole needs a local. When the value is a field, an element, or the
 result of a call, `$(expression)` inserts it without one:
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 typedef struct Call { List callee; List arguments; Type result; } Call;
@@ -603,7 +598,6 @@ it. `x2c_ident` checks a name and returns identifier code, which a
 quotation uses where the code reads the name:
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 meta static List call_of(String callee, List argument) {
@@ -662,7 +656,6 @@ the invocation and stops the expansion. It does not return. Use it when the
 argument is wrong in a way the macro can see:
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 meta static List one_word(Source node) {
@@ -728,7 +721,6 @@ that refers to it agrees.
 Here the counter runs after each statement that traces a value:
 
 ```x2c
-#include "x2c.x"
 #include "meta.x"
 
 static int traced = 0;
@@ -779,7 +771,6 @@ only on definitions with that return type and storage, before the rules
 whose pattern holds a hole there:
 
 ```x2c
-#include "x2c.x"
 #include "rewrite.x"
 
 static int entries = 0;
@@ -879,7 +870,6 @@ also makes its nonstatic meta functions available.
 
 <!-- ignore: this program includes the shape.x file above -->
 ```x2c,ignore
-#include "x2c.x"
 #include "meta.x"
 
 #include "shape.x"

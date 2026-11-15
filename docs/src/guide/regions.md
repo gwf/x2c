@@ -125,7 +125,7 @@ The lifetime proof is experimental and runs only from a source checkout:
 `make install` and release payloads do not install `x2c-graph`. Build it in
 the checkout with `make commands`.
 
-`x2c-graph certify` checks selected entry points and the functions they can
+`x2c graph certify` checks selected entry points and the functions they can
 call across the supplied source units. It applies the same region ownership
 and parameter-effect rules as the compiler's local pass, then checks whether
 every reachable memory effect is covered. A `proved` result establishes the

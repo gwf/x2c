@@ -33,7 +33,7 @@ playground does not install missing dependencies.
 
 For example, save this C source as `points.c`:
 
-```x2c
+```c
 #include <stdlib.h>
 
 typedef struct Point { int x; int y; } Point;
