@@ -179,12 +179,13 @@ static List _expression_body(Compiler c) {
    (see `_collected_function`). The full parse binds the whole function
    under the macro stack that constructed it, as a declaration default. */
 module List _bind_collected_function(
-  Compiler c, List input, Var return_type, Var declarator, Var body,
-  Var construction) {
+  Compiler c, List input, Var return_type, List declarator, Var body,
+  Var construction, List self_method) {
   if (c.shallow) return input;
   Type type = %(declare $return_type (bindings $declarator)).type_from_ast();
   if (c.public_bodies &&
       (!type.is_inline() || type.is_static() || c.source_private)) return NULL;
+  if (self_method) _restore_self_method(c, declarator.cadr(), self_method);
   with (c.macro_stack = construction) {
     Token invocation = c.macro_stack ? c.macro_stack.last().list()[3] : NULL;
     with (c.origin = invocation ? c.record_origin(invocation) : c.origin) {
@@ -192,6 +193,15 @@ module List _bind_collected_function(
         %(function $return_type $declarator $body), <unit>, c.return_type);
     }
   }
+}
+
+/* The full parse starts without the facts collection recorded. A kept Self
+   method receives its method and relative signature again, and installation
+   preserves both. */
+static void _restore_self_method(Compiler c, List binding, List method) {
+  c.set_fact(%(method $binding), method);
+  Type relative = c.sym.get_exact(%(self $(Ast.binding_spelling(binding))));
+  if (relative) c.set_fact(%(self $binding), relative);
 }
 
 /* Binds a constructed function's parameters in a fresh prototype scope,
@@ -234,6 +244,7 @@ static List _bind_parameters(Compiler c, List values) {
 static List _collected_function(
   Compiler c, List declaration, Var body) {
   c.record_inline_function(declaration);
+  List self_method = NULL;
   match (declaration)
     case %(declare ?type (bindings (bind ?binding ?modifiers))): {
       String name = Ast.binding_spelling(binding);
@@ -243,15 +254,16 @@ static List _collected_function(
       else c.fn_defs[name] = 1;
       c.record_declaration_visibility(declaration);
       List method = c.fact(%(method $binding));
-      // A Self method keeps its bound identity and relative signature.
-      if (method && !c.fact(%(self $binding))) {
+      // A Self method keeps its bound identity, and its method goes along.
+      if (method && c.fact(%(self $binding))) self_method = method;
+      else if (method) {
         // Replay the resolved owner with this declaration's own member.
         String member = method.cadr();
         String owner = name[:name.len() - member.len() - 1];
         declaration = %(declare $type
           (bindings (bind (($owner) $member) $modifiers)));
       }
-      else if (!method) {
+      else {
         /* Renamed locals keep their identity; exact names complete
            prototypes. */
         Var source;
@@ -260,5 +272,6 @@ static List _collected_function(
           declaration = %(declare $type (bindings (bind $name $modifiers)));
       }
     }
-  return %(declaration-function $declaration $body $(c.macro_stack));
+  return %(declaration-function
+           $declaration $body $(c.macro_stack) $self_method);
 }
