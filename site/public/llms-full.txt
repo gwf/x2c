@@ -6702,6 +6702,17 @@ creates a session with the standard environment from `etc/init.xlisp`, and
 The compiler itself does not evaluate Lisp; compile-time code is x2c, as
 described under [compile-time calls](https://x2c-lang.dev/docs/reference/language.html#compile-time-calls-and-operations).
 
+Lisp conditions treat only `nil` (the empty List) and `void` as false. Every
+other value is true, including numeric zero and the empty string. Thus
+`(cond (0 "yes"))` returns `"yes"`; this differs from a C condition.
+
+Evaluation raises `<call-stack>` if nested forms or calls exhaust its stack
+allowance, or if it uses up its call budget. Tail calls avoid growing the
+stack but still spend calls, so a loop can reach the budget too. Use
+`lisp.call_budget(n)` with a positive number to set that session's budget.
+Each outer `eval`, `apply`, or `eval_string` starts a fresh budget; catching
+an exhausted-budget error inside the evaluation does not reset it.
+
 `$lisp.bind(lisp, "name", function)`, `$lisp.binding(group, "name")`, and
 `$lisp.install(lisp, group)` bind direct x2c functions into a session.
 `lisp.bind("name", function)` is the method form of the single-function
