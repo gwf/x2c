@@ -63,14 +63,16 @@ x2c script --help
 compiler installation:
 
 ```sh
-x2c update --check
 x2c update
 x2c update --version 0.16.0
 ```
 
-The check reports the installed and available versions without changing the
-installation or downloading a compiler archive. Ordinary updates install only
-a newer version. An explicit version can select an older release deliberately.
+The command's check option reports the installed and available versions
+without changing the installation or downloading a compiler archive.
+`x2c help update` lists that option, and
+[Install a release](../guide/installation.md#install-a-release) shows it.
+Ordinary updates install only a newer version. An explicit version can
+select an older release deliberately.
 The target is the invoked executable's installation, not `X2C_HOME`, the
 working directory, or another executable on `PATH`. The recorded release
 source supplies update metadata; ambient installer variables do not change it.
