@@ -67,6 +67,12 @@ compiler:
 "x2c.semantic.compilerPath": "/path/to/x2c/builds/0/x2c"
 ```
 
+Without an explicit compiler path, the extension searches PATH, then
+`~/.local/x2c/bin/x2c`. It does not automatically select workspace `./x2c`.
+The **x2c** Output channel reports the selected path and selection reason.
+After a startup failure, repair the installation and reload the window or
+change the x2c settings to retry.
+
 VS Code 1.82 or newer is required. The extension starts `x2c lsp` over
 stdio and keeps one server per local workspace. Setup errors appear in the
 **x2c** Output channel.

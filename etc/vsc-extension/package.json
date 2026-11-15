@@ -107,7 +107,7 @@
         "x2c.semantic.compilerPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the x2c compiler. Otherwise use trusted workspace ./x2c, then x2c on PATH.",
+          "description": "Path to the x2c compiler. Otherwise use x2c on PATH, then ~/.local/x2c/bin/x2c.",
           "scope": "resource"
         }
       }
