@@ -26,8 +26,10 @@ int main(void) {
 Array literals and iteration work alongside ordinary C functions. The core
 runtime types need no include; other library modules name their `#include`
 on their [reference page](docs/src/library/modules/index.md). The
-[language tour](examples/tours/language.x) shows more: dynamic values,
-destructuring, maps, lambdas, matching, memory scopes, and embedded Lisp.
+[language walkthrough](examples/tours/language.x) progresses from values to
+classes, operators, patterns, macros, and threads. The shorter
+[essentials walkthrough](examples/tours/essentials.x) explains the key
+distinctions and gotchas.
 
 ## Install a release
 

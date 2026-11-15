@@ -1,0 +1,19 @@
+1. values: int tag 1, double tag 0, converted 42.0
+   numeric equality 1, identity 0
+2. sharing: tail 1; array [ 9, 3 ]
+   canonical text 1
+   zero present 1, value 0; missing 0
+3. quoting: (n) versus (2)
+   nested ((2 3)); spliced (2 3)
+   keys (key) versus ("answer")
+4. classes: point 3,4; copy 2,3; shared node 8
+5. operators: union (apple bread pear); original size 2
+6. patterns: (at 3 4 fast quiet)
+   doubles match int pattern 0
+7. lifetime: retained [ 1, 2 ]; snapshot 3; shared 12
+   temporary 99; alias 5
+   cleanup before catch
+   caught; restored 12
+8. compile time: cube 27; runtime total 54
+   Lisp 5; native 5
+9. threads: cake 2, tea 1
