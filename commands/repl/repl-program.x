@@ -612,7 +612,14 @@ static String _program_native_build(
   }
   if (kind == <module>) {
     command.push("-Wl,-t");
+#ifdef __linux__
+    // Header exports are weak so declarations without providers stay inspectable.
+    command.push("-Wl,--push-state,--no-as-needed");
+#endif
     foreach (String option, request.ld_args) command.push(option);
+#ifdef __linux__
+    command.push("-Wl,--pop-state");
+#endif
 #ifdef __APPLE__
     foreach (List row, b.exports)
       if (row.len() >= 3 && row[2] == <dynamic>) {

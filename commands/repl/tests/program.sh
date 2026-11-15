@@ -5,10 +5,14 @@ tmp=${TMPDIR:-/tmp}/x2c-repl-program.$$
 mkdir -p "$tmp"
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 export TMPDIR="$tmp" X2C="$PWD/builds/0/x2c"
+native_link=
+if [ "$(uname -s)" = Linux ]; then
+  native_link='-Xlinker -export-dynamic -Wl,--whole-archive,builds/0/libx2c.a,--no-whole-archive'
+fi
 
 builds/0/x2c build --plain --build-dir "$tmp/cc" --output "$tmp/program-api" \
   --x-include-dir commands/repl --x-include-dir commands/repl/tests \
-  --x-include-dir src --c-include-dir builds/0/src \
+  --x-include-dir src --c-include-dir builds/0/src $native_link \
   commands/repl/tests/program-api.x commands/repl/repl-program.x \
   commands/repl/repl-types.x commands/repl/tests/library/program-check.c \
   builds/0/commands/identity.x builds/0/libx2c-dev.a
