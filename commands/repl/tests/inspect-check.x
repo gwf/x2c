@@ -68,7 +68,8 @@ int main(int argc, char **argv) {
   String full = _render(session, 3, 100);
   _check("Probe" in full && "x: 7" in full && "values: [ 1, 2, 3 ]" in full,
          %"record values missing: $full");
-  _check("pointer: 0x0" in full && "watch: <volatile>" in full,
+  _check(String.printf("pointer: %p", (void *) NULL) in full &&
+         "watch: <volatile>" in full,
          %"pointer or volatile field was followed: $full");
   _check("bits: 5" in full, %"bitfield missing: $full");
   _check("members: first, second" in full,
