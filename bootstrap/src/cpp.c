@@ -939,7 +939,7 @@ static f10_conditions___CppValue f10_conditions____apply(String op, f10_conditio
     0
   }
   ;
-  long a = left.value, b = right.value;
+  long a = left.value, b = right.value, result;
   int shifts =(unsigned long) b < 64;
   int divides = b && !(a == LONG_MIN && b == - 1);
   switch(_x2c_gensym_string_switch_2(op)){
@@ -952,7 +952,7 @@ static f10_conditions___CppValue f10_conditions____apply(String op, f10_conditio
     case 7 : return f10_conditions____known(a > b);
     case 8 : return f10_conditions____known(a <= b);
     case 9 : return f10_conditions____known(a >= b);
-    case 10 : return shifts ? f10_conditions____known(a << b) :(f10_conditions___CppValue){
+    case 10 : return shifts && a >= 0 && a <=(LONG_MAX >> b) ? f10_conditions____known(a << b) :(f10_conditions___CppValue){
       0
     }
     ;
@@ -960,9 +960,18 @@ static f10_conditions___CppValue f10_conditions____apply(String op, f10_conditio
       0
     }
     ;
-    case 12 : return f10_conditions____known(a + b);
-    case 13 : return f10_conditions____known(a - b);
-    case 14 : return f10_conditions____known(a * b);
+    case 12 : return __builtin_add_overflow(a, b, & result) ?(f10_conditions___CppValue){
+      0
+    }
+    : f10_conditions____known(result);
+    case 13 : return __builtin_sub_overflow(a, b, & result) ?(f10_conditions___CppValue){
+      0
+    }
+    : f10_conditions____known(result);
+    case 14 : return __builtin_mul_overflow(a, b, & result) ?(f10_conditions___CppValue){
+      0
+    }
+    : f10_conditions____known(result);
     case 15 : return divides ? f10_conditions____known(a / b) :(f10_conditions___CppValue){
       0
     }
@@ -1002,7 +1011,10 @@ static f10_conditions___CppValue f10_conditions____unary(f10_conditions___CppEva
   if(! operand.known) return operand;
   switch(_x2c_gensym_string_switch_3(op)){
     case 1 : return f10_conditions____known(! operand.value);
-    case 2 : return f10_conditions____known(- operand.value);
+    case 2 : return operand.value == LONG_MIN ?(f10_conditions___CppValue){
+      0
+    }
+    : f10_conditions____known(- operand.value);
     case 3 : return f10_conditions____known(~ operand.value);
   }
   return operand;

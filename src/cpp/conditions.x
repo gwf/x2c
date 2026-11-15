@@ -236,11 +236,14 @@ static CppValue _apply(String op, CppValue left, CppValue right) {
         ? _known(a << b) : (CppValue) {0};
     case ">>": return shifts ? _known(a >> b) : (CppValue) {0};
     case "+":
-      return __builtin_add_overflow(a, b, &result) ? (CppValue) {0} : _known(result);
+      return __builtin_add_overflow(a, b, &result)
+        ? (CppValue) {0} : _known(result);
     case "-":
-      return __builtin_sub_overflow(a, b, &result) ? (CppValue) {0} : _known(result);
+      return __builtin_sub_overflow(a, b, &result)
+        ? (CppValue) {0} : _known(result);
     case "*":
-      return __builtin_mul_overflow(a, b, &result) ? (CppValue) {0} : _known(result);
+      return __builtin_mul_overflow(a, b, &result)
+        ? (CppValue) {0} : _known(result);
     case "/": return divides ? _known(a / b) : (CppValue) {0};
     case "%": return divides ? _known(a % b) : (CppValue) {0};
   }
@@ -269,7 +272,8 @@ static CppValue _unary(CppEval &e) {
   switch (op) {
     case "!": return _known(!operand.value);
     case "-":
-      return operand.value == LONG_MIN ? (CppValue) {0} : _known(-operand.value);
+      return operand.value == LONG_MIN
+        ? (CppValue) {0} : _known(-operand.value);
     case "~": return _known(~operand.value);
   }
   return operand;
