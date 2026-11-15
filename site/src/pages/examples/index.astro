@@ -8,10 +8,10 @@ import { exampleRoutes as routes } from "../../lib/example-catalog";
 ---
 <BaseLayout title="Examples — x2c" description="Browse x2c examples, from everyday values to complete programs.">
 <Fragment slot="header"><SiteHeader examples /></Fragment>
-<ExamplesShell current="love"><ExamplesTopic topic="love" /></ExamplesShell>
+<ExamplesShell current="programs"><ExamplesTopic topic="programs" /></ExamplesShell>
 <SiteFooter slot="footer" />
 <script is:inline define:vars={{routes, base: import.meta.env.BASE_URL}}>
   const requested = new URL(location.href).searchParams.get("example");
-  if (requested && routes[requested]) location.replace(`${base}examples/${routes[requested]}`);
+  location.replace(`${base}examples/${requested && routes[requested] || "programs/"}`);
 </script>
 </BaseLayout>

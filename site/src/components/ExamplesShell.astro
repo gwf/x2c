@@ -38,8 +38,8 @@ const sectionLinks = (section: string) => {
       <ol class="chapter">
         {sidebarGroups.map(group => <>
         <li class="part-title">{group.title}</li>
-        {group.sections.map(section => <li class:list={["chapter-item", {expanded: !["love", "power", "magic"].includes(section)}]} data-example-section={section} data-track-example-sections={current === section ? "" : undefined}>
-          <span class="chapter-link-wrapper"><a href={`${base}examples/${section}/`} class:list={{active: current === section}}><strong>{sectionNumbers.get(section)}.</strong> {sectionLabel(section)}</a><button class="chapter-fold-toggle" aria-label={`Toggle ${sectionLabel(section)}`} aria-expanded={String(!["love", "power", "magic"].includes(section))} type="button"><div aria-hidden="true">&#10097;</div></button></span>
+        {group.sections.map(section => <li class:list={["chapter-item", {expanded: section === "programs"}]} data-example-section={section} data-track-example-sections={current === section ? "" : undefined}>
+          <span class="chapter-link-wrapper"><a href={`${base}examples/${section}/`} class:list={{active: current === section}}><strong>{sectionNumbers.get(section)}.</strong> {sectionLabel(section)}</a><button class="chapter-fold-toggle" aria-label={`Toggle ${sectionLabel(section)}`} aria-expanded={String(section === "programs")} type="button"><div aria-hidden="true">&#10097;</div></button></span>
           <ol class="section">{sectionLinks(section).map((entry, index) =>
             <li class="chapter-item"><a href={entry.href} data-index-link class:list={{active: entry.active}}><strong>{sectionNumbers.get(section)}.{index + 1}.</strong> {entry.label}</a></li>)}</ol>
         </li>)}
@@ -49,10 +49,20 @@ const sectionLinks = (section: string) => {
     <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle"><div class="sidebar-resize-indicator"></div></div>
   </nav>
   <script is:inline>
+    try {
+      if (!sessionStorage.getItem("examples-visited") && document.body.clientWidth >= 1080) {
+        document.getElementById("mdbook-sidebar-toggle-anchor").checked = true;
+        document.documentElement.classList.add("sidebar-visible");
+      }
+      // The entry route redirects; initialize the session on its destination.
+      if (!/\/examples\/(?:index.html)?$/.test(location.pathname)) {
+        sessionStorage.setItem("examples-visited", "true");
+      }
+    } catch {}
     for (const item of document.querySelectorAll("[data-example-section]")) {
       const key = `examples-section-${item.dataset.exampleSection}`;
       try {
-        const saved = localStorage.getItem(key);
+        const saved = sessionStorage.getItem(key);
         if (saved !== null) item.classList.toggle("expanded", saved === "open");
       } catch {}
       item.querySelector(".chapter-fold-toggle").setAttribute(
@@ -72,7 +82,7 @@ const sectionLinks = (section: string) => {
     const item = toggle?.closest<HTMLElement>("[data-example-section]");
     if (item) {
       try {
-        localStorage.setItem(`examples-section-${item.dataset.exampleSection}`,
+        sessionStorage.setItem(`examples-section-${item.dataset.exampleSection}`,
           item.classList.contains("expanded") ? "open" : "closed");
       } catch {}
     }
@@ -81,7 +91,7 @@ const sectionLinks = (section: string) => {
   addEventListener("pagehide", () => {
     for (const item of index.querySelectorAll<HTMLElement>("[data-example-section]")) {
       try {
-        localStorage.setItem(`examples-section-${item.dataset.exampleSection}`,
+        sessionStorage.setItem(`examples-section-${item.dataset.exampleSection}`,
           item.classList.contains("expanded") ? "open" : "closed");
       } catch {}
     }
