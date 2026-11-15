@@ -19755,7 +19755,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_32(void
   _16594 = List_var(_16593);
   _16595 = String_new("src/macros/invocations/expressions.x");
   _16596 = String_var(_16595);
-  _16597 = String_new("078d14f9");
+  _16597 = String_new("b4c46739");
   _16598 = String_var(_16597);
   _16599 = cons(_16598, NULL);
   _16600 = cons(_16596, _16599);

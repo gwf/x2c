@@ -7997,7 +7997,8 @@ int Type_is_typedef(Type);
 List Compiler_try_parse_static_macro(Compiler c, String spelling, Token start){
   if(! _init_guard_) _file_init_();
   Token name = _previous_source_token(c, c -> token);
-  if(_previous_source_token(c, name) -> type != 93 || ! String_endswith(spelling, cons(String_var(String_add(_598, name -> text)), NULL))) return NULL;
+  Token dot = _previous_source_token(c, name);
+  if(! dot || dot -> type != 93 || ! String_endswith(spelling, cons(String_var(String_add(_598, name -> text)), NULL))) return NULL;
   String owner = String_getslice(spelling, (-2147483647 - 1), x2c_slice_bound(String_len(spelling) - String_len(name -> text) - 1), 1);
   Type type = List_type(Sym_get(c -> sym, cons(String_var(owner), NULL)));
   if(! List_truth(Type_list(type)) || ! Type_is_typedef(type)) return NULL;
@@ -8007,7 +8008,7 @@ List Compiler_try_parse_static_macro(Compiler c, String spelling, Token start){
   if(start == c -> meta_statement && f23_invocations_expressions____target_follows(c)){
     c -> method_decorator = definition;
     {
-      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/macros/invocations/expressions.x",.function = "Compiler_try_parse_static_macro",.line = 85};
+      static const X2CErrorSite _x2c_gensym_error_site_7 = {.file = "../../src/macros/invocations/expressions.x",.function = "Compiler_try_parse_static_macro",.line = 86};
       x2c_error_raise_n(& _x2c_gensym_error_site_7, 927181377052998, 0);
     }
 
