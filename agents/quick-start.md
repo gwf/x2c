@@ -241,6 +241,19 @@ From the repository root, use `./x2c`, which links to `builds/0/x2c`, for
 current development behavior. `bin/x2c` is the bootstrap compiler unless
 stage 0 was intentionally installed. Explicit stage paths select that stage.
 
+`make build-install` selects the rebuilt compiler inside the checkout: it
+copies it to `bin/x2c-<branch>`, links `bin/x2c` to that copy, and installs
+the shipped commands under `libexec/x2c/`. Use it for development compiler
+selection, including rebootstrap work.
+
+`make install` instead builds and installs the current source into
+`$HOME/.local/x2c`, or an explicit `PREFIX`. Repeat it to update that personal
+installation and record its source checkout. It does not fetch Git changes
+or switch branches. `x2c update` manages official release installations;
+for a source installation, it reports the corresponding Make command.
+See the [installation guide](../docs/src/guide/installation.md) for both
+workflows, custom prefixes, and installation provenance.
+
 ## Compile an example
 
 From the repository root, build an ordinary native executable with the driver.
