@@ -432,12 +432,34 @@ tier, obsolete native-module REPL probe, and Notes command simplification.
 The included-alias collision was already repaired. Focused evidence is
 recorded in [the history](HISTORY.md#deferred-items-follow-up-2026-11-15).
 
+The file-scope diagnostic now selects the declaration's existing token span.
+The five-line reproducer reports `3:1`, rather than EOF `6:1`; nested-origin
+fixtures retain their locations.
+
 Deep List rendering, CPP overflow policy, included-header attribute
-compatibility, diagnostic location polish, and optional structured lint
-output remain deferred. Linux REPL dependency identity remains unverified.
+compatibility, and optional structured lint output remain deferred.
+Linux REPL dependency identity remains unverified.
 These are separate findings or improvements, not universal safety obligations.
 No computed-slot staging redesign or broader native ownership proof is part
 of this plan.
+
+## CPP investigation, 2026-11-15
+
+At `13e6693d95d6920b46ba46c2888ccae68b3e4a5d`, the actual generated CPP
+condition evaluator was rebuilt with Clang UBSan and linked into the compiler.
+Real `translate --cpp --dump-tokens` inputs reproduced undefined behavior for
+`LONG_MAX + 1`, `LONG_MIN - 1`, `LONG_MAX * 2`, `-LONG_MIN`, `1 << 63`, and
+`-1 << 1`. Each sanitizer run aborted. Ordinary arithmetic, the existing
+`LONG_MIN / -1` guard, and the invalid shift-count guard completed cleanly.
+The normal compiler completed all probes; an ordinary-build crash or wrong
+branch selection was not demonstrated.
+
+The reference limits evaluation to signed `long` arithmetic and leaves
+unsupported operands undecided. A bounded proposed repair would extend that
+existing fallback to unsupported intermediate results and left shifts.
+Investigation did not authorize that policy change; no CPP source was changed.
+The reproduction script and raw logs are retained under
+`/tmp/x2c-cpp-review-20261115/debug/cpp-overflow/` on the review host.
 
 ## Implementation verification and delivery
 

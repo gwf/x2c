@@ -57,7 +57,6 @@ retains its prior scope; completed and superseded work is recorded in history.
 
 | Remaining work | Current evidence and owner | Next bounded action |
 | --- | --- | --- |
-| File-scope diagnostic location | A five-line Iter initializer reports `6:1`; [transform traversal](../src/transform/traversal.x) does not select the recorded definition span. | Anchor that diagnostic through the existing source-location owner. |
 | List rendering recursion | [List rendering](../lib/list/rendering.x) has no recursive floor check. Regex matching was repaired in PR #650 after focused measurements; see the [release plan](public-release-readiness.md). | List rendering remains deferred; do not expand the accepted Regex repair. |
 | Optional structured lint findings | [Lint](../commands/lint/x2c-lint.x) still prints human text only; [Lint.print](../commands/lint/lint.x) has findings to reuse. | Complete the previously approved List-output option and thin compiler consumer; keep execution optional and lint experimental. |
 
@@ -71,9 +70,12 @@ retains its prior scope; completed and superseded work is recorded in history.
 - Linux REPL dependency identity: [dependency collection](../commands/repl/repl-program.x)
   treats an entire trace line as a path. Decorated GNU linker output and stale
   reuse have not been reproduced on Linux. Obtain that evidence before repair.
-- CPP arithmetic: [conditions](../src/cpp/conditions.x) use native signed
-  arithmetic. Settle intermediate-overflow behavior against the reference and
-  obtain sanitizer evidence before choosing arithmetic semantics.
+- CPP arithmetic: six real `--cpp` probes reproduce undefined signed addition,
+  subtraction, multiplication, negation, and left shifts under UBSan. Normal
+  builds complete those probes; no ordinary-build failure is established.
+  A bounded proposed repair would leave unsupported intermediate arithmetic
+  undecided, matching existing division and shift-count guards. This policy
+  change is not yet selected. See the release-plan investigation record.
 
 Dormant feasibility studies and unselected optimization ideas are historical,
 not active work. No broad null audit, public-API deletion, extra gate, or new
