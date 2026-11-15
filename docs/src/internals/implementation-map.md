@@ -212,7 +212,8 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 ### The `with` statement
 
-- Parse: `_with_statement` in `src/statements.x`
+- Recognize: `Compiler.with_form_starts` in
+  `src/compiler/parsing/tokens.x`, at statement position
 - Lower: `_with_expand` in `src/builtins.x`, reached through the
   `with` macro in `etc/compiler-prelude.x`
 - Tests: the `with-*` compiler fixtures

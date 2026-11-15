@@ -4,7 +4,8 @@ import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 const x2cLang = { ...grammar, name: "x2c" };
 const local = (path: string) => `${import.meta.env.BASE_URL}${path}`;
-const recorded = "https://github.com/gwf/x2c/tree/ccc7e475869cf93f91637f283761a57dfd92715b/examples/shootout/benchmarks";
+const published = "2ef0360087259225066a60021a417218d9caa306";
+const recorded = `https://github.com/gwf/x2c/tree/${published}/examples/shootout/benchmarks`;
 ---
 <div class="example-prose shootout-story">
 <p>A small numerical loop and a DNA-processing pipeline ask different things of a language. One spends its time on arithmetic. Another creates strings, looks up keys, and moves bytes between buffers. A single score hides those differences.</p>
@@ -72,20 +73,20 @@ const recorded = "https://github.com/gwf/x2c/tree/ccc7e475869cf93f91637f283761a5
   <figcaption>Geometric means across the eight shared problems. Runtime uses a log scale; source size uses a linear scale. Lower values mean less time or fewer lines.</figcaption>
 </figure>
 
-<p>This view includes only the eight problems with an admitted contribution in every column. Tuned x2c&#x27;s elapsed-time ratio is 1.20; Rust&#x27;s is 1.17. Idiomatic x2c is 2.82 relative to C, with 1.19 times Python&#x27;s source lines; tuned x2c uses 1.29 times Python&#x27;s lines.</p>
+<p>This view includes only the eight problems with an entry in every column. Tuned x2c&#x27;s elapsed-time ratio is 1.20; Rust&#x27;s is 1.17. Idiomatic x2c is 2.82 relative to C, with 1.19 times Python&#x27;s source lines; tuned x2c uses 1.29 times Python&#x27;s lines.</p>
 
 <p>These are selected implementations, not rankings of what each language can do. The source choices, libraries, process model, and input sizes all matter. Java starts a fresh JVM for each sample, including startup and JIT compilation; the warmup process does not warm the next JVM. Its number is not a steady-state server measurement.</p>
 
-<p>The missing contributions also matter. K-nucleotide has no admitted Rust, C++, Go, or Java entry in this environment. Binary-trees has no admitted Python entry. Those problems remain visible in the x2c comparisons above, but are excluded from the shared summary rather than silently given substitute scores.</p>
+<p>The missing contributions also matter. K-nucleotide has no Rust, C++, Go, or Java entry in this environment. Binary-trees has no Python entry. Those problems remain visible in the x2c comparisons above, but are excluded from the shared summary rather than silently given substitute scores.</p>
 
 <h2 id="method">What was measured</h2>
 
 <p>The figures use the recorded <strong>12 November 2026 UTC</strong> snapshot on an <strong>Apple M4 Max</strong>, with the suite&#x27;s <strong>local</strong> input profile. Each x2c result is the median of twelve fresh processes after one warmup. Foreign-language measurements come from the pinned earlier calibration; they were not rerun alongside these x2c samples. The canonical-size suite remains unrun.</p>
 
-<p>The measured source revision is <code>ccc7e475869cf93f91637f283761a57dfd92715b</code>. The explanations above describe those measured sources. Some current example sources have since changed. The downloadable results, measurements, and provenance identify the snapshot, its inputs, and admitted contributions.</p>
+<p>The measured source revision is <code>ccc7e475869cf93f91637f283761a57dfd92715b</code>. Published commit <code>{published.slice(0, 10)}</code> holds the same benchmark sources. The explanations above describe those measured sources. Some current example sources have since changed. The downloadable results, measurements, and provenance identify the snapshot, its inputs, and included entries.</p>
 
 <p>The useful next step is to read a pair of implementations for a workload you recognize. Below are the complete current programs, followed by commands for checking them locally. The charts describe the recorded snapshot, not a new run of those current files.</p>
-<p class="story-links"><a href={recorded}>Measured source revision</a>
+<p class="story-links"><a href={recorded}>Measured benchmark sources</a>
   <a href={local("charts/shootout/provenance.json")}>Figure provenance</a>
   <a href="https://github.com/gwf/x2c/blob/dev/examples/shootout/results/current.md">Full results and inputs</a>
   <a href="https://github.com/gwf/x2c/blob/dev/examples/shootout/results/charts/measurements.csv">Measurements CSV</a></p>

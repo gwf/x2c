@@ -133,6 +133,7 @@ entry file and implementation members.
 | [builds/](builds/) | Working compiler stages and generated build outputs. |
 | [docs/](docs/src/index.md) | The book's source. |
 | [site/](site/README.md) | The public website. |
+| [agents/](agents/README.md), [plans/](plans/README.md) | Maintainer and coding-agent workflow guidance and design records. You do not need them to use x2c. |
 
 [Compiler architecture](docs/src/internals/architecture.md) explains the
 phases. [Building the compiler](docs/src/internals/building.md) explains
