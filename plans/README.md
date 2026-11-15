@@ -67,9 +67,12 @@ retains its prior scope; completed and superseded work is recorded in history.
   probe fails without `--cpp`. Trace header visibility through
   [type parsing](../src/parse/types.x) before classifying the gap or choosing
   a compatibility change.
-- Linux REPL dependency identity: [dependency collection](../commands/repl/repl-program.x)
-  treats an entire trace line as a path. Decorated GNU linker output and stale
-  reuse have not been reproduced on Linux. Obtain that evidence before repair.
+- Linux REPL: Ubuntu 24.04 with GNU ld 2.42 records shared-library paths,
+  detects atomic library replacement, and refuses stale snapshot restore.
+  The suspected trace-parsing defect was not reproduced. A separate header-only
+  weak-provider case loses its callable address with default linker retention;
+  `-Wl,--no-as-needed` makes the same case callable. Decide a bounded provider
+  retention repair separately; see the release-plan evidence and scope.
 - CPP arithmetic: six real `--cpp` probes reproduce undefined signed addition,
   subtraction, multiplication, negation, and left shifts under UBSan. Normal
   builds complete those probes; no ordinary-build failure is established.

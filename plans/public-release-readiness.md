@@ -438,7 +438,8 @@ fixtures retain their locations.
 
 Deep List rendering, CPP overflow policy, included-header attribute
 compatibility, and optional structured lint output remain deferred.
-Linux REPL dependency identity remains unverified.
+Linux REPL dependency identity passed the bounded Ubuntu probe below; a
+separate header-provider retention issue remains open.
 These are separate findings or improvements, not universal safety obligations.
 No computed-slot staging redesign or broader native ownership proof is part
 of this plan.
@@ -460,6 +461,42 @@ existing fallback to unsupported intermediate results and left shifts.
 Investigation did not authorize that policy change; no CPP source was changed.
 The reproduction script and raw logs are retained under
 `/tmp/x2c-cpp-review-20261115/debug/cpp-overflow/` on the review host.
+
+## Linux REPL investigation, 2026-11-15
+
+A one-time Ubuntu 24.04 x86_64 run used GCC 13.3 and GNU ld 2.42 against
+source `13e6693d95d6920b46ba46c2888ccae68b3e4a5d`. The linker emitted ordinary
+path lines and the REPL recorded the selected shared library. With the library
+retained, a function returned 17, unchanged snapshot restore succeeded, atomic
+replacement was detected, and stale restore was refused with `use :reload`.
+[The successful run](https://github.com/gwf/x2c/actions/runs/43732348426)
+retains linker traces and REPL output. This settles the ordinary shared-library
+path, not every linker-script or forwarding variant. No trace-parser change
+is justified by this evidence.
+
+A separate case is reproducible: the header-only library's function was absent
+from callable addresses with default linking, although its path was tracked.
+The same case works with `-Wl,--no-as-needed`. Linux header exports deliberately
+use weak references; provider retention needs a bounded follow-up that preserves
+missing-provider inspection. [The failing default-link run](https://github.com/gwf/x2c/actions/runs/43732001744)
+retains the evidence. No production REPL source was changed during investigation.
+The two earlier harness attempts failed before this minimal test was established;
+they are not evidence of dependency invalidation failure.
+
+## Diagnostic repair verification, 2026-11-15
+
+The full publication gate passed after updating the intentional location change
+in `list-rest-pointer-mismatch`: 1,222 unit tests, 104,267 assertions, and
+1,506 compiler fixtures (2,498 artifacts), plus command and documentation checks.
+The new initializer fixture reports line 3 and underlines its declaration.
+Existing nested-origin fixtures retain their precise locations.
+
+A bounded performance check alternated eight Literate Lisp translations between
+the prior stage 0 and fixed stage 1 compiler. Excluding each warmup, mean retired
+instructions were 2,563,806,108 and 2,555,269,313. Ranges overlap; this shows no
+measurable regression for that workload, not a general speed improvement.
+Both compilers had valid prelude interfaces. Generated output matched after
+normalizing compiler-root paths and generated identity hashes.
 
 ## Implementation verification and delivery
 
