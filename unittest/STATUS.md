@@ -202,8 +202,8 @@ and stderr byte for byte; no expected result was weakened.
   empty per-run `TMPDIR`.
 - `program.sh` resolves program addresses from sources, archives, shared
   libraries, manifest targets, and packages. It checks that `:reload` keeps
-  one copy of each manifest root and that conflicting `main` roots and
-  duplicate definitions fail.
+  one copy of each manifest root, consumes redirected input once, and exits
+  at EOF. Conflicting `main` roots and duplicate definitions fail.
 - Linked extension probes build with parallel translation, so registration
   units collect package-prefixed declarations without a preceding unit cache.
 - Lisp cases cover special-form rebinding after earlier effects or call

@@ -606,3 +606,20 @@ validation.
 - Gary approved the minimal Regex repair; 0.16.0 is selected. Any
   material growth in runtime work, code, or caller obligations returns to Gary
   with alternatives instead of being treated as routine implementation.
+
+## Linux manifest reload repair (2026-11-15)
+
+The apparent reload hang replayed redirected input. A forked worker inherited
+stdin's unread buffer; glibc `freopen` rewound the shared file offset while
+closing that stream. Each reload could therefore repeat earlier commands.
+The worker now closes its own stdin descriptor before reopening the stream,
+so reopening cannot seek the supervisor's input. Terminal and pipe behavior
+retain their existing owners.
+
+A minimal Linux probe reproduced the offset moving from 14 back to 4 without
+the repair; closing the child descriptor kept it at 14. Both Linux
+architectures then completed the existing manifest-reload test with one root
+and result 22 (workflow 43751555164). That run exposed a subsequent fixture
+loader-path omission: the temporary `-lplayground` provider now receives its
+fixture directory through `LD_LIBRARY_PATH`. The full macOS REPL suite passed.
+Final combined publication and Linux suite results are retained with delivery.
