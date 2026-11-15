@@ -69,7 +69,8 @@ List Compiler.try_parse_method_macro(
 List Compiler.try_parse_static_macro(
   Compiler c, String spelling, Token start) {
   Token name = _previous_source_token(c, c.token);
-  if (_previous_source_token(c, name).type != <.> ||
+  Token dot = _previous_source_token(c, name);
+  if (!dot || dot.type != <.> ||
       !spelling.endswith("_" + name.text))
     return NULL;
   String owner = spelling[:spelling.len() - name.text.len() - 1];

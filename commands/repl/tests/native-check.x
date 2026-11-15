@@ -84,6 +84,9 @@ static void _objects(ReplSession session) {
   _expect(session, "int inspections=0;", <executed>, NULL);
   _expect(session, "Point counted(void) { inspections++; return make_point(5); }",
           <defined>, NULL);
+  _check("Point" in session.info("counted()"),
+         "a call at the first token had no expression type");
+  _value(session, "inspections;", "int 0");
   _value(session, "counted();", "Point { x: 5, y: 6 }");
   _value(session, "inspections;", "int 1");
   _check(session.info("inspections++") != NULL, "expression type was unavailable");
