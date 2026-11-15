@@ -303,10 +303,10 @@ def site(args):
         text = text.replace('https://github.com/gwf/x2c/releases/download',
                             'https://github.com/gwf/x2c-staging/releases/download')
         text = text.replace('https://x2c-lang.dev', SITES['staging'])
-        old = '${X2C_RELEASE_TAG:-v$version}'
+        old = '${release_tag:-v$version}'
         if text.count(old) != 1:
             raise ValueError('installer has no unique candidate tag default')
-        text = text.replace(old, '${X2C_RELEASE_TAG:-' + manifest['identity'] + '}')
+        text = text.replace(old, '${release_tag:-' + manifest['identity'] + '}')
         installer.write_text(text)
     run('tar', '-czf', str(archive.resolve()), '-C', str(directory.resolve()), '.')
     write(candidate / f'site-{destination}.json', {

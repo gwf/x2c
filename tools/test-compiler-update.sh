@@ -130,4 +130,8 @@ printf '../escape\n' >"$WORK/latest"
 reject sh "$INSTALL" --update --prefix "$PREFIX"
 grep -q 'invalid release version' "$WORK/err"
 [ ! -e "$PREFIX.update-lock" ]
+printf '1.10.0\ngarbage\n' >"$WORK/latest"
+reject sh "$INSTALL" --update --prefix "$PREFIX" --check
+grep -q 'invalid release version' "$WORK/err"
+[ ! -e "$PREFIX.update-lock" ]
 echo 'compiler update: passed'

@@ -40,6 +40,14 @@ sh "$ROOT/site/public/install.sh" --version "$version" >/dev/null
 x2c run -q "$ROOT/examples/power/greet-client.x" >"$WORK/greet.stdout"
 grep -q "ping ping ping" "$WORK/greet.stdout"
 
+# The installed command uses its own prefix and recorded feed, not overrides.
+X2C_HOME="$ROOT" X2C_VERSION=9.9.9 X2C_RELEASES=file:///wrong \
+  X2C_VERSION_URL=file:///wrong x2c update --check >"$WORK/update-check.stdout"
+grep -q 'already up to date' "$WORK/update-check.stdout"
+x2c update --version "$version" >"$WORK/update.stdout"
+[[ "$(x2c list)" == "greet - source" ]] || exit 1
+grep -q '^kind=release$' "$WORK/prefix/.x2c-install-origin"
+
 # Candidates sharing a version select distinct bytes, never the vVERSION path.
 for candidate in candidate-one candidate-two; do
   mkdir -p "$WORK/candidate-tree" "$WORK/releases/$candidate"

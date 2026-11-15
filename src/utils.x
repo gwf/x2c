@@ -158,6 +158,14 @@ int Compiler.run_command(String name, List arguments) {
 /** Returns an executable command in this compiler's libexec, or NULL. */
 String Compiler.command_path(String name) {
   String libexec = Compiler.home_libexec();
+  /* Updating follows the invoked compiler, never an X2C_HOME override. */
+  if (name == "update") {
+    String driver = Compiler.driver_executable();
+    if (!driver) return NULL;
+    Path parent = Path.dirname(driver);
+    libexec = parent.basename() == "bin"
+      ? %"$(parent.dirname())/libexec/x2c" : %"$parent/libexec";
+  }
   if (!libexec) return NULL;
   String path = %"$libexec/x2c-$name";
   return Path.is_executable(path) ? path : NULL;

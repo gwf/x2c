@@ -85,7 +85,10 @@ fail() { echo "x2c: $*" >&2; exit 1; }
 # Read installation data as text, never as shell code.
 origin_value() { sed -n "s/^$1=//p" "$prefix/.x2c-install-origin"; }
 quote() { printf "'%s'" "$(printf '%s' "$1" | sed "s/'/'\\\\''/g")"; }
-valid_version() { printf '%s\n' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; }
+valid_version() {
+  case "$1" in *[!0-9.]*) return 1 ;; esac
+  printf '%s\n' "$1" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
+}
 compare_versions() {
   awk -v a="$1" -v b="$2" 'BEGIN {
     split(a, x, "."); split(b, y, ".");

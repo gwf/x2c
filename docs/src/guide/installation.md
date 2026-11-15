@@ -35,8 +35,27 @@ version comes from `https://x2c-lang.dev/x2c-version.txt`. Releases publish
 the compiler for macOS on arm64 and x86_64 and for Linux on x86_64 and
 aarch64, and every release's downloads stay available.
 
-To upgrade, run the installer again. It replaces the compiler in the same
-prefix and keeps installed packages.
+After an official installation, check for and install compiler updates with:
+
+```sh
+x2c update --check
+x2c update
+```
+
+The update uses the invoked compiler's installation and recorded release
+source, including a custom prefix. `X2C_HOME` does not redirect it. An ordinary
+update never downgrades; `x2c update --version <n>` explicitly selects a
+version; an explicit version also permits reinstallation. An ordinary update
+to an equal version needs no download. Checking does not change files.
+See [compiler updates](../reference/cli.md#compiler-updates) for compatibility
+and recovery behavior.
+
+The installer can also be run again. An older installation without recorded
+origin needs one installer run with `--replace-origin` before `x2c update`
+can manage it. A source installation also requires `--replace-origin` to
+convert it to a release.
+Do not use that option to update a personal compiler from a local checkout;
+use `make install` there instead.
 
 To uninstall, remove the prefix directory and the `export` line from your
 shell startup file. Removing the prefix also removes the packages installed
@@ -70,9 +89,15 @@ The checkout is then a complete x2c home. Use `./x2c` there; run
 To install into a prefix instead:
 
 ```sh
-make install PREFIX="$HOME/.local/x2c"
+make install
 export PATH="$HOME/.local/x2c/bin:$PATH"
 ```
+
+`make install` defaults to `$HOME/.local/x2c`. Run it again from the checkout
+to update that installation from your current source, including local edits.
+It does not fetch Git changes. `PREFIX=/another/path` selects a different
+destination. The installation records its source directory; `x2c update`
+shows the corresponding Make command instead of replacing it with a release.
 
 The install command builds the compiler and its commands, then installs the
 compiler, the shipped commands under `libexec/x2c/`, and the matching
@@ -203,12 +228,17 @@ may contain spaces. Quote the compiler path when invoking it:
 "/path with spaces/x2c/bin/x2c" build src/main.x -o hello
 ```
 
-An upgrade stages a complete payload, replaces files owned by the previous
-installation, and removes obsolete owned files using its inventory. It leaves
-unrelated files alone and does not overwrite an unrelated file with the same
-name. Publication replaces individual files; do not run an installation while
-programs are compiling against it. Keep `.x2c-install-manifest` with the prefix
-so upgrades retain ownership and build identity information.
+A source upgrade stages a complete payload, replaces files owned by the
+previous installation, and removes obsolete owned files using its inventory.
+It leaves unrelated files alone and does not overwrite an unrelated file
+with the same name. Publication replaces individual files.
+
+A release upgrade replaces the complete compiler tree and moves its packages
+into the new tree. It refuses unrelated files outside `packages/` instead of
+deleting them. Both routes require an idle prefix: do not install while
+programs are compiling against it. Keep `.x2c-install-manifest` and
+`.x2c-install-origin` with the prefix; they record payload ownership and
+installation origin respectively.
 
 For a packaging staging directory, use `DESTDIR` with the intended prefix:
 
@@ -278,6 +308,9 @@ export PATH="$HOME/src/x2c/bin:$PATH"
 X2C_HOME="$HOME/src/x2c" x2c env
 ```
 
-Keep the global prefix on a release, so a problem seen through it reproduces
-for other users. Compiler development itself runs through `make` inside the
-checkout and does not depend on which compiler `PATH` selects.
+Choose whether your personal prefix follows releases or your local source.
+Use `x2c update` for a release installation, or `make install` in the checkout
+for a source installation. `make build-install` only selects the checkout's
+branch-named compiler; it does not update your personal prefix. Compiler
+development itself runs through `make` inside the checkout and does not depend
+on which compiler `PATH` selects.

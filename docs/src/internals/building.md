@@ -182,9 +182,14 @@ check the playground's support notice before running a program.
 
 ## Installation layouts
 
-With no `PREFIX`, `make install` runs `make build-install`: it copies the
-development compiler to `bin/x2c-<branch>`, links `bin/x2c` to that copy, and
-installs the shipped commands under `libexec/x2c/`.
+`make install` builds and installs into `$HOME/.local/x2c`; an explicit
+`PREFIX` selects another dedicated prefix. Repeat it to update that prefix
+from the current checkout. `DESTDIR` stages the prefix for packaging.
+
+`make build-install` keeps the developer's in-checkout selection separate:
+it copies the development compiler to `bin/x2c-<branch>`, links `bin/x2c` to
+that copy, and installs the shipped commands under `libexec/x2c/`. Use this
+target to select a rebuilt compiler for development or rebootstrap work.
 
 ## Syntax feature records
 

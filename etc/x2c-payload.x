@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 static String INSTALL_MANIFEST = ".x2c-install-manifest";
+static String INSTALL_ORIGIN = ".x2c-install-origin";
 
 static Path root;
 
@@ -71,6 +72,7 @@ static void copy(Path source, Path target) {
 }
 
 static void copy_support(Path destination) {
+  copy(root.join("site/public/install.sh"), destination.join("etc/install.sh"));
   foreach (Path source, root.join("lib").walk()) {
     if (!source.is_file() || !source.endswith(".x")) continue;
     String relative = source.remove_prefix(%"$root/lib/");
@@ -204,6 +206,7 @@ static Map owned_files(Path prefix) {
     files[relative] = 1;
   }
   files[INSTALL_MANIFEST] = 1;
+  if (prefix.join(INSTALL_ORIGIN).exists()) files[INSTALL_ORIGIN] = 1;
   return files;
 }
 
@@ -231,7 +234,7 @@ static Path make_stage(Path parent) {
   return String.new(buffer);
 }
 
-static void install(Path prefix, Path destdir) {
+static void install(Path prefix, Path destdir, int distribution) {
   if (!prefix.startswith("/"))
     fail("PREFIX must be an absolute dedicated x2c prefix");
   Path target =
@@ -257,6 +260,9 @@ static void install(Path prefix, Path destdir) {
       AR=ar
     "));
     identity = write_manifest(stage, INSTALL_MANIFEST, "x2c-native-v1");
+    if (!distribution)
+      stage.join(INSTALL_ORIGIN).write_text(
+        %"kind=source\nsource=$root\nidentity=$identity\n");
     Map previous = owned_files(target), current = owned_files(stage);
     foreach (String relative,
              sorted_names(previous.copy().merge(current))) {
@@ -308,7 +314,8 @@ static void uninstall(Path prefix) {
 root = Path.absolute(argv[0]).dirname().dirname();
 String program = Path.basename(argv[0]);
 List commands = %(
-  (install (--prefix (value path) required) (--destdir (value dir)))
+  (install (--prefix (value path) required) (--destdir (value dir))
+           (--distribution))
   (uninstall (--prefix (value path) required))
   (commands (--prefix (value path) required)));
 String command = args ? args.car().str() : NULL;
@@ -333,7 +340,8 @@ catch %(bad-arg *detail): {
 
 try {
   if (command == "install")
-    install(normal(options["prefix"]), options["destdir"]);
+    install(normal(options["prefix"]), options["destdir"],
+            options["distribution"].int());
   else if (command == "commands")
     copy_shipped_commands(normal(options["prefix"]));
   else uninstall(normal(options["prefix"]));
