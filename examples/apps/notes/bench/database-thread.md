@@ -18,11 +18,8 @@ root:
 
 ```sh
 make -C packages/sqlite build
-SQLITE_PREFIX="$(python3 packages/tools/deps.py path \
-  packages/sqlite/dependency.json prefix)"
 ./builds/0/x2c build -O2 -o /tmp/threaded-notes \
-  --package-dir packages --c-include-dir packages/sqlite/src \
-  --c-include-dir "$SQLITE_PREFIX/include" \
+  --package-dir packages \
   examples/apps/notes/bench/threaded-notes.x \
   examples/apps/notes/bench/notes-database.x
 python3 examples/apps/notes/tests/test_notes.py /tmp/threaded-notes
