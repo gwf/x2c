@@ -203,6 +203,11 @@ with tempfile.TemporaryDirectory(prefix="x2c-lsp-script-") as temporary:
     script_text = "#!/usr/bin/env x2c\nint answer(void) { return 42; }\n"
     script.write_text(script_text)
     client = Client(root, directory, ["translate", str(script)])
+    # Query before didOpen: analysis rewrites the shebang before byte offsets
+    # can be computed from the client's line and character.
+    hover = query(client, "hover", script, script_text, "answer")["result"]
+    assert "int answer(void);" in hover["contents"]["value"], hover
+    assert selected(script_text, hover["range"]) == "answer", hover
     client.opened(script, script_text)
     assert client.diagnostics() == []
     # A save without text keeps the script's own first line as the overlay;

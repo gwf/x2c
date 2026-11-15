@@ -259,7 +259,7 @@ static void _watched(Server &server, Map params) {
 }
 
 static void _query(Server &server, Var id, Map params, int definition) {
-  Cursor cursor = _cursor(server, params);
+  Cursor cursor = _cursor(server, params, 1);
   if (!cursor.path) { _reply(server, id, NULL); return; }
   Var result = definition
     ? server.workspace.definition(cursor.path, cursor.offset)
@@ -268,8 +268,9 @@ static void _query(Server &server, Var id, Map params, int definition) {
   _notice(server);
 }
 
-static Cursor _cursor(Server &server, Map params) {
+static Cursor _cursor(Server &server, Map params, int analyze) {
   String path = server.workspace.retain(_document(params));
+  if (path && analyze) server.workspace.analyze(path);
   int offset = path ? lsp_offset(
     server.workspace.text(path), params.getdefault("position", {}).map())
     : 0;
@@ -277,7 +278,7 @@ static Cursor _cursor(Server &server, Map params) {
 }
 
 static void _completion(Server &server, Var id, Map params) {
-  Cursor cursor = _cursor(server, params);
+  Cursor cursor = _cursor(server, params, 0);
   _reply(
     server, id,
     cursor.path ? server.workspace.complete(cursor.path, cursor.offset)
@@ -298,7 +299,7 @@ static void _workspace_symbols(Server &server, Var id, Map params) {
 }
 
 static void _references(Server &server, Var id, Map params) {
-  Cursor cursor = _cursor(server, params);
+  Cursor cursor = _cursor(server, params, 1);
   if (!cursor.path) { _reply(server, id, []); return; }
   Map context = params.getdefault("context", {});
   _answer(
@@ -309,7 +310,7 @@ static void _references(Server &server, Var id, Map params) {
 }
 
 static void _rename(Server &server, Var id, Map params) {
-  Cursor cursor = _cursor(server, params);
+  Cursor cursor = _cursor(server, params, 1);
   if (!cursor.path) {
     _error(server, id, -32602, "Rename requires a file document");
     return;

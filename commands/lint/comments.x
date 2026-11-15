@@ -257,7 +257,7 @@ static void _comment(
       l.add("module-header-inventory", c.start,
             "the module header inventories the implementation")
   if c.kind != <doc>: return
-  String tier = _tier(l.path)
+  String tier = _tier(l.entry)
   if (tier == "contract" || tier == "internal") &&
      declarations[next] != <template>:
     l.add("doc-comment-tier", c.start, %"doc comment in a $tier module")

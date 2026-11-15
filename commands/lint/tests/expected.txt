@@ -106,6 +106,9 @@ exit 0
 # internal module documentation
 lib/scan.x:1: violation doc-comment-tier CM-5: doc comment in a internal module
 exit 0
+# module member documentation inherits its entry tier
+lib/part.x:1: violation doc-comment-tier CM-5: doc comment in a internal module
+exit 0
 # shape rules
 commands/lint/tests/src/shape.x:6: candidate long-function FN-2: function spans 41 lines; review above 40
 commands/lint/tests/src/shape.x:89: candidate deep-nesting FN-5: brace depth reaches 5; review at 5

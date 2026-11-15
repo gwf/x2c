@@ -164,7 +164,8 @@ and stderr byte for byte; no expected result was weakened.
   and cleanup when a later initializer raises.
 
 - Native module probes reuse a constructor's cached Func across isolated
-  units.
+  units. Their REPL check loads the full helper source with its native module;
+  compile-time declarations are not submitted interactively.
 - `commands/repl/tests/run.sh` runs the REPL checks. `native-check.x` keeps
   globals, functions, records, and pointers live across native submissions,
   separates tag and object namespaces, completes fields and methods, and

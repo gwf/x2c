@@ -374,8 +374,8 @@ assert archive.stat().st_mtime_ns == archive_stamp
 print('cold serial/parallel package consumers and module-link freshness passed')
 PY_PACKAGE_CONSUMERS
 
-printf 'meta int triple(int);\nprintln(%%"$(triple(4))");\n' |
-  "$X2C" repl --native-module .x2c-build/helpers.so >repl.out 2>&1
+printf 'println(%%"$(triple(4))");\n' |
+  "$X2C" repl --native-module .x2c-build/helpers.so src/helpers.x >repl.out 2>&1
 grep -qx "16" repl.out || {
   cat repl.out >&2
   fail "REPL module call"

@@ -13,6 +13,9 @@ mkdir -p "$work/docs" "$work/lib"
 # The internal-module fixture uses the current library documentation tier.
 cp docs/library-manifest.txt "$work/docs/library-manifest.txt"
 cp "$tests/src/doc-tier.x" "$work/lib/scan.x"
+printf 'module { "part.x" }\n' >"$work/lib/module.x"
+printf '/** Returns the input. */\nint member(int x) => x;\n' >"$work/lib/part.x"
+printf 'lib/module.x|internal\n' >>"$work/docs/library-manifest.txt"
 # Repository files stay ASCII, so the non-ASCII case is written here.
 printf '// caf\303\251\n' >"$work/ascii.x"
 # Formatting input that the fixtures would otherwise have to hold.
@@ -71,6 +74,8 @@ run() {
     "$tests/src/duplicate-a.x" "$tests/src/duplicate-b.x"
   echo "# internal module documentation"
   (cd "$work" && run --rule doc-comment-tier lib/scan.x)
+  echo "# module member documentation inherits its entry tier"
+  (cd "$work" && run --rule doc-comment-tier lib/module.x)
   echo "# shape rules"
   run --all "$tests/src/shape.x"
   echo "# accepted and invalid suppressions"
