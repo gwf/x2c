@@ -128,6 +128,10 @@ int main(int argc, char **argv) {
     int (*value)(void) =
       (int (*)(void)) program.addresses["manifest_value"].pointer();
     if (value() != 17) return 1;
+    String header = Path.read_text(%"$(program.directory)/unit-0.h");
+    if (header.count("#pragma GCC diagnostic ignored \"-Wconversion\"") != 1 ||
+        "#pragma GCC diagnostic ignored \"-Wunused-function\"" in header)
+      return 1;
   }
 
   Map function = program.descriptions["playground_new"];

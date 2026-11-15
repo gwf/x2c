@@ -333,7 +333,8 @@ static void _program_describe(ProgramBuild &b, ParsedUnit &unit, String path) {
   }
 }
 
-/* Native C declarations retain their authored aggregate attributes. */
+/* Native C declarations retain authored attributes and directives.
+   Replaying directives from expanded headers bypasses their include guards. */
 static String _program_c_header(Compiler c, List ast) {
   Buffer text = auto Buffer.new();
   text.write(
@@ -351,9 +352,6 @@ static String _program_c_header(Compiler c, List ast) {
   foreach (List node, ast) {
     if (!_program_owned(c, node, Path.absolute(c.filename))) continue;
     match (node) {
-      case %(preproc ?directive): {
-        text.write(directive); text.write("\n");
-      }
       case %(typedef *): {
         String source = _program_slice(c, _program_span(c, node));
         if (source) { text.write(source); text.write("\n"); }

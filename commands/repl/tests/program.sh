@@ -25,7 +25,9 @@ ar rcs "$tmp/libplayground.a" "$tmp/playground.o"
 
 cp commands/repl/tests/library/playground.c "$tmp/manifest.c"
 cp commands/repl/tests/library/playground.h "$tmp/playground.h"
+printf '#pragma GCC diagnostic ignored "-Wunused-function"\n' >>"$tmp/playground.h"
 cat >>"$tmp/manifest.c" <<'EOF'
+#pragma GCC diagnostic ignored "-Wconversion"
 int dependency_value(void);
 int manifest_value(void) { return dependency_value() + SELECTED_VALUE; }
 EOF
