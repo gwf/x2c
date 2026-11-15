@@ -1,11 +1,11 @@
 # x2cui: a first-class x2c package over CUI
 
-> Status: in progress on the long-lived branch `x2cui`, 2026-11-11.
+> Status: implemented on `dev`, checked on 2026-11-15 at `5b33b9a81`.
 > Gary accepted the plan's decisions and the to-do example; decision 3 is
-> superseded by method forms. Delivery 0 is published on `dev`
-> (gwf/x2c#653). Deliveries 1 to 3 and the method forms are on `x2cui`;
-> see [Current status](#current-status-2026-11-12). Nothing in this plan
-> is on `dev` except Delivery 0.
+> superseded by method forms. Deliveries 0 to 3 and the later package changes
+> are merged. The branch-specific progress entries below are historical.
+> The package remains experimental; the remaining platform and upstream
+> limitations at the end of this record still apply.
 > Baseline: x2c `239408687`, CUI `v1.3.1`.
 > Every "verified" statement below was compiled and run on macOS arm64.
 > Statements marked "not verified" were not.

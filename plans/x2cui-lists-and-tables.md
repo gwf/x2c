@@ -7,7 +7,8 @@
 > the package has one way to write each thing; the `$cui.*` decorators
 > are gone. See [One paradigm](#one-paradigm-2026-11-11). Constant data
 > is Array literals, data the program owns is x2c values, and result
-> forms declare their names (branch `gwf/x2cui-ready`). Not on `dev`.
+> forms declare their names. These changes are on `dev`, checked on
+> 2026-11-15 at `5b33b9a81`; branch-specific entries below are historical.
 > Every "verified" statement below was compiled and run on macOS arm64
 > by the package worker with the branch's stage 0. Statements marked
 > "not verified" were not.

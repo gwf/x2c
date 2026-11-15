@@ -10,9 +10,9 @@
 > are implemented on the same branch (PR 661). His later "Fix file-scope
 > method forms too." is implemented on `gwf/method-form-file-scope` (PR
 > 662). PRs 661 and 662 are merged. The type-name form, `T.name(...)`,
-> approved on 2026-11-12, is on `gwf/method-form-static`, based on `dev` at
-> `43b158c28`. Decision
-> 5 and the x2cui macros are package work on the x2cui branch.
+> approved on 2026-11-12, is also merged into `dev`, as are decision 5
+> and the x2cui macros. Checked on 2026-11-15 at `5b33b9a81`; the
+> branch-specific progress entries below are historical.
 > The prototype that preceded the implementation is on the local branch
 > `gwf/scratch-x2cui-method-ui` on top of `x2cui` at `b393dd58c`.
 > Every "verified" statement below was compiled and run on macOS arm64 with

@@ -19,8 +19,9 @@ forbid a different design or a new workload-supported investigation.
 
 [Public release readiness](public-release-readiness.md) is the authorized
 implementation plan based on `68ebfece6`. It records bounded repairs,
-performance decisions, packaging work, and deferred items. The small fixes are implemented;
-website work belongs to a separate session.
+performance decisions, packaging work, and deferred items. Candidate staging
+has passed on four platforms; the separate twenty installed-package cases
+remain outstanding. Official publication remains held.
 
 ## x2cui package
 
@@ -44,27 +45,20 @@ accepted its decisions on 2026-11-11. The compiler semantics, decisions 1 to
 `Decl` holes in `foreach` headers, computed macro names in templates, and
 sequence holes before final `Entry` rows are implemented with fixtures and
 a book section; the x2cui option lowering, decision 5, is package work.
-File-scope method forms are merged; the type-name form `T.name(...)` is
-implemented for a follow-up PR.
+File-scope and type-name method forms (`T.name(...)`) are merged into `dev`.
 
 ## Current work
 
-Checked against `a7a01924c` on 2026-11-02. These are the remaining items from
-the former active plans, verified during consolidation. This cleanup does not
-implement them. The public-release plan above records the callable and region
-repairs completed on its work branch; remaining rows below are unchanged.
-Completed and superseded items are explained in the history.
+Reevaluated on 2026-11-15 against `955dfde73`. The repair batch below
+resolves the first-hover, alias-member collision, native-module probe, lint
+classification, Lisp explanation, and Notes command items. The earlier
+included-alias collision already rejects correctly. Remaining work below
+retains its prior scope; completed and superseded work is recorded in history.
 
 | Remaining work | Current evidence and owner | Next bounded action |
 | --- | --- | --- |
 | File-scope diagnostic location | A five-line Iter initializer reports `6:1`; [transform traversal](../src/transform/traversal.x) does not select the recorded definition span. | Anchor that diagnostic through the existing source-location owner. |
-| Alias collisions | Member-wrapper and declaration-before-included-alias cases still translate; [aggregate parsing](../src/parse/types.x), [aliases](../src/macros/aliases.x). | Repair these shapes through their existing binding checks. |
 | List rendering recursion | [List rendering](../lib/list/rendering.x) has no recursive floor check. Regex matching was repaired in PR #650 after focused measurements; see the [release plan](public-release-readiness.md). | List rendering remains deferred; do not expand the accepted Regex repair. |
-| First hover on an unopened script | First hover returns null, identical second/opened hover finds the value; [LSP requests](../commands/lsp/lsp.x) compute the cursor before [analysis](../commands/lsp/analysis.x) rewrites stored script text. | Preserve original cursor coordinates through the existing mapping. |
-| Optional native-module probe | [The probe](../unittest/probes/run-native-modules.sh) submits a REPL meta declaration that the current playground explicitly rejects. | Use source loading for that check while preserving compile-time native coverage. |
-| Lint member documentation tier | Entry-only internal manifest classification does not reach its member; [comment checks](../commands/lint/comments.x) use the member path despite an existing entry field. | Reuse the entry's classification and cover the module case. |
-| Notes benchmark instructions | [The instructions](../examples/apps/notes/bench/database-thread.md) repeat include and prefix discovery already supplied by package linking. | Remove only those redundant arguments; no database architecture change. |
-| Runtime Lisp explanation | [The reference](../docs/src/reference/language.md#runtime-lisp) documents bindings but not explicit condition truthiness or the evaluator's stack/step limits. | Explain those existing semantics using [the evaluator](../lib/lisp/evaluate.x) and current Lisp API. |
 | Optional structured lint findings | [Lint](../commands/lint/x2c-lint.x) still prints human text only; [Lint.print](../commands/lint/lint.x) has findings to reuse. | Complete the previously approved List-output option and thin compiler consumer; keep execution optional and lint experimental. |
 
 ### Evidence questions

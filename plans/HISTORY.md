@@ -281,3 +281,36 @@ That behavior is not a reproduced correctness failure or a selected gate change.
 Included-header visibility, Linux linker tracing, and intermediate CPP
 arithmetic retain bounded evidence questions in the README. No old architecture restriction, blanket audit, or
 recurring validation requirement is created by this consolidation.
+
+
+## Deferred items follow-up, 2026-11-15
+
+The review at `955dfde73` separated reproduced defects, documentation gaps,
+and unresolved compatibility questions. The declaration-before-included-alias
+case already rejects with `declaration 'level' is already bound`; close that
+case as fixed, while retaining the separate member-wrapper repair.
+
+The follow-up repairs field/alias collision checks within aggregate wrapper
+bodies while allowing fields to hide outer aliases. Semantic LSP queries
+prepare analysis before converting cursor coordinates, so the first hover
+on an unopened script works. Lint member documentation uses its module
+entry's tier. The optional native-module probe loads its complete helper
+source; interactive compile-time declarations remain deliberately rejected.
+The book explains runtime Lisp truthiness and evaluation limits. Notes
+benchmark instructions rely on the existing package include-path handling.
+
+Focused evidence includes alias fixtures with outer/nested/constructed
+aggregate controls, the full LSP and lint suites, the full native-module
+probe, Lisp truthiness/budget probes, and the shorter Notes build followed
+by its API and threaded error/shutdown tests. No recurring gate was added.
+
+Deep List rendering remains explicitly deferred. CPP overflow and Linux
+REPL dependency identity still need bounded evidence; included-header macros
+retain the documented `--cpp` workaround. Diagnostic location polish and
+optional structured lint output remain deferred. Historical unselected ideas
+remain closed. x2cui retains its documented experimental coverage limits.
+
+The earlier candidate passed four-platform staging verification, but this
+compiler repair is newer. Release of the newer compiler requires fresh
+candidate verification. The separate approved twenty installed-package cases
+remain outstanding, and official publication remains held.

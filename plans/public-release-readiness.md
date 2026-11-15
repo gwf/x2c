@@ -359,19 +359,24 @@ all four promised platforms against the final candidate compiler and matching
 archives. This is 20 package/platform cases, not a recurring gate or new CI
 matrix. PCRE2 and Torch retain their existing release checks.
 
-PRs #649 and #650 are merged. The reviewed source tip is
-`ee8730a234b99428bda1345480cbbc456ae5fa25`, not a selected final candidate.
-The release notes now include Regex. Upgrade instructions cover the existing
-source/ABI changes, including explicit `$let`/`with` and alias migration rows.
-Keep `0.16.0 (unreleased)` until the release date is known. No `v0.16.0` tag
-existed at this review; recheck before tagging.
+PRs #649 and #650 are merged. The release notes include Regex, and the
+upgrade instructions cover the source/ABI changes, including `$let`/`with`
+and alias migration. Keep `0.16.0 (unreleased)` until publication is approved.
 
-Staging and publication are explicitly held until the website session is
-ready. Do not advance `main`, create a release tag, or dispatch staging or
-promotion while that hold is active. The candidate workflow assembles complete
-sites as well as native archives, so defer the final candidate selection and
-build to the coordinated release owner. No candidate archive exists yet for
-this source; current local tests cannot complete candidate verification.
+As of 2026-11-15, candidate
+`candidate-5d7ffb4b0d790384178df3859ebbc8cefb42aff9-43651932463-1`
+was assembled by [run 43651932463](https://github.com/gwf/x2c/actions/runs/43651932463)
+and passed four-platform staging verification in
+[run 43653633222](https://github.com/gwf/x2c/actions/runs/43653633222).
+Those installed-package checks cover PCRE2 and the supported Torch targets;
+they do not complete the twenty cases below. Website-only staging updates
+preserve those native archives and do not validate a newer compiler candidate.
+
+Gary authorized dev integration and staging updates. Official publication
+remains held: do not advance `main`, create a release tag, or promote without
+separate authorization. Compiler changes after the named candidate require
+fresh candidate validation before their release. No `v0.16.0` tag existed at
+this review; recheck before tagging.
 
 The integration owner must retain generated-refresh and publication-gate
 proof for the final tree. The merged PRs' focused evidence does not establish
@@ -421,15 +426,16 @@ remain separate steps under the hold above.
 
 ## Deferred work
 
-Do not include these in the first implementation batch: deep List rendering,
-CPP overflow policy, alias-collision consistency, included-header attribute
-compatibility, first unopened-script hover, diagnostic location polish,
-runtime Lisp explanation, lint tier/structured output, or Notes command
-simplification. They remain recorded findings or improvements, not universal
-safety obligations. Linux REPL dependency identity remains unverified.
+The 2026-11-15 follow-up resolves the alias-member collision, first
+unopened-script hover, runtime Lisp explanation, lint member documentation
+tier, obsolete native-module REPL probe, and Notes command simplification.
+The included-alias collision was already repaired. Focused evidence is
+recorded in [the history](HISTORY.md#deferred-items-follow-up-2026-11-15).
 
-Repair the obsolete optional native-module REPL probe before using that probe
-as release evidence; it is not evidence that native-module loading is broken.
+Deep List rendering, CPP overflow policy, included-header attribute
+compatibility, diagnostic location polish, and optional structured lint
+output remain deferred. Linux REPL dependency identity remains unverified.
+These are separate findings or improvements, not universal safety obligations.
 No computed-slot staging redesign or broader native ownership proof is part
 of this plan.
 
