@@ -635,3 +635,46 @@ passed there. The earlier ARM run completed the same manifest regression;
 the minimal descriptor probe passed on both architectures. A successful
 comparison workflow records evidence, not a claim that every REPL test passed.
 The full macOS REPL suite and the existing publication gate passed.
+
+
+## Remaining Linux REPL repairs (2026-11-15)
+
+Both defects recorded above are repaired. A minimal `:info next()` input
+crashed in `Compiler.try_parse_static_macro` on Linux x86-64 and ARM
+(workflow 43756511700). A call at the first token has no preceding dot;
+the recognizer dereferenced that missing token. It now returns NULL at that
+boundary. The direct resolver regression verifies a call's type without
+executing the function; the existing playground test also checks `next()`.
+
+Generated native headers copied authored directives, then copied surviving
+system-header directives from the preprocessed AST. Replaying GCC's
+`arm_neon.h` pragma bypassed the original include guards. Header generation
+now retains only the existing authored-directive path. The manifest fixture
+checks that an authored pragma appears once and an included-header pragma
+is not copied separately. That regression failed before the repair.
+
+The full Linux suite exposed two test portability omissions. The inspection
+executable now uses the runtime-export linker flags already used by the
+adjacent native test. Its null-pointer assertion derives the expected spelling
+from the host's `%p` formatter instead of assuming macOS's `0x0` spelling.
+
+Validation on revision `89d839f93b57a6516259b4aa93f0f4151a2864e1`:
+
+- Workflow 43758546772 built from shipped bootstrap and passed the complete
+  REPL suite on Linux x86-64 and Linux ARM, including native inspection,
+  manifest reload, playground examples, terminal behavior, and recovery.
+- The publication gate passed, including the full macOS REPL suite. The
+  compiler-changing gate passed 1,222 unit tests with 104,267 assertions;
+  later command-test changes reused that compiler evidence and reran their
+  applicable checks.
+- Five alternating instruction-count samples translated the same seven
+  representative source files with the previous and repaired compilers.
+  Median totals were 55,531,392,748 and 55,383,104,908 retired instructions,
+  respectively. This small difference does not establish a speedup; the
+  checkpoint shows no instruction-count regression. The baseline compiler
+  at aa02ed22468 has the same compiler, runtime, and bootstrap sources as
+  d8b6d98f810, before these repairs.
+
+Bootstrap changes were regenerated through repository targets. No official
+release was published by this repair; the earlier four-platform candidate
+receipt still belongs to its recorded revision and archives.
