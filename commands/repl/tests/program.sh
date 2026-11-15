@@ -84,6 +84,7 @@ esac
 if [ "$(uname -s)" = Linux ]; then
   "$tmp/program-api" "$PWD/commands/repl/tests/library/playground.h" "$shared"
 fi
+LD_LIBRARY_PATH="$tmp${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
 REPL_PROGRAM_REMOVE_NATIVE="$shared" "$tmp/program-api" \
   "$PWD/commands/repl/tests/library/playground.h" -L"$tmp" -lplayground
 
