@@ -5,6 +5,7 @@ We will start with a working C implementation and rewrite it in eight steps. The
 Here's the direction that we're going:
 
 ```x2c
+~#include "substring-map.x"
 static MapSubInt count_words(String filename) {
   String text = filename.open("r").string_close()
     .reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
@@ -37,7 +38,8 @@ V1 uses the default group, which the runtime cleans up at shutdown, so it does n
 
 The allocation sites remain familiar:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v1.x; it needs that program's declarations. -->
+```x2c,ignore
 Entry *entry = xcalloc(1, sizeof(*entry));
 entry.word = xmemdup(word, strlen(word) + 1);
 ```
@@ -59,14 +61,16 @@ The hash table and counting algorithm have not changed. The program drops from *
 
 The next step removes another set of chores: managing a growable line buffer, checking how the read loop ended, and remembering to close the file. We ask the library to read the text instead:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v2.x; it needs that program's declarations. -->
+```x2c,ignore
 auto File input = File.open(argv[1], "r");
 count_words(counts, input.string());
 ```
 
 `auto` closes the file when execution leaves the surrounding block, including when an error leaves it. Reading failures raise an error instead of requiring a separate end-of-file check. Inside `count_words`, the library also handles removing punctuation, lowercasing, and finding each word:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v2.x; it needs that program's declarations. -->
+```x2c,ignore
 text = text.reject("!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~").lower();
 foreach (Substr word in text)
   count_word(counts, word);
@@ -82,7 +86,8 @@ This changes the storage tradeoff: the program reads and normalizes the whole fi
 
 We want ten results, but the previous versions allocate a sorting array for every distinct word. V3 replaces that array and its comparator with a min-heap of `(count word)` pairs:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v3.x; it needs that program's declarations. -->
+```x2c,ignore
 if (ranked.len() == 10 && entry.count < ranked[0][0]) continue;
 ranked.heap_push($(entry.count, entry.word.str()));
 if (ranked.len() > 10) ranked.heap_pop();
@@ -92,7 +97,8 @@ The smallest retained pair is at the front. Lower counts cannot qualify once ten
 
 Only the retained pairs are sorted for output:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v3.x; it needs that program's declarations. -->
+```x2c,ignore
 foreach ((int count, String word) in ranked.sort())
   printf("%d\t%s\n", count, word);
 ```
@@ -106,12 +112,17 @@ This step deliberately changes ordering. V0-V2 print descending counts with asce
 Our custom hash table is now doing a standard job: associate each word with a count. A library map can do that job, so we no longer need to maintain bucket sizes, resolve collisions, or move entries when the table grows:
 
 ```x2c
-MapSubInt counts = MapSubInt.new();
+~#include "substring-map.x"
+~int main(void) {
+  MapSubInt counts = MapSubInt.new();
+~  return 0;
+~}
 ```
 
 `MapSubInt` stores borrowed `Substr` keys and integer counts. Its `increment` operation replaces our insertion and lookup code. Its typed traversal replaces the nested bucket and entry loops:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v4.x; it needs that program's declarations. -->
+```x2c,ignore
 foreach ((Substr word, int count) in counts) {
   if (ranked.len() == 10 && count < ranked[0][0]) continue;
   ranked.heap_push($(count, word.str()));
@@ -133,14 +144,16 @@ At 42 lines, V5 is the shortest complete program in this sequence. It still read
 
 We already know how to count one file. To count a directory, we can reuse that function for each file and add the results. The library handles walking the directory and passing files through those steps, so we do not need to write a recursive directory walker:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v6.x; it needs that program's declarations. -->
+```x2c,ignore
 return root.walk().filter(Path.is_file).map(count_words)
   .foldl(MapStringInt.new(), accumulate);
 ```
 
 The per-file maps keep their borrowed word views. The total uses String keys, because its words must remain usable after each per-file table is released:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v6.x; it needs that program's declarations. -->
+```x2c,ignore
 foreach ((Substr word, int count) in counts) total.add_substr(word, count);
 counts.cleanup();
 return total;
@@ -154,7 +167,8 @@ Traversal follows file symlinks, skips unreadable child directories, and does no
 
 Files can be counted independently. We can keep the counting function and the merging step, and ask the library to run up to four file counts at once:
 
-```x2c
+<!-- ignore: excerpt from examples/c2x2c/words-v7.x; it needs that program's declarations. -->
+```x2c,ignore
 return root.walk().filter(Path.is_file).parallel_map(count_words, 4)
   .foldl(MapStringInt.new(), accumulate);
 ```
@@ -170,6 +184,7 @@ Four workers do not promise a fourfold speedup. Directory size, file sizes, merg
 So far, counting ends by printing to the terminal. Another program might instead want to display the results, save them, or ask for a different number of words. The final rewrite returns a usable result and lets the caller decide what happens next:
 
 ```x2c
+~#include "typed-map.x"
 class Frequencies MapStringInt;
 ```
 
