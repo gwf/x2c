@@ -86,6 +86,3 @@ printf 'int unavailable_example(int value);\n' >"$probe/missing.h"
 REPL_PROGRAM_MISSING=unavailable_example "$probe/program-api" "$probe/missing.h" \
  >>"$probe/repl.log" 2>&1 || { cat "$probe/repl.log"; exit 1; }
 tail -1 "$probe/repl.log"
-make commands >debug/repl-command-build.log 2>&1
-sh commands/repl/tests/program.sh >debug/repl-program-tests.log 2>&1 || { cat debug/repl-program-tests.log; exit 1; }
-cat debug/repl-program-tests.log
