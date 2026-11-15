@@ -76,6 +76,12 @@ LD_LIBRARY_PATH="$probe${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" REPL_PROGRAM_REMOV
  "$probe/program-api" "$probe/library.h" -L"$probe" -lplayground \
  >"$probe/repl.log" 2>&1 || { cat "$probe/repl.log"; exit 1; }
 cat "$probe/repl.log"
+cc -shared -fPIC "$probe/library.c" -o "$probe/libplayground.so"
+cc -shared -fPIC "$probe/replacement.c" -o "$probe/libplayground.so.replacement"
+REPL_PROGRAM_REMOVE_NATIVE="$probe/libplayground.so" \
+ "$probe/program-api" "$probe/library.h" "$probe/libplayground.so" \
+ >>"$probe/repl.log" 2>&1 || { cat "$probe/repl.log"; exit 1; }
+tail -5 "$probe/repl.log"
 printf 'int unavailable_example(int value);\n' >"$probe/missing.h"
 REPL_PROGRAM_MISSING=unavailable_example "$probe/program-api" "$probe/missing.h" \
  >>"$probe/repl.log" 2>&1 || { cat "$probe/repl.log"; exit 1; }
