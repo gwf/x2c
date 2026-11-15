@@ -57,7 +57,6 @@ program that imports it, such as the example above saved as `hello.x`:
 ```sh
 make -C packages/x2cui build
 ./x2c build --package-dir packages \
-  --c-include-dir packages/x2cui/deps/include \
   -I packages/x2cui/deps/include --output hello hello.x
 ./hello
 ```

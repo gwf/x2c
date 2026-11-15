@@ -330,7 +330,11 @@ printf("%s\n", rewritten.str());
 Bindings are an association `List` keyed by the binder `Atom`, so you read them
 with `assoc` and the same spelling you wrote in the pattern: `<?name>` for a
 `?` binder and `<*rest>` for a `*` binder. These are standalone `Symbol`
-literals, outside the `List` syntax that accepts bare `Atom`s.
+literals, outside the `List` syntax that accepts bare `Atom`s. A `Symbol`
+literal holds at most ten characters and no uppercase letters. Read a longer
+or mixed-case binder such as `?LongBinderName` with
+`Atom.intern("?LongBinderName")`; [Symbols and Atoms](symbols.md) explains
+the limit.
 
 The search family walks a whole structure instead of matching at the root.
 `try_search` returns the first depth-first hit, `search` collects every hit,

@@ -241,7 +241,7 @@ functions the compiler provides.
 At file scope, `meta` can also advertise one initialized static value to
 compile-time code:
 
-```c
+```x2c
 meta static const double pi = 3.1415;
 meta static int compile_counter = 0;
 ```

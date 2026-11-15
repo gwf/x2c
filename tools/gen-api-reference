@@ -707,8 +707,17 @@ static String _index(Array modules):
     Start with the [standard library overview](../overview.md) to choose
     a type or find a function for a particular task.
 
-    The [x2c C API](x2c-c-api.md) collects the stable `x2c_*` entry
-    points used by generated code, native callers, and compiler setup.
+    The [x2c C API](x2c-c-api.md) collects the `x2c_*` entry points used
+    by generated code, native callers, and compiler setup.
+
+    Each page groups its entries into tiers. Primary API holds operations
+    for ordinary programs. Advanced and interop API holds storage, ABI,
+    embedding, and diagnostics operations. Convenience API holds adapters
+    whose text names a preferred operation. Runtime-internal callables
+    are documented for source readers and are not supported user API.
+
+    In a signature, `Self` is the receiver's static type; see
+    [Methods and `Self`](../../reference/language.md#methods-and-self).
 
     ## Modules
 

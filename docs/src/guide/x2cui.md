@@ -63,15 +63,14 @@ package and the program:
 ```sh
 make -C packages/x2cui build
 ./x2c build --package-dir packages \
-  --c-include-dir packages/x2cui/deps/include \
   -I packages/x2cui/deps/include --output hello hello.x
 ./hello
 ```
 
 The first `make` downloads, verifies, and builds CUI in the shared
 dependency cache. The driver links `builds/libx2cui.a` with CUI and the
-system frameworks. The `-I` option lets x2c's own collection read CUI's
-headers, and `--c-include-dir` gives the same headers to the C compiler.
+system frameworks. The `-I` option gives CUI's headers to x2c's own
+collection and to the C compiler.
 Linux also needs the X11 development headers; the package's `PROFILE.md`
 names them. `make -C packages/x2cui bundle` builds a movable bundle, as
 [Packages](packages.md#movable-native-bundles) describes; a program that

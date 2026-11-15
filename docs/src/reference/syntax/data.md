@@ -50,7 +50,7 @@ expression-body addition:
 ```x2c
 List rule = %(rule function-body
   (choice
-    (ref block)
+    (ref raw-block)
     (seq (token "=") (token ">") (ref expression) (token ";"))));
 ```
 

@@ -74,7 +74,7 @@ List syntax_extensions(void) => %(
       (grammar function-body lambda bare-parameters capture-list)
       (lexical percent-forms)
       (grammar-note "`int f(int x) => x + 1;` returns an expression directly. `%!(int x) => x + 1` builds a lambda; its parameters may omit types, and `using` names captured variables.")
-      (lexical-note "`%!` opens a lambda. `=>` is `=` followed by `>`, not a new token, and `using` is a keyword only in a lambda.")
+      (lexical-note "`%!` opens a lambda. `=>` is `=` followed by `>`, not a new token, and `using` is a keyword only in a lambda and in a macro body.")
       (spellings "=>" "%!" "using")
       (reference "../reference/language.md#lambdas"))
     (feature collections
@@ -150,7 +150,7 @@ List syntax_extensions(void) => %(
                enumerator-extension entry-extension)
       (lexical code-reference named-reference data-prefix)
       (grammar-note "`macro` and `keyword` define new syntax with typed holes, `@` parameters accept sequences, and quotations and decorators build source. `meta` functions run at compile time, and `meta native` lets compile-time code call the native copy of a function the compiler links.")
-      (lexical-note "`\$name` inserts one result and `@items` splices a sequence; `\$!` is `\$` followed by `!`. `macro`, `keyword`, `meta`, and `native` are keywords only where a definition starts.")
+      (lexical-note "`\$name` inserts one result and `@items` splices a sequence; `\$!` is `\$` followed by `!`. `macro`, `keyword`, `meta`, and `native` are keywords only where a definition starts. In a macro body, `using name` keeps a file-scope name and `using \$name` makes a private one.")
       (spellings "macro" "keyword" "\$name(...)" "\$!{...}"
                  "@items" "@name(...)" "@(expression)"
                  "meta" "native")

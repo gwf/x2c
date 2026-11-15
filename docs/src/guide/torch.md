@@ -72,9 +72,9 @@ also boxes into a `Var`, and the operators work on the boxed form.
 ```x2c,ignore
 Tensor a = Tensor.of(%(1 2 3 4), %(2 2), XT_FLOAT64);
 Tensor b = Tensor.of(%(1 0 0 1), %(2 2), XT_FLOAT64);
-EXPECT_TRUE((a * b).equal(Tensor.of(%(1 0 0 4), %(2 2), XT_FLOAT64)));
-EXPECT_TRUE((a.matmul(b)).equal(a));
-EXPECT_NEAR((2.0 * a).sum().item().double(), 20.0, 1e-12);
+assert((a * b).equal(Tensor.of(%(1 0 0 4), %(2 2), XT_FLOAT64)));
+assert((a.matmul(b)).equal(a));
+assert(fabs((2.0 * a).sum().item().double() - 20.0) < 1e-12);
 ```
 
 ## Indexing
@@ -91,10 +91,10 @@ source therefore affect its views, but not those copies.
 <!-- ignore: an import needs the built torch package archive. -->
 ```x2c,ignore
 Tensor m = Tensor.of(%((1 2) (3 4)), %(2 2), XT_FLOAT64);
-EXPECT_NEAR(m[%(1 0)].item().double(), 3.0, 1e-12);
+assert(fabs(m[%(1 0)].item().double() - 3.0) < 1e-12);
 Tensor mask = m.gt(Tensor.scalar(2.0, XT_FLOAT64));
-EXPECT_INT_EQ(mask.dtype(), XT_BOOL);
-EXPECT_NEAR(m[mask].sum().item().double(), 7.0, 1e-12);
+assert(mask.dtype() == XT_BOOL);
+assert(fabs(m[mask].sum().item().double() - 7.0) < 1e-12);
 ```
 
 ## Lifetimes

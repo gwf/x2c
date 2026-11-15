@@ -453,7 +453,7 @@ A package publishes the nonstatic macros and aliases its entry source and
 ordinary includes define. `import "name";` makes that syntax available at the
 import position.
 
-Prefer a qualified name such as `$test.run` or `$project.logging.trace` in a
+Prefer a qualified name such as `$test.main` or `$project.logging.trace` in a
 shared module. It identifies the project or library at each call and avoids
 ambiguous short global names.
 
