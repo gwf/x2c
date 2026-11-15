@@ -224,8 +224,8 @@ static List _bind_form(Compiler c, List input, Symbol context, int pending) {
       return %(declaration-forward $own $base $name $form $(c.source_private));
     case %(default ?function) if (unit): return _bind_default(c, function);
     case %(declaration-function
-             (declare ?type (bindings ?decl)) ?body ?source) if (unit):
-      return _bind_collected_function(c, input, type, decl, body, source);
+             (declare ?type (bindings ?decl)) ?body ?stack ?self) if (unit):
+      return _bind_collected_function(c, input, type, decl, body, stack, self);
     case %(declaration-initialized ?decl ?source) if (unit):
       return _bind_collected_initializers(c, input, decl, source);
     case %(seq *items): return _bind_items(c, items, context);
