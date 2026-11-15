@@ -25,6 +25,7 @@ PY
 builds/0/x2c build --plain --build-dir "$probe/cc" --output "$probe/program-api" \
  --x-include-dir commands/repl --x-include-dir commands/repl/tests \
  --x-include-dir src --c-include-dir builds/0/src \
+ -Xlinker -export-dynamic -Wl,--whole-archive,builds/0/libx2c.a,--no-whole-archive \
  "$probe/program-api.x" commands/repl/repl-program.x commands/repl/repl-types.x \
  commands/repl/tests/library/program-check.c builds/0/commands/identity.x builds/0/libx2c-dev.a
 cc -shared -fPIC commands/repl/tests/library/playground.c -o "$probe/libplayground.so"
