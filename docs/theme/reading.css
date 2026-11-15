@@ -81,14 +81,6 @@
 .content h2 { margin: 48px 0 18px; padding-top: 24px; }
 .content main > p { margin: 0 0 18px; }
 .x2c-pager { margin: 48px auto 0; padding-top: 24px; }
-.x2c-footer { margin: 0 auto; padding: 24px 0 2px; }
-
-body:has(.about-page) .landing-footer,
-body:has(.examples-shell) .landing-footer {
-  width: min(calc(100% - 2 * var(--reading-gutter)), var(--reading-width));
-  padding: 24px 0 2px;
-  border-top: 0;
-}
 /* Keep the reading column on the viewport center until the TOC reaches its
    gutter. Then move it only far enough to clear the panel. At tighter widths,
    use the available space beside the TOC, as before. */
@@ -101,11 +93,7 @@ body:has(.examples-shell) .landing-footer {
   html #mdbook-sidebar-toggle-anchor:checked ~ .page-wrapper {
     margin-left: var(--reading-sidebar-offset);
   }
-  html.sidebar-visible body:has(.examples-shell) .landing-footer {
-    width: min(calc(100% - var(--reading-sidebar-offset) - 2 * var(--reading-gutter)), var(--reading-width));
-    position: relative;
-    left: calc(var(--reading-sidebar-offset) / 2);
-  }
+
 }
 @media (max-width: 800px) {
   :root { --reading-top: 28px; --reading-gutter: 20px; }

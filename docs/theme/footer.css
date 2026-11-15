@@ -1,0 +1,57 @@
+.landing-footer {
+  display: grid;
+  width: min(100%, 1180px);
+  margin-inline: auto;
+  margin-top: auto;
+  padding: 24px clamp(40px, 3.2vw, 44px) 2px;
+  color: var(--nav-muted);
+  font: 13px/1.6 Archivo, Helvetica, sans-serif;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 24px;
+}
+
+.landing-footer .footer-brand {
+  display: inline-flex;
+  color: var(--dark, var(--fg));
+  justify-self: start;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-wordmark {
+  font-size: 15px;
+}
+
+.landing-footer>p {
+  margin: 0;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.footer-top {
+  justify-self: end;
+  white-space: nowrap;
+  font: 500 12px/1 "JetBrains Mono", monospace;
+}
+
+.landing-footer, .landing-footer * { box-sizing: border-box; }
+.landing-footer a { text-decoration: none; }
+.landing-footer p a { color: var(--red-text, var(--x2c-red-text)); }
+.landing-footer .footer-top { color: var(--dark, var(--fg)); }
+.landing-footer a:hover { text-decoration: underline; }
+body:has(> .landing-footer), #mdbook-body-container { display: flex; flex-direction: column; min-height: 100vh; }
+#mdbook-body-container > #mdbook-page-wrapper { flex: 1; }
+
+/* Clear an open desktop TOC without moving the footer's right edge. */
+@media (min-width: 620px) {
+  html.sidebar-visible body:has(.examples-shell, .x2c-header) .landing-footer {
+    padding-left: max(clamp(40px, 3.2vw, 44px),
+      calc(var(--sidebar-width) + 32px - max(0px, (100vw - 1180px) / 2)));
+  }
+}
+@media (max-width: 800px) {
+  .landing-footer { grid-template-columns: 1fr auto; gap: 18px; }
+  .landing-footer > p { grid-column: 1 / -1; grid-row: 2; }
+  .footer-top { grid-column: 2; grid-row: 1; }
+}

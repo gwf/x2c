@@ -1,4 +1,5 @@
 @import "../../../docs/theme/header.css";
+@import "../../../docs/theme/footer.css";
 
 :root {
   color-scheme: light;
@@ -651,6 +652,10 @@ html:has(.landing-header) {
 .landing-section:nth-of-type(even) {
   border-bottom: 1px solid var(--hairline);
   background: var(--paper);
+}
+
+.landing-section:last-child {
+  border-bottom: 0;
 }
 
 .section-break {
@@ -1342,41 +1347,6 @@ a.docs-card:hover {
   line-height: 1.9;
 }
 
-.landing-footer {
-  display: grid;
-  width: min(100%, 1180px);
-  margin-inline: auto;
-  padding: 24px clamp(20px, 3.2vw, 44px) 2px;
-  color: var(--nav-muted);
-  font-size: 13px;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 24px;
-}
-
-.footer-brand {
-  display: inline-flex;
-  color: var(--dark);
-  justify-self: start;
-  align-items: center;
-  gap: 10px;
-}
-
-.footer-wordmark {
-  font-size: 15px;
-}
-
-.landing-footer>p {
-  margin: 0;
-  line-height: 1.6;
-  text-align: center;
-}
-
-.footer-top {
-  justify-self: end;
-  white-space: nowrap;
-  font: 500 12px/1 "JetBrains Mono", monospace;
-}
 
 .dark-link {
   color: var(--dark);
@@ -1485,11 +1455,6 @@ a.docs-card:hover {
   }
 }
 
-@media (max-width: 560px) {
-  .landing-footer { grid-template-columns: 1fr auto; gap: 18px; }
-  .landing-footer > p { grid-column: 1 / -1; grid-row: 2; }
-  .footer-top { grid-column: 2; grid-row: 1; }
-}
 
 /* Idea sections: a full-width heading row, then a full-width carousel. */
 .idea-section .section-shell {

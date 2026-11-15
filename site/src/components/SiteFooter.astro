@@ -1,5 +1,4 @@
 ---
-import { destination } from "../../release-destination.mjs";
 
 interface Props {
   home?: boolean;
@@ -12,7 +11,7 @@ const brandHref = home ? "#top" : local("");
 ---
 
 <footer class="landing-footer">
-  <a href={brandHref} class="footer-brand">
+  <a href={brandHref} class="footer-brand" aria-label="x2c home">
     <svg viewBox="0 0 100 100" width="18" height="18" aria-hidden="true"
       ><g fill="none" stroke="#da291c" stroke-width="17" stroke-linecap="butt"
         ><path d="M9 16 A34.5 34.5 0 0 1 9 84"></path><path
@@ -25,8 +24,7 @@ const brandHref = home ? "#top" : local("");
     &copy; 2025&ndash;2026 <a href="https://flake.org">GWF</a> &middot; <a
       href="https://github.com/gwf/x2c/blob/main/LICENSE">Apache 2.0</a> &middot; <a
       href="https://github.com/gwf/x2c/blob/main/TRADEMARKS.md">Trademarks</a>
-    {destination.candidate && <>&middot; <a
-      href={local("x2c-book.pdf")}>Book PDF</a></>}
+    { " " }&middot; <a href={local("x2c-book.pdf")}>Book PDF</a>
   </p>
   <a href="#main" class="footer-top dark-link">
     Back to top <span aria-hidden="true">&uarr;</span>

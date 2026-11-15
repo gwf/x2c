@@ -17,7 +17,7 @@ renderers = ["html"]
 default-theme = "light"
 preferred-dark-theme = "light"
 git-repository-url = "https://github.com/gwf/x2c"
-additional-css = ["theme/header.css", "theme/x2c.css", "theme/reading.css"]
+additional-css = ["theme/header.css", "theme/x2c.css", "theme/reading.css", "theme/footer.css"]
 
 [output.html.fold]
 enable = true
