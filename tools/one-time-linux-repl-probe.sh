@@ -23,6 +23,14 @@ int main(int argc, char **argv) {
   ReplProgram program = repl_program_build_selected(
     frontend, Path.temp_dir(), request.inputs, NULL, failure);
   if (!program) { fprintf(stderr, "BUILD: %s\n", failure); return 10; }
+  String missing = Env.get("REPL_PROGRAM_MISSING");
+  if (missing) {
+    Map description = program.descriptions[missing];
+    if (missing in program.addresses || !description ||
+        !description["unavailable"].integer()) return 18;
+    puts("missing provider remains inspectable and unavailable");
+    return 0;
+  }
   printf("dependency map: %s\n", program.dependencies.repr());
   fflush(stdout);
   if (!("dependency_value" in program.addresses)) {
@@ -65,6 +73,13 @@ printf 'extern int dependency_value(void); int main(void) { return dependency_va
 cc "$probe/trace.c" -L"$probe" -lplayground -Wl,-t -o "$probe/trace" >"$probe/link-trace.log" 2>&1
 cat "$probe/link-trace.log"
 LD_LIBRARY_PATH="$probe${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" REPL_PROGRAM_REMOVE_NATIVE="$probe/libplayground.so" \
- "$probe/program-api" "$probe/library.h" -Wl,--no-as-needed -L"$probe" -lplayground \
+ "$probe/program-api" "$probe/library.h" -L"$probe" -lplayground \
  >"$probe/repl.log" 2>&1 || { cat "$probe/repl.log"; exit 1; }
 cat "$probe/repl.log"
+printf 'int unavailable_example(int value);\n' >"$probe/missing.h"
+REPL_PROGRAM_MISSING=unavailable_example "$probe/program-api" "$probe/missing.h" \
+ >>"$probe/repl.log" 2>&1 || { cat "$probe/repl.log"; exit 1; }
+tail -1 "$probe/repl.log"
+make commands >debug/repl-command-build.log 2>&1
+sh commands/repl/tests/program.sh >debug/repl-program-tests.log 2>&1 || { cat debug/repl-program-tests.log; exit 1; }
+cat debug/repl-program-tests.log

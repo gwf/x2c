@@ -17,19 +17,30 @@ permissions:
 jobs:
   linux-repl-investigation:
     if: inputs.mode == 'linux-repl'
-    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          path: harness
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.source_sha }}
+          path: candidate
       - name: Probe GNU linker dependencies
-        run: bash tools/one-time-linux-repl-probe.sh
+        working-directory: candidate
+        run: bash ../harness/tools/one-time-linux-repl-probe.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: linux-repl-investigation
+          name: linux-repl-check-${{ matrix.runner }}
           path: |
             /tmp/x2c-linux-repl.*/repl.log
             /tmp/x2c-linux-repl.*/link-trace.log
-            debug/repl-probe-bootstrap.log
+            candidate/debug/repl-*.log
   installed-packages:
     if: inputs.mode == 'packages'
     strategy:
