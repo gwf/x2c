@@ -1,20 +1,60 @@
 name: release-validation
 on:
   workflow_dispatch:
+    inputs:
+      identity:
+        required: true
+        type: string
+      source_sha:
+        required: true
+        type: string
 permissions:
   contents: read
 jobs:
-  linux-repl-investigation:
-    runs-on: ubuntu-24.04
+  installed-packages:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            target: darwin-arm64
+          - runner: macos-15-intel
+            target: darwin-x86_64
+          - runner: ubuntu-24.04
+            target: linux-x86_64
+          - runner: ubuntu-24.04-arm
+            target: linux-aarch64
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v5
-      - name: Probe GNU linker dependencies
-        run: bash tools/one-time-linux-repl-probe.sh
+        with:
+          path: harness
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ inputs.source_sha }}
+          path: candidate
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install PTY test tool on Linux
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y expect clang make
+      - name: Install PTY test tool on macOS
+        if: runner.os == 'macOS'
+        run: command -v expect || brew install expect
+      - name: Verify five installed candidate packages
+        working-directory: candidate
+        env:
+          CANDIDATE_IDENTITY: ${{ inputs.identity }}
+          CANDIDATE_SOURCE: ${{ inputs.source_sha }}
+          CANDIDATE_TARGET: ${{ matrix.target }}
+        run: python3 ../harness/tools/one-time-package-checks.py --identity "$CANDIDATE_IDENTITY" --source-sha "$CANDIDATE_SOURCE" --target "$CANDIDATE_TARGET"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: linux-repl-investigation
+          name: installed-packages-${{ matrix.target }}
           path: |
-            /tmp/x2c-linux-repl.*/repl.log
-            /tmp/x2c-linux-repl.*/link-trace.log
-            debug/repl-probe-bootstrap.log
+            /tmp/x2c-twenty-*/*.json
+            /tmp/x2c-twenty-*/*.stdout
+            /tmp/x2c-twenty-*/*.stderr
+            /tmp/x2c-twenty-*/*legal*.txt
