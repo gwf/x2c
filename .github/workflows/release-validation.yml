@@ -2,16 +2,36 @@ name: release-validation
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        type: choice
+        default: packages
+        options: [packages, linux-repl]
       identity:
-        required: true
+        required: false
         type: string
       source_sha:
-        required: true
+        required: false
         type: string
 permissions:
   contents: read
 jobs:
+  linux-repl-investigation:
+    if: inputs.mode == 'linux-repl'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+      - name: Probe GNU linker dependencies
+        run: bash tools/one-time-linux-repl-probe.sh
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: linux-repl-investigation
+          path: |
+            /tmp/x2c-linux-repl.*/repl.log
+            /tmp/x2c-linux-repl.*/link-trace.log
+            debug/repl-probe-bootstrap.log
   installed-packages:
+    if: inputs.mode == 'packages'
     strategy:
       fail-fast: false
       matrix:
