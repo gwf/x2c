@@ -40,7 +40,7 @@ jobs:
           path: |
             /tmp/x2c-linux-repl.*/repl.log
             /tmp/x2c-linux-repl.*/link-trace.log
-            candidate/debug/repl-*.log
+            candidate/debug/**
   installed-packages:
     if: inputs.mode == 'packages'
     strategy:
