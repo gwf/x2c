@@ -5,7 +5,7 @@ make build-safe >debug/repl-bootstrap.log 2>&1
 make commands >debug/repl-commands.log 2>&1
 printf 'int reads=0;\nint next(void) { reads++; return 13; }\n:info next()\n:quit\n' >/tmp/repl-info-input
 command -v gdb || { sudo apt-get update && sudo apt-get install -y gdb; }
-timeout 120 gdb -q -batch -ex 'set pagination off' -ex 'set follow-fork-mode child' -ex 'set detach-on-fork on' -ex 'handle SIGCHLD nostop noprint' -ex 'run < /tmp/repl-info-input' -ex 'bt full' --args builds/0/libexec/x2c-repl --plain >debug/repl-info-gdb.log 2>&1 || true
+timeout 120 gdb -q -batch -ex 'set pagination off' -ex 'set follow-fork-mode child' -ex 'set detach-on-fork on' -ex 'handle SIGCHLD nostop noprint' -ex 'break _worker_serve' -ex 'run < /tmp/repl-info-input' -ex 'set follow-fork-mode parent' -ex 'continue' -ex 'bt full' --args builds/0/libexec/x2c-repl --plain >debug/repl-info-gdb.log 2>&1 || true
 cat debug/repl-info-gdb.log
 # Keep generated units for inspection on this disposable runner.
 sed -i '/^trap /d' commands/repl/tests/program.sh
