@@ -156,6 +156,7 @@ small install-and-run jobs after staging and four after production.
 
 Run `python3 tools/test-release-candidate.py` for offline candidate integrity,
 conflicting upload, receipt retry, and restoration-proof cases. Run
+`python3 tools/test-release-main.py` for the main and tag command. Run
 `npm --prefix site test` for destination rendering. The installer check
 (`tools/check-install-script.sh`) covers same-version candidate selection as
 well as production defaults. Run `actionlint` against the source workflows.

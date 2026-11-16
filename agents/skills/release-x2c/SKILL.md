@@ -36,9 +36,10 @@ substitute fresh archives into a previously verified identity.
 
 ## Promote and verify
 
-Hand Gary the main fast-forward and annotated-tag commands pinned to the
-verified candidate SHA. Check ancestry and current main first; stop on a
-conflicting published version or tag. A tag triggers no rebuild.
+Hand Gary the `tools/release-main` command for the verified candidate SHA and
+version, with the absolute path of his checkout. Run it with `--dry-run`
+first; stop on a conflicting published version or tag. A tag triggers no
+rebuild.
 
 With explicit release authorization, dispatch `promote.yml` for that candidate
 and the observed previous production version. Follow asset upload, complete

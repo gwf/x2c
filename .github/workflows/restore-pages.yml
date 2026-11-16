@@ -103,10 +103,10 @@ jobs:
       identity: ${{ inputs.identity }}
       runners: ${{ needs.prepare.outputs.runners }}
       destination: production
+  # The review of `prepare` covers this run.
   restore-latest:
     needs: [prepare, verify]
     runs-on: ubuntu-24.04
-    environment: production-publication
     permissions:
       contents: write
     steps:

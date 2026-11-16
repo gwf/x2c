@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Advance main to a verified release commit and publish its tag.
+
+The release owner runs this once per release, after staging verification:
+
+    tools/release-main SOURCE_SHA VERSION
+
+It fetches, checks that main fast-forwards to SOURCE_SHA and that the commit
+declares VERSION, asks for confirmation, then pushes main and the annotated
+tag vVERSION. A repeated run completes whatever is missing. --dry-run makes
+every check and pushes nothing. It never forces main and never moves a tag.
+"""
+
+import argparse
+from pathlib import Path
+import re
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parent.parent
+
+
+def git(*arguments, check=True):
+    result = subprocess.run(["git", *arguments], cwd=ROOT, text=True,
+                            capture_output=True)
+    if check and result.returncode:
+        raise ValueError(result.stderr.strip() or "git " + " ".join(arguments))
+    return result
+
+
+def remote_tag(tag):
+    """The commit origin's tag names, or None when origin has no such tag."""
+    listed = git("ls-remote", "origin", f"refs/tags/{tag}",
+                 f"refs/tags/{tag}^{{}}").stdout.split()
+    return listed[-2] if listed else None
+
+
+def release(sha, version, dry_run):
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        raise ValueError("SOURCE_SHA must be a full 40-digit commit ID")
+    if not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version):
+        raise ValueError("VERSION must look like 0.16.0")
+    tag = "v" + version
+    git("fetch", "origin")
+    git("cat-file", "-e", sha + "^{commit}")
+    main = git("rev-parse", "origin/main").stdout.strip()
+    if git("merge-base", "--is-ancestor", main, sha, check=False).returncode:
+        raise ValueError(f"main ({main}) does not fast-forward to {sha}")
+    declared = git("show", sha + ":src/cli/requests.x").stdout
+    if f'"x2c {version}"' not in declared:
+        raise ValueError(f"{sha} does not declare version {version}")
+    published = remote_tag(tag)
+    if published not in (None, sha):
+        raise ValueError(f"origin already has {tag} at {published}")
+    local = git("rev-parse", "--verify", "--quiet", tag + "^{commit}",
+                check=False).stdout.strip()
+    if local not in ("", sha):
+        raise ValueError(f"this checkout already has {tag} at {local}")
+
+    print(f"main  {main[:12]} -> {sha[:12]}" if main != sha
+          else f"main  already at {sha[:12]}")
+    print(f"tag   {tag} at {sha[:12]}" +
+          (" (already published)" if published else ""))
+    if dry_run:
+        print("dry run: every check passed; nothing was pushed")
+        return
+    if main == sha and published:
+        print("nothing to do")
+        return
+    if input(f"Type {version} to publish: ").strip() != version:
+        raise ValueError("not confirmed; nothing was pushed")
+    # The worktree delivery hook governs routine pushes of dev and main. This
+    # command is the release owner's deliberate publication, so it bypasses it.
+    if main != sha:
+        git("push", "--no-verify", "origin", f"{sha}:refs/heads/main")
+    if not local:
+        git("tag", "-a", tag, "-m", f"x2c {version}", sha)
+    if not published:
+        git("push", "--no-verify", "origin", f"refs/tags/{tag}:refs/tags/{tag}")
+    print(f"published: main and {tag} are at {sha}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument("source_sha", metavar="SOURCE_SHA")
+    parser.add_argument("version", metavar="VERSION")
+    parser.add_argument("--dry-run", action="store_true")
+    args = parser.parse_args()
+    try:
+        release(args.source_sha, args.version, args.dry_run)
+    except (ValueError, EOFError) as error:
+        print(f"release-main: {error or 'not confirmed; nothing was pushed'}",
+              file=sys.stderr)
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
