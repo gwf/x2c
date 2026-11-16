@@ -96,16 +96,23 @@ already writes ES 3.0 shaders when it sees an ES context. Without the
 patch CUI falls back to its software renderer, which on a high-density
 display draws into one quarter of the canvas.
 
-A program links with `-sJSPI`, so that waiting for input returns control
-to the browser, and with `-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2
--sGL_ENABLE_GET_PROC_ADDRESS=1`. It needs a browser with 64-bit
+A program links with `-sJSPI -sASYNCIFY_IGNORE_INDIRECT=1`, so that waiting
+for input returns control to the browser without marking synchronous
+`invoke_*` exception wrappers as suspending. Nested wrappers otherwise
+raise `SuspendError: trying to suspend JS frames` in Emscripten 6.0.13,
+including the gallery's table sort. Gallery and stress callbacks are
+synchronous; their frame loops call the asynchronous waits outside those
+callbacks. Explicit async imports retain their JSPI marking.
+The programs also link with `-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2
+-sGL_ENABLE_GET_PROC_ADDRESS=1`. They need a browser with 64-bit
 WebAssembly memory, JavaScript Promise Integration, and WebGL 2.
 
 CUI 1.4.0 was built on 2026-11-16 with Emscripten 6.0.13 and tested
 under Node 26.12.1: `make web web-check` builds the gallery and stress
-programs and draws all 27 gallery pages off screen. Interactive browser
-rendering was not retested for this upgrade. The previous CUI 1.3.1
-profile was tested in Chromium, but not Safari or Firefox.
+programs and draws all 27 gallery pages off screen with the same JSPI
+settings as the browser build. Chromium checks covered opening Data display,
+sorting by name, role, and status, selecting a row, and both animated stress
+loads. Safari and Firefox were not tested.
 
 ## Bundled third-party content
 
