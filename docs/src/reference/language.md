@@ -1514,10 +1514,10 @@ parenthesized expression body written as `=> (expression)` without a
 semicolon.
 
 ```x2c
-macro Stmt $legacy.guard(Expr $condition) => {
+macro Stmt $sample.guard(Expr $condition) => {
   if (!$condition) return 0;
 }
-macro Expression $legacy.twice(Expr $value) => ($value * 2)
+macro Expression $sample.twice(Expr $value) => ($value * 2)
 ```
 
 Ordinary global invocation is `$qualified.name(arguments)`. A local macro is
@@ -2860,9 +2860,8 @@ int main(void) {
 
 Compile-time code is written in x2c, and the compiler does not evaluate Lisp.
 In code, `$(...)` is an [evaluated List](#evaluated-lists-and-maps), which is
-an expression, so a Lisp form such as `$(import "file.xlisp")` at file
-scope reports `an evaluated collection is an expression, not a top-level
-form`. Ordinary `.x` modules
+an expression, so one written at file scope reports `an evaluated collection
+is an expression, not a top-level form`. Ordinary `.x` modules
 containing macros and `meta` functions use `#include`, and `.xlisp` files are
 runtime assets that a [Lisp session](#runtime-lisp) loads.
 
@@ -3450,8 +3449,8 @@ invocation error.
 Region `auto` needs no per-source import and retains normal runtime
 declaration requirements. It uses native syntax and adds ordinary blocks and
 defers and no hidden loops. These forms use the region operations and cleanup
-boundaries. `$scope()` and `$scope(pointer)` remain compatibility spellings,
-and the `$scope` decorator retains its macro collision policy. Variable
+boundaries. `$scope()` and `$scope(pointer)` are the decorator spellings of these forms,
+and the `$scope` decorator follows the ordinary macro collision rules. Variable
 declaration `auto` and initializer `auto` keep their distinct meanings below.
 
 ### Managed declarations and initializers
@@ -5376,7 +5375,7 @@ an exhausted-budget error inside the evaluation does not reset it.
 `$lisp.install(lisp, group)` bind direct x2c functions into a session.
 `lisp.bind("name", function)` is the method form of the single-function
 binding. It also accepts an existing `Func` without creating another handle.
-The `$lisp.bind` spelling remains available without an include. The macros
+The `$lisp.bind` spelling needs no include. The macros
 live in `lib/lisp-bindings.x`. A bound function stays an ordinary x2c
 function, callable natively and from Lisp. Binding a direct function creates
 a fresh `Func` handle, which the session releases in `Lisp.destroy()`.

@@ -20,7 +20,7 @@ runtime prelude, which every unit loads; see
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
-`$lock`. Initializer `auto` follows `=`; its compatibility spelling
+`$lock`. Initializer `auto` follows `=`; its macro spelling
 is `$auto(value)`. For authoring your own macros, continue with
 [Compile-time Macros](macros.md).
 
@@ -263,7 +263,7 @@ function. Empty `auto()` is not accepted. A variable declaration such as
 `auto Array values = [];` still manages that variable; initializer `auto`
 still manages the acquired value.
 
-The compatibility decorator `$scope()` opens a region, and
+The `$scope()` decorator opens a region, and
 `$scope(destination)` selects a destination with the same semantics.
 
 Without an argument, `auto` opens one region around the following
@@ -525,7 +525,7 @@ initializer `auto`. Static or threaded storage, fields, assignment, returns,
 call arguments, for-header declarations, and wrappers nested inside arithmetic
 or conditionals do not supply this enclosing-block lifetime.
 
-The compatibility macro `$auto(value)` has the same acquired-value cleanup.
+The `$auto(value)` macro has the same acquired-value cleanup.
 Parentheses and forwarding macros can preserve its complete-initializer
 position; nested `$auto` calls are rejected. Initializer `auto` itself must
 follow `=`. Declaration `auto`, written before the type or name, instead

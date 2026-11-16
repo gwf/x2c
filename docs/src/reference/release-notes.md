@@ -38,6 +38,12 @@ conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
   error; pass its `.str()` or `.repr()`, or pass a `Var`.
 - `x2c repl` is not installed by releases; build it in a checkout with
   `make commands`.
+- `make install` with no `PREFIX` installs into `$HOME/.local/x2c`. In
+  0.15.1 it ran `make build-install`, which installs into the checkout;
+  run that target for the old result.
+- An installation made by the 0.15.1 installer has no recorded release
+  source. Run the installer once with `--replace-origin` before using
+  `x2c update` on it.
 
 ### Language
 
@@ -223,6 +229,12 @@ conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
   [Language server](cli.md#language-server).
 - `x2c test` finds and runs a project's test programs, which use `test.x`.
   Normal installations include it. See [Testing](../guide/testing.md).
+- `x2c update` checks for and installs compiler releases in the
+  installation that the invoked compiler belongs to. `x2c update --check`
+  reports without changing files. An ordinary update never downgrades, and
+  `--version <n>` selects a release. On an installation made by
+  `make install`, it shows the Make command to run. Normal installations
+  include it. See [Compiler updates](cli.md#compiler-updates).
 - `x2c repl` is now a native library playground. `:load` builds a program
   from C or x2c sources, headers, and native libraries with the ordinary
   compiler. Each submission compiles natively and runs in a supervised

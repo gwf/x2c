@@ -89,7 +89,7 @@ without being installed globally. Function conversion supplies fixed native
 signatures; the small `$rest` macro states the shared convention for native
 functions that take every argument as a List. These are compile-time x2c
 facilities, not another runtime evaluator. The `lisp_*` strings are
-compatibility names; their implementations belong to this file or ordinary
+registry names; their implementations belong to this file or ordinary
 runtime modules.
 
 The static `_stdlib` List supplies the remaining macros and higher-order
@@ -103,7 +103,7 @@ The source uses ordinary runtime collection and pattern operations, including
 implementation; this example reimplements only Lisp evaluation and uses
 x2c's collection and pattern operations unchanged.
 
-## Compatibility
+## Agreement with x2c Lisp
 
 The reference follows x2c Lisp, including behavior that differs from Scheme:
 
