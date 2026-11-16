@@ -9,13 +9,17 @@ export function releaseDestination(env = process.env) {
   if (sourceRef !== "main" && !/^[a-f0-9]{40}$/.test(sourceRef)) {
     throw new Error("SITE_SOURCE_REF must be a full source SHA");
   }
-  const stagedSource = env.SITE_STAGED_SOURCE_REF || sourceRef;
-  if (staging && (sourceRef === "main" ||
-      !/^[a-f0-9]{40}$/.test(stagedSource) ||
-      !new RegExp(`^candidate-${stagedSource}-[0-9]+-[0-9]+$`).test(candidate))) {
+  // A website-only update builds website source newer than the release whose
+  // installer and packages it keeps; releaseRef names that release's source.
+  const releaseRef = env.SITE_STAGED_SOURCE_REF || sourceRef;
+  if (releaseRef !== "main" && !/^[a-f0-9]{40}$/.test(releaseRef)) {
+    throw new Error("SITE_STAGED_SOURCE_REF must be a full source SHA");
+  }
+  if (staging && (sourceRef === "main" || releaseRef === "main" ||
+      !new RegExp(`^candidate-${releaseRef}-[0-9]+-[0-9]+$`).test(candidate))) {
     throw new Error("staging requires a source SHA and SITE_CANDIDATE_ID");
   }
-  return { sourceRef, staging, candidate };
+  return { sourceRef, releaseRef, staging, candidate };
 }
 
 export const destination = releaseDestination();

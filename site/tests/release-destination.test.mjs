@@ -71,6 +71,14 @@ test("website-only staging separates website source from retained release", () =
   assert.ok(html.includes(`/blob/${website}/example.x`));
   assert.ok(html.includes(`name="x2c-site-source" content="${website}"`));
   assert.ok(html.includes(`name="x2c-candidate" content="${candidate}"`));
+  assert.equal(config.releaseRef, sha);
+  const production = releaseDestination({ SITE_SOURCE_REF: website,
+    SITE_STAGED_SOURCE_REF: sha });
+  assert.deepEqual([production.sourceRef, production.releaseRef,
+    production.staging], [website, sha, false]);
+  assert.equal(releaseDestination({ SITE_SOURCE_REF: sha }).releaseRef, sha);
+  assert.throws(() => releaseDestination({ SITE_SOURCE_REF: website,
+    SITE_STAGED_SOURCE_REF: "feature" }));
   assert.throws(() => releaseDestination({ SITE_SOURCE_REF: website,
     SITE_STAGED_SOURCE_REF: "main", SITE_RELEASE_CHANNEL: "staging",
     SITE_CANDIDATE_ID: candidate }));
