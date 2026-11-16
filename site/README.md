@@ -60,6 +60,28 @@ files. A line with both code and a comment counts as code. The detailed
 `tools/repo-metrics.py --json` inventory instead reports physical lines,
 including comments and blanks, from tracked files.
 
+## Unlisted interface demos
+
+`/secret/` links to the standalone `/secret/gallery/` and `/secret/stress/`
+demos. These stable routes have `noindex` metadata and no public navigation
+links. `site-config.mjs` excludes the entire subtree from the sitemap.
+They are not book content and therefore do not enter the book search index.
+Anyone with a URL can open or share it; there is no authentication.
+
+The normal `npm run build` builds x2c's WebAssembly runtime and the x2cui
+web targets, then installs their HTML, JavaScript, and WebAssembly beneath
+`dist/secret/` before the book and deployment metadata are finalized.
+Emscripten 6.0.13, a native compiler, and Python 3 are required; Linux also
+needs X11 development headers for the package's native build step.
+Missing tools or failed demo builds fail the site build rather than omit
+the demos. Pages, candidate, and website-only staging workflows provide
+these tools; the resulting demos travel with the complete site artifact.
+
+For local verification, build and serve `dist` (or use `npm run preview`).
+The demos require Memory64, JavaScript Promise Integration, and WebGL 2.
+The stress test suspends while its tab is hidden, retaining its state.
+Its FPS remains subject to browser/display pacing and CUI's frame limit.
+
 ## Optional measurement
 
 Analytics is off unless both `SITE_ANALYTICS=production` and

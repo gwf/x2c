@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
 <title>CUI Gallery in x2c</title>
 <style>
   html, body { margin: 0; height: 100%; background: #fff; overflow: hidden; }
@@ -12,11 +13,13 @@
 </style>
 </head>
 <body>
-<canvas id="canvas" tabindex="0"></canvas>
-<div id="notice"></div>
+<canvas id="canvas" tabindex="0" aria-label="Interactive x2c demo"></canvas>
+<div id="notice" role="status">Loading demo...</div>
+<noscript>This demo needs JavaScript and WebAssembly.</noscript>
 <script type="module">
   const canvas = document.getElementById("canvas");
   const notice = document.getElementById("notice");
+  notice.style.display = "block";
   function stop(text) {
     notice.textContent = text;
     notice.style.display = "block";
@@ -39,11 +42,13 @@
     stop("This browser does not support JavaScript Promise Integration.");
   } else {
     // index.html?stress opens the stress test in place of the gallery.
-    const program = location.search === "?stress" ? "stress" : "gallery";
-    const { default: start } = await import(`./${program}.js`);
-    canvas.focus();
-    canvas.addEventListener("pointerdown", () => canvas.focus());
+    const program = document.body.dataset.program ||
+      (location.search === "?stress" ? "stress" : "gallery");
     try {
+      const { default: start } = await import(`./${program}.js`);
+      notice.style.display = "none";
+      canvas.focus();
+      canvas.addEventListener("pointerdown", () => canvas.focus());
       await start({ canvas, print: (line) => console.log(line),
                     printErr: (line) => console.error(line) });
     } catch (error) {

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "node scripts/playground-programs.mjs compile && astro build && node scripts/playground-programs.mjs install && node scripts/build-book.mjs && node scripts/build-cheatsheet.mjs",
+    "build": "node scripts/cui-demos.mjs compile && node scripts/playground-programs.mjs compile && astro build && node scripts/playground-programs.mjs install && node scripts/cui-demos.mjs install && node scripts/build-book.mjs && node scripts/build-cheatsheet.mjs",
     "preview": "astro preview",
     "test": "node --test tests/*.test.mjs",
     "pdf:cheatsheet": "node scripts/build-cheatsheet.mjs"

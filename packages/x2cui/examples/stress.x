@@ -19,6 +19,7 @@
 import "x2cui" with App, Offscreen, Ui, Vec2s;
 
 #include "time.x"
+#include "stress-platform.h"
 
 #include <math.h>
 
@@ -227,9 +228,11 @@ static int run_window(bool no_vsync) {
                           continuous: true, no_vsync: no_vsync);
   Stress stress = stress_new(SHAPES, 2000);
   double last = seconds(), spent = 0;
-  while (app.frame()) {
+  for (;;) {
+    int resumed = stress_wait_visible();
+    if (!app.frame()) break;
     double now = seconds();
-    record(stress, now - last, spent, app.ui());
+    if (!resumed) record(stress, now - last, spent, app.ui());
     last = now;
     draw(app.ui(), stress);
     spent = seconds() - now;

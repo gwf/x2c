@@ -173,7 +173,7 @@ jobs:
       - name: Install site build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y cloc clang
+          sudo apt-get install -y cloc clang libx11-dev
           npm ci --prefix source/site
           (cd source/site && npx playwright install --with-deps chromium)
       # The site build precompiles the playground examples to WebAssembly.
@@ -181,10 +181,9 @@ jobs:
       - uses: emscripten-core/setup-emsdk@v15
         with:
           version: 6.0.13
-      - name: Build the compiler and wasm runtime for playground programs
+      - name: Build the compiler for website programs
         run: |
           make -C source build-safe
-          make -C source wasm-runtime
       - name: Build both destination sites at selected source
         env:
           SOURCE_SHA: ${{ needs.select.outputs.source_sha }}

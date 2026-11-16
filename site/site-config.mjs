@@ -46,5 +46,6 @@ export function htmlFileRoute(relativeFile) {
 export function isIndexedHtmlFile(relativeFile) {
   const portableFile = relativeFile.replaceAll("\\", "/");
   return portableFile.endsWith(".html") &&
+    !portableFile.startsWith("secret/") &&
     !unindexedHtmlFiles.has(portableFile);
 }
