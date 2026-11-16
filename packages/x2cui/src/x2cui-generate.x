@@ -259,6 +259,7 @@ meta static List _parameter_names = %(
   ("cui_draw_emoji" "utf8" "len" "r") ("cui_emoji" "utf8" "size")
   ("cui_emoji_picker_ex" "id" "opts") ("cui_hex_view_goto" "id" "offset")
   ("cui_flame_span_rect" "flame" "span")
+  ("cui_step_slider_ex" "label" "value" "min" "max" "opts")
   ("cui_schedule_picker_ex" "id" "cron" "cap" "opts")
   ("cui_cron_describe" "cron")
   ("cui_regex_tester_ex" "id" "pattern" "pattern_cap" "text" "text_cap" "opts")

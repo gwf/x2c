@@ -239,6 +239,17 @@ cui_series cui_series.of(String name, ArrayFloat values) =>
   (cui_series){ .name = name, .values = (const float *) values.bytes,
                 .count = (int) values.len() };
 
+/** Reduces voice levels to `columns` peak samples in a new owned array.
+    Nonpositive column counts return an empty array, as CUI does. */
+ArrayFloat voice_resample(ArrayFloat levels, int columns) {
+  ArrayFloat result = ArrayFloat.new();
+  if (columns <= 0) return result;
+  result.reserve(columns);
+  result.length = cui_voice_resample((const float *) levels.bytes,
+    (int) levels.len(), (float *) result.bytes, columns);
+  return result;
+}
+
 /** Draws text formatted from `format` and `values` by `String.format`.
     CUI's `cui_textf` takes C variadic arguments; this takes x2c values.
 */
@@ -776,7 +787,7 @@ expand %(
   cui_dialog_footer_end cui_sheet_begin cui_sheet_end
   cui_toast_action_clicked cui_toast_ex cui_toast_dismiss cui_alert_ex
   cui_progress_ex cui_spinner_ex cui_skeleton cui_badge_ex cui_avatar_ex
-  cui_readout_ex cui_dot_display_ex
+  cui_readout_ex cui_dot_display_ex cui_step_slider_ex
   cui_avatar_group cui_empty_state_ex cui_metric_ex cui_meter
   cui_accordion_begin cui_accordion_end cui_tree_end cui_tree_clicked
   cui_list_item_ex cui_virtual_list_begin cui_virtual_list_end
@@ -1200,12 +1211,6 @@ inline int Ui.gradient_slider(
   cui_gradient_slider_opts opts) =>
   cui_gradient_slider_ex(u, label, &value, min, max, &opts);
 
-/** Calls `cui_step_slider_ex`. */
-inline int Ui.step_slider(
-  Ui u, String label, int *value, int min, int max,
-  cui_step_slider_opts opts) =>
-  cui_step_slider_ex(u, label, value, min, max, &opts);
-
 /** Calls `cui_palette_strip_ex`. */
 inline int Ui.palette_strip(
   Ui u, String label, cui_color *colors, bool *locked, int count,
@@ -1451,15 +1456,15 @@ expand %(
   toolbar_group_begin toolbar_group_end toolbar_radio toolbar_primary
   toolbar_cycle flyout_mark (doc_tabs 1) (prop_vec 1) (hex_view 1)
   (flame_graph 1) curve_editor gradient_editor status_tag ratio_slider
-  gradient_slider (step_slider 1) (palette_strip 2) aspect_picker
-  option_action seed_field (timeline_editor 1) kv_editor (problems 1)
-  (pipeline 2) (query_builder 1) (keymap 1) (commit_graph 1)
-  (graph_view 1 3) (waterfall 1) (trace_view 1 3) trace_span_rect
-  (test_explorer 1) (stack_trace 1) (uptime 1) (time_histogram 4)
-  (coverage 1) (blame 4) (feature_flags 1) (api_explorer 1) (dot_chart 1)
-  format_bar (live_cursors 1) (presence_pill 1) selection_ring
-  canvas_controls result_card (selection_bar 2) (draw_polyline 0)
-  (draw_polygon 0) wheel_region wheel_take)
+  gradient_slider (palette_strip 2) aspect_picker option_action seed_field
+  (timeline_editor 1) kv_editor (problems 1) (pipeline 2)
+  (query_builder 1) (keymap 1) (commit_graph 1) (graph_view 1 3)
+  (waterfall 1) (trace_view 1 3) trace_span_rect (test_explorer 1)
+  (stack_trace 1) (uptime 1) (time_histogram 4) (coverage 1) (blame 4)
+  (feature_flags 1) (api_explorer 1) (dot_chart 1) format_bar
+  (live_cursors 1) (presence_pill 1) selection_ring canvas_controls
+  result_card (selection_bar 2) (draw_polyline 0) (draw_polygon 0)
+  wheel_region wheel_take)
 macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)
 }
