@@ -5,6 +5,12 @@ first.
 
 ## 0.4.1 - 2026-10-31
 
+- Without an explicit compiler path, search `PATH`, then
+  `~/.local/x2c/bin/x2c`. A workspace `./x2c` is no longer selected
+  automatically. The **x2c** Output channel reports the selected path and
+  why it was selected.
+- After a startup failure, retry when the window reloads or the x2c
+  settings change.
 - Remove LSP semantic tokens; TextMate grammar owns syntax coloring.
 - Highlight C declaration keywords and `using` in braced macro headers.
 - Highlight named and unnamed `List @` and `Map @` rest parameters,
