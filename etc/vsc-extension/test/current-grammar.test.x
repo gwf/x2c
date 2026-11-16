@@ -273,12 +273,12 @@ unalias += 1;
 //     ^ punctuation.section.parens.begin.destructuring.x2c
 foreach (Var (key, value), map) {
 // <------ keyword.control.foreach.x2c
-//      ^^^ support.type.prelude.x2c
-//          ^ punctuation.section.parens.begin.destructuring.x2c
-//           ^^^ variable.other.readwrite.destructuring.x2c
-//              ^ punctuation.separator.destructuring.x2c
-//                ^^^^^ variable.other.readwrite.destructuring.x2c
-//                     ^ punctuation.section.parens.end.destructuring.x2c
+//       ^^^ support.type.prelude.x2c
+//           ^ punctuation.section.parens.begin.destructuring.x2c
+//            ^^^ variable.other.readwrite.destructuring.x2c
+//               ^ punctuation.separator.destructuring.x2c
+//                 ^^^^^ variable.other.readwrite.destructuring.x2c
+//                      ^ punctuation.section.parens.end.destructuring.x2c
 }
   int (*callback)(int) = handler;
 //     ^ - punctuation.section.parens.begin.destructuring.x2c
