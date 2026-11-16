@@ -66,6 +66,7 @@ contains generated C for the bootstrap.
 ```sh
 git clone https://github.com/gwf/x2c.git
 cd x2c
+git checkout main
 make build-safe
 make commands
 ./x2c run -q examples/foreach.x
