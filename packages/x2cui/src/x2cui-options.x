@@ -512,7 +512,8 @@ meta static int _icons_field(String name) =>
 
 meta static List _icon_parameters = %(
   ("icon" 0) ("icon_button" 0) ("tree_cell" 4) ("tree_table_name" 1)
-  ("dock_item" 0) ("toolbar_button" 0) ("draw_icon" 0));
+  ("dock_item" 0) ("toolbar_button" 0) ("toolbar_primary" 0)
+  ("option_action" 3) ("draw_icon" 0));
 /* gen-arrays: end generated icons */
 
 meta static int _icon_parameter(String method, int position) {

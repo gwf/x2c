@@ -119,7 +119,7 @@ meta static List _parameter_names = %(
   ("cui_sheet_begin" "title" "open" "opts") ("cui_sheet_end")
   ("cui_toast_ex" "title" "opts") ("cui_toast_action_clicked" "handle")
   ("cui_toast_dismiss" "handle") ("cui_alert_ex" "title" "opts")
-  ("cui_progress_ex" "value" "opts") ("cui_spinner" "size")
+  ("cui_progress_ex" "value" "opts") ("cui_spinner_ex" "size" "opts")
   ("cui_skeleton" "width" "height") ("cui_badge_ex" "text" "opts")
   ("cui_avatar_ex" "name" "opts")
   ("cui_avatar_group" "names" "count" "max_visible" "size")
@@ -412,6 +412,7 @@ macro Unit $x2cui.method(Name $target) { @x2cui_method($target) }
 meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
   "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
   "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
+  "skeleton_group" "veil" "toolbar_group"
   "menu_bar" "toolbar" "status_bar" "virtual_list" "node" "tree_table");
 meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
   "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
