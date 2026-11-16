@@ -153,6 +153,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* mdBook makes .content scroll vertically. Its fractional height leaves one
+   pixel of travel, which acts as a second scroll area inside the page. */
+.content {
+  overflow-y: hidden;
+}
+
 .content main {
   line-height: 1.6;
   font-size: 17px;
