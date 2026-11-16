@@ -1188,6 +1188,26 @@ if hasattr(lock,'close'): lock.close()
         self.cli('land',batch,'--publish')
         self.assertEqual(len(self.state()['gates']),1)
 
+    def test_wait_expiry_survives_a_process_that_exits_before_the_kill(self):
+        import importlib.util
+        spec=importlib.util.spec_from_file_location(
+            'integrate_dev',TOOL_ROOT/'tools'/'integrate-dev.py')
+        tool=importlib.util.module_from_spec(spec)
+        sys.path.insert(0,str(TOOL_ROOT/'tools'))
+        try: spec.loader.exec_module(tool)
+        finally: sys.path.pop(0)
+        kill=os.killpg
+        def late_kill(group,number):
+            time.sleep(0.5)
+            kill(group,number)
+        tool.os.killpg=late_kill
+        try:
+            with self.assertRaises(tool.WaitExpired):
+                tool.command(['sleep','0.2'],self.root,
+                             deadline=time.monotonic()+0.05)
+        finally:
+            tool.os.killpg=kill
+
     def test_wait_budget_bounds_git_and_gh_io(self):
         self.pr(1)
         for variable, value in [('PROBE_GIT_BLOCK','rev-parse'),
