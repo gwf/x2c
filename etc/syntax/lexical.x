@@ -70,7 +70,7 @@ List syntax_lexical(void) => %(lexical
     (rule octal-integer
       (seq (byte 48) (one-of-bytes "oO") (repeat 1 (ref octal-digit))
         (ref integer-suffix)))
-    (rule legacy-octal
+    (rule c-octal
       (seq (byte 48) (range 49 55) (repeat 0 (ref octal-digit))
         (ref integer-suffix)))
     (rule hex-integer
@@ -104,7 +104,7 @@ List syntax_lexical(void) => %(lexical
             (when (and
                 (prefix (seq (byte 48) (range 49 55)))
                 (not (after-decimal-digits (one-of-bytes ".eE"))))
-              (ref legacy-octal))
+              (ref c-octal))
             (otherwise (choice (ref decimal-float) (ref decimal-integer))))))
       (require (not-followed-by (ref identifier-rest)))
       (emit-by-form (integer lit-int) (float lit-float))
@@ -519,7 +519,7 @@ List syntax_lexical(void) => %(lexical
     (layout-status indent)
     (prefix-preconditions external-error)
     (numeric-signed-invalid-prefix may-return-zero)
-    (legacy-number-type-helper skip-minus-only))
+    (number-type-helper skip-minus-only))
   (sources
     (source "lib/scan.x")
     (source "lib/tokenizer.x")

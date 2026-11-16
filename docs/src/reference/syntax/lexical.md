@@ -115,7 +115,7 @@ The rules below differ from C in the cases listed.
 
 1. An explicit `0x`/`0X`, `0b`/`0B`, or `0o`/`0O` selects hexadecimal,
    binary, or octal.
-2. Otherwise, `0` immediately followed by `1` through `7` selects legacy
+2. Otherwise, `0` immediately followed by `1` through `7` selects C
    octal, unless the run of decimal digits is followed by `.`, `e`, or `E`.
    Those three continuations select decimal floating recognition.
 3. Every other numeric start selects decimal recognition.
@@ -130,7 +130,7 @@ binary-integer = ( "0b" | "0B" ) , binary-digit , { binary-digit } ,
                  integer-suffix ;
 octal-integer = ( "0o" | "0O" ) , octal-digit , { octal-digit } ,
                 integer-suffix ;
-legacy-octal = "0" , ? 1-7 ? , { octal-digit } , integer-suffix ;
+c-octal = "0" , ? 1-7 ? , { octal-digit } , integer-suffix ;
 hex-integer = ( "0x" | "0X" ) , hex-digit , { hex-digit } , integer-suffix ;
 integer-suffix = [ unsigned , [ long , [ long ] ]
                  | long , [ long ] , [ unsigned ] ] ;
