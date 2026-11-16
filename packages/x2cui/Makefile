@@ -7,7 +7,7 @@ CUI_INCLUDE := $(CUI_PREFIX)/include
 # --c-include-dir is a C-compiler flag. x2c's own collection needs -I to read
 # CUI's headers, which declare every type the package's methods take.
 PACKAGE_X_FLAGS += -I $(CUI_INCLUDE)
-PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir $(CUI_INCLUDE) \
+PACKAGE_C_FLAGS := --c-include-dir src --c-include-dir examples --c-include-dir $(CUI_INCLUDE) \
 	-I $(CUI_INCLUDE)
 # CUI's window layer is X11 on Linux, as dependency.json builds it, and
 # Cocoa over OpenGL on macOS.
@@ -114,19 +114,26 @@ $(WASM_RUNTIME):
 builds/web/gallery.rsp: WEB_UNITS := $(GALLERY_UNITS)
 builds/web/gallery.rsp: $(GALLERY_UNITS)
 
+builds/web/stress.rsp: examples/stress-platform.h
+builds/web/stress.js: builds/web/stress-platform.o
+builds/web/stress.js: WEB_NATIVE := builds/web/stress-platform.o
+
+builds/web/stress-platform.o: web/stress-platform.c | builds/web
+	$(WASM_CC) -Os -c $< -o $@
+
 builds/web/%.rsp: examples/%.x \
 		$(PACKAGE_CONSUMER_DEPS) $(WASM_MANIFEST) tools/wasm-cc \
 		| builds/web
 	$(WASM_DEPS) prepare $(WASM_MANIFEST)
 	$(X2C) build --kind static-library --cc $(WASM_CC) --ar emar -Os \
 	  --output builds/web/libx2cui.a --build-dir builds/web/package \
-	  --c-include-dir src --c-include-dir $(WASM_CUI)/include \
+	  --c-include-dir src --c-include-dir examples --c-include-dir $(WASM_CUI)/include \
 	  $(filter %.c,$(PACKAGE_GENERATED)) $(PACKAGE_NATIVE)
 	mkdir -p builds/web/$*/obj
 	$(X2C) build -c --cc $(WASM_CC) --meta-cc cc -Os \
 	  --build-dir builds/web/$* --x-include-dir src \
 	  --package-dir .. -I $(WASM_CUI)/include --x-include-dir examples \
-	  --c-include-dir src --c-include-dir $(WASM_CUI)/include \
+	  --c-include-dir src --c-include-dir examples --c-include-dir $(WASM_CUI)/include \
 	  $(if $(WEB_UNITS),,--output builds/web/$*/obj/$*.o) \
 	  $< $(WEB_UNITS)
 	{ find builds/web/$*/obj -name '*.o'; \
@@ -142,7 +149,7 @@ builds/web/%.rsp: examples/%.x \
 .PRECIOUS: builds/web/%.rsp
 
 builds/web/%.js: builds/web/%.rsp $(WASM_RUNTIME)
-	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) -sMODULARIZE=1 -sEXPORT_ES6=1 \
+	$(WASM_CC) -Os @$< $(WEB_NATIVE) -o $@ $(WASM_LINK) -sMODULARIZE=1 -sEXPORT_ES6=1 \
 	  -sENVIRONMENT=web -sJSPI -sMIN_WEBGL_VERSION=2 \
 	  -sMAX_WEBGL_VERSION=2 -sGL_ENABLE_GET_PROC_ADDRESS=1
 

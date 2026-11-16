@@ -40,7 +40,19 @@ jobs:
         run: npm ci --prefix site
 
       - name: Install repository statistics dependencies
-        run: sudo apt-get update && sudo apt-get install -y python3 cloc
+        run: sudo apt-get update && sudo apt-get install -y python3 cloc clang libx11-dev
+
+      - uses: ./.github/actions/select-clang
+
+      - uses: emscripten-core/setup-emsdk@v15
+        with:
+          version: 6.0.13
+
+      - name: Build compiler for website demos
+        run: make build-safe
+
+      - name: Install PDF renderer
+        run: cd site && npx playwright install --with-deps chromium
 
       - name: Build public site and book
         run: npm --prefix site run build

@@ -61,6 +61,7 @@ jobs:
       - uses: ./trusted/.github/actions/install-mdbook
       - name: Install website dependencies
         run: |
+          sudo apt-get update && sudo apt-get install -y libx11-dev
           command -v clang
           curl -fsSL --retry 3 \
             https://github.com/AlDanial/cloc/releases/download/v2.06/cloc-2.06.pl \
@@ -74,10 +75,9 @@ jobs:
       - uses: emscripten-core/setup-emsdk@v15
         with:
           version: 6.0.13
-      - name: Build compiler and WebAssembly runtime for website examples
+      - name: Build compiler for website examples
         run: |
           make -C source build-safe
-          make -C source wasm-runtime
       - name: Build complete runnable website
         run: npm --prefix source/site run build
       - name: Retain staged release and check site
