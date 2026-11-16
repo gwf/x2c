@@ -1,7 +1,7 @@
 # x2cui: CUI components from x2c
 
 This package provides an x2c interface to [CUI](https://github.com/yappologistic/CUI)
-1.3.1, an immediate-mode UI library that draws its own components. A program
+1.4.0, an immediate-mode UI library that draws its own components. A program
 describes the screen with calls on every frame. CUI lays it out, handles the
 mouse and keyboard, and draws it in a window or into pixels. `PROFILE.md`
 records the build. The book's
@@ -33,19 +33,20 @@ int main(void) {
 
 ## Status
 
-The package is experimental. Native builds run on macOS arm64. On Linux
-arm64 and x86_64 the package builds and passes its off-screen checks; the
-windowed path has not been tested there. The browser build
-needs Memory64, JavaScript Promise Integration, and WebGL 2; it was run
-in a Chromium-based browser and under Node. CUI has no accessibility tree, no inline
+The package is experimental. CUI 1.4.0 builds and passes off-screen checks
+on macOS arm64 and under Node with WebAssembly. Linux arm64 and x86_64
+checks and interactive Chromium testing were last run with CUI 1.3.1;
+the Linux windowed path has not been tested. The browser build needs
+Memory64, JavaScript Promise Integration, and WebGL 2.
+CUI has no accessibility tree, no inline
 input-method composition, and no bidirectional text. The package
 applies two patches to CUI, `table-row-state` and `focusable-canvas`
-(see `PROFILE.md`), and an upgrade of CUI must remake them. A program
+(see `PROFILE.md`), which must be checked on each upgrade. A program
 draws from one thread.
 
 CUI's records, enums, constants, and icons, such as `cui_box`,
 `CUI_BUTTON_PRIMARY`, `CUI_FILL`, and `CUI_ICON_PLUS`, arrive under their
-own names through the published `src/cui-1.3.h`, the raw API. The
+own names through the published `src/cui-1.4.h`, the raw API. The
 package's own types, such as `Ui`, `App`, `Offscreen`, `TextField`, and
 the collections below, are `x2cui__*` names and need `with` or the alias.
 
@@ -217,6 +218,12 @@ also gives the window's title bar the background color of the current
 theme, so the title bar follows `ui.set_theme` and fades with it. `app.ui()`
 is the window's borrowed `Ui`. `App` adopts `Cleanup`, so
 `App app = auto App.open(...)` closes the window when the scope ends.
+
+`App.open(app_id: "org.example.Notes", ...)` sets the Linux desktop
+identity in CUI 1.4. Name the app's `.desktop` file after that ID. CUI's
+raw window operations remain available; inside a `cui_app_run` callback,
+`cui_app_quit(NULL)` and `cui_app_set_title(NULL, "Notes")` address the
+running app.
 
 Draw each frame with an ordinary call:
 
@@ -438,6 +445,44 @@ A callback that CUI calls, such as a canvas paint function, is an ordinary
 function. Where its type names `cui_ctx *`, declare that parameter as
 `cui_ctx *` and assign it to a `Ui` to call methods.
 
+## Instruments
+
+CUI 1.4 adds `ui.dot_chart`, `ui.event_track`, `ui.readout`, and
+`ui.dot_display`. `examples/gallery/instruments.x` shows them together.
+
+```x2c
+ArrayFloat samples = [10, 20, 40, 30];
+DotSeries series = DotSeries.of([]);
+series.push(cui_dot_series.of(values: samples, name: "Load", accent: true));
+ui.dot_chart("load", series, samples.len(), height: 160,
+  annotations: [{kind: y, y: 35, label: "Limit"}]);
+ui.readout("PEAK", "40", unit: "REQ/S", detail: "Last hour");
+ui.dot_display("READY", accent: true);
+```
+
+Import `DotSeries` with the other x2cui names. Each series borrows its
+sample array; keep those arrays alive while drawing. The sample count is
+separate from the number of series. `ChartAnnotations` holds annotations
+that change; constant annotations can be option literals, as above.
+Line and bar charts accept the same `annotations` option. Annotation
+kinds are `x` for a vertical line, `y` for a threshold, and `point` for
+a labelled point.
+
+An event track edits an `ArrayDbl` in place. Its method supplies the live
+count and reserves room for additions, then updates the array's length:
+
+```x2c
+ArrayDbl times = [8, 11, 12.25];
+int selected = -1;
+cui_event_track_result change = ui.event_track("jobs", times, 6, 30,
+  step: 0.25, units: hours, selected: &selected);
+```
+
+The result reports `changed`, `added`, `removed`, `selected`, and
+`dragging`. Times stay sorted. Use `no_add` or `no_remove` to restrict
+editing. The `hours` axis unit also works as `x_units: hours` on a dot
+chart; 30 means 06:00 the next day.
+
 ## What has no x2c form
 
 Functions that fill caller buffers without a `cui_ctx`, such as
@@ -468,12 +513,11 @@ columns, sorted by the header clicked. `mail --shot IMAGE.png` and
 
 `examples/gallery.x` is the broader application (`make example`). It is
 a port of CUI's own gallery, `examples/gallery_ui.c` and
-`examples/gallery_more.c` in CUI's source: the same 26 pages, sections,
-and layout, with each page in a file under `examples/gallery/`. Read a
-page beside its C original to compare the two forms. `make run-gallery`
-opens it, and `gallery --shots DIR` draws every page off screen. Drawn
-that way, each page is the same image, byte for byte, as the same page of
-CUI's C gallery.
+`examples/gallery_more.c` in CUI's source, with each page in a file under
+`examples/gallery/`. The Instruments page adds dot charts, event tracks,
+readouts, and dot displays, bringing the gallery to 27 pages.
+`make run-gallery` opens it, and `gallery --shots DIR` draws every page
+off screen.
 
 `examples/stress.x` is an animation load with a displayed frame rate
 (`make run-stress`). It redraws on every frame and animates as many items
@@ -487,7 +531,7 @@ window waits for the display, so the rate stops at the display's rate;
 with the software renderer and prints the means.
 
 `examples/scenes.x` is a check, not an application. It has one small
-scene for each of CUI's 201 components, named for the component and
+scene for each of CUI's 205 components, named for the component and
 grouped into families under `examples/scenes/`. `scenes --shots DIR`
 draws every scene off screen to `DIR/NAME.png`, and `scenes --list` prints
 the names. `scenes --check HEADER` compares the names with the
@@ -508,15 +552,12 @@ make -C packages/x2cui web-serve  # then open http://127.0.0.1:4399/
 stress test in place of the gallery. It needs Emscripten. The program is 64-bit WebAssembly and
 draws with WebGL 2 through CUI's SDL2 window layer. The browser must
 support 64-bit WebAssembly memory and JavaScript Promise Integration;
-`web/index.html` says so where one is missing. `gallery.wasm` is 2.6 MB,
-1.0 MB compressed with gzip.
+`web/index.html` says so where one is missing.
 
-`make web-check` draws every gallery page off screen under Node. Of the
-26 images, 22 match the native build's to within one step of one color
-channel in fewer than 1,200 bytes of 23.8 million. The four others
-differ where the platform differs: two table rows with equal sort keys
-change places, the keymap shows Ctrl for Cmd, and the file pages list
-another directory.
+`make web-check` draws every gallery page off screen under Node. Images
+can differ from the native build where the platform differs: table rows
+with equal sort keys can change places, the keymap shows Ctrl for Cmd,
+and the file pages list another directory.
 
 `web-check` and `web` are not part of `make check`, which needs no
 Emscripten. `PROFILE.md` records the browser build.
@@ -528,7 +569,7 @@ browser runtime, and CUI's browser archive.
 
 ## Native API
 
-`src/cui-1.3.h` includes the real upstream headers and rejects a different
+`src/cui-1.4.h` includes the real upstream headers and rejects a different
 minor version. Importing the package is enough to reach them:
 `tests/test-raw-api.x` uses only `import "x2cui"` and then calls
 `cui_create`, `cui_textf`, `cui_button_ex`, and `cui_get_draw_data`

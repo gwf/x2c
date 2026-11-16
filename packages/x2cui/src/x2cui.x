@@ -29,11 +29,11 @@
 
     This unit is the `x2cui` package entry: `import "x2cui"` reaches every
     nonstatic name as `x2cui__*` and every method form. The vendored
-    `cui-1.3.h` stays public because these methods take CUI's own types,
+    `cui-1.4.h` stays public because these methods take CUI's own types,
     and it is the raw API for everything below.
  */
 
-#include "cui-1.3.h"
+#include "cui-1.4.h"
 #include "cleanup.x"
 #include "typed-array.x"
 
@@ -201,6 +201,18 @@ String TextField.take(TextField field) {
 }
 
 // component methods
+
+/** Edits event times in place, keeping them sorted and growing `times`
+    when an event is added. The result reports additions and removals. */
+cui_event_track_result Ui.event_track(
+  Ui ui, String id, ArrayDbl times, double min, double max,
+  cui_event_track_opts opts) {
+  int count = x2cui_spare(times);
+  cui_event_track_result result = cui_event_track_ex(
+    ui, id, (double *) times.bytes, &count, (int) times.cap, min, max, &opts);
+  times.length = count;
+  return result;
+}
 
 /** Returns a chart series named `name` over `values`. The series borrows
     the values, which a chart copies when it is drawn.
@@ -538,55 +550,60 @@ int x2cui_spare(Block records) {
 
 $x2cui.record(cui_vec2); $x2cui.record(cui_rect); $x2cui.record(cui_date);
 $x2cui.record(cui_tour_step); $x2cui.record(cui_table_column);
-$x2cui.record(cui_table_sort); $x2cui.record(cui_image_view);
-$x2cui.record(cui_command); $x2cui.record(cui_choice);
-$x2cui.record(cui_reaction); $x2cui.record(cui_speed_action);
-$x2cui.record(cui_swipe_action); $x2cui.record(cui_grid_column);
-$x2cui.record(cui_filter_field); $x2cui.record(cui_tree_node);
-$x2cui.record(cui_tree_table_events); $x2cui.record(cui_file_entry);
-$x2cui.record(cui_text_mark); $x2cui.record(cui_diff_row);
-$x2cui.record(cui_diff_hunk); $x2cui.record(cui_diff_stats);
-$x2cui.record(cui_diff_range); $x2cui.record(cui_presence_user);
-$x2cui.record(cui_ticker_item); $x2cui.record(cui_viz_item);
-$x2cui.record(cui_sankey_link); $x2cui.record(cui_scatter_series);
-$x2cui.record(cui_gauge_band); $x2cui.record(cui_candle);
-$x2cui.record(cui_tab_bar_item); $x2cui.record(cui_now_playing);
-$x2cui.record(cui_plan_step); $x2cui.record(cui_source);
-$x2cui.record(cui_prompt_suggestion); $x2cui.record(cui_model);
-$x2cui.record(cui_kanban_move); $x2cui.record(cui_cal_event);
-$x2cui.record(cui_month_event); $x2cui.record(cui_gantt_task);
-$x2cui.record(cui_toc_item); $x2cui.record(cui_check_step);
-$x2cui.record(cui_date_range); $x2cui.record(cui_key_combo);
-$x2cui.record(cui_node_view); $x2cui.record(cui_doc_tab);
-$x2cui.record(cui_log_line); $x2cui.record(cui_log_buffer);
-$x2cui.record(cui_terminal_line); $x2cui.record(cui_terminal_buffer);
-$x2cui.record(cui_hex_range); $x2cui.record(cui_hex_selection);
-$x2cui.record(cui_flame_span); $x2cui.record(cui_flame_view);
-$x2cui.record(cui_curve_key); $x2cui.record(cui_gradient_stop);
-$x2cui.record(cui_timeline_clip); $x2cui.record(cui_timeline_track);
-$x2cui.record(cui_timeline_view); $x2cui.record(cui_kv_pair);
-$x2cui.record(cui_diagnostic); $x2cui.record(cui_pipeline_job);
-$x2cui.record(cui_query_field); $x2cui.record(cui_query_node);
-$x2cui.record(cui_keymap_binding); $x2cui.record(cui_commit);
-$x2cui.record(cui_graph_node); $x2cui.record(cui_graph_edge);
-$x2cui.record(cui_net_request); $x2cui.record(cui_trace_track);
-$x2cui.record(cui_trace_span); $x2cui.record(cui_trace_marker);
-$x2cui.record(cui_trace_view); $x2cui.record(cui_regex_match);
-$x2cui.record(cui_test_item); $x2cui.record(cui_stack_frame);
-$x2cui.record(cui_uptime_service); $x2cui.record(cui_histogram_series);
-$x2cui.record(cui_coverage_file); $x2cui.record(cui_blame_commit);
-$x2cui.record(cui_feature_flag); $x2cui.record(cui_api_param);
-$x2cui.record(cui_api_endpoint);
+$x2cui.record(cui_table_sort); $x2cui.record(cui_chart_annotation);
+$x2cui.record(cui_image_view); $x2cui.record(cui_command);
+$x2cui.record(cui_choice); $x2cui.record(cui_reaction);
+$x2cui.record(cui_speed_action); $x2cui.record(cui_swipe_action);
+$x2cui.record(cui_grid_column); $x2cui.record(cui_filter_field);
+$x2cui.record(cui_tree_node); $x2cui.record(cui_tree_table_events);
+$x2cui.record(cui_file_entry); $x2cui.record(cui_text_mark);
+$x2cui.record(cui_diff_row); $x2cui.record(cui_diff_hunk);
+$x2cui.record(cui_diff_stats); $x2cui.record(cui_diff_range);
+$x2cui.record(cui_presence_user); $x2cui.record(cui_ticker_item);
+$x2cui.record(cui_viz_item); $x2cui.record(cui_sankey_link);
+$x2cui.record(cui_scatter_series); $x2cui.record(cui_gauge_band);
+$x2cui.record(cui_candle); $x2cui.record(cui_tab_bar_item);
+$x2cui.record(cui_now_playing); $x2cui.record(cui_plan_step);
+$x2cui.record(cui_source); $x2cui.record(cui_prompt_suggestion);
+$x2cui.record(cui_model); $x2cui.record(cui_kanban_move);
+$x2cui.record(cui_cal_event); $x2cui.record(cui_month_event);
+$x2cui.record(cui_gantt_task); $x2cui.record(cui_toc_item);
+$x2cui.record(cui_check_step); $x2cui.record(cui_date_range);
+$x2cui.record(cui_key_combo); $x2cui.record(cui_node_view);
+$x2cui.record(cui_doc_tab); $x2cui.record(cui_log_line);
+$x2cui.record(cui_log_buffer); $x2cui.record(cui_terminal_line);
+$x2cui.record(cui_terminal_buffer); $x2cui.record(cui_hex_range);
+$x2cui.record(cui_hex_selection); $x2cui.record(cui_flame_span);
+$x2cui.record(cui_flame_view); $x2cui.record(cui_curve_key);
+$x2cui.record(cui_gradient_stop); $x2cui.record(cui_timeline_clip);
+$x2cui.record(cui_timeline_track); $x2cui.record(cui_timeline_view);
+$x2cui.record(cui_kv_pair); $x2cui.record(cui_diagnostic);
+$x2cui.record(cui_pipeline_job); $x2cui.record(cui_query_field);
+$x2cui.record(cui_query_node); $x2cui.record(cui_keymap_binding);
+$x2cui.record(cui_commit); $x2cui.record(cui_graph_node);
+$x2cui.record(cui_graph_edge); $x2cui.record(cui_net_request);
+$x2cui.record(cui_trace_track); $x2cui.record(cui_trace_span);
+$x2cui.record(cui_trace_marker); $x2cui.record(cui_trace_view);
+$x2cui.record(cui_regex_match); $x2cui.record(cui_test_item);
+$x2cui.record(cui_stack_frame); $x2cui.record(cui_uptime_service);
+$x2cui.record(cui_histogram_series); $x2cui.record(cui_coverage_file);
+$x2cui.record(cui_blame_commit); $x2cui.record(cui_feature_flag);
+$x2cui.record(cui_api_param); $x2cui.record(cui_api_endpoint);
+$x2cui.record(cui_dot_series);
 $x2cui.collection(CalEvents, cui_cal_event);
 $x2cui.records(cui_cal_event, CalEvents);
 $x2cui.collection(Candles, cui_candle);
 $x2cui.records(cui_candle, Candles);
+$x2cui.collection(ChartAnnotations, cui_chart_annotation);
+$x2cui.records(cui_chart_annotation, ChartAnnotations);
 $x2cui.collection(CheckSteps, cui_check_step);
 $x2cui.records(cui_check_step, CheckSteps);
 $x2cui.collection(CurveKeys, cui_curve_key);
 $x2cui.records(cui_curve_key, CurveKeys);
 $x2cui.collection(DocTabs, cui_doc_tab);
 $x2cui.records(cui_doc_tab, DocTabs);
+$x2cui.collection(DotSeries, cui_dot_series);
+$x2cui.records(cui_dot_series, DotSeries);
 $x2cui.collection(FeatureFlags, cui_feature_flag);
 $x2cui.records(cui_feature_flag, FeatureFlags);
 $x2cui.collection(FlameSpans, cui_flame_span);
@@ -725,6 +742,7 @@ expand %(
   cui_dialog_footer_end cui_sheet_begin cui_sheet_end
   cui_toast_action_clicked cui_toast_ex cui_toast_dismiss cui_alert_ex
   cui_progress_ex cui_spinner cui_skeleton cui_badge_ex cui_avatar_ex
+  cui_readout_ex cui_dot_display_ex
   cui_avatar_group cui_empty_state_ex cui_metric_ex cui_meter
   cui_accordion_begin cui_accordion_end cui_tree_end cui_tree_clicked
   cui_list_item_ex cui_virtual_list_begin cui_virtual_list_end
@@ -1181,6 +1199,12 @@ inline cui_api_explorer_result Ui.api_explorer(
   cui_api_explorer_opts opts) =>
   cui_api_explorer_ex(u, id, endpoints, count, &opts);
 
+/** Calls `cui_dot_chart_ex`. */
+inline cui_dot_chart_result Ui.dot_chart(
+  Ui u, String id, const cui_dot_series *series, int series_count, int count,
+  cui_dot_chart_opts opts) =>
+  cui_dot_chart_ex(u, id, series, series_count, count, &opts);
+
 /** Calls `cui_draw_polyline`. */
 inline void Ui.draw_polyline(
   Ui u, const cui_vec2 *points, int count, float thickness, cui_color color,
@@ -1199,10 +1223,10 @@ inline void Ui.draw_polygon(
 /* gen-arrays: begin generated forms */
 
 expand %(
-  prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell donut_chart
-  sparkline otp_input reorder_begin (line_chart 1) (bar_chart 1)
-  each_begin each_end item_begin table_row_begin cell_text grid_cell_text
-  (tour 1) toggle_group (reactions 1) (speed_dial 1)
+  event_track prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell
+  donut_chart sparkline otp_input reorder_begin (line_chart 1)
+  (bar_chart 1) each_begin each_end item_begin table_row_begin cell_text
+  grid_cell_text (tour 1) toggle_group (reactions 1) (speed_dial 1)
   (swipe_item_begin 1 3) (filter_bar 1) (tree_table_begin 1 3)
   diff_view_rows (presence 1) (ticker 1) heatmap (calendar_heatmap 2)
   (treemap 1) (radar_chart 1) (funnel 1) (sankey 2) (waffle 1)
@@ -1216,7 +1240,7 @@ expand %(
   (query_builder 1) (keymap 1) (commit_graph 1) (graph_view 1 3)
   (waterfall 1) (trace_view 1 3) (test_explorer 1) (stack_trace 1)
   (uptime 1) (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
-  (api_explorer 1) (draw_polyline 0) (draw_polygon 0))
+  (api_explorer 1) (dot_chart 1) (draw_polyline 0) (draw_polygon 0))
 macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)
 }
