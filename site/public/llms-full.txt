@@ -2,7 +2,7 @@
 
 > x2c extends C with dynamic values, collections, and compile-time code generation. Use the features you need; keep ordinary C where it already works. C headers, libraries, data layout, expressions, and native tools remain available. x2c compiles to C, and its compiler and runtime are written in x2c.
 
-These pages describe x2c 0.16.0. x2c is experimental. Install it with `curl -fsSL https://x2c-lang.dev/install.sh | sh`.
+These pages describe x2c 0.16.1. x2c is experimental. Install it with `curl -fsSL https://x2c-lang.dev/install.sh | sh`.
 
 These chapters come from [The x2c Book](https://x2c-lang.dev/docs/).
 Each chapter follows a comment naming its published URL. Samples
@@ -6943,7 +6943,7 @@ compiler installation:
 
 ```sh
 x2c update
-x2c update --version 0.16.0
+x2c update --version 0.16.1
 ```
 
 The command's check option reports the installed and available versions

@@ -3,6 +3,24 @@
 Each section summarizes what changed for a user of the compiler, runtime,
 commands, and packages since the previous release.
 
+## 0.16.1 (2026-11-16)
+
+A patch release of 0.16.0. The compiler and runtime are unchanged. Upgrade
+with `x2c update`. A native package installed for 0.16.0 blocks the update:
+remove it with `x2c remove`, update, and install it again.
+
+- The x2cui package builds against CUI 1.4.0. It adds `ui.dot_chart`,
+  `ui.event_track`, `ui.readout`, and `ui.dot_display`, and dot, line, and
+  bar charts accept `annotations`. See
+  [Instruments](../guide/x2cui.md#instruments). Releases do not install
+  x2cui; build it in a checkout.
+- The installation guide's source build checks out `main`, which holds
+  released source. The repository's default branch is now `dev`, which
+  holds current development.
+- The benchmark chart renderer and the VS Code extension's development
+  tools use dependency versions with no open security advisory. No
+  dependency of the compiler, runtime, or a released package changed.
+
 ## 0.16.0 (2026-11-15)
 
 Compile-time code is ordinary x2c: the compiler no longer evaluates Lisp,
