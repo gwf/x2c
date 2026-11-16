@@ -59,7 +59,7 @@ test("without WebAssembly, galleries still link to complete examples", () => {
 
 test("complete examples retain precompiled programs and expected output",
   { skip: !emcc && "emcc is not on PATH" }, () => {
-    const { page, home, love } = render({});
+    const { page, home, love } = render({ PLAYGROUND_REQUIRED: "1" });
     assert.doesNotMatch(page, /data-playground/);
     assert.match(love, /data-programs="[^"]*playground\/programs\/"/);
     const examples = [...love.matchAll(

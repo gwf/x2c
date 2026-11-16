@@ -4,12 +4,4 @@ run: |
   curl -fsSL https://x2c-lang.dev/install.sh | sh
   export PATH="$HOME/.local/x2c/bin:$PATH"
   x2c run ~/.local/x2c/examples/foreach.x
-source: |
-  ./x2c run examples/foreach.x
-
-  # Strings, slicing, and interpolation
-  ./x2c run examples/love/strings.x
-
-  # Build C array initializers with meta functions
-  ./x2c run examples/magic/compile-time.x
 ---

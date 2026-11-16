@@ -633,10 +633,6 @@ main:focus {
   gap: 8px 16px;
 }
 
-.install-window .install-source {
-  border-top: 1px solid var(--hairline-on-dark);
-}
-
 .feature-code,
 .install-code {
   margin: 0;
