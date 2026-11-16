@@ -321,6 +321,19 @@ main:focus {
   line-height: 1.65;
 }
 
+.about-copy hr {
+  --mark: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg fill='none' stroke='%23da291c' stroke-width='17'%3E%3Cpath d='M9 16 A34.5 34.5 0 0 1 9 84'/%3E%3Cpath d='M91 16 A34.5 34.5 0 0 0 91 84'/%3E%3C/g%3E%3C/svg%3E");
+  height: 20px;
+  margin: 40px 0;
+  border: 0;
+  background:
+    var(--mark) calc(50% - 49px) 50% / 10px 10px no-repeat,
+    var(--mark) calc(50% - 27px) 50% / 14px 14px no-repeat,
+    var(--mark) 50% 50% / 20px 20px no-repeat,
+    var(--mark) calc(50% + 27px) 50% / 14px 14px no-repeat,
+    var(--mark) calc(50% + 49px) 50% / 10px 10px no-repeat;
+}
+
 .landing {
   background: var(--paper);
   overflow-x: clip;
