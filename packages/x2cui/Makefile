@@ -86,6 +86,9 @@ WASM_CC := $(CURDIR)/tools/wasm-cc
 WASM_CUI = $(shell $(WASM_DEPS) path $(WASM_MANIFEST) prefix)
 WASM_LINK := -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 \
 	-sINITIAL_MEMORY=64MB -sMAXIMUM_MEMORY=1GB -sSTACK_SIZE=8MB
+# Callbacks are synchronous; only the frame loop's explicit async imports
+# suspend. Marking nested longjmp invoke_* wrappers as suspending breaks JSPI.
+WASM_JSPI := -sJSPI -sASYNCIFY_IGNORE_INDIRECT=1
 
 web: builds/web/gallery.js builds/web/stress.js builds/web/index.html
 
@@ -148,11 +151,11 @@ builds/web/%.rsp: examples/%.x \
 
 .PRECIOUS: builds/web/%.rsp
 
-builds/web/%.js: builds/web/%.rsp $(WASM_RUNTIME)
+builds/web/%.js: builds/web/%.rsp $(WASM_RUNTIME) Makefile
 	$(WASM_CC) -Os @$< $(WEB_NATIVE) -o $@ $(WASM_LINK) -sMODULARIZE=1 -sEXPORT_ES6=1 \
-	  -sENVIRONMENT=web -sJSPI -sMIN_WEBGL_VERSION=2 \
+	  -sENVIRONMENT=web $(WASM_JSPI) -sMIN_WEBGL_VERSION=2 \
 	  -sMAX_WEBGL_VERSION=2 -sGL_ENABLE_GET_PROC_ADDRESS=1
 
-builds/web/%-node.cjs: builds/web/%.rsp $(WASM_RUNTIME)
-	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) -sENVIRONMENT=node \
+builds/web/%-node.cjs: builds/web/%.rsp $(WASM_RUNTIME) Makefile
+	$(WASM_CC) -Os @$< -o $@ $(WASM_LINK) $(WASM_JSPI) -sENVIRONMENT=node \
 	  -sNODERAWFS=1
