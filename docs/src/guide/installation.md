@@ -73,6 +73,7 @@ checkout contains generated C for the bootstrap:
 ```sh
 git clone https://github.com/gwf/x2c.git
 cd x2c
+git checkout main
 make build-safe
 make commands
 ./x2c --version
@@ -283,8 +284,9 @@ Native Windows is not supported.
 
 ## Developer workflow
 
-Clone the default branch for released source; release tags mark published
-versions. A source checkout is the development install. After
+The `main` branch holds released source, and release tags mark published
+versions. The `dev` branch holds current development. A source checkout is
+the development install. After
 `make build-safe` and `make commands`, the checkout is a complete home with
 its own `packages/` directory, and `./x2c` runs the checkout's compiler with
 its commands. `bin/x2c` starts as the bootstrap compiler, so run
