@@ -1,10 +1,12 @@
 # Releasing x2c
 
-Everyday work integrates on `dev`. A release selects one exact source commit,
-fully builds and verifies it at `https://staging.x2c-lang.dev`, then promotes
-those same compiler and package archives to production. `main` advances only
-for a deliberate release, preserving individual commits, preferably by
-fast-forward. Development may continue after candidate selection.
+Everyday work integrates on `dev`, the repository's default branch. `main`
+names the commit of the latest release. A release selects one exact source
+commit, fully builds and verifies it at `https://staging.x2c-lang.dev`, then
+promotes those same compiler and package archives to production. `main`
+advances only for a deliberate release, preserving individual commits,
+preferably by fast-forward. Development may continue after candidate
+selection.
 
 Gary authorizes production promotion, advances `main`, and creates release
 tags. Plan or implementation approval does not authorize those actions.
@@ -71,7 +73,9 @@ and does not run the notes application.
 1. Land intended work and version preparation on `dev`, including generated
    bootstrap updates and the existing source gate. Update `src/cli/requests.x`
    and the version expectations in `unittest/probes/run-cli-boundary.sh` when
-   changing the version. Select a full source
+   changing the version. Give the release-notes heading, and any changelog
+   entry that ships with the release, its date in this step. Do not change
+   that date after publication. Select a full source
    SHA containing that work and the published history.
 2. Dispatch the full candidate build at that exact SHA:
 
@@ -96,18 +100,19 @@ and does not run the notes application.
    must precede final staging verification; never rebuild after testing and
    substitute the new bytes.
 4. Give Gary the exact candidate, version, source SHA, proof and current main
-   SHA. He checks ancestry and deliberately advances main and creates the
-   annotated tag. With those values confirmed, his commands are:
+   SHA. He deliberately advances main and creates the annotated tag with one
+   command, written with the absolute path of his checkout:
 
    ```sh
-   git fetch origin
-   git merge-base --is-ancestor origin/main "$source_sha"
-   git push origin "$source_sha:refs/heads/main"
-   git tag -a "v$version" -m "x2c $version" "$source_sha"
-   git push origin "refs/tags/v$version:refs/tags/v$version"
+   tools/release-main "$source_sha" "$version"
    ```
 
-   Stop on a rejected push, ancestry conflict or existing conflicting tag.
+   The command fetches, checks that main fast-forwards to the source SHA and
+   that the commit declares the version, asks him to type the version, then
+   pushes main and the tag. It works from any directory and under any
+   worktree delivery context. A repeated run completes a missing step. Run it
+   with `--dry-run` before handing it over; that makes every check and pushes
+   nothing. Stop on an ancestry conflict or existing conflicting tag.
    Never force main or move a public tag. This action does not publish assets
    by itself and can temporarily put main ahead of the production site.
 5. With Gary's explicit promotion authorization, dispatch the selected
@@ -118,8 +123,10 @@ and does not run the notes application.
      -f identity="$candidate" -f expected_version="$current_version"
    ```
 
-   Follow that exact run through upload, Pages, live checks and retained
-   proof. Report completion only after production verification succeeds.
+   The run waits once for Gary's review of the `production-publication`
+   environment, before its first job. Follow that exact run through upload,
+   Pages, live checks and retained proof. Report completion only after
+   production verification succeeds.
 
 The retained legacy `pages.yml` source is not part of candidate promotion;
 its workflow registration stays disabled, and it is never dispatched as an

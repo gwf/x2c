@@ -100,10 +100,10 @@ jobs:
       identity: ${{ inputs.identity }}
       runners: ${{ needs.publish.outputs.runners }}
       destination: production
+  # The review of `publish` covers this run; this job only retains its proof.
   record:
     needs: verify
     runs-on: ubuntu-24.04
-    environment: production-publication
     permissions:
       contents: write
       actions: read
