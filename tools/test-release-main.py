@@ -45,25 +45,24 @@ class ReleaseMain(unittest.TestCase):
         hook.write_text("#!/bin/sh\nexit 1\n")
         hook.chmod(0o755)
 
-    def run_tool(self, *arguments, answer=""):
+    def run_tool(self, *arguments):
         return subprocess.run(
             [sys.executable, str(self.work / "tools/release-main"), *arguments],
-            input=answer, text=True, capture_output=True, cwd="/")
+            text=True, capture_output=True, cwd="/")
 
     def origin_ref(self, ref):
         result = subprocess.run(["git", "rev-parse", "--verify", "--quiet", ref],
                                 cwd=self.origin, text=True, capture_output=True)
         return result.stdout.strip()
 
-    def test_dry_run_and_unconfirmed_runs_push_nothing(self):
-        for arguments, answer in ((("--dry-run",), ""), ((), "1.2.4\n"), ((), "")):
-            run = self.run_tool(self.selected, "1.2.3", *arguments, answer=answer)
-            self.assertEqual(run.returncode, 0 if arguments else 1, run.stderr)
-            self.assertEqual(self.origin_ref("main"), self.released)
-            self.assertEqual(self.origin_ref("refs/tags/v1.2.3"), "")
+    def test_dry_run_pushes_nothing(self):
+        run = self.run_tool(self.selected, "1.2.3", "--dry-run")
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertEqual(self.origin_ref("main"), self.released)
+        self.assertEqual(self.origin_ref("refs/tags/v1.2.3"), "")
 
-    def test_confirmed_run_publishes_main_and_annotated_tag_once(self):
-        run = self.run_tool(self.selected, "1.2.3", answer="1.2.3\n")
+    def test_run_publishes_main_and_annotated_tag_once(self):
+        run = self.run_tool(self.selected, "1.2.3")
         self.assertEqual(run.returncode, 0, run.stderr)
         self.assertEqual(self.origin_ref("main"), self.selected)
         self.assertEqual(self.origin_ref("v1.2.3^{commit}"), self.selected)
@@ -76,22 +75,22 @@ class ReleaseMain(unittest.TestCase):
 
     def test_repeated_run_publishes_only_the_missing_tag(self):
         self.git("push", "-q", "--no-verify", "origin", f"{self.selected}:main")
-        run = self.run_tool(self.selected, "1.2.3", answer="1.2.3\n")
+        run = self.run_tool(self.selected, "1.2.3")
         self.assertEqual(run.returncode, 0, run.stderr)
         self.assertEqual(self.origin_ref("v1.2.3^{commit}"), self.selected)
 
     def test_refuses_wrong_version_diverged_main_and_conflicting_tag(self):
-        wrong = self.run_tool(self.selected, "1.2.4", answer="1.2.4\n")
+        wrong = self.run_tool(self.selected, "1.2.4")
         self.assertIn("does not declare version 1.2.4", wrong.stderr)
         self.git("tag", "-a", "v1.2.3", "-m", "other", self.released)
         self.git("push", "-q", "--no-verify", "origin", "refs/tags/v1.2.3")
         self.git("tag", "-d", "v1.2.3")
-        tagged = self.run_tool(self.selected, "1.2.3", answer="1.2.3\n")
+        tagged = self.run_tool(self.selected, "1.2.3")
         self.assertIn("origin already has v1.2.3", tagged.stderr)
         self.git("switch", "-q", "main")
         diverged = self.commit("1.2.2", "diverged")
         self.git("push", "-q", "--no-verify", "origin", "main")
-        behind = self.run_tool(self.selected, "1.2.3", answer="1.2.3\n")
+        behind = self.run_tool(self.selected, "1.2.3")
         self.assertIn("does not fast-forward", behind.stderr)
         self.assertEqual(self.origin_ref("main"), diverged)
         for run in (wrong, tagged, behind):

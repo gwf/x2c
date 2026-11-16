@@ -16,10 +16,12 @@ release. Read [agents/releasing.md](../../releasing.md) for the sequence and
 [deployment operations](../../../etc/release/README.md) for provisioning,
 recovery and first-release constraints.
 
-Gary authorizes production promotion, advancement of `main`, and release tags.
-Keep those actions separate from ordinary implementation delivery to `dev`.
-Give him exact candidate identities, source SHAs, effects and commands when
-his action is required. Do not infer release authorization from plan approval.
+Gary decides each publication by asking for it. A request such as "release
+0.16.2" or "publish the site" covers every step through production. Perform
+them without further questions and send one report at the end: the verified
+live result, or the exact failure. Do not infer a request to publish from
+approval of a plan or an implementation, and keep publication separate from
+ordinary delivery to `dev`.
 
 ## Prepare and stage
 
@@ -36,12 +38,10 @@ substitute fresh archives into a previously verified identity.
 
 ## Promote and verify
 
-Hand Gary the `tools/release-main` command for the verified candidate SHA and
-version, with the absolute path of his checkout. Run it with `--dry-run`
-first; stop on a conflicting published version or tag. A tag triggers no
-rebuild.
+Run `tools/release-main` for the verified candidate SHA and version; stop on
+a conflicting published version or tag. A tag triggers no rebuild.
 
-With explicit release authorization, dispatch `promote.yml` for that candidate
+Dispatch `promote.yml` for that candidate
 and the observed previous production version. Follow asset upload, complete
 site deployment, live verification and retained proof. Report success only
 after all finish; a green build, tag or visible release alone is insufficient.
@@ -50,9 +50,9 @@ after all finish; a green build, tag or visible release alone is insufficient.
 
 For a website correction between releases, follow
 [Update only the website](../../releasing.md#update-only-the-website): stage
-the `dev` commit with `mode=website`, then promote the kept archive with
-Gary's explicit authorization. Report the book files the staging run lists
-as changed since the release.
+the `dev` commit with `mode=website`, check it, then promote the kept
+archive. Ask Gary before promoting only when the staging run lists book
+changes that describe unreleased behavior.
 
 ## Recover
 
