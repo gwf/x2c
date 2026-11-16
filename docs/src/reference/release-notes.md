@@ -3,7 +3,7 @@
 Each section summarizes what changed for a user of the compiler, runtime,
 commands, and packages since the previous release.
 
-## 0.16.0 (unreleased)
+## 0.16.0 (2026-11-15)
 
 Compile-time code is ordinary x2c: the compiler no longer evaluates Lisp,
 and `$(...)` builds an evaluated List. The release adds temporary

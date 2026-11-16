@@ -313,12 +313,13 @@ Raw local evidence is retained in
 ## 7. Version and final release evidence
 
 Gary selected **0.16.0**. The compiler and CLI expectations now use that
-version; the release-notes heading says `0.16.0 (unreleased)`. Existing
+version; the release-notes heading says `0.16.0 (2026-11-15)`. Existing
 release identities remain unchanged.
 
 The version preparation changes `Compiler.version` in `src/cli/requests.x`, both
 version expectations in `unittest/probes/run-cli-boundary.sh`, and the
-Unreleased heading in `docs/src/reference/release-notes.md`. Publication date remains unset. Review the
+heading in `docs/src/reference/release-notes.md`. Gary set the publication
+date, 2026-11-15, on that day. Review the
 upgrade instructions against the included changes. Do not replace historical
 0.15.x references globally. Generated bootstrap changes belong to the existing
 regeneration/publication procedure, not hand edits.
@@ -361,7 +362,7 @@ matrix. PCRE2 and Torch retain their existing release checks.
 
 PRs #649 and #650 are merged. The release notes include Regex, and the
 upgrade instructions cover the source/ABI changes, including `$let`/`with`
-and alias migration. Keep `0.16.0 (unreleased)` until publication is approved.
+and alias migration. The heading carries the date Gary chose, 2026-11-15.
 
 The earlier candidate
 `candidate-9889b2cf88f141d3d4d63c78193a1d4618703c01-43732772269-1`
