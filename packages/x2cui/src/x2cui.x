@@ -623,6 +623,8 @@ $x2cui.record(cui_api_param); $x2cui.record(cui_api_endpoint);
 $x2cui.record(cui_dot_series); $x2cui.record(cui_text_format);
 $x2cui.record(cui_text_style); $x2cui.record(cui_live_user);
 $x2cui.record(cui_canvas_toggle); $x2cui.record(cui_selection_action);
+$x2cui.collection(Colors, cui_color);
+$x2cui.records(cui_color, Colors);
 $x2cui.collection(Aspects, cui_aspect);
 $x2cui.records(cui_aspect, Aspects);
 $x2cui.collection(CanvasToggles, cui_canvas_toggle);

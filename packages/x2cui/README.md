@@ -1,7 +1,7 @@
 # x2cui: CUI components from x2c
 
 This package provides an x2c interface to [CUI](https://github.com/yappologistic/CUI)
-1.4.0, an immediate-mode UI library that draws its own components. A program
+revision `a5c9ef5efc39` (after 1.4.0), an immediate-mode UI library that draws its own components. A program
 describes the screen with calls on every frame. CUI lays it out, handles the
 mouse and keyboard, and draws it in a window or into pixels. `PROFILE.md`
 records the build. The book's
@@ -33,10 +33,10 @@ int main(void) {
 
 ## Status
 
-The package is experimental. CUI 1.4.0 builds and passes off-screen checks
-on macOS arm64 and under Node with WebAssembly. Linux arm64 and x86_64
-checks and interactive Chromium testing were last run with CUI 1.3.1;
-the Linux windowed path has not been tested. The browser build needs
+The package is experimental. The pinned revision builds and passes off-screen
+checks on macOS arm64 and under Node with WebAssembly. Headless Chromium
+checks cover the new pages, sorting, and stress modes. Linux arm64 and x86_64
+checks were last run with CUI 1.3.1; the Linux windowed path is untested. The browser build needs
 Memory64, JavaScript Promise Integration, and WebGL 2.
 CUI has no accessibility tree, no inline
 input-method composition, and no bidirectional text. The package
@@ -515,7 +515,8 @@ columns, sorted by the header clicked. `mail --shot IMAGE.png` and
 a port of CUI's own gallery, `examples/gallery_ui.c` and
 `examples/gallery_more.c` in CUI's source, with each page in a file under
 `examples/gallery/`. The Instruments page adds dot charts, event tracks,
-readouts, and dot displays, bringing the gallery to 27 pages.
+readouts, and dot displays. Four further pages cover creative controls,
+canvas tools and collaboration, voice displays, and loading patterns.
 `make run-gallery` opens it, and `gallery --shots DIR` draws every page
 off screen.
 
@@ -531,7 +532,7 @@ window waits for the display, so the rate stops at the display's rate;
 with the software renderer and prints the means.
 
 `examples/scenes.x` is a check, not an application. It has one small
-scene for each of CUI's 205 components, named for the component and
+scene for each of CUI's 232 component entries, named for the component and
 grouped into families under `examples/scenes/`. `scenes --shots DIR`
 draws every scene off screen to `DIR/NAME.png`, and `scenes --list` prints
 the names. `scenes --check HEADER` compares the names with the
@@ -604,3 +605,31 @@ builds in retain the MIT, SIL Open Font License 1.1, ISC, zlib, and Unicode
 License V3 terms reproduced under `LICENSES/`. `PROFILE.md` lists each
 component and its notice. See `../LICENSE-POLICY.md` for the project intake
 policy.
+
+## Experimental APIs
+
+This branch pins upstream revision `a5c9ef5efc39b3fc783758362f6b8f9f130f5883`.
+It includes configurable spinners, creative controls, canvas toolbars and
+selection tools, presence indicators, voice displays, and loading patterns.
+The complete raw API remains available through the package import.
+
+`ui.spinner(24)` keeps its default ring. Options select other styles, for
+example `ui.spinner(32, style: radar)`. `ui.skeleton_group`, `ui.veil`, and
+`ui.toolbar_group` have scoped block forms. New record arrays include
+`Colors`, `Aspects`, `CanvasToggles`, `LiveUsers`, `MeterParts`, `SelectionActions`, and
+`TraceLinks`. `voice_resample(levels, columns)` returns owned peak levels.
+
+`ui.set_clipboard_text(text)` and `ui.get_clipboard_text()` use platform
+clipboard hooks. The method returns an owned String; without hooks it returns an empty String.
+The raw C getter instead borrows text until the next getter call. Custom canvases register
+`ui.wheel_region(id, rect)` while painting and consume `ui.wheel_take(id, delta)`
+before copying paint data. Use a separate stable ID; routing uses the previous
+frame's regions. A region captures both axes, and content-edge handoff is
+not automatic.
+
+Native windows expose `app.maximize()`, `app.minimize()`, `app.restore()`,
+`app.window_state()`, `app.placement(placement)`, `app.set_position(x, y)`,
+and `app.follow_system_theme(follow)`. Their platform behavior follows CUI.
+
+These additions do not provide ordered keyboard/text events or custom-editor
+IME composition. md-edit input reconciliation remains separate.

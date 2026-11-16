@@ -44,6 +44,10 @@
 #include "gallery/devtools.x"
 #include "gallery/devtools2.x"
 #include "gallery/instruments.x"
+#include "gallery/creative.x"
+#include "gallery/canvas.x"
+#include "gallery/voice.x"
+#include "gallery/loading.x"
 
 // The first nine are in the order of the PAGE_ constants.
 static Page pages[] = {
@@ -75,6 +79,10 @@ static Page pages[] = {
   { "Developer tools", CUI_ICON_SQUARE_TERMINAL, page_devtools },
   { "More developer tools", CUI_ICON_BUG, page_devtools2 },
   { "Instruments", CUI_ICON_CHART_LINE, page_instruments },
+  { "Creative controls", CUI_ICON_PALETTE, page_creative },
+  { "Canvas and bars", CUI_ICON_LAYERS, page_canvas },
+  { "Voice", CUI_ICON_MIC, page_voice },
+  { "Loading and patterns", CUI_ICON_LOADER_CIRCLE, page_loading },
 };
 
 static int page_total(void) => sizeof pages / sizeof *pages;
@@ -143,9 +151,8 @@ static void sidebar(Ui ui, Gallery g, bool drawer) {
                      color: background, line_height: 1.0f);
       ui.text("CUI", font: medium, size: 15, nowrap: true);
       ui.spacer();
-      // x2c reads a C macro constant as a value only when its type is given.
-      int major = CUI_VERSION_MAJOR, minor = CUI_VERSION_MINOR;
-      ui.badge(%"v$major.$minor", size: sm);
+      ui.badge("a5c9ef5", size: sm);
+      ui.tooltip("Experimental CUI revision a5c9ef5");
     }
     ui.scroll (id: "nav", height: fill, gap: 2) {
       ui.nav_section("Components");

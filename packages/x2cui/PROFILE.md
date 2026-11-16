@@ -1,10 +1,10 @@
-# CUI 1.4.0 profile
+# CUI experimental profile
 
-- Upstream release: tag `v1.4.0` of `yappologistic/CUI`, reported by the
-  header as CUI 1.4.0
-- Source archive: `https://github.com/yappologistic/CUI/archive/refs/tags/v1.4.0.tar.gz`
+- Upstream revision: `a5c9ef5efc39b3fc783758362f6b8f9f130f5883` of
+  `yappologistic/CUI`, after v1.4.0. The upstream header still reports 1.4.0.
+- Source archive: `https://github.com/yappologistic/CUI/archive/a5c9ef5efc39b3fc783758362f6b8f9f130f5883.tar.gz`
 - Source archive SHA-256:
-  `fb347014eaa6238b729a9153e9f4ea61d4ceb6090b23d31db62ebf6e4fe8d1f7`
+  `c1814ad77ae16c3a1930a3512ca1c08001e9bcb89925ac6fdea76481cd9b866b`
 - Public header SHA-256 values: `headers.sha256` pins `cui/cui.h`,
   `cui/cui_app.h`, `cui/cui_icons.h`, and `cui/cui_render.h`
 - License: MIT, reproduced verbatim in `LICENSES/cui-1.4.0-MIT.txt`.
@@ -59,10 +59,10 @@ minor version, so the records a program fills always match the archive.
 `cui.c` is compiled with `-x objective-c -fobjc-arc -D_DARWIN_C_SOURCE`.
 A program links `libcui.a` with the Cocoa, QuartzCore, and OpenGL
 frameworks. Apple's frameworks are part of the system and are not
-redistributed. CUI 1.4.0 was verified on macOS arm64 on 2026-11-16:
-`make check example` passes 31 tests and draws all 205 component scenes.
-The gallery draws all 27 pages off screen. No native window was opened
-for this upgrade.
+redistributed. Revision `a5c9ef5efc39` was verified on macOS arm64 on 2026-11-16:
+`make check example` passes 34 tests (146 assertions) and draws all 232
+component scenes, with zero unmatched entries. The gallery draws all 31
+pages off screen. No native window was opened for this integration.
 
 ## Linux
 
@@ -74,7 +74,7 @@ needs no OpenGL package. Emoji draw only when the host has an emoji font.
 
 The previous CUI 1.3.1 profile was verified on Ubuntu 24.04 arm64 and
 x86_64 with `make check`, which draws off screen and needs no X server.
-The 1.4.0 profile has not been run on Linux. A window has not been opened
+The experimental revision has not been run on Linux. A window has not been opened
 on Linux.
 
 ## Browser
@@ -107,12 +107,19 @@ The programs also link with `-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2
 -sGL_ENABLE_GET_PROC_ADDRESS=1`. They need a browser with 64-bit
 WebAssembly memory, JavaScript Promise Integration, and WebGL 2.
 
-CUI 1.4.0 was built on 2026-11-16 with Emscripten 6.0.13 and tested
-under Node 26.12.1: `make web web-check` builds the gallery and stress
-programs and draws all 27 gallery pages off screen with the same JSPI
-settings as the browser build. Chromium checks covered opening Data display,
-sorting by name, role, and status, selecting a row, and both animated stress
-loads. Safari and Firefox were not tested.
+Revision `a5c9ef5efc39` was built on 2026-11-16 with Emscripten 6.0.13
+and Node 26.12.1. `make web web-check` builds gallery and stress and
+renders all 31 gallery pages with zero empty pages using the browser's JSPI
+settings. Headless Chromium checks covered the four new pages, keyboard
+waveform seeking, the selection bar, table sorting by name/role/status, and
+both animated stress modes. The website's demo installer also copied the
+artifacts into its standalone hidden routes. Safari, Firefox, native OS
+clipboard access, and native IME/window-state behavior were not tested.
+
+The new clipboard test uses platform hooks and checks owned String lifetime.
+The wheel test checks both axes and one-time consumption. Voice resampling
+checks peaks and independent result storage. Ordered keyboard/text event
+reconciliation remains outside this integration.
 
 ## Bundled third-party content
 

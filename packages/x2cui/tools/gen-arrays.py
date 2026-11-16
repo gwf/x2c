@@ -195,7 +195,7 @@ def written_methods(source):
 
 def is_icon(name):
   """Whether a parameter or field named `name` holds an icon."""
-  return name == "icon" or name.startswith("icon_") or name.endswith("_icon")
+  return name in ("tool", "icon") or name.startswith("icon_") or name.endswith("_icon")
 
 
 def icon_parameters(header, hand):
@@ -268,7 +268,7 @@ NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
 
 # The records a program keeps by name: the arrays a component edits in
 # place, and the arrays a program both reads and passes to a component.
-COLLECTIONS = ["cui_aspect", "cui_canvas_toggle", "cui_live_user",
+COLLECTIONS = ["cui_color", "cui_aspect", "cui_canvas_toggle", "cui_live_user",
                "cui_meter_part", "cui_selection_action", "cui_trace_link",
                "cui_cal_event", "cui_candle", "cui_chart_annotation",
                "cui_check_step", "cui_curve_key", "cui_doc_tab", "cui_dot_series",

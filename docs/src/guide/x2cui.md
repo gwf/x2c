@@ -5,14 +5,15 @@ For the full component forms, collections, and build profile, see the
 This chapter belongs to [Advanced Topics](../library/advanced-topics.md).
 
 The `x2cui` package draws windows and user interfaces from x2c. It is an
-interface to [CUI](https://github.com/yappologistic/CUI) 1.4.0, a C99
+interface to [CUI](https://github.com/yappologistic/CUI) revision
+`a5c9ef5efc39` (after 1.4.0), a C99
 immediate-mode UI library that draws its own components. A program
 describes the whole screen with calls on every frame. CUI lays the screen
 out, handles the mouse and keyboard, and draws it in a window or into
 pixels. The entry unit is `packages/x2cui/src/x2cui.x`, and every public
 name compiles to `x2cui__*`.
 
-The package is experimental. CUI 1.4.0 passes off-screen checks on macOS
+The package is experimental. The pinned revision passes off-screen checks on macOS
 arm64 and under Node with WebAssembly. Linux arm64 and x86_64 checks
 were last run with CUI 1.3.1; the Linux windowed path has not been tested.
 The package has
@@ -360,9 +361,10 @@ to-do list, the mail list, the orders table, and every scene off screen:
   menu. `builds/mail --shot IMAGE.png` draws the inbox.
 - `orders.x` is a table of recent orders with a Map of columns, sorted
   by the header clicked. `builds/orders --shot IMAGE.png` draws it.
-- `gallery.x` has 27 pages, with each page in a file under
+- `gallery.x` has 31 pages, with each page in a file under
   `examples/gallery/`. It ports CUI's gallery and adds an Instruments
-  page for dot charts, event tracks, readouts, and dot displays.
+  page for dot charts, event tracks, readouts, and dot displays. Further pages
+  cover creative controls, canvas tools, voice displays, and loading patterns.
   `make -C packages/x2cui run-gallery` opens it, and
   `builds/gallery --shots DIR` draws every page.
 - `stress.x` animates as many moving circles or cards as its slider asks
@@ -370,7 +372,7 @@ to-do list, the mail list, the orders table, and every scene off screen:
   it. `builds/stress --frames N` times N frames off screen and prints the
   means.
 - `scenes.x` is a check, not an application. It draws one small scene for
-  each of CUI's 205 components, and `--check` fails when a component in
+  each of CUI's 232 component entries, and `--check` fails when a component in
   CUI's header has no scene.
 
 The gallery and the stress test also run in a browser, from the same x2c
@@ -383,9 +385,33 @@ make -C packages/x2cui web-serve  # then open http://127.0.0.1:4399/
 
 `http://127.0.0.1:4399/?stress` opens the stress test. The program is
 64-bit WebAssembly drawn with WebGL 2. The browser must support 64-bit
-WebAssembly memory and JavaScript Promise Integration. CUI 1.4.0 has been
-tested off screen under Node. Interactive Chromium testing was last run
-with CUI 1.3.1; see the package's `PROFILE.md` for verification details.
+WebAssembly memory and JavaScript Promise Integration. The pinned revision
+has been tested off screen under Node and interactively in headless Chromium;
+see the package's `PROFILE.md` for verification details.
+
+## Additional controls and input services
+
+The experimental revision adds creative sliders and palette tools, grouped
+and floating toolbars, text formatting, canvas controls, selection actions,
+voice waveforms and notes, and loading patterns. `ui.spinner` accepts style
+options while preserving the default ring. `ui.skeleton_group`, `ui.veil`,
+and `ui.toolbar_group` are block forms.
+
+`ui.get_clipboard_text()` copies platform clipboard text into an owned
+String; `ui.set_clipboard_text(text)` writes through the platform hook.
+Without hooks, the getter returns an empty String and the setter does nothing.
+`voice_resample(levels, columns)` returns an owned ArrayFloat of peak levels.
+
+A custom canvas registers `ui.wheel_region(id, rect)` while painting and
+consumes `ui.wheel_take(id, delta)` before it copies paint data. The region
+uses a separate stable ID and previous-frame geometry. It captures both
+axes; content-edge handoff to a parent is the custom component's decision.
+These services do not provide ordered keyboard/text events or custom-editor
+IME composition.
+
+The native App methods include maximize, minimize, restore, window_state,
+placement, set_position, and follow_system_theme. They retain CUI's platform
+contracts; see the pinned raw header for placement support on each backend.
 
 ## The native API
 

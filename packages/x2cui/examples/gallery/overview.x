@@ -23,7 +23,7 @@ void page_overview(Ui ui, Gallery g) {
   }
   ui.box (dir: grid, columns: 3, min_column_width: 200,
           gap: 16) {
-    ui.metric("Components", "150", icon: box);
+    ui.metric("Components", "232", icon: box);
     ui.metric("Frame time", "0.4 ms",
       delta: -18.0f, delta_label: "-18% vs v0.9",
       lower_is_better: true, spark: [9, 7, 8, 6, 5, 6, 4, 4, 3], icon: zap);
