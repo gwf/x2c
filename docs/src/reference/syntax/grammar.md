@@ -300,8 +300,7 @@ rather than adding another surrounding list. Quoted Map entries can contain
 `$(...)` with either a computed key followed by `:` or an Entry macro/slot.
 A String interpolation uses `$name` or `$(expression)`; the latter also
 supports macro sequence handling where the template parser permits it. An
-unescaped `${` in String text is the retired insertion spelling and is
-reported as an error.
+unescaped `${` in String text is reported as an error.
 
 In code, `$` followed directly by `(` is two tokens. In an expression position
 they begin an evaluated List; in a quotation's code they begin a computed
@@ -376,10 +375,9 @@ macro/decorator invocation or an expression statement). Other results use a
 braced category-specific sequence, optionally preceded by `=>`.  A named
 expression body normally ends with `;`; an anonymous arrow body omits that
 terminator, which belongs to the enclosing expression. The implementation also
-accepts a legacy parenthesized expression body after the arrow without its own
+accepts a parenthesized expression body after the arrow without its own
 semicolon when the next token cannot extend that expression. A following
-semicolon selects the canonical form. See `_legacy_expression_body` and
-`_expression_body`.
+semicolon selects the ordinary form.
 
 A braced template can begin with `using` lines terminated by semicolons.
 `using $name` declares fresh names; `using name` retains a file-level binding.

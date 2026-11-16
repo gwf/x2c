@@ -952,13 +952,13 @@ Owners: `src/components/pattern-match.x` writes these forms,
 `_placed` in `src/transform/traversal.x` lowers placed code, and
 `src/emit/dispatch.x` emits both.
 
-### Cache payloads and compatibility content
+### Cache payloads and unproduced heads
 
 ```text
 CACHE-PAYLOAD ::= (string EXPR) | (var EXPR)
                 | (cons CACHE-VALUE CACHE-VALUE) | (nil)
 CACHE-VALUE   ::= (cache CACHE-ID) | CACHE-PAYLOAD | EXPR
-COMPATIBILITY-CONTENT ::= (varray EXPR*) | (vmap MAP-ROW*)
+UNPRODUCED-CONTENT    ::= (varray EXPR*) | (vmap MAP-ROW*)
 ```
 
 `(cache ID)` is an AST reference into the current translation's literal cache.
@@ -966,8 +966,8 @@ Payloads are data owned by that cache; `string` is not a generic emitter
 expression head. Cache keys can also retain expression forms and converted
 values. Their meaning depends on the existing cache operation.
 
-The transform still consumes `varray` and `vmap` as array/map compatibility
-heads with unchanged children. No literal constructor produces them.
+The transform consumes `varray` and `vmap` as array and map heads with
+unchanged children. No literal constructor produces them.
 In particular, `vmap` does not
 establish a separate `vpair` row grammar.
 
@@ -1154,7 +1154,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `break` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
 | `builtin` | [Macro definitions](#macro-definitions) |
 | `c-assert` | [Imports, protocols, and static assertions](#imports-protocols-and-static-assertions) |
-| `cache` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
+| `cache` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and unproduced heads](#cache-payloads-and-unproduced-heads) |
 | `call` | [Operators, calls, and access](#operators-calls-and-access) |
 | `capture` | [Lambdas and typed adaptation](#lambdas-and-typed-adaptation); [Pending applications and captures](#pending-applications-and-captures) |
 | `captures` | [Lambdas and typed adaptation](#lambdas-and-typed-adaptation); [Macro definitions](#macro-definitions) |
@@ -1167,7 +1167,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `comment` | [Native sequences, decorations, and output tokens](#native-sequences-decorations-and-output-tokens) |
 | `composite` | [Initializers and destructuring](#initializers-and-destructuring) |
 | `conform` | [Imports, protocols, and static assertions](#imports-protocols-and-static-assertions) |
-| `cons` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
+| `cons` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and unproduced heads](#cache-payloads-and-unproduced-heads) |
 | `construct` | [Roots, wrappers, and identities](#roots-wrappers-and-identities); [Pending applications and captures](#pending-applications-and-captures) |
 | `continue` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
 | `decl` | [Declaration forms](#declaration-forms) |
@@ -1257,7 +1257,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `name` | [Macro definitions](#macro-definitions) |
 | `named-type` | [Declaration forms](#declaration-forms) |
 | `new-name` | [Code values and effects](#code-values-and-effects); [Cleanup, initialization, and generated markers](#cleanup-initialization-and-generated-markers) |
-| `nil` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
+| `nil` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and unproduced heads](#cache-payloads-and-unproduced-heads) |
 | `offsetof` | [Grouping, type operands, and selection](#grouping-type-operands-and-selection) |
 | `op` | [Operators, calls, and access](#operators-calls-and-access); [Declaration forms](#declaration-forms); [Source types and semantic Types](#source-types-and-semantic-types) |
 | `origin` | [Macro definitions](#macro-definitions) |
@@ -1293,7 +1293,7 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `static` | [Macro definitions](#macro-definitions) |
 | `staticinit` | [Cleanup, initialization, and generated markers](#cleanup-initialization-and-generated-markers) |
 | `stmnt` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
-| `string` | [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
+| `string` | [Cache payloads and unproduced heads](#cache-payloads-and-unproduced-heads) |
 | `switch` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
 | `syntax-recipe` | [Retained declaration production](#retained-declaration-production) |
 | `tadapt` | [Lambdas and typed adaptation](#lambdas-and-typed-adaptation) |
@@ -1309,9 +1309,9 @@ classified cache/transport records. Descriptor row keys are indexed through
 | `unqual` | [Source types and semantic Types](#source-types-and-semantic-types) |
 | `va-arg` | [Grouping, type operands, and selection](#grouping-type-operands-and-selection) |
 | `value` | [Pending applications and captures](#pending-applications-and-captures) |
-| `var` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
-| `varray` | [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
-| `vmap` | [Cache payloads and compatibility content](#cache-payloads-and-compatibility-content) |
+| `var` | [Collections, List construction, and String segments](#collections-list-construction-and-string-segments); [Cache payloads and unproduced heads](#cache-payloads-and-unproduced-heads) |
+| `varray` | [Cache payloads and unproduced heads](#cache-payloads-and-unproduced-heads) |
+| `vmap` | [Cache payloads and unproduced heads](#cache-payloads-and-unproduced-heads) |
 | `while` | [Ordinary statements and sequences](#ordinary-statements-and-sequences) |
 
 ### Dynamic heads and forms without a head
@@ -1325,7 +1325,7 @@ untagged. Their enclosing productions determine how to read them.
 For example, a pattern `(expr TYPE (call CALLEE (args ...)))` first establishes
 the typed shell, then the call content, then its ordered arguments. A pattern
 on `(return TYPE EXPR)` is recognizing the bound return stage; the lowered
-stage no longer has that type field. A match on `(capture ...)` must know
+stage has no type field. A match on `(capture ...)` must know
 whether it is reading a lambda capture or a macro invocation capture. Use this
 chapter's production and stage together when reading such patterns.
 

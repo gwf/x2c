@@ -10,7 +10,6 @@ checkout. Then create a first project, run it, and build it for a debugger.
 | macOS 15 or later | arm64, x86_64 | release or source |
 | Linux with glibc 2.38 or later | x86_64, aarch64 | release or source |
 | Windows through WSL2 | as for Linux | release or source |
-| Windows through MSYS2 | x86_64 | source only |
 
 Ubuntu 24.04 and Debian 13 meet the Linux requirement. Every route needs a
 C compiler named `cc`: clang 15 or later, or gcc. On macOS,
@@ -280,14 +279,7 @@ home, because builds under `/mnt/c` are slower. Use clang
 15 or newer, or `gcc`: Ubuntu 22.04 ships clang 14, which rejects two static
 initializers in the runtime.
 
-A source checkout also builds under MSYS2 with its `gcc`, given three
-settings: check the repository out with LF line endings
-(`git config core.autocrlf false`), enable native symlinks
-(`export MSYS=winsymlinks:native`, which needs Developer Mode or an
-administrator shell), and select the compiler with `CC=gcc X2C_CC=gcc`.
-`make build-safe` then produces a working compiler. Native Windows without a
-POSIX layer is not supported, and under MSYS2 only a source build is
-supported.
+Native Windows is not supported.
 
 ## Developer workflow
 

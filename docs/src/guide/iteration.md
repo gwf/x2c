@@ -58,7 +58,7 @@ foreach (char ch in word)
 
 Parenthesize declarations to give each loop binding its own type, as in
 `foreach ((String name, int age) in ages)`. The shared-type form
-`foreach (Var (name, age) in ages)` remains available. Native cursors assign
+`foreach (Var (name, age) in ages)` gives both bindings one type. Native cursors assign
 each output directly to its declared type; iterator outputs use the ordinary
 `Var` conversions. For example, `foreach ((Substr word, int count) in counts)`
 can traverse a `MapSubInt` without boxing keys or allocating an iterator;

@@ -478,8 +478,8 @@ arguments are `NULL` and a cons list of boxed `Var` values. Each callee,
 `String_join` and each `String_var`, is a resolved binding carrying that
 function's type, so the emitter prints the call from typed nodes.
 `src/components/interpolation.x` wrote the join; see [builtin
-components](#builtin-components). The `return` no longer carries a type
-annotation; nothing downstream needs it.
+components](#builtin-components). The `return` carries no type
+annotation at this stage; nothing downstream needs it.
 
 ### Generation and cache staging
 
