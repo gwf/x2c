@@ -80,7 +80,7 @@ apps/notes/notes|optional|none||-|SQLite-backed notes server; make -C examples/a
 
 love/two-kinds|showcase|run||expected/love-two-kinds.stdout|Gallery: canonical values versus objects with identity.
 love/collections|showcase|run||expected/love-collections.stdout|Gallery: shared List tails, growable Arrays, and keyed Map lookup.
-love/loops|showcase|run||expected/love-loops.stdout|Gallery: iterate collections, text lines and words, and file lines.
+love/loops|showcase|run|../../data/love-files|expected/love-loops.stdout|Gallery: iterate collections, text lines and words, and file lines.
 power/classes|showcase|run||expected/power-classes.stdout|Gallery: a value class with generated operations as a Map key.
 power/protocols|showcase|run||expected/power-protocols.stdout|Gallery: set union and intersection as + and * through a protocol.
 power/channels|showcase|run||expected/power-channels.stdout|Gallery: two threads share a bounded channel under Thread.run.
