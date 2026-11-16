@@ -181,9 +181,12 @@ jobs:
       - uses: emscripten-core/setup-emsdk@v15
         with:
           version: 6.0.13
-      - name: Build the compiler for website programs
+      # The selected source may predate the site build that makes the wasm
+      # runtime itself; the explicit step keeps such a source buildable.
+      - name: Build the compiler and wasm runtime for website programs
         run: |
           make -C source build-safe
+          make -C source wasm-runtime
       - name: Build both destination sites at selected source
         env:
           SOURCE_SHA: ${{ needs.select.outputs.source_sha }}

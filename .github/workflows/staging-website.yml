@@ -75,9 +75,12 @@ jobs:
       - uses: emscripten-core/setup-emsdk@v15
         with:
           version: 6.0.13
-      - name: Build compiler for website examples
+      # The selected source may predate the site build that makes the wasm
+      # runtime itself; the explicit step keeps such a source buildable.
+      - name: Build compiler and WebAssembly runtime for website examples
         run: |
           make -C source build-safe
+          make -C source wasm-runtime
       - name: Build complete runnable website
         run: npm --prefix source/site run build
       - name: Retain staged release and check site
