@@ -118,8 +118,11 @@
     "test": "node --test test/*.test.js && vscode-tmgrammar-test 'test/**/*.test.x' 'test/**/*.test.xlisp'"
   },
   "devDependencies": {
-    "@vscode/vsce": "3.9.2",
+    "@vscode/vsce": "4.1.1",
     "vscode-tmgrammar-test": "0.1.3"
+  },
+  "overrides": {
+    "minimatch@^10": "11.0.8"
   },
   "icon": "images/icon.png",
   "main": "./extension.js",
