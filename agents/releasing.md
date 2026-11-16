@@ -8,10 +8,12 @@ advances only for a deliberate release, preserving individual commits,
 preferably by fast-forward. Development may continue after candidate
 selection.
 
-Gary authorizes production promotion, advances `main`, and creates release
-tags. Plan or implementation approval does not authorize those actions.
-Agents prepare candidates and carry out explicitly authorized staging or
-verification. The [release skill](skills/release-x2c/SKILL.md) owns task
+Gary decides each publication by asking for it: a release, or a website
+update. That one request covers every step below, including staging,
+advancing `main`, the tag, and promotion. The session performs them without
+further questions and reports once, with the verified live result or the
+exact failure. Approval of a plan or an implementation is not a request to
+publish. The [release skill](skills/release-x2c/SKILL.md) owns task
 execution; [deployment operations](../etc/release/README.md) owns provisioning,
 and recovery commands. Ordinary validation gates
 and their costs are unchanged.
@@ -99,34 +101,33 @@ and does not run the notes application.
    stage or verification is not a promotable candidate. The final full build
    must precede final staging verification; never rebuild after testing and
    substitute the new bytes.
-4. Give Gary the exact candidate, version, source SHA, proof and current main
-   SHA. He deliberately advances main and creates the annotated tag with one
-   command, written with the absolute path of his checkout:
+4. Advance main and create the annotated tag:
 
    ```sh
    tools/release-main "$source_sha" "$version"
    ```
 
    The command fetches, checks that main fast-forwards to the source SHA and
-   that the commit declares the version, asks him to type the version, then
-   pushes main and the tag. It works from any directory and under any
-   worktree delivery context. A repeated run completes a missing step. Run it
-   with `--dry-run` before handing it over; that makes every check and pushes
-   nothing. Stop on an ancestry conflict or existing conflicting tag.
-   Never force main or move a public tag. This action does not publish assets
-   by itself and can temporarily put main ahead of the production site.
-5. With Gary's explicit promotion authorization, dispatch the selected
-   candidate against the observed current production version:
+   that the commit declares the version, then pushes main and the tag. It
+   works from any directory and under any worktree delivery context. A
+   repeated run completes a missing step, and `--dry-run` makes every check
+   and pushes nothing. Stop on an ancestry conflict or existing conflicting
+   tag. Never force main or move a public tag. This action does not publish
+   assets by itself and can temporarily put main ahead of the production
+   site.
+5. Dispatch the selected candidate against the observed current production
+   version:
 
    ```sh
    gh workflow run promote.yml --repo gwf/x2c --ref main \
      -f identity="$candidate" -f expected_version="$current_version"
    ```
 
-   The run waits once for Gary's review of the `production-publication`
-   environment, before its first job. Follow that exact run through upload,
-   Pages, live checks and retained proof. Report completion only after
-   production verification succeeds.
+   Follow that exact run through upload, Pages, live checks and retained
+   proof. Report completion only after production verification succeeds.
+
+Rerun a failed job when the failure is in the runner or a service and not
+in the candidate, and say so in the final report.
 
 The retained legacy `pages.yml` source is not part of candidate promotion;
 its workflow registration stays disabled, and it is never dispatched as an
@@ -151,8 +152,7 @@ lacks.
    Record the run ID. The run verifies the live staging website, then builds
    and keeps the production website for the same commit. Its summary lists
    the book files changed since the production release.
-2. Give Gary the staging URL, the source SHA, and that list. With his
-   explicit authorization, promote the kept archive:
+2. Check the staged website, then promote the kept archive:
 
    ```sh
    gh workflow run promote.yml --repo gwf/x2c --ref main -f mode=website \
@@ -160,9 +160,10 @@ lacks.
      -f expected_version="$current_version"
    ```
 
-   The run waits once for Gary's review, deploys without building, and
-   compares the live site with the archive. The released installer, version,
-   package index, and book PDF stay byte for byte.
+   The run deploys without building and compares the live site with the
+   archive. The released installer, version, package index, and book PDF
+   stay byte for byte. Stop before this step and ask Gary when the staging
+   run's list shows book changes that describe unreleased behavior.
 
 [Deployment operations](../etc/release/README.md#website-only-updates) has
 the details.

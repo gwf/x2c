@@ -341,8 +341,8 @@ git push origin HEAD:refs/heads/dev
 
 If the push is rejected because `dev` advanced, fetch, integrate, review,
 and validate the new tree before retrying. Never force-push `dev` or `main`.
-Do not advance `main` as ordinary delivery; Gary authorizes production
-promotion separately under [releasing](../../releasing.md).
+Do not advance `main` as ordinary delivery; a release that Gary requests
+does that under [releasing](../../releasing.md).
 
 For a requested draft PR review stop, push the workspace branch to the same-named
 remote branch and use `dev` as the base:

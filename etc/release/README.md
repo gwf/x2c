@@ -13,9 +13,9 @@ The source repository is the public `gwf/x2c`. The public `gwf/x2c-staging`
 stores generated output and immutable candidates; it is not a development
 source tree.
 
-The release owner approves production publication, advances `main`, and
-creates release tags. The workflows never create or move `main` or a
-production tag.
+Gary requests each publication. The session that carries it out advances
+`main` and creates the release tag with `tools/release-main`. The workflows
+never create or move `main` or a production tag.
 
 ## Account setup
 
@@ -38,9 +38,8 @@ permissions and one credential, not values embedded in source.
    DNS CNAME to `gwf.github.io` and a domain verified by the owning account.
    Production Pages serves `x2c-lang.dev` from `main`.
 5. In the source repository, `staging-publication` permits `dev`, and
-   `production-publication` permits `main` and requires the release owner's
-   review. Repository settings allow the workflow token to write release
-   assets.
+   `production-publication` permits `main`. Repository settings allow the
+   workflow token to write release assets.
 6. Allowed Actions, App policy, and branch and tag rules match these
    workflows. Workflow artifacts expire after 30 days; publicly staged assets
    and promoted candidates are kept indefinitely, so artifact expiration
@@ -89,7 +88,7 @@ names per run and attempt, so a failed receipt upload cannot replace a prior
 receipt. Promotion accepts only a receipt whose exact staging workflow attempt
 completed successfully.
 
-The release owner selects one exact verified candidate, fast-forwards `main`
+A release selects one exact verified candidate, fast-forwards `main`
 preserving commits, and creates its annotated version tag. Promotion checks
 that both point to the selected source, uploads those same bytes to a draft
 release, verifies the remote assets, publishes the release, and deploys the
@@ -110,13 +109,13 @@ If the output commit was written but dispatch failed, dispatch staging Pages
 with that recorded exact output SHA while holding the staging publication
 lock. Do not replay an old expected-output SHA and overwrite a newer
 selection. If a Pages run is still running after a timeout, let it finish or
-have the release owner resolve it before starting another publication.
+resolve it before starting another publication.
 Publication workflows serialize per destination without cancelling a running
 publication.
 
 `restore-pages.yml` is the production rollback path for a previously promoted
-candidate. The release owner selects its exact identity and the currently
-observed production version, then dispatches from `main`:
+candidate. Select its exact identity and the currently observed production
+version, then dispatch from `main`:
 
 ```sh
 gh workflow run restore-pages.yml --repo gwf/x2c --ref main \
@@ -200,8 +199,8 @@ and the current production version as `expected_version`.
 `production-website.yml` builds nothing. It requires a successful `stage.yml`
 run from dev, an archive for that source, and a retained release identical
 to the one production serves. It then deploys the archive through Pages and
-compares the live site with it. The run waits once for the release owner's
-review. It changes no branch, tag, release asset, or receipt. The next full
+compares the live site with it. It changes no branch, tag, release asset,
+or receipt. The next full
 promotion replaces a website-only update, and `restore-pages.yml` restores a
 promoted candidate's complete site.
 

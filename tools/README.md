@@ -49,8 +49,7 @@ describes its options.
 ## Release tooling
 
 - `release-candidate.py` assembles and transports release candidates.
-- `release-main` advances `main` and publishes the release tag; the release
-  owner runs it.
+- `release-main` advances `main` and publishes the release tag.
 - `gen-package-index` writes the package index that `x2c install` reads.
 
 [Releasing](../agents/releasing.md) and
