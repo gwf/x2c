@@ -59,9 +59,11 @@ def command(args, root, *, input=None, check=True, deadline=None):
             except (subprocess.TimeoutExpired, KeyboardInterrupt) as error:
                 # Git's SSH/credential helpers can retain its output pipes.
                 # Stop this wait's process group before draining those pipes.
+                # macOS reports a group whose only process has exited and
+                # is not yet reaped as PermissionError.
                 try:
                     os.killpg(process.pid, signal.SIGKILL)
-                except ProcessLookupError:
+                except (ProcessLookupError, PermissionError):
                     pass
                 process.communicate()
                 if isinstance(error, KeyboardInterrupt):
