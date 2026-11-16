@@ -267,8 +267,8 @@ NOT_RECORDS = {"cui_renderer_iface", "cui_allocator", "cui_ctx_desc",
 
 # The records a program keeps by name: the arrays a component edits in
 # place, and the arrays a program both reads and passes to a component.
-COLLECTIONS = ["cui_cal_event", "cui_candle",
-               "cui_check_step", "cui_curve_key", "cui_doc_tab",
+COLLECTIONS = ["cui_cal_event", "cui_candle", "cui_chart_annotation",
+               "cui_check_step", "cui_curve_key", "cui_doc_tab", "cui_dot_series",
                "cui_feature_flag", "cui_flame_span",
                "cui_gantt_task", "cui_gradient_stop", "cui_kv_pair",
                "cui_month_event", "cui_plan_step",

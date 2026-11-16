@@ -1,13 +1,13 @@
-# CUI 1.3.1 profile
+# CUI 1.4.0 profile
 
-- Upstream release: tag `v1.3.1` of `yappologistic/CUI`, reported by the
-  header as CUI 1.3.1
-- Source archive: `https://github.com/yappologistic/CUI/archive/refs/tags/v1.3.1.tar.gz`
+- Upstream release: tag `v1.4.0` of `yappologistic/CUI`, reported by the
+  header as CUI 1.4.0
+- Source archive: `https://github.com/yappologistic/CUI/archive/refs/tags/v1.4.0.tar.gz`
 - Source archive SHA-256:
-  `d925329943d377b748995efed5603b47ff469eb956c297244b562a73b74641d5`
+  `fb347014eaa6238b729a9153e9f4ea61d4ceb6090b23d31db62ebf6e4fe8d1f7`
 - Public header SHA-256 values: `headers.sha256` pins `cui/cui.h`,
   `cui/cui_app.h`, `cui/cui_icons.h`, and `cui/cui_render.h`
-- License: MIT, reproduced verbatim in `LICENSES/cui-1.3.1-MIT.txt`.
+- License: MIT, reproduced verbatim in `LICENSES/cui-1.4.0-MIT.txt`.
   `licenses.sha256` pins every file under `LICENSES/`.
 
 Every profile applies `patches/table-row-state.patch`. It adds two
@@ -50,7 +50,7 @@ Left out by leaving the macro undefined: Arabic-script shaping and
 bidirectional text (`CUI_TEXT_SHAPING`), which upstream marks experimental.
 
 CUI's option records gain fields between minor versions. The package
-compiles CUI from this pinned source and `src/cui-1.3.h` rejects another
+compiles CUI from this pinned source and `src/cui-1.4.h` rejects another
 minor version, so the records a program fills always match the archive.
 
 ## macOS
@@ -59,7 +59,10 @@ minor version, so the records a program fills always match the archive.
 `cui.c` is compiled with `-x objective-c -fobjc-arc -D_DARWIN_C_SOURCE`.
 A program links `libcui.a` with the Cocoa, QuartzCore, and OpenGL
 frameworks. Apple's frameworks are part of the system and are not
-redistributed. Verified on macOS arm64.
+redistributed. CUI 1.4.0 was verified on macOS arm64 on 2026-11-16:
+`make check example` passes 31 tests and draws all 205 component scenes.
+The gallery draws all 27 pages off screen. No native window was opened
+for this upgrade.
 
 ## Linux
 
@@ -69,8 +72,10 @@ redistributed. Verified on macOS arm64.
 `libx11-dev` on Ubuntu. CUI loads OpenGL when a window opens, so linking
 needs no OpenGL package. Emoji draw only when the host has an emoji font.
 
-Verified on Ubuntu 24.04 arm64 and x86_64 with `make check`, which draws
-off screen and needs no X server. A window has not been opened on Linux.
+The previous CUI 1.3.1 profile was verified on Ubuntu 24.04 arm64 and
+x86_64 with `make check`, which draws off screen and needs no X server.
+The 1.4.0 profile has not been run on Linux. A window has not been opened
+on Linux.
 
 ## Browser
 
@@ -96,9 +101,11 @@ to the browser, and with `-sMIN_WEBGL_VERSION=2 -sMAX_WEBGL_VERSION=2
 -sGL_ENABLE_GET_PROC_ADDRESS=1`. It needs a browser with 64-bit
 WebAssembly memory, JavaScript Promise Integration, and WebGL 2.
 
-Verified on 2026-11-10 with Emscripten 6.0.13 and SDL 2.32.10: under
-Node 26 for off-screen drawing, and in the Chromium of the Claude desktop
-app's browser pane for the window. Not run in Safari or Firefox.
+CUI 1.4.0 was built on 2026-11-16 with Emscripten 6.0.13 and tested
+under Node 26.12.1: `make web web-check` builds the gallery and stress
+programs and draws all 27 gallery pages off screen. Interactive browser
+rendering was not retested for this upgrade. The previous CUI 1.3.1
+profile was tested in Chromium, but not Safari or Firefox.
 
 ## Bundled third-party content
 

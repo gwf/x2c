@@ -26,6 +26,7 @@
 #include "scenes/choices.x"
 #include "scenes/tools.x"
 #include "scenes/chrome.x"
+#include "scenes/instruments.x"
 
 #define FAMILY_LIMIT 16
 
@@ -47,6 +48,7 @@ static void add_families(void) {
   add_family(choices_family());
   add_family(tools_family());
   add_family(chrome_family());
+  add_family(instruments_family());
 }
 
 // The page every scene is drawn on.

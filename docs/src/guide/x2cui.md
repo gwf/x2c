@@ -5,16 +5,17 @@ For the full component forms, collections, and build profile, see the
 This chapter belongs to [Advanced Topics](../library/advanced-topics.md).
 
 The `x2cui` package draws windows and user interfaces from x2c. It is an
-interface to [CUI](https://github.com/yappologistic/CUI) 1.3.1, a C99
+interface to [CUI](https://github.com/yappologistic/CUI) 1.4.0, a C99
 immediate-mode UI library that draws its own components. A program
 describes the whole screen with calls on every frame. CUI lays the screen
 out, handles the mouse and keyboard, and draws it in a window or into
 pixels. The entry unit is `packages/x2cui/src/x2cui.x`, and every public
 name compiles to `x2cui__*`.
 
-The package is experimental. Native builds are supported on macOS arm64 and
-on Linux arm64 and x86_64. On Linux the package passes its off-screen
-checks; the windowed path has not been tested there. The package has
+The package is experimental. CUI 1.4.0 passes off-screen checks on macOS
+arm64 and under Node with WebAssembly. Linux arm64 and x86_64 checks
+were last run with CUI 1.3.1; the Linux windowed path has not been tested.
+The package has
 no release bundle, so a program builds it from a checkout. A browser build
 of the gallery also exists. CUI has no accessibility tree, no inline
 input-method composition, and no bidirectional text, and a program draws
@@ -224,6 +225,21 @@ ui.table_row (row, selected: s.chosen == o) {
 `examples/orders.x` sorts by `s.sort.column` before drawing. The README
 also describes the data grid, which draws only the rows on screen.
 
+## Instruments
+
+CUI 1.4 supplies `ui.dot_chart`, `ui.event_track`, `ui.readout`, and
+`ui.dot_display`. The Instruments gallery page shows all four. A dot
+chart takes `DotSeries` records and a separate sample count; each record
+borrows its sample array. Dot, line, and bar charts accept `annotations`
+for vertical lines, thresholds, and labelled points. Use an option
+literal for constant annotations or `ChartAnnotations` for changing data.
+
+An event track edits a sorted `ArrayDbl` of times. The method reserves
+room for additions and updates the array's length after CUI edits it.
+Its result reports additions, removals, selection, and dragging. The
+`hours` axis unit displays times of day, including values beyond 24.
+See the package README for calls and ownership details.
+
 ## Data the UI changes
 
 Some components read an array of CUI's own records, such as a tab bar's
@@ -344,17 +360,17 @@ to-do list, the mail list, the orders table, and every scene off screen:
   menu. `builds/mail --shot IMAGE.png` draws the inbox.
 - `orders.x` is a table of recent orders with a Map of columns, sorted
   by the header clicked. `builds/orders --shot IMAGE.png` draws it.
-- `gallery.x` is a port of CUI's own gallery: the same 26 pages, with each
-  page in a file under `examples/gallery/`. Read a page beside its C
-  original to compare the two forms. `make -C packages/x2cui run-gallery`
-  opens it, and `builds/gallery --shots DIR` draws every page. Each page
-  drawn that way is the same image, byte for byte, as CUI's C gallery.
+- `gallery.x` has 27 pages, with each page in a file under
+  `examples/gallery/`. It ports CUI's gallery and adds an Instruments
+  page for dot charts, event tracks, readouts, and dot displays.
+  `make -C packages/x2cui run-gallery` opens it, and
+  `builds/gallery --shots DIR` draws every page.
 - `stress.x` animates as many moving circles or cards as its slider asks
   for and shows the frame rate. `make -C packages/x2cui run-stress` opens
   it. `builds/stress --frames N` times N frames off screen and prints the
   means.
 - `scenes.x` is a check, not an application. It draws one small scene for
-  each of CUI's 201 components, and `--check` fails when a component in
+  each of CUI's 205 components, and `--check` fails when a component in
   CUI's header has no scene.
 
 The gallery and the stress test also run in a browser, from the same x2c
@@ -367,13 +383,14 @@ make -C packages/x2cui web-serve  # then open http://127.0.0.1:4399/
 
 `http://127.0.0.1:4399/?stress` opens the stress test. The program is
 64-bit WebAssembly drawn with WebGL 2. The browser must support 64-bit
-WebAssembly memory and JavaScript Promise Integration. The build has run
-in a Chromium-based browser and under Node.
+WebAssembly memory and JavaScript Promise Integration. CUI 1.4.0 has been
+tested off screen under Node. Interactive Chromium testing was last run
+with CUI 1.3.1; see the package's `PROFILE.md` for verification details.
 
 ## The native API
 
 Importing the package also makes CUI's C API available under its own
-names, through the published header `src/cui-1.3.h`. `Ui` is CUI's
+names, through the published header `src/cui-1.4.h`. `Ui` is CUI's
 `cui_ctx *` and `App` is its `cui_app *`, so a raw CUI call and a method
 form can act on the same object. `tests/test-raw-api.x` calls CUI's C
 functions directly after `import "x2cui"`.

@@ -1,6 +1,6 @@
 /*  test-raw-api.x -- The pinned CUI API reached through the package.
 
-    The package publishes src/cui-1.3.h, so importing it is enough to call
+    The package publishes src/cui-1.4.h, so importing it is enough to call
     upstream declarations under their own names, including the ones the
     client never wraps.
 */
@@ -13,7 +13,11 @@ import "x2cui" with Ui;
 
 static void cui_raw_header(void) {
   EXPECT_INT_EQ(CUI_VERSION_MAJOR, 1);
-  EXPECT_INT_EQ(CUI_VERSION_MINOR, 3);
+  EXPECT_INT_EQ(CUI_VERSION_MINOR, 4);
+  EXPECT_INT_EQ(CUI_VERSION_PATCH, 0);
+
+  cui_app_desc desc = { .app_id = "org.example.Notes" };
+  EXPECT_STR_EQ(desc.app_id, "org.example.Notes");
 
   cui_sw_renderer *renderer = cui_sw_create();
   defer cui_sw_destroy(renderer);

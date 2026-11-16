@@ -43,6 +43,7 @@
 #include "gallery/files.x"
 #include "gallery/devtools.x"
 #include "gallery/devtools2.x"
+#include "gallery/instruments.x"
 
 // The first nine are in the order of the PAGE_ constants.
 static Page pages[] = {
@@ -73,6 +74,7 @@ static Page pages[] = {
   { "Files", CUI_ICON_FOLDER, page_files },
   { "Developer tools", CUI_ICON_SQUARE_TERMINAL, page_devtools },
   { "More developer tools", CUI_ICON_BUG, page_devtools2 },
+  { "Instruments", CUI_ICON_CHART_LINE, page_instruments },
 };
 
 static int page_total(void) => sizeof pages / sizeof *pages;

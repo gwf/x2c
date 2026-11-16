@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "name": "cui",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "profile": "static-app-cocoa-fonts",
   "sources": [
     {
       "name": "cui",
-      "url": "https://github.com/yappologistic/CUI/archive/refs/tags/v1.3.1.tar.gz",
-      "sha256": "d925329943d377b748995efed5603b47ff469eb956c297244b562a73b74641d5",
-      "root": "CUI-1.3.1"
+      "url": "https://github.com/yappologistic/CUI/archive/refs/tags/v1.4.0.tar.gz",
+      "sha256": "fb347014eaa6238b729a9153e9f4ea61d4ceb6090b23d31db62ebf6e4fe8d1f7",
+      "root": "CUI-1.4.0"
     }
   ],
   "inputs": [

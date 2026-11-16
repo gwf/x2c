@@ -43,7 +43,8 @@ void page_charts(Ui ui, Gallery g) {
                             "between points.");
   ui.card () {
     ui.line_chart("revenue", trends, months,
-      area: true, smooth: true, height: 240, format: "$%.0fk");
+      area: true, smooth: true, height: 240, format: "$%.0fk",
+      annotations: [{kind: y, y: 50, label: "TARGET $50k"}]);
   }
   ui.box (dir: grid, columns: 2, min_column_width: 260,
           gap: 16) {
@@ -52,7 +53,8 @@ void page_charts(Ui ui, Gallery g) {
       ui.card () {
         ui.bar_chart("visits", visits,
                      %("Jan" "Feb" "Mar" "Apr" "May" "Jun"),
-                     height: 200);
+                     height: 200,
+                     annotations: [{kind: point, x: 5, y: 71, label: "PEAK"}]);
       }
     }
     ui.column (gap: 12) {
