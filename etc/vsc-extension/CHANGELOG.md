@@ -3,7 +3,7 @@
 All notable changes to the x2c syntax extension are recorded here, newest
 first.
 
-## 0.4.1 - 2026-10-31
+## 0.4.1 - 2026-11-16
 
 - Without an explicit compiler path, search `PATH`, then
   `~/.local/x2c/bin/x2c`. A workspace `./x2c` is no longer selected
