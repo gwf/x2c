@@ -10,10 +10,14 @@ title: Loop, there it is!
 ```x2c
 ~#include "path.x"
 
-~int main(int argc, char **argv) {
+~String example_data(String name) {
 ~  Path source = String.new(__FILE__);
-~  String path = argc > 1 ? argv[1]
-~    : source.dirname().join("../data/love-files/quantities.txt");
+~  return source.dirname().join("../data", name);
+~}
+
+~int main(int argc, char **argv) {
+~  Path directory = argc > 1 ? argv[1] : example_data("love-files");
+~  Path path = directory.join("quantities.txt");
 
   // Walk collection elements and Map values.
   foreach (int score in [3, 4, 5])

@@ -312,7 +312,7 @@ String SourceView.package_entry(
   return NULL;
 }
 
-/** Recognizes a package's `src/` files or its package-named legacy entry.
+/** Recognizes a package's `src/` files or its package-named entry file.
     Other files under the package directory are consumers.
 */
 int Compiler.is_package_source(String directory, String path) {

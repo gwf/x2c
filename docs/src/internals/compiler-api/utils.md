@@ -32,7 +32,7 @@ System utilities for environment discovery and workers.
 | [`Compiler.home_libexec`](#Compiler.home_libexec) | Returns the command directory for this checkout or installed home. |
 | [`Compiler.home_packages`](#Compiler.home_packages) | Returns `<home>/packages`, which may not exist, or NULL without a home. |
 | [`Compiler.identity`](#Compiler.identity) | Returns the active compiler's identity in 16 hexadecimal digits. |
-| [`Compiler.is_package_source`](#Compiler.is_package_source) | Recognizes a package's `src/` files or its package-named legacy entry. |
+| [`Compiler.is_package_source`](#Compiler.is_package_source) | Recognizes a package's `src/` files or its package-named entry file. |
 | [`Compiler.module_stamp`](#Compiler.module_stamp) | Returns the stamp a native module records: `x2c-module-stamp:` and the running compiler's identity. |
 | [`Compiler.package_directory`](#Compiler.package_directory) | Returns the package directory that holds `path` below one of `roots`: the root's child on the way to `path`, compared by canonical path, when that child's name is an identifier. |
 | [`Compiler.prune_cache`](#Compiler.prune_cache) | Removes each entry of the cache `directory` whose recorded `source` file no longer exists and that no other run holds by its `lock`. |
@@ -256,7 +256,7 @@ Source: `src/utils.x`
 
 `int Compiler.is_package_source(String directory, String path)`
 
-Recognizes a package's `src/` files or its package-named legacy entry.
+Recognizes a package's `src/` files or its package-named entry file.
 Other files under the package directory are consumers.
 
 Source: `src/utils.x`
