@@ -217,6 +217,10 @@ editing remain separate requirements; none is claimed solved here.
 
 ## Recommended next decision
 
+The authorized isolated focus experiment is now complete. See
+[its results and proposed contract](md-edit-focus-prototype.md) for the resolved
+pass requirements and remaining API boundaries. Shared changes remain unapproved.
+
 Approve an isolated focus-participation prototype plus MdApp eligibility fixes,
 using the private hook and the same exact CUI revision. Preserve selection as
 editor state while replacing the private focus flag as input authority. Run the
