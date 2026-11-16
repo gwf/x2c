@@ -106,6 +106,52 @@ jobs:
             --expected-output "$EXPECTED_OUTPUT"
       - name: Verify live website and retained release files
         run: python3 trusted/etc/release/verify-website.py --site source/site/dist
+      # The same source is then built for production and kept, so that
+      # promotion deploys this archive without building.
+      - name: Fetch the release production serves
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          curl -fsSL --retry 3 https://x2c-lang.dev/release-candidate.json \
+            -o production-release.json
+          read -r version released < <(python3 -c 'import json
+          release = json.load(open("production-release.json"))
+          print(release["version"], release["source_sha"])')
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ && "$released" =~ ^[0-9a-f]{40}$ ]]
+          gh release download "v$version" --repo "$GITHUB_REPOSITORY" \
+            --pattern site-production.tar.gz --dir released
+          mkdir released/public
+          tar -xzf released/site-production.tar.gz -C released/public
+          cmp production-release.json released/public/release-candidate.json
+          echo "PRODUCTION_SOURCE_REF=$released" >> "$GITHUB_ENV"
+          git -C source fetch origin "$released"
+          {
+            echo "### Book files changed since production release $version"
+            echo '```'
+            git -C source diff --stat "$released" "$SOURCE_SHA" -- docs/src
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Build and keep the production website at the same source
+        env:
+          SITE_RELEASE_CHANNEL: production
+          SITE_URL: https://x2c-lang.dev
+          SITE_STAGED_SOURCE_REF: ${{ env.PRODUCTION_SOURCE_REF }}
+          SITE_CANDIDATE_ID: ""
+          SOURCE_SHA: ${{ inputs.source_sha }}
+        run: |
+          npm --prefix source/site run build
+          python3 trusted/etc/release/prepare-website.py \
+            --site source/site/dist --staged released/public \
+            --source-sha "$SOURCE_SHA" --destination production \
+            --output production/site-production.tar.gz
+          cd source
+          node site/scripts/check-built-site.mjs
+      - uses: actions/upload-artifact@v7
+        with:
+          name: website-production
+          path: production
+          retention-days: 30
       - uses: actions/upload-artifact@v7
         if: always()
         with:

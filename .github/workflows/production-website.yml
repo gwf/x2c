@@ -1,0 +1,96 @@
+# Deploys the production website a website-only staging run built and kept.
+# It builds nothing; the release's installer, version, and packages stay.
+name: promote website only
+on:
+  workflow_call:
+    inputs:
+      website_run:
+        required: true
+        type: string
+      source_sha:
+        required: true
+        type: string
+      expected_version:
+        required: true
+        type: string
+permissions:
+  contents: read
+  actions: read
+jobs:
+  select:
+    runs-on: ubuntu-24.04
+    environment: production-publication
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: website-production
+          path: staged
+          run-id: ${{ inputs.website_run }}
+          github-token: ${{ github.token }}
+      - name: Check the staged website against production
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WEBSITE_RUN: ${{ inputs.website_run }}
+          SOURCE_SHA: ${{ inputs.source_sha }}
+          EXPECTED_VERSION: ${{ inputs.expected_version }}
+        run: |
+          [[ "$WEBSITE_RUN" =~ ^[0-9]+$ && "$SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          python3 tools/release-candidate.py site-version \
+            --expected "$EXPECTED_VERSION"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/$WEBSITE_RUN" > run.json
+          curl -fsSL --retry 3 https://x2c-lang.dev/release-candidate.json \
+            -o live-release.json
+          python3 etc/release/select-website.py \
+            --archive staged/site-production.tar.gz --source-sha "$SOURCE_SHA" \
+            --run run.json --live-release live-release.json --output public
+      - name: Keep the exact production website for Pages
+        uses: actions/upload-artifact@v7
+        with:
+          name: production-website
+          path: staged/site-production.tar.gz
+          retention-days: 30
+  pages:
+    needs: select
+    runs-on: ubuntu-24.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: production-website
+          path: staged
+      - name: Extract the selected website
+        run: |
+          mkdir public
+          tar -xzf staged/site-production.tar.gz -C public
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v5
+  verify:
+    needs: pages
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+          sparse-checkout: etc/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: production-website
+          path: staged
+      - name: Verify live website and retained release files
+        run: |
+          mkdir public
+          tar -xzf staged/site-production.tar.gz -C public
+          python3 etc/release/verify-website.py --site public

@@ -134,6 +134,39 @@ alternative to deploying the selected site archive. The 0.15.0 and 0.15.1
 releases established the production baseline and recovery path recorded
 under deployment operations.
 
+## Update only the website
+
+A website correction does not need a release. The website is built from the
+whole `dev` tree, so the book it publishes describes `dev`. Cut a patch
+release instead when the book has documented behavior the released compiler
+lacks.
+
+1. Stage the selected `dev` commit, using the current staging output commit:
+
+   ```sh
+   gh workflow run stage.yml --repo gwf/x2c --ref dev -f mode=website \
+     -f source_sha="$source_sha" -f expected_output="$staging_output_sha"
+   ```
+
+   Record the run ID. The run verifies the live staging website, then builds
+   and keeps the production website for the same commit. Its summary lists
+   the book files changed since the production release.
+2. Give Gary the staging URL, the source SHA, and that list. With his
+   explicit authorization, promote the kept archive:
+
+   ```sh
+   gh workflow run promote.yml --repo gwf/x2c --ref main -f mode=website \
+     -f website_run="$website_run" -f source_sha="$source_sha" \
+     -f expected_version="$current_version"
+   ```
+
+   The run waits once for Gary's review, deploys without building, and
+   compares the live site with the archive. The released installer, version,
+   package index, and book PDF stay byte for byte.
+
+[Deployment operations](../etc/release/README.md#website-only-updates) has
+the details.
+
 ## Versions and packages
 
 While x2c is `0.x`, bump the last number for fixes and the middle number when

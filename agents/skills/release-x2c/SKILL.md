@@ -46,6 +46,14 @@ and the observed previous production version. Follow asset upload, complete
 site deployment, live verification and retained proof. Report success only
 after all finish; a green build, tag or visible release alone is insufficient.
 
+## Update only the website
+
+For a website correction between releases, follow
+[Update only the website](../../releasing.md#update-only-the-website): stage
+the `dev` commit with `mode=website`, then promote the kept archive with
+Gary's explicit authorization. Report the book files the staging run lists
+as changed since the release.
+
 ## Recover
 
 Use the recovery instructions in deployment operations. Preserve immutable

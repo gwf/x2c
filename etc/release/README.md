@@ -165,7 +165,7 @@ needed. None of these adds a gate. Finish a change to the release workflows
 or helpers with `tools/gate-state.py ensure agent-pr-check`; in a sandboxed
 checkout, set `X2C_CACHE_DIR` to a writable scratch directory.
 
-## Website-only staging
+## Website-only updates
 
 To update the website from dev without replacing the staged compiler or
 packages, dispatch `stage.yml` from dev with `mode=website`, a full
@@ -186,5 +186,29 @@ The resulting website is not a newly verified compiler candidate and does not
 alter immutable candidate archives or promotion receipts. Full-candidate
 staging will replace this website-only update on its next deployment.
 
-Local checks are `python3 etc/release/test-prepare-website.py` and
+After the staged website verifies, the same run builds that source for
+production. It downloads `site-production.tar.gz` from the release that
+`x2c-lang.dev` serves, copies the same retained files from it, and keeps the
+result as the `website-production` workflow artifact for 30 days. The run
+summary lists the book files that changed since that release. The website's
+source recipe checks out the retained release's source, not the website
+source.
+
+To publish that website, dispatch `promote.yml` from main with
+`mode=website`, the staging run ID as `website_run`, the same `source_sha`,
+and the current production version as `expected_version`.
+`production-website.yml` builds nothing. It requires a successful `stage.yml`
+run from dev, an archive for that source, and a retained release identical
+to the one production serves. It then deploys the archive through Pages and
+compares the live site with it. The run waits once for the release owner's
+review. It changes no branch, tag, release asset, or receipt. The next full
+promotion replaces a website-only update, and `restore-pages.yml` restores a
+promoted candidate's complete site.
+
+The `production-publication` and `github-pages` environments permit only
+`main`. A change to this path therefore takes effect in production after the
+next release puts it on `main`.
+
+Local checks are `python3 etc/release/test-prepare-website.py`,
+`python3 etc/release/test-select-website.py`, and
 `node --test site/tests/release-destination.test.mjs`.

@@ -4,9 +4,22 @@ name: promote verified candidate
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: Promote a full candidate or update only the website
+        type: choice
+        options: [candidate, website]
+        default: candidate
       identity:
         description: Exact verified staging candidate selected by Gary
-        required: true
+        required: false
+        type: string
+      website_run:
+        description: Successful website-only staging run ID
+        required: false
+        type: string
+      source_sha:
+        description: Exact dev source SHA that staging run built
+        required: false
         type: string
       expected_version:
         description: Current production site version (guard against stale selection)
@@ -20,7 +33,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  website:
+    if: inputs.mode == 'website'
+    uses: ./.github/workflows/production-website.yml
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+    with:
+      website_run: ${{ inputs.website_run }}
+      source_sha: ${{ inputs.source_sha }}
+      expected_version: ${{ inputs.expected_version }}
   publish:
+    if: inputs.mode != 'website'
     outputs:
       runners: ${{ steps.matrix.outputs.runners }}
     runs-on: ubuntu-24.04
