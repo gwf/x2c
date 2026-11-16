@@ -68,14 +68,19 @@ jobs:
         run: |
           make build-safe
           make wasm-runtime
-      - name: Run the foreach example under Node
+      - name: Run five examples under Node
         run: |
-          mkdir -p /tmp/x2c-wasm-example
-          tools/wasm-build examples/foreach.x /tmp/x2c-wasm-example/foreach
-          node --input-type=module -e \
-            'import("file:///tmp/x2c-wasm-example/foreach.js").then(m => m.default())' \
-            > /tmp/x2c-wasm-example/stdout
-          diff -u examples/expected/foreach.stdout /tmp/x2c-wasm-example/stdout
+          out=/tmp/x2c-wasm-example
+          mkdir -p "$out"
+          for example in foreach love/literals power/classes \
+              power/protocols magic/compile-time; do
+            name=${example//\//-}
+            tools/wasm-build "examples/$example.x" "$out/$name"
+            node --input-type=module -e \
+              "import('file://$out/$name.js').then(m => m.default())" \
+              > "$out/$name.stdout"
+            diff -u "examples/expected/$name.stdout" "$out/$name.stdout"
+          done
 
   release-validation:
     if: inputs.release_validation
