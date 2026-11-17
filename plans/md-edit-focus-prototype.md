@@ -148,6 +148,11 @@ and wall timings and all policies are retained in `results.json` and the CSVs.
 
 ## Proposed contract for review
 
+The broader [focused-component input proposal](focused-component-input.md)
+now governs the proposed API direction. This section records the earlier focus
+prototype boundary; its measured results remain evidence, not a complete
+key-map or unhandled-input contract.
+
 1. **Opt-in custom text focus.** A participating canvas registers in CUI's
    existing focus order and layer bookkeeping. Pointer and Tab use the same
    focus owner as built-ins. Text participation suppresses Space/Enter button
