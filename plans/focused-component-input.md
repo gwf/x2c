@@ -1,9 +1,9 @@
 # Focused-component input handling
 
-> Status: proposed contract for Gary's review, 2026-11-16. Documentation only.
-> No shared CUI, x2cui, or md-edit implementation changes are authorized by this
-> proposal. This reframes the earlier text-canvas proposal around components
-> that own their keyboard behavior.
+> Status: isolated implementation and measurements complete, 2026-11-16.
+> See [prototype results](md-edit-dispatch-prototype.md). Shared CUI and x2cui
+> implementation remains held for review. This contract reframes the earlier
+> text-canvas proposal around components that own their keyboard behavior.
 
 ## Goal and division of responsibility
 
