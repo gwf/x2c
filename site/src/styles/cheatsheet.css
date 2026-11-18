@@ -115,7 +115,7 @@
   display: grid;
   grid-template-columns: 1fr 1.07fr 1.23fr;
   grid-template-rows: minmax(0, 1fr);
-  column-gap: 1.7cqw;
+  column-gap: 1.4cqw;
 }
 
 /* Every column fills the page height: each section grows with its row
@@ -137,9 +137,10 @@
 
 .sheet-section h2 {
   margin: 0;
-  padding: 0 var(--row-inset) 0.3cqw;
-  color: var(--red-text);
-  font: 700 1cqw/1 Archivo, Helvetica, sans-serif;
+  padding: 0.33cqw var(--row-inset) 0.23cqw;
+  background: #3d3d3d;
+  color: var(--white);
+  font: 700 0.95cqw/1 Archivo, Helvetica, sans-serif;
   letter-spacing: 0.01em;
 }
 
@@ -160,7 +161,7 @@
   grid-template-columns: subgrid;
   grid-column: 1 / -1;
   align-items: baseline;
-  align-content: start;
+  align-content: center;
   padding: 0.15cqw var(--row-inset);
 }
 
@@ -219,7 +220,7 @@
 
   .sheet-section { margin-top: 22px; }
 
-  .sheet-section h2 { padding: 0 8px 5px; font-size: 14px; }
+  .sheet-section h2 { padding: 6px 8px; font-size: 14px; }
   .sheet-row { padding: 7px 8px; }
   .sheet-row dt { font-size: 13.5px; }
   .sheet-row dd { margin-top: 2px; font-size: 14px; }
