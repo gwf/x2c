@@ -27,9 +27,10 @@
   those decisions.
 - [ ] Audit obsolete files, assets, and directories throughout the repository.
   Establish purpose, history, references, and current use before recommending
-  removal. `etc/playground` is a candidate old on-demand Docker compilation
-  service. Distinguish it from the current precompiled WebAssembly assets and
-  runners that serve runnable examples. This checklist authorizes no deletion.
+  removal. The repository audit identified an unused on-demand Docker
+  compilation service, removed in the authorized follow-up. The current
+  precompiled WebAssembly assets and runners remain live. Other candidates
+  still require a separate removal decision.
 - [ ] Review the [staged installation instructions](https://staging.x2c-lang.dev/#install)
   and promote the website when approved. The installation simplification and
   WebAssembly prerequisite repair in [PR #717](https://github.com/gwf/x2c/pull/717)

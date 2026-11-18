@@ -78,7 +78,7 @@
   color: inherit;
   font-family: "JetBrains Mono", monospace;
   font-size: 1em;
-  font-weight: 500;
+  font-weight: 400;
   letter-spacing: 0;
 }
 
@@ -87,7 +87,7 @@
   align-items: baseline;
   gap: 2.2cqw;
   padding-bottom: 0.6cqw;
-  border-bottom: 0.26cqw solid var(--red);
+  border-bottom: 0.08cqw solid var(--line-strong);
 }
 
 .sheet-wordmark {
@@ -118,18 +118,17 @@
 .sheet-column {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 0.6cqw;
+  gap: 0.7cqw;
   min-width: 0;
 }
 
 .sheet-section h2 {
   margin: 0;
   padding-bottom: 0.32cqw;
-  border-bottom: 0.18cqw solid var(--red);
+  border-bottom: 0.08cqw solid var(--line-strong);
   color: var(--red-text);
-  font: 700 1.05cqw/1.2 "JetBrains Mono", monospace;
-  letter-spacing: 0.08em;
+  font: 700 1.05cqw/1.2 Archivo, Helvetica, sans-serif;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -138,12 +137,7 @@
 }
 
 .sheet-row {
-  padding: 0.04cqw 0;
-  border-top: 0.07cqw solid var(--line);
-}
-
-.sheet-row:first-child {
-  border-top: 0;
+  padding: 0.08cqw 0;
 }
 
 .sheet-row dt,
@@ -163,7 +157,7 @@
 }
 
 .sheet-row dd code {
-  color: var(--code-chip-ink);
+  color: inherit;
 }
 
 @media screen and (max-width: 760px) {
@@ -211,7 +205,6 @@
   .sheet-row {
     display: block;
     padding: 7px 0;
-    border-top-width: 1px;
   }
 
   .sheet-row dt code { white-space: pre-wrap; }
