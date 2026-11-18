@@ -28,8 +28,9 @@ with the project's trademark policy.
 
 ## External contributions
 
-The project is not currently accepting external code contributions. See
-[`CONTRIBUTING.md`](CONTRIBUTING.md) for the current participation policy.
+The project welcomes external feedback and pull requests. The Project Lead
+decides which contributions enter the official project. See
+[`CONTRIBUTING.md`](CONTRIBUTING.md) for the participation policy.
 
 ## Succession
 
