@@ -6,20 +6,17 @@ import { inlineMarkdown } from "../lib/inline-markdown";
 import { sheet } from "../content/cheatsheet";
 import "../styles/cheatsheet.css";
 
-// A fragment longer than this many characters would crowd the note column, so
-// it spans both cells and its note sits in the note column underneath.
-const codeColumnLimit = 25;
-
 const columns = await Promise.all([1, 2, 3].map(async (column) =>
   Promise.all(sheet.filter((section) => section.column === column).map(async (section) => ({
     title: section.title,
     rows: await Promise.all(section.rows.map(async ([code, note]) => ({
       code,
       note: await inlineMarkdown(note),
-      wide: code.length > codeColumnLimit,
     }))),
   })))));
 const titleHtml = await inlineMarkdown("x2c on one page.");
+const legendHtml = await inlineMarkdown(
+  "`...` stands for code you supply. Names in a note without an example are further methods of the same type.");
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -51,11 +48,11 @@ const base = import.meta.env.BASE_URL;
           {columns.map((sections) => (
             <div class="sheet-column">
               {sections.map((section) => (
-                <section class="sheet-section">
+                <section class="sheet-section" style={`--rows: ${section.rows.length}`}>
                   <h2>{section.title}</h2>
                   <dl>
                     {section.rows.map((row) => (
-                      <div class:list={["sheet-row", { wide: row.wide }]}>
+                      <div class="sheet-row">
                         <dt><code>{row.code}</code></dt>
                         <dd set:html={row.note} />
                       </div>
@@ -66,6 +63,10 @@ const base = import.meta.env.BASE_URL;
             </div>
           ))}
         </div>
+        <footer class="sheet-foot">
+          <span set:html={legendHtml} />
+          <span>x2c-lang.dev/docs</span>
+        </footer>
       </article>
     </div>
   </div>

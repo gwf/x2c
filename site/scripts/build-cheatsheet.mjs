@@ -16,6 +16,11 @@ try {
   if (!response.ok()) throw new Error(`Cheat sheet returned HTTP ${response.status()}`);
   await page.locator('.sheet-columns').waitFor();
   await page.evaluate(() => document.fonts.ready);
+  // Columns have a fixed height, so text that does not fit would spill
+  // over the footer instead of starting a second page.
+  const spill = await page.locator('.sheet-column').evaluateAll((columns) =>
+    Math.max(...columns.map((column) => column.scrollHeight - column.clientHeight)));
+  if (spill > 0) throw new Error(`Cheat sheet column overflows by ${spill}px`);
   const output = fileURLToPath(new URL('dist/x2c-cheatsheet.pdf', root));
   await page.pdf({ path: output, preferCSSPageSize: true, printBackground: true,
     displayHeaderFooter: false, tagged: true });

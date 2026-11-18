@@ -49,7 +49,7 @@ export const sheet: Section[] = [
     ["T f(List @rest)", "Rest arguments as a `List`."],
     ["void bump(int &n)", "By reference; `&?p` allows `NULL`."],
   ] },
-  { column: 1, title: "Memory and cleanup", rows: [
+  { column: 2, title: "Memory and cleanup", rows: [
     ["auto { ... }", "Group allocations; free them on leaving the block."],
     ["for (...) auto { ... }", "A scope per iteration."],
     ["T t = auto T.new();", "Clean up this value at exit."],
@@ -91,7 +91,7 @@ export const sheet: Section[] = [
     ["$derive(T, <json>, <repr>)", "Methods from fields; `<derive.x>`."],
     ["ArrayInt  MapIntInt", "Unboxed, from `typed-*.x`."],
   ] },
-  { column: 2, title: "Concurrency", rows: [
+  { column: 3, title: "Concurrency", rows: [
     ["Thread.run([%!(void) => { ... }, ...])", "Start all, then join all."],
     ["Thread.start(fn, v)", "One thread; `t.join()`."],
     ["Channel.new(<i32>, 2)", "Exact `i32` messages; `foreach` ends after close + drain."],
