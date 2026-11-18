@@ -108,7 +108,7 @@ export const sheet: Section[] = [
     ["meta List g(TypeInfo t)", "Reads a type's fields, methods."],
     ["$!( { @items } )  $!Stmt{ ... }", "Quoted syntax; `$` inserts, `@` splices."],
   ] },
-  { column: 2, title: "Lisp", rows: [
+  { column: 4, title: "Lisp", rows: [
     ["Lisp l = Lisp.new();", "Embedded; `l.destroy()` ends it."],
     ["$lisp.bind(l, \"f\", fn);", "Expose a native function."],
     ["l.eval(%(f 1 2))", "Run a `List`; results convert."],

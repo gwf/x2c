@@ -15,6 +15,8 @@ const columns = await Promise.all([1, 2, 3, 4].map(async (column) =>
     }))),
   })))));
 const titleHtml = await inlineMarkdown("x2c on one page.");
+const legendHtml = await inlineMarkdown(
+  "`...` stands for code you supply. Names in a note without an example are further methods of the same type.");
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -40,13 +42,13 @@ const base = import.meta.env.BASE_URL;
         <header class="sheet-head">
           <span class="x2c-wordmark sheet-wordmark">x2c</span>
           <span class="sheet-title">Language quick reference</span>
-          <span class="sheet-site">x2c-lang.dev</span>
+          <span class="sheet-site">for readers who know C</span>
         </header>
         <div class="sheet-columns">
           {columns.map((sections) => (
             <div class="sheet-column">
               {sections.map((section) => (
-                <section class="sheet-section">
+                <section class="sheet-section" style={`--rows: ${section.rows.length}`}>
                   <h2>{section.title}</h2>
                   <dl>
                     {section.rows.map((row) => (
@@ -61,6 +63,10 @@ const base = import.meta.env.BASE_URL;
             </div>
           ))}
         </div>
+        <footer class="sheet-foot">
+          <span set:html={legendHtml} />
+          <span>x2c-lang.dev/docs</span>
+        </footer>
       </article>
     </div>
   </div>

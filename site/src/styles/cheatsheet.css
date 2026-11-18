@@ -46,7 +46,8 @@
 }
 
 /* Letter landscape with quarter-inch margins. Container units keep the
- * screen preview proportional to the printed page; 0.99cqw is 7.5pt. */
+ * screen preview proportional to the printed page: inside the page,
+ * 1cqw is 7.56pt of the 10.5in printable width. */
 .sheet {
   container-type: inline-size;
   width: min(100%, 1100px);
@@ -60,12 +61,12 @@
 .sheet-page {
   container-type: inline-size;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100%;
   padding: 2.273cqw;
   color: var(--dark);
   font-family: Archivo, Helvetica, sans-serif;
-  line-height: 1.1;
+  line-height: 1.14;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -85,59 +86,78 @@
 .sheet-head {
   display: flex;
   align-items: baseline;
-  gap: 2.2cqw;
-  padding-bottom: 0.6cqw;
-  border-bottom: 0.08cqw solid var(--line-strong);
+  gap: 1.3cqw;
+  padding-bottom: 0.9cqw;
 }
 
 .sheet-wordmark {
   color: var(--red-text);
-  font-size: 2.2cqw;
+  font-size: 2.9cqw;
+  line-height: 0.8;
 }
 
 .sheet-title {
-  font: 400 2cqw/1 "Instrument Serif", Georgia, serif;
+  font: 400 2.5cqw/0.8 "Instrument Serif", Georgia, serif;
   letter-spacing: -0.01em;
 }
 
 .sheet-site {
   margin-left: auto;
-  color: var(--nav-muted);
-  font: 500 1.25cqw/1 "JetBrains Mono", monospace;
+  color: var(--muted-dark);
+  font: 500 0.95cqw/1 "JetBrains Mono", monospace;
+  letter-spacing: 0.02em;
 }
 
+/* The last column holds the longest code lines. */
 .sheet-columns {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: 0.94fr 1fr 1fr 1.16fr;
   grid-template-rows: minmax(0, 1fr);
-  column-gap: 1.8cqw;
-  padding-top: 0.9cqw;
-  font-size: 0.99cqw;
+  column-gap: 1.7cqw;
 }
 
-.sheet-column {
+/* Every column starts on the same rule and ends on the same line: each
+ * column shares its spare height equally among its rows. */
+.sheet-column,
+.sheet-section,
+.sheet-section dl {
   display: flex;
   flex-direction: column;
-  gap: 0.7cqw;
   min-width: 0;
+}
+
+.sheet-section,
+.sheet-row {
+  flex: var(--rows, 1) 0 auto;
+}
+
+.sheet-section + .sheet-section {
+  margin-top: 0.2cqw;
 }
 
 .sheet-section h2 {
   margin: 0;
-  padding-bottom: 0.32cqw;
-  border-bottom: 0.08cqw solid var(--line-strong);
+  padding: 0.42cqw 0 0.2cqw;
+  border-top: 0.2cqw solid var(--dark);
   color: var(--red-text);
-  font: 700 1.05cqw/1.2 Archivo, Helvetica, sans-serif;
-  letter-spacing: 0.06em;
+  font: 700 0.9cqw/1.2 Archivo, Helvetica, sans-serif;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
 .sheet-section dl {
+  flex: 1 0 auto;
   margin: 0;
 }
 
+/* The gap between rows is wider than the gap inside one, so each line of
+ * code reads with its own note. */
 .sheet-row {
-  padding: 0.08cqw 0;
+  padding: 0.13cqw 0;
+}
+
+.sheet-row + .sheet-row {
+  border-top: 0.04cqw solid var(--line);
 }
 
 .sheet-row dt,
@@ -146,18 +166,40 @@
   min-width: 0;
 }
 
+.sheet-row dt {
+  font-size: 0.955cqw;
+}
+
 .sheet-row dt code {
   color: var(--dark);
+  font-weight: 500;
   white-space: pre-wrap;
 }
 
 .sheet-row dd {
   color: var(--muted-dark);
-  margin-top: 0.08cqw;
+  font-size: 0.9cqw;
 }
 
 .sheet-row dd code {
-  color: inherit;
+  color: var(--dark);
+  font-size: 0.94em;
+}
+
+.sheet-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqw;
+  margin-top: 0.5cqw;
+  padding-top: 0.5cqw;
+  border-top: 0.08cqw solid var(--line-strong);
+  color: var(--muted-dark);
+  font-size: 0.86cqw;
+}
+
+.sheet-foot code {
+  color: var(--dark);
+  font-size: 0.94em;
 }
 
 @media screen and (max-width: 760px) {
@@ -175,40 +217,43 @@
   .sheet-head {
     flex-wrap: wrap;
     gap: 4px 12px;
-    padding-bottom: 10px;
-    border-bottom-width: 2px;
+    padding-bottom: 0;
   }
 
-  .sheet-wordmark { font-size: 24px; }
-  .sheet-title { order: 3; flex-basis: 100%; font-size: 22px; line-height: 1.1; }
-  .sheet-site { font-size: 12px; }
+  .sheet-wordmark { font-size: 24px; line-height: 1; }
+  .sheet-title { font-size: 24px; line-height: 1; }
+  .sheet-site { flex-basis: 100%; margin: 0; font-size: 12px; }
 
-  .sheet-columns {
-    display: block;
-    padding-top: 6px;
-    font-size: 14px;
-  }
+  .sheet-columns { display: block; }
 
   .sheet-column,
-  .sheet-section { display: block; }
+  .sheet-section,
+  .sheet-section dl { display: block; }
 
-  .sheet-section { margin-top: 22px; }
+  .sheet-section,
+  .sheet-section + .sheet-section { margin-top: 22px; }
 
   .sheet-section h2 {
-    padding-bottom: 4px;
-    border-bottom-width: 2px;
-    font-size: 13px;
+    padding: 6px 0 2px;
+    border-top-width: 2px;
+    font-size: 12px;
   }
-
-  .sheet-section dl { display: block; }
 
   .sheet-row {
     display: block;
     padding: 7px 0;
   }
 
-  .sheet-row dt code { white-space: pre-wrap; }
-  .sheet-row dd { margin-top: 2px; padding-left: 14px; }
+  .sheet-row + .sheet-row { border-top-width: 1px; }
+  .sheet-row dt { font-size: 14px; }
+  .sheet-row dd { margin-top: 2px; font-size: 14px; }
+
+  .sheet-foot {
+    display: block;
+    margin-top: 22px;
+    padding-top: 8px;
+    font-size: 13px;
+  }
 
 }
 
