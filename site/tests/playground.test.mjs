@@ -18,8 +18,8 @@ const manifest = join(site, "../builds/wasm/playground/programs.json");
 const saved = existsSync(manifest) ? readFileSync(manifest) : undefined;
 after(() => { if (saved) writeFileSync(manifest, saved); });
 
-// Prepares the precompiled programs, builds the site without a compile
-// service, and returns the redirect, complete examples, and homepage.
+// Prepares the precompiled programs, builds the site, and returns the
+// redirect, complete examples, and homepage.
 function render(env) {
   const prepared = spawnSync(process.execPath, [
     "scripts/playground-programs.mjs", "compile",
@@ -30,7 +30,7 @@ function render(env) {
     const result = spawnSync(process.execPath, [
       "node_modules/astro/bin/astro.mjs", "build", "--outDir", destination,
     ], {
-      cwd: site, env: { ...process.env, PLAYGROUND_URL: "" },
+      cwd: site, env: process.env,
       encoding: "utf8",
     });
     assert.equal(result.status, 0, result.stdout + result.stderr);

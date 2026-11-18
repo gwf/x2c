@@ -67,14 +67,8 @@ bootstrap-ready: configure
 	fi
 
 ##@ Getting started
-configure:						## Report core build prerequisites; set core.hooksPath to tools/hooks in the configuration all worktrees share, if unset
+configure:						## Report core build prerequisites
 	@./configure
-	@if git rev-parse --git-dir >/dev/null 2>&1; then \
-	  git config --get core.hooksPath >/dev/null 2>&1; \
-	  if [ $$? -eq 1 ]; then \
-	    git config --local core.hooksPath tools/hooks || true; \
-	  fi; \
-	fi
 
 configure-packages:					## Report package build prerequisites
 	@./configure --packages
