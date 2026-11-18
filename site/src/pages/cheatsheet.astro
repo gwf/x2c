@@ -3,20 +3,23 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
 import SiteFooter from "../components/SiteFooter.astro";
 import { inlineMarkdown } from "../lib/inline-markdown";
+import { Code } from "astro:components";
+import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
+import { x2cLightTheme } from "../../shiki-x2c-theme.mjs";
 import { sheet } from "../content/cheatsheet";
 import "../styles/cheatsheet.css";
 
-const columns = await Promise.all([1, 2, 3].map(async (column) =>
+const columns = await Promise.all([1, 2, 3, 4].map(async (column) =>
   Promise.all(sheet.filter((section) => section.column === column).map(async (section) => ({
     title: section.title,
     rows: await Promise.all(section.rows.map(async ([code, note]) => ({
       code,
+      shell: /^(x2c |#!)/.test(code),
       note: await inlineMarkdown(note),
     }))),
   })))));
 const titleHtml = await inlineMarkdown("x2c on one page.");
-const legendHtml = await inlineMarkdown(
-  "`...` stands for code you supply. Names in a note without an example are further methods of the same type.");
+const language = { ...grammar, name: "x2c" };
 const base = import.meta.env.BASE_URL;
 ---
 
@@ -30,7 +33,7 @@ const base = import.meta.env.BASE_URL;
       <p class="about-eyebrow">cheat sheet</p>
       <h1 set:html={titleHtml} />
       <p class="cheat-intro">
-        One letter-size page for readers who know C.{" "}
+        One landscape letter-size page for readers who know C.{" "}
         <a href={`${base}docs/guide/from-c.html`}>Start from C</a> to begin, or
         the <a href={`${base}docs/`}>book</a> when a line needs more than a line.{" "}
         <a href={`${base}x2c-cheatsheet.pdf`} download>Download PDF</a>
@@ -42,7 +45,7 @@ const base = import.meta.env.BASE_URL;
         <header class="sheet-head">
           <span class="x2c-wordmark sheet-wordmark">x2c</span>
           <span class="sheet-title">The syntax on one page.</span>
-          <span class="sheet-site">x2c-lang.dev</span>
+          <span class="sheet-site"><code>...</code> is code you supply &nbsp;/&nbsp; x2c-lang.dev</span>
         </header>
         <div class="sheet-columns">
           {columns.map((sections) => (
@@ -53,7 +56,8 @@ const base = import.meta.env.BASE_URL;
                   <dl>
                     {section.rows.map((row) => (
                       <div class="sheet-row">
-                        <dt><code>{row.code}</code></dt>
+                        <dt>{row.shell ? <code>{row.code}</code>
+                          : <Code code={row.code} lang={language} theme={x2cLightTheme} inline />}</dt>
                         <dd set:html={row.note} />
                       </div>
                     ))}
@@ -63,10 +67,6 @@ const base = import.meta.env.BASE_URL;
             </div>
           ))}
         </div>
-        <footer class="sheet-foot">
-          <span set:html={legendHtml} />
-          <span>x2c-lang.dev/docs</span>
-        </footer>
       </article>
     </div>
   </div>
