@@ -62,12 +62,12 @@
   container-type: inline-size;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  row-gap: 0.75cqw;
+  row-gap: 0.8cqw;
   height: 100%;
   padding: 2.273cqw;
   color: var(--dark);
   font-family: Archivo, Helvetica, sans-serif;
-  line-height: 1.1;
+  line-height: 1.18;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -86,80 +86,83 @@
 .sheet-head {
   display: flex;
   align-items: baseline;
-  gap: 1.2cqw;
-  padding: 0.5cqw 0 0.35cqw;
+  gap: 0.8cqw;
+  padding-bottom: 0.5cqw;
+  border-bottom: 0.13cqw solid var(--dark);
+  font-size: 1.25cqw;
+  line-height: 1;
 }
 
 .sheet-wordmark {
   color: var(--red-text);
-  font-size: 3cqw;
-  line-height: 0.8;
+  font-size: 1.45cqw;
 }
 
 .sheet-title {
-  font: 400 3.1cqw/0.8 "Instrument Serif", Georgia, serif;
-  letter-spacing: -0.015em;
+  font-weight: 500;
 }
 
 .sheet-site {
   margin-left: auto;
   color: var(--nav-muted);
-  font: 400 0.86cqw/1 "JetBrains Mono", monospace;
-  letter-spacing: 0.04em;
+  font: 400 0.9cqw/1 "JetBrains Mono", monospace;
 }
 
-.sheet-site code {
-  color: var(--dark);
-}
-
-/* The last column holds the longest code lines. */
+/* Later columns hold longer code lines. */
 .sheet-columns {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1.16fr;
+  grid-template-columns: 1fr 1.04fr 1.14fr;
   grid-template-rows: minmax(0, 1fr);
-  column-gap: 0.75cqw;
+  column-gap: 2cqw;
 }
 
-/* Every column fills the page height: each card grows with its row count
- * and shares that height equally among its rows. */
+/* Every column fills the page height: each section grows with its row
+ * count and shares that height equally among its rows. */
 .sheet-column,
-.sheet-section,
-.sheet-section dl {
+.sheet-section {
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
 .sheet-column {
-  gap: 0.75cqw;
-}
-
-.sheet-section,
-.sheet-row {
-  flex: var(--rows, 1) 0 auto;
+  gap: 0.8cqw;
 }
 
 .sheet-section {
-  padding: 0.5cqw 0.85cqw 0.3cqw;
-  border-top: 0.26cqw solid var(--red);
-  background: var(--paper);
+  flex: var(--rows, 1) 0 auto;
 }
 
 .sheet-section h2 {
-  margin: 0 0 0.2cqw;
+  margin: 0;
+  padding-bottom: 0.3cqw;
+  border-bottom: 0.07cqw solid var(--dark);
   color: var(--dark);
-  font: 400 1.5cqw/1 "Instrument Serif", Georgia, serif;
-  letter-spacing: 0;
+  font: 700 1cqw/1 Archivo, Helvetica, sans-serif;
+  letter-spacing: 0.01em;
 }
 
+/* Code and note sit side by side in every row. The code cell is as wide as
+ * the section's longest code line. */
 .sheet-section dl {
   flex: 1 0 auto;
+  display: grid;
+  grid-template-columns: fit-content(70%) minmax(0, 1fr);
+  column-gap: 1.1cqw;
   margin: 0;
 }
 
-/* Code reads down the left edge of a card and notes down the right edge. */
 .sheet-row {
-  padding: 0.14cqw 0;
+  display: grid;
+  grid-template-columns: subgrid;
+  grid-column: 1 / -1;
+  align-items: baseline;
+  align-content: start;
+  padding: 0.18cqw 0;
+}
+
+.sheet-row + .sheet-row {
+  border-top: 0.05cqw solid var(--hairline);
 }
 
 .sheet-row dt,
@@ -169,7 +172,7 @@
 }
 
 .sheet-row dt {
-  font-size: 0.94cqw;
+  font-size: 0.89cqw;
 }
 
 .sheet-row dt code {
@@ -179,8 +182,7 @@
 
 .sheet-row dd {
   color: var(--muted-dark);
-  text-align: right;
-  font-size: 0.88cqw;
+  font-size: 0.89cqw;
 }
 
 .sheet-row dd code {
@@ -196,34 +198,35 @@
   .sheet-page {
     display: block;
     height: auto;
-    padding: 0;
+    padding: 16px;
     line-height: 1.4;
   }
 
   .sheet-head {
-    flex-wrap: wrap;
-    gap: 6px 12px;
-    padding: 16px 16px 4px;
+    padding-bottom: 8px;
+    border-bottom-width: 2px;
+    font-size: 15px;
   }
 
-  .sheet-wordmark,
-  .sheet-title { font-size: 26px; line-height: 1; }
-  .sheet-site { flex-basis: 100%; margin: 0; font-size: 12px; }
+  .sheet-wordmark { font-size: 17px; }
+  .sheet-site { font-size: 12px; }
 
   .sheet-columns,
   .sheet-column,
+  .sheet-section,
   .sheet-section dl,
   .sheet-row { display: block; }
 
-  .sheet-section {
-    display: block;
-    margin: 14px 12px;
-    padding: 12px 14px 8px;
-    border-top-width: 3px;
+  .sheet-section { margin-top: 22px; }
+
+  .sheet-section h2 {
+    padding-bottom: 4px;
+    border-bottom-width: 1px;
+    font-size: 14px;
   }
 
-  .sheet-section h2 { margin-bottom: 4px; font-size: 24px; }
   .sheet-row { padding: 7px 0; }
+  .sheet-row + .sheet-row { border-top-width: 1px; }
   .sheet-row dt { font-size: 13.5px; }
   .sheet-row dd { margin-top: 2px; font-size: 14px; }
 }
