@@ -25,12 +25,11 @@
   fix; some reports may never be addressed. Decide separately whether to
   invite ideas or feature requests. Align issue settings and templates with
   those decisions.
-- [ ] Audit obsolete files, assets, and directories throughout the repository.
-  Establish purpose, history, references, and current use before recommending
-  removal. The repository audit identified an unused on-demand Docker
-  compilation service, removed in the authorized follow-up. The current
-  precompiled WebAssembly assets and runners remain live. Other candidates
-  still require a separate removal decision.
+- [x] Audit obsolete files, assets, and directories throughout the repository.
+  The unused on-demand Docker compilation service was removed. The stale
+  `PLAYGROUND_URL` test override was already removed. The remaining Playground
+  tests cover the live site. Shootout PNG charts have no repository references,
+  but the chart script regenerates them with the SVGs, so they remain.
 - [ ] Review the [staged installation instructions](https://staging.x2c-lang.dev/#install)
   and promote the website when approved. The installation simplification and
   WebAssembly prerequisite repair in [PR #717](https://github.com/gwf/x2c/pull/717)
@@ -48,8 +47,7 @@
 This record preserves Gary's pending checklist; it does not authorize
 implementation of its items. Historical deferrals are not launch tasks.
 The release-state statement comes from Gary; the staging evidence above
-comes from the completed workflow and live checks. No pending item is
-marked complete on the strength of those narrower checks.
+comes from the completed workflow and live checks. Completed items are marked only after their follow-up work was verified.
 
 The checklist reuses existing repository plans and publication workflows.
 It adds no source machinery, helpers, representations, traversals, caches,
