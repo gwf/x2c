@@ -138,7 +138,9 @@ The host must reconcile draw-time focus/layer changes before its next event.
 On 2026-11-17, the shared component patch compiled natively on macOS arm64.
 Its focused raw tests cover eligible and invalid focus targets, revocation,
 physical versus actionable held state, repeat metadata, inactive input,
-reactivation, and unhandled Tab navigation. The parent integration records
+reactivation, unhandled Tab navigation, and modal-popover eligibility at both
+completed-frame and next-frame input boundaries. Unrelated root popovers remain
+excluded by the modal. The parent integration records
 application and web validation separately.
 
 ## Bundled third-party content

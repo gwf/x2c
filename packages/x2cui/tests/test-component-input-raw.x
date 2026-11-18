@@ -155,10 +155,67 @@ static void fallback_tab(void) {
   EXPECT_TRUE(cui_component_has_input(ui, second));
 }
 
+typedef struct PopupInput {
+  bool modal_open, open_popup, request;
+  char text[32];
+  cui_id component, unrelated;
+  bool focus_unrelated, check_previous;
+} PopupInput;
+
+static void popup_input_frame(Ui ui, PopupInput *state) {
+  cui_begin_frame(ui, 0);
+  if (state.check_previous) EXPECT_TRUE(cui_component_has_input(ui, state.component));
+  cui_button_ex(ui, "Outside anchor", NULL);
+  if (state.open_popup) cui_popover_open(ui, "Unrelated popup");
+  if (cui_popover_begin(ui, "Unrelated popup", NULL)) {
+    state.unrelated = cui_make_id(ui, "unrelated");
+    canvas(ui, "unrelated", true);
+    if (state.focus_unrelated) cui_request_component_focus(ui, state.unrelated);
+    cui_popover_end(ui);
+  }
+  if (cui_dialog_begin(ui, "Modal", &state.modal_open, NULL)) {
+    cui_button_ex(ui, "Anchor", NULL);
+    if (state.open_popup) cui_popover_open(ui, "Popup");
+    if (cui_popover_begin(ui, "Popup", NULL)) {
+      cui_input_ex(ui, "builtin", state.text, sizeof state.text,
+                   &(cui_input_opts){.autofocus = true});
+      state.component = cui_make_id(ui, "component");
+      canvas(ui, "component", true);
+      if (state.request) cui_request_component_focus(ui, state.component);
+      cui_popover_end(ui);
+    }
+    cui_dialog_end(ui);
+  }
+  cui_end_frame(ui);
+  state.open_popup = false;
+}
+
+static void modal_popup_input(void) {
+  Offscreen screen = auto Offscreen.open(640, 480);
+  Ui ui = screen.ui();
+  cui_set_reduced_motion(ui, true);
+  PopupInput state = {.modal_open = true, .open_popup = true};
+  popup_input_frame(ui, &state);
+  cui_input_text(ui, "X");
+  popup_input_frame(ui, &state);
+  EXPECT_STR_EQ(state.text, "X");
+  state.request = true;
+  popup_input_frame(ui, &state);
+  EXPECT_TRUE(cui_focused_id(ui) == state.component);
+  EXPECT_TRUE(cui_component_has_input(ui, state.component));
+  state.request = false;
+  state.check_previous = true;
+  state.focus_unrelated = true;
+  popup_input_frame(ui, &state);
+  EXPECT_TRUE(cui_focused_id(ui) == state.unrelated);
+  EXPECT_FALSE(cui_component_has_input(ui, state.unrelated));
+}
+
 static void raw_component_suite(void) {
   $test.run(ownership);
   $test.run(physical_and_actions);
   $test.run(fallback_tab);
+  $test.run(modal_popup_input);
 }
 
 int main(void) {

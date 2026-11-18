@@ -101,7 +101,15 @@
      uint8_t dir, align, justify, self_align;   /* self_align: 0 = inherit */
      cui_size w, h;
      float min_w, max_w, min_h, max_h;
-@@ -533,6 +533,9 @@
+@@ -439,6 +439,7 @@
+ /* ---- popups ---- */
+ typedef struct cui_popup {
+     cui_id id;
++    cui_id parent_layer;       /* submitting layer, for modal ancestry */
+     cui_id anchor;
+     cui_rect anchor_rect;
+     bool open;
+@@ -533,6 +534,9 @@
      cui_id focus;                   /* keyboard focus */
      bool focus_visible;             /* focus came from the keyboard */
      cui_id focus_next_request;
@@ -111,7 +119,7 @@
      int focus_move;                 /* +1/-1 tab navigation requested */
      cui_id *focus_order; int focus_count, focus_cap;
      cui_id *prev_focus_order; int prev_focus_count, prev_focus_cap;
-@@ -548,6 +551,8 @@
+@@ -548,6 +552,8 @@
      cui_cursor cursor;
  
      /* input */
@@ -224,7 +232,7 @@
          for (int i = 0; i < 3; i++) { if (ui->mdown[i]) ui->mreleased[i] = true; ui->mdown[i] = false; }
          ui->mods = 0;
      }
-@@ -687,6 +725,77 @@
+@@ -687,6 +725,88 @@
      }
  }
  
@@ -251,6 +259,17 @@
 +/* Component requests commit against the complete submission. The routing
 + * query is used after end_frame or before components in the next frame. */
 +void cui_request_component_focus(cui_ctx *ui, cui_id id) { ui->component_focus_request = id; }
++/* A popup submitted inside a modal belongs to that modal's input scope. */
++static bool cui__component_in_modal(cui_ctx *ui, cui_id layer, cui_id modal) {
++    for (int depth = 0; depth <= ui->popup_count; depth++) {
++        if (layer == modal) return true;
++        cui_popup *popup = cui__popup_get(ui, layer, false);
++        if (!popup || !popup->open) return false;
++        layer = popup->parent_layer;
++    }
++    return false;
++}
++
 +bool cui_component_has_input(cui_ctx *ui, cui_id id) {
 +    if (!id || !ui->window_focused || ui->focus != id || ui->component_focus_owner != id) return false;
 +    int count = ui->in_frame ? ui->prev_focus_count : ui->focus_count;
@@ -258,7 +277,7 @@
 +    cui_id *layers = ui->in_frame ? ui->prev_focus_layers : ui->focus_layers;
 +    cui_id modal = ui->in_frame ? ui->prev_modal_layer : ui->modal_layer;
 +    for (int i = 0; i < count; i++) if (order[i] == id) {
-+        if (modal && layers[i] != modal) return false;
++        if (modal && !cui__component_in_modal(ui, layers[i], modal)) return false;
 +        int z = 0;
 +        for (int p = 0; p < ui->popup_count; p++)
 +            if (ui->popups[p].id == layers[i]) z = ui->popups[p].z;
@@ -302,7 +321,7 @@
  /** Track focus independently from whether a popup covers keyboard input. */
  cui_interact cui__interact(cui_ctx *ui, cui_id id, int flags) {
      cui_interact r;
-@@ -842,24 +951,9 @@
+@@ -842,24 +962,9 @@
  
      /* Tab navigation (uses last frame's focus order; stays inside an open modal).
       * Ctrl+Tab is left to the app: it switches documents, as in a browser. */
@@ -329,7 +348,7 @@
      if (ui->mpressed[0] && ui->hot == 0) { ui->focus = 0; }
  
      cui__theme_update(ui);
-@@ -932,6 +1026,28 @@
+@@ -932,6 +1037,28 @@
      dd->height_px = (int)(ui->vh * ui->scale + 0.5f);
      dd->clear_color = ui->theme.colors[CUI_TOKEN_BACKGROUND];
      dd->font_atlas = ui->atlas_tex;
@@ -421,3 +440,13 @@
      bool fire = false;
      if (held && !st->fired) {
          st->progress += ui->dt / duration;
+--- a/src/cui_overlay.c
++++ b/src/cui_overlay.c
+@@ -86,6 +86,7 @@
+     cui_popup *p = cui__popup_get(ui, id, false);
+     if (!p) return false;
+     p->last_frame = ui->frame;
++    p->parent_layer = ui->current_layer;
+     if (p->open) {
+         bool top = cui__popup_is_topmost(ui, p);
+         if (top && cui_key_pressed(ui, CUI_KEY_ESCAPE)) { p->open = false; ui->kpressed[CUI_KEY_ESCAPE] = 0; }

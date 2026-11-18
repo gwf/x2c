@@ -26,7 +26,7 @@
     },
     {
       "path": "patches/component-input.patch",
-      "sha256": "ce1df5e905acd29301496f29645dcf10afd637f76cb2fc53ab004ae3168afaf8"
+      "sha256": "3021b9f041673fe82e2863e44ff00e9c95d4215acafffcb9c800d93d7b40f933"
     }
   ],
   "steps": [
