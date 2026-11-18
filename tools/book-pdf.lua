@@ -27,6 +27,15 @@ local function label(page, anchor)
   return page .. '#' .. (anchor or '')
 end
 
+-- API signatures and generated metadata are paragraphs too, but are not prose.
+local function prose(block)
+  if block.t ~= 'Para' then return false end
+  if #block.content == 1 and block.content[1].t == 'Code' then return false end
+  local text = pandoc.utils.stringify(block)
+  return text ~= '' and not text:match('^Source:')
+    and not text:match('^Raises:') and not text:match('^See:')
+end
+
 function Pandoc()
   local entries, pages = {}, {}
   for line in read('SUMMARY.md'):gmatch('[^\n]+') do
@@ -101,7 +110,14 @@ function Pandoc()
           return link
         end,
       })
-      blocks:extend(document.blocks)
+      local previous
+      for _, block in ipairs(document.blocks) do
+        if previous and prose(previous) and prose(block) then
+          blocks:insert(pandoc.RawBlock('typst', '#proseGap'))
+        end
+        blocks:insert(block)
+        previous = block
+      end
     end
   end
   return pandoc.Pandoc(blocks)
