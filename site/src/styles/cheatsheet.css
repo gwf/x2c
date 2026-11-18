@@ -83,36 +83,33 @@
   letter-spacing: 0;
 }
 
-/* The header is the site's dark ground: red wordmark, bone serif title. */
 .sheet-head {
   display: flex;
   align-items: baseline;
   gap: 1.2cqw;
-  padding: 0.85cqw 0.85cqw 0.95cqw;
-  background: var(--dark);
-  color: var(--paper);
+  padding: 0.5cqw 0 0.35cqw;
 }
 
 .sheet-wordmark {
-  color: var(--red-ink, #ff2719);
-  font-size: 2.5cqw;
+  color: var(--red-text);
+  font-size: 3cqw;
   line-height: 0.8;
 }
 
 .sheet-title {
-  font: 400 2.5cqw/0.8 "Instrument Serif", Georgia, serif;
-  letter-spacing: -0.005em;
+  font: 400 3.1cqw/0.8 "Instrument Serif", Georgia, serif;
+  letter-spacing: -0.015em;
 }
 
 .sheet-site {
   margin-left: auto;
-  color: var(--caption-muted);
+  color: var(--nav-muted);
   font: 400 0.86cqw/1 "JetBrains Mono", monospace;
   letter-spacing: 0.04em;
 }
 
 .sheet-site code {
-  color: var(--paper);
+  color: var(--dark);
 }
 
 /* The last column holds the longest code lines. */
@@ -160,8 +157,9 @@
   margin: 0;
 }
 
+/* Code reads down the left edge of a card and notes down the right edge. */
 .sheet-row {
-  padding: 0.11cqw 0;
+  padding: 0.14cqw 0;
 }
 
 .sheet-row dt,
@@ -181,6 +179,7 @@
 
 .sheet-row dd {
   color: var(--muted-dark);
+  text-align: right;
   font-size: 0.88cqw;
 }
 
@@ -204,7 +203,7 @@
   .sheet-head {
     flex-wrap: wrap;
     gap: 6px 12px;
-    padding: 16px;
+    padding: 16px 16px 4px;
   }
 
   .sheet-wordmark,
