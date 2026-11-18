@@ -44,12 +44,12 @@ The generator's `--check-path <path>` mode audits compiler API, optional-library
 API, and public-type surfaces without adding pages to the book. It reads the
 same compiler projection, so signatures and names are the compiler's own.
 
-The generator also owns `docs/src/internals/compiler-api/`, its
-`Compiler API` entries at the end of the `# Compiler internals` part of
-`docs/src/SUMMARY.md`, and full pages for optional library modules. Those
-pages describe the compiler's own functions for readers of its source; a
-program cannot call them. Never hand-edit those pages or their
-table-of-contents entries.
+The generator also owns the single Compiler API index at
+`docs/src/internals/compiler-api/index.md` and its entry at the end of the
+`# Compiler internals` part of `docs/src/SUMMARY.md`. The index links to
+compiler source modules; individual compiler API pages are not published.
+Optional library modules retain their full reference pages. Never hand-edit
+these generated pages or their table-of-contents entries.
 
 A library module page is titled by the type its file stem names, such as
 `String` for `lib/string/string.x`, and lists its source path under the

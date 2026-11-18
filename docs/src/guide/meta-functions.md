@@ -740,7 +740,8 @@ meets compile-time code, and means evaluate now and insert the result.
 A `match` or `catch` pattern in a `meta` body is the exception. Its
 captures come from its value, so a `$f(...)` call in it runs while the
 body is translated. Only meta code linked into the compiler can run then,
-such as the [source-form builders](../internals/compiler-api/grammar.md).
+such as the
+[source-form builders](https://github.com/gwf/x2c/blob/main/src/grammar.x).
 A call of a project function waits until the body runs, so a pattern built
 by one cannot capture.
 

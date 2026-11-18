@@ -17,8 +17,8 @@ For the modules that implement a particular language feature, see the
 [implementation map](implementation-map.md). For the language being
 implemented, see the [language reference](../reference/language.md). For the
 runtime these phases target, see the [standard library
-overview](../library/overview.md). The [compiler API reference](compiler-api/index.md)
-lists the functions and types exposed by each compiler module.
+overview](../library/overview.md). The [compiler API index](compiler-api/index.md)
+links to compiler modules and their source documentation.
 
 ## Repository topology
 
