@@ -89,19 +89,19 @@
 .sheet-head {
   display: flex;
   align-items: baseline;
-  gap: 0.8cqw;
+  gap: 0.4cqw;
   padding: 0 var(--row-inset);
-  font-size: 1.25cqw;
+  color: #3d3d3d;
+  font-size: 1.05cqw;
   line-height: 1;
 }
 
 .sheet-wordmark {
-  color: var(--red-text);
-  font-size: 1.45cqw;
+  font-size: 1.15cqw;
 }
 
 .sheet-title {
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .sheet-site {
@@ -116,6 +116,8 @@
   grid-template-columns: 1fr 1.07fr 1.23fr;
   grid-template-rows: minmax(0, 1fr);
   column-gap: 1.4cqw;
+  padding-bottom: 0.6cqw;
+  border-bottom: 0.13cqw solid var(--red);
 }
 
 /* Every column fills the page height: each section grows with its row
