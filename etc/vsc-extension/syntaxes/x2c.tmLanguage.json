@@ -3885,7 +3885,7 @@
 					"name": "keyword.operator.$1.x2c"
 				},
 				{
-					"match": "\\b(in|try|catch|finally|defer|raise|match|expand)\\b",
+					"match": "(?<!\\.)(?<!->)\\b(in|try|catch|finally|defer|raise|match|expand)\\b",
 					"name": "keyword.control.x2c",
 					"captures": {
 						"1": { "name": "keyword.control.$1.x2c" }
