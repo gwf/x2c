@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "name": "cui",
-  "version": "1.4.0",
+  "version": "1.4.0-dev.a5c9ef5efc39",
   "profile": "static-app-sdl2-wasm64",
   "sources": [
     {
       "name": "cui",
-      "url": "https://github.com/yappologistic/CUI/archive/refs/tags/v1.4.0.tar.gz",
-      "sha256": "fb347014eaa6238b729a9153e9f4ea61d4ceb6090b23d31db62ebf6e4fe8d1f7",
-      "root": "CUI-1.4.0"
+      "url": "https://github.com/yappologistic/CUI/archive/a5c9ef5efc39b3fc783758362f6b8f9f130f5883.tar.gz",
+      "sha256": "c1814ad77ae16c3a1930a3512ca1c08001e9bcb89925ac6fdea76481cd9b866b",
+      "root": "CUI-a5c9ef5efc39b3fc783758362f6b8f9f130f5883"
     }
   ],
   "inputs": [
@@ -23,6 +23,10 @@
     {
       "path": "patches/web-opengl-es.patch",
       "sha256": "95ff8af9bf064fd90e859957ce6339330788036c75e5ab17431b55bb7eb01cdc"
+    },
+    {
+      "path": "patches/component-input.patch",
+      "sha256": "3021b9f041673fe82e2863e44ff00e9c95d4215acafffcb9c800d93d7b40f933"
     }
   ],
   "steps": [
@@ -51,6 +55,15 @@
         "-p1",
         "-i",
         "{package}/patches/web-opengl-es.patch"
+      ]
+    },
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/component-input.patch"
       ]
     },
     {

@@ -26,7 +26,7 @@
                                      cui_color, medium is CUI_FONT_MEDIUM
                                      for a cui_font
         an icon                      plus is CUI_ICON_PLUS, in a text
-                                     option named icon, icon_*, or
+                                     option named tool, icon, icon_*, or
                                      *_icon, or a parameter CUI names
                                      icon
       a number for a cui_size        pixels: 26 is CUI_PX(26)
@@ -491,14 +491,15 @@ meta static List _short(Type type, String name, List value) {
 }
 
 /* The type of a parameter or field that names an icon: a text field
-   named `icon`, `icon_*`, or `*_icon`, or a parameter `_icon_parameters`
+   named `tool`, `icon`, `icon_*`, or `*_icon`, or a parameter `_icon_parameters`
    lists.
    Other text takes no short names, so an undeclared name there stays an
    undeclared name. */
 meta static Type _icon(void) => %(icon);
 
 meta static int _icon_field(String name) =>
-  name == "icon" || name.startswith("icon_") || name.endswith("_icon");
+  name == "tool" || name == "icon" ||
+  name.startswith("icon_") || name.endswith("_icon");
 
 meta static Type _icons(void) => %(icons);
 
@@ -512,7 +513,8 @@ meta static int _icons_field(String name) =>
 
 meta static List _icon_parameters = %(
   ("icon" 0) ("icon_button" 0) ("tree_cell" 4) ("tree_table_name" 1)
-  ("dock_item" 0) ("toolbar_button" 0) ("draw_icon" 0));
+  ("dock_item" 0) ("toolbar_button" 0) ("toolbar_primary" 0)
+  ("option_action" 3) ("draw_icon" 0));
 /* gen-arrays: end generated icons */
 
 meta static int _icon_parameter(String method, int position) {

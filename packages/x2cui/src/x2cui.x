@@ -62,6 +62,49 @@ $cleanup.by(Offscreen, close);
 #include <stdlib.h>
 #include <string.h>
 
+// focused-component input
+
+typedef struct InputRoute {
+  cui_input_route_fn route;
+  void *user;
+  Symbol cause;
+  List detail;
+} InputRoute;
+
+/** Routes one captured keyboard, committed-text, or window-focus event.
+    Call after begin_frame, before submitting components. The route callback
+    owns its component key map and host fallback. Returning true consumes the
+    action; physical key state is maintained either way. Unhandled Tab uses
+    CUI focus traversal. The event and user pointer are borrowed for this call.
+    An x2c Error from route is raised after returning safely from CUI.
+*/
+void Ui.dispatch_input(Ui ui, const cui_input_event *event,
+                       cui_input_route_fn route, void *user) {
+  InputRoute call = { .route = route, .user = user };
+  cui_dispatch_input(ui, event, _route_input, &call);
+  if (call.cause) Error.raise(call.cause, call.detail);
+}
+
+static bool _route_input(Ui ui, void *user, const cui_input_event *event) {
+  InputRoute *call = user;
+  try return call.route ? call.route(ui, call.user, event) : false;
+  catch %(?cause *detail): {
+    call.cause = cause;
+    call.detail = Error.snapshot(detail);
+    return true;
+  }
+}
+
+/** Submits a custom component that owns its keyboard interpretation.
+    It participates in Tab order but does not synthesize button clicks from
+    Enter or Space. The painter and user-data lifetime match Ui.canvas.
+    Use make_id(id) at this scope for component_has_input/request_component_focus.
+*/
+cui_canvas_result Ui.canvas_input(Ui ui, String id, cui_size width, cui_size height,
+                                  cui_paint_fn paint, const void *user, size_t user_size) =>
+  cui_canvas_ex(ui, id, width, height, paint, user, user_size,
+                CUI_CANVAS_FOCUSABLE | CUI_CANVAS_COMPONENT_INPUT);
+
 // windows
 
 /** Opens a window. Raises `<init-fail>` when CUI cannot create it. */
@@ -99,6 +142,24 @@ App App.close(App app) {
   if (app) cui_app_destroy(app);
   return NULL;
 }
+
+/** Maximizes, minimizes, or restores the native window. */
+inline void App.maximize(App app) => cui_app_maximize(app);
+inline void App.minimize(App app) => cui_app_minimize(app);
+inline void App.restore(App app) => cui_app_restore(app);
+
+/** Returns the native window state and its restorable placement. */
+inline cui_window_state App.window_state(App app) => cui_app_window_state(app);
+inline bool App.placement(App app, cui_window_placement &placement) =>
+  cui_app_placement(app, &placement);
+
+/** Moves the native window in screen coordinates. */
+inline void App.set_position(App app, int x, int y) =>
+  cui_app_set_position(app, x, y);
+
+/** Follows system theme changes while `follow` is true. */
+inline void App.follow_system_theme(App app, bool follow) =>
+  cui_app_follow_system_theme(app, follow);
 
 // off-screen frames
 
@@ -220,6 +281,17 @@ cui_event_track_result Ui.event_track(
 cui_series cui_series.of(String name, ArrayFloat values) =>
   (cui_series){ .name = name, .values = (const float *) values.bytes,
                 .count = (int) values.len() };
+
+/** Reduces voice levels to `columns` peak samples in a new owned array.
+    Nonpositive column counts return an empty array, as CUI does. */
+ArrayFloat voice_resample(ArrayFloat levels, int columns) {
+  ArrayFloat result = ArrayFloat.new();
+  if (columns <= 0) return result;
+  result.reserve(columns);
+  result.length = cui_voice_resample((const float *) levels.bytes,
+    (int) levels.len(), (float *) result.bytes, columns);
+  return result;
+}
 
 /** Draws text formatted from `format` and `values` by `String.format`.
     CUI's `cui_textf` takes C variadic arguments; this takes x2c values.
@@ -548,24 +620,26 @@ int x2cui_spare(Block records) {
 
 /* gen-arrays: begin generated records */
 
-$x2cui.record(cui_vec2); $x2cui.record(cui_rect); $x2cui.record(cui_date);
+$x2cui.record(cui_vec2); $x2cui.record(cui_rect);
+$x2cui.record(cui_input_event); $x2cui.record(cui_date);
 $x2cui.record(cui_tour_step); $x2cui.record(cui_table_column);
 $x2cui.record(cui_table_sort); $x2cui.record(cui_chart_annotation);
-$x2cui.record(cui_image_view); $x2cui.record(cui_command);
-$x2cui.record(cui_choice); $x2cui.record(cui_reaction);
-$x2cui.record(cui_speed_action); $x2cui.record(cui_swipe_action);
-$x2cui.record(cui_grid_column); $x2cui.record(cui_filter_field);
-$x2cui.record(cui_tree_node); $x2cui.record(cui_tree_table_events);
-$x2cui.record(cui_file_entry); $x2cui.record(cui_text_mark);
-$x2cui.record(cui_diff_row); $x2cui.record(cui_diff_hunk);
-$x2cui.record(cui_diff_stats); $x2cui.record(cui_diff_range);
-$x2cui.record(cui_presence_user); $x2cui.record(cui_ticker_item);
-$x2cui.record(cui_viz_item); $x2cui.record(cui_sankey_link);
-$x2cui.record(cui_scatter_series); $x2cui.record(cui_gauge_band);
-$x2cui.record(cui_candle); $x2cui.record(cui_tab_bar_item);
-$x2cui.record(cui_now_playing); $x2cui.record(cui_plan_step);
-$x2cui.record(cui_source); $x2cui.record(cui_prompt_suggestion);
-$x2cui.record(cui_model); $x2cui.record(cui_kanban_move);
+$x2cui.record(cui_meter_part); $x2cui.record(cui_image_view);
+$x2cui.record(cui_command); $x2cui.record(cui_choice);
+$x2cui.record(cui_reaction); $x2cui.record(cui_speed_action);
+$x2cui.record(cui_swipe_action); $x2cui.record(cui_grid_column);
+$x2cui.record(cui_filter_field); $x2cui.record(cui_tree_node);
+$x2cui.record(cui_tree_table_events); $x2cui.record(cui_file_entry);
+$x2cui.record(cui_text_mark); $x2cui.record(cui_diff_row);
+$x2cui.record(cui_diff_hunk); $x2cui.record(cui_diff_stats);
+$x2cui.record(cui_diff_range); $x2cui.record(cui_presence_user);
+$x2cui.record(cui_ticker_item); $x2cui.record(cui_viz_item);
+$x2cui.record(cui_sankey_link); $x2cui.record(cui_scatter_series);
+$x2cui.record(cui_gauge_band); $x2cui.record(cui_candle);
+$x2cui.record(cui_tab_bar_item); $x2cui.record(cui_now_playing);
+$x2cui.record(cui_plan_step); $x2cui.record(cui_source);
+$x2cui.record(cui_prompt_suggestion); $x2cui.record(cui_model);
+$x2cui.record(cui_voice_note); $x2cui.record(cui_kanban_move);
 $x2cui.record(cui_cal_event); $x2cui.record(cui_month_event);
 $x2cui.record(cui_gantt_task); $x2cui.record(cui_toc_item);
 $x2cui.record(cui_check_step); $x2cui.record(cui_date_range);
@@ -575,21 +649,38 @@ $x2cui.record(cui_log_buffer); $x2cui.record(cui_terminal_line);
 $x2cui.record(cui_terminal_buffer); $x2cui.record(cui_hex_range);
 $x2cui.record(cui_hex_selection); $x2cui.record(cui_flame_span);
 $x2cui.record(cui_flame_view); $x2cui.record(cui_curve_key);
-$x2cui.record(cui_gradient_stop); $x2cui.record(cui_timeline_clip);
-$x2cui.record(cui_timeline_track); $x2cui.record(cui_timeline_view);
-$x2cui.record(cui_kv_pair); $x2cui.record(cui_diagnostic);
-$x2cui.record(cui_pipeline_job); $x2cui.record(cui_query_field);
-$x2cui.record(cui_query_node); $x2cui.record(cui_keymap_binding);
-$x2cui.record(cui_commit); $x2cui.record(cui_graph_node);
-$x2cui.record(cui_graph_edge); $x2cui.record(cui_net_request);
-$x2cui.record(cui_trace_track); $x2cui.record(cui_trace_span);
-$x2cui.record(cui_trace_marker); $x2cui.record(cui_trace_view);
+$x2cui.record(cui_gradient_stop); $x2cui.record(cui_aspect);
+$x2cui.record(cui_timeline_clip); $x2cui.record(cui_timeline_track);
+$x2cui.record(cui_timeline_view); $x2cui.record(cui_kv_pair);
+$x2cui.record(cui_diagnostic); $x2cui.record(cui_pipeline_job);
+$x2cui.record(cui_query_field); $x2cui.record(cui_query_node);
+$x2cui.record(cui_keymap_binding); $x2cui.record(cui_commit);
+$x2cui.record(cui_graph_node); $x2cui.record(cui_graph_edge);
+$x2cui.record(cui_net_request); $x2cui.record(cui_trace_track);
+$x2cui.record(cui_trace_span); $x2cui.record(cui_trace_marker);
+$x2cui.record(cui_trace_link); $x2cui.record(cui_trace_view);
 $x2cui.record(cui_regex_match); $x2cui.record(cui_test_item);
 $x2cui.record(cui_stack_frame); $x2cui.record(cui_uptime_service);
 $x2cui.record(cui_histogram_series); $x2cui.record(cui_coverage_file);
 $x2cui.record(cui_blame_commit); $x2cui.record(cui_feature_flag);
 $x2cui.record(cui_api_param); $x2cui.record(cui_api_endpoint);
-$x2cui.record(cui_dot_series);
+$x2cui.record(cui_dot_series); $x2cui.record(cui_text_format);
+$x2cui.record(cui_text_style); $x2cui.record(cui_live_user);
+$x2cui.record(cui_canvas_toggle); $x2cui.record(cui_selection_action);
+$x2cui.collection(Colors, cui_color);
+$x2cui.records(cui_color, Colors);
+$x2cui.collection(Aspects, cui_aspect);
+$x2cui.records(cui_aspect, Aspects);
+$x2cui.collection(CanvasToggles, cui_canvas_toggle);
+$x2cui.records(cui_canvas_toggle, CanvasToggles);
+$x2cui.collection(LiveUsers, cui_live_user);
+$x2cui.records(cui_live_user, LiveUsers);
+$x2cui.collection(MeterParts, cui_meter_part);
+$x2cui.records(cui_meter_part, MeterParts);
+$x2cui.collection(SelectionActions, cui_selection_action);
+$x2cui.records(cui_selection_action, SelectionActions);
+$x2cui.collection(TraceLinks, cui_trace_link);
+$x2cui.records(cui_trace_link, TraceLinks);
 $x2cui.collection(CalEvents, cui_cal_event);
 $x2cui.records(cui_cal_event, CalEvents);
 $x2cui.collection(Candles, cui_candle);
@@ -714,7 +805,10 @@ expand %(
   cui_next_wakeup cui_request_redraw cui_request_wakeup cui_time
   cui_delta_time cui_frame_count cui_input_mouse_move cui_input_mouse_button
   cui_input_mouse_leave cui_input_scroll cui_input_key cui_input_text
-  cui_input_focus cui_input_file_hover cui_input_file_drop
+  cui_input_focus cui_set_input_hook cui_input_repeated cui_window_focused
+  cui_focused_id cui_request_component_focus cui_component_has_input
+  cui_key_action_down cui_draw_text_slanted
+  cui_input_file_hover cui_input_file_drop
   cui_dropped_file_count cui_dropped_file cui_file_drag_active
   cui_set_platform cui_get_cursor cui_key_pressed cui_key_down cui_shortcut
   cui_key_mods cui_mouse_pos cui_mouse_down cui_mouse_clicked
@@ -741,8 +835,8 @@ expand %(
   cui_dialog_begin cui_dialog_end cui_dialog_footer_begin
   cui_dialog_footer_end cui_sheet_begin cui_sheet_end
   cui_toast_action_clicked cui_toast_ex cui_toast_dismiss cui_alert_ex
-  cui_progress_ex cui_spinner cui_skeleton cui_badge_ex cui_avatar_ex
-  cui_readout_ex cui_dot_display_ex
+  cui_progress_ex cui_spinner_ex cui_skeleton cui_badge_ex cui_avatar_ex
+  cui_readout_ex cui_dot_display_ex cui_step_slider_ex
   cui_avatar_group cui_empty_state_ex cui_metric_ex cui_meter
   cui_accordion_begin cui_accordion_end cui_tree_end cui_tree_clicked
   cui_list_item_ex cui_virtual_list_begin cui_virtual_list_end
@@ -812,16 +906,43 @@ macro Unit(Name $target) { $x2cui.method($target); }
 
 /* gen-arrays: begin generated methods */
 
+/** Calls `cui_set_clipboard_text`. */
+inline void Ui.set_clipboard_text(Ui u, String text) =>
+  cui_set_clipboard_text(u, text);
+
+/** Calls `cui_get_clipboard_text`. */
+inline String Ui.get_clipboard_text(Ui u) =>
+  cui_get_clipboard_text(u);
+
 /** Calls `cui_tour_ex`. */
 inline int Ui.tour(
   Ui u, String id, const cui_tour_step *steps, int count, int &step,
   cui_tour_opts opts) =>
   cui_tour_ex(u, id, steps, count, &step, &opts);
 
+/** Calls `cui_skeleton_group_begin_ex`. */
+inline void Ui.skeleton_group_begin(Ui u, cui_skeleton_group_opts opts) =>
+  cui_skeleton_group_begin_ex(u, &opts);
+
+/** Calls `cui_skeleton_group_end`. */
+inline void Ui.skeleton_group_end(Ui u) =>
+  cui_skeleton_group_end(u);
+
+/** Calls `cui_pattern_meter_ex`. */
+inline int Ui.pattern_meter(
+  Ui u, String id, const cui_meter_part *parts, int count,
+  cui_pattern_meter_opts opts) =>
+  cui_pattern_meter_ex(u, id, parts, count, &opts);
+
 /** Calls `cui_toggle_group_ex`. */
 inline bool Ui.toggle_group(
   Ui u, String id, List labels, bool *values, cui_toggle_group_opts opts) =>
   cui_toggle_group_ex(u, id, labels.c_strings(), labels.len(), values, &opts);
+
+/** Calls `cui_status_spinner_ex`. */
+inline bool Ui.status_spinner(
+  Ui u, String id, cui_status status, cui_status_spinner_opts opts) =>
+  cui_status_spinner_ex(u, id, status, &opts);
 
 /** Calls `cui_reactions`. */
 inline int Ui.reactions(Ui u, String id, cui_reaction *items, int count) =>
@@ -979,6 +1100,22 @@ inline bool Ui.model_picker(
   cui_model_picker_opts opts) =>
   cui_model_picker_ex(u, id, models, count, &selected, &opts);
 
+/** Calls `cui_voice_wave_ex`. */
+inline bool Ui.voice_wave(
+  Ui u, String id, const float *levels, int count, cui_voice_wave_opts opts) =>
+  cui_voice_wave_ex(u, id, levels, count, &opts);
+
+/** Calls `cui_voice_note_ex`. */
+inline int Ui.voice_note(
+  Ui u, String id, cui_voice_note &note, cui_voice_note_opts opts) =>
+  cui_voice_note_ex(u, id, &note, &opts);
+
+/** Calls `cui_voice_session_ex`. */
+inline int Ui.voice_session(
+  Ui u, String id, cui_voice_state state, const float *levels, int count,
+  cui_voice_session_opts opts) =>
+  cui_voice_session_ex(u, id, state, levels, count, &opts);
+
 /** Calls `cui_week_calendar_ex`. */
 inline int Ui.week_calendar(
   Ui u, String id, cui_date week_start, cui_cal_event *events, int count,
@@ -1008,6 +1145,15 @@ inline int Ui.checklist(
   cui_checklist_opts opts) =>
   cui_checklist_ex(u, id, steps, count, &opts);
 
+/** Calls `cui_veil_begin_ex`. */
+inline bool Ui.veil_begin(
+  Ui u, String id, bool &revealed, cui_veil_opts opts) =>
+  cui_veil_begin_ex(u, id, &revealed, &opts);
+
+/** Calls `cui_veil_end`. */
+inline void Ui.veil_end(Ui u) =>
+  cui_veil_end(u);
+
 /** Calls `cui_multi_select_ex`. */
 inline bool Ui.multi_select(
   Ui u, String id, List items, bool *selected, cui_multi_select_opts opts) =>
@@ -1025,6 +1171,32 @@ inline bool Ui.level_meter(
   Ui u, String id, const float *levels, int channels,
   cui_level_meter_opts opts) =>
   cui_level_meter_ex(u, id, levels, channels, &opts);
+
+/** Calls `cui_toolbar_group_begin`. */
+inline void Ui.toolbar_group_begin(Ui u) =>
+  cui_toolbar_group_begin(u);
+
+/** Calls `cui_toolbar_group_end`. */
+inline void Ui.toolbar_group_end(Ui u) =>
+  cui_toolbar_group_end(u);
+
+/** Calls `cui_toolbar_radio_ex`. */
+inline bool Ui.toolbar_radio(
+  Ui u, String id, List icons, int &index, cui_toolbar_radio_opts opts) =>
+  cui_toolbar_radio_ex(u, id, icons.c_strings(), icons.len(), &index, &opts);
+
+/** Calls `cui_toolbar_primary_ex`. */
+inline bool Ui.toolbar_primary(Ui u, String icon, cui_tool_opts opts) =>
+  cui_toolbar_primary_ex(u, icon, &opts);
+
+/** Calls `cui_toolbar_cycle_ex`. */
+inline bool Ui.toolbar_cycle(
+  Ui u, String id, List items, int &index, cui_tool_opts opts) =>
+  cui_toolbar_cycle_ex(u, id, items.c_strings(), items.len(), &index, &opts);
+
+/** Calls `cui_flyout_mark`. */
+inline void Ui.flyout_mark(Ui u) =>
+  cui_flyout_mark(u);
 
 /** Calls `cui_doc_tabs_ex`. */
 inline cui_doc_tabs_result Ui.doc_tabs(
@@ -1070,6 +1242,47 @@ cui_gradient_result Ui.gradient_editor(
   stops.length = count;
   return result;
 }
+
+/** Calls `cui_status_tag_ex`. */
+inline bool Ui.status_tag(
+  Ui u, String label, cui_tag_status status, cui_status_tag_opts opts) =>
+  cui_status_tag_ex(u, label, status, &opts);
+
+/** Calls `cui_ratio_slider_ex`. */
+inline bool Ui.ratio_slider(
+  Ui u, String first, String second, float &ratio,
+  cui_ratio_slider_opts opts) =>
+  cui_ratio_slider_ex(u, first, second, &ratio, &opts);
+
+/** Calls `cui_gradient_slider_ex`. */
+inline int Ui.gradient_slider(
+  Ui u, String label, float &value, float min, float max,
+  cui_gradient_slider_opts opts) =>
+  cui_gradient_slider_ex(u, label, &value, min, max, &opts);
+
+/** Calls `cui_palette_strip_ex`. */
+inline int Ui.palette_strip(
+  Ui u, String label, cui_color *colors, bool *locked, int count,
+  cui_palette_strip_opts opts) =>
+  cui_palette_strip_ex(u, label, colors, locked, count, &opts);
+
+/** Calls `cui_aspect_picker_ex`. */
+inline bool Ui.aspect_picker(
+  Ui u, String label, int &index, cui_aspect_picker_opts opts) =>
+  cui_aspect_picker_ex(u, label, &index, &opts);
+
+/** Calls `cui_option_action_ex`. */
+inline int Ui.option_action(
+  Ui u, String label, List items, int &index, String icon,
+  cui_option_action_opts opts) =>
+  cui_option_action_ex(
+    u, label, items.c_strings(), items.len(), &index, icon, &opts);
+
+/** Calls `cui_seed_field_ex`. */
+inline int Ui.seed_field(
+  Ui u, String label, uint32_t &seed, bool &locked,
+  cui_seed_field_opts opts) =>
+  cui_seed_field_ex(u, label, &seed, &locked, &opts);
 
 /** Calls `cui_timeline_editor_ex`. */
 inline cui_timeline_editor_result Ui.timeline_editor(
@@ -1145,6 +1358,11 @@ inline cui_trace_result Ui.trace_view(
   cui_trace_view_ex(
     u, id, tracks, track_count, spans, span_count, &view, &selected, &opts);
 
+/** Calls `cui_trace_span_rect`. */
+inline cui_rect Ui.trace_span_rect(
+  Ui u, cui_id trace, const cui_trace_span *span) =>
+  cui_trace_span_rect(u, trace, span);
+
 /** Calls `cui_test_explorer_ex`. */
 inline cui_test_explorer_result Ui.test_explorer(
   Ui u, String id, const cui_test_item *items, int count,
@@ -1205,6 +1423,45 @@ inline cui_dot_chart_result Ui.dot_chart(
   cui_dot_chart_opts opts) =>
   cui_dot_chart_ex(u, id, series, series_count, count, &opts);
 
+/** Calls `cui_format_bar_ex`. */
+inline int Ui.format_bar(
+  Ui u, String id, cui_text_format &format, cui_format_bar_opts opts) =>
+  cui_format_bar_ex(u, id, &format, &opts);
+
+/** Calls `cui_live_cursors_ex`. */
+inline void Ui.live_cursors(
+  Ui u, String id, const cui_live_user *users, int count,
+  cui_live_cursors_opts opts) =>
+  cui_live_cursors_ex(u, id, users, count, &opts);
+
+/** Calls `cui_presence_pill_ex`. */
+inline void Ui.presence_pill(
+  Ui u, String id, const cui_live_user *users, int count,
+  cui_presence_pill_opts opts) =>
+  cui_presence_pill_ex(u, id, users, count, &opts);
+
+/** Calls `cui_selection_ring_ex`. */
+inline void Ui.selection_ring(
+  Ui u, cui_color color, cui_selection_ring_opts opts) =>
+  cui_selection_ring_ex(u, color, &opts);
+
+/** Calls `cui_canvas_controls_ex`. */
+inline int Ui.canvas_controls(
+  Ui u, String id, cui_node_view &view, cui_canvas_controls_opts opts) =>
+  cui_canvas_controls_ex(u, id, &view, &opts);
+
+/** Calls `cui_result_card_ex`. */
+inline bool Ui.result_card(
+  Ui u, String id, cui_texture image, String title,
+  cui_result_card_opts opts) =>
+  cui_result_card_ex(u, id, image, title, &opts);
+
+/** Calls `cui_selection_bar_ex`. */
+inline int Ui.selection_bar(
+  Ui u, String id, int count, const cui_selection_action *actions,
+  int action_count, cui_selection_bar_opts opts) =>
+  cui_selection_bar_ex(u, id, count, actions, action_count, &opts);
+
 /** Calls `cui_draw_polyline`. */
 inline void Ui.draw_polyline(
   Ui u, const cui_vec2 *points, int count, float thickness, cui_color color,
@@ -1216,6 +1473,14 @@ inline void Ui.draw_polygon(
   Ui u, const cui_vec2 *points, int count, cui_color color) =>
   cui_draw_polygon(u, points, count, color);
 
+/** Calls `cui_wheel_region`. */
+inline void Ui.wheel_region(Ui u, cui_id id, cui_rect rect) =>
+  cui_wheel_region(u, id, rect);
+
+/** Calls `cui_wheel_take`. */
+inline bool Ui.wheel_take(Ui u, cui_id id, cui_vec2 &delta) =>
+  cui_wheel_take(u, id, &delta);
+
 /* gen-arrays: end generated methods */
 
 /* The method forms of the methods above that take an option record. */
@@ -1223,24 +1488,33 @@ inline void Ui.draw_polygon(
 /* gen-arrays: begin generated forms */
 
 expand %(
-  event_track prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell
-  donut_chart sparkline otp_input reorder_begin (line_chart 1)
-  (bar_chart 1) each_begin each_end item_begin table_row_begin cell_text
-  grid_cell_text (tour 1) toggle_group (reactions 1) (speed_dial 1)
-  (swipe_item_begin 1 3) (filter_bar 1) (tree_table_begin 1 3)
-  diff_view_rows (presence 1) (ticker 1) heatmap (calendar_heatmap 2)
-  (treemap 1) (radar_chart 1) (funnel 1) (sankey 2) (waffle 1)
-  (split_bar 1) (bar_list 1) (activity_rings 1) (scatter_chart 1)
-  (candlestick 1) (tab_bar 1) (waveform 1) (agent_plan 1) (source_list 1)
-  (prompt_suggestions 1) (model_picker 1) (week_calendar 2)
-  (month_calendar 2) (gantt 1) (toc 1) (checklist 1) multi_select
-  (histogram_slider 1) (level_meter 1) (doc_tabs 1) (prop_vec 1)
-  (hex_view 1) (flame_graph 1) curve_editor gradient_editor
+  dispatch_input canvas_input event_track prop_vec2 prop_vec3 prop_vec4
+  tree_begin tree_cell donut_chart sparkline otp_input reorder_begin
+  (line_chart 1) (bar_chart 1) each_begin each_end item_begin
+  table_row_begin cell_text grid_cell_text set_clipboard_text
+  get_clipboard_text (tour 1) skeleton_group_begin skeleton_group_end
+  (pattern_meter 1) toggle_group status_spinner (reactions 1)
+  (speed_dial 1) (swipe_item_begin 1 3) (filter_bar 1)
+  (tree_table_begin 1 3) diff_view_rows (presence 1) (ticker 1) heatmap
+  (calendar_heatmap 2) (treemap 1) (radar_chart 1) (funnel 1) (sankey 2)
+  (waffle 1) (split_bar 1) (bar_list 1) (activity_rings 1)
+  (scatter_chart 1) (candlestick 1) (tab_bar 1) (waveform 1)
+  (agent_plan 1) (source_list 1) (prompt_suggestions 1) (model_picker 1)
+  (voice_wave 1) voice_note (voice_session 2) (week_calendar 2)
+  (month_calendar 2) (gantt 1) (toc 1) (checklist 1) veil_begin veil_end
+  multi_select (histogram_slider 1) (level_meter 1) toolbar_group_begin
+  toolbar_group_end toolbar_radio toolbar_primary toolbar_cycle
+  flyout_mark (doc_tabs 1) (prop_vec 1) (hex_view 1) (flame_graph 1)
+  curve_editor gradient_editor status_tag ratio_slider gradient_slider
+  (palette_strip 2) aspect_picker option_action seed_field
   (timeline_editor 1) kv_editor (problems 1) (pipeline 2)
   (query_builder 1) (keymap 1) (commit_graph 1) (graph_view 1 3)
-  (waterfall 1) (trace_view 1 3) (test_explorer 1) (stack_trace 1)
-  (uptime 1) (time_histogram 4) (coverage 1) (blame 4) (feature_flags 1)
-  (api_explorer 1) (dot_chart 1) (draw_polyline 0) (draw_polygon 0))
+  (waterfall 1) (trace_view 1 3) trace_span_rect (test_explorer 1)
+  (stack_trace 1) (uptime 1) (time_histogram 4) (coverage 1) (blame 4)
+  (feature_flags 1) (api_explorer 1) (dot_chart 1) format_bar
+  (live_cursors 1) (presence_pill 1) selection_ring canvas_controls
+  result_card (selection_bar 2) (draw_polyline 0) (draw_polygon 0)
+  wheel_region wheel_take)
 macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)
 }

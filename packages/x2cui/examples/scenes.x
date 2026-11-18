@@ -27,6 +27,9 @@
 #include "scenes/tools.x"
 #include "scenes/chrome.x"
 #include "scenes/instruments.x"
+#include "scenes/creative.x"
+#include "scenes/canvas.x"
+#include "scenes/loading_voice.x"
 
 #define FAMILY_LIMIT 16
 
@@ -49,6 +52,9 @@ static void add_families(void) {
   add_family(tools_family());
   add_family(chrome_family());
   add_family(instruments_family());
+  add_family(creative_family());
+  add_family(canvas_family());
+  add_family(loading_voice_family());
 }
 
 // The page every scene is drawn on.

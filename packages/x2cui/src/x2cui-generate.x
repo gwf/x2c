@@ -55,10 +55,12 @@ meta static List _parameter_names = %(
   ("cui_dpi_scale") ("cui_begin_frame" "dt") ("cui_end_frame")
   ("cui_needs_redraw") ("cui_next_wakeup") ("cui_request_redraw")
   ("cui_request_wakeup" "seconds") ("cui_time") ("cui_delta_time")
-  ("cui_frame_count") ("cui_input_mouse_move" "x" "y")
-  ("cui_input_mouse_button" "button" "down") ("cui_input_mouse_leave")
-  ("cui_input_scroll" "dx" "dy") ("cui_input_key" "key" "down" "mods")
-  ("cui_input_text" "utf8") ("cui_input_focus" "window_focused")
+  ("cui_frame_count") ("cui_set_input_hook" "hook" "user")
+  ("cui_input_repeated") ("cui_key_action_down" "key")
+  ("cui_input_mouse_move" "x" "y") ("cui_input_mouse_button" "button" "down")
+  ("cui_input_mouse_leave") ("cui_input_scroll" "dx" "dy")
+  ("cui_input_key" "key" "down" "mods") ("cui_input_text" "utf8")
+  ("cui_input_focus" "window_focused")
   ("cui_input_file_hover" "hovering" "x" "y")
   ("cui_input_file_drop" "paths" "count" "x" "y") ("cui_dropped_file_count")
   ("cui_dropped_file" "index") ("cui_file_drag_active")
@@ -119,7 +121,7 @@ meta static List _parameter_names = %(
   ("cui_sheet_begin" "title" "open" "opts") ("cui_sheet_end")
   ("cui_toast_ex" "title" "opts") ("cui_toast_action_clicked" "handle")
   ("cui_toast_dismiss" "handle") ("cui_alert_ex" "title" "opts")
-  ("cui_progress_ex" "value" "opts") ("cui_spinner" "size")
+  ("cui_progress_ex" "value" "opts") ("cui_spinner_ex" "size" "opts")
   ("cui_skeleton" "width" "height") ("cui_badge_ex" "text" "opts")
   ("cui_avatar_ex" "name" "opts")
   ("cui_avatar_group" "names" "count" "max_visible" "size")
@@ -259,6 +261,7 @@ meta static List _parameter_names = %(
   ("cui_draw_emoji" "utf8" "len" "r") ("cui_emoji" "utf8" "size")
   ("cui_emoji_picker_ex" "id" "opts") ("cui_hex_view_goto" "id" "offset")
   ("cui_flame_span_rect" "flame" "span")
+  ("cui_step_slider_ex" "label" "value" "min" "max" "opts")
   ("cui_schedule_picker_ex" "id" "cron" "cap" "opts")
   ("cui_cron_describe" "cron")
   ("cui_regex_tester_ex" "id" "pattern" "pattern_cap" "text" "text_cap" "opts")
@@ -273,12 +276,14 @@ meta static List _parameter_names = %(
   ("cui_draw_circle" "center" "radius" "color")
   ("cui_draw_arc" "center" "radius" "a0" "a1" "thickness" "color")
   ("cui_draw_text" "font" "size" "pos" "color" "text" "len")
+  ("cui_draw_text_slanted" "font" "size" "pos" "color" "text" "len" "shear")
   ("cui_draw_icon" "icon" "r" "size" "color")
   ("cui_draw_image" "tex" "r" "uv" "radius" "tint") ("cui_push_clip" "r")
   ("cui_pop_clip")
   ("cui_canvas" "id" "width" "height" "paint" "user" "user_size")
-  ("cui_state" "id" "size") ("cui_state_on_free" "id" "p2" "p3")
-  ("cui_animate" "id" "target")
+  ("cui_request_component_focus" "id") ("cui_component_has_input" "id")
+  ("cui_focused_id") ("cui_window_focused") ("cui_state" "id" "size")
+  ("cui_state_on_free" "id" "p2" "p3") ("cui_animate" "id" "target")
   ("cui_animate_spring" "id" "target" "duration" "bounce")
   ("cui_get_draw_data"));
 /* gen-arrays: end generated parameter names */
@@ -412,6 +417,7 @@ macro Unit $x2cui.method(Name $target) { @x2cui_method($target) }
 meta static List _scopes = %("node_content" "dockspace" "box" "row" "column"
   "card" "scroll" "split" "dialog_footer" "button_group" "reorder_item"
   "spotlight" "dock" "carousel" "carousel_slide" "card_stack_item"
+  "skeleton_group" "veil" "toolbar_group"
   "menu_bar" "toolbar" "status_bar" "virtual_list" "node" "tree_table");
 meta static List _openings = %("dock_panel" "popover" "menu" "context_menu"
   "dialog" "sheet" "accordion" "reasoning" "hover_card" "expandable_card"
