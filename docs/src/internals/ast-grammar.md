@@ -122,7 +122,8 @@ Owners: [Ast.binding, Ast.without_origin, Ast.rewrap_origin][ast];
 [x2c_ident and Code.binding_spelling][sdk-syntax];
 [_method_spelling][declarators].
 Consumers preserve identity across expressions, declarations, transformations,
-and emission. The [AST API](compiler-api/ast.md) documents shared operations.
+and emission. The [AST source](https://github.com/gwf/x2c/blob/main/src/ast.x)
+documents shared operations.
 
 ## Expressions
 

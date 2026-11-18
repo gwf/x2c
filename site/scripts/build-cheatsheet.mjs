@@ -2,7 +2,7 @@
 import { preview } from 'astro';
 import { chromium } from 'playwright';
 import { fileURLToPath } from 'node:url';
-import { copyFile } from 'node:fs/promises';
+import { copyFile, writeFile } from 'node:fs/promises';
 import { sitePath } from '../site-config.mjs';
 
 const root = new URL('../', import.meta.url);
@@ -17,8 +17,12 @@ try {
   await page.locator('.sheet-columns').waitFor();
   await page.evaluate(() => document.fonts.ready);
   const output = fileURLToPath(new URL('dist/x2c-cheatsheet.pdf', root));
-  await page.pdf({ path: output, preferCSSPageSize: true, printBackground: true,
+  const pdf = await page.pdf({ preferCSSPageSize: true, printBackground: true,
     displayHeaderFooter: false, tagged: true });
+  // Chromium writes an uncompressed dictionary for each PDF page.
+  const pages = [...pdf.toString('latin1').matchAll(/\/Type\s*\/Page\b/g)].length;
+  if (pages !== 1) throw new Error(`Cheat sheet must fit one page; got ${pages}`);
+  await writeFile(output, pdf);
   await copyFile(output, new URL('public/x2c-cheatsheet.pdf', root));
   console.log(`Generated ${output}`);
 } finally {

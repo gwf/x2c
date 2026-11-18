@@ -3,74 +3,74 @@
 
 # Compiler API
 
-These pages list the functions and types inside the x2c compiler,
-generated from its source. They are for readers who study or modify the
-compiler. A program cannot call them: the compiler is not a library, and
-these names can change in any release.
+This index links to the compiler modules and their source documentation.
+Use it to find the code that implements a compiler operation. These
+internal interfaces can change in any release; programs use the
+[runtime library](../../library/modules/index.md) instead.
 
 | Module | Description |
 | --- | --- |
-| [`src/adapter-memo.x`](adapter-memo.md) | Memoized compiler adapter construction. |
-| [`src/ast-rewrite.x`](ast-rewrite.md) | Rewrite immediate AST children through canonical Lists. |
-| [`src/ast.x`](ast.md) | Shared helpers for x2c compiler AST nodes. |
-| [`src/builtins.x`](builtins.md) | The built-in macros' compile-time algorithms. |
-| [`src/cache.x`](cache.md) | Cached literal slots and deferred file-static initializers. |
-| [`src/callables/callables.x`](callables.md) | Callable values lowered to C helpers. |
-| [`src/cleanup/cleanup.x`](cleanup.md) | Cleanup regions and the transfers that leave them. |
-| [`src/cli/cli.x`](cli.md) | x2c command-line parsing and presentation. |
-| [`src/collect/collect.x`](collect.md) | Source-ordered shallow symbol collection and replay. |
-| [`src/compiler/compiler.x`](compiler.md) | One x2c unit's translation state and its two parses. |
-| [`src/components/bracket-access.x`](bracket-access.md) | Bracket access policy. |
-| [`src/components/collection-literals.x`](collection-literals.md) | Array and Map literals. |
-| [`src/components/delegate-members.x`](delegate-members.md) | Delegate fields. |
-| [`src/components/destructuring.x`](destructuring.md) | Flat List destructuring. |
-| [`src/components/dynamic-operators.x`](dynamic-operators.md) | Dynamic operators. |
-| [`src/components/interpolation.x`](interpolation.md) | Interpolated Strings. |
-| [`src/components/lambda-functions.x`](lambda-functions.md) | Lambda lowering. |
-| [`src/components/macro-mapping.x`](macro-mapping.md) | Maps a source macro over compile-time rows. |
-| [`src/components/pattern-match.x`](pattern-match.md) | Match statements. |
-| [`src/components/printf-format.x`](printf-format.md) | Var values in printf-family formats. |
-| [`src/components/protocol-adapters.x`](protocol-adapters.md) | Protocol adapters and Var descriptors. |
-| [`src/components/raise.x`](raise.md) | Raise. |
-| [`src/components/string-switch.x`](string-switch.md) | Switches on a String. |
-| [`src/components/try-catch.x`](try-catch.md) | Try, catch, and finally. |
-| [`src/cpp/cpp.x`](cpp.md) | Optional preprocessing for existing C compatibility. |
-| [`src/deps.x`](deps.md) | Make dependency output for x2c translation units. |
-| [`src/diagnostics.x`](diagnostics.md) | Compiler diagnostic storage and rendering. |
-| [`src/emit/emit.x`](emit.md) | C tokens from normalized x2c ASTs. |
-| [`src/expressions-reports.x`](expressions-reports.md) | Expression typing diagnostics. |
-| [`src/expressions/expressions.x`](expressions.md) | Expression syntax and its resolution. |
-| [`src/fields.x`](fields.md) | Statements that copy or set named fields. |
-| [`src/format.x`](format.md) | Code formatting helpers for the x2c compiler. |
-| [`src/frontend.x`](frontend.md) | Configured compiler sessions and source units. |
-| [`src/generate/generate.x`](generate.md) | The generated header and source of one unit. |
-| [`src/grammar.x`](grammar.md) | The source forms that lowering recognizes. |
-| [`src/initializers/initializers.x`](initializers.md) | Brace initializer conversion. |
-| [`src/lambdas.x`](lambdas.md) | Lambda parsing and capture resolution. |
-| [`src/linked-meta.x`](linked-meta.md) | Shipped `meta` code compiled into the compiler. |
-| [`src/literals/literals.x`](literals.md) | x2c literal parsing. |
-| [`src/macros/macros.x`](macros.md) | Source macros and the compile-time calls they run. |
-| [`src/main.x`](main.md) | x2c command dispatch. |
-| [`src/meta-group/meta-group.x`](meta-group.md) | A unit's meta group, emitted as C. |
-| [`src/meta-helper-client.x`](meta-helper-client.md) | The compiler's side of the project meta helper. |
-| [`src/meta-native/meta-native.x`](meta-native.md) | Meta functions and the native code they call. |
-| [`src/meta-project.x`](meta-project.md) | The project meta build. |
-| [`src/meta-sdk/meta-sdk.x`](meta-sdk.md) | Compiler implementations of `lib/meta.x` operations. |
-| [`src/operator-ledger.x`](operator-ledger.md) | Binary operator facts and case projections. |
-| [`src/parse-reports.x`](parse-reports.md) | Package, binding, and alias diagnostics. |
-| [`src/parse/parse.x`](parse.md) | x2c declarations, parsed from source or constructed. |
-| [`src/preprocess.x`](preprocess.md) | C preprocessor directives in x2c source. |
-| [`src/project/project.x`](project.md) | x2c project manifests. |
-| [`src/protocol/protocol.x`](protocol.md) | Protocols from declaration to conform forms. |
-| [`src/regions/regions.x`](regions.md) | Values that can outlive the region that allocated them. |
-| [`src/report.x`](report.md) | Command progress and completion receipts. |
-| [`src/sourceview.x`](sourceview.md) | Request-owned source overlays. |
-| [`src/stage.x`](stage.md) | The values crossing between meta code and the program. |
-| [`src/statements.x`](statements.md) | x2c statement parsing. |
-| [`src/symtab/symtab.x`](symtab.md) | The compiler's semantic symbol table. |
-| [`src/toolchain.x`](toolchain.md) | Host preprocessing, compilation, archive, and link actions. |
-| [`src/transform/transform.x`](transform.md) | x2c AST transformation pipeline. |
-| [`src/translation.x`](translation.md) | Synchronous compiler translation requests. |
-| [`src/type-ledger.x`](type-ledger.md) | The compiler's Var tag tables, projected from the ledger. |
-| [`src/type.x`](type.md) | x2c semantic types. |
-| [`src/utils.x`](utils.md) | System utilities for environment discovery and workers. |
+| [`src/adapter-memo.x`](https://github.com/gwf/x2c/blob/main/src/adapter-memo.x) | Memoized compiler adapter construction. |
+| [`src/ast-rewrite.x`](https://github.com/gwf/x2c/blob/main/src/ast-rewrite.x) | Rewrite immediate AST children through canonical Lists. |
+| [`src/ast.x`](https://github.com/gwf/x2c/blob/main/src/ast.x) | Shared helpers for x2c compiler AST nodes. |
+| [`src/builtins.x`](https://github.com/gwf/x2c/blob/main/src/builtins.x) | The built-in macros' compile-time algorithms. |
+| [`src/cache.x`](https://github.com/gwf/x2c/blob/main/src/cache.x) | Cached literal slots and deferred file-static initializers. |
+| [`src/callables/callables.x`](https://github.com/gwf/x2c/blob/main/src/callables/callables.x) | Callable values lowered to C helpers. |
+| [`src/cleanup/cleanup.x`](https://github.com/gwf/x2c/blob/main/src/cleanup/cleanup.x) | Cleanup regions and the transfers that leave them. |
+| [`src/cli/cli.x`](https://github.com/gwf/x2c/blob/main/src/cli/cli.x) | x2c command-line parsing and presentation. |
+| [`src/collect/collect.x`](https://github.com/gwf/x2c/blob/main/src/collect/collect.x) | Source-ordered shallow symbol collection and replay. |
+| [`src/compiler/compiler.x`](https://github.com/gwf/x2c/blob/main/src/compiler/compiler.x) | One x2c unit's translation state and its two parses. |
+| [`src/components/bracket-access.x`](https://github.com/gwf/x2c/blob/main/src/components/bracket-access.x) | Bracket access policy. |
+| [`src/components/collection-literals.x`](https://github.com/gwf/x2c/blob/main/src/components/collection-literals.x) | Array and Map literals. |
+| [`src/components/delegate-members.x`](https://github.com/gwf/x2c/blob/main/src/components/delegate-members.x) | Delegate fields. |
+| [`src/components/destructuring.x`](https://github.com/gwf/x2c/blob/main/src/components/destructuring.x) | Flat List destructuring. |
+| [`src/components/dynamic-operators.x`](https://github.com/gwf/x2c/blob/main/src/components/dynamic-operators.x) | Dynamic operators. |
+| [`src/components/interpolation.x`](https://github.com/gwf/x2c/blob/main/src/components/interpolation.x) | Interpolated Strings. |
+| [`src/components/lambda-functions.x`](https://github.com/gwf/x2c/blob/main/src/components/lambda-functions.x) | Lambda lowering. |
+| [`src/components/macro-mapping.x`](https://github.com/gwf/x2c/blob/main/src/components/macro-mapping.x) | Maps a source macro over compile-time rows. |
+| [`src/components/pattern-match.x`](https://github.com/gwf/x2c/blob/main/src/components/pattern-match.x) | Match statements. |
+| [`src/components/printf-format.x`](https://github.com/gwf/x2c/blob/main/src/components/printf-format.x) | Var values in printf-family formats. |
+| [`src/components/protocol-adapters.x`](https://github.com/gwf/x2c/blob/main/src/components/protocol-adapters.x) | Protocol adapters and Var descriptors. |
+| [`src/components/raise.x`](https://github.com/gwf/x2c/blob/main/src/components/raise.x) | Raise. |
+| [`src/components/string-switch.x`](https://github.com/gwf/x2c/blob/main/src/components/string-switch.x) | Switches on a String. |
+| [`src/components/try-catch.x`](https://github.com/gwf/x2c/blob/main/src/components/try-catch.x) | Try, catch, and finally. |
+| [`src/cpp/cpp.x`](https://github.com/gwf/x2c/blob/main/src/cpp/cpp.x) | Optional preprocessing for existing C compatibility. |
+| [`src/deps.x`](https://github.com/gwf/x2c/blob/main/src/deps.x) | Make dependency output for x2c translation units. |
+| [`src/diagnostics.x`](https://github.com/gwf/x2c/blob/main/src/diagnostics.x) | Compiler diagnostic storage and rendering. |
+| [`src/emit/emit.x`](https://github.com/gwf/x2c/blob/main/src/emit/emit.x) | C tokens from normalized x2c ASTs. |
+| [`src/expressions-reports.x`](https://github.com/gwf/x2c/blob/main/src/expressions-reports.x) | Expression typing diagnostics. |
+| [`src/expressions/expressions.x`](https://github.com/gwf/x2c/blob/main/src/expressions/expressions.x) | Expression syntax and its resolution. |
+| [`src/fields.x`](https://github.com/gwf/x2c/blob/main/src/fields.x) | Statements that copy or set named fields. |
+| [`src/format.x`](https://github.com/gwf/x2c/blob/main/src/format.x) | Code formatting helpers for the x2c compiler. |
+| [`src/frontend.x`](https://github.com/gwf/x2c/blob/main/src/frontend.x) | Configured compiler sessions and source units. |
+| [`src/generate/generate.x`](https://github.com/gwf/x2c/blob/main/src/generate/generate.x) | The generated header and source of one unit. |
+| [`src/grammar.x`](https://github.com/gwf/x2c/blob/main/src/grammar.x) | The source forms that lowering recognizes. |
+| [`src/initializers/initializers.x`](https://github.com/gwf/x2c/blob/main/src/initializers/initializers.x) | Brace initializer conversion. |
+| [`src/lambdas.x`](https://github.com/gwf/x2c/blob/main/src/lambdas.x) | Lambda parsing and capture resolution. |
+| [`src/linked-meta.x`](https://github.com/gwf/x2c/blob/main/src/linked-meta.x) | Shipped `meta` code compiled into the compiler. |
+| [`src/literals/literals.x`](https://github.com/gwf/x2c/blob/main/src/literals/literals.x) | x2c literal parsing. |
+| [`src/macros/macros.x`](https://github.com/gwf/x2c/blob/main/src/macros/macros.x) | Source macros and the compile-time calls they run. |
+| [`src/main.x`](https://github.com/gwf/x2c/blob/main/src/main.x) | x2c command dispatch. |
+| [`src/meta-group/meta-group.x`](https://github.com/gwf/x2c/blob/main/src/meta-group/meta-group.x) | A unit's meta group, emitted as C. |
+| [`src/meta-helper-client.x`](https://github.com/gwf/x2c/blob/main/src/meta-helper-client.x) | The compiler's side of the project meta helper. |
+| [`src/meta-native/meta-native.x`](https://github.com/gwf/x2c/blob/main/src/meta-native/meta-native.x) | Meta functions and the native code they call. |
+| [`src/meta-project.x`](https://github.com/gwf/x2c/blob/main/src/meta-project.x) | The project meta build. |
+| [`src/meta-sdk/meta-sdk.x`](https://github.com/gwf/x2c/blob/main/src/meta-sdk/meta-sdk.x) | Compiler implementations of `lib/meta.x` operations. |
+| [`src/operator-ledger.x`](https://github.com/gwf/x2c/blob/main/src/operator-ledger.x) | Binary operator facts and case projections. |
+| [`src/parse-reports.x`](https://github.com/gwf/x2c/blob/main/src/parse-reports.x) | Package, binding, and alias diagnostics. |
+| [`src/parse/parse.x`](https://github.com/gwf/x2c/blob/main/src/parse/parse.x) | x2c declarations, parsed from source or constructed. |
+| [`src/preprocess.x`](https://github.com/gwf/x2c/blob/main/src/preprocess.x) | C preprocessor directives in x2c source. |
+| [`src/project/project.x`](https://github.com/gwf/x2c/blob/main/src/project/project.x) | x2c project manifests. |
+| [`src/protocol/protocol.x`](https://github.com/gwf/x2c/blob/main/src/protocol/protocol.x) | Protocols from declaration to conform forms. |
+| [`src/regions/regions.x`](https://github.com/gwf/x2c/blob/main/src/regions/regions.x) | Values that can outlive the region that allocated them. |
+| [`src/report.x`](https://github.com/gwf/x2c/blob/main/src/report.x) | Command progress and completion receipts. |
+| [`src/sourceview.x`](https://github.com/gwf/x2c/blob/main/src/sourceview.x) | Request-owned source overlays. |
+| [`src/stage.x`](https://github.com/gwf/x2c/blob/main/src/stage.x) | The values crossing between meta code and the program. |
+| [`src/statements.x`](https://github.com/gwf/x2c/blob/main/src/statements.x) | x2c statement parsing. |
+| [`src/symtab/symtab.x`](https://github.com/gwf/x2c/blob/main/src/symtab/symtab.x) | The compiler's semantic symbol table. |
+| [`src/toolchain.x`](https://github.com/gwf/x2c/blob/main/src/toolchain.x) | Host preprocessing, compilation, archive, and link actions. |
+| [`src/transform/transform.x`](https://github.com/gwf/x2c/blob/main/src/transform/transform.x) | x2c AST transformation pipeline. |
+| [`src/translation.x`](https://github.com/gwf/x2c/blob/main/src/translation.x) | Synchronous compiler translation requests. |
+| [`src/type-ledger.x`](https://github.com/gwf/x2c/blob/main/src/type-ledger.x) | The compiler's Var tag tables, projected from the ledger. |
+| [`src/type.x`](https://github.com/gwf/x2c/blob/main/src/type.x) | x2c semantic types. |
+| [`src/utils.x`](https://github.com/gwf/x2c/blob/main/src/utils.x) | System utilities for environment discovery and workers. |
