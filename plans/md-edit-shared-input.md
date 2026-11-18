@@ -54,7 +54,7 @@ x2c checkout. Historical probe files remain unused by the new build.
 
 | Workload | Result |
 | --- | --- |
-| Shared package native unit tests | 39 tests, 180 assertions passed |
+| Shared package native unit tests | 40 tests, 186 assertions passed |
 | Shared package native `check` | Passed; 232 rendered scenes, zero empty or unmatched components; refused literal checks passed |
 | Shared package `web` | Gallery and stress browser artifacts built |
 | Shared package `web-check` | 31 gallery pages rendered in Node/WebAssembly, zero empty |
@@ -78,7 +78,9 @@ Logs are `debug/component-package-{build,tests,check,web,web-check}.log` and
 
 The implementation reuses CUI's existing focus traversal and renderer. Focus
 participation fits existing node padding and needs no component registry.
-Opt-out callers retain legacy input behavior. md-edit deletes its private CUI
+Modal popovers retain their enclosing input scope through parent-layer data
+in existing popup records. Tests cover both frame boundaries and reject
+unrelated root popups. Opt-out callers retain legacy input behavior. md-edit deletes its private CUI
 builder and probe policies instead of maintaining a second shared contract.
 
 Raw and wrapper tests protect focus eligibility, handled/default separation,
