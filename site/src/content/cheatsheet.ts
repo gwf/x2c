@@ -10,18 +10,13 @@ export interface Section {
 }
 
 export const sheet: Section[] = [
-  { column: 1, title: "Start", rows: [
+  { column: 1, title: "Commands", rows: [
     ["x2c run hello.x -- args", "Build and run; args follow `--`."],
     ["x2c build -o app a.x b.x", "An executable from its units."],
-    ["#include \"unit.x\"", "Its public names; no header."],
-    ["import \"pcre2\" as rx;", "A package: `rx.Regexp`."],
-    ["#!/usr/bin/env -S x2c script", "File-scope statements run."],
-    ["#pragma indent", "Indent instead of braces; or `.xp`."],
-  ] },
-  { column: 1, title: "Commands", rows: [
     ["x2c translate --dump-ast a.x", "Print the expanded, bound AST; omit flag to emit C."],
-    ["new  repl  lsp", "Project, REPL (checkout only), editor server."],
-    ["install  remove  list", "Packages; `env` shows paths."],
+    ["#!/usr/bin/env -S x2c script", "File-scope statements run."],
+    ["x2c <command>", "Also `new repl lsp install remove list env`."],
+    ["x2c help <command>", "`x2c help` lists every command."],
   ] },
   { column: 1, title: "Values", rows: [
     ["Var v = 42;", "Eight-byte tagged value; not arbitrary C data."],
@@ -55,13 +50,18 @@ export const sheet: Section[] = [
     ["T f(List @rest)", "Rest arguments as a `List`."],
     ["void bump(int &n)", "By reference; `&?p` allows `NULL`."],
   ] },
+  { column: 1, title: "Lisp", rows: [
+    ["Lisp l = Lisp.new();", "Embedded; `l.destroy()` ends it."],
+    ["l.bind(\"f\", fn);", "Expose a native function."],
+    ["int r = l.eval(%(f $n 2));", "`$n` inserts a C value; the result converts back."],
+  ] },
   { column: 2, title: "Memory and cleanup", rows: [
     ["auto { ... }", "Group allocations; free them on leaving the block."],
     ["for (...) auto { ... }", "A scope per iteration."],
     ["T t = auto T.new();", "Clean up this value at exit."],
     ["Scope.open(); defer Scope.close();", "A scope by hand."],
     ["defer f.close();", "At exit, `return`, or a raise."],
-    ["xmalloc(n)  xfree(p)", "Tracked allocation; `xfree` releases it early."],
+    ["xmalloc(n);  xfree(p);", "Tracked allocation; `xfree` releases it early."],
   ] },
   { column: 2, title: "Flow", rows: [
     ["foreach (T x in c)", "Collections; a `File` by line."],
@@ -94,7 +94,8 @@ export const sheet: Section[] = [
     ["protocol Base(T) { long T.m(T); }", "A contract named for its base."],
     ["protocol Base(Impl);", "Adopt; provide required methods, replace defaults."],
     ["$derive(T, <json>, <repr>)", "Methods from fields; `<derive.x>`."],
-    ["ArrayInt  MapIntInt", "Unboxed, from `typed-*.x`."],
+    ["ArrayInt a = [1, 2, 3];", "Packed `int`s; `typed-array.x`."],
+    ["MapStringInt m = {\"a\": 1};", "Unboxed; also `ArrayDbl ListInt`, more."],
   ] },
   { column: 3, title: "Concurrency", rows: [
     ["Thread.run([%!(void) => { ... }, ...])", "Start all, then join all."],
@@ -112,15 +113,9 @@ export const sheet: Section[] = [
     ["meta List g(TypeInfo t)", "Reads a type's fields, methods."],
     ["$!( { @items } )  $!Stmt{ ... }", "Quoted syntax; `$` inserts, `@` splices."],
   ] },
-  { column: 3, title: "Lisp", rows: [
-    ["Lisp l = Lisp.new();", "Embedded; `l.destroy()` ends it."],
-    ["$lisp.bind(l, \"f\", fn);", "Expose a native function."],
-    ["l.eval(%(f 1 2))", "Run a `List`; results convert."],
-  ] },
   { column: 3, title: "Library", rows: [
     ["%(git status).job().output()", "`process.x`: run a command."],
     ["Path p = \".\";  p.join(\"*.x\").glob()", "`path.x`: files, globs, dirs."],
-    ["args", "Script args; `args.x` parses."],
     ["Socket.connect(host, port, ms)", "`net.x`: blocking TCP."],
     ["Router.new().get(path, %!(req, res) => ...)", "`http.x`: routes and a server."],
     ["Json.parse(s)  v.json()", "`json.x`; also `time url regex`."],
@@ -132,6 +127,10 @@ export const sheet: Section[] = [
     ["x2c test --filter name", "Run the project's tests."],
   ] },
   { column: 3, title: "C interop", rows: [
+    ["#include \"unit.x\"", "Its public names; no header."],
+    ["#include \"lib.h\"", "A C header, unchanged."],
+    ["import \"pcre2\" as rx;", "A wrapped library: `rx.Regexp`."],
+    ["#pragma indent", "Indent instead of braces; or `.xp`."],
     ["p.field  p->field", "`.` works through a pointer."],
     ["String.new(cstr)", "To `String`; out as `char *`."],
     ["x2c build -I dir -O2 a.x", "Flags pass to `cc`."],
