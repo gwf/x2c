@@ -31,6 +31,52 @@ int main(void) {
 }
 ```
 
+## Focused components and input
+
+A custom component can own its keyboard behavior without using a text field.
+Submit it with `ui.canvas_input`, retain its scoped `ui.make_id`, and use
+`ui.component_has_input(id)` to decide whether it receives input. Its key map,
+commands, and host requests belong to the application, not to CUI.
+
+`ui.set_input_hook` captures ordered input before legacy aggregation. The hook
+borrows events and text; copy anything retained in an application-owned queue.
+Unregister the hook while replaying and before freeing its user data. The raw
+hook is a C callback: catch and retain any x2c Error there, then raise it after
+returning from native event collection.
+
+For each queued key, committed-text, or window-focus event, call
+`ui.dispatch_input(&event, route, user)` after beginning the frame and before
+submitting components. The synchronous route callback receives
+`(Ui, void *user, const cui_input_event *)`. Route to the focused component first,
+then the active host scope and permitted application shortcuts. Return true to
+consume the action, or false for CUI defaults, including Tab traversal.
+The x2c method catches callback Errors and raises them after CUI returns.
+Do not construct UI or recursively inject input inside the callback.
+
+`ui.input_repeated()` identifies a repeated down inside the callback.
+`ui.key_down(key)` always reports physical held state;
+`ui.key_action_down(key)` reports held state allowed to drive default controls.
+Consuming an event never prevents modifier/release bookkeeping. Inactive downs
+cannot activate default controls, including after reactivation until release.
+Keys and committed text remain separate; consuming a key does not cancel a
+later text event or implement IME composition.
+
+`ui.request_component_focus(id)` resolves against the next completed submission
+and only accepts a participating component. Missing or disabled targets do not
+acquire focus. Keyboard eligibility queries are valid after a completed frame
+or before component submission in the next one. Notify components when ownership
+changes after every completed submission, including frames with no input, so
+local held-key and chord state can be cancelled. Selection can remain.
+
+A dialog closed after it was submitted may require a reconciliation submission
+before routing the next event. The host owns that scheduling; the package adds
+no input queue or unconditional second pass. Existing built-in controls retain
+their ordinary input path; this is not universal widget event bubbling.
+
+The focused-component tests use a counter with no text buffer. The md-edit
+application uses the same contract for formatting commands, Markdown prefix
+conversion, typed dialog requests, and unhandled application shortcuts.
+
 ## Status
 
 The package is experimental. The pinned revision builds and passes off-screen

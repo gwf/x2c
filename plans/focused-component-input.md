@@ -1,9 +1,9 @@
 # Focused-component input handling
 
-> Status: isolated implementation and measurements complete, 2026-11-16.
-> See [prototype results](md-edit-dispatch-prototype.md). Shared CUI and x2cui
-> implementation remains held for review. This contract reframes the earlier
-> text-canvas proposal around components that own their keyboard behavior.
+> Status: shared CUI and x2cui implementation complete, 2026-11-17.
+> The md-edit client now uses the shared contract. See
+> [integration results](md-edit-shared-input.md) and the earlier
+> [prototype measurements](md-edit-dispatch-prototype.md).
 
 ## Goal and division of responsibility
 

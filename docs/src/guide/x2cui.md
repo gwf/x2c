@@ -406,12 +406,52 @@ A custom canvas registers `ui.wheel_region(id, rect)` while painting and
 consumes `ui.wheel_take(id, delta)` before it copies paint data. The region
 uses a separate stable ID and previous-frame geometry. It captures both
 axes; content-edge handoff to a parent is the custom component's decision.
-These services do not provide ordered keyboard/text events or custom-editor
-IME composition.
+Focused-component keyboard handling is described below. IME composition
+remains outside that contract.
 
 The native App methods include maximize, minimize, restore, window_state,
 placement, set_position, and follow_system_theme. They retain CUI's platform
 contracts; see the pinned raw header for placement support on each backend.
+
+## Focused-component keyboard handling
+
+`ui.canvas_input(id, width, height, paint, user, user_size)` submits a custom
+component that participates in focus and owns its keyboard interpretation.
+It does not need a text buffer. Its key map can execute component commands,
+emit typed host requests, or decline an event for host fallback.
+
+Use `ui.set_input_hook` to capture ordered events in an application-owned
+queue. Events and committed text are borrowed during capture. Copy retained
+text, unregister during replay, and unregister before releasing callback data.
+The raw capture callback must contain x2c Errors and report them after native
+event collection returns.
+
+After beginning a frame and before submitting components, call
+`ui.dispatch_input(&event, route, user)` for a captured key, committed-text,
+or window-focus event. The synchronous callback receives `(Ui, user, event)`.
+Route to the eligible component first, then the active host scope and permitted
+application shortcuts. Return true when handled, including an intentionally
+blocked operation, or false for CUI defaults. Unhandled Tab traverses focus.
+The x2c wrapper raises callback Errors after returning safely from CUI.
+
+`ui.input_repeated()` describes repeated downs during routing. Physical held
+state from `ui.key_down(key)` is distinct from default-action eligibility from
+`ui.key_action_down(key)`. Consuming input never suppresses key-release or
+modifier bookkeeping. Consumed and inactive downs cannot activate default held
+behavior until release. Committed text remains separate from physical keys.
+
+Retain the scoped ID from `ui.make_id(id)`. `ui.request_component_focus(id)`
+resolves against a completed submission and admits only a participating,
+enabled component. `ui.component_has_input(id)` checks focus, membership,
+window activation, and overlay ownership at completed-submission boundaries.
+Notify components when ownership changes after every completed submission,
+including empty frames, so they can cancel local held-key and chord state.
+
+The host owns any reconciliation needed after changing an already-submitted
+dialog. CUI adds no queue or unconditional second pass. Existing built-in
+controls retain their input path; this API does not add general widget event
+bubbling or IME composition. `ui.draw_text_slanted` exposes styled drawing for
+custom components without access to CUI's private vertex storage.
 
 ## The native API
 
@@ -445,9 +485,9 @@ lasts across frames.
   no bidirectional text.
 - A program draws from one thread. The package keeps one unlocked table,
   shared by every `Ui`, of the arrays it builds for Lists of Strings.
-- The package applies two patches to CUI, `table-row-state` and
-  `focusable-canvas`, and an upgrade of CUI must remake them.
-  `PROFILE.md` describes both.
+- The package applies `table-row-state`, `focusable-canvas`, and
+  `component-input` patches to CUI. The browser also has an OpenGL ES patch.
+  An upstream upgrade must revalidate them; `PROFILE.md` records the profile.
 
 ## Where to go next
 

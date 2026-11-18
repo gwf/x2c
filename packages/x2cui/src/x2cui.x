@@ -62,6 +62,49 @@ $cleanup.by(Offscreen, close);
 #include <stdlib.h>
 #include <string.h>
 
+// focused-component input
+
+typedef struct InputRoute {
+  cui_input_route_fn route;
+  void *user;
+  Symbol cause;
+  List detail;
+} InputRoute;
+
+/** Routes one captured keyboard, committed-text, or window-focus event.
+    Call after begin_frame, before submitting components. The route callback
+    owns its component key map and host fallback. Returning true consumes the
+    action; physical key state is maintained either way. Unhandled Tab uses
+    CUI focus traversal. The event and user pointer are borrowed for this call.
+    An x2c Error from route is raised after returning safely from CUI.
+*/
+void Ui.dispatch_input(Ui ui, const cui_input_event *event,
+                       cui_input_route_fn route, void *user) {
+  InputRoute call = { .route = route, .user = user };
+  cui_dispatch_input(ui, event, _route_input, &call);
+  if (call.cause) Error.raise(call.cause, call.detail);
+}
+
+static bool _route_input(Ui ui, void *user, const cui_input_event *event) {
+  InputRoute *call = user;
+  try return call.route ? call.route(ui, call.user, event) : false;
+  catch %(?cause *detail): {
+    call.cause = cause;
+    call.detail = Error.snapshot(detail);
+    return true;
+  }
+}
+
+/** Submits a custom component that owns its keyboard interpretation.
+    It participates in Tab order but does not synthesize button clicks from
+    Enter or Space. The painter and user-data lifetime match Ui.canvas.
+    Use make_id(id) at this scope for component_has_input/request_component_focus.
+*/
+cui_canvas_result Ui.canvas_input(Ui ui, String id, cui_size width, cui_size height,
+                                  cui_paint_fn paint, const void *user, size_t user_size) =>
+  cui_canvas_ex(ui, id, width, height, paint, user, user_size,
+                CUI_CANVAS_FOCUSABLE | CUI_CANVAS_COMPONENT_INPUT);
+
 // windows
 
 /** Opens a window. Raises `<init-fail>` when CUI cannot create it. */
@@ -577,7 +620,8 @@ int x2cui_spare(Block records) {
 
 /* gen-arrays: begin generated records */
 
-$x2cui.record(cui_vec2); $x2cui.record(cui_rect); $x2cui.record(cui_date);
+$x2cui.record(cui_vec2); $x2cui.record(cui_rect);
+$x2cui.record(cui_input_event); $x2cui.record(cui_date);
 $x2cui.record(cui_tour_step); $x2cui.record(cui_table_column);
 $x2cui.record(cui_table_sort); $x2cui.record(cui_chart_annotation);
 $x2cui.record(cui_meter_part); $x2cui.record(cui_image_view);
@@ -761,7 +805,10 @@ expand %(
   cui_next_wakeup cui_request_redraw cui_request_wakeup cui_time
   cui_delta_time cui_frame_count cui_input_mouse_move cui_input_mouse_button
   cui_input_mouse_leave cui_input_scroll cui_input_key cui_input_text
-  cui_input_focus cui_input_file_hover cui_input_file_drop
+  cui_input_focus cui_set_input_hook cui_input_repeated cui_window_focused
+  cui_focused_id cui_request_component_focus cui_component_has_input
+  cui_key_action_down cui_draw_text_slanted
+  cui_input_file_hover cui_input_file_drop
   cui_dropped_file_count cui_dropped_file cui_file_drag_active
   cui_set_platform cui_get_cursor cui_key_pressed cui_key_down cui_shortcut
   cui_key_mods cui_mouse_pos cui_mouse_down cui_mouse_clicked
@@ -1441,24 +1488,25 @@ inline bool Ui.wheel_take(Ui u, cui_id id, cui_vec2 &delta) =>
 /* gen-arrays: begin generated forms */
 
 expand %(
-  event_track prop_vec2 prop_vec3 prop_vec4 tree_begin tree_cell
-  donut_chart sparkline otp_input reorder_begin (line_chart 1)
-  (bar_chart 1) each_begin each_end item_begin table_row_begin cell_text
-  grid_cell_text set_clipboard_text get_clipboard_text (tour 1)
-  skeleton_group_begin skeleton_group_end (pattern_meter 1) toggle_group
-  status_spinner (reactions 1) (speed_dial 1) (swipe_item_begin 1 3)
-  (filter_bar 1) (tree_table_begin 1 3) diff_view_rows (presence 1)
-  (ticker 1) heatmap (calendar_heatmap 2) (treemap 1) (radar_chart 1)
-  (funnel 1) (sankey 2) (waffle 1) (split_bar 1) (bar_list 1)
-  (activity_rings 1) (scatter_chart 1) (candlestick 1) (tab_bar 1)
-  (waveform 1) (agent_plan 1) (source_list 1) (prompt_suggestions 1)
-  (model_picker 1) (voice_wave 1) voice_note (voice_session 2)
-  (week_calendar 2) (month_calendar 2) (gantt 1) (toc 1) (checklist 1)
-  veil_begin veil_end multi_select (histogram_slider 1) (level_meter 1)
-  toolbar_group_begin toolbar_group_end toolbar_radio toolbar_primary
-  toolbar_cycle flyout_mark (doc_tabs 1) (prop_vec 1) (hex_view 1)
-  (flame_graph 1) curve_editor gradient_editor status_tag ratio_slider
-  gradient_slider (palette_strip 2) aspect_picker option_action seed_field
+  dispatch_input canvas_input event_track prop_vec2 prop_vec3 prop_vec4
+  tree_begin tree_cell donut_chart sparkline otp_input reorder_begin
+  (line_chart 1) (bar_chart 1) each_begin each_end item_begin
+  table_row_begin cell_text grid_cell_text set_clipboard_text
+  get_clipboard_text (tour 1) skeleton_group_begin skeleton_group_end
+  (pattern_meter 1) toggle_group status_spinner (reactions 1)
+  (speed_dial 1) (swipe_item_begin 1 3) (filter_bar 1)
+  (tree_table_begin 1 3) diff_view_rows (presence 1) (ticker 1) heatmap
+  (calendar_heatmap 2) (treemap 1) (radar_chart 1) (funnel 1) (sankey 2)
+  (waffle 1) (split_bar 1) (bar_list 1) (activity_rings 1)
+  (scatter_chart 1) (candlestick 1) (tab_bar 1) (waveform 1)
+  (agent_plan 1) (source_list 1) (prompt_suggestions 1) (model_picker 1)
+  (voice_wave 1) voice_note (voice_session 2) (week_calendar 2)
+  (month_calendar 2) (gantt 1) (toc 1) (checklist 1) veil_begin veil_end
+  multi_select (histogram_slider 1) (level_meter 1) toolbar_group_begin
+  toolbar_group_end toolbar_radio toolbar_primary toolbar_cycle
+  flyout_mark (doc_tabs 1) (prop_vec 1) (hex_view 1) (flame_graph 1)
+  curve_editor gradient_editor status_tag ratio_slider gradient_slider
+  (palette_strip 2) aspect_picker option_action seed_field
   (timeline_editor 1) kv_editor (problems 1) (pipeline 2)
   (query_builder 1) (keymap 1) (commit_graph 1) (graph_view 1 3)
   (waterfall 1) (trace_view 1 3) trace_span_rect (test_explorer 1)
