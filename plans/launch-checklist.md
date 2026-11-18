@@ -17,7 +17,9 @@
   actors rather than non-agentic things.
 - [x] Consolidate the book's low-level Compiler API entries into an index.
   The book build change landed on `dev`.
-- [ ] Decide whether the website should retain only the low-level API index.
+- [x] Keep only the consolidated Compiler API index on the website. The
+  staged website publishes the index and omits the former individual API
+  pages. Production publication remains part of the website update below.
 - [ ] Publish the collaboration wording and issue templates. The policy
   welcoming bug reports, ideas, and pull requests is submitted in
   [PR #728](https://github.com/gwf/x2c/pull/728), not yet on `dev`. GitHub
