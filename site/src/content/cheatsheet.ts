@@ -1,9 +1,9 @@
-// The one-page cheat sheet: four columns of sections, each a table of
+// The one-page cheat sheet: three columns of sections, each a table of
 // [code, note] rows. Notes may mark inline code with backticks. In code,
 // `...` stands for code the reader supplies.
 
 export interface Section {
-  column: 1 | 2 | 3 | 4;
+  column: 1 | 2 | 3;
   title: string;
   rows: [string, string][];
 }
@@ -41,7 +41,7 @@ export const sheet: Section[] = [
     ["m[<key>]  m.del(<key>)", "A missing key reads `void`."],
     ["$(a, b)  ${k: v}", "Evaluated items and keys."],
   ] },
-  { column: 2, title: "Functions", rows: [
+  { column: 1, title: "Functions", rows: [
     ["int f(int x) => x * 2;", "Expression body; forward calls need no prototype."],
     ["%!(a, b) => a + b", "Lambda; `using &k` by reference."],
     ["Func g = f;  g(21)", "First-class; calls return `Var`."],
@@ -49,7 +49,7 @@ export const sheet: Section[] = [
     ["T f(List @rest)", "Rest arguments as a `List`."],
     ["void bump(int &n)", "By reference; `&?p` allows `NULL`."],
   ] },
-  { column: 2, title: "Memory and cleanup", rows: [
+  { column: 1, title: "Memory and cleanup", rows: [
     ["auto { ... }", "Group allocations; free them on leaving the block."],
     ["for (...) auto { ... }", "A scope per iteration."],
     ["T t = auto T.new();", "Clean up this value at exit."],
@@ -71,14 +71,14 @@ export const sheet: Section[] = [
     ["with (n = 5) { ... }", "Set for the block, then restored."],
     ["alias total to a + b;", "Substitute an expression; re-evaluate at each use."],
   ] },
-  { column: 3, title: "Errors", rows: [
+  { column: 2, title: "Errors", rows: [
     ["raise %(bad-arg (reason \"r\"));", "An `Error` is a `List`: cause, details."],
     ["try stmt catch %(not-found *): stmt", "Catch by pattern."],
     ["catch %(?c *d): stmt", "Bind the cause and details."],
     ["catch: stmt  finally stmt", "Anything else; then cleanup."],
     ["$assert(n > 0)", "Raises `<invariant>`; in `system-macros.x`."],
   ] },
-  { column: 3, title: "Types", rows: [
+  { column: 2, title: "Types", rows: [
     ["int T.f(T self, int n)", "A method: `value.f(3)`."],
     ["class Point { int x; int y; };", "A value class; generated construction, equality, printing."],
     ["class Node { int v; } *;", "A pointer class in the scope."],
@@ -91,7 +91,7 @@ export const sheet: Section[] = [
     ["$derive(T, <json>, <repr>)", "Methods from fields; `<derive.x>`."],
     ["ArrayInt  MapIntInt", "Unboxed, from `typed-*.x`."],
   ] },
-  { column: 3, title: "Concurrency", rows: [
+  { column: 2, title: "Concurrency", rows: [
     ["Thread.run([%!(void) => { ... }, ...])", "Start all, then join all."],
     ["Thread.start(fn, v)", "One thread; `t.join()`."],
     ["Channel.new(<i32>, 2)", "Exact `i32` messages; `foreach` ends after close + drain."],
@@ -99,7 +99,7 @@ export const sheet: Section[] = [
     ["threaded int counter;", "One copy per thread."],
   ] },
 
-  { column: 4, title: "Compile time", rows: [
+  { column: 3, title: "Compile time", rows: [
     ["macro Expression $m(Expr $e) => $e * 60;", "`$m(2)` becomes `2 * 60`."],
     ["macro Stmt $s(Expr $a, Expr $b) { ... }", "Names resolve where it lands; `using name` keeps one."],
     ["macro Decorator $d(Function $f) { ... }", "Rewrites the item after `$d()`."],
@@ -108,12 +108,12 @@ export const sheet: Section[] = [
     ["meta List g(TypeInfo t)", "Reads a type's fields, methods."],
     ["$!( { @items } )  $!Stmt{ ... }", "Quoted syntax; `$` inserts, `@` splices."],
   ] },
-  { column: 2, title: "Lisp", rows: [
+  { column: 3, title: "Lisp", rows: [
     ["Lisp l = Lisp.new();", "Embedded; `l.destroy()` ends it."],
     ["$lisp.bind(l, \"f\", fn);", "Expose a native function."],
     ["l.eval(%(f 1 2))", "Run a `List`; results convert."],
   ] },
-  { column: 4, title: "Library", rows: [
+  { column: 3, title: "Library", rows: [
     ["%(git status).job().output()", "`process.x`: run a command."],
     ["Path p = \".\";  p.join(\"*.x\").glob()", "`path.x`: files, globs, dirs."],
     ["args", "Script args; `args.x` parses."],
@@ -121,13 +121,13 @@ export const sheet: Section[] = [
     ["Router.new().get(path, %!(req, res) => ...)", "`http.x`: routes and a server."],
     ["Json.parse(s)  v.json()", "`json.x`; also `time url regex`."],
   ] },
-  { column: 4, title: "Tests", rows: [
+  { column: 3, title: "Tests", rows: [
     ["$test() static void t(void) { ... }", "`test.x`; end with `$test.main();`."],
     ["$expect(c)  $expect_eq(a, b)", "Continue after a failure."],
     ["$expect_raises(<cause>, { ... })", "Pass if that cause is raised."],
     ["x2c test --filter name", "Run the project's tests."],
   ] },
-  { column: 4, title: "C interop", rows: [
+  { column: 3, title: "C interop", rows: [
     ["p.field  p->field", "`.` works through a pointer."],
     ["String.new(cstr)", "To `String`; out as `char *`."],
     ["x2c build -I dir -O2 a.x", "Flags pass to `cc`."],
