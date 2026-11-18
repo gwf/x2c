@@ -58,8 +58,7 @@ does not approve a distributable binary profile.
 
 x2c-owned wrappers, examples, and specifications use the repository's
 [Apache License 2.0](../LICENSE). Upstream components retain their own terms.
-The project is not accepting external code contributions; see
-[the contribution policy](../CONTRIBUTING.md).
+External contributions follow [the contribution policy](../CONTRIBUTING.md).
 
 Names and logos are covered separately by [the trademark policy](../TRADEMARKS.md).
 Dependency names are used descriptively and do not imply sponsorship or

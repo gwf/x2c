@@ -20,11 +20,11 @@
   low-level API descriptions from the book. Gary described roughly 350 pages
   of two-sentence API entries with little explanatory value. Decide separately
   whether the website should retain only their table of contents.
-- [ ] Revise collaboration wording and GitHub issue settings. Welcome bug
-  reports and explain one-person capacity without promising a response or
-  fix; some reports may never be addressed. Decide separately whether to
-  invite ideas or feature requests. Align issue settings and templates with
-  those decisions.
+- [x] Revise collaboration wording and GitHub issue settings. Bug reports,
+  ideas, and pull requests are welcome without a response, review, fix, or
+  merge promise. The Project Lead chooses the project's direction. GitHub
+  Issues and forks were already enabled; the issue and pull request templates
+  now reflect the policy. Discussions remain disabled.
 - [x] Audit obsolete files, assets, and directories throughout the repository.
   The unused on-demand Docker compilation service was removed. The stale
   `PLAYGROUND_URL` test override was already removed. The remaining Playground
