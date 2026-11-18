@@ -5,26 +5,23 @@
 > been publicly announced. Release preparation, verification, and publication
 > are complete. This checklist is not a new release campaign.
 
-## Remaining work
+## Checklist
 
 - [ ] Review the landing-page gallery puns for sense and quality.
-- [ ] Audit ordinary developer commands for unwanted side effects. Check
-  whether Makefile targets such as `make install` alter agent hooks or
-  unrelated configuration. This is a concern to investigate, not a confirmed
-  defect. Remove inappropriate effects only in separately authorized work.
+- [x] Audit ordinary developer commands for unwanted side effects. The hook
+  repair landed on `dev`; `make install` and other ordinary developer commands
+  no longer change `core.hooksPath`.
 - [ ] Edit the entire book for clear, direct language. Remove explanatory
   indirection, put cause before effect, prefer normal positive statements
   over unnecessary negative framing, and attribute actions to their actual
   actors rather than non-agentic things.
-- [ ] Revise book builds and API-reference coverage. Exclude low-value,
-  low-level API descriptions from the book. Gary described roughly 350 pages
-  of two-sentence API entries with little explanatory value. Decide separately
-  whether the website should retain only their table of contents.
-- [x] Revise collaboration wording and GitHub issue settings. Bug reports,
-  ideas, and pull requests are welcome without a response, review, fix, or
-  merge promise. The Project Lead chooses the project's direction. GitHub
-  Issues and forks were already enabled; the issue and pull request templates
-  now reflect the policy. Discussions remain disabled.
+- [x] Consolidate the book's low-level Compiler API entries into an index.
+  The book build change landed on `dev`.
+- [ ] Decide whether the website should retain only the low-level API index.
+- [ ] Publish the collaboration wording and issue templates. The policy
+  welcoming bug reports, ideas, and pull requests is submitted in
+  [PR #728](https://github.com/gwf/x2c/pull/728), not yet on `dev`. GitHub
+  Issues and forks are enabled; Discussions remain disabled.
 - [x] Audit obsolete files, assets, and directories throughout the repository.
   The unused on-demand Docker compilation service was removed. The stale
   `PLAYGROUND_URL` test override was already removed. The remaining Playground
@@ -39,7 +36,9 @@
   browser programs were verified. The staged compiler and packages were
   preserved. Production promotion was neither authorized nor performed in
   this work; review and approval remain pending.
-- [ ] Fix cheatsheet formatting and enforce a one-page limit.
+- [ ] Land the latest one-page cheatsheet redesign. The revised landscape sheet
+  is submitted in [PR #727](https://github.com/gwf/x2c/pull/727), not yet on
+  `dev`. The earlier one-page version landed in PR #723.
 - [ ] Prepare the public announcement after the desired patches.
 
 ## Scope and plan review
