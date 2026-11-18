@@ -8,6 +8,10 @@ on:
         type: choice
         options: [candidate, website]
         default: candidate
+      update_book:
+        description: Rebuild the staging book PDF only (website mode)
+        type: boolean
+        default: false
       source_sha:
         description: Exact dev source SHA for a website-only update
         type: string
@@ -36,6 +40,7 @@ jobs:
     if: inputs.mode == 'website'
     uses: ./.github/workflows/staging-website.yml
     with:
+      update_book: ${{ inputs.update_book }}
       source_sha: ${{ inputs.source_sha }}
       expected_output: ${{ inputs.expected_output }}
     secrets: inherit

@@ -24,9 +24,10 @@ for attempt in range(12):
             raise ValueError("live website deployment differs")
         if read("index.html") != (args.site / "index.html").read_bytes():
             raise ValueError("live homepage differs")
-        for path, digest in expected["preserved_sha256"].items():
+        files = expected["preserved_sha256"] | expected.get("updated_sha256", {})
+        for path, digest in files.items():
             if hashlib.sha256(read(path)).hexdigest() != digest:
-                raise ValueError(f"retained release file differs: {path}")
+                raise ValueError(f"website file differs: {path}")
         programs = json.loads((args.site / "playground/programs/programs.json").read_text())
         if not programs:
             raise ValueError("website has no precompiled programs")

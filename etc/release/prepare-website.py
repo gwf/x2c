@@ -13,8 +13,12 @@ PRESERVED = ("install.sh", "x2c-version.txt", "release-candidate.json",
 DOMAINS = {"staging": "staging.x2c-lang.dev", "production": "x2c-lang.dev"}
 
 
-def prepare(site, staged, source_sha, output, destination="staging"):
+def prepare(site, staged, source_sha, output, destination="staging", update_book=False):
     """`staged` is the complete site of the release `destination` serves."""
+    if update_book and destination != "staging":
+        raise ValueError("book updates are staging-only")
+    if update_book and not (site / "x2c-book.pdf").is_file():
+        raise ValueError("missing rebuilt staging book")
     if not re.fullmatch(r"[0-9a-f]{40}", source_sha):
         raise ValueError("website source must be a full commit SHA")
     release = json.loads((staged / "release-candidate.json").read_text())
@@ -34,6 +38,8 @@ def prepare(site, staged, source_sha, output, destination="staging"):
         raise ValueError("built website provenance does not match selection")
     preserved = {}
     for name in PRESERVED:
+        if name == "x2c-book.pdf" and update_book:
+            continue
         source, target = staged / name, site / name
         if name == "x2c-book.pdf" and not source.exists():
             continue
@@ -57,6 +63,8 @@ def prepare(site, staged, source_sha, output, destination="staging"):
         "destination": destination, "source_sha": source_sha,
         "retained_candidate": release["identity"],
         "preserved_sha256": preserved,
+        "updated_sha256": ({"x2c-book.pdf": hashlib.sha256(
+            (site / "x2c-book.pdf").read_bytes()).hexdigest()} if update_book else {}),
     }, indent=2) + "\n")
     output.parent.mkdir(parents=True, exist_ok=True)
     with tarfile.open(output, "w:gz") as archive:
@@ -72,6 +80,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--destination", choices=sorted(DOMAINS),
                         default="staging")
+    parser.add_argument("--update-book", action="store_true")
     args = parser.parse_args()
     prepare(args.site, args.staged, args.source_sha, args.output,
-            args.destination)
+            args.destination, args.update_book)

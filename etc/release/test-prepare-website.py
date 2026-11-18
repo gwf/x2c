@@ -58,6 +58,34 @@ class WebsitePreparation(unittest.TestCase):
                 self.assertEqual(receipt["retained_candidate"], identity)
                 self.assertEqual(receipt["source_sha"], source)
 
+    def test_book_update_is_staging_only(self):
+        source = "b" * 40
+        html = (f'<meta name="x2c-site-source" content="{source}">'
+                '<meta name="x2c-candidate" content="{identity}">')
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            staged, site, _ = self.prepared(root, "staging", html)
+            (site / "x2c-book.pdf").write_bytes(b"new book")
+            module.prepare(site, staged, source, root / "w.tar.gz", update_book=True)
+            self.assertEqual((site / "x2c-book.pdf").read_bytes(), b"new book")
+            for original in staged.rglob("*"):
+                if original.is_file() and original.name != "x2c-book.pdf":
+                    self.assertEqual(original.read_bytes(),
+                        (site / original.relative_to(staged)).read_bytes())
+            receipt = json.loads((site / "website-deployment.json").read_text())
+            self.assertNotIn("x2c-book.pdf", receipt["preserved_sha256"])
+            self.assertEqual(receipt["updated_sha256"]["x2c-book.pdf"],
+                             module.hashlib.sha256(b"new book").hexdigest())
+            (site / "x2c-book.pdf").unlink()
+            with self.assertRaisesRegex(ValueError, "missing rebuilt"):
+                module.prepare(site, staged, source, root / "w.tar.gz", update_book=True)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            staged, site, _ = self.prepared(root, "production", "plain")
+            with self.assertRaisesRegex(ValueError, "staging-only"):
+                module.prepare(site, staged, source, root / "w.tar.gz",
+                               "production", update_book=True)
+
     def test_a_build_for_the_other_destination_is_refused(self):
         source = "b" * 40
         staging_html = ('<meta name="x2c-release-channel" content="staging">'

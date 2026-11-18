@@ -2,6 +2,9 @@ name: stage website only
 on:
   workflow_call:
     inputs:
+      update_book:
+        type: boolean
+        default: false
       source_sha:
         required: true
         type: string
@@ -83,13 +86,36 @@ jobs:
           make -C source wasm-runtime
       - name: Build complete runnable website
         run: npm --prefix source/site run build
+      - name: Install pinned PDF tools
+        if: inputs.update_book
+        env:
+          PANDOC_SHA256: 67d7d011fed8c8543306022b985b9b2499ab9b74818df91d8727c7e9ebc5ba06
+          TYPST_SHA256: 59b207df01be2dab9f13e80f73d04d7ff8273ffd46b3dd1b9eef5c60f3eeabea
+        run: |
+          curl -fsSL https://github.com/jgm/pandoc/releases/download/3.12/pandoc-3.12-linux-amd64.tar.gz \
+            -o "$RUNNER_TEMP/pandoc.tar.gz"
+          echo "$PANDOC_SHA256  $RUNNER_TEMP/pandoc.tar.gz" | sha256sum --check
+          tar -xzf "$RUNNER_TEMP/pandoc.tar.gz" -C "$RUNNER_TEMP"
+          curl -fsSL https://github.com/typst/typst/releases/download/v0.15.0/typst-x86_64-unknown-linux-musl.tar.xz \
+            -o "$RUNNER_TEMP/typst.tar.xz"
+          echo "$TYPST_SHA256  $RUNNER_TEMP/typst.tar.xz" | sha256sum --check
+          tar -xJf "$RUNNER_TEMP/typst.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/pandoc-3.12/bin" >> "$GITHUB_PATH"
+          echo "$RUNNER_TEMP/typst-x86_64-unknown-linux-musl" >> "$GITHUB_PATH"
+      - name: Typeset the complete book at selected source
+        if: inputs.update_book
+        run: make -C source doc-pdf
+      - name: Copy rebuilt staging book
+        if: inputs.update_book
+        run: cp source/docs/x2c-book.pdf source/site/dist/x2c-book.pdf
       - name: Retain staged release and check site
         env:
           SOURCE_SHA: ${{ inputs.source_sha }}
         run: |
           python3 trusted/etc/release/prepare-website.py \
             --site source/site/dist --staged staged/public \
-            --source-sha "$SOURCE_SHA" --output prepared/site-staging.tar.gz
+            --source-sha "$SOURCE_SHA" --output prepared/site-staging.tar.gz \
+            ${{ inputs.update_book && '--update-book' || '' }}
           cd source
           node site/scripts/check-built-site.mjs
       - uses: actions/create-github-app-token@v2
