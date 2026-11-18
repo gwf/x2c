@@ -145,12 +145,12 @@
 
 /* Code and note sit side by side in every row. The code cell is as wide as
  * the column's longest code line, so every note in a column starts at the
- * same place. A JetBrains Mono character is 0.6em wide. */
+ * same place. A JetBrains Mono character is 0.6em wide; the extra width
+ * holds the shortest leader. */
 .sheet-section dl {
   flex: 1 0 auto;
   display: grid;
-  grid-template-columns: calc((var(--code-chars) + 0.5) * 0.6 * var(--code-size)) minmax(0, 1fr);
-  column-gap: 1.1cqw;
+  grid-template-columns: calc((var(--code-chars) + 2.4) * 0.6 * var(--code-size)) minmax(0, 1fr);
   margin: 0;
 }
 
@@ -160,11 +160,21 @@
   grid-column: 1 / -1;
   align-items: baseline;
   align-content: start;
-  padding: 0.16cqw 0;
+  padding: 0.17cqw 0;
 }
 
-.sheet-row + .sheet-row {
-  border-top: 0.05cqw solid var(--hairline);
+/* A dotted leader runs from the code to its note. */
+.sheet-row dt {
+  display: flex;
+  align-items: baseline;
+}
+
+.sheet-row dt::after {
+  content: "";
+  flex: 1;
+  margin: 0 0.45cqw 0 0.5cqw;
+  border-bottom: 0.09cqw dotted var(--line-strong);
+  transform: translateY(-0.22cqw);
 }
 
 .sheet-row dt,
@@ -178,12 +188,13 @@
 }
 
 .sheet-row dt code {
+  flex: none;
   color: var(--dark);
   white-space: pre-wrap;
 }
 
 .sheet-row dd {
-  color: var(--muted-dark);
+  color: #2e2b28;
   font-size: 0.875cqw;
 }
 
@@ -228,7 +239,8 @@
   }
 
   .sheet-row { padding: 7px 0; }
-  .sheet-row + .sheet-row { border-top-width: 1px; }
+  .sheet-row + .sheet-row { border-top: 1px solid var(--hairline); }
+  .sheet-row dt::after { content: none; }
   .sheet-row dt { font-size: 13.5px; }
   .sheet-row dd { margin-top: 2px; font-size: 14px; }
 }
