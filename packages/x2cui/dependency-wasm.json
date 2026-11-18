@@ -23,6 +23,10 @@
     {
       "path": "patches/web-opengl-es.patch",
       "sha256": "95ff8af9bf064fd90e859957ce6339330788036c75e5ab17431b55bb7eb01cdc"
+    },
+    {
+      "path": "patches/component-input.patch",
+      "sha256": "ce1df5e905acd29301496f29645dcf10afd637f76cb2fc53ab004ae3168afaf8"
     }
   ],
   "steps": [
@@ -51,6 +55,15 @@
         "-p1",
         "-i",
         "{package}/patches/web-opengl-es.patch"
+      ]
+    },
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/component-input.patch"
       ]
     },
     {

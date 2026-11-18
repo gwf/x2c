@@ -24,8 +24,18 @@ canvas is in the Tab order, and Enter or Space clicks it, as CUI's
 interaction does for a button. `cui_canvas` calls `cui_canvas_ex` with no
 flags and behaves as before. `ui.item` uses the flag.
 
-Because both patches add declarations to `cui.h`, `headers.sha256` pins
-the patched header. The browser profile applies a third patch; see
+Every profile also applies `patches/component-input.patch`. It adds ordered
+input capture, a synchronous component-first keyboard dispatcher, and custom
+component focus participation. The host retains its queue, key maps, commands,
+fallback scopes, and reconciliation. `cui_key_down` remains physical state;
+`cui_key_action_down` excludes consumed or inactive downs until release and is
+used by built-in held-key actions. Focus requests admit only participating
+canvases and expire at completed submission. No callback registry or CUI event
+queue is added. The same patch exposes baseline-sheared text drawing through
+`cui_draw_text_slanted`, so custom text components need no draw-vertex access.
+
+The patches add declarations to `cui.h`, so `headers.sha256` pins the patched
+header. The browser profile also applies its OpenGL ES patch; see
 [Browser](#browser).
 
 ## Build profile
@@ -88,7 +98,7 @@ and builds on first use. SDL2 is under the zlib license, reproduced in
 `LICENSES/sdl2-zlib.txt`. The SDL2 version is the one the installed
 Emscripten ships; this package does not pin it.
 
-A third patch, `patches/web-opengl-es.patch`, is applied to
+The browser-specific `patches/web-opengl-es.patch` is applied to
 `src/platform/cui_app_sdl2.c`. CUI's SDL2 layer asks for a desktop OpenGL
 3.3 core context, which a browser does not offer. Under `__EMSCRIPTEN__`
 the patch asks for OpenGL ES 3.0, which is WebGL 2. CUI's OpenGL renderer
@@ -118,8 +128,18 @@ clipboard access, and native IME/window-state behavior were not tested.
 
 The new clipboard test uses platform hooks and checks owned String lifetime.
 The wheel test checks both axes and one-time consumption. Voice resampling
-checks peaks and independent result storage. Ordered keyboard/text event
-reconciliation remains outside this integration.
+checks peaks and independent result storage. The component input contract is shared by native and browser profiles. Capture
+preserves input-call order and borrowed text lifetime. Dispatch accepts key,
+committed-text, and focus events before component submission; callbacks are
+synchronous and must not build UI or recursively inject input. It does not add
+IME composition or pair physical keys with separately delivered committed text.
+The host must reconcile draw-time focus/layer changes before its next event.
+
+On 2026-11-17, the shared component patch compiled natively on macOS arm64.
+Its focused raw tests cover eligible and invalid focus targets, revocation,
+physical versus actionable held state, repeat metadata, inactive input,
+reactivation, and unhandled Tab navigation. The parent integration records
+application and web validation separately.
 
 ## Bundled third-party content
 
