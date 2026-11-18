@@ -45,14 +45,14 @@
   color: var(--paper);
 }
 
-/* Letter landscape with quarter-inch margins. Container units keep the
- * screen preview proportional to the printed page: inside the page,
- * 1cqw is 7.56pt of the 10.5in printable width. */
+/* Letter portrait. Container units keep the screen preview proportional to
+ * the printed page: inside the page, one unit is 5.62pt of the 7.8in
+ * printable width. */
 .sheet {
   container-type: inline-size;
   width: min(100%, 1100px);
   margin: 0 auto;
-  aspect-ratio: 11 / 8.5;
+  aspect-ratio: 8.5 / 11;
   border: 1px solid var(--line);
   background: var(--white);
   box-shadow: 0 1px 2px rgba(23, 23, 23, 0.08), 0 14px 36px rgba(23, 23, 23, 0.1);
@@ -63,7 +63,7 @@
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto;
   height: 100%;
-  padding: 2.273cqw;
+  padding: 2.907cqw;
   color: var(--dark);
   font-family: Archivo, Helvetica, sans-serif;
   line-height: 1.14;
@@ -86,34 +86,34 @@
 .sheet-head {
   display: flex;
   align-items: baseline;
-  gap: 1.3cqw;
-  padding-bottom: 0.9cqw;
+  gap: 1.663cqw;
+  padding-bottom: 1.151cqw;
 }
 
 .sheet-wordmark {
   color: var(--red-text);
-  font-size: 2.9cqw;
+  font-size: 3.709cqw;
   line-height: 0.8;
 }
 
 .sheet-title {
-  font: 400 2.5cqw/0.8 "Instrument Serif", Georgia, serif;
+  font: 400 3.197cqw/0.8 "Instrument Serif", Georgia, serif;
   letter-spacing: -0.01em;
 }
 
 .sheet-site {
   margin-left: auto;
   color: var(--muted-dark);
-  font: 500 0.95cqw/1 "JetBrains Mono", monospace;
+  font: 500 1.215cqw/1 "JetBrains Mono", monospace;
   letter-spacing: 0.02em;
 }
 
 /* The last column holds the longest code lines. */
 .sheet-columns {
   display: grid;
-  grid-template-columns: 0.94fr 1fr 1fr 1.16fr;
+  grid-template-columns: 0.94fr 1fr 1.16fr;
   grid-template-rows: minmax(0, 1fr);
-  column-gap: 1.7cqw;
+  column-gap: 2.174cqw;
 }
 
 /* Every column starts on the same rule and ends on the same line: each
@@ -132,15 +132,15 @@
 }
 
 .sheet-section + .sheet-section {
-  margin-top: 0.2cqw;
+  margin-top: 0.256cqw;
 }
 
 .sheet-section h2 {
   margin: 0;
-  padding: 0.42cqw 0 0.2cqw;
-  border-top: 0.2cqw solid var(--dark);
+  padding: 0.537cqw 0 0.256cqw;
+  border-top: 0.256cqw solid var(--dark);
   color: var(--red-text);
-  font: 700 0.9cqw/1.2 Archivo, Helvetica, sans-serif;
+  font: 700 1.151cqw/1.2 Archivo, Helvetica, sans-serif;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -153,11 +153,11 @@
 /* The gap between rows is wider than the gap inside one, so each line of
  * code reads with its own note. */
 .sheet-row {
-  padding: 0.13cqw 0;
+  padding: 0.166cqw 0;
 }
 
 .sheet-row + .sheet-row {
-  border-top: 0.04cqw solid var(--line);
+  border-top: 0.051cqw solid var(--line);
 }
 
 .sheet-row dt,
@@ -167,7 +167,7 @@
 }
 
 .sheet-row dt {
-  font-size: 0.955cqw;
+  font-size: 1.221cqw;
 }
 
 .sheet-row dt code {
@@ -178,7 +178,7 @@
 
 .sheet-row dd {
   color: var(--muted-dark);
-  font-size: 0.9cqw;
+  font-size: 1.151cqw;
 }
 
 .sheet-row dd code {
@@ -189,12 +189,12 @@
 .sheet-foot {
   display: flex;
   justify-content: space-between;
-  gap: 2cqw;
-  margin-top: 0.5cqw;
-  padding-top: 0.5cqw;
-  border-top: 0.08cqw solid var(--line-strong);
+  gap: 2.558cqw;
+  margin-top: 0.639cqw;
+  padding-top: 0.639cqw;
+  border-top: 0.102cqw solid var(--line-strong);
   color: var(--muted-dark);
-  font-size: 0.86cqw;
+  font-size: 1.1cqw;
 }
 
 .sheet-foot code {
@@ -259,8 +259,8 @@
 
 @media print {
   @page {
-    size: letter landscape;
-    margin: 0.25in;
+    size: letter portrait;
+    margin: 0.35in;
   }
 
   html,
@@ -283,13 +283,13 @@
 
   /*
    * The page margin replaces the sheet's padding. The sheet stops 0.1in
-   * short of the 8in printable height so rounding cannot push the content
+   * short of the 10.3in printable height so rounding cannot push the content
    * onto a second page.
    */
   .sheet {
     width: 100%;
     margin: 0;
-    aspect-ratio: 10.5 / 7.9;
+    aspect-ratio: 7.8 / 10.2;
     border: 0;
     box-shadow: none;
     break-inside: avoid;

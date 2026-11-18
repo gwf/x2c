@@ -6,7 +6,7 @@ import { inlineMarkdown } from "../lib/inline-markdown";
 import { sheet } from "../content/cheatsheet";
 import "../styles/cheatsheet.css";
 
-const columns = await Promise.all([1, 2, 3, 4].map(async (column) =>
+const columns = await Promise.all([1, 2, 3].map(async (column) =>
   Promise.all(sheet.filter((section) => section.column === column).map(async (section) => ({
     title: section.title,
     rows: await Promise.all(section.rows.map(async ([code, note]) => ({
@@ -30,7 +30,7 @@ const base = import.meta.env.BASE_URL;
       <p class="about-eyebrow">cheat sheet</p>
       <h1 set:html={titleHtml} />
       <p class="cheat-intro">
-        One landscape letter-size page for readers who know C.{" "}
+        One letter-size page for readers who know C.{" "}
         <a href={`${base}docs/guide/from-c.html`}>Start from C</a> to begin, or
         the <a href={`${base}docs/`}>book</a> when a line needs more than a line.{" "}
         <a href={`${base}x2c-cheatsheet.pdf`} download>Download PDF</a>
@@ -41,8 +41,8 @@ const base = import.meta.env.BASE_URL;
       <article class="sheet-page" aria-label="x2c cheat sheet">
         <header class="sheet-head">
           <span class="x2c-wordmark sheet-wordmark">x2c</span>
-          <span class="sheet-title">Language quick reference</span>
-          <span class="sheet-site">for readers who know C</span>
+          <span class="sheet-title">The syntax on one page.</span>
+          <span class="sheet-site">x2c-lang.dev</span>
         </header>
         <div class="sheet-columns">
           {columns.map((sections) => (
