@@ -677,5 +677,5 @@ Native windows expose `app.maximize()`, `app.minimize()`, `app.restore()`,
 `app.window_state()`, `app.placement(placement)`, `app.set_position(x, y)`,
 and `app.follow_system_theme(follow)`. Their platform behavior follows CUI.
 
-These additions do not provide ordered keyboard/text events or custom-editor
-IME composition. md-edit input reconciliation remains separate.
+These additions do not provide custom-editor IME composition.
+md-edit input reconciliation remains application-owned.
