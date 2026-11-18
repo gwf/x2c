@@ -32,7 +32,7 @@ export const sheet: Section[] = [
     ["\"text\"  s + t  s.len()", "Immutable `String`; `+` joins."],
     ["%\"a $x $(f(y))\"", "Interpolate `$x` or `$(expr)`."],
     ["s.split(\",\")  s.lower()", "Also `strip upper words lines`."],
-    ["a[start:stop:step]", "Negative bounds count from the end; negative step reverses. Not `Var`."],
+    ["a[start:stop:step]", "Negative bounds count from the end; negative step reverses."],
   ] },
   { column: 1, title: "Collections", rows: [
     ["%(1 2 (3) \"s\" $x @xs)", "An immutable `List`; `$x` inserts, `@xs` splices."],
@@ -51,7 +51,8 @@ export const sheet: Section[] = [
     ["void bump(int &n)", "By reference; `&?p` allows `NULL`."],
   ] },
   { column: 1, title: "Lisp", rows: [
-    ["Lisp l = Lisp.new();", "Embedded; `l.destroy()` ends it."],
+    ["Lisp l = Lisp.new();", "Embedded Lisp interpreter."],
+    ["defer l.destroy();", "Free the interpreter at scope exit."],
     ["l.bind(\"f\", fn);", "Expose a native function."],
     ["int r = l.eval(%(f $n 2));", "`$n` inserts a C value; the result converts back."],
   ] },
@@ -85,7 +86,7 @@ export const sheet: Section[] = [
   ] },
   { column: 2, title: "Types", rows: [
     ["int T.f(T self, int n)", "A method: `value.f(3)`."],
-    ["class Point { int x; int y; };", "A value class; generated construction, equality, printing."],
+    ["class Point { int x; int y; };", "A value class; generated constructor, `==`, printing."],
     ["class Node { int v; } *;", "A pointer class in the scope."],
     ["void Node.init(Node n, int v)", "Runs inside `Node.new(v)`."],
     ["String Point.repr(Point p)", "Replaces a default method."],
@@ -100,13 +101,13 @@ export const sheet: Section[] = [
   { column: 3, title: "Concurrency", rows: [
     ["Thread.run([%!(void) => { ... }, ...])", "Start all, then join all."],
     ["Thread.start(fn, v)", "One thread; `t.join()`."],
-    ["Channel.new(<i32>, 2)", "Exact `i32` messages; `foreach` ends after close + drain."],
+    ["Channel.new(<i32>, 2)", "Typed messages; `foreach` drains until closed."],
     ["$lock(m) { ... }", "Hold a `Mutex` for a block."],
     ["threaded int counter;", "One copy per thread."],
   ] },
   { column: 3, title: "Compile time", rows: [
     ["macro Expression $m(Expr $e) => $e * 60;", "`$m(2)` becomes `2 * 60`."],
-    ["macro Stmt $s(Expr $a, Expr $b) { ... }", "Names resolve where it lands; `using name` keeps one."],
+    ["macro Stmt $s(Expr $a, Expr $b) { ... }", "Names resolve where it lands; or `using name`."],
     ["macro Decorator $d(Function $f) { ... }", "Rewrites the item after `$d()`."],
     ["keyword repeat $ns.repeat;", "Now `repeat (3) stmt` parses."],
     ["meta int f(int n) => ...;", "`$f(3)` runs in the compiler."],
@@ -118,7 +119,10 @@ export const sheet: Section[] = [
     ["Path p = \".\";  p.join(\"*.x\").glob()", "`path.x`: files, globs, dirs."],
     ["Socket.connect(host, port, ms)", "`net.x`: blocking TCP."],
     ["Router.new().get(path, %!(req, res) => ...)", "`http.x`: routes and a server."],
-    ["Json.parse(s)  v.json()", "`json.x`; also `time url regex`."],
+    ["Json.parse(s)  v.json()", "`json.x`: parse and print."],
+    ["Regex re = Regex.compile(\"a+\");  re.match(s)", "`regex.x`: match, split, replace."],
+    ["Url u = Url.parse(s);  u.host  u.port", "`url.x`: parsed fields."],
+    ["Time t = Time.now();  t.since(t0)", "`time.x`: clocks, `Duration`, sleep."],
   ] },
   { column: 3, title: "Tests", rows: [
     ["$test() static void t(void) { ... }", "`test.x`; end with `$test.main();`."],
@@ -130,10 +134,9 @@ export const sheet: Section[] = [
     ["#include \"unit.x\"", "Its public names; no header."],
     ["#include \"lib.h\"", "A C header, unchanged."],
     ["import \"pcre2\" as rx;", "A wrapped library: `rx.Regexp`."],
-    ["#pragma indent", "Indent instead of braces; or `.xp`."],
     ["p.field  p->field", "`.` works through a pointer."],
     ["String.new(cstr)", "To `String`; out as `char *`."],
     ["x2c build -I dir -O2 a.x", "Flags pass to `cc`."],
-    ["x2c bind --package p --header p.h", "Experimental; checkout only. Generates a starting wrapper."],
+    ["x2c bind --package p --header p.h", "Experimental, checkout only: a starting wrapper."],
   ] },
 ];

@@ -3921,7 +3921,7 @@
 			]
 		},
 		"x2c_prelude_types": {
-			"match": "\\b((?:Array|List)(?:Char|Short|Int|Long|Float|Dbl|String|Symbol)|Map(?:IntInt|LongDouble|StringString|StringInt)|Array|Atom|Block|Buffer|Bytes|Channel|Context|Error|ErrorHandler|File|Func|Iter|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Path|Pool|Scope|Split|String|Symbol|SymbolSet|Thread|Token|Tokenizer|Var|Code|Macro|TypeInfo|Source|Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Function|NamedType|Type|Decl|DeclaratorRow|Name|Literal|Param|Catch|Captures|MatchRow|EXPR|EXPRESSION|STMT|FIELD|ENTRY|ENUMERATOR|UNIT|DECLARATION|DECORATOR|FUNCTION|NAMEDTYPE|TYPE|DECL|DECLARATORROW|NAME|LITERAL|PARAM|CATCH|CAPTURES|MATCHROW|MACRO)\\b",
+			"match": "\\b((?:Array|List)(?:Char|Short|Int|Long|Float|Dbl|String|Symbol)|Map(?:IntInt|LongDouble|StringString|StringInt)|Array|Atom|Block|Buffer|Bytes|Channel|Context|Duration|Error|ErrorHandler|File|Func|Iter|Json|Lambda|Lisp|List|Logger|LogSink|Map|Mutex|Path|Pool|Regex|Router|Scope|Socket|Split|String|Symbol|SymbolSet|Thread|Time|Token|Tokenizer|Url|Var|Code|Macro|TypeInfo|Source|Expr|Expression|Stmt|Field|Entry|Enumerator|Unit|Declaration|Decorator|Function|NamedType|Type|Decl|DeclaratorRow|Name|Literal|Param|Catch|Captures|MatchRow|EXPR|EXPRESSION|STMT|FIELD|ENTRY|ENUMERATOR|UNIT|DECLARATION|DECORATOR|FUNCTION|NAMEDTYPE|TYPE|DECL|DECLARATORROW|NAME|LITERAL|PARAM|CATCH|CAPTURES|MATCHROW|MACRO)\\b",
 			"name": "support.type.prelude.x2c"
 		},
 		"x2c_macro_definition": {
