@@ -1,5 +1,6 @@
 // The one-page cheat sheet: three columns of sections, each a table of
-// [code, note] rows. Notes may mark inline code with backticks. In code,
+// [code, note] rows. A column groups sections whose code lines have similar
+// lengths, because its notes all start at the end of its longest code line. Notes may mark inline code with backticks. In code,
 // `...` stands for code the reader supplies.
 
 export interface Section {
@@ -16,6 +17,11 @@ export const sheet: Section[] = [
     ["import \"pcre2\" as rx;", "A package: `rx.Regexp`."],
     ["#!/usr/bin/env -S x2c script", "File-scope statements run."],
     ["#pragma indent", "Indent instead of braces; or `.xp`."],
+  ] },
+  { column: 1, title: "Commands", rows: [
+    ["x2c translate --dump-ast a.x", "Print the expanded, bound AST; omit flag to emit C."],
+    ["new  repl  lsp", "Project, REPL (checkout only), editor server."],
+    ["install  remove  list", "Packages; `env` shows paths."],
   ] },
   { column: 1, title: "Values", rows: [
     ["Var v = 42;", "Eight-byte tagged value; not arbitrary C data."],
@@ -49,7 +55,7 @@ export const sheet: Section[] = [
     ["T f(List @rest)", "Rest arguments as a `List`."],
     ["void bump(int &n)", "By reference; `&?p` allows `NULL`."],
   ] },
-  { column: 1, title: "Memory and cleanup", rows: [
+  { column: 2, title: "Memory and cleanup", rows: [
     ["auto { ... }", "Group allocations; free them on leaving the block."],
     ["for (...) auto { ... }", "A scope per iteration."],
     ["T t = auto T.new();", "Clean up this value at exit."],
@@ -57,7 +63,6 @@ export const sheet: Section[] = [
     ["defer f.close();", "At exit, `return`, or a raise."],
     ["xmalloc(n)  xfree(p)", "Tracked allocation; `xfree` releases it early."],
   ] },
-
   { column: 2, title: "Flow", rows: [
     ["foreach (T x in c)", "Collections; a `File` by line."],
     ["range(0, n, 2)", "Lazy `int`s; stop is excluded."],
@@ -91,14 +96,13 @@ export const sheet: Section[] = [
     ["$derive(T, <json>, <repr>)", "Methods from fields; `<derive.x>`."],
     ["ArrayInt  MapIntInt", "Unboxed, from `typed-*.x`."],
   ] },
-  { column: 2, title: "Concurrency", rows: [
+  { column: 3, title: "Concurrency", rows: [
     ["Thread.run([%!(void) => { ... }, ...])", "Start all, then join all."],
     ["Thread.start(fn, v)", "One thread; `t.join()`."],
     ["Channel.new(<i32>, 2)", "Exact `i32` messages; `foreach` ends after close + drain."],
     ["$lock(m) { ... }", "Hold a `Mutex` for a block."],
     ["threaded int counter;", "One copy per thread."],
   ] },
-
   { column: 3, title: "Compile time", rows: [
     ["macro Expression $m(Expr $e) => $e * 60;", "`$m(2)` becomes `2 * 60`."],
     ["macro Stmt $s(Expr $a, Expr $b) { ... }", "Names resolve where it lands; `using name` keeps one."],
@@ -132,10 +136,5 @@ export const sheet: Section[] = [
     ["String.new(cstr)", "To `String`; out as `char *`."],
     ["x2c build -I dir -O2 a.x", "Flags pass to `cc`."],
     ["x2c bind --package p --header p.h", "Experimental; checkout only. Generates a starting wrapper."],
-  ] },
-  { column: 3, title: "Commands", rows: [
-    ["x2c translate --dump-ast a.x", "Print the expanded, bound AST; omit flag to emit C."],
-    ["new  repl  lsp", "Project, REPL (checkout only), editor server."],
-    ["install  remove  list", "Packages; `env` shows paths."],
   ] },
 ];

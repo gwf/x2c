@@ -68,6 +68,7 @@
   color: var(--dark);
   font-family: Archivo, Helvetica, sans-serif;
   line-height: 1.18;
+  --code-size: 0.875cqw;
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;
 }
@@ -111,7 +112,7 @@
 /* Later columns hold longer code lines. */
 .sheet-columns {
   display: grid;
-  grid-template-columns: 1fr 1.04fr 1.14fr;
+  grid-template-columns: 1fr 1.1fr 1.2fr;
   grid-template-rows: minmax(0, 1fr);
   column-gap: 2cqw;
 }
@@ -143,11 +144,12 @@
 }
 
 /* Code and note sit side by side in every row. The code cell is as wide as
- * the section's longest code line. */
+ * the column's longest code line, so every note in a column starts at the
+ * same place. A JetBrains Mono character is 0.6em wide. */
 .sheet-section dl {
   flex: 1 0 auto;
   display: grid;
-  grid-template-columns: fit-content(70%) minmax(0, 1fr);
+  grid-template-columns: calc((var(--code-chars) + 0.5) * 0.6 * var(--code-size)) minmax(0, 1fr);
   column-gap: 1.1cqw;
   margin: 0;
 }
@@ -158,7 +160,7 @@
   grid-column: 1 / -1;
   align-items: baseline;
   align-content: start;
-  padding: 0.18cqw 0;
+  padding: 0.16cqw 0;
 }
 
 .sheet-row + .sheet-row {
@@ -172,7 +174,7 @@
 }
 
 .sheet-row dt {
-  font-size: 0.89cqw;
+  font-size: var(--code-size);
 }
 
 .sheet-row dt code {
@@ -182,7 +184,7 @@
 
 .sheet-row dd {
   color: var(--muted-dark);
-  font-size: 0.89cqw;
+  font-size: 0.875cqw;
 }
 
 .sheet-row dd code {
