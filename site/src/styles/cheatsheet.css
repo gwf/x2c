@@ -137,9 +137,9 @@
 
 .sheet-section h2 {
   margin: 0;
-  padding: 0.33cqw var(--row-inset) 0.23cqw;
-  background: #3d3d3d;
-  color: var(--white);
+  padding: 0.3cqw var(--row-inset) 0.13cqw;
+  border-top: 0.13cqw solid var(--red);
+  color: var(--red-text);
   font: 700 0.95cqw/1 Archivo, Helvetica, sans-serif;
   letter-spacing: 0.01em;
 }
