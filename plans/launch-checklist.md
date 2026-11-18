@@ -29,18 +29,16 @@
   `PLAYGROUND_URL` test override was already removed. The remaining Playground
   tests cover the live site. Shootout PNG charts have no repository references,
   but the chart script regenerates them with the SVGs, so they remain.
-- [ ] Review the [staged installation instructions](https://staging.x2c-lang.dev/#install)
-  and promote the website when approved. The installation simplification and
-  WebAssembly prerequisite repair in [PR #717](https://github.com/gwf/x2c/pull/717)
-  merged into `dev` at `fee9387e0d697b1b0808a540de2643478a938287`.
-  [Website-only staging run 43997682945](https://github.com/gwf/x2c/actions/runs/43997682945)
-  succeeded. Desktop/mobile presentation, links, copied commands, and 28
-  browser programs were verified. The staged compiler and packages were
-  preserved. Production promotion was neither authorized nor performed in
-  this work; review and approval remain pending.
+- [ ] Finish reviewing the [staged installation instructions](https://staging.x2c-lang.dev/#install).
+  The review found that the staging example included a temporary directory
+  and an unrelated package install. The focused correction is submitted in
+  [PR #729](https://github.com/gwf/x2c/pull/729). Review the updated staging
+  page after that change is deployed there.
 - [ ] Land the latest one-page cheatsheet redesign. The revised landscape sheet
   is submitted in [PR #727](https://github.com/gwf/x2c/pull/727), not yet on
   `dev`. The earlier one-page version landed in PR #723.
+- [ ] After the remaining website changes are complete, review and approve a
+  separate production website update.
 - [ ] Prepare the public announcement after the desired patches.
 
 ## Scope and plan review
