@@ -32,14 +32,14 @@ delivery. An independent working session uses `individual`; `worker` is only
 for subordinate private handoffs; the context command rejects any other
 delivery for a worker. Context is ignored worktree-local state in
 `debug/agent-context.json`; the common Git hook protects shared branches for
-both providers and refuses every push from a worker. `make configure`, which
-`make build` and `make build-safe` run, sets `core.hooksPath` to the relative
-`tools/hooks` when it is unset, in the repository configuration that every
-worktree shares, so each worktree runs its own checkout's hook. An absolute
-value would make every worktree run that one script. Context setup sets the
-same value when it is unset, then checks the effective hook path and
-executable hook and reports incompatible existing configuration instead of
-overwriting it.
+both providers and refuses every push from a worker. Explicit context setup
+sets `core.hooksPath` to the relative `tools/hooks` when it is unset, in the
+repository configuration that every worktree shares. Each worktree therefore
+runs its own checkout's hook. An absolute value would make every worktree run
+that one script. Context setup checks the effective hook path and executable
+hook, and reports incompatible configuration instead of overwriting it.
+Ordinary commands such as `make configure`, `make build`, and `make install`
+leave Git hook configuration unchanged.
 Canonical instructions and skills are shared through the existing discovery
 links.
 

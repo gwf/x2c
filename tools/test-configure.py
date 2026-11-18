@@ -97,21 +97,37 @@ class ConfigureHookTests(unittest.TestCase):
     self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
     return result
 
-  def test_configure_installs_default_only_when_hooks_path_is_unset(self):
-    self.command(["git", "init", "-q"])
-    self.command(["make", "configure"])
-    self.assertEqual(
-      self.command(["git", "config", "--local", "--get",
-                    "core.hooksPath"]).stdout.strip(), "tools/hooks")
+  def ordinary_commands(self):
+    # Keep the real prerequisite edges, but avoid compiling or installing.
+    # configure still runs its actual recipe in this temporary repository.
+    (self.root / "probe.mk").write_text(
+      "bootstrap-ready build build-safe commands install uninstall dist:\n\t@:\n")
+    for target in ("configure", "build", "build-safe", "install", "uninstall", "dist"):
+      with self.subTest(target=target):
+        before = (self.root / ".git/config").read_bytes()
+        self.command(["make", "-f", "Makefile", "-f", "probe.mk", target])
+        self.assertEqual((self.root / ".git/config").read_bytes(), before)
 
-  def test_configure_preserves_configured_hooks_paths(self):
+  def test_ordinary_commands_leave_unset_hooks_path_and_default_hook(self):
+    self.command(["git", "init", "-q"])
+    self.ordinary_commands()
+    hook = self.root / ".git/hooks/pre-push"
+    hook.write_text("#!/bin/sh\nexit 0\n")
+    hook.chmod(0o755)
+    self.ordinary_commands()
+    self.assertEqual(
+      self.command(["git", "rev-parse", "--git-path", "hooks/pre-push"])
+          .stdout.strip(), ".git/hooks/pre-push")
+    self.assertEqual(hook.read_text(), "#!/bin/sh\nexit 0\n")
+
+  def test_ordinary_commands_preserve_configured_hooks_paths(self):
     self.command(["git", "init", "-q"])
     for scope, hooks in (("--local", "tools/hooks"),
                          ("--local", "custom-hooks"), ("--local", ""),
                          ("--global", "global-hooks")):
       with self.subTest(scope=scope, hooks=hooks):
         self.command(["git", "config", scope, "core.hooksPath", hooks])
-        self.command(["make", "configure"])
+        self.ordinary_commands()
         configured = self.command(["git", "config", scope, "--get",
                                    "core.hooksPath"]).stdout.rstrip("\n")
         effective = self.command(["git", "config", "--get",
