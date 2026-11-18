@@ -1,7 +1,7 @@
 #set document(title: "The x2c Book", author: "Gary William Flake", date: none)
 #set page(paper: "a4", margin: (x: 22mm, top: 22mm, bottom: 23mm))
 #set text(font: "Libertinus Serif", size: 10.5pt, lang: "en", costs: (runt: 200%))
-#set par(justify: true, leading: 0.65em, spacing: 0.8em)
+#set par(justify: true, leading: 0.65em, spacing: 1.4em)
 #set heading(numbering: none)
 #show raw: set text(font: "DejaVu Sans Mono", size: 8pt)
 #set table(inset: 5pt)
@@ -45,7 +45,14 @@ $endif$
 ]
 #pagebreak()
 #set page(numbering: "i", number-align: center)
-#outline(title: [Contents], depth: 2)
+#{
+  set par(spacing: 0.8em)
+  show heading: it => block(
+    above: 0pt, below: 8mm,
+    text(size: 21pt, weight: "regular", it.body),
+  )
+  outline(title: [Contents], depth: 2)
+}
 #pagebreak()
 #counter(page).update(1)
 #set page(numbering: "1", header: context {
