@@ -6,12 +6,17 @@ import { inlineMarkdown } from "../lib/inline-markdown";
 import { sheet } from "../content/cheatsheet";
 import "../styles/cheatsheet.css";
 
-const columns = await Promise.all([1, 2, 3, 4].map(async (column) =>
+// A fragment longer than this many characters would crowd the note column, so
+// it spans both cells and its note sits in the note column underneath.
+const codeColumnLimit = 25;
+
+const columns = await Promise.all([1, 2, 3].map(async (column) =>
   Promise.all(sheet.filter((section) => section.column === column).map(async (section) => ({
     title: section.title,
     rows: await Promise.all(section.rows.map(async ([code, note]) => ({
       code,
       note: await inlineMarkdown(note),
+      wide: code.length > codeColumnLimit,
     }))),
   })))));
 const titleHtml = await inlineMarkdown("x2c on one page.");
@@ -28,7 +33,7 @@ const base = import.meta.env.BASE_URL;
       <p class="about-eyebrow">cheat sheet</p>
       <h1 set:html={titleHtml} />
       <p class="cheat-intro">
-        One landscape letter-size page for readers who know C.{" "}
+        One letter-size page for readers who know C.{" "}
         <a href={`${base}docs/guide/from-c.html`}>Start from C</a> to begin, or
         the <a href={`${base}docs/`}>book</a> when a line needs more than a line.{" "}
         <a href={`${base}x2c-cheatsheet.pdf`} download>Download PDF</a>
@@ -39,7 +44,7 @@ const base = import.meta.env.BASE_URL;
       <article class="sheet-page" aria-label="x2c cheat sheet">
         <header class="sheet-head">
           <span class="x2c-wordmark sheet-wordmark">x2c</span>
-          <span class="sheet-title">Language quick reference</span>
+          <span class="sheet-title">The syntax on one page.</span>
           <span class="sheet-site">x2c-lang.dev</span>
         </header>
         <div class="sheet-columns">
@@ -50,7 +55,7 @@ const base = import.meta.env.BASE_URL;
                   <h2>{section.title}</h2>
                   <dl>
                     {section.rows.map((row) => (
-                      <div class="sheet-row">
+                      <div class:list={["sheet-row", { wide: row.wide }]}>
                         <dt><code>{row.code}</code></dt>
                         <dd set:html={row.note} />
                       </div>
