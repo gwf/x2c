@@ -10,7 +10,9 @@ const server = await preview({ root: fileURLToPath(root), server: { host: '127.0
 let browser;
 try {
   browser = await chromium.launch();
-  const page = await browser.newPage();
+  // The printable area of the page in CSS pixels, so the overflow check
+  // below measures the layout that the PDF gets.
+  const page = await browser.newPage({ viewport: { width: 1008, height: 768 } });
   await page.emulateMedia({ media: 'print' });
   const response = await page.goto(`http://127.0.0.1:${server.port}${sitePath('/cheatsheet/')}`);
   if (!response.ok()) throw new Error(`Cheat sheet returned HTTP ${response.status()}`);
