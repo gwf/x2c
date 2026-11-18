@@ -179,6 +179,11 @@ makes missing WebAssembly prerequisites fail deployment builds rather than
 produce a read-only website. It copies the staged
 installer, version, release-candidate identity, package directory, domain,
 and existing release PDF byte for byte. It never uploads release assets.
+For an explicitly requested staging PDF review, set `update_book=true`. This
+rebuilds the PDF from the selected source and verifies its live hash. All other
+retained files stay unchanged. The production archive still retains its release
+PDF; this option cannot update a production PDF.
+
 `website-deployment.json` records the website source and hashes of retained
 files; HTML separately identifies its website source and staged candidate.
 The resulting website is not a newly verified compiler candidate and does not
