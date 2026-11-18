@@ -24,15 +24,6 @@ export function releaseDestination(env = process.env) {
 
 export const destination = releaseDestination();
 
-export function installExample(original, config = destination) {
-  if (!config.staging) return original;
-  return `export X2C_PREFIX="$(mktemp -d)/x2c"
-curl -fsSL ${absoluteSiteUrl("/install.sh")} | sh
-export PATH="$X2C_PREFIX/bin:$PATH"
-x2c run "$X2C_PREFIX/examples/foreach.x"
-x2c install pcre2 --index ${absoluteSiteUrl("/packages/index.txt")}`;
-}
-
 function escapeHtml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;").replaceAll('"', "&quot;");

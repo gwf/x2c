@@ -1,8 +1,6 @@
 ---
 import { Code } from "astro:components";
 import { execFileSync } from "node:child_process";
-import { absoluteSiteUrl } from "../../site-config.mjs";
-import { destination, installExample } from "../../release-destination.mjs";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import SiteHeader from "../components/SiteHeader.astro";
@@ -40,7 +38,7 @@ const statistics = JSON.parse(execFileSync(
   "python3", ["tools/repo-metrics.py", "--summary-json"],
   { cwd: import.meta.env.X2C_REPOSITORY_ROOT, encoding: "utf8" }
 ));
-const releaseInstall = installExample(install.run.trim());
+const releaseInstall = install.run.trim();
 const number = (value: number) => value.toLocaleString("en-US");
 const sourceLines = (name: string) =>
   `${number(statistics.source[name].code)} / ` +
@@ -170,17 +168,11 @@ const kickerHtml = await inlineMarkdown(home.kicker);
         <p>
           <strong>Install a release.</strong>{" "}
           One command downloads the compiler, runtime, headers, and
-          examples for your platform into <code>{destination.staging
-            ? "$X2C_PREFIX" : "~/.local/x2c"}</code>{destination.staging
-            ? ", ideally a fresh scratch directory." : "."}{" "}
+          examples for your platform into <code>~/.local/x2c</code>.{" "}
           The installer needs a C compiler named <code>cc</code>.{" "}
-          Then add packages from the{" "}
+          See the{" "}
           <a href={local("docs/guide/packages.html#install-packages")}>
-            package index</a> with{" "}
-          <code>{destination.staging
-            ? "x2c install <package> --index " +
-              absoluteSiteUrl("/packages/index.txt")
-            : "x2c install <package>"}</code>.{" "}
+            package installation instructions</a> to add packages.{" "}
           The <a href={local("docs/reference/release-notes.html")}>release
           notes</a> list what changed and how to upgrade.
         </p>
