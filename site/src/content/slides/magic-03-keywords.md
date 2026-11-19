@@ -4,7 +4,7 @@ section: magic
 home: true
 order: 4
 tab: keywords
-title: Lock of the draw.
+title: One good term deserves another.
 ---
 
 ```x2c

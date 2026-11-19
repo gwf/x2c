@@ -5,7 +5,7 @@ section: power
 home: true
 order: 7
 tab: channels
-title: Queue the workers.
+title: Concurrently yours.
 ---
 
 ```x2c

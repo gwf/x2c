@@ -147,26 +147,37 @@ const kickerHtml = await inlineMarkdown(home.kicker);
       <div class="deal-copy">
         <header class="section-heading install-heading">
           <h2>Install x2c</h2>
-          <div class="install-actions">
-            <a class="button button-primary"
-              href={local("docs/guide/installation.html")}>
-              Installation guide
-            </a>
-            <a class="button button-secondary"
-              href="https://github.com/gwf/x2c">View on GitHub</a>
-          </div>
         </header>
         <p>
-          x2c is experimental: the language and library can still change
-          between releases.
+          x2c is experimental. Expect changes between releases.
         </p>
         <p>
           <strong>Platforms.</strong>{" "}
           macOS 15 or later (arm64, x86_64); Linux with glibc 2.38 or later
           on x86_64 or arm64 (aarch64); Windows through WSL2.
         </p>
+        <div class="install-actions">
+          <a class="button button-primary"
+            href={local("docs/guide/installation.html")}>
+            Installation guide
+          </a>
+          <a class="button button-secondary"
+            href="https://github.com/gwf/x2c">View on GitHub</a>
+        </div>
+      </div>
+      <div class="deal-copy install-support">
+        <figure class="install-window">
+          <figcaption class="install-label">
+            <span>{install.caption}</span>
+            <CopyButton text={releaseInstall} label="Copy commands"
+              action="copy-run" />
+          </figcaption>
+          <div class="install-code">
+            <Code code={releaseInstall} lang="sh" theme={x2cDarkTheme} />
+          </div>
+        </figure>
         <p>
-          <strong>Install a release.</strong>{" "}
+          <strong>Install native binaries.</strong>{" "}
           One command downloads the compiler, runtime, headers, and
           examples for your platform into <code>~/.local/x2c</code>.{" "}
           The installer needs a C compiler named <code>cc</code>.{" "}
@@ -183,16 +194,6 @@ const kickerHtml = await inlineMarkdown(home.kicker);
           install x2c into your home directory.
         </p>
       </div>
-      <figure class="install-window">
-        <figcaption class="install-label">
-          <span>{install.caption}</span>
-          <CopyButton text={releaseInstall} label="Copy commands"
-            action="copy-run" />
-        </figcaption>
-        <div class="install-code">
-          <Code code={releaseInstall} lang="sh" theme={x2cDarkTheme} />
-        </div>
-      </figure>
     </div>
   </section>
 

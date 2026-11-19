@@ -4,7 +4,7 @@ section: magic
 home: true
 order: 2
 tab: templates
-title: Just my prototype.
+title: The rewrite stuff.
 ---
 
 ```x2c

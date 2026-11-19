@@ -4,7 +4,7 @@ section: magic
 home: true
 order: 6
 tab: meta
-title: A field day.
+title: It takes one to code one.
 ---
 
 ```x2c

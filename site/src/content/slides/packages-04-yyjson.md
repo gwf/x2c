@@ -2,7 +2,7 @@
 slug: yyjson
 section: packages
 tab: yyjson
-title: Brace for the diagnosis.
+title: JSON and the Autobots.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/yyjson/examples/service-health.x

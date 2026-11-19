@@ -2,7 +2,7 @@
 slug: pcre2
 section: packages
 tab: PCRE2
-title: Log and behold.
+title: Matchmaker, matchmaker.
 links:
   - label: Full source
     href: https://github.com/gwf/x2c/blob/main/packages/pcre2/examples/parse-log.x

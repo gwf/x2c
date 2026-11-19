@@ -9,7 +9,7 @@ section: magic
 home: true
 order: 8
 tab: autodiff
-title: Derive another day.
+title: Derive me crazy.
 run: |
   make -C packages/autodiff builds/example-energy-gradient
   ./packages/autodiff/builds/example-energy-gradient

@@ -4,7 +4,7 @@ aliases: [ways-to-agree, self-host]
 section: magic
 home: true
 order: 7
-tab: compile time
+tab: compile-time
 title: Block and roll.
 ---
 
