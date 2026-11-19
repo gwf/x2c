@@ -5,11 +5,8 @@
 int main(void) {
   int n = 2;
   List pair = $(n, n + 1);
-  puts($dedent(%"
-    Quoted name: $(%(n).repr())
-    Inserted value: $($(n).repr())
-    Nested list: $(%($pair).repr())
-    Spliced list: $(%(@pair).repr())"));
+  printf("Quoted name: %s\nInserted value: %s\n", %(n).repr(), $(n).repr());
+  printf("Nested list: %s\nSpliced list: %s\n", %($pair).repr(), %(@pair).repr());
   String key = "answer";
   Map named = {key: n}, evaluated = ${key: n};
   puts($dedent(%"
