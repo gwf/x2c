@@ -1,3 +1,5 @@
+#include "system-macros.x"
+
 /* A region frees mutable allocations together. Canonical text belongs to a
    pool, normally lasting until shutdown. Containers do not adopt
    references. */
@@ -19,14 +21,16 @@ int main(void) {
     temporary.move_to(&saved); // Preserve the container beyond this region.
     kept = temporary;
   }
-  printf("Retained array: %s\n", kept.repr());
+  puts(%"Retained array: $(kept.repr())");
   int level = 1;
   with (level = 9) {
     printf("Temporary level: %d\n", level);
   }
   alias kept[0] as first;
   first += 4; // An alias substitutes its expression on each use.
-  printf("Restored level: %d\nAliased element: %s\n", level, kept[0]);
+  puts($dedent(%"
+    Restored level: $level
+    Aliased element: $(kept[0])"));
   try {
     defer puts("Cleanup before catch");
     raise %(bad-arg (operation "tour"));

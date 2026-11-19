@@ -5,7 +5,7 @@ int main(void) {
   List command = %(move (3 4) fast quiet);
   match (command) {
     case %(move (?(int x) ?(int y)) *flags):
-      printf("Matched command: %s\n", %(at $x $y @flags).repr());
+      puts(%"Matched command: $(%(at $x $y @flags).repr())");
   }
   List real = %(move (3.0 4.0));
   printf("Doubles match the int pattern: %d\n",

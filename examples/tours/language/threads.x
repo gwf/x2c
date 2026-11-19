@@ -1,3 +1,5 @@
+#include "system-macros.x"
+
 /* One worker writes counts; main reads only after Thread.run joins both.
    The parent owns the Map and Channel throughout. Strings are canonical.
    Channel capacity bounds queued messages, not the canonical-value pool. */
@@ -14,6 +16,8 @@ int main(void) {
         foreach (String word in line.words()) counts[word] += 1;
     }
   ]);
-  printf("Cake: %s\nTea: %s\n", counts["cake"], counts["tea"]);
+  puts($dedent(%"
+    Cake: $(counts["cake"])
+    Tea: $(counts["tea"])"));
   return 0;
 }

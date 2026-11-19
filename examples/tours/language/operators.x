@@ -1,3 +1,5 @@
+#include "system-macros.x"
+
 /* A typedef can reuse storage while defining new operations. Explicit
    adoption connects those methods to a protocol; names alone do not. */
 typedef Map Set;
@@ -16,8 +18,8 @@ int main(void) {
   Set a = Set.new(%(apple pear)), b = Set.new(%(pear bread));
   Set combined = a + b, common = a * b;
   // Map traversal has no promised order; sort before presenting keys.
-  printf("Union: %s\nIntersection: %s\n",
-         combined.keys().list().sort().repr(),
-         common.keys().list().sort().repr());
+  puts($dedent(%"
+    Union: $(combined.keys().list().sort().repr())
+    Intersection: $(common.keys().list().sort().repr())"));
   return 0;
 }

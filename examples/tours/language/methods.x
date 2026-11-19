@@ -17,6 +17,6 @@ int main(void) {
   trail = trail.record(3).record(4);
   printf("Original counter: %d\nCopied counter: %d\nDelegated counter: %d\n",
          counter.read(), copy.read(), meter.read());
-  printf("Trail after recording: %s\n", trail.repr());
+  puts(%"Trail after recording: $(trail.repr())");
   return 0;
 }

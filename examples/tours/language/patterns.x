@@ -12,7 +12,7 @@ int main(void) {
   List command = %(move (3 4) fast quiet);
   match (command) {
     case %(move (?(int x) ?(int y)) *flags) if (x > 0):
-      printf("Matched command: %s\n", %(at $x $y @flags).repr());
+      puts(%"Matched command: $(%(at $x $y @flags).repr())");
     default: puts("No move matched");
   }
   List result = simplify(%(add 2 3));

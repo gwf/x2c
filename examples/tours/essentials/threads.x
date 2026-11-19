@@ -1,3 +1,5 @@
+#include "system-macros.x"
+
 /* Threads share references; joining does not transfer their ownership. The
    parent owns counts. Only the consumer writes it, and main reads after
    both workers finish. Immutable text crosses the channel without copying. */
@@ -14,6 +16,8 @@ int main(void) {
         foreach (String word in line.words()) counts[word] += 1;
     }
   ]);
-  printf("Cake: %s\nTea: %s\n", counts["cake"], counts["tea"]);
+  puts($dedent(%"
+    Cake: $(counts["cake"])
+    Tea: $(counts["tea"])"));
   return 0;
 }

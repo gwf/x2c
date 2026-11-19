@@ -1,3 +1,5 @@
+#include "system-macros.x"
+
 /* The same language computes values and constructs source at compile time.
    meta enables compilation-time calls; $ requests one. Macros capture
    syntax. Declared macro locals are private; free names normally come from
@@ -15,6 +17,8 @@ int main(void) {
   // Lists can also be executable data. Lisp evaluates them at runtime.
   List expression = %(+ 2 3);
   Lisp lisp = auto Lisp.new();
-  printf("Lisp result: %s\nNative result: %d\n", lisp.eval(expression), 2 + 3);
+  puts($dedent(%"
+    Lisp result: $(lisp.eval(expression))
+    Native result: $(2 + 3)"));
   return 0;
 }

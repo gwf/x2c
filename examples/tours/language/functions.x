@@ -1,3 +1,5 @@
+#include "system-macros.x"
+
 /* References borrow caller storage; call without &. Rest parameters collect
    arguments into a List or Map. @ explicitly splices arguments. */
 static int square(int n) => n * n;
@@ -10,16 +12,22 @@ int main(void) {
   int count = 3;
   increment(count);
   List pair = %(2 3);
-  printf("Square: %d\nCollected arguments: %s\nItem description: %s\n",
-         square(count), collect(1, @pair).repr(),
-         describe("items", count: count));
+  puts($dedent(%"
+    Square: $(square(count))
+    Collected arguments: $(collect(1, @pair).repr())
+    Item description: $(describe("items", count: count))"));
   Func snapshot = %!() => count;
   Func update = %!(int n) using &count => count += n;
   count = 10;
   Var old = snapshot(), next = update(2);
-  printf("Captured value: %s\nShared value: %s\nLocal value: %d\n", old, next, count);
+  puts($dedent(%"
+    Captured value: $old
+    Shared value: $next
+    Local value: $count"));
   List doubled = pair.map(%!(int n) => n * 2);
   Var total = pair.iter().map(square).foldl(0, %!(int a, int b) => a + b);
-  printf("Doubled items: %s\nSum of squares: %s\n", doubled.repr(), total);
+  puts($dedent(%"
+    Doubled items: $(doubled.repr())
+    Sum of squares: $total"));
   return 0;
 }

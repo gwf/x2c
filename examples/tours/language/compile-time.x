@@ -28,6 +28,6 @@ int main(void) {
   $report(total);
   // Lisp is a runtime library, not the implementation of meta functions.
   Lisp lisp = auto Lisp.new();
-  printf("Runtime Lisp result: %s\n", lisp.eval(%(+ 2 3)));
+  puts(%"Runtime Lisp result: $(lisp.eval(%(+ 2 3)))");
   return 0;
 }
