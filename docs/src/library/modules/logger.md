@@ -559,8 +559,8 @@ Source: `lib/logger.x`
 
 Logger owns filtering, event timestamps, sink ordering, and sink lifetime.
 It is reentrant and serializes configuration, sequencing, and delivery.
-Expensive callers may query Logger.should_log before constructing
-canonical field `List`s.
+Callers can check `Logger.should_log` before doing the work of
+constructing canonical field `List`s.
 
 Events carry one wall-clock timestamp and one monotonic elapsed timestamp.
 Every sink for an event observes the same immutable LogEvent. Built-in text

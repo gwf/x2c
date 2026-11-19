@@ -15,7 +15,7 @@ Var transport and explicit storage handoff.
 | --- | --- |
 | [`Channel.cleanup`](#Channel.cleanup) | Ends the owned lifetime when a managed local leaves its block. |
 | [`Channel.close`](#Channel.close) | Ends sends and wakes waiters; accepted messages remain available to drain. |
-| [`Channel.free`](#Channel.free) | Closes and destroys an unused Channel's complete storage scope. |
+| [`Channel.free`](#Channel.free) | Closes the `Channel` and destroys its storage scope. |
 | [`Channel.iter`](#Channel.iter) | Initializes a borrowed iterator that blocks for each received message. |
 | [`Channel.new`](#Channel.new) | Creates a Channel constrained to an exact Var tag, with capacity zero for rendezvous, a nonnegative integer for bounded buffering, or `<unbounded>`. |
 | [`Channel.receive`](#Channel.receive) | Receives one accepted Var. |
@@ -52,11 +52,11 @@ Source: `lib/channel.x`
 
 `void Channel.free(Channel channel)`
 
-Closes and destroys an unused Channel's complete storage scope. Every
-user and waiter must already have finished. Undelivered owned payload
-subtrees are destroyed outside the queue mutex; ordinary payloads are
-not followed. NULL does nothing. Owner destruction releases these native
-queue nodes and resources through the same finalizer.
+Closes the `Channel` and destroys its storage scope. Every user and
+waiter must already have finished. Cleanup destroys undelivered owned
+payload subtrees outside the queue mutex and leaves borrowed payload
+storage alone. NULL does nothing. Destroying the owner runs the same
+finalizer to release native queue nodes and resources.
 
 Source: `lib/channel.x`
 
@@ -198,8 +198,10 @@ Source: `lib/channel.x`
 
 ## Design notes
 
-Each queue owns its mutex; registered monitors order commitment with stop.
-Allocation, Error dispatch, and payload destruction stay outside it.
+Each queue has its own mutex. To publish a stop request while a Channel
+operation is registered, the stop operation takes that mutex. This orders
+the stop request with message commitment. Allocation,
+`Error` dispatch, and payload destruction happen outside the lock.
 
 ## Examples
 

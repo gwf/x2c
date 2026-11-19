@@ -95,11 +95,11 @@ Source: `lib/match/operations.x`
 `int List.try_match_replace(List input, Var pat, Var template, Var &?out)`
 
 Matches `input` and writes the instantiated `template` on success.
-The output may be any `Var`, including typed `nil` or a scalar. A template
-that is one binder the match left unbound, such as the binder of an `!or`
-alternative another alternative satisfied, writes that binder. Returns 0
-for a miss, malformed pattern, invalid output, or machine error and leaves
-`out` unchanged.
+The output may be any `Var`, including typed `nil` or a scalar. If the
+template is a single binder the match left unbound, the function writes
+that binder itself. This can happen when a different `!or` alternative
+matches. A miss, malformed pattern, invalid output, or machine error
+returns 0 and leaves `out` unchanged.
 
 **Raises:** `<size-limit>` for an ineligible pattern, or `<alloc-fail>` while
 preparing, materializing, or replacing.

@@ -66,10 +66,11 @@ Exports `value` into the parent of the current `Context`.
 Values may belong to an open region of that `Context`; export them
 while live, before closing their `Scope` or the `Context`.
 Built-in movable families preserve identity. A custom exact-descriptor
-exporter defines its returned value, including identity. Private canonical
-immutable built-ins may change, so callers must use the returned value;
-inherited or borrowed built-ins are unchanged. `void` exports as `void`
-because it owns no storage.
+exporter defines its returned value, including identity. Export can
+return a different canonical pointer for an immutable built-in value
+from the source's private pool. Use the returned value. Inherited or
+borrowed built-ins are unchanged. `void` exports as `void` because it
+owns no storage.
 
 Built-in `Array` and `Map` export restores the container's source ownership
 if recursive export fails, but nested exports already completed are not

@@ -110,8 +110,8 @@ Source: `lib/args.x`
 
 ## Design notes
 
-Args owns the reading of a command line against a spec: an ordinary
-List with one row per option or operand. The result is a Map from each
-row's name to its value, words stay Strings, and bad input raises
-`<bad-arg>` so the caller decides whether to print `Args.usage` and which
-status to return.
+`Args.parse` parses command-line arguments against a spec. The spec is a
+`List` with one row per option or operand, and the result is a `Map` from
+each row's name to its value. Words remain `String`s. For bad input,
+`Args.parse` raises `<bad-arg>`. The caller decides whether to print
+`Args.usage` and which status to return.

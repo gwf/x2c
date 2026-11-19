@@ -359,9 +359,9 @@ Source: `lib/block.x`
 
 `Block` maintains the length and capacity invariants for contiguous
 fixed-width storage. `Bytes` exposes the same allocation through its data
-pointer and a hidden back-pointer. Capacity growth raises where the
-failure is detected, leaves storage unchanged, and does not return to the
-call.
+pointer and a hidden back-pointer. If a `Block` cannot grow, the operation
+raises where it detects the failure and leaves storage unchanged. The
+call does not return.
 
 A self-source may name any initialized range inside reserved capacity.
 Growth rebases that range after reallocating the owning block.

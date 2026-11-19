@@ -143,8 +143,8 @@ Source: `lib/list/building.x`
 `int List.all(List lst, Func pred)`
 
 True when every element satisfies `pred` by ordinary `Var` truthiness.
-Stops at the first rejection. Nil is true without invoking or checking
-`pred`.
+Stops at the first rejection. For `nil`, returns true without invoking
+or checking `pred`.
 
 Any cause raised by `pred` or its result's truth operation propagates. A
 null `pred` on nonempty input raises `<bad-arg>` from `Func.apply`.

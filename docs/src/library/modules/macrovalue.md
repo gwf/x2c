@@ -14,7 +14,7 @@ Macros as values that build and recognize code.
 | Function | Summary |
 | --- | --- |
 | [`Macro_apply`](#Macro_apply) | Applies a macro value to code values. |
-| [`Macro_close`](#Macro_close) | Records the Macro values an anonymous macro captured where it was created, so applying it later applies the same children. |
+| [`Macro_close`](#Macro_close) | Records the `Macro` values captured when an anonymous macro was created. |
 | [`Macro_pattern`](#Macro_pattern) | Derives the Match pattern that recognizes code this macro builds, capturing each parameter under the given binder. |
 | [`Macro.declared`](#Macro.declared) | Returns the name a typed quotation declares with a Name hole whose local holds `value`: the name form of an `x2c_ident` spelling or a String, or a binding as it is. |
 | [`Macro.inserted`](#Macro.inserted) | Returns what a typed quotation inserts for one use of a hole whose local holds `value`, as a rebuild inserts it. |
@@ -45,8 +45,8 @@ Source: `lib/macrovalue/construction.x`
 
 `Macro Macro_close(Macro value, List captures)`
 
-Records the Macro values an anonymous macro captured where it was
-created, so applying it later applies the same children.
+Records the `Macro` values captured when an anonymous macro was created.
+The anonymous macro uses those same values when applied later.
 
 Source: `lib/macrovalue/construction.x`
 
@@ -197,7 +197,7 @@ for source readers but are not supported as user API.
 | [`Macro_case_enter`](#Macro_case_enter) | Stores in `cursor` the List a macro-valued `case` examines for `value`, beneath its source wrappers, and returns whether there is one. |
 | [`Macro_case_own`](#Macro_case_own) | Whether an `expr` node whose content is `content` is its own view: the content is not a List headed by an Atom, as a retained invocation's is, or by the `expr` a template shell holds. |
 | [`Macro_case_pattern`](#Macro_case_pattern) | The pattern a macro-valued `case` compiles to; the compiler lowers a call of this to `Macro_case_capture_at` over the match subject. |
-| [`Macro_case_root`](#Macro_case_root) | Starts a macro-valued `case` whose derived pattern generated `match` code tests in place. |
+| [`Macro_case_root`](#Macro_case_root) | Starts a macro-valued `case` whose derived pattern the generated `match` code tests in place. |
 | [`Macro_case_shape`](#Macro_case_shape) | The pattern a macro-valued `case` compiles to when the compiler derived `shape`, the pattern the case tests, while compiling it. |
 | [`Macro_case_start`](#Macro_case_start) | Starts a macro-valued `case` without `Macro_case_root` when `code` is its own view. |
 | [`Macro_case_symbol`](#Macro_case_symbol) | The short Symbol `value` holds, or 0 for any other value. |
@@ -257,12 +257,15 @@ Source: `lib/macrovalue/recognition.x`
 
 `int Macro_case_root(List code, Macro t, List names, int statement, List &cursor, MatchCaptureBuffer *published)`
 
-Starts a macro-valued `case` whose derived pattern generated `match`
-code tests in place. Returns 1 when `code` is a retained invocation of
-`t` and its arguments captured under `names` into `published`, 0 when
-`code` cannot match, and 2 after storing in `cursor` the List the
-pattern tests: the view of `code` or, for a `statement` body, of the one
-statement a `seq` holds.
+Starts a macro-valued `case` whose derived pattern the generated
+`match` code tests in place.
+
+- Returns 1 after capturing the arguments of a matching retained
+  invocation of `t` under `names` into `published`.
+- Returns 0 when `code` cannot match.
+- Returns 2 after storing the subject `List` in `cursor` for the pattern
+  to test. The subject is the view of `code` or, for a `statement` body,
+  the view of the single statement in a `seq`.
 
 Source: `lib/macrovalue/recognition.x`
 

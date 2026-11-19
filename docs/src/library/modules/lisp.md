@@ -740,12 +740,12 @@ Source: `lib/lisp/lisp.x`
 
 ## Design notes
 
-Lisp owns the sessions a program embeds: the reader, the evaluator, and
-each session's global environment. Lambdas and natives receive their
-arguments evaluated left to right, macros and special forms receive them
-raw, nil and void are false, and a Lambda captures by value the free
-locals its body reads. Names are canonical Atoms, and `bind` reaches
-native operations through the table that lisp-targets.x builds.
+`Lisp` provides a reader and evaluator for embedded sessions. Each
+session has its own global environment. Lambdas and native functions
+receive arguments evaluated from left to right. Macros and special forms
+receive raw arguments. Nil and void are false. A `Lambda` captures by
+value the free locals its body reads. Names are canonical Atoms, and `bind`
+reaches native operations through the table that lisp-targets.x builds.
 
 The session Scope owns the Lisp record, its Maps, Lambdas, and bound Func
 storage, which hold Vars by value without cloning their referents. Those

@@ -148,7 +148,7 @@ Source: `lib/error/records.x`
 | [`Error.bound`](#Error.bound) | Returns the maximum number of errors that may remain accumulated. |
 | [`Error.bound_set`](#Error.bound_set) | Sets the accumulated-error bound when `bound` is positive. |
 | [`Error.count`](#Error.count) | Returns the number of errors currently accumulated. |
-| [`Error.depth`](#Error.depth) | Returns the current nested error-dispatch depth. |
+| [`Error.depth`](#Error.depth) | Returns the current nesting depth of error dispatch. |
 | [`Error.handler_depth`](#Error.handler_depth) | Returns the current thread's number of registered `Error` handlers. |
 | [`Error.handler_head`](#Error.handler_head) | Returns the current thread's borrowed top `Error`-handler pointer. |
 | [`Error.initialize_raw`](#Error.initialize_raw) | Initializes the current thread's `Error` runtime without lifecycle insertion. |
@@ -200,9 +200,8 @@ Source: `lib/error/records.x`
 
 `int Error.depth(void)`
 
-Returns the current nested error-dispatch depth.
-This is the nesting depth of error dispatch. `Error.count` returns the
-number of accumulated errors.
+Returns the current nesting depth of error dispatch. `Error.count`
+returns the number of accumulated errors.
 
 Source: `lib/error/dispatch.x`
 

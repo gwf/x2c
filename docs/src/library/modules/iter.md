@@ -48,9 +48,9 @@ Returns an inclusive integer range over caller-supplied `iter` storage.
 Both endpoints belong to the range when the step direction reaches them:
 `range(1, 4, 1, &storage)` yields 1, 2, 3, 4, and `range(3, 1, -1,
 &storage)` counts down 3, 2, 1. A step that would cross `end` stops short
-of it, so `range(0, 9, 2, &storage)` yields 0, 2, 4, 6, 8. A range
-pointed against its step is empty. A range needs no state struct and no
-cleanup.
+of it, so `range(0, 9, 2, &storage)` yields 0, 2, 4, 6, 8. The range
+is empty when a positive step starts above `end` or a negative step
+starts below `end`. A range needs no state struct and no cleanup.
 
 **Raises:** `<bad-arg>` when `step` is zero. A null `iter` returns NULL
 without raising.
@@ -143,9 +143,9 @@ Source: `lib/iter.x`
 `meta native Iter Iter.filter(Iter iter, Func func, Iter dest)`
 
 Returns a lazy iterator over elements accepted by `func`'s `Var`
-truthiness. The predicate fits in `dest`, so that storage is all you
-declare. Rejected elements are consumed without being yielded, so one
-request for an element can pull many from the source.
+truthiness. The iterator stores the predicate handle in `dest`. The
+caller supplies no separate iterator state. Pulling skips rejected
+elements, so one request can consume several source values.
 
 Elements are passed as values. Both `iter` and its storage, `dest`, and any
 dynamic or captured `func` must remain valid while the result is used.

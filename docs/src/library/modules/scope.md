@@ -171,8 +171,8 @@ the handle from `drop`; an explicit early release that clears the field
 leaves nothing for the finalizer to do. `drop` runs on the thread that
 reclaims the block, with the block already unlinked, so it must not free
 or move the block itself. It must not raise. It may allocate into other
-scopes, and into the dying scope only for scratch the same destruction
-reclaims.
+scopes. In the dying scope, it may allocate only scratch storage that
+the same destruction reclaims.
 
 **Raises:** `<bad-arg>` when `drop` is NULL, `<size-limit>` when the size
 would overflow the allocation header, or `<alloc-fail>` when the
@@ -517,9 +517,7 @@ close that ends the region. Nothing about the source is remembered, so
 duplicating a C string means copying its terminator too:
 `xmemdup(text, strlen(text) + 1)`.
 
-A NULL `ptr` or a zero `size` returns NULL and allocates nothing, so a
-duplicate of nothing is indistinguishable from failure; check the
-arguments when that distinction matters.
+A NULL `ptr` or a zero `size` returns NULL and allocates nothing.
 
 **Raises:** `<size-limit>` or `<alloc-fail>` from the underlying allocation.
 A NULL `ptr` or zero `size` returns NULL without raising.

@@ -30,7 +30,7 @@ Include it with `#include "typed-map.x"`.
 | [`MapIntInt.getdefault`](#MapIntInt.getdefault) | Returns the value for `key`, or `defval` without inserting it. |
 | [`MapIntInt.getindex`](#MapIntInt.getindex) | Returns the value selected by bracket indexing. |
 | [`MapIntInt.iter`](#MapIntInt.iter) | Initializes `dest` as a single-pass iterator over boxed values. |
-| [`MapIntInt.keys`](#MapIntInt.keys) | Initializes `dest` as a single-pass iterator over boxed keys. |
+| [`MapIntInt.keys`](#MapIntInt.keys) | Initializes `dest` as a single-pass iterator over keys in bucket order. |
 | [`MapIntInt.len`](#MapIntInt.len) | Returns the number of entries, or zero for a null map. |
 | [`MapIntInt.map`](#MapIntInt.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapIntInt.merge`](#MapIntInt.merge) | Copies every entry of `other` into `map` and returns the destination. |
@@ -63,7 +63,7 @@ Include it with `#include "typed-map.x"`.
 | [`MapLongDouble.getdefault`](#MapLongDouble.getdefault) | Returns the value for `key`, or `defval` without inserting it. |
 | [`MapLongDouble.getindex`](#MapLongDouble.getindex) | Returns the value selected by bracket indexing. |
 | [`MapLongDouble.iter`](#MapLongDouble.iter) | Initializes `dest` as a single-pass iterator over boxed values. |
-| [`MapLongDouble.keys`](#MapLongDouble.keys) | Initializes `dest` as a single-pass iterator over boxed keys. |
+| [`MapLongDouble.keys`](#MapLongDouble.keys) | Initializes `dest` as a single-pass iterator over keys in bucket order. |
 | [`MapLongDouble.len`](#MapLongDouble.len) | Returns the number of entries, or zero for a null map. |
 | [`MapLongDouble.map`](#MapLongDouble.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapLongDouble.merge`](#MapLongDouble.merge) | Copies every entry of `other` into `map` and returns the destination. |
@@ -97,7 +97,7 @@ Include it with `#include "typed-map.x"`.
 | [`MapStringInt.getdefault`](#MapStringInt.getdefault) | Returns the value for `key`, or `defval` without inserting it. |
 | [`MapStringInt.getindex`](#MapStringInt.getindex) | Returns the value selected by bracket indexing. |
 | [`MapStringInt.iter`](#MapStringInt.iter) | Initializes `dest` as a single-pass iterator over boxed values. |
-| [`MapStringInt.keys`](#MapStringInt.keys) | Initializes `dest` as a single-pass iterator over boxed keys. |
+| [`MapStringInt.keys`](#MapStringInt.keys) | Initializes `dest` as a single-pass iterator over keys in bucket order. |
 | [`MapStringInt.len`](#MapStringInt.len) | Returns the number of entries, or zero for a null map. |
 | [`MapStringInt.map`](#MapStringInt.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapStringInt.merge`](#MapStringInt.merge) | Copies every entry of `other` into `map` and returns the destination. |
@@ -130,7 +130,7 @@ Include it with `#include "typed-map.x"`.
 | [`MapStringString.getdefault`](#MapStringString.getdefault) | Returns the value for `key`, or `defval` without inserting it. |
 | [`MapStringString.getindex`](#MapStringString.getindex) | Returns the value selected by bracket indexing. |
 | [`MapStringString.iter`](#MapStringString.iter) | Initializes `dest` as a single-pass iterator over boxed values. |
-| [`MapStringString.keys`](#MapStringString.keys) | Initializes `dest` as a single-pass iterator over boxed keys. |
+| [`MapStringString.keys`](#MapStringString.keys) | Initializes `dest` as a single-pass iterator over keys in bucket order. |
 | [`MapStringString.len`](#MapStringString.len) | Returns the number of entries, or zero for a null map. |
 | [`MapStringString.map`](#MapStringString.map) | Returns a fresh ordinary Map containing boxed keys and values. |
 | [`MapStringString.merge`](#MapStringString.merge) | Copies every entry of `other` into `map` and returns the destination. |
@@ -287,19 +287,22 @@ Source: `lib/typed-map.x`
 `Iter MapIntInt.enumerate(MapIntInt map, Iter dest)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
-order.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL, and a null map is
-exhausted. Each step boxes both fields and interns two `List` cells. Each
-cell belongs to the pool owning its canonical match, which may be an
-ancestor pool, or to the current pool when newly allocated. Structural
-mutation invalidates the iterator. Each MapLongDouble pull allocates its
-long key as a `Var` in the current `Scope`; the yielded `List` and
-anything retaining it must not outlive that `Scope`.
+order. The caller owns `dest`, and the iterator borrows `map`. Both must
+remain live during traversal. A null `dest` returns NULL, and a null map
+is exhausted. Structural mutation invalidates the iterator.
 
-**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`, and
-for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
-Shared causes do not return from the pull.
+Each step boxes both fields and interns two `List` cells. Each cell
+belongs to the pool owning its canonical match, which may be an ancestor
+pool, or to the current pool when newly allocated. For `MapSubInt`,
+boxing materializes the key as a canonical `String` and boxes the count.
+The key follows its actual owning pool. Each `MapLongDouble` pull
+allocates its long key as a `Var` in the current `Scope`. The yielded
+`List` and anything retaining it must stay within that `Scope`.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`.
+For `MapSubInt`, materializing the key may raise any cause from
+`Substring.str`. For `MapLongDouble`, boxing the key may raise
+`<alloc-fail>` or `<bad-enc>`. Shared causes do not return from the pull.
 
 Source: `lib/typed-map.x`
 
@@ -363,17 +366,20 @@ Source: `lib/typed-map.x`
 
 `Iter MapIntInt.keys(MapIntInt map, Iter dest)`
 
-Initializes `dest` as a single-pass iterator over boxed keys.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL. Keys follow bucket
-order, a null map is exhausted, and structural mutation invalidates the
-iterator. MapIntInt and both String-keyed families box keys without
-allocation.
-Each MapLongDouble pull allocates its long key as a `Var` in the current
-`Scope`; the yielded `Var` and anything retaining it must not outlive
+Initializes `dest` as a single-pass iterator over keys in bucket order.
+The caller owns `dest`, and the iterator borrows `map`. Both must remain
+live during traversal. A null `dest` returns NULL, and a null map is
+exhausted. Structural mutation invalidates the iterator.
+
+Each `MapSubInt` pull materializes the key as a canonical `String` with
+`Substring.str`. The result follows its actual owning pool.
+`MapIntInt` and both String-keyed families box keys without allocation.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the current
+`Scope`. The yielded `Var` and anything retaining it must stay within
 that `Scope`.
 
-**Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
+**Raises:** for `MapSubInt`, the causes from `Substring.str` while
+materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
 Source: `lib/typed-map.x`
@@ -694,19 +700,22 @@ Source: `lib/typed-map.x`
 `Iter MapLongDouble.enumerate(MapLongDouble map, Iter dest)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
-order.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL, and a null map is
-exhausted. Each step boxes both fields and interns two `List` cells. Each
-cell belongs to the pool owning its canonical match, which may be an
-ancestor pool, or to the current pool when newly allocated. Structural
-mutation invalidates the iterator. Each MapLongDouble pull allocates its
-long key as a `Var` in the current `Scope`; the yielded `List` and
-anything retaining it must not outlive that `Scope`.
+order. The caller owns `dest`, and the iterator borrows `map`. Both must
+remain live during traversal. A null `dest` returns NULL, and a null map
+is exhausted. Structural mutation invalidates the iterator.
 
-**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`, and
-for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
-Shared causes do not return from the pull.
+Each step boxes both fields and interns two `List` cells. Each cell
+belongs to the pool owning its canonical match, which may be an ancestor
+pool, or to the current pool when newly allocated. For `MapSubInt`,
+boxing materializes the key as a canonical `String` and boxes the count.
+The key follows its actual owning pool. Each `MapLongDouble` pull
+allocates its long key as a `Var` in the current `Scope`. The yielded
+`List` and anything retaining it must stay within that `Scope`.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`.
+For `MapSubInt`, materializing the key may raise any cause from
+`Substring.str`. For `MapLongDouble`, boxing the key may raise
+`<alloc-fail>` or `<bad-enc>`. Shared causes do not return from the pull.
 
 Source: `lib/typed-map.x`
 
@@ -770,17 +779,20 @@ Source: `lib/typed-map.x`
 
 `Iter MapLongDouble.keys(MapLongDouble map, Iter dest)`
 
-Initializes `dest` as a single-pass iterator over boxed keys.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL. Keys follow bucket
-order, a null map is exhausted, and structural mutation invalidates the
-iterator. MapIntInt and both String-keyed families box keys without
-allocation.
-Each MapLongDouble pull allocates its long key as a `Var` in the current
-`Scope`; the yielded `Var` and anything retaining it must not outlive
+Initializes `dest` as a single-pass iterator over keys in bucket order.
+The caller owns `dest`, and the iterator borrows `map`. Both must remain
+live during traversal. A null `dest` returns NULL, and a null map is
+exhausted. Structural mutation invalidates the iterator.
+
+Each `MapSubInt` pull materializes the key as a canonical `String` with
+`Substring.str`. The result follows its actual owning pool.
+`MapIntInt` and both String-keyed families box keys without allocation.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the current
+`Scope`. The yielded `Var` and anything retaining it must stay within
 that `Scope`.
 
-**Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
+**Raises:** for `MapSubInt`, the causes from `Substring.str` while
+materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
 Source: `lib/typed-map.x`
@@ -1112,19 +1124,22 @@ Source: `lib/typed-map.x`
 `Iter MapStringInt.enumerate(MapStringInt map, Iter dest)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
-order.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL, and a null map is
-exhausted. Each step boxes both fields and interns two `List` cells. Each
-cell belongs to the pool owning its canonical match, which may be an
-ancestor pool, or to the current pool when newly allocated. Structural
-mutation invalidates the iterator. Each MapLongDouble pull allocates its
-long key as a `Var` in the current `Scope`; the yielded `List` and
-anything retaining it must not outlive that `Scope`.
+order. The caller owns `dest`, and the iterator borrows `map`. Both must
+remain live during traversal. A null `dest` returns NULL, and a null map
+is exhausted. Structural mutation invalidates the iterator.
 
-**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`, and
-for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
-Shared causes do not return from the pull.
+Each step boxes both fields and interns two `List` cells. Each cell
+belongs to the pool owning its canonical match, which may be an ancestor
+pool, or to the current pool when newly allocated. For `MapSubInt`,
+boxing materializes the key as a canonical `String` and boxes the count.
+The key follows its actual owning pool. Each `MapLongDouble` pull
+allocates its long key as a `Var` in the current `Scope`. The yielded
+`List` and anything retaining it must stay within that `Scope`.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`.
+For `MapSubInt`, materializing the key may raise any cause from
+`Substring.str`. For `MapLongDouble`, boxing the key may raise
+`<alloc-fail>` or `<bad-enc>`. Shared causes do not return from the pull.
 
 Source: `lib/typed-map.x`
 
@@ -1188,17 +1203,20 @@ Source: `lib/typed-map.x`
 
 `Iter MapStringInt.keys(MapStringInt map, Iter dest)`
 
-Initializes `dest` as a single-pass iterator over boxed keys.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL. Keys follow bucket
-order, a null map is exhausted, and structural mutation invalidates the
-iterator. MapIntInt and both String-keyed families box keys without
-allocation.
-Each MapLongDouble pull allocates its long key as a `Var` in the current
-`Scope`; the yielded `Var` and anything retaining it must not outlive
+Initializes `dest` as a single-pass iterator over keys in bucket order.
+The caller owns `dest`, and the iterator borrows `map`. Both must remain
+live during traversal. A null `dest` returns NULL, and a null map is
+exhausted. Structural mutation invalidates the iterator.
+
+Each `MapSubInt` pull materializes the key as a canonical `String` with
+`Substring.str`. The result follows its actual owning pool.
+`MapIntInt` and both String-keyed families box keys without allocation.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the current
+`Scope`. The yielded `Var` and anything retaining it must stay within
 that `Scope`.
 
-**Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
+**Raises:** for `MapSubInt`, the causes from `Substring.str` while
+materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
 Source: `lib/typed-map.x`
@@ -1519,19 +1537,22 @@ Source: `lib/typed-map.x`
 `Iter MapStringString.enumerate(MapStringString map, Iter dest)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
-order.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL, and a null map is
-exhausted. Each step boxes both fields and interns two `List` cells. Each
-cell belongs to the pool owning its canonical match, which may be an
-ancestor pool, or to the current pool when newly allocated. Structural
-mutation invalidates the iterator. Each MapLongDouble pull allocates its
-long key as a `Var` in the current `Scope`; the yielded `List` and
-anything retaining it must not outlive that `Scope`.
+order. The caller owns `dest`, and the iterator borrows `map`. Both must
+remain live during traversal. A null `dest` returns NULL, and a null map
+is exhausted. Structural mutation invalidates the iterator.
 
-**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`, and
-for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
-Shared causes do not return from the pull.
+Each step boxes both fields and interns two `List` cells. Each cell
+belongs to the pool owning its canonical match, which may be an ancestor
+pool, or to the current pool when newly allocated. For `MapSubInt`,
+boxing materializes the key as a canonical `String` and boxes the count.
+The key follows its actual owning pool. Each `MapLongDouble` pull
+allocates its long key as a `Var` in the current `Scope`. The yielded
+`List` and anything retaining it must stay within that `Scope`.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`.
+For `MapSubInt`, materializing the key may raise any cause from
+`Substring.str`. For `MapLongDouble`, boxing the key may raise
+`<alloc-fail>` or `<bad-enc>`. Shared causes do not return from the pull.
 
 Source: `lib/typed-map.x`
 
@@ -1595,17 +1616,20 @@ Source: `lib/typed-map.x`
 
 `Iter MapStringString.keys(MapStringString map, Iter dest)`
 
-Initializes `dest` as a single-pass iterator over boxed keys.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL. Keys follow bucket
-order, a null map is exhausted, and structural mutation invalidates the
-iterator. MapIntInt and both String-keyed families box keys without
-allocation.
-Each MapLongDouble pull allocates its long key as a `Var` in the current
-`Scope`; the yielded `Var` and anything retaining it must not outlive
+Initializes `dest` as a single-pass iterator over keys in bucket order.
+The caller owns `dest`, and the iterator borrows `map`. Both must remain
+live during traversal. A null `dest` returns NULL, and a null map is
+exhausted. Structural mutation invalidates the iterator.
+
+Each `MapSubInt` pull materializes the key as a canonical `String` with
+`Substring.str`. The result follows its actual owning pool.
+`MapIntInt` and both String-keyed families box keys without allocation.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the current
+`Scope`. The yielded `Var` and anything retaining it must stay within
 that `Scope`.
 
-**Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
+**Raises:** for `MapSubInt`, the causes from `Substring.str` while
+materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
 Source: `lib/typed-map.x`

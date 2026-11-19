@@ -263,12 +263,11 @@ Source: `lib/dispatch.x`
 
 `Buffer Var.write_str(Var v, Buffer out)`
 
-Appends the display text of `Var` to a `Buffer`.
-A descriptor that registers `write_str` streams straight into `out`. One
-that registers only `str` writes its `String` through, which materializes
-the text but keeps existing custom descriptors working. Neither fallback
-re-enters this function, so a descriptor providing neither cannot
-recurse.
+Appends the display text of `Var` to a `Buffer`. If the descriptor
+registers `write_str`, that callback writes directly into `out`. If
+it registers only `str`, `Var.write_str` appends the `String` returned
+by that callback. With neither callback, it uses `Var.fallback_write_str`.
+The fallbacks do not re-enter `Var.write_str`.
 
 Source: `lib/dispatch.x`
 

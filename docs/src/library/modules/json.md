@@ -238,9 +238,9 @@ Source: `lib/json.x`
 
 ## Design notes
 
-Json owns the crossing between JSON text and ordinary x2c values: an
-object is a Map with String keys, an array an Array, null the all-zero
-Var, and true or false a `JsonBool`. A Map keeps neither member order nor
-duplicate names, so a repeated name keeps its last value and output
-writes names in byte order; `packages/yyjson` serves a program that
-needs either.
+`Json` converts between JSON text and x2c values. Objects map to `Map`s
+with `String` keys. Arrays map to `Array`s, null to the all-zero `Var`,
+and true or false to a `JsonBool`. A `Map` discards member order and
+retains only the last value for a repeated name. JSON output writes names
+in byte order. Use `packages/yyjson` to preserve member order or repeated
+names.

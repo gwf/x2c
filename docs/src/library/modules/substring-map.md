@@ -17,7 +17,7 @@ Include it with `#include "substring-map.x"`.
 | [`MapSubInt.enumerate`](#MapSubInt.enumerate) | Initializes `dest` to yield canonical `(key value)` `List`s in bucket order. |
 | [`MapSubInt.increment`](#MapSubInt.increment) | Adds one occurrence without copying or interning the word's bytes. |
 | [`MapSubInt.iter`](#MapSubInt.iter) | Initializes `dest` as a single-pass iterator over boxed values. |
-| [`MapSubInt.keys`](#MapSubInt.keys) | Initializes `dest` as a single-pass iterator over boxed keys. |
+| [`MapSubInt.keys`](#MapSubInt.keys) | Initializes `dest` as a single-pass iterator over keys in bucket order. |
 | [`MapSubInt.move_to`](#MapSubInt.move_to) | Moves the record, backing Blocks, and nullable owned contents together. |
 | [`MapSubInt.new`](#MapSubInt.new) | Creates an empty count table in the current Scope. |
 | [`MapSubInt.scope`](#MapSubInt.scope) | Acquires the Map's scope for explicitly owned contents. |
@@ -43,19 +43,22 @@ Source: `lib/substring-map.x`
 `Iter MapSubInt.enumerate(MapSubInt map, Iter dest)`
 
 Initializes `dest` to yield canonical `(key value)` `List`s in bucket
-order.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL, and a null map is
-exhausted. Each step boxes both fields and interns two `List` cells. Each
-cell belongs to the pool owning its canonical match, which may be an
-ancestor pool, or to the current pool when newly allocated. Structural
-mutation invalidates the iterator. Each MapLongDouble pull allocates its
-long key as a `Var` in the current `Scope`; the yielded `List` and
-anything retaining it must not outlive that `Scope`.
+order. The caller owns `dest`, and the iterator borrows `map`. Both must
+remain live during traversal. A null `dest` returns NULL, and a null map
+is exhausted. Structural mutation invalidates the iterator.
 
-**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`, and
-for MapLongDouble, `<alloc-fail>` or `<bad-enc>` while boxing its key.
-Shared causes do not return from the pull.
+Each step boxes both fields and interns two `List` cells. Each cell
+belongs to the pool owning its canonical match, which may be an ancestor
+pool, or to the current pool when newly allocated. For `MapSubInt`,
+boxing materializes the key as a canonical `String` and boxes the count.
+The key follows its actual owning pool. Each `MapLongDouble` pull
+allocates its long key as a `Var` in the current `Scope`. The yielded
+`List` and anything retaining it must stay within that `Scope`.
+
+**Raises:** `<alloc-fail>` or `<size-limit>` while interning the `List`.
+For `MapSubInt`, materializing the key may raise any cause from
+`Substring.str`. For `MapLongDouble`, boxing the key may raise
+`<alloc-fail>` or `<bad-enc>`. Shared causes do not return from the pull.
 
 Source: `lib/substring-map.x`
 
@@ -87,17 +90,20 @@ Source: `lib/substring-map.x`
 
 `Iter MapSubInt.keys(MapSubInt map, Iter dest)`
 
-Initializes `dest` as a single-pass iterator over boxed keys.
-The caller owns `dest`, and the iterator borrows `map`; both must remain
-live during traversal. A null `dest` returns NULL. Keys follow bucket
-order, a null map is exhausted, and structural mutation invalidates the
-iterator. MapIntInt and both String-keyed families box keys without
-allocation.
-Each MapLongDouble pull allocates its long key as a `Var` in the current
-`Scope`; the yielded `Var` and anything retaining it must not outlive
+Initializes `dest` as a single-pass iterator over keys in bucket order.
+The caller owns `dest`, and the iterator borrows `map`. Both must remain
+live during traversal. A null `dest` returns NULL, and a null map is
+exhausted. Structural mutation invalidates the iterator.
+
+Each `MapSubInt` pull materializes the key as a canonical `String` with
+`Substring.str`. The result follows its actual owning pool.
+`MapIntInt` and both String-keyed families box keys without allocation.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the current
+`Scope`. The yielded `Var` and anything retaining it must stay within
 that `Scope`.
 
-**Raises:** MapLongDouble iteration may raise `<alloc-fail>` or `<bad-enc>`
+**Raises:** for `MapSubInt`, the causes from `Substring.str` while
+materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
 while boxing a key.
 
 Source: `lib/substring-map.x`

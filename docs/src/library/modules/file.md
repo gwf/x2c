@@ -292,7 +292,7 @@ Source: `lib/file.x`
 | [`File.setpos`](#File.setpos) | Calls C's `fsetpos` on the `File`. |
 | [`File.setvbuf`](#File.setvbuf) | Calls C's `setvbuf` on the `File`. |
 | [`File.stat`](#File.stat) | Writes metadata for `file` into `buf`. |
-| [`File.str`](#File.str) | Returns the display `String` for `file`. |
+| [`File.str`](#File.str) | For a nonnull handle, calls `File.string` to read from the current position through EOF. |
 | [`File.string`](#File.string) | Reads the remaining stream into one canonical `String`. |
 | [`File.string_close`](#File.string_close) | Reads the remaining text, then closes `file` on return or transfer. |
 | [`File.tello`](#File.tello) | Calls C's `ftello` on the `File`. |
@@ -547,11 +547,11 @@ Source: `lib/file.x`
 
 `String File.str(File file)`
 
-Returns the display `String` for `file`.
-A nonnull file follows `File.string`. It advances through EOF, returns a
-canonical result with the pool-chain lifetime that this module's design
-notes describe, or NULL when empty, and transfers the same causes. A null
-handle returns its pointer representation without reading.
+For a nonnull handle, calls `File.string` to read from the current
+position through EOF. The result is a canonical `String` that remains live
+until its owning pool is released, or NULL when no bytes remain. Read
+failures follow `File.string`. A null handle returns its pointer
+representation without reading.
 
 Source: `lib/file.x`
 
@@ -731,8 +731,8 @@ Source: `lib/file.x`
 
 ## Design notes
 
-A `File` is a native stdio stream whose handle identity serves hashing,
-equality, and ordering. Raw reads and copies report status separately
+A `File` is a native stdio stream. Hashing, equality, and ordering use
+the stream's handle identity. Raw reads and copies report status separately
 from the bytes they move. Other results, stream position, buffering, and
 error indicators follow stdio unless an operation documents otherwise.
 The standard streams are borrowed from the process.
