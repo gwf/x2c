@@ -43,7 +43,7 @@ This chapter has these sections:
   depfiles, build reuse, and external Make builds.
 - [Help, version, and status](#help-version-and-status): exit status.
 
-Examples write the installed compiler as `x2c`; in a source checkout, write
+The examples use `x2c` to run the installed compiler. In a source checkout, use
 `./x2c`. [Building the Compiler](../internals/building.md) describes how a
 checkout builds the compiler and its commands.
 
@@ -132,8 +132,9 @@ number of workers:
 x2c translate -j 8 --out-dir /tmp/x2c-generated src/*.x
 ```
 
-Each unit is translated by exactly one worker and writes only its own files,
-so the generated `.c` and `.h` are byte-identical to a serial run. A `.d` file
+Exactly one worker translates each unit and writes that unit's files. The
+generated `.c` and `.h` match the output of a serial run byte for byte. A `.d`
+file
 may list more prerequisites than the serial run produces, and never fewer. A
 worker that parses a header records what that parse reads, where a serial run
 replays the header from its process cache. The default limit is the host's
@@ -174,8 +175,9 @@ and `run`:
 ```
 
 C macro expansion is off by default. Use `--cpp` when existing C requires
-macro-generated grammar. It does not discover x2c module or meta constructs
-inside C macros. `--no-cpp` suppresses expansion even when `--cpp` is present.
+macro-generated grammar. Expansion with `--cpp` does not discover x2c module or
+meta constructs inside C macros. `--no-cpp` suppresses expansion even when
+`--cpp` is present.
 The host-symbol collection modes retain their separate purpose.
 
 ### Source mapping
@@ -203,8 +205,9 @@ optimized-away values.
 On macOS, mapped executable builds with effective native debug information
 also produce `<output>.dSYM` before removing temporary objects. Move that
 companion directory with the executable to retain native debug information.
-Symbol assembly adds time only to these requested debug links. Its failure
-fails the build and retains intermediates for diagnosis. A later `-Xcc -g0`
+Symbol assembly adds time only to these requested debug links. If symbol
+assembly fails, the build stops and leaves its intermediate files for
+diagnosis. A later `-Xcc -g0`
 overrides an earlier `-g`, including one selected by a project profile.
 Linux builds produce no companion directory. `--build-dir` and `--save-temps`
 retain intermediate files on either platform.
@@ -243,8 +246,9 @@ x2c translate --dump-tokens source.x
 selected, expanded, and bound it, one `List` form per line. Documentation
 generators and repository tools read it instead of scanning source text.
 Each unit starts with `(unit PATH)`, so one command can inspect several
-files. A file that opens with a block comment, after any directives, then
-prints `(module TEXT)` with the comment as written. Each function, including
+files. If the file opens with a block comment after any directives, the command
+then prints `(module TEXT)` with the comment as written. Each function,
+including
 static functions, foreign aliases, and functions a Unit macro or `class`
 produced, prints a `function` row, and each `typedef` or `class` prints a
 `type` row:
@@ -289,8 +293,9 @@ produced, prints a `function` row, and each `typedef` or `class` prints a
 - `kind` is `alias`, `struct`, `union`, `enum`, `callback`, or `class`, and
   `private` is 1 for a type declared with `static`.
 
-A bodied `meta` function the file spells prints a `meta` row after the
-definitions, `(meta (name NAME) (line LINE) (comptime N))`, where
+After the definitions, the command prints one `meta` row for each `meta`
+function whose body is written in the source file. The row is
+`(meta (name NAME) (line LINE) (comptime N))`.
 `N` is 1 when the function reaches a compiler operation and so has
 no runtime form. A compile-time-only function is not part of the
 translated unit and has no `function` row.
@@ -682,8 +687,8 @@ Keep that file with the manifest so a later build reproduces the same
 packages. A manifest with no `[dependencies]` section pins nothing, so a
 lockfile left beside it is removed.
 
-A build whose lockfile already covers every pinned package, at the pinned
-version and installed in the home, reads no index and makes no network
+If the lockfile covers every package pin and those versions are already
+installed in the x2c home, the build reads no index and makes no network
 request. A pin the lockfile covers but the home does not hold is installed
 from the url and sha256 that lockfile recorded, not from the index, so the
 archive is the one the lockfile pinned however the index has changed. Only a
@@ -1094,8 +1099,9 @@ no diagnostics leaves it empty. Each line is one JSON object:
 - `line` and `column` are one-based, `length` is the token width in bytes,
   and `position` is its zero-based byte offset. All five location fields are
   `null` for a diagnostic without a location.
-- `notes` holds the note line that standard error shows, the text notes
-  joined with spaces, or nothing when the diagnostic has no notes.
+- `notes` holds the same note text printed on standard error, with multiple
+  notes joined by spaces. The field has no text when the diagnostic has no
+  notes.
 
 Macros and `meta` functions may print to standard output and standard error,
 so neither stream contains JSON. Parallel translation workers share the file;

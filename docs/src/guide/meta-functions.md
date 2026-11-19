@@ -7,13 +7,10 @@ when a value or a piece of code can be computed before the program runs.
 A `meta` function uses the x2c backend and the host compiler
 selected by `--meta-cc`. It runs as native code during translation, and its
 body is ordinary x2c: anything the unit can compile, it can run during
-translation. Two questions remain, both at the boundary between the
-program and compile-time code:
-
-1. Which arguments can cross: a `$helper(...)` call passes constants,
-   captured syntax, or the results of other `$` calls.
-2. Which results can become program code: returning a value to another
-   meta function and inserting it with `$helper(...)` have different limits.
+translation. A `$helper(...)` call from program code passes constants,
+captured syntax, or the results of other `$` calls. A meta function can
+return values to another meta function that the compiler cannot insert
+into the program.
 
 `meta` is not a purity annotation. A body can mutate locals, arrays, maps
 and structs, and pass local addresses to other meta functions. Its
@@ -98,8 +95,8 @@ and one runs in the compiler. Both come from the same body. A
 [rewrite rule](generating-code.md#rewriting-a-function-definition) in your
 program changes only the program's copy; the copy the compiler runs is
 compiled as written. Functions that call a compiler query or build a source
-template, directly or through another meta function, are exceptions: they
-only run during translation. We will reach those after ordinary calculations.
+template, directly or through another meta function, run only during
+translation.
 
 ## Compute the arguments too
 
@@ -310,9 +307,9 @@ sample.x:1:1: type: native meta function declaration does not match its target
   note: name: sin signature: float (double)
 ```
 
-Two kinds of function follow a rule. An iterator operation takes its
-destination last: its last parameter and its result are `Iter`. Compile-time
-code may omit that destination; the call then allocates one with `Iter.new`
+Iterator and `Func` signatures have special rules. An iterator operation has
+`Iter` as its last parameter and result. Compile-time code may omit that
+parameter, in which case the compiler creates a destination with `Iter.new`
 before calling the native operation. A declared `Func` parameter matches any
 `Var` parameter of the compiler's target, which receives the compile-time
 callable and adapts it.
@@ -423,12 +420,11 @@ write `$sin(1.0)` to compute the value during translation.
 
 ## Native modules
 
-The project's bodied `meta` functions need no module of your own: the
-compiler builds the project meta module from them and caches it, as
-[How a meta function runs](#how-a-meta-function-runs) describes. A native
-module is built ahead of time instead, by you or by a package. It lets
-compile-time code call functions that are not part of the project meta
-module, and it can be shared between projects. Define each function with
+The compiler builds and caches the project meta module from the project's
+`meta` functions with bodies, as
+[How a meta function runs](#how-a-meta-function-runs) describes. You or a package can build a native module ahead of time. This
+lets compile-time code call functions outside the project meta module, and
+several projects can share the native module. Define each function with
 `meta native`:
 
 ```x2c
@@ -696,18 +692,17 @@ no Scope allocator returned.
 
 ## How a meta function runs
 
-A translation runs in two phases. Before any unit is translated, the
-compiler gathers the bodied `meta` functions the inputs reach: those of
-each ordinary source module an input reaches, directly, through includes,
-or through a package. It emits them, with the declarations they use, as C
-through the ordinary backend, compiles them with the host C compiler
-(`--meta-cc`, default `cc`, never the target `--cc`), and links them with
-the host runtime into one helper program, the project meta module. Each
-unit's meta functions form a group, which has access to the headers that
-unit includes, found from the unit's directory and the `-I` directories. The
-translation then sends each `$` call of one of those functions to the helper
-and inserts the reply. A project whose inputs reach no `meta` function
-builds nothing extra.
+Before translating any unit, the compiler collects the `meta` functions
+with bodies from the ordinary source modules the inputs reach, whether
+directly, through includes, or through packages. It emits those functions
+and their declarations as C through the ordinary backend. It then compiles
+them with the host C compiler (`--meta-cc`, default `cc`) and links them with
+the host runtime into one helper program, the project meta module. The target
+`--cc` does not select that compiler. Each unit's meta functions form a group
+that uses the unit's included headers, found from its directory and the `-I`
+directories. During translation, the compiler sends each `$` call of one of
+these functions to the helper and inserts the reply. A project whose inputs
+reach no `meta` function builds nothing extra.
 
 A call runs with the functions of the file that wrote it. An included
 `.x` file computes its file-scope constants, such as an enumerator or an
@@ -760,10 +755,9 @@ at the `$` call's site, so a project function gets the same result as
 compiler-linked meta code at the same place. `Code.source_text` reads only the text a
 `Source` parameter carries.
 
-Running compile-time code needs what building the program needs: the C
-compiler and the runtime headers. A project meta module that does not
-compile is reported at the call with the C compiler's first error and the
-directory that keeps its C.
+The project meta module needs a C compiler and the runtime headers. If it
+fails to compile, the diagnostic at the call includes the C compiler's first
+error and the directory containing the emitted C.
 
 A raise inside a `meta` body becomes a diagnostic at the `$` call. A body
 that crashes, exits, or overflows the stack ends the helper; the call is
@@ -952,9 +946,9 @@ templates, quotations, and compiler queries.
 
 Define a shared `meta` function in an ordinary `.x` module, beside any macros
 and runtime code that use it. The project meta build compiles the provider's
-meta code into the project meta module. A meta function must be written in
-source: a definition inside a macro template, or one produced by a `$` call,
-is reported where it is written.
+meta code into the project meta module. Define each meta function directly in
+source. The compiler reports an error at a definition inside a macro template
+or one produced by a `$` call.
 
 The provider includes its own dependencies. A consumer includes the provider:
 

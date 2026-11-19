@@ -12,7 +12,7 @@ Three modules under `etc/syntax/` hold the data:
 | `lexical.x` | `syntax_lexical()` | Byte patterns, ordered scanning, modes, transitions, predicates, token passes, failures |
 | `extensions.x` | `syntax_extensions()` | Reviewed C11 comparison, feature groups, affected rule names, example spellings, documentation links |
 
-For example, an ordinary x2c script can consume the grammar:
+This x2c script loads the grammar and prints its `repr()`:
 
 <!-- ignore: this script requires repository-root placement and local module linking -->
 ```x2c,ignore
@@ -44,8 +44,7 @@ Rule expressions use these forms:
 | `(repeat 0 EXPR)` | Recognize zero or more occurrences |
 | `(external "contract")` | Delegate recognition to the named lexical or contextual contract |
 
-For example, the function-body rule contains both familiar blocks and the
-expression-body addition:
+The function-body rule accepts a raw block or an expression body:
 
 ```x2c
 List rule = %(rule function-body
@@ -54,10 +53,12 @@ List rule = %(rule function-body
     (seq (token "=") (token ">") (ref expression) (token ";"))));
 ```
 
-The [EBNF](x2c.ebnf) is generated from this value. The [grammar
+The [EBNF](x2c.ebnf) is generated from the grammar returned by
+`syntax_grammar()`. The [grammar
 chapter](grammar.md) explains binding, macro signatures, precedence, and other
-contextual contracts. An external leaf marks a rule that the grammar chapter
-describes in prose. A parser generator would need code for each one.
+contextual contracts. Each `(external "contract")` leaf names a contract
+described in the grammar chapter. A parser generator would need code for each
+external contract.
 
 ## Lexical model
 
@@ -129,7 +130,7 @@ The extension data lists the productions that x2c adds to or changes from C.
 
 ## Further uses and limits
 
-These values could support:
+Tools could use these Lists to:
 
 - Generate railroad diagrams for productions with no external leaves.
 - Produce candidate token sequences from bounded derivations, then filter them
@@ -181,8 +182,9 @@ The specification has three layers:
 3. Context and semantic constraints in the grammar chapter and language
    reference.
 
-This specification is written and reviewed by hand. No parser is generated
-from it, and nothing proves it equal to the compiler. Named external
+Maintainers write and review this specification by hand. The compiler uses a
+separate parser. Equivalence between the specification and that parser has not
+been proved. Named external
 recognizers cover the macro syntax, which definitions extend, and
 host-specific syntax. The lexical chapter identifies observed implementation
 edges separately from the supported spelling described by the book.

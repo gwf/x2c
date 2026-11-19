@@ -106,12 +106,11 @@ pushed slot, raises `<bad-state>` and leaves the open region intact.
 A matching `catch` can handle the error. Without one, the default policy
 aborts the program.
 
-Storage returned by these calls is managed memory. `Scope.realloc` resizes
-it and returns a pointer that can differ from the old one, and `Scope.free`
-frees it before the close. Most storage does not need `Scope.free`, because
-the close frees the whole region. `Scope.malloc_finalized`
-allocates storage that runs a function of your choice when it is reclaimed;
-see [attaching a finalizer](#attaching-a-finalizer).
+These calls return managed memory. `Scope.realloc` resizes it and may return
+a different pointer. `Scope.free` frees it before the close. Most storage
+does not need `Scope.free`, because the close frees the whole region. Pass a
+function to `Scope.malloc_finalized` to run it when the allocator reclaims
+the storage. See [attaching a finalizer](#attaching-a-finalizer).
 
 For storage that must outlive the current region, hold a scope in a variable
 of type `Scope` and allocate into it directly. `Scope.malloc_in`,
@@ -376,11 +375,10 @@ auto {
 puts(text);
 ```
 
-The `String` destination calls `Buffer.str`, which interns the accumulated
-text, so `text` is canonical. It stays valid after the `Buffer` cleanup and
-the region close free every byte the builder used. Most x2c code follows
-this pattern: mutable storage inside a region, a canonical result outside
-it.
+The `String` destination calls `Buffer.str` to intern the accumulated text.
+`text` belongs to the canonical pool and stays valid after cleanup frees the
+builder's storage. This pattern keeps the mutable builder inside the region
+and the canonical result available outside it.
 
 ## Choosing when to free storage
 

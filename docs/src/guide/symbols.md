@@ -181,9 +181,9 @@ Two cautions:
   does not follow the spelling. For a text
   order over a mixed set, compare `Atom.str` values.
 
-## Where each one belongs
+<a id="where-each-one-belongs"></a>
 
-Choose the type by who wrote the names.
+## Choosing between `Symbol` and `Atom`
 
 Use a `Symbol` for a closed set of names that you wrote, such as outcome and
 lifecycle values. `Lisp.read` returns `<value>` or `<eof>` and raises

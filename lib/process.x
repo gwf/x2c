@@ -2,13 +2,14 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    Job owns running a command or pipeline without a shell. A command is an
-    ordinary `List` whose elements' `str`s become its arguments, and a `List`
-    of commands is a pipeline. A job runs once, when its first result is
-    requested, and records that run; its status is the last failing stage's
-    status, with 128 plus the signal for a signalled stage. The calling
-    process's own environment is read here too, beside the `env` option that
-    sets a child's.
+    `Job` runs commands and pipelines without a shell. Each command is a
+    `List` whose elements' `str`s become its arguments. A pipeline is a
+    `List` of commands.
+
+    A job runs when its first result is requested and records that run.
+    Its status is the status of the last failing stage. A stage ended by a
+    signal has status 128 plus the signal number. `Env.get` reads the calling
+    process's environment. The `env` option sets the child's environment.
 */
 
 #pragma once

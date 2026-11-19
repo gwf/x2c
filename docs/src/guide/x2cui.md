@@ -416,15 +416,15 @@ contracts; see the pinned raw header for placement support on each backend.
 ## Focused-component keyboard handling
 
 `ui.canvas_input(id, width, height, paint, user, user_size)` submits a custom
-component that participates in focus and owns its keyboard interpretation.
-It does not need a text buffer. Its key map can execute component commands,
-emit typed host requests, or decline an event for host fallback.
+component that can receive focus and interpret keys without a text buffer.
+Its key map can execute component commands, emit typed host requests, or
+decline an event for the host to handle.
 
 Use `ui.set_input_hook` to capture ordered events in an application-owned
 queue. Events and committed text are borrowed during capture. Copy retained
 text, unregister during replay, and unregister before releasing callback data.
-The raw capture callback must contain x2c Errors and report them after native
-event collection returns.
+Catch x2c Errors inside the raw capture callback and report them after
+native event collection returns.
 
 After beginning a frame and before submitting components, call
 `ui.dispatch_input(&event, route, user)` for a captured key, committed-text,

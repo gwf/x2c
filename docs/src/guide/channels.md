@@ -1,9 +1,8 @@
 # Channels
 
 A `Channel` passes `Var` values between threads or tasks. `send` puts a value
-in; `receive` or `foreach` takes values out until the channel is closed and
-drained. This chapter covers closing and draining, capacity and message types,
-handing off storage with `send_owned`, and stopping a blocked operation.
+in. `receive` or `foreach` takes values out until the channel is closed and
+drained.
 
 Plain `send` lends the value: the sender keeps ownership and keeps the value
 alive while receivers use it. `send_owned` hands one container's storage to
@@ -74,12 +73,12 @@ processing.
 
 ## Borrow or hand off storage
 
-Ordinary `send(value)` copies `Var` representation bits. The sender keeps its
-storage ownership, and the application keeps storage alive for every borrower.
-It can send
-the same parent-owned `Map` to several readers without transferring it, while
-preventing writes until those readers finish. Send acceptance is not evidence
-that any borrower has finished using the object.
+Ordinary `send(value)` copies `Var` representation bits. The sender keeps
+ownership, and the application keeps storage alive for every borrower. For
+example, the application can send the same parent-owned `Map` to several
+readers without transferring it and prevent writes until those readers
+finish. Send acceptance is not evidence that any borrower has finished
+using the object.
 
 Use `send_owned` when a worker produces a `Map` whose storage must survive
 worker exit. Ordinary `Map` and `Array` values start with records and buffers
@@ -174,10 +173,9 @@ stop. A pending stop before commitment prevents that operation and raises the
 rendezvous participant cannot be matched by another operation.
 
 Thread stopping does not close Channels or stop unrelated users. A stop does
-not interrupt computation or arbitrary native I/O. A cancelled client's
-request bytes must stay alive until the actual service borrower finishes.
-Keep them under an owner that survives the whole batch when that is the
-simplest arrangement.
+not interrupt computation or arbitrary native I/O. Keep a cancelled client's
+request bytes alive until the service finishes borrowing them. The owner can
+outlive the whole batch if that is the simplest arrangement.
 
 Batch jobs use the shared process canonical pool by default. Interned
 `String` values there outlive the jobs and stay until process shutdown, as

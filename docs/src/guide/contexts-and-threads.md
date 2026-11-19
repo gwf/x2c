@@ -1,11 +1,8 @@
 # Contexts and Threads
 
-A `Context` runs a piece of work with its own `Scope`, `Error` state, and
-`Match` state, and reclaims what that work allocated when it closes. A
-`Thread` runs a function on another native thread. This chapter covers
-bounded work in a `Context`, starting and joining threads, running batches
-of jobs on threads or as `Channel` tasks on one thread, stopping jobs, and
-mapping over data in parallel.
+A `Context` gives work its own `Scope`, `Error` state, and `Match` state.
+Closing the `Context` reclaims what the work allocated. A `Thread` runs a
+function on another native thread.
 
 ## Use a Context for bounded work
 
@@ -384,11 +381,11 @@ observes the pending stop. A stopped receive raises; it is not successful EOF.
 The normal application protocol still closes Channels and drains accepted data.
 
 A batch can stop only its own jobs. Stopping it does not stop independently
-owned services or other users of a borrowed Channel. A stopped client is not
-evidence that a service finished reading borrowed request bytes. Keep those
-bytes under an owner that survives actual borrower completion, including
-failure cleanup. A service shared outside the batch needs an explicit way to
-learn that a client failed, such as a failure reply.
+owned services or other users of a borrowed Channel. A service can still be
+reading borrowed request bytes after a client stops. Keep those bytes alive
+until the service finishes using them, including during failure cleanup.
+A service shared outside the batch needs an explicit way to learn that a
+client failed, such as a failure reply.
 
 ## Parallel mapping and explicit ownership
 

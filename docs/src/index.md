@@ -70,8 +70,7 @@ matching.
   implementation for readers who want to study or modify it.
 
 The book describes implemented behavior. Its x2c samples compile with the
-current compiler, and a sample followed by its output runs and produces that
-output.
+current compiler. Samples with expected output produce the output shown.
 
 ### Running the samples
 

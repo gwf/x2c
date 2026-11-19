@@ -303,8 +303,8 @@ conditions, Channels and tasks, networking, testing, and the `x2c lsp` and
 - An arm that C never takes, such as the `#else` of `#ifndef __cplusplus`,
   stays hidden after an `#include` earlier in its group, so C++ text there
   no longer fails collection.
-- A playground candidate whose worker fails while starting reports
-  `session unchanged` and keeps the active session.
+- If a new playground worker fails to start, the playground reports `session
+  unchanged` and keeps the active session.
 - `:reload` after loading a manifest rebuilds the selected roots once
   instead of adding the manifest's inputs to them again.
 

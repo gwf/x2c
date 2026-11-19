@@ -33,10 +33,9 @@ foreach (String file in %(git diff --name-only).job().lines())
 reference describes which forms stay at file scope, how a script that
 defines `main` runs, and the exit status of an uncaught failure.
 
-`x2c script` builds the file once and then runs the cached executable. The
-first run builds it; later runs start the cached executable in a few
-milliseconds until the script or something it uses changes. Save the script
-above as `changed.x`, then run it:
+The first `x2c script` run builds the file. Later runs start the cached
+executable in a few milliseconds, until the script or a dependency changes.
+Save the script above as `changed.x`, then run it:
 
 ```sh
 x2c script changed.x
@@ -271,7 +270,9 @@ directory.
 An absolute component replaces the path accumulated before it. `root.join()`
 returns `root`; `root.join(@components)` splices an existing List of paths.
 
-### Asking about a path
+<a id="asking-about-a-path"></a>
+
+### Querying the filesystem
 
 `exists`, `is_dir`, `is_file`, `is_executable`, `size`, and `modified_time`
 query the filesystem. `modified_time` keeps the fraction of a second that the
@@ -594,8 +595,8 @@ A script that reads or writes JSON includes `json.x` itself:
 #include "json.x"
 ```
 
-The names in `json.x` match the converting surface of the
-[`yyjson` package](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md).
+The JSON conversion functions in `json.x` have the same names as those in
+the [`yyjson` package](https://github.com/gwf/x2c/blob/main/packages/yyjson/README.md).
 To switch a script to the package, replace that line with
 `import "yyjson" with Json;`.
 

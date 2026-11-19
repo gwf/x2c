@@ -1,8 +1,8 @@
 # Source Grammar
 
 The [EBNF file](x2c.ebnf), generated from [ordinary List data](data.md),
-describes x2c's current source forms. It consumes tokens after the [lexical
-transformations](lexical.md). A parser generator cannot use it directly,
+describes x2c's current source forms. Its rules apply to tokens after the
+[lexical transformations](lexical.md). A parser generator cannot use it directly,
 because some rules depend on context. The [language reference](../language.md)
 defines semantics and restrictions.
 
@@ -36,10 +36,10 @@ uses `Compiler.script_statement_starts`, `_declaration_stays`, and
 `defines_main`, defined in `src/parse/units.x`. File-level functions cannot refer
 to script locals.
 
-Module blocks are expanded by `src/collect/splice.x` before
-`translation-unit` parsing. `module-block` is spliced before parsing and is
-not a `unit-item`. It contains quoted member paths, separated by commas, with
-an optional trailing comma. Members are inserted in order. Each path is
+Before parsing a `translation-unit`, `src/collect/splice.x` replaces each
+`module-block` with its members in order. A `module-block` contains quoted
+member paths separated by commas, with an optional trailing comma. It is not a
+`unit-item`. Each path is
 relative to the file that holds the block. Members may be siblings,
 descendants, or files elsewhere; no same-named companion directory is
 required. Nested module blocks are expanded too. Each file permits one

@@ -56,8 +56,9 @@ macro Expression $task.run.jobs(Expr $jobs) => Task.run($jobs);
     Channel waits park a job. The optional completed callback receives each
     successful result after job cleanup, under restored caller state, and
     must not wait for participant progress. Results retain ordinary owners.
-    Jobs borrow the caller's active Scope and Pool through this call, start
-    without a current Context, and copy effective Error policies and bound.
+    Jobs borrow the caller's active `Scope` and `Pool` until `Task.run`
+    returns. Each job starts without a current `Context` and copies the
+    caller's effective `Error` policies and limit on accumulated errors.
     Lisp callback and recursive rendering activations start fresh.
     Every exit finishes all jobs; failure stops unfinished participants.
     Thread.stop on the owner requests cooperative batch cancellation.

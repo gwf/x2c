@@ -9,7 +9,7 @@ application needs an event loop.
 
 A `Socket` owns two `File` streams: `input` reads and `output` writes.
 The streams use separate descriptors because a C update stream cannot safely
-switch direction on a socket. Ordinary `File` operations own byte I/O.
+switch direction on a socket. Use ordinary `File` operations for byte I/O.
 Flush `output` when a peer must see buffered data.
 
 ```x2c
@@ -100,8 +100,8 @@ Malformed JSON produces a 400 response with `{"error":"malformed JSON"}`.
 Any other `<malformed>` Error that escapes a handler produces 400 with
 `{"error":"malformed request"}`.
 
-`res.status(code)` selects a status. `header(name, value)` sets a header and
-replaces an earlier value for the same name, which compares without case.
+`res.status(code)` selects a status. `header(name, value)` sets a header.
+It compares names case-insensitively and replaces any earlier matching value.
 `text`, `json`, and `bytes` fill the response body. JSON responses set
 `Content-Type: application/json`; response framing supplies `Content-Length`.
 The server buffers the body until the handler returns.

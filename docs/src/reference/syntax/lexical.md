@@ -120,9 +120,10 @@ The rules below differ from C in the cases listed.
    Those three continuations select decimal floating recognition.
 3. Every other numeric start selects decimal recognition.
 
-After this dispatch, the following productions apply. A numeric token must
-end before a byte outside `letter | digit | "_"`; a bad suffix or radix
-continuation fails the token instead of splitting it into a number and name.
+After this dispatch, the following productions apply. A numeric token can end
+only at a byte outside `letter | digit | "_"`. The scanner rejects a bad suffix
+or an invalid continuation for the selected radix rather than splitting the
+text into a number and a name.
 
 ```ebnf
 decimal-integer = digit , { digit } , integer-suffix ;

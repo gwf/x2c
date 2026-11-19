@@ -86,9 +86,8 @@ void x2c_error_raise_operation(
   _dispatch(r);
 }
 
-/** Returns the current nested error-dispatch depth.
-    This is the nesting depth of error dispatch. `Error.count` returns the
-    number of accumulated errors.
+/** Returns the current nesting depth of error dispatch. `Error.count`
+    returns the number of accumulated errors.
 */
 int Error.depth(void) => _thread().depth;
 

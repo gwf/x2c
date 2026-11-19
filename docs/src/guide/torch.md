@@ -4,14 +4,13 @@ For package setup and supported operations, see the
 [Torch package README](https://github.com/gwf/x2c/blob/main/packages/torch/README.md).
 This chapter belongs to [Advanced Topics](../library/advanced-topics.md).
 
-The `torch` package reaches PyTorch's C++ library, libtorch, from x2c.
-Tensors, autograd, layers, optimizers, schedules, checkpoints, TorchScript
-inference, and the MNIST reader are all libtorch's; the package supplies x2c
-types and methods over them. The entry unit is `packages/torch/src/torch.x`,
-the C ABI it compiles over is `src/torch-2.10.h`, and `src/torch-shim.cpp`
-implements that ABI. libtorch has no C API and no stable C++ ABI, so the shim
-is the package's only C++ and it is tied to exactly the pinned version,
-2.10.0.
+The `torch` package provides x2c types and methods for PyTorch's C++ library,
+libtorch. It wraps tensors, autograd, layers, optimizers, schedules,
+checkpoints, TorchScript inference, and the MNIST reader. The entry unit,
+`packages/torch/src/torch.x`, calls the C ABI declared in `src/torch-2.10.h`.
+`src/torch-shim.cpp` implements that ABI. libtorch has no C API or stable C++
+ABI, so the shim is the package's only C++ code and is tied to the pinned
+version, 2.10.0.
 
 A program links the pinned libtorch shared libraries dynamically through an
 rpath into the prepared prefix, so it depends on that prefix at run time.
@@ -223,11 +222,10 @@ for (int step = 0; step < 200; step++) auto {
 }
 ```
 
-libtorch ships exactly two learning-rate schedules, `Scheduler.step_lr`
-and `Scheduler.reduce_on_plateau`; the first advances with `step`, the
-second with `step_metric`. The other three are x2c arithmetic over
-`Optimizer.lr` and `set_lr`, each writing the rate for the number of
-completed `step` calls, starting at construction with none taken:
+The package exposes two native libtorch schedules. Advance `Scheduler.step_lr`
+with `step` and `Scheduler.reduce_on_plateau` with `step_metric`. The three
+x2c schedules below use `Optimizer.lr` and `set_lr`. Each sets the rate for
+the number of completed `step` calls, starting at zero when constructed:
 
 - `Scheduler.cosine(o, t_max, eta_min)` anneals along a half cosine:
   after `t` steps the rate is
@@ -333,10 +331,10 @@ reach.
 
 A failure inside libtorch raises `<bad-state>` with `(library "torch")`,
 the operation name, and the first line of libtorch's text under
-`(message ...)`; the full text stays available through `xt_last_error_full` in the raw API.
-Every entry point in `torch-2.10.h` catches, so no C++ exception crosses
-the ABI. This arm in `examples/mlp.x` prints `caught matmul: mat1 and
-mat2 shapes cannot be multiplied (3x5 and 4x8)`.
+`(message ...)`. The raw API function `xt_last_error_full` returns the full
+text. The shim catches C++ exceptions at every entry point in `torch-2.10.h`
+before they cross the ABI. This arm in `examples/mlp.x` prints `caught matmul:
+mat1 and mat2 shapes cannot be multiplied (3x5 and 4x8)`.
 
 <!-- ignore: an import needs the built torch package archive. -->
 ```x2c,ignore

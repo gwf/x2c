@@ -98,10 +98,8 @@ function. Native definitions appear only in the table, rather than being
 declared again in this List. The few text adapters that return `Var` preserve
 signatures printed in Lisp error messages.
 
-The source uses ordinary runtime collection and pattern operations, including
-`List.match` and replacement. Those operations retain their normal runtime
-implementation; this example reimplements only Lisp evaluation and uses
-x2c's collection and pattern operations unchanged.
+The interpreter calls the existing x2c runtime for collection and pattern
+operations, including `List.match` and replacement.
 
 ## Agreement with x2c Lisp
 
@@ -143,11 +141,11 @@ implementations; they do not prove identical behavior for every program.
 The production evaluator recurses on the C stack for every nested form and
 every call except a call in tail position, which reuses its caller's frame.
 A self-recursive loop written in tail position therefore runs in constant
-native stack. Each public entry measures the stack. Forms and calls nested
-below it may then use the smaller of 6 MB and four fifths of the thread's
-remaining stack, and one nested beyond that raises `<call-stack>`. Each
-public entry, such as
-`Lisp.eval`, also opens a budget of 40,000,000 calls, tail calls included;
+native stack. At each public entry, the evaluator measures the thread's
+remaining stack. It limits nested forms and calls to 6 MB or four fifths of the
+remaining stack, whichever is smaller. Exceeding that limit raises
+`<call-stack>`. Each public entry, such as `Lisp.eval`, also opens a budget of
+40,000,000 calls, tail calls included.
 `Lisp.call_budget` changes it. Exhausting it raises `<call-stack>` with
 reason `"steps"`. Free names resolve through the Lambda's captures and
 then the session globals and reserved names, never through caller locals.

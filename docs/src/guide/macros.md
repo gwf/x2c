@@ -78,9 +78,8 @@ origin.y = 2;
 The name lasts to the end of the enclosing scope. The braced form
 `alias shape.origin { ... }` limits the name `_` to its body. Like a macro
 hole, every use substitutes the original expression and may evaluate it
-again; `alias` does not create a runtime temporary. It declares no reusable
-generator. See
-[expression aliases](../reference/language.md#expression-aliases-with-alias).
+again. `alias` creates neither a runtime temporary nor a reusable macro.
+See [expression aliases](../reference/language.md#expression-aliases-with-alias).
 
 ## Keep a generator inside one block
 
@@ -103,10 +102,11 @@ invoked, as in a global macro, unless the macro lists it with
 [`using`](#keep-a-file-scope-name-with-using). Names the caller writes in
 arguments resolve there too.
 
-The bare call shape belongs to the local macro before a file `keyword` alias
-(see [local keyword spellings](#give-macros-local-keyword-spellings)) or
-ordinary function. A use without parentheses is an ordinary identifier, except
-for a local decorator (see [decorators](#decorators-transform-one-target))
+A call spelled `scaled(value)` selects the local macro before a file
+`keyword` alias or ordinary function. See
+[local keyword spellings](#give-macros-local-keyword-spellings).
+A use without parentheses is an ordinary identifier, except for a local
+decorator (see [decorators](#decorators-transform-one-target))
 with no explicit parameters. That decorator is applied
 as `name TARGET`, like a keyword alias. `(scaled)(value)` explicitly calls a
 function. `$scaled(value)` uses only a global or imported macro, so local and
@@ -754,12 +754,12 @@ working through the generator. Keep unrelated outputs as direct source.
 
 ## Declare methods and converters before adoption
 
-Before the compiler reads a file in full, it first scans the file's includes
-and file-scope `Unit` macros; this scan loads included macro definitions,
-expands those macros, and applies preceding top-level definitions when the
-producer needs them. Generated private helpers stay available in their source
-module. Public declarations and protocol rows reach includers. The full parse
-binds the retained result without running its producer again.
+The compiler scans includes and file-scope `Unit` macros before parsing the
+whole file. During that scan it loads included macro definitions, expands
+the macros, and applies preceding top-level definitions when a macro expansion
+needs them. Generated private helpers stay available in their source module.
+Public declarations and protocol rows reach includers. The full parse binds
+the retained result without rerunning the macro expansion.
 
 A generated public function definition can complete a preceding prototype in
 the same expansion when their canonical signature and ownership agree.

@@ -143,9 +143,8 @@ opaque C handles. They stay alive until the library's explicit release calls.
 | `:files` | Show loaded roots and native build settings. |
 
 For example, `:info point_move` includes parameter names and their types.
-`:members Point` lists its fields and related C functions. Related C
-functions retain their real names and calling syntax: discovering
-`point_move` does not create an invented `Point.move` method.
+`:members Point` lists its fields and related C functions. Use the ordinary
+C spelling `point_move(...)` to call that function.
 
 Declared x2c methods accept their ordinary `Type.method` spelling in
 inspection. Tab completion offers relevant names in their grammar position,
@@ -283,11 +282,11 @@ and the retained directory containing native headers, source, and module;
 `:stats [verbose]` reports those statistics during a session.
 
 The worker needs the matching x2c compiler, runtime, and configured host C
-toolchain. New executable submissions incur native compilation work; cached
-artifacts avoid compiling identical code again. Earlier submissions and their
+toolchain. It compiles new executable submissions to native code and reuses
+cached artifacts for identical code. Earlier submissions and their
 initializers are not rerun to compile the next expression. Native modules may
-remain loaded until the worker retires, so reset provides a reclamation
-boundary.
+stay loaded until the worker exits. Resetting the session lets it reclaim
+those modules.
 
 Use source/header roots for includes, package imports, and user-authored
 macro/meta/protocol surfaces. Live configuration-changing directives and

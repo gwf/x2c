@@ -11,10 +11,10 @@ operation. x2c provides that type: `Var`.
 
 ## A value that carries its own type
 
-A `Var` is a single 64-bit value holding a payload plus a tag that names what
-the payload is. Assigning a typed value into a `Var` boxes it, and the tag
-records where the value came from. To run a sample like this one as a file,
-see [Running the samples](../index.md#running-the-samples).
+A `Var` is a 64-bit value with a payload and a tag that identifies its type.
+Assigning a typed value to a `Var` boxes it and records its type in the tag.
+To run a sample like this one as a file, see
+[Running the samples](../index.md#running-the-samples).
 
 ```x2c
 Var count = 42;
@@ -129,10 +129,9 @@ payload readers, `Var.integer`, `Var.floating`, and the wide `*_value`
 readers, are silent low-level decoders that return zero for a tag they do
 not handle.
 
-A crossing to a pointer-shaped runtime type has nothing to convert. The payload
-either has that tag or it does not. Assigning to `List`, `Map`, `Array`,
-`Symbol`, or a type with a declared `protocol Var(T)` conversion uses that
-type's exact reader, and a wrong tag yields NULL. An alias of such a type,
+Assigning to `List`, `Map`, `Array`, `Symbol`, or a type with a declared
+`protocol Var(T)` conversion uses that type's exact reader. A wrong tag
+yields NULL. An alias of such a type,
 declared with `class` or `typedef`, uses the reader of its nearest ancestor
 that has one, and a destination spelled `struct T` or `union T` uses the
 reader of the typedef that names that aggregate. A `String` destination

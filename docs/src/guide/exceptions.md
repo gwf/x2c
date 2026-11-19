@@ -17,9 +17,9 @@ raise %(size-limit (operation "Block.reserve") (capacity $requested));
 ```
 
 The first item is a compact `Symbol` naming the cause. The remaining items are
-`(key value)` detail pairs. `Error` also records the source location. The
-cause is what a handler branches on. Put the reporting mechanism and the
-module that found the failure in the details.
+`(key value)` detail pairs. `Error` also records the source location. A handler
+branches on the cause. Put the reporting mechanism and the module that found
+the failure in the details.
 
 The runtime raises 31 *shared causes*; the
 [reference](../reference/language.md#shared-causes) lists them. Prefer
@@ -179,9 +179,9 @@ unchanged. It also rejects `<log>`, `<collect>`, or `<ignore>` for every
 non-returning cause, leaving those policies at `<abort>`. Unknown `Error`
 causes remain legal and default to `<abort>`.
 
-The default `Logger` registers an observing `Error` handler. An uncaught
-`Error`, one whose policy is `<abort>`, is reported as one line on standard
-error, and the process then aborts:
+The default `Logger` registers an observing `Error` handler. When an
+uncaught `Error` has the `<abort>` policy, the handler reports it on one
+line on standard error. The process then aborts:
 
 ```text
 x2c: uncaught <bad-state> in main (config.x:12): operation load-config, path x.toml
@@ -292,9 +292,9 @@ the source path.
 
 ## Cleanup and scopes
 
-`Error` transfer does not release a `Scope` automatically. Write the region as
-`auto` whenever a raising call can cross the release; its deferred release
-runs on the error path too:
+`Error` transfer does not release a `Scope` automatically. Use `auto` if
+an `Error` could transfer control past the release. `auto` runs the deferred
+release on that path too:
 
 ```x2c
 static void render(String text, int width) {

@@ -1,7 +1,7 @@
 # Wrapping a C Library
 
-The [previous chapter](packages.md) explains how to build and import a package.
-This chapter explains how to design one around a C library.
+Once you know how to [build and import a package](packages.md), you can design
+an x2c API around a C library.
 
 Provide an x2c API for ordinary use, with strings, collections, indexing,
 iteration, `defer`, and `Error` where they simplify the caller's work. Keep the
@@ -32,13 +32,13 @@ A real package includes a pinned header here. The examples declare these
 names in hidden lines, visible through the eye icon, so each example compiles
 on its own.
 
-These five functions leave five things for the caller to manage:
+Callers of this C API have these obligations:
 
 | Concern | Here |
 | --- | --- |
-| allocation and release | `feed_open` / `feed_close`, and nothing frees it for you |
+| allocation and release | the caller must release the parser from `feed_open` with `feed_close` |
 | pointer plus length | `feed_next` yields `const char *` and a separate length |
-| borrowed storage | that pointer is invalidated by the next `feed_next` |
+| borrowed storage | the next `feed_next` call invalidates the title pointer |
 | status versus absence | `feed_next` returns 1, 0 for end, negative for failure |
 | callback and its state | `feed_scan` calls back into a C frame with a `void *` |
 
@@ -52,10 +52,9 @@ that `String` cannot hold, such as embedded NUL.
 
 ## Start with the tasks
 
-Start by listing the tasks a developer brings to this kind of library. Then
-ask whether the imported x2c API can perform each task without requiring the
-raw C header or a hand-written loop over lower-level operations. Measure the
-wrapper by the tasks the x2c API performs.
+List the tasks a developer brings to this kind of library. For each task,
+check whether the imported x2c API can perform it without the raw C header
+or a hand-written loop over lower-level operations.
 
 For a regular-expression library such as PCRE2, the list might be:
 
@@ -335,11 +334,12 @@ explicitly when that information is unnecessary.
 When conversion does not cover the native value's whole domain, name the
 loss and make conversion opt-in.
 
-### Keep bytes x2c cannot hold on the raw API
+<a id="keep-bytes-x2c-cannot-hold-on-the-raw-api"></a>
 
-When x2c cannot represent the bytes, keep that path raw. `String`
-excludes embedded NUL, so PCRE2's explicit-length binary matching stays on the
-raw header.
+### Use the raw API for bytes x2c cannot represent
+
+`String` excludes embedded NUL, so expose PCRE2's explicit-length binary
+matching through the raw header.
 
 Add indexing and iteration when they simplify the caller's code. Inside a
 protocol member named `getindex`, a bare `item.getindex(...)` would resolve to
@@ -573,8 +573,8 @@ identically with the flag absent. Assert on the bytes in between.
 - Lisp bindings, if provided, are in the package.
 - The source version, build options, hashes, and licenses are recorded.
 
-Reread the short application as a new reader would, and revise it until a
-new reader can follow it.
+Reread the short application. Check that a reader new to the package can
+follow the example from setup to result.
 
 See `packages/pcre2/README.md` and `packages/yyjson/README.md` for complete
 examples of package documentation.

@@ -1,8 +1,7 @@
 # The Region Model
 
-The compiler checks that values allocated in a region do not remain reachable
-after the region ends. This chapter states the invariant behind that check,
-its exemptions and limits, and how it works.
+The region check looks for values that can remain reachable after the region
+that allocated them ends.
 
 ## The invariant
 
@@ -186,7 +185,9 @@ order, the job count, and interfaces left by an earlier translation. As a
 result, the pass reports no warning when a caller passes a region-born value
 to a function in another unit that stores its argument into a static.
 
-## Where the design sits
+<a id="where-the-design-sits"></a>
+
+## Related lifetime checks
 
 The region check is based on the ML Kit and Cyclone. The ML Kit inferred
 regions and a region-annotated program from an unannotated one. Cyclone made

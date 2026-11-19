@@ -74,7 +74,7 @@ Supported fields are numeric scalars, enums, String, Symbol, Array, List,
 Map, and nested structs. Derive a nested struct earlier in the same unit
 with the methods its containing record uses. The generated `from_map`
 calls the nested method's ordinary flat spelling, such as `Point_from_map`.
-A missing nested method receives the ordinary compiler diagnostic.
+The compiler reports its usual diagnostic if that nested method is missing.
 
 Pointer fields, including `char *`, fail at the invocation. For example,
 `typedef struct Bad { int *raw; } Bad;` followed by `$derive(Bad, <map>);`

@@ -4,12 +4,13 @@ For a C reader, x2c adds twelve useful syntax families. Most declarations,
 expressions, and control flow keep their familiar shapes. Start with the
 families needed by your program; macros and compile-time code can wait.
 
-This map groups additions from the [source grammar and lexical
-specification](../reference/syntax/index.md). It is onboarding material,
-not a second language specification. The [language
-reference](../reference/language.md) owns each construct's meaning.
+The [source grammar and lexical specification](../reference/syntax/index.md)
+records these syntax additions. The [language reference](../reference/language.md)
+defines what each construct does.
 
-## The short list
+<a id="the-short-list"></a>
+
+## Additions to C11
 
 <!-- syntax-extensions:start -->
 
@@ -47,8 +48,6 @@ summary: [WG14 N1570, sections 6.4 and Annex A](https://www.open-std.org/jtc1/sc
 Ordinary C declarations, pointer declarators, expressions, control flow,
 designated initializers, compound literals, `_Static_assert`, `_Generic`,
 and `_Thread_local` are therefore absent from the short list.
-
-Three boundaries keep the map useful:
 
 - Existing native extensions: GNU statement expressions `({ ... })`,
   GNU attributes, linkage strings/groups, and native annotation macros

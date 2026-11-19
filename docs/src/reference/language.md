@@ -267,12 +267,12 @@ name is visible only in its declaring file. Enumerators of a
 enumerators of an enum declared without a typedef stay unit-wide, even under
 `static`. A later declaration without `static` refers to the file's static, as
 in C. Examples are the definition after a `static` prototype and a block-scope
-`extern` declaration or prototype. A file's statics take a prefix in the
-generated C: the file's path relative to the entry's directory without its
-extension, with each character that cannot continue a C identifier made `_`,
-then `___`. The prefix starts with `f`, the normalized path's length, and `_`;
-a path that starts with a digit gets a leading `x` before its length is
-measured. Under the entry `parser/parser.x`, a static `advance` in
+`extern` declaration or prototype. To form the prefix for a file's static
+names, take its path relative to the entry's directory and drop the extension.
+Replace characters that cannot continue a C identifier with `_`. If the
+normalized path starts with a digit, prepend `x` before measuring its length.
+The prefix is `f`, the length, `_`, the normalized path, then `___`. Under the
+entry `parser/parser.x`, a static `advance` in
 `parser/statements/loops.x` emits as `f16_statements_loops___advance`, and one
 in the entry itself as `f6_parser___advance`. Trailing `_` of the path's
 spelling are dropped first, so `a.x` and `a-.x` give one prefix. A package
@@ -298,8 +298,9 @@ A quoted include of a file beside the member includes that file, in
 collection and in the generated C. Any other include resolves as it
 would at the block's position in the entry.
 
-Members are not translation units. A build never lists them; the entry's
-generated C and header contain everything. The entry's depfile and interface
+When building a module unit, list only its entry as a build input. The entry's
+generated C and header include the members' code and declarations. The entry's
+depfile and interface
 depend on each member's content, so editing a member translates the entry
 again and changes what an including unit collects. Translated on its own, a
 member is an ordinary file.
@@ -352,10 +353,10 @@ among the statements are locals of that body, so functions cannot refer to
 them. Lambdas capture them as usual. Write `static` for a variable that
 functions share.
 
-Falling off the end of the statements returns zero, and `return` among them
-sets the exit status. A `<cmd-fail>` that no statement catches prints the
-command and its status on standard error, and that status becomes the exit
-status. Any other uncaught `Error` prints its cause and details on standard
+A script exits with status 0 when it reaches the end of its statements. An
+explicit `return` sets the exit status. For an uncaught `<cmd-fail>`, the script
+prints the command and its status on standard error and exits with that status.
+For any other uncaught `Error`, it prints the cause and details on standard
 error and exits with status 1.
 
 ```x2c
@@ -1104,8 +1105,8 @@ not accepted inside the parentheses. Inside a `%()` `List` literal, use
 `$(...)` to insert a C character expression because the `List` reader reads a
 bare single quote as `quote`.
 
-The singleton assignment destructures. It assigns element zero; the left side
-is not a parenthesized scalar assignment.
+An assignment with one name in parentheses still destructures the List. It
+assigns element zero to that name.
 
 The source expression is evaluated once. Elements are then assigned from left
 to right through the same conversions used by ordinary initialization or
@@ -1684,8 +1685,9 @@ method declaration in a `Unit` template, as in `inline Var $type.$method($type
 value)`. A literal registered type may use the same member form, as in
 `Logger.$method`. Both expansions use the `Type_method` declaration identity.
 
-Repeated `Unit`-macro applications over `Type` holes are how x2c writes
-compile-time generic code. Every supplied type must already be a valid named C
+To generate a family of concrete declarations at compile time, invoke a `Unit`
+macro with a different `Type` argument for each member of the family. Every
+supplied type must already be a valid named C
 type, and every expansion produces separately typed declarations and
 definitions. There is no runtime type argument, erased element representation,
 or parameterized type spelling such as `Box<T>`. A macro generates named
@@ -2509,7 +2511,8 @@ capture is bound to the slot's sequence hole, with one element per statement.
 Each element can then be recognized with a `case` on the macro that built it.
 The pattern a literal macro value derives is prepared once per process.
 
-A macro's pattern is also a pattern wherever patterns go. In a `case`,
+You can use a pattern derived from a macro wherever a pattern is accepted. In a
+`case`,
 `$($name(P, ...))` is the pattern of code `$name` builds with each argument
 pattern in its hole, derived while the compiler reads the `case`. Each
 argument is a binder or wildcard, another `$name(...)` pattern, or a
@@ -2645,7 +2648,8 @@ checking it. A typed quotation states the type the code has; it converts
 nothing, so write a cast inside the braces when the code needs one. See [Code
 with an explicit type](../guide/generating-code.md#code-that-knows-its-type).
 
-`$!Type{ T }` builds the type `T`, written as a cast writes a type name.
+`$!Type{ T }` builds type syntax for `T`. Inside the braces, write the type as
+you would in a cast.
 `$!Param{ P }` builds one parameter declaration. A `Type` local or a
 `$(...)` hole of type `Type` may stand for a type or for the base a
 declarator modifies. Both build where they are written: they bind nothing,
@@ -3020,7 +3024,7 @@ rejected; read its spelling with `Code.source_text` instead.
 `Type.members` returns an enum's members in source order as `(("NAME"
 VALUE) ...)`. `VALUE` is one of these:
 
-- `nil` when the member takes its position's value;
+- `nil` when the enum member has no explicit initializer,
 - the literal's exact spelling as a `String` when the initializer is one
   literal, including its base, suffix, and character quotes;
 - otherwise the initializer's expression node, which a generator can splice
@@ -3051,9 +3055,9 @@ code-value carrier do. Placed code that declares a name the result uses
 takes it from `x2c_binding_fresh`. `where` is one of these Lists:
 
 - `(after-statement)` places code after the initialized declarator that
-  `x2c_enclosing` returns, or otherwise after the enclosing block item. A
-  declaration split after the declarator keeps the declarators before it in
-  their own declaration, its shared inline type, and initialization order.
+  `x2c_enclosing` returns, or otherwise after the enclosing block item.
+  Splitting the declaration keeps the declarators through that point together.
+  The split preserves the shared inline type and the initialization order.
   The placing expansion's result must be that declarator's complete
   initializer, through parentheses and typed expression shells. Otherwise,
   or when the declarator is not an item of a block, as in a `for` header,
@@ -4113,8 +4117,9 @@ static int pointer_tags(void) {
 }
 ```
 
-An unparenthesized pointer selector is rejected with the parenthesized
-spelling. `Array`s, function types, unsupported pointer depths, unknown types,
+If a pointer selector omits its parentheses, the compiler rejects it and shows
+the parenthesized spelling. `Array`s, function types, unsupported pointer
+depths, unknown types,
 and aggregates without a `Var(T)` adoption have no tag to select and are
 rejected. Enum selectors are rejected because enum values box as the shared
 `<i32>` family and retain no nominal enum identity.
@@ -4949,8 +4954,9 @@ optional default and must be last. Every filter expression is evaluated once
 when the `try` is entered.
 
 Selecting a filtered arm consumes the errors accumulated since that arm was
-registered and transfers through each intervening cleanup frame. Its
-`finally` and `defer` cleanup runs before the selected arm. A `finally` body
+registered. Control passes through each intervening cleanup frame, running its
+`finally` and `defer` cleanup before entering the selected arm. A `finally`
+body
 may not define a label, because its statements are repeated on each path that
 leaves the region. The transferring registration is removed before the arm
 executes, so raising a replacement `Error` continues outward instead of
@@ -4959,9 +4965,9 @@ matches, the `Error` continues outward unchanged. Catch bindings are borrowed
 through the selected arm and must be copied with `Error.snapshot` to outlive
 it.
 
-Generated `Error` transfer preserves the automatic locals and parameters a
-protected body modifies with optimization enabled, whether the
-body assigns them by name or writes through a pointer it holds the address in.
+Even with optimization enabled, generated `Error` transfer preserves changes a
+protected body makes to automatic locals and parameters. This includes direct
+assignments and writes through pointers to those variables.
 The compiler supplies the required volatile C representation for those values
 and for the transfer state its frames carry; source code does not need
 optimization-specific qualifiers for ordinary assignments in `try`, `catch`,
@@ -5256,8 +5262,9 @@ The active host-preprocessed stream is shallow-parsed only to establish the
 global environment. Full parsing, diagnostics, and emitted source still come
 from x2c's own token stream.
 
-A failed host preprocess prints its captured stderr, reports a structured x2c
-driver diagnostic at the first directive, and exits nonzero. Partial host
+If host preprocessing fails, x2c prints the host preprocessor's captured
+standard error, reports a structured driver diagnostic at the first directive,
+and exits with a nonzero status. Partial host
 stdout is never parsed after failure. `--no-cpp` bypasses this discovery pass;
 `--dump-cpp-text` exposes the successful host output.
 
@@ -5380,8 +5387,9 @@ live in `lib/lisp-bindings.x`. A bound function stays an ordinary x2c
 function, callable natively and from Lisp. Binding a direct function creates
 a fresh `Func` handle, which the session releases in `Lisp.destroy()`.
 
-A free name in a Lisp `lambda` or `defmacro` body reads the definitions the
-body was written next to, and then the session's globals. The environment the
+Lisp looks up a free name in a `lambda` or `defmacro` body in the lexical
+environment where the body was defined, then in the session's globals. The
+environment the
 call was written in is not part of that chain, so a caller that binds the same
 name changes nothing about what the body reads. A lambda written inside a
 binding form reads that form's bindings and keeps the values it was made with.
