@@ -59,10 +59,10 @@ String String.rstrip(String str, List @chars) {
 }
 
 /** Removes the indentation the text was written with.
-    The prefix is the run of spaces and tabs that opens the first content
-    line, after one leading newline is dropped. Every following line that
-    starts with that prefix loses exactly it, so indentation written past the
-    prefix survives and the block renormalizes as a unit. A line that does not
+    After dropping one leading newline, take the run of spaces and tabs
+    at the start of the first content line as the prefix. Remove that exact
+    prefix from each line that starts with it. Any indentation beyond the
+    prefix remains. A line that does not
     carry the prefix, including a blank one, is left alone, except that a
     final line of only spaces and tabs is removed so the closing quote's own
     indentation does not reach the result. `\r\n` is preserved because only

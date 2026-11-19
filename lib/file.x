@@ -2,8 +2,8 @@
 
     Copyright (c) 2025 Gary William Flake.
 
-    A `File` is a native stdio stream whose handle identity serves hashing,
-    equality, and ordering. Raw reads and copies report status separately
+    A `File` is a native stdio stream. Hashing, equality, and ordering use
+    the stream's handle identity. Raw reads and copies report status separately
     from the bytes they move. Other results, stream position, buffering, and
     error indicators follow stdio unless an operation documents otherwise.
     The standard streams are borrowed from the process.
@@ -326,11 +326,11 @@ String File.repr(File file) {
   return "<File:%p, fd:%d>".printf(file, file.fileno());
 }
 
-/** Returns the display `String` for `file`.
-    A nonnull file follows `File.string`. It advances through EOF, returns a
-    canonical result with the pool-chain lifetime that this module's design
-    notes describe, or NULL when empty, and transfers the same causes. A null
-    handle returns its pointer representation without reading.
+/** For a nonnull handle, calls `File.string` to read from the current
+    position through EOF. The result is a canonical `String` that remains live
+    until its owning pool is released, or NULL when no bytes remain. Read
+    failures follow `File.string`. A null handle returns its pointer
+    representation without reading.
 */
 String File.str(File file) => file ? file.string() : Var.pointer_string(file);
 

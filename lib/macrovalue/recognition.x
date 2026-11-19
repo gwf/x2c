@@ -38,12 +38,15 @@ int Macro_case_capture_at(
   return _derived_capture(site, code, t, names, published);
 }
 
-/** Starts a macro-valued `case` whose derived pattern generated `match`
-    code tests in place. Returns 1 when `code` is a retained invocation of
-    `t` and its arguments captured under `names` into `published`, 0 when
-    `code` cannot match, and 2 after storing in `cursor` the List the
-    pattern tests: the view of `code` or, for a `statement` body, of the one
-    statement a `seq` holds.
+/** Starts a macro-valued `case` whose derived pattern the generated
+    `match` code tests in place.
+
+    - Returns 1 after capturing the arguments of a matching retained
+      invocation of `t` under `names` into `published`.
+    - Returns 0 when `code` cannot match.
+    - Returns 2 after storing the subject `List` in `cursor` for the pattern
+      to test. The subject is the view of `code` or, for a `statement` body,
+      the view of the single statement in a `seq`.
 */
 int Macro_case_root(
   List code, Macro t, List names, int statement, List &cursor,

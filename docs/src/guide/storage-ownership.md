@@ -123,9 +123,9 @@ extend the lifetime of keys in a private pool. An immutable cons cell can also
 reference a mutable object whose lifetime remains independent.
 
 Batch jobs intern into the shared process pool, so those values outlive jobs
-and returned `Map` values. [Interned values outlive
-workers](contexts-and-threads.md#interned-values-outlive-workers) states that
-rule and how to bound the memory it retains.
+and returned `Map` values. See [Interned values outlive
+workers](contexts-and-threads.md#interned-values-outlive-workers) for how to
+bound the memory the pool retains.
 
 Explicit `Context.export` is recursive: it exports private
 canonical values, preserves container identities, and keeps explicitly adopted

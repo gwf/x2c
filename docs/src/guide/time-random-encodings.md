@@ -116,9 +116,10 @@ printf("%ld %s %s\n", die, deck.repr(), r.choice(deck).str());
 1 [ "ace", "king", "jack", "queen" ] ace
 ```
 
-A `Random` is fast and predictable from its output, so it must not make
-secrets. `Random.secure_fill` fills a buffer from the operating system's
-cryptographic generator, and `Random.from_entropy` seeds a `Random` from it
+Someone who sees a `Random` generator's output can predict future output.
+Do not use it to generate secrets. `Random.secure_fill` fills a buffer from
+the operating system's cryptographic generator. `Random.from_entropy` seeds
+a `Random` from that generator
 when the sequence should differ on every run. `Uuid.v4` returns a random
 UUID in its canonical lowercase form, and `Uuid.parse` checks and
 normalizes one:

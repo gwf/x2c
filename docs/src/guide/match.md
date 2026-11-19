@@ -220,7 +220,9 @@ The `?binder?`, `*binder?`, and `!op?` spellings are reserved in `!is`
 operand positions. They are not named binders and do not execute a predicate.
 Use the `(!is ...)` forms above.
 
-## Where binders live
+<a id="where-binders-live"></a>
+
+## Binder scope
 
 Each arm declares its binders as local variables before its body is parsed. A
 `?name` has type `Var`, a `*name` has type `List`, and either works with method
@@ -366,9 +368,9 @@ received as a parameter -- goes through a plan cache instead: the first call
 prepares its program and later calls with the same pattern reuse it, so a loop
 over one computed pattern pays a single preparation. The cache is local to the
 enclosing `Context` and holds a bounded number of recent patterns, so a loop
-that alternates between more distinct patterns than it holds prepares them
-again; hoist the pattern out of the loop when that matters. The arms of a
-filtered `catch` get their own per-site program, like a literal.
+that alternates between more distinct patterns than the cache holds prepares
+evicted patterns again. Hoist the pattern out of the loop when that matters.
+The arms of a filtered `catch` get their own per-site program, like a literal.
 
 ## Match for shape, traversal for search
 

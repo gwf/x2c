@@ -36,9 +36,8 @@ int main(void) {
 count 3
 ```
 
-The macro body is one call and nothing else. That is the usual shape: the
-macro declares the holes and the result kind, and the `meta` function does
-the work.
+The macro declares the holes and result kind. Its body calls the `meta`
+function that performs the transformation.
 
 `field_count` declares its parameter `TypeInfo`, so it receives a description
 of the argument's type rather than its code. The compiler computes that
@@ -190,8 +189,8 @@ The constructor returns one code node. The helper wraps it in a List because
 function declaration for the helper to inspect. Name, Type, parameter and
 statement captures still follow the source macro's declared hole kinds.
 
-A decorator can make that choice from the function it captures. Here the
-`meta` helper selects one of two named Stmt templates, then the decorator
+A decorator can choose a template based on the function it captures. Here
+the `meta` helper selects one of two named Stmt templates, then the decorator
 inserts the selected invocation into the function body:
 
 ```x2c
@@ -832,9 +831,9 @@ keeps both forms and is emitted normally.
 
 ## A complete example
 
-Two ordinary source files. `shape.x` holds the `meta` functions and the
-macros that call them. `shape_fields` reads the fields from the `TypeInfo` the
-compiler sends. `shape_names` and `shape_reads` turn them into code.
+This example uses two source files. `shape.x` holds the `meta` functions and
+the macros that call them. `shape_fields` reads the fields from the `TypeInfo`
+the compiler sends. `shape_names` and `shape_reads` turn those fields into code.
 
 ```x2c
 #include "meta.x"

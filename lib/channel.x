@@ -2,8 +2,10 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    Each queue owns its mutex; registered monitors order commitment with stop.
-    Allocation, Error dispatch, and payload destruction stay outside it.
+    Each queue has its own mutex. To publish a stop request while a Channel
+    operation is registered, the stop operation takes that mutex. This orders
+    the stop request with message commitment. Allocation,
+    `Error` dispatch, and payload destruction happen outside the lock.
 */
 
 #pragma once
@@ -147,11 +149,11 @@ void Channel.send(Channel c, Var value) => _send(c, value, 0);
 */
 void Channel.send_owned(Channel c, Var value) => _send(c, value, 1);
 
-/** Closes and destroys an unused Channel's complete storage scope. Every
-    user and waiter must already have finished. Undelivered owned payload
-    subtrees are destroyed outside the queue mutex; ordinary payloads are
-    not followed. NULL does nothing. Owner destruction releases these native
-    queue nodes and resources through the same finalizer.
+/** Closes the `Channel` and destroys its storage scope. Every user and
+    waiter must already have finished. Cleanup destroys undelivered owned
+    payload subtrees outside the queue mutex and leaves borrowed payload
+    storage alone. NULL does nothing. Destroying the owner runs the same
+    finalizer to release native queue nodes and resources.
 */
 void Channel.free(Channel channel) {
   if (channel) { channel.closed = 1; channel.lifetime.destroy(); }

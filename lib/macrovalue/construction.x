@@ -2,8 +2,8 @@
 
 // application
 
-/** Records the Macro values an anonymous macro captured where it was
-   created, so applying it later applies the same children.
+/** Records the `Macro` values captured when an anonymous macro was created.
+   The anonymous macro uses those same values when applied later.
 */
 Macro Macro_close(Macro value, List captures) =>
   value.append(%((env $captures)));

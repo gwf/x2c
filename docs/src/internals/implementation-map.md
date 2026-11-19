@@ -87,11 +87,10 @@ set of dump flags is listed under [compiler options](../reference/cli.md).
 
 - Parse: `src/literals/literals.x` for `$name` and `$(expr)`, which are separate sites
 - Type/convert: `Compiler.convert_segment_to_string` in `src/expressions/conversions.x`
-  selects the conversion for each segment. A segment that is already a `Var`,
-  canonical or aliased, renders through `Var_str` whatever its run-time tag; a
-  numeric segment takes its nearest declared `T_str` converter when one exists
-  and is
-  boxed and rendered through `Var_str` otherwise
+  selects the conversion for each segment. `Var_str` renders a `Var` segment
+  regardless of its runtime tag or whether it uses a typedef alias. For a
+  numeric segment, the compiler uses the nearest declared `T_str` converter if
+  one exists. Otherwise it boxes the segment and calls `Var_str`.
 - Lower/generate: `src/transform/transform.x` converts each insertion, then
   `src/components/interpolation.x` joins them; see [builtin
   components](architecture.md#builtin-components)

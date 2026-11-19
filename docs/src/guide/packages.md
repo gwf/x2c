@@ -4,7 +4,9 @@ x2c has one flat namespace, so an included `.x` library merges its names into
 yours. A package's public names carry its prefix. It is compiled once into an
 archive, and an importing program reaches its names through an alias.
 
-## What a package looks like
+<a id="what-a-package-looks-like"></a>
+
+## Package directory layout
 
 A package is a directory named for the package. Only its `src/` directory
 holds package sources; everything else in the directory consumes it like any
@@ -181,11 +183,11 @@ imported packages provide the same receiver method, the call is ambiguous;
 call the selected package function explicitly, such as
 `pcre2.Var_regexpmatch(value)`.
 
-That external type is often one from the package's own vendored header, which
-crosses the import under its own name. raylib's `Image` and `Vector2` are
-raylib's, so a consumer writes `Image.new(...)`, reads `image.width`, and uses
-`a + b` with no `with` entry for either type. The types come from the header
-and the methods from `raylib__`.
+The external type often comes from the package's vendored header and keeps
+its native name after the import. For example, raylib's `Image` and `Vector2`
+need no `with` entry. You can write `Image.new(...)`, read `image.width`, or use
+`a + b`. The types come from the header and the methods use the `raylib__`
+prefix.
 
 ## Packages with compile-time parts
 
@@ -341,10 +343,9 @@ ordinary builds, keeping the generated public headers, archive, and link flags
 together. Package tests that include `unittest/test-support.x` still need that
 repository test support; it is not part of the source-package build contract.
 
-A package over a third-party C library also has to decide what to expose, who
-owns each returned value, how to preserve the library's error codes, and
-whether to provide Lisp bindings. That is [Wrapping a C
-Library](wrapping-c-libraries.md).
+[Wrapping a C Library](wrapping-c-libraries.md) explains how to choose the
+x2c API, assign ownership to returned values, preserve native error codes,
+and decide whether to supply Lisp bindings.
 
 ### Package examples
 

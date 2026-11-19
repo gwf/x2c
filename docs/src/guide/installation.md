@@ -1,7 +1,8 @@
 # Install a Native Compiler
 
 Install a release with one command, or build and install from a source
-checkout. Then create a first project, run it, and build it for a debugger.
+checkout. Then create your first project, run it, and build it with debug
+information.
 
 ## Supported platforms
 

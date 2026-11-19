@@ -545,8 +545,9 @@ String greet(String name){
 }
 ```
 
-That is the emitted unit on its own. The include lines, the `_0` static, and
-`_file_init_` are added afterwards by generation. The final `greet.c` defines
+`--dump-code` shows the function body and signature. The generated files also
+include the include directives, the `_0` static, and `_file_init_`. The final
+`greet.c` defines
 the header's guard macro and includes `x2c.h` itself, and `greet.h` holds
 the declaration.
 
@@ -865,9 +866,10 @@ operand has `Var` identity, after protocol operators resolved, presents it
 typed `Var`, and normalizes the replacement as it would its own lowering. A
 binary operator returns a call of its inline lane in `lib/common.x` or of
 `Var.binary` through `Code.lowered`, so an operator chain does not rebind
-its remaining terms at each level; an update returns the lowered call of
-its storage's update helper with the target's address, the form the
-cleanup walk recognizes as a write. Truthiness stays a conversion the
+its remaining terms at each level. For an update, the translator returns a
+lowered call to the storage-specific helper and passes the target's address.
+The cleanup walk recognizes that call as a write. Truthiness stays a conversion
+the
 transform applies at condition positions, and slices,
 comparisons, and a participant's direct compound update remain in the
 transform. When a rewrite lowers its replacement, the source expressions the
@@ -879,9 +881,10 @@ without the subject's bindings matches without collecting them.
 keyed by the `raise` head. Its translator converts the code to a `Symbol` and
 each detail key and value to a `Var` with `Code.convert`, promotes a C string
 literal value with `Code.promoted`, and reports a value whose type is not
-immutable with `x2c_diagnostic_error_at`, which returns so the translation goes
-on. It returns the converted raise as a lowered carrier, which binding leaves
-as it is. The compiler lowers that raise's parts in source order, moving them
+immutable with `x2c_diagnostic_error_at`. That call records the error and
+returns control to the translator. The translator returns the converted raise
+as a lowered carrier, which the binder leaves intact. The compiler lowers that
+raise's parts in source order, moving them
 into temporaries as literal parts move, and builds its literals at run time.
 
 `src/components/pattern-match.x` registers `match` on the statement family
@@ -978,10 +981,11 @@ typedef's header boundary.
 `src/components/macro-mapping.x` supplies `_x2c_expand_rows`, the operation
 behind `expand`. The `$expand` decorator in `etc/compiler-prelude.x`
 declares it with a bodyless `meta` prototype and passes it the row List and
-the following macro. It reads the rows as a compile-time value and returns one
-pending application of the macro for each row, so ordinary insertion binds
-them. It reports a decorator as the macro, input that is not a List, and a row
-with the wrong number of arguments.
+the following macro. `_x2c_expand_rows` reads the rows as a compile-time value
+and returns one pending macro application per row. The compiler binds those
+applications when it inserts them. The helper reports an error if it receives a
+decorator, if the input is not a List, or if a row has the wrong number of
+arguments.
 
 The rewrite components and `src/grammar.x`, whose source forms they
 recognize, are compiler prelude sources. The compiler links

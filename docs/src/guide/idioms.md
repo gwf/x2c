@@ -99,7 +99,9 @@ and callback state. A nested context that borrows its mutable parent needs a
 pointer field so both contexts reach the same parent. See
 [Reference parameters](../reference/language.md#reference-parameters).
 
-## Adopt a protocol for one real contract
+<a id="adopt-a-protocol-for-one-real-contract"></a>
+
+## Adopt a protocol for a shared interface
 
 Adopt a protocol when a concrete type should support a shared interface.
 Define the required conversions beside the type. Similar method names are
@@ -163,9 +165,8 @@ A name that a quotation declares is private to it, so another quotation
 cannot refer to it. An `x2c_ident` hole declares and refers to one exact
 name.
 
-When a `meta` function builds one statement, the macro can hand it the work
-in one line. Write the `Stmt` macro with an arrow body and return the
-statement itself:
+When a `meta` function builds one statement, call it from a `Stmt` macro
+with an arrow body and return the statement itself:
 
 ```x2c
 #include "meta.x"
@@ -234,7 +235,9 @@ List values = (left_a, left_b) = %(1 2);
 Use `match` for conditional or nested shapes. Use named accessors when only one
 position matters.
 
-## Let collection methods express collection work
+<a id="let-collection-methods-express-collection-work"></a>
+
+## Choose between `foreach` and collection methods
 
 Use `foreach` when the operation is naturally sequential or can stop early.
 Use `map`, `filter`, and folds for direct transformations:

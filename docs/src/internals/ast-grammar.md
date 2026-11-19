@@ -943,11 +943,11 @@ Match lowering writes code that is already lowered. `placed` wraps a lowered
 match switch or arm. The transform lowers only the source parts that the
 active lowering watches inside it and renders the rest as C text; emission
 prints NODE. The match tests are C conditions over List cells. `m-all` and
-`m-any` join two or more tests with `&&` and `||`. `m-next` assigns the
-`cdr` of PRIOR to CURSOR and holds, while `m-step` makes the same assignment
-and tests the new cursor. `m-take` assigns the `car` of CURSOR to LOCAL and
-holds. `m-bits` compares the `u64` bits of the `car` of CURSOR with the
-`uint64_t` literal BITS.
+`m-any` join two or more tests with `&&` and `||`. `m-next` assigns the `cdr`
+of PRIOR to CURSOR, then evaluates to true. `m-step` makes the same assignment
+and tests the new cursor. `m-take` assigns the `car` of CURSOR to LOCAL, then
+evaluates to true. `m-bits` compares the `u64` bits of the `car` of CURSOR with
+the `uint64_t` literal BITS.
 
 Owners: `src/components/pattern-match.x` writes these forms,
 `_placed` in `src/transform/traversal.x` lowers placed code, and

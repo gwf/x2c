@@ -2,9 +2,9 @@
 
     Copyright (c) 2026 Gary William Flake.
 
-    Diff owns line differences: a shortest edit script between two texts,
-    found with the Myers algorithm after trimming the lines both share at
-    each end, and its unified spelling. Each search step keeps only its
+    `Diff` trims the common lines at each end of two texts, then uses the Myers
+    algorithm to search for a shortest edit script. It can render the script
+    as a unified diff. Each search step keeps only its
     frontier, so the cost is the square of the edit distance; past `_LIMIT`
     edits the middle becomes one deletion run and one insertion run.
 */

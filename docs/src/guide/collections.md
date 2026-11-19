@@ -86,8 +86,8 @@ parentheses to make a comma expression one element:
 depends on its destination. Inside `${...}`, a nested bare `{...}` keeps the
 natural key rule; write another `${...}` to evaluate its keys too.
 
-Each collection has a natural reading and an explicit prefix that selects
-the other one:
+The table compares the default forms and their explicit quoting or evaluation
+prefixes:
 
 | Source form | Result | Reading rule |
 | --- | --- | --- |
@@ -522,8 +522,8 @@ a=[ 1, 2, 3, 4 ] alias=[ 1, 2, 3, 4 ] copy=[ 1, 2, 3 ]
 distinct empty literals: 0
 ```
 
-Mutating operations mutate in place and return the same object, so
-`array.sort()` is not a sorted copy:
+Mutating operations return the same object. For example, `array.sort()`
+sorts `array` in place:
 
 ```x2c
 Array numbers = [5, 3, 9, 1];
@@ -700,9 +700,9 @@ on the key: integers index, anything else does an `assoc` lookup. `assoc`,
 
 The functional `List` operations take `Func`. A fixed nonvariadic function or
 function pointer converts automatically, and you can pass a capturing lambda
-directly. Each element is supplied as a value. A callback with a reference
-parameter is rejected when the first element is invoked, and it never
-receives an alias into `List` storage. Empty inputs do not invoke or
+directly. Each element is supplied as a value. The first callback invocation
+rejects a reference parameter, so the callback never receives an alias into
+`List` storage. Empty inputs do not invoke or
 arity-check the callback. The
 [language reference](../reference/language.md#lambdas) has the conversion and
 lifetime rules.
@@ -1247,8 +1247,8 @@ ada -> 36
 grace -> 45
 ```
 
-That is the table's order, and it moves when the hash changes. Sort what you
-print when the order matters.
+The entries appear in hash-table order. That order can change when the hash
+changes. Sort the entries before printing when the order matters.
 
 `Map.get`, `Map.del`, and the bracket forms are wrappers over
 these calls. `Map.set` and bracket writes are fail-fast and reject a `void`
@@ -1481,9 +1481,8 @@ Some guidelines:
   family, preferably a packed `Array`, which has a raw bracket. Measure
   speed when it matters.
 
-A small program that uses each type for what it is good at: a `String` split
-into words, a `Map` for counting, an `Array` for ranking, and `List` pairs to
-carry each entry.
+This program splits a `String` into words, counts them with a `Map`, and
+ranks the counts in an `Array` of `List` pairs.
 
 ```x2c
 String text = "the quick the lazy the end";

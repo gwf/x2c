@@ -166,9 +166,10 @@ conversion](../reference/language.md#conversions-required-by-adapters).
 
 ## How members are chosen
 
-Each adopted member resolves on its own. The participant's own method wins,
-then the nearest inherited method, then the protocol's default. An explicit
-adoption can use a method inherited through the participant's typedef chain:
+The compiler resolves each member separately. It uses the participant's own
+method if available, then the nearest inherited method, then the protocol's
+default. An explicit adoption can use a method inherited through the
+participant's typedef chain:
 
 ```x2c
 typedef List Domain;
@@ -201,8 +202,8 @@ compatible member. Two protocol defaults for one member are an error;
 implement the member on the participant to choose. The reference gives
 [the full rule](../reference/language.md#members-shared-by-several-protocols).
 
-Before adding a protocol member, inspect the conformance dump for every
-participant homonym and its signature:
+Before adding a protocol member, inspect the conformance dump for participant
+methods with that name and check their signatures:
 
 ```sh
 x2c translate --dump-conformance path/to/unit.x

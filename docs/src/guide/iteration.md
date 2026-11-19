@@ -191,7 +191,9 @@ it cannot convert `Var` to that type. For a `struct` tag, the C compiler
 reports an incompatible assignment to the loop variable. Pick a converting
 type, or take a `Var` and convert in the body.
 
-### What foreach guarantees
+<a id="what-foreach-guarantees"></a>
+
+### How `foreach` selects a cursor
 
 For a statically typed collection other than `Iter`, the declared loop type
 can supply a native cursor. Foreach first looks for that type's `try_next`
@@ -481,7 +483,9 @@ Nested `foreach` loops receive separate storage for each chain. Use the
 explicit form when the same iterator must be paused and resumed outside one
 loop.
 
-## Choosing between the two
+<a id="choosing-between-the-two"></a>
+
+## Choosing between `foreach` and `Iter`
 
 Use `foreach` when the collection has an adapter, the element conversion you
 want exists, and the loop body is the interesting part. It is shorter and it

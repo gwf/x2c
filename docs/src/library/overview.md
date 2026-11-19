@@ -247,9 +247,10 @@ object to configure logging and manage its lifetime.
 
 ## Embed Lisp
 
-[Lisp](modules/lisp.md) provides a reader, evaluator, lexical closures, macros,
-global bindings, native `Func` integration, host-side value application, and
-file/string evaluation:
+Use [Lisp](modules/lisp.md) to embed a Lisp session in an x2c program. The
+session reads and evaluates code from files or Strings. It supports lexical
+closures, macros, and global bindings. Host code can apply Lisp values or
+bind a native `Func`. This example binds and calls a native function.
 
 ```x2c
 static String greet(String name) {

@@ -16,7 +16,7 @@ runtime prelude, which every unit loads; see
 | Initializer `auto` | Keyword after `=` | Clean up the acquired value at block exit |
 | `foreach` | Shipped keyword alias | Traverse through the ordinary Iter protocol |
 | `alias` | Contextual grammar | Name a source expression within a scope |
-| `$dedent`, `$assert`, `$time` | Shipped, explicit `#include` | Remove boilerplate C leaves to every caller |
+| `$dedent`, `$assert`, `$time` | Shipped, explicit `#include` | Strip text indentation, report a failed assertion, or time a statement |
 | Project macros | Explicit import | Supply project-specific syntax and policy |
 
 `class` and `foreach` are keyword aliases. Use the `$` spelling for
@@ -532,7 +532,9 @@ follow `=`. Declaration `auto`, written before the type or name, instead
 cleans the variable's value at exit. See
 [Managed declarations and initializers](../reference/language.md#managed-declarations-and-initializers).
 
-## Include the rest of the set
+<a id="include-the-rest-of-the-set"></a>
+
+## Macros that require an include
 
 `class`, `foreach`, `with`, `alias`, `$lock`, and `auto` need no include. A
 second set ships in `lib/system-macros.x` and becomes available with one
@@ -569,7 +571,9 @@ Other expressions call `String.dedent` at run time and evaluate their input
 once. An interpolated block therefore means the same thing and costs one call.
 Use `String.dedent` directly on text that arrives from a file or an argument.
 
-### Report the check you actually wrote
+<a id="report-the-check-you-actually-wrote"></a>
+
+### Report a failed assertion with `$assert`
 
 `$assert` raises `<invariant>` carrying the failing expression as written and
 the source line it was written on. It transfers to a catch like any other x2c
@@ -588,8 +592,8 @@ int main(void) {
 
 ### Measure a statement in place
 
-`$time` wraps its target in a monotonic clock pair and reports the duration on
-stderr. The caller includes `<time.h>`:
+`$time` reads a monotonic clock before and after the decorated statement
+and reports the duration on stderr. The caller includes `<time.h>`:
 
 ```x2c
 ~#include <time.h>
@@ -606,7 +610,9 @@ int main(void) {
 The report runs from a `defer`, so decorating a whole function body still
 reports when that body returns or a cause transfers out of it.
 
-## A complete resource-using program
+<a id="a-complete-resource-using-program"></a>
+
+## Collect line lengths from a file
 
 This program collects line lengths from a file. The open region owns all
 allocations; the managed locals close the file and release the mutable history

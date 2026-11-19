@@ -11,9 +11,9 @@ The `autodiff` package differentiates ordinary `double` code four ways:
 - `autodiff.x` records a runtime tape for code that the decorators cannot
   transform.
 
-All four are ordinary x2c: a macro file, a runtime unit, and the protocol
-and decorator features. The compiler has no derivative support
-of its own. The macros are in `autodiff-macros.x` and the runtime tape is in
+The package implements all four in x2c using macros, a runtime unit,
+protocols, and decorators. The compiler has no derivative support of its own.
+The macros are in `autodiff-macros.x` and the runtime tape is in
 `autodiff.x`. Both files belong to the optional `autodiff` package in
 `packages/autodiff`, which has no native dependency. Install it with
 `x2c install autodiff`. `import "autodiff";` gives a unit the macros and the
@@ -222,10 +222,10 @@ Apple M-series, `-O2`):
 | `$ad.checkpoint(256)` | 1.8 MB | 0.066 s |
 | `$ad.checkpoint(1024)` | 1.7 MB | 0.065 s |
 
-Full recording stores three doubles per iteration; checkpointing pays about
-a quarter more time for running the loop twice, and its memory is
-dominated by the snapshots at small `K` and by the block tape at large
-`K`.
+Full recording stores three doubles per iteration. On this benchmark,
+checkpointing takes about a quarter longer than full recording because it
+runs the loop twice. Snapshots account for most of its memory at small `K`.
+The block tape accounts for most of its memory at large `K`.
 
 This is two-level checkpointing with a fixed block size. The
 divide-and-conquer schedule of Siskind and Pearlmutter (2018), which needs
