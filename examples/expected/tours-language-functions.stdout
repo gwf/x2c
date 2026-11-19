@@ -1,3 +1,8 @@
-functions: 16; (1 2 3); items: 4
-   captured 4; shared 12; local 12
-   mapped (4 6); lazy squares total 13
+Square: 16
+Collected arguments: (1 2 3)
+Item description: items: 4
+Captured value: 4
+Shared value: 12
+Local value: 12
+Doubled items: (4 6)
+Sum of squares: 13

@@ -13,13 +13,11 @@ protocol Map(T) { T T.add(T, T); T T.mul(T, T); }
 protocol Map(Set);
 
 int main(void) {
-  auto {
-    Set a = Set.new(%(apple pear)), b = Set.new(%(pear bread));
-    Set combined = a + b, common = a * b;
-    // Map traversal has no promised order; sort before presenting keys.
-    printf("operators: union %s; intersection %s\n",
-           combined.keys().list().sort().repr(),
-           common.keys().list().sort().repr());
-  }
+  Set a = Set.new(%(apple pear)), b = Set.new(%(pear bread));
+  Set combined = a + b, common = a * b;
+  // Map traversal has no promised order; sort before presenting keys.
+  printf("Union: %s\nIntersection: %s\n",
+         combined.keys().list().sort().repr(),
+         common.keys().list().sort().repr());
   return 0;
 }

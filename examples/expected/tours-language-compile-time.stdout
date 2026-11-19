@@ -1,4 +1,6 @@
-meta: runtime 27; compile time 27
-   caller name 30; kept name 6
-   generated report: 2
-   runtime Lisp: 5
+Runtime cube: 27
+Compile-time cube: 27
+Caller name result: 30
+Kept name result: 6
+Generated report: 2
+Runtime Lisp result: 5

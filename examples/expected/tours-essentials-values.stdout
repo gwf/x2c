@@ -1,2 +1,5 @@
-values: int tag 1, double tag 0, converted 42.0
-   numeric equality 1, identity 0
+Int tag: 1
+Double tag: 0
+Converted to double: 42.0
+Numeric equality: 1
+Identity: 0

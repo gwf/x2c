@@ -1,3 +1,8 @@
-iteration: sum 8; unpacked 7 seven
-   zero present 1, value 0; absent 0
-   empty truth 0; null differs from void 1
+Sum after skipping 2: 8
+Unpacked number: 7
+Unpacked label: seven
+Zero key present: 1
+Stored value: 0
+Missing key present: 0
+Empty array is true: 0
+Null differs from void: 1

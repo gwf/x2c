@@ -1,3 +1,7 @@
-text: hello world; hello; ready
-   a-name-too-long-for-a-symbol; phase index 0
-   equal 1, identical 1
+Greeting: hello world
+Slice: hello
+Phase: ready
+Long atom: a-name-too-long-for-a-symbol
+Phase index: 0
+Equal strings: 1
+Identical strings: 1

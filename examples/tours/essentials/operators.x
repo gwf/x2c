@@ -6,11 +6,9 @@ protocol Map(T) { T T.add(T, T); }
 protocol Map(Set);
 
 int main(void) {
-  auto {
-    Set a = {apple: 1, pear: 1}, b = {pear: 1, bread: 1};
-    Set combined = a + b;
-    printf("operators: union %s; original size %d\n",
-           combined.keys().list().sort().repr(), a.len());
-  }
+  Set a = {apple: 1, pear: 1}, b = {pear: 1, bread: 1};
+  Set combined = a + b;
+  printf("Union: %s\nOriginal set size: %d\n",
+         combined.keys().list().sort().repr(), a.len());
   return 0;
 }

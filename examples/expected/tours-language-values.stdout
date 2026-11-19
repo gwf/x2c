@@ -1,2 +1,5 @@
-values: 43, native 43, half 21.5
-   now ready, String tag 1
+Var value: 43
+Native int: 43
+Half: 21.5
+New Var value: ready
+String tag: 1

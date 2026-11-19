@@ -9,15 +9,13 @@ static List simplify(List expression) {
 }
 
 int main(void) {
-  auto {
-    List command = %(move (3 4) fast quiet);
-    match (command) {
-      case %(move (?(int x) ?(int y)) *flags) if (x > 0):
-        printf("patterns: %s\n", %(at $x $y @flags).repr());
-      default: puts("patterns: no move");
-    }
-    List result = simplify(%(add 2 3));
-    if (result ~= %(value ?(int n))) printf("   simplified %d\n", n);
+  List command = %(move (3 4) fast quiet);
+  match (command) {
+    case %(move (?(int x) ?(int y)) *flags) if (x > 0):
+      printf("Matched command: %s\n", %(at $x $y @flags).repr());
+    default: puts("No move matched");
   }
+  List result = simplify(%(add 2 3));
+  if (result ~= %(value ?(int n))) printf("Simplified value: %d\n", n);
   return 0;
 }

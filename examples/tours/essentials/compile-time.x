@@ -9,14 +9,12 @@ macro Decorator $twice(Stmt $body) {
 keyword twice $twice;
 
 int main(void) {
-  auto {
-    int n = 3, total = 0;
-    twice { total += cube(n); }
-    printf("compile time: cube %d; runtime total %d\n", $cube(3), total);
-    // Lists can also be executable data. Lisp evaluates them at runtime.
-    List expression = %(+ 2 3);
-    Lisp lisp = auto Lisp.new();
-    printf("   Lisp %s; native %d\n", lisp.eval(expression), 2 + 3);
-  }
+  int n = 3, total = 0;
+  twice { total += cube(n); }
+  printf("Compile-time cube: %d\nRuntime total: %d\n", $cube(3), total);
+  // Lists can also be executable data. Lisp evaluates them at runtime.
+  List expression = %(+ 2 3);
+  Lisp lisp = auto Lisp.new();
+  printf("Lisp result: %s\nNative result: %d\n", lisp.eval(expression), 2 + 3);
   return 0;
 }

@@ -8,17 +8,15 @@ typedef List Trail;
 static Self Trail.record(Self trail, Var item) => cons(item, trail);
 
 int main(void) {
-  auto {
-    Counter counter = {2};
-    counter.add(3);
-    Counter copy = counter;
-    copy.add(1);
-    Meter meter = {counter};
-    Trail trail = %(2);
-    trail = trail.record(3).record(4);
-    printf("methods: original %d, copy %d, delegated %d\n",
-           counter.read(), copy.read(), meter.read());
-    printf("   typedef keeps its methods: %s\n", trail.repr());
-  }
+  Counter counter = {2};
+  counter.add(3);
+  Counter copy = counter;
+  copy.add(1);
+  Meter meter = {counter};
+  Trail trail = %(2);
+  trail = trail.record(3).record(4);
+  printf("Original counter: %d\nCopied counter: %d\nDelegated counter: %d\n",
+         counter.read(), copy.read(), meter.read());
+  printf("Trail after recording: %s\n", trail.repr());
   return 0;
 }

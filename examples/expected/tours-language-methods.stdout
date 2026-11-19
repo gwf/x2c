@@ -1,2 +1,4 @@
-methods: original 5, copy 6, delegated 5
-   typedef keeps its methods: (4 3 2)
+Original counter: 5
+Copied counter: 6
+Delegated counter: 5
+Trail after recording: (4 3 2)

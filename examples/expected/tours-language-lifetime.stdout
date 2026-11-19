@@ -1,7 +1,8 @@
-lifetime: ready!
-   retained [ 1, 2 ]
-   temporary 9
-   restored 1; aliased 5
-   cleanup before catch
-   caught bad-arg
-   finally
+Label: ready!
+Retained array: [ 1, 2 ]
+Temporary level: 9
+Restored level: 1
+Aliased element: 5
+Cleanup before catch
+Caught bad-arg
+Finally

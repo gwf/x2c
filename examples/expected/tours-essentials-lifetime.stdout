@@ -1,4 +1,7 @@
-lifetime: retained [ 1, 2 ]; snapshot 3; shared 12
-   temporary 99; alias 5
-   cleanup before catch
-   caught; restored 12
+Retained array: [ 1, 2 ]
+Captured value: 3
+Shared value: 12
+Temporary count: 99
+Aliased element: 5
+Cleanup before catch
+Caught error. Restored count: 12

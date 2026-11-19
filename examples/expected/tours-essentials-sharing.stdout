@@ -1,3 +1,6 @@
-sharing: tail 1; array [ 9, 3 ]
-   canonical text 1
-   zero present 1, value 0; missing 0
+Shared list tail: 1
+Array after mutation: [ 9, 3 ]
+Canonical string identity: 1
+Zero key present: 1
+Stored value: 0
+Missing key present: 0

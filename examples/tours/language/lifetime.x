@@ -11,27 +11,25 @@ static String make_label(void) {
 }
 
 int main(void) {
+  puts(%"Label: $(make_label())");
+  Scope saved = auto Scope.new();
+  Array kept;
   auto {
-    puts(%"lifetime: $(make_label())");
-    Scope saved = auto Scope.new();
-    Array kept;
-    auto {
-      Array temporary = [1, 2];
-      temporary.move_to(&saved); // Preserve the container beyond this region.
-      kept = temporary;
-    }
-    printf("   retained %s\n", kept.repr());
-    int level = 1;
-    with (level = 9) { printf("   temporary %d\n", level); }
-    alias kept[0] as first;
-    first += 4; // An alias substitutes its expression on each use.
-    printf("   restored %d; aliased %s\n", level, kept[0]);
-    try {
-      defer puts("   cleanup before catch");
-      raise %(bad-arg (operation "tour"));
-    }
-    catch %(bad-arg *details): puts("   caught bad-arg");
-    finally puts("   finally");
+    Array temporary = [1, 2];
+    temporary.move_to(&saved); // Preserve the container beyond this region.
+    kept = temporary;
   }
+  printf("Retained array: %s\n", kept.repr());
+  int level = 1;
+  with (level = 9) { printf("Temporary level: %d\n", level); }
+  alias kept[0] as first;
+  first += 4; // An alias substitutes its expression on each use.
+  printf("Restored level: %d\nAliased element: %s\n", level, kept[0]);
+  try {
+    defer puts("Cleanup before catch");
+    raise %(bad-arg (operation "tour"));
+  }
+  catch %(bad-arg *details): puts("Caught bad-arg");
+  finally puts("Finally");
   return 0;
 }

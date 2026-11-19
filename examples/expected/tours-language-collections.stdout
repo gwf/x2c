@@ -1,5 +1,13 @@
-lists: (n 2 3); (2 3); (1 2 3)
-   array [ 9, 2, 3 ]; last 3; slice [ 2, 3 ]
-   map keys: (key) / ("answer"); member 1
-   shared tail 1; shared object 1
-   quoted: [ <ready>, <done> ] fast
+Quoted list: (n 2 3)
+Evaluated list: (2 3)
+Extended list: (1 2 3)
+Array: [ 9, 2, 3 ]
+Last item: 3
+Slice: [ 2, 3 ]
+Bare keys: (key)
+Computed keys: ("answer")
+Computed key present: 1
+Shared list tail: 1
+Shared array: 1
+Quoted array: [ <ready>, <done> ]
+Quoted map mode: fast
