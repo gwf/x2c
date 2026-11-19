@@ -4,7 +4,7 @@ section: magic
 home: true
 order: 3
 tab: decorators
-title: You trace yourself.
+title: Highly decorated.
 ---
 
 ```x2c

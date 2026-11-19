@@ -2,7 +2,7 @@
 slug: game-of-life
 section: packages
 tab: termbox2
-title: A terminal case of Life.
+title: Terminal velocity.
 image: packages/game-of-life.gif
 imagePoster: packages/game-of-life-poster.png
 imageAlt: A twenty-second recording of green Game of Life cells evolving in a terminal.

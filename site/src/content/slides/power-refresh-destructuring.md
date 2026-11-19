@@ -4,7 +4,7 @@ section: power
 home: true
 order: 3
 tab: destructuring
-title: Tuple trouble.
+title: Breaking up is easy to do.
 ---
 
 ```x2c
