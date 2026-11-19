@@ -7,7 +7,8 @@
 
 ## Checklist
 
-- [ ] Review the landing-page gallery puns for sense and quality.
+- [x] Review the landing-page gallery puns for sense and quality. The approved
+  titles and Install edits landed on `dev` in PR #731.
 - [x] Audit ordinary developer commands for unwanted side effects. The hook
   repair landed on `dev`; `make install` and other ordinary developer commands
   no longer change `core.hooksPath`.
@@ -20,23 +21,21 @@
 - [x] Keep only the consolidated Compiler API index on the website. The
   staged website publishes the index and omits the former individual API
   pages. Production publication remains part of the website update below.
-- [ ] Publish the collaboration wording and issue templates. The policy
-  welcoming bug reports, ideas, and pull requests is submitted in
-  [PR #728](https://github.com/gwf/x2c/pull/728), not yet on `dev`. GitHub
+- [x] Publish the collaboration wording and issue templates. The policy
+  welcoming bug reports, ideas, and pull requests landed on `dev` in
+  [PR #728](https://github.com/gwf/x2c/pull/728). GitHub
   Issues and forks are enabled; Discussions remain disabled.
 - [x] Audit obsolete files, assets, and directories throughout the repository.
   The unused on-demand Docker compilation service was removed. The stale
   `PLAYGROUND_URL` test override was already removed. The remaining Playground
   tests cover the live site. Shootout PNG charts have no repository references,
   but the chart script regenerates them with the SVGs, so they remain.
-- [ ] Finish reviewing the [staged installation instructions](https://staging.x2c-lang.dev/#install).
-  The review found that the staging example included a temporary directory
-  and an unrelated package install. The focused correction is submitted in
-  [PR #729](https://github.com/gwf/x2c/pull/729). Review the updated staging
-  page after that change is deployed there.
-- [ ] Land the latest one-page cheatsheet redesign. The revised landscape sheet
-  is submitted in [PR #727](https://github.com/gwf/x2c/pull/727), not yet on
-  `dev`. The earlier one-page version landed in PR #723.
+- [x] Review the installation instructions. Gary approved the revised Install
+  section on localhost; its changes landed on `dev` in PR #731. Staging
+  publication is a separate step.
+- [x] Land the latest one-page cheatsheet redesign. The revised landscape sheet
+  landed on `dev` in [PR #727](https://github.com/gwf/x2c/pull/727).
+- [ ] Publish the current `dev` website to staging for final site review.
 - [ ] After the remaining website changes are complete, review and approve a
   separate production website update.
 - [ ] Prepare the public announcement after the desired patches.
