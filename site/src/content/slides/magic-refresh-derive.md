@@ -4,7 +4,7 @@ section: magic
 home: true
 order: 1
 tab: macros
-title: Derive me crazy.
+title: The rewrite stuff.
 ---
 
 ```x2c
