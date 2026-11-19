@@ -21,7 +21,9 @@ int main(void) {
   }
   printf("Retained array: %s\n", kept.repr());
   int level = 1;
-  with (level = 9) { printf("Temporary level: %d\n", level); }
+  with (level = 9) {
+    printf("Temporary level: %d\n", level);
+  }
   alias kept[0] as first;
   first += 4; // An alias substitutes its expression on each use.
   printf("Restored level: %d\nAliased element: %s\n", level, kept[0]);

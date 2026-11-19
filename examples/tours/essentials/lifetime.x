@@ -19,7 +19,9 @@ int main(void) {
   // alias substitutes an expression each time; with saves and restores storage.
   alias kept[0] as first;
   first += 4;
-  with (count = 99) { printf("Temporary count: %d\nAliased element: %s\n", count, first); }
+  with (count = 99) {
+    printf("Temporary count: %d\nAliased element: %s\n", count, first);
+  }
   try {
     defer puts("Cleanup before catch");
     raise %(bad-arg (operation "tour"));
