@@ -1,0 +1,7 @@
+Retained array: [ 1, 2 ]
+Captured value: 3
+Shared value: 12
+Temporary count: 99
+Aliased element: 5
+Cleanup before catch
+Caught error. Restored count: 12

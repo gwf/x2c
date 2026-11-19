@@ -26,9 +26,9 @@ int main(void) {
 Array literals and iteration work alongside ordinary C functions. The core
 runtime types need no include; other library modules name their `#include`
 on their [reference page](docs/src/library/modules/index.md). The
-[language walkthrough](examples/tours/language.x) progresses from values to
+[language walkthrough](examples/tours/language/) progresses from values to
 classes, operators, patterns, macros, and threads. The shorter
-[essentials walkthrough](examples/tours/essentials.x) explains the key
+[essentials walkthrough](examples/tours/essentials/) explains the key
 distinctions and gotchas.
 
 ## Install a release

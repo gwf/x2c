@@ -193,5 +193,89 @@
   {
     "slide": "packages-08-x2cui.md",
     "source": "packages/x2cui/examples/orders.x"
+  },
+  {
+    "slide": "tour-essentials-01-values.md",
+    "source": "examples/tours/essentials/values.x"
+  },
+  {
+    "slide": "tour-essentials-02-sharing.md",
+    "source": "examples/tours/essentials/sharing.x"
+  },
+  {
+    "slide": "tour-essentials-03-quoting.md",
+    "source": "examples/tours/essentials/quoting.x"
+  },
+  {
+    "slide": "tour-essentials-04-classes.md",
+    "source": "examples/tours/essentials/classes.x"
+  },
+  {
+    "slide": "tour-essentials-05-operators.md",
+    "source": "examples/tours/essentials/operators.x"
+  },
+  {
+    "slide": "tour-essentials-06-patterns.md",
+    "source": "examples/tours/essentials/patterns.x"
+  },
+  {
+    "slide": "tour-essentials-07-lifetime.md",
+    "source": "examples/tours/essentials/lifetime.x"
+  },
+  {
+    "slide": "tour-essentials-08-compile-time.md",
+    "source": "examples/tours/essentials/compile-time.x"
+  },
+  {
+    "slide": "tour-essentials-09-threads.md",
+    "source": "examples/tours/essentials/threads.x"
+  },
+  {
+    "slide": "tour-language-01-values.md",
+    "source": "examples/tours/language/values.x"
+  },
+  {
+    "slide": "tour-language-02-text.md",
+    "source": "examples/tours/language/text.x"
+  },
+  {
+    "slide": "tour-language-03-collections.md",
+    "source": "examples/tours/language/collections.x"
+  },
+  {
+    "slide": "tour-language-04-iteration.md",
+    "source": "examples/tours/language/iteration.x"
+  },
+  {
+    "slide": "tour-language-05-functions.md",
+    "source": "examples/tours/language/functions.x"
+  },
+  {
+    "slide": "tour-language-06-methods.md",
+    "source": "examples/tours/language/methods.x"
+  },
+  {
+    "slide": "tour-language-07-classes.md",
+    "source": "examples/tours/language/classes.x"
+  },
+  {
+    "slide": "tour-language-08-operators.md",
+    "source": "examples/tours/language/operators.x"
+  },
+  {
+    "slide": "tour-language-09-patterns.md",
+    "source": "examples/tours/language/patterns.x"
+  },
+  {
+    "slide": "tour-language-10-lifetime.md",
+    "source": "examples/tours/language/lifetime.x"
+  },
+  {
+    "slide": "tour-language-11-compile-time.md",
+    "source": "examples/tours/language/compile-time.x"
+  },
+  {
+    "slide": "tour-language-12-threads.md",
+    "source": "examples/tours/language/threads.x"
   }
 ]

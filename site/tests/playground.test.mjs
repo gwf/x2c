@@ -38,6 +38,8 @@ function render(env) {
       page: readFileSync(join(destination, "playground/index.html"), "utf8"),
       love: readFileSync(join(destination, "examples/love/index.html"), "utf8"),
       magic: readFileSync(join(destination, "examples/magic/index.html"), "utf8"),
+      essentials: readFileSync(join(destination, "examples/essentials/index.html"), "utf8"),
+      language: readFileSync(join(destination, "examples/language/index.html"), "utf8"),
       home: readFileSync(join(destination, "index.html"), "utf8"),
     };
   } finally {
@@ -59,7 +61,7 @@ test("without WebAssembly, galleries still link to complete examples", () => {
 
 test("complete examples retain precompiled programs and expected output",
   { skip: !emcc && "emcc is not on PATH" }, () => {
-    const { page, home, love } = render({ PLAYGROUND_REQUIRED: "1" });
+    const { page, home, love, essentials, language } = render({ PLAYGROUND_REQUIRED: "1" });
     assert.doesNotMatch(page, /data-playground/);
     assert.match(love, /data-programs="[^"]*playground\/programs\/"/);
     const examples = [...love.matchAll(
@@ -71,6 +73,21 @@ test("complete examples retain precompiled programs and expected output",
     assert.match(maps.source, /int main\(void\)/);
     assert.match(love, /data-expected-output/);
     assert.match(home, /examples\/love\/#love-collections/);
+    for (const [tour, html, count] of [
+      ["essentials", essentials, 8],
+      ["language", language, 11],
+    ]) {
+      const lessons = [...html.matchAll(
+        /<script type="application\/json" data-examples>([\s\S]*?)<\//g)]
+        .flatMap(match => JSON.parse(match[1]));
+      assert.equal(lessons.length, count);
+      assert.ok(lessons.every(lesson => lesson.program && lesson.output));
+      assert.ok(lessons.every(lesson => lesson.id.startsWith(`tours/${tour}/`)));
+      assert.match(html, /Site Examples/);
+      assert.match(html, new RegExp(`id="tours-${tour}-threads"`));
+      assert.ok(html.includes(`x2c run examples/tours/${tour}/threads.x`));
+      assert.ok(!lessons.some(lesson => lesson.id.endsWith("/threads")));
+    }
   });
 
 

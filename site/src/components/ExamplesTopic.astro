@@ -1,13 +1,26 @@
 ---
 import { Code } from "astro:components";
-import { exampleEntries } from "../lib/example-catalog";
+import { exampleEntries, tourSections } from "../lib/example-catalog";
 import grammar from "../../../etc/vsc-extension/syntaxes/x2c.tmLanguage.json";
 import { x2cDarkTheme } from "../../shiki-x2c-theme.mjs";
 const { topic = "love" } = Astro.props;
 const cards = import.meta.glob<string>("../../assets/social/*.svg", { query: "?url", import: "default", eager: true });
 const entries = exampleEntries.filter(entry => entry.section === topic && topic !== "programs" && !entry.article);
-const titles = { love: "Everyday values and operations.", power: "Compose larger programs.", magic: "Extend the language.", programs: "Complete programs." };
-const descriptions = { love: "Values, text, and collections. Read down the page or choose an example from the index.", power: "Types, protocols, control flow, and concurrency, working together.", magic: "Operators, macros, and compile-time code that shape the language.", programs: "Longer examples bring the pieces together." };
+const titles = {
+  ...tourSections,
+  love: "Everyday values and operations.",
+  power: "Compose larger programs.",
+  magic: "Extend the language.",
+  programs: "Complete programs.",
+};
+const descriptions = {
+  essentials: "Start with dynamic values and native types, then explore sharing, quoted data, classes, protocols, patterns, lifetime, and compile-time code.",
+  language: "Start with Var and progress through collections, functions, types, operators, patterns, macros, and cooperating threads.",
+  love: "Values, text, and collections. Read down the page or choose an example from the index.",
+  power: "Types, protocols, control flow, and concurrency, working together.",
+  magic: "Operators, macros, and compile-time code that shape the language.",
+  programs: "Longer examples bring the pieces together.",
+};
 const programs = import.meta.env.DEV
   ? `/@fs${import.meta.env.X2C_REPOSITORY_ROOT}builds/wasm/playground/`
   : `${import.meta.env.BASE_URL}playground/programs/`;
@@ -19,7 +32,12 @@ const notes = await Promise.all(entries.map(async entry => {
   return at < 0 ? html : html.slice(at + 6);
 }));
 ---
-<header class="examples-topic-heading"><h1>{titles[topic]}</h1><p>{descriptions[topic]}</p></header>
+<header class="examples-topic-heading">
+  <h1>{titles[topic]}</h1>
+  <p>{descriptions[topic]}</p>
+  {topic === "essentials" && <p>Continue with the <a href="../language/">language walkthrough</a> or read the <a href="../../docs/guide/from-c.html">guide to x2c from C</a>.</p>}
+  {topic === "language" && <p>See <a href="../essentials/">x2c essentials</a> for the main distinctions or consult the <a href="../../docs/guide/x2c-syntax-map.html">syntax map</a>.</p>}
+</header>
 {topic === "programs" && <ul class="program-cards">{exampleEntries.filter(entry => entry.section === "programs").map(entry => {
   const slug = entry.article?.frontmatter.slug ?? entry.id.split("/").pop();
   return <li><a href={`${import.meta.env.BASE_URL}examples/${slug}/`} aria-label={entry.label}>

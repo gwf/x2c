@@ -13,19 +13,17 @@ x2c run -q examples/foreach.x
 
 ## Start here
 
-1. [tours/language.x](tours/language.x) walks from `Var` through collections,
-   functions, types, classes, protocols, operators, patterns, cleanup, macros,
-   and threads. Read the numbered sections in order; `main` runs them all.
-2. [tours/essentials.x](tours/essentials.x) revisits the same examples with
-   fewer details, emphasizing values versus objects, quoting, conversions,
-   ownership, and compile-time code.
+1. [x2c essentials](tours/essentials/) introduces values, sharing, quoting,
+   classes, operators, patterns, lifetime, compile-time code, and threads.
+2. [Language walkthrough](tours/language/) progresses through values, text,
+   collections, iteration, functions, methods, classes, operators, patterns,
+   lifetime and errors, compile-time code, and threads and channels.
 
-Both are self-contained programs with concise explanations and deterministic
-output. Neither needs input files or optional packages:
+Each lesson is a standalone program. For example:
 
 ```sh
-x2c run examples/tours/language.x
-x2c run examples/tours/essentials.x
+x2c run examples/tours/essentials/sharing.x
+x2c run examples/tours/language/collections.x
 ```
 
 The [book's language guide](../docs/src/SUMMARY.md) supplies the full rules,

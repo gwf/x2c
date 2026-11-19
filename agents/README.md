@@ -8,8 +8,8 @@ delivery. This page routes tasks to skills and deeper references.
 
 - [Programming idioms](../docs/src/guide/idioms.md) explains how to choose
   values, collections, protocols, macros, and cleanup.
-- [The language tour](../examples/tours/language.x) shows the language in an
-  executable program. `examples/manifest.txt` records each example's role,
+- [The language tour](../examples/tours/language/) shows the language in
+  standalone programs. `examples/manifest.txt` records each example's role,
   check, and expected output; use it to find a relevant smaller example.
 - [The implementation map](../docs/src/internals/implementation-map.md)
   connects features to compiler and runtime modules. Read a nearby operation

@@ -1,0 +1,8 @@
+Label: ready!
+Retained array: [ 1, 2 ]
+Temporary level: 9
+Restored level: 1
+Aliased element: 5
+Cleanup before catch
+Caught bad-arg
+Finally

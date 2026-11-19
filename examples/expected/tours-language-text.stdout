@@ -1,0 +1,7 @@
+Greeting: hello world
+Slice: hello
+Phase: ready
+Long atom: a-name-too-long-for-a-symbol
+Phase index: 0
+Equal strings: 1
+Identical strings: 1

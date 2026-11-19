@@ -55,8 +55,27 @@ magic/tic-tac-toe|external-input|build||-|Interactive game whose Lisp opponent i
 magic/ways-to-agree|showcase|run||expected/magic-ways-to-agree.stdout|Four paths to the same List, including a meta function and runtime Lisp.
 scripts/line-counts|showcase|run||expected/scripts-line-counts.stdout|Parallel commands, pipelines, globbing, and file operations with process.x and path.x.
 scripts/parallel-jobs|showcase|run||expected/scripts-parallel-jobs.stdout|Bounded job concurrency with Job.wait_any, captured output, and a failing command.
-tours/language|showcase|run||expected/tours-language.stdout|Progressive language walkthrough from Var through types, macros, and threads.
-tours/essentials|showcase|run||expected/tours-essentials.stdout|Short walkthrough of x2c concepts, distinctions, and gotchas.
+tours/language/values|showcase|run||expected/tours-language-values.stdout|Values and types.
+tours/language/text|showcase|run||expected/tours-language-text.stdout|Names and text.
+tours/language/collections|showcase|run||expected/tours-language-collections.stdout|Collections and literals.
+tours/language/iteration|showcase|run||expected/tours-language-iteration.stdout|Iteration and absence.
+tours/language/functions|showcase|run||expected/tours-language-functions.stdout|Functions and closures.
+tours/language/methods|showcase|run||expected/tours-language-methods.stdout|Types and methods.
+tours/language/classes|showcase|run||expected/tours-language-classes.stdout|Classes.
+tours/language/operators|showcase|run||expected/tours-language-operators.stdout|Protocols and operators.
+tours/language/patterns|showcase|run||expected/tours-language-patterns.stdout|Patterns and templates.
+tours/language/lifetime|showcase|run||expected/tours-language-lifetime.stdout|Lifetime and errors.
+tours/language/compile-time|showcase|run||expected/tours-language-compile-time.stdout|Compile-time code.
+tours/language/threads|showcase|run||expected/tours-language-threads.stdout|Threads and channels.
+tours/essentials/values|showcase|run||expected/tours-essentials-values.stdout|Values and conversions.
+tours/essentials/sharing|showcase|run||expected/tours-essentials-sharing.stdout|Immutable values and shared objects.
+tours/essentials/quoting|showcase|run||expected/tours-essentials-quoting.stdout|Quoting and interpolation.
+tours/essentials/classes|showcase|run||expected/tours-essentials-classes.stdout|Classes and copying.
+tours/essentials/operators|showcase|run||expected/tours-essentials-operators.stdout|Protocols and operators.
+tours/essentials/patterns|showcase|run||expected/tours-essentials-patterns.stdout|Patterns and templates.
+tours/essentials/lifetime|showcase|run||expected/tours-essentials-lifetime.stdout|Lifetime and cleanup.
+tours/essentials/compile-time|showcase|run||expected/tours-essentials-compile-time.stdout|Compile-time code.
+tours/essentials/threads|showcase|run||expected/tours-essentials-threads.stdout|Threads.
 programs/lisp|showcase|run|--init ../../../etc/init.xlisp --selftest|expected/programs-lisp.stdout|Bootstrapped Lisp command-line shell.
 programs/literate-lisp|showcase|run|../../../examples/data/reference-lisp/showcase.xlisp|expected/programs-literate-lisp.stdout|Independent recursive Lisp with symbolic differentiation.
 programs/mandelbrot|showcase|run||expected/programs-mandelbrot.stdout|Deep Mandelbrot zoom rendered on native threads.
