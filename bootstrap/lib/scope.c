@@ -218,7 +218,7 @@ Scope Scope_owner(void * ptr){
 void Scope_move(void * ptr, Scope * slot){
   if(! _init_guard_) Scope_initialize();  _require_running();  if(! ptr) return;  if(! slot){
     const X2CErrorSite _x2c_gensym_macro_site_2 ={
-      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 231, .runtime = 1
+      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 229, .runtime = 1
     }
     ;  x2c_error_raise_operation(& _x2c_gensym_macro_site_2, 4372499598, "Scope.move");  __builtin_unreachable();
   }
@@ -235,7 +235,7 @@ void * Scope_realloc(void * ptr, size_t size){
   }
   ScopeAlloc old =((ScopeAlloc)((char *)(ptr) - sizeof(struct ScopeAlloc))), next = old -> next, prev = old -> prev;  f10_allocation___ScopeMetadata * old_meta =(((f10_allocation___ScopeMetadata *)(old)) - 1);  size_t old_size = old_meta -> requested_size;  if(size > SIZE_MAX - sizeof(f10_allocation___ScopeMetadata) - sizeof(struct ScopeAlloc)){
     const X2CErrorSite _x2c_gensym_macro_site_3 ={
-      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 273, .runtime = 1
+      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 271, .runtime = 1
     }
     ;  x2c_error_raise_operation(& _x2c_gensym_macro_site_3, 1358596898646632, "Scope.realloc");  __builtin_unreachable();
   }
@@ -245,14 +245,14 @@ void * Scope_realloc(void * ptr, size_t size){
 static void * f10_allocation____malloc_in(Scope * slot, size_t size, void(* drop)(void *)){
   if(! slot){
     const X2CErrorSite _x2c_gensym_macro_site_4 ={
-      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 284, .runtime = 1
+      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 282, .runtime = 1
     }
     ;  x2c_error_raise_operation(& _x2c_gensym_macro_site_4, 4372499598, "Scope.malloc");  __builtin_unreachable();
   }
   if(size > SIZE_MAX - sizeof(f10_allocation___ScopeMetadata) - sizeof(struct ScopeAlloc)){
     if(x2c_error_runtime_ready){
       const X2CErrorSite _x2c_gensym_macro_site_5 ={
-        .file = "../../lib/scope/allocation.x", .function = __func__, .line = 287, .runtime = 1
+        .file = "../../lib/scope/allocation.x", .function = __func__, .line = 285, .runtime = 1
       }
       ;  x2c_error_raise_operation(& _x2c_gensym_macro_site_5, 1358596898646632, "Scope.malloc");  __builtin_unreachable();
     }
@@ -268,7 +268,7 @@ static void f10_allocation____attach(Scope scope, ScopeAlloc alloc){
 static void * _data_malloc(size_t size){
   void * ptr = malloc(size);  if(! ptr){
     const X2CErrorSite _x2c_gensym_macro_site_6 ={
-      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 311, .runtime = 1
+      .file = "../../lib/scope/allocation.x", .function = __func__, .line = 309, .runtime = 1
     }
     ;  x2c_error_raise_operation(& _x2c_gensym_macro_site_6, 97614135954008, "Scope.malloc");  __builtin_unreachable();
   }
@@ -279,7 +279,7 @@ static void * f10_allocation____calloc_in(Scope * slot, size_t count, size_t siz
   if(count && size > SIZE_MAX / count){
     if(x2c_error_runtime_ready){
       const X2CErrorSite _x2c_gensym_macro_site_7 ={
-        .file = "../../lib/scope/allocation.x", .function = __func__, .line = 318, .runtime = 1
+        .file = "../../lib/scope/allocation.x", .function = __func__, .line = 316, .runtime = 1
       }
       ;  x2c_error_raise_operation(& _x2c_gensym_macro_site_7, 1358596898646632, "Scope.calloc");  __builtin_unreachable();
     }

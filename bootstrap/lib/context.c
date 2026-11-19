@@ -115,12 +115,12 @@ void Context_initialize(void);
 Var Context_export(Context c, Var value){
   if(! _init_guard_) Context_initialize();
   if(! c){
-    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 72,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/context.x",.function = "Context_export",.line = 73,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
   if(current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 73,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/context.x",.function = "Context_export",.line = 74,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_1, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL))));
     __builtin_unreachable();
   }
@@ -144,7 +144,7 @@ Var Context_export_nested(Context c, Var value){
 Scope * Context_export_destination(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c){
-    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_export_destination",.line = 131,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/context.x",.function = "Context_export_destination",.line = 132,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_2, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.export_destination")), NULL))));
     __builtin_unreachable();
   }
@@ -170,7 +170,7 @@ void Context_move_block(Context c, Block block){
 int Context_owns(Context context, void * allocation){
   if(! _init_guard_) Context_initialize();
   if(! context){
-    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/context.x",.function = "Context_owns",.line = 169,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_3 = {.file = "../../lib/context.x",.function = "Context_owns",.line = 170,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_3, 4372499598, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.owns")), NULL))));
     __builtin_unreachable();
   }
@@ -232,7 +232,7 @@ void Context_close(Context c){
   if(! _init_guard_) Context_initialize();
   if(! c) return;
   if(current_context != c){
-    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/context.x",.function = "Context_close",.line = 257,.runtime = 1};
+    static const X2CErrorSite _x2c_gensym_error_site_4 = {.file = "../../lib/context.x",.function = "Context_close",.line = 258,.runtime = 1};
     x2c_error_raise_n(& _x2c_gensym_error_site_4, 4477477457162, 1, Symbol_var(34096809266140), String_var(String_join(NULL, cons(String_var(String_new("Context.close")), NULL))));
     __builtin_unreachable();
   }
@@ -353,7 +353,7 @@ static Var _export_value(Context c, Var v){
   {
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Context.export")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/context.x",.function = "_export_value",.line = 338,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_5 = {.file = "../../lib/context.x",.function = "_export_value",.line = 339,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_5, 4477479911782, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(41038), Symbol_var(tag));
       __builtin_unreachable();
     }

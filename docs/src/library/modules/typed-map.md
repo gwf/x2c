@@ -374,9 +374,9 @@ exhausted. Structural mutation invalidates the iterator.
 Each `MapSubInt` pull materializes the key as a canonical `String` with
 `Substring.str`. The result follows its actual owning pool.
 `MapIntInt` and both String-keyed families box keys without allocation.
-Each `MapLongDouble` pull allocates its long key as a `Var` in the current
-`Scope`. The yielded `Var` and anything retaining it must stay within
-that `Scope`.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the
+current `Scope`. The yielded `Var` and anything retaining it must stay
+within that `Scope`.
 
 **Raises:** for `MapSubInt`, the causes from `Substring.str` while
 materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
@@ -787,9 +787,9 @@ exhausted. Structural mutation invalidates the iterator.
 Each `MapSubInt` pull materializes the key as a canonical `String` with
 `Substring.str`. The result follows its actual owning pool.
 `MapIntInt` and both String-keyed families box keys without allocation.
-Each `MapLongDouble` pull allocates its long key as a `Var` in the current
-`Scope`. The yielded `Var` and anything retaining it must stay within
-that `Scope`.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the
+current `Scope`. The yielded `Var` and anything retaining it must stay
+within that `Scope`.
 
 **Raises:** for `MapSubInt`, the causes from `Substring.str` while
 materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
@@ -1211,9 +1211,9 @@ exhausted. Structural mutation invalidates the iterator.
 Each `MapSubInt` pull materializes the key as a canonical `String` with
 `Substring.str`. The result follows its actual owning pool.
 `MapIntInt` and both String-keyed families box keys without allocation.
-Each `MapLongDouble` pull allocates its long key as a `Var` in the current
-`Scope`. The yielded `Var` and anything retaining it must stay within
-that `Scope`.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the
+current `Scope`. The yielded `Var` and anything retaining it must stay
+within that `Scope`.
 
 **Raises:** for `MapSubInt`, the causes from `Substring.str` while
 materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
@@ -1624,9 +1624,9 @@ exhausted. Structural mutation invalidates the iterator.
 Each `MapSubInt` pull materializes the key as a canonical `String` with
 `Substring.str`. The result follows its actual owning pool.
 `MapIntInt` and both String-keyed families box keys without allocation.
-Each `MapLongDouble` pull allocates its long key as a `Var` in the current
-`Scope`. The yielded `Var` and anything retaining it must stay within
-that `Scope`.
+Each `MapLongDouble` pull allocates its long key as a `Var` in the
+current `Scope`. The yielded `Var` and anything retaining it must stay
+within that `Scope`.
 
 **Raises:** for `MapSubInt`, the causes from `Substring.str` while
 materializing a key. For `MapLongDouble`, `<alloc-fail>` or `<bad-enc>`
