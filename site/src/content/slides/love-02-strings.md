@@ -4,7 +4,7 @@ section: love
 home: true
 order: 2
 tab: text
-title: Character development.
+title: Text me, maybe.
 ---
 
 ```x2c

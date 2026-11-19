@@ -4,7 +4,7 @@ section: power
 home: true
 order: 8
 tab: packages
-title: Of great import.
+title: The whole package.
 run: |
   ./configure --packages pcre2
   make -C packages/pcre2 builds/gallery-imports

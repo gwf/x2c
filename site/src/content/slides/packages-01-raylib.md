@@ -2,7 +2,7 @@
 slug: raylib
 section: packages
 tab: raylib
-title: Weather or not.
+title: Plot twist.
 image: packages/climate-trends.png
 imageAlt: Line chart of Seattle daily high temperatures from Monday to Sunday.
 imageWidth: 1440

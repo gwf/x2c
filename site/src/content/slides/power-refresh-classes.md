@@ -5,7 +5,7 @@ section: power
 home: true
 order: 0
 tab: classes
-title: Class dismissed.
+title: A class act.
 ---
 
 ```x2c

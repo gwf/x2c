@@ -4,7 +4,7 @@ section: love
 home: true
 order: 4
 tab: literals
-title: Literally speaking.
+title: Just my types.
 ---
 
 ```x2c

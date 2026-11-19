@@ -4,7 +4,7 @@ section: love
 home: true
 order: 5
 tab: two tests
-title: Equal rites.
+title: The object of my detection.
 ---
 
 ```x2c

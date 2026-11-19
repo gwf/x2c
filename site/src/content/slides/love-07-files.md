@@ -4,7 +4,7 @@ section: love
 home: true
 order: 6
 tab: files
-title: Read between the files.
+title: Smooth pickup lines.
 ---
 
 ```x2c
@@ -37,4 +37,6 @@ title: Read between the files.
 ~}
 ```
 
-Read a whole file as text or process its lines one at a time. File methods handle the buffers; ordinary String and collection operations handle the contents.
+Read the whole file and close it with `string_close()`, or iterate through its lines. In the example, the loop splits each line into words and sums the numbers. The File iterator handles line scanning and buffering.
+
+Once the text is a String, filtering, transforming, slicing, and joining are method calls. You can also iterate through its bytes when character-oriented work calls for it. These operations avoid manual C buffers and scanning loops.

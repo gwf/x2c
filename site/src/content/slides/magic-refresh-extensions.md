@@ -4,7 +4,7 @@ section: magic
 home: true
 order: 5
 tab: extensions
-title: UI had me at hello.
+title: A C change.
 run: |
   make -C packages/x2cui build
   ./x2c build --package-dir packages \
