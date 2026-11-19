@@ -138,7 +138,7 @@ linked into the compiler itself.
 
 ## Working examples and further reading
 
-The [language tour](../examples/tours/language.x) is a smaller introduction to
+The [language tour](../examples/tours/language/) is a smaller introduction to
 the language used here. The [implementation map](../docs/src/internals/implementation-map.md)
 connects language features to their owners. The [architecture chapter](../docs/src/internals/architecture.md)
 explains the phases in more detail.

@@ -1,0 +1,4 @@
+lifetime: retained [ 1, 2 ]; snapshot 3; shared 12
+   temporary 99; alias 5
+   cleanup before catch
+   caught; restored 12

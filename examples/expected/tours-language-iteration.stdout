@@ -1,0 +1,3 @@
+iteration: sum 8; unpacked 7 seven
+   zero present 1, value 0; absent 0
+   empty truth 0; null differs from void 1

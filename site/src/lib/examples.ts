@@ -24,7 +24,10 @@ import gallery from "../../../examples/gallery.json";
 import {
   selectPlaygroundExamples,
 } from "../../scripts/playground-examples.mjs";
-const sources = import.meta.glob("../../../examples/{love,magic,power}/*.x", {
+const sources = import.meta.glob([
+  "../../../examples/{love,magic,power}/*.x",
+  "../../../examples/tours/{essentials,language}/*.x",
+], {
   query: "?raw", import: "default", eager: true,
 });
 const built = Object.values(import.meta.glob(

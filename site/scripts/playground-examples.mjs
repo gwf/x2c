@@ -8,11 +8,17 @@ const needsHostFiles = /^(love\/files|power\/counting)$/;
 const needsHostRuntime =
   /\b(Thread|Channel|Dispatch|Job)\b|Pool\.start|File\.popen/;
 
+// Source-backed examples inside examples/ use the same IDs as generated ones.
+export function galleryExampleId(entry) {
+  return entry.example ?? entry.source?.match(/^examples\/(.+)\.x$/)?.[1];
+}
+
 // The reason a gallery program cannot run in the browser, if any.
 export function nativeReason(entry, source) {
-  if (!entry.example || entry.optional)
+  const id = galleryExampleId(entry);
+  if (!id || entry.optional)
     return "This program needs a package, so it runs only with the native toolchain.";
-  if (needsHostFiles.test(entry.example))
+  if (needsHostFiles.test(id))
     return "This program reads files from disk, so it runs only with the native toolchain.";
   if (needsHostRuntime.test(source))
     return "This program uses threads, so it runs only with the native toolchain.";
@@ -22,9 +28,10 @@ export function nativeReason(entry, source) {
 export function selectPlaygroundExamples(gallery, sourceFor) {
   return gallery.flatMap((entry) => {
     if (entry.language) return [];
-    const source = entry.example && sourceFor(entry.example);
+    const id = galleryExampleId(entry);
+    const source = id && sourceFor(id);
     if (!source || nativeReason(entry, source)) return [];
-    return [{ id: entry.example, slide: entry.slide, source }];
+    return [{ id, slide: entry.slide, source }];
   });
 }
 

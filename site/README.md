@@ -158,12 +158,12 @@ to their linked program. Gallery links use the same routes as the Examples
 index. The former `/playground/?example=...` interface redirects to those
 routes; `/playground/programs/` still holds the shared WebAssembly assets.
 
-Complete-example pages use `src/content/examples/*.md` metadata and the shared
-article layout. The two introductory walkthroughs set `section: tours` and
-`fullSource: true`; their `order` puts Essentials before Language. Their source
-and expected output come directly from the checked-in examples. The numbered
-source comments supply the linked section index, so editing a walkthrough
-updates its page without a second copy of the code. `/examples/` opens Essentials.
+Complete programs use `src/content/examples/*.md` metadata and the shared
+article layout. The two Start here tours use the same topic layout as Love,
+Power, and Magic. Each lesson is a source-owned gallery entry with
+`home: false`. The gallery supplies the lesson title and order, and the
+manifest supplies its expected output. The browser runs each supported lesson
+independently. The threads lessons run locally. `/examples/` opens Essentials.
 
 
 A sample that genuinely cannot compile must

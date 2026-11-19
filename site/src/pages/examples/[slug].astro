@@ -1,7 +1,5 @@
 ---
 import { basename } from "node:path";
-import ExampleSource from "../../components/ExampleSource.astro";
-import { exampleEntries } from "../../lib/example-catalog";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import SiteHeader from "../../components/SiteHeader.astro";
 import SiteFooter from "../../components/SiteFooter.astro";
@@ -48,7 +46,7 @@ const previous = articles[(current + articles.length - 1) % articles.length];
 <BaseLayout
   title={`${page.title.replace(/\.$/, "")} \u2014 x2c`}
   description={page.description}
-  socialImage={page.fullSource ? undefined : `examples/${page.slug}.png`}
+  socialImage={`examples/${page.slug}.png`}
   socialImageAlt={`${page.title} ${page.description}`}
 >
   <Fragment slot="header"><SiteHeader examples /></Fragment>
@@ -57,14 +55,11 @@ const previous = articles[(current + articles.length - 1) % articles.length];
     data-section={section} data-surface="detail">
     <ExampleHeading page={page} sourceUrl={sourceUrl} />
 
-    {page.fullSource ? <>
-      <div class="example-prose"><Content /></div>
-      <ExampleSource source={exampleEntries.find(entry => entry.path === source)!.source} path={source} />
-    </> : <ExampleWalkthrough panels={panels}
-      codeLabel={page.codeLabel ?? "The idea in code"} />}
+    <ExampleWalkthrough panels={panels}
+      codeLabel={page.codeLabel ?? "The idea in code"} />
 
     <div class="example-reading">
-      {!page.fullSource && <div class="example-prose"><Content /></div>}
+      <div class="example-prose"><Content /></div>
       {output && (
         <figure class="example-output">
           <figcaption>

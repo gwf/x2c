@@ -1,0 +1,7 @@
+lifetime: ready!
+   retained [ 1, 2 ]
+   temporary 9
+   restored 1; aliased 5
+   cleanup before catch
+   caught bad-arg
+   finally

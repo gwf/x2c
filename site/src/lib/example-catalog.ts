@@ -3,7 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import gallery from "../../../examples/gallery.json";
 import { slides, articles, playgroundExamples } from "./examples";
-import { nativeReason } from "../../scripts/playground-examples.mjs";
+import { galleryExampleId, nativeReason } from "../../scripts/playground-examples.mjs";
 
 type ExampleMarkdown = MarkdownInstance<Record<string, any>>;
 const published = new Map(playgroundExamples.map(entry => [entry.id, entry]));
@@ -32,9 +32,8 @@ const galleryEntries = gallery.flatMap((entry) => {
   if (!path?.endsWith(".x")) return [];
   const slide = slides.find((item) => item.file?.endsWith(`/${entry.slide}`))!;
   if (slide.frontmatter.section === "packages") return [];
-  const id = entry.example ?? (path.startsWith("examples/")
-    ? path.slice("examples/".length, -2)
-    : `${slide.frontmatter.section}/${slide.frontmatter.slug}`);
+  const id = galleryExampleId(entry)
+    ?? `${slide.frontmatter.section}/${slide.frontmatter.slug}`;
   const flagFile = path.slice(0, -2) + ".flags";
   const flags = existsSync(join(import.meta.env.X2C_REPOSITORY_ROOT, flagFile))
     ? read(flagFile).trim() : "";
@@ -76,8 +75,11 @@ export const exampleEntries: {
   nativeReason?: string; program: boolean; output?: string;
   slide?: ExampleMarkdown;
   article?: ExampleMarkdown; recipe?: string; description?: string;
-}[] = [...programEntries.filter(entry => entry.section === "tours"),
-  ...galleryEntries, ...programEntries.filter(entry => entry.section !== "tours")];
+}[] = [...galleryEntries, ...programEntries];
+export const tourSections = {
+  essentials: "x2c essentials",
+  language: "Language walkthrough",
+};
 export const exampleSections = ["love", "power", "magic", "programs"];
 
 // All entry points use the same complete-example destination.
