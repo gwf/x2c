@@ -32,6 +32,6 @@ int main(void) {
     defer puts("Cleanup before catch");
     raise %(bad-arg (operation "tour"));
   }
-  catch %(bad-arg *): printf("Caught error. Restored count: %d\n", count);
+  catch %(bad-arg *): puts(%"Caught error. Restored count: $count");
   return 0;
 }

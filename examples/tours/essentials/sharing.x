@@ -11,7 +11,7 @@ int main(void) {
     Shared list tail: $(whole.cdr() === tail)
     Array after mutation: $(numbers.repr())"));
   String greeting = "hello" + " world", expected = "hello world";
-  printf("Canonical string identity: %d\n", greeting === expected);
+  puts(%"Canonical string identity: $(greeting === expected)");
   Map counts = {zero: 0};
   Var found;
   int present = counts.try_get(<zero>, found);

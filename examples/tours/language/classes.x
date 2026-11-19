@@ -16,6 +16,6 @@ int main(void) {
   Node node = auto Node.new(7);
   Node same = node;
   same.value++;
-  printf("Shared node: %d\n", node.value);
+  puts(%"Shared node: $(node.value)");
   return 0;
 }

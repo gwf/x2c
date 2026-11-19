@@ -16,8 +16,7 @@ int main(void) {
   puts($dedent(%"
     Sum after skipping 2: $total
     Unpacked number: $first
-    Unpacked label: $label"));
-  puts($dedent(%"
+    Unpacked label: $label
     Zero key present: $present
     Stored value: $found
     Missing key present: $(<missing> in counts)"));

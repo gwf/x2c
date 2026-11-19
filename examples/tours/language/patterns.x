@@ -16,6 +16,7 @@ int main(void) {
     default: puts("No move matched");
   }
   List result = simplify(%(add 2 3));
-  if (result ~= %(value ?(int n))) printf("Simplified value: %d\n", n);
+  if (result ~= %(value ?(int n)))
+    puts(%"Simplified value: $n");
   return 0;
 }

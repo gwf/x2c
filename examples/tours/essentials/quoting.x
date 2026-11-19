@@ -7,8 +7,7 @@ int main(void) {
   List pair = $(n, n + 1);
   puts($dedent(%"
     Quoted name: $(%(n).repr())
-    Inserted value: $($(n).repr())"));
-  puts($dedent(%"
+    Inserted value: $($(n).repr())
     Nested list: $(%($pair).repr())
     Spliced list: $(%(@pair).repr())"));
   String key = "answer";

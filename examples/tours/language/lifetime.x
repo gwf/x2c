@@ -24,7 +24,7 @@ int main(void) {
   puts(%"Retained array: $(kept.repr())");
   int level = 1;
   with (level = 9) {
-    printf("Temporary level: %d\n", level);
+    puts(%"Temporary level: $level");
   }
   alias kept[0] as first;
   first += 4; // An alias substitutes its expression on each use.

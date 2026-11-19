@@ -13,17 +13,15 @@ int main(void) {
   puts($dedent(%"
     Quoted list: $(quoted.repr())
     Evaluated list: $(evaluated.repr())
-    Extended list: $(extended.repr())"));
-  puts($dedent(%"
+    Extended list: $(extended.repr())
     Array: $(numbers.repr())
     Last item: $(numbers[-1])
-    Slice: $(numbers[1:].repr())"));
-  puts($dedent(%"
+    Slice: $(numbers[1:].repr())
     Bare keys: $(named.keys().list().repr())
     Computed keys: $(computed.keys().list().repr())
-    Computed key present: $(key in computed)"));
-  printf("Shared list tail: %d\nShared array: %d\n",
-         extended.cdr() === evaluated, numbers === shared);
+    Computed key present: $(key in computed)
+    Shared list tail: $(extended.cdr() === evaluated)
+    Shared array: $(numbers === shared)"));
   // Quoted Array/Map contents follow the same data-reading rule.
   Array tags = %[ready, done];
   Map settings = %{mode: fast};

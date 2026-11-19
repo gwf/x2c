@@ -10,11 +10,10 @@ int main(void) {
   puts($dedent(%"
     Greeting: $greeting
     Slice: $(greeting[0:5])
-    Phase: $phase"));
-  puts($dedent(%"
+    Phase: $phase
     Long atom: $name
-    Phase index: $(phases.index(phase))"));
-  printf("Equal strings: %d\nIdentical strings: %d\n",
-         greeting == expected, greeting === expected);
+    Phase index: $(phases.index(phase))
+    Equal strings: $(greeting == expected)
+    Identical strings: $(greeting === expected)"));
   return 0;
 }
