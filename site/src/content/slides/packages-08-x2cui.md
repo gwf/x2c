@@ -2,7 +2,7 @@
 slug: x2cui
 section: packages
 tab: x2cui
-title: You complete me.
+title: UI complete me.
 image: packages/x2cui-orders.png
 imageAlt: Recent orders with customer avatars, payment badges, sortable columns, and pagination.
 imageWidth: 760
