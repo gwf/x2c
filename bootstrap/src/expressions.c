@@ -292,6 +292,8 @@ static List f6_access____field_member(Compiler c, Type receiver, List field, Sym
 
 static List f6_access____method_member(Compiler c, Type receiver_type, Type type, List field);
 
+static List f6_access____package_static_method(Compiler c, String method, Type * signature);
+
 static List f6_access____imported_method(Compiler c, String method, Type receiver);
 
 static Type f6_access____receiver_relative_signature(Compiler c, List binding, Type signature, Type receiver);
@@ -2567,7 +2569,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_3(void)
   _1944 = cons(_1943, NULL);
   _1945 = cons(_250, _1944);
   _1946 = List_var(_1945);
-  _1947 = int_var(89789);
+  _1947 = int_var(90342);
   _1948 = cons(_1947, NULL);
   _1949 = cons(_255, _1948);
   _1950 = List_var(_1949);
@@ -2766,7 +2768,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2140 = cons(_2139, NULL);
   _2141 = cons(_242, _2140);
   _2142 = List_var(_2141);
-  _2143 = int_var(90151);
+  _2143 = int_var(90704);
   _2144 = cons(_2143, NULL);
   _2145 = cons(_255, _2144);
   _2146 = List_var(_2145);
@@ -2883,7 +2885,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2257 = cons(_2256, NULL);
   _2258 = cons(_242, _2257);
   _2259 = List_var(_2258);
-  _2260 = int_var(90913);
+  _2260 = int_var(91466);
   _2261 = cons(_2260, NULL);
   _2262 = cons(_255, _2261);
   _2263 = List_var(_2262);
@@ -2981,7 +2983,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2355 = cons(_2354, NULL);
   _2356 = cons(_242, _2355);
   _2357 = List_var(_2356);
-  _2358 = int_var(90997);
+  _2358 = int_var(91550);
   _2359 = cons(_2358, NULL);
   _2360 = cons(_255, _2359);
   _2361 = List_var(_2360);
@@ -3106,7 +3108,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_4(void)
   _2480 = cons(_2479, NULL);
   _2481 = cons(_242, _2480);
   _2482 = List_var(_2481);
-  _2483 = int_var(90734);
+  _2483 = int_var(91287);
   _2484 = cons(_2483, NULL);
   _2485 = cons(_255, _2484);
   _2486 = List_var(_2485);
@@ -3207,7 +3209,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2578 = cons(_2577, NULL);
   _2579 = cons(_242, _2578);
   _2580 = List_var(_2579);
-  _2581 = int_var(90563);
+  _2581 = int_var(91116);
   _2582 = cons(_2581, NULL);
   _2583 = cons(_255, _2582);
   _2584 = List_var(_2583);
@@ -3431,7 +3433,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _2802 = cons(_2801, NULL);
   _2803 = cons(_242, _2802);
   _2804 = List_var(_2803);
-  _2805 = int_var(91204);
+  _2805 = int_var(91757);
   _2806 = cons(_2805, NULL);
   _2807 = cons(_255, _2806);
   _2808 = List_var(_2807);
@@ -3639,7 +3641,7 @@ __attribute__((noinline, cold)) static void _x2c_gensym_cache_initialize_5(void)
   _3010 = List_var(_3009);
   _3011 = cons(_202, _84);
   _3012 = List_var(_3011);
-  _3013 = int_var(93606);
+  _3013 = int_var(94159);
   _3014 = cons(_3013, NULL);
   _3015 = cons(_255, _3014);
   _3016 = List_var(_3015);
@@ -6134,6 +6136,7 @@ static List f6_access____method_member(Compiler c, Type receiver_type, Type type
   }
   );
   Type signature = List_type(Sym_get(c -> sym, cons(String_var(method), NULL)));
+  List binding = List_truth(Type_list(signature)) ? NULL : f6_access____package_static_method(c, method, &(signature));
   int rejected = Compiler_protocol_rejects_direct_member(c, type, Var_str(List_car(field)));
   if(List_truth(Type_list(signature)) && rejected == 2){
     String name =({
@@ -6143,24 +6146,32 @@ static List f6_access____method_member(Compiler c, Type receiver_type, Type type
     String hidden = String_join(NULL, cons(String_var(_1534), cons(String_var(name), cons(String_var(_1535), NULL))));
     Compiler_report_error(c, 1362954, String_add(hidden, _1536), NULL, NULL);
   }
-  if(List_truth(Type_list(signature)) && rejected) signature = NULL;
-  List binding = NULL;
-  if(List_truth(Type_list(signature))) binding = Sym_reference(c -> sym, cons(String_var(method), NULL), NULL);
-  else{
-    List imported = rejected ? NULL : f6_access____imported_method(c, method, receiver_type);
-    if(List_truth(imported)) return imported;
-    List resolved = Compiler_resolve_protocol_member(c, type, Var_str(List_car(field)));
-    if(List_truth(resolved)){
-      List _x2c_gensym_destructure_1 = resolved;
-      List method_binding = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));
-      Type method_signature = Var_type(List_getindex(_x2c_gensym_destructure_1, 1));
-      return cons(_613, cons(List_var(method_binding), cons(List_var(method_signature), NULL)));
-    }
-
+  if(List_truth(Type_list(signature)) && ! rejected){
+    if(! List_truth(binding)) binding = Sym_reference(c -> sym, cons(String_var(method), NULL), NULL);
+    signature = f6_access____receiver_relative_signature(c, binding, signature, receiver_type);
+    return cons(_613, cons(List_var(binding), cons(List_var(signature), NULL)));
   }
-  if(! List_truth(Type_list(signature))) return NULL;
-  signature = f6_access____receiver_relative_signature(c, binding, signature, receiver_type);
-  return cons(_613, cons(List_var(binding), cons(List_var(signature), NULL)));
+  List imported = rejected ? NULL : f6_access____imported_method(c, method, receiver_type);
+  if(List_truth(imported)) return imported;
+  List resolved = Compiler_resolve_protocol_member(c, type, Var_str(List_car(field)));
+  if(! List_truth(resolved)) return NULL;
+  List _x2c_gensym_destructure_1 = resolved;
+  List method_binding = Var_list_payload(List_getindex(_x2c_gensym_destructure_1, 0));
+  Type method_signature = Var_type(List_getindex(_x2c_gensym_destructure_1, 1));
+  return cons(_613, cons(List_var(method_binding), cons(List_var(method_signature), NULL)));
+}
+
+int Sym_is_file_static(Sym, Var);
+
+static List f6_access____package_static_method(Compiler c, String method, Type * signature){
+  if(! String_truth(c -> package)) return NULL;
+  String source = String_remove_prefix(method, String_join(NULL, cons(String_var(c -> package), cons(String_var(_1537), NULL))));
+  if(String_equal(source, method)) return NULL;
+  Type declared = NULL;
+  List binding = Sym_lookup(c -> sym, cons(String_var(source), NULL), &(declared));
+  if(! Type_is_function(declared) || ! Sym_is_file_static(c -> sym, List_var(binding))) return NULL;
+  (* signature) = declared;
+  return binding;
 }
 
 List Compiler_imported_providers(Compiler, String);
