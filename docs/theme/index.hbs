@@ -494,6 +494,26 @@
         {{/if}}
         {{/if}}
 
+        <script>
+            const codeScrollObserver = new ResizeObserver(entries => {
+                for (const { target } of entries) {
+                    const overflowing = target.scrollWidth > target.clientWidth;
+                    if (overflowing) target.tabIndex = 0;
+                    else target.removeAttribute('tabindex');
+                }
+            });
+            document.querySelectorAll('main pre, main pre > code').forEach(block => {
+                if (!['auto', 'scroll'].includes(getComputedStyle(block).overflowX)) return;
+                codeScrollObserver.observe(block);
+                block.addEventListener('keydown', event => {
+                    if (block.tabIndex === 0 && ['ArrowLeft', 'ArrowRight'].includes(event.key)) {
+                        // Let the browser scroll the block before mdBook handles chapter shortcuts.
+                        event.stopPropagation();
+                    }
+                });
+            });
+        </script>
+
         {{#if fragment_map}}
         <script>
             document.addEventListener('DOMContentLoaded', function() {

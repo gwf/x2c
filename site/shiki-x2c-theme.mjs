@@ -160,7 +160,14 @@ export const x2cDarkTheme = withDistinctColors(darkTheme, "x2c-dark", {
 const githubLight = (await bundledThemes["github-light"]()).default;
 
 export const x2cLightTheme = withDistinctColors(
-  githubLight,
+  {
+    ...githubLight,
+    tokenColors: githubLight.tokenColors.map(rule =>
+      rule.settings.foreground?.toLowerCase() === "#e36209"
+        ? { ...rule, settings: { ...rule.settings, foreground: "#b85008" } }
+        : rule
+    )
+  },
   "x2c-light",
   {
     keyword: "#A626A4",

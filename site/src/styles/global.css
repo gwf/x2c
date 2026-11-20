@@ -565,8 +565,7 @@ main:focus {
 }
 
 .idea-list .idea-tagline {
-  color: var(--dark);
-  opacity: 0.5;
+  color: #6e6d6c;
   font: italic 400 14px "Instrument Serif", Georgia, serif;
 }
 

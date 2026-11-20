@@ -86,5 +86,8 @@ export const exampleSections = ["love", "power", "magic", "programs"];
 export const exampleRoute = (entry: typeof exampleEntries[number]) => entry.article
   ? `${entry.article.frontmatter.slug}/`
   : `${entry.section}/#${entry.id.replaceAll("/", "-")}`;
-export const exampleRoutes = Object.fromEntries(
-  exampleEntries.map(entry => [entry.id, exampleRoute(entry)]));
+export const exampleRoutes = {
+  ...Object.fromEntries(exampleEntries.map(entry => [entry.id, exampleRoute(entry)])),
+  "tours/essentials": "essentials/",
+  "tours/language": "language/",
+};
