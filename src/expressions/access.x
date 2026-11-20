@@ -98,7 +98,8 @@ static List _method_member(
   Compiler c, Type receiver_type, Type type, List field) {
   String method = %"$(type.base_type().car())_$(field.car())";
   Type signature = c.sym.get($(method));
-  List binding = signature ? NULL : _package_static_method(c, method, signature);
+  List binding = signature
+    ? NULL : _package_static_method(c, method, signature);
   int rejected =
     c.protocol_rejects_direct_member(type, field.car().str());
   if (signature && rejected == 2) {
@@ -125,7 +126,8 @@ static List _method_member(
 
 /* A static method on a package type takes the source spelling of its
    owner. Ordinary lookup applies the current file's visibility rules. */
-static List _package_static_method(Compiler c, String method, Type &signature) {
+static List _package_static_method(
+  Compiler c, String method, Type &signature) {
   if (!c.package) return NULL;
   String source = method.remove_prefix(%"$(c.package)__");
   if (source == method) return NULL;
