@@ -98,6 +98,7 @@ static List _method_member(
   Compiler c, Type receiver_type, Type type, List field) {
   String method = %"$(type.base_type().car())_$(field.car())";
   Type signature = c.sym.get($(method));
+  List binding = signature ? NULL : _package_static_method(c, method, signature);
   int rejected =
     c.protocol_rejects_direct_member(type, field.car().str());
   if (signature && rejected == 2) {
@@ -108,23 +109,31 @@ static List _method_member(
       hidden + " conformance; adopt the protocol for this type to use it",
       NULL);
   }
-  if (signature && rejected) signature = NULL;
-  List binding = NULL;
-  if (signature) binding = c.sym.reference($(method), NULL);
-  else {
-    List imported = rejected
-      ? NULL : _imported_method(c, method, receiver_type);
-    if (imported) return imported;
-    List resolved = c.resolve_protocol_member(type, field.car().str());
-    if (resolved) {
-      (List method_binding, Type method_signature) = resolved;
-      return %(method $method_binding $method_signature);
-    }
+  if (signature && !rejected) {
+    if (!binding) binding = c.sym.reference($(method), NULL);
+    signature = _receiver_relative_signature(
+      c, binding, signature, receiver_type);
+    return %(method $binding $signature);
   }
-  if (!signature) return NULL;
-  signature = _receiver_relative_signature(
-    c, binding, signature, receiver_type);
-  return %(method $binding $signature);
+  List imported = rejected ? NULL : _imported_method(c, method, receiver_type);
+  if (imported) return imported;
+  List resolved = c.resolve_protocol_member(type, field.car().str());
+  if (!resolved) return NULL;
+  (List method_binding, Type method_signature) = resolved;
+  return %(method $method_binding $method_signature);
+}
+
+/* A static method on a package type takes the source spelling of its
+   owner. Ordinary lookup applies the current file's visibility rules. */
+static List _package_static_method(Compiler c, String method, Type &signature) {
+  if (!c.package) return NULL;
+  String source = method.remove_prefix(%"$(c.package)__");
+  if (source == method) return NULL;
+  Type declared = NULL;
+  List binding = c.sym.lookup($(source), declared);
+  if (!declared.is_function() || !c.sym.is_file_static(binding)) return NULL;
+  signature = declared;
+  return binding;
 }
 
 /* Find a method that an imported package adds to an external receiver. The

@@ -594,6 +594,8 @@ cat >"$BUILD/package-import/packages/depcache/src/depcache.x" <<'EOF'
 #include "helper.x"
 #include "native.h"
 typedef int Value;
+static int Value.step(Value value) => value + 1;
+int package_steps(Value value) => value.step() + Value.step(value);
 class CachedValue { int value; };
 static class HiddenValue { int value; };
 protocol Addition(T) { T T.add(T, T); }
@@ -622,6 +624,13 @@ grep -q 'depcache__Var_cachedvalue' \
   fail "package class lost its canonical reverse converter"
 ! grep -q 'HiddenValue' "$BUILD/package-import/out/depcache.h" ||
   fail "private package class escaped through generated defaults"
+grep -q '^static int Value_step(' "$BUILD/package-import/out/depcache.c" ||
+  fail "package static method lost internal linkage"
+grep -Fq 'return Value_step(value) + Value_step(value);' \
+  "$BUILD/package-import/out/depcache.c" ||
+  fail "package static method calls selected different bindings"
+! grep -q 'Value_step' "$BUILD/package-import/out/depcache.h" ||
+  fail "package static method escaped into the public header"
 
 # Recording a package interface must retain resolved native-type methods.
 mkdir -p "$BUILD/package-import/packages/depcache/builds" \
