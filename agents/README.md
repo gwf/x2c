@@ -6,6 +6,8 @@ delivery. This page routes tasks to skills and deeper references.
 
 ## Learn from working code
 
+- [Writing a good x2c app](writing-x2c-apps.md) gives agents the application
+  idioms, x2cui practices, and measured exceptions in one guide.
 - [Programming idioms](../docs/src/guide/idioms.md) explains how to choose
   values, collections, protocols, macros, and cleanup.
 - [The language tour](../examples/tours/language/) shows the language in
