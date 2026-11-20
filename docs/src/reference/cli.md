@@ -64,7 +64,7 @@ compiler installation:
 
 ```sh
 x2c update
-x2c update --version 0.16.1
+x2c update --version 0.16.2
 ```
 
 The command's check option reports the installed and available versions

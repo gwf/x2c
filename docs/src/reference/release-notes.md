@@ -3,6 +3,14 @@
 Each section summarizes what changed for a user of the compiler, runtime,
 commands, and packages since the previous release.
 
+## 0.16.2 (2026-11-19)
+
+- The book has clearer explanations and a consolidated Compiler API index.
+- The website's Start Here tours let readers run individual lessons. The
+  threading lessons run locally with the native compiler.
+- x2cui adds experimental component input and focus support through its
+  pinned CUI revision.
+
 ## 0.16.1 (2026-11-16)
 
 A patch release of 0.16.0. The compiler and runtime are unchanged.
