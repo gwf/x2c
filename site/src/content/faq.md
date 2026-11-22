@@ -1,22 +1,32 @@
 ## What is x2c, and who is it for?
 
-x2c is C with ideas borrowed from Lisp: dynamic values, useful collections,
-and macros that work with the structure of a program. I built it for the
-way I like to think and code. If you like C's directness but wish it did
-more of the tedious work, you might like it too.
+x2c is a superset of C with a strong Lisp influence: dynamic values,
+collections, and macros that work with program structure. I built it for
+programmers who like C's control and access to native libraries, but want
+less bookkeeping and more room to extend the language.
 
 ## What kinds of programs is it suited for?
 
-Command-line tools, native applications, language tools, and experiments
-that benefit from C libraries without quite so much C bookkeeping. The
-compiler and runtime are themselves written in x2c. The
-[examples](../../examples/) are the best place to judge whether it suits
+x2c is especially well suited to prototyping. You can put an idea together
+quickly, then refine it into production code a piece at a time. Start with
+the built-in types and methods and replace them with more specialized code
+wherever performance or control matters. The prototype can grow into the
+finished program without a rewrite in another language.
+
+x2c is more versatile than its C ancestry might suggest. x2c is
+comfortable with command-line tools, scripts, graphical applications,
+multithreaded services, and embedded languages, and it can target WebAssembly
+too. I like being able to move among those kinds of programs without
+changing languages or carrying a large toolchain.
+
+The [examples](../../examples/) are the best place to judge whether it suits
 something you want to build.
 
 ## Which platforms and tooling are supported?
 
 macOS 15 or later and Linux with glibc 2.38 or later, on Apple Silicon/ARM64
-and x86-64. Windows support is through WSL2. There is a VS Code extension
+and x86-64. Windows support is through WSL2. There is a
+[VS Code extension](https://marketplace.visualstudio.com/items?itemName=x2c-lang.x2c-syntax)
 and a language server for editors with an LSP client. Native debugging
 uses ordinary C tools, with source mapping back to x2c. See
 [installation](../../docs/guide/installation.html) and
@@ -24,19 +34,30 @@ uses ordinary C tools, with source mapping back to x2c. See
 
 ## What does x2c add to C?
 
-Collections, dynamic values, pattern matching, scoped allocation,
-exceptions, threads, classes, and compile-time macros written in x2c.
-You can use those features where they help and write ordinary C elsewhere.
+x2c adds strings, collections, dynamic values, pattern matching, lambdas,
+and closures. `foreach` works across collections and other types that
+support iteration. Scoped allocation, automatic cleanup, exceptions, and
+threads take care of more of the machinery around your code.
+
+It also adds classes, modules with clean namespaces, and package management
+for working with native libraries. Compile-time macros and meta-functions
+let you generate and transform code using x2c itself.
+
+You can use these features where they help and keep ordinary C elsewhere.
 The [language walkthrough](../../examples/language/) shows how the pieces
 fit together.
 
 ## How does Lisp influence x2c?
 
-Lisp shaped how x2c represents values and programs, and the idea that a
-language should be something you can extend. Lists, symbols, and structured
-macros are part of that inheritance. You don't need to write Lisp to use
-x2c: compile-time code is x2c too. There is also an embeddable Lisp
-interpreter for programs that want one.
+Lisp's deepest influence is that x2c is its own metalanguage: you can
+metaprogram x2c in x2c. Code is data you can inspect, match, and transform
+using the language itself.
+
+You don't have to metaprogram to use x2c. I've used that extensibility
+mainly to make ordinary programming simpler: a small set of language
+additions lets the compiler handle conversions and boilerplate that you
+would otherwise write yourself. You benefit from that machinery even if
+you never write a macro.
 
 ## Why use x2c instead of C++, Rust, Zig, or Python?
 
@@ -77,8 +98,10 @@ the rules.
 There is no garbage collector. Scopes reclaim mutable allocations, while
 interned strings and lists live in pools, usually for the life of the
 process. Shorter-lived pools are available. C pointers and C's obligations
-remain: x2c does not promise memory safety. Scoped cleanup and lifetime
-diagnostics help with some of the work. See the
+remain. While x2c does not promise memory safety, its scoped memory model
+makes it straightforward to write fast, memory-safe code by following one
+simple rule: an object's lifetime must stay within its enclosing scope.
+See the
 [memory guide](../../docs/guide/memory.html).
 
 ## What can x2c's macros do?
@@ -111,8 +134,10 @@ isn't the same thing as twenty years of production use.
 Start with the runnable [examples](../../examples/essentials/), then
 [install the compiler](../../#install) and change a small program. The
 [language walkthrough](../../examples/language/) gives you a broader tour;
-the [book](../../docs/) fills in the details. You don't need to learn the
-macro system before writing something useful.
+the [book](../../docs/) fills in the details. You don't need macros,
+meta-functions, or any of the fancy stuff to get started. x2c is happy to
+flirt or casually date before you get engaged or married. Use as little or
+as much of the language as you like.
 
 ## What role did AI play in building x2c?
 
@@ -140,8 +165,16 @@ request will fit the project.
 
 ## Who maintains x2c, and what support or future development should users expect?
 
-I'm Gary Flake, and I maintain x2c. This is a personal project, with no
+I am Gary William Flake, and I wrote x2c. This is a personal project, with no
 support team or promised schedule. I intend to keep working on it, but
 I can't commit to response times, fixes, or particular features. Use the
 [issue tracker](https://github.com/gwf/x2c/issues) for bugs and ideas, and
 make your plans with those limits in mind.
+
+## Your name sounds familiar. Do I know you from somewhere?
+
+Possibly. I wrote *The Computational Beauty of Nature*, founded Yahoo!
+Research Labs and Microsoft Live Labs, later founded Clipboard, and have
+been involved with a bunch of other startups. You may have also seen my
+TED talk. None of that explains how I ended up writing a programming
+language, but here we are.
