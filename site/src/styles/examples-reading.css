@@ -1,6 +1,4 @@
-html:has(.examples-shell) { --sidebar-width: min(var(--sidebar-target-width), 80vw); --sidebar-resize-indicator-width: 8px; --sidebar-resize-indicator-space: 2px; --icons: var(--muted-dark); }
-.examples-shell { --sans-font: Archivo, Helvetica, sans-serif; --mono-font: "JetBrains Mono", monospace; --examples-top: var(--landing-header-height, 69px); }
-.examples-shell .sidebar { top: var(--examples-top); z-index: 19; border-right: 1px solid var(--line); font: 14px/1.4 Archivo, sans-serif; }
+@import "./section-sidebar.css";
 .examples-reading { padding: 42px clamp(20px, 4vw, 64px) 80px; }
 .examples-reading > * { max-width: var(--reading-width, 720px); margin-left: auto; margin-right: auto; }
 .examples-topic-heading { margin-bottom: 56px; }

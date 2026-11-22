@@ -53,16 +53,6 @@ const sectionLinks = (section: string) => {
     <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle"><div class="sidebar-resize-indicator"></div></div>
   </nav>
   <script is:inline>
-    try {
-      if (!sessionStorage.getItem("examples-visited") && document.body.clientWidth >= 1080) {
-        document.getElementById("mdbook-sidebar-toggle-anchor").checked = true;
-        document.documentElement.classList.add("sidebar-visible");
-      }
-      // The entry route redirects; initialize the session on its destination.
-      if (!/\/examples\/(?:index.html)?$/.test(location.pathname)) {
-        sessionStorage.setItem("examples-visited", "true");
-      }
-    } catch {}
     for (const item of document.querySelectorAll("[data-example-section]")) {
       const key = `examples-section-${item.dataset.exampleSection}`;
       try {

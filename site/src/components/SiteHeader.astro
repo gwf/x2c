@@ -2,9 +2,10 @@
 interface Props {
   home?: boolean;
   examples?: boolean;
+  sidebarLabel?: string;
 }
 
-const { home = false, examples = false } = Astro.props;
+const { home = false, examples = false, sidebarLabel = examples ? "Toggle example index" : undefined } = Astro.props;
 const base = import.meta.env.BASE_URL;
 const local = (path: string) => `${base}${path.replace(/^\/+/, "")}`;
 const currentPage = Astro.url.pathname.slice(base.length).split("/")[0];
@@ -24,8 +25,8 @@ const taglines = [
 ];
 ---
 
-<header class:list={["landing-header", {"examples-header": examples}]}>
-  {examples && <label id="mdbook-sidebar-toggle" class="sidebar-toggle" for="mdbook-sidebar-toggle-anchor" tabindex="0" role="button" aria-label="Toggle example index" aria-controls="mdbook-sidebar" aria-expanded="true"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M1 3h14M1 8h14M1 13h14" fill="none" stroke="currentColor" /></svg></label>}
+<header class:list={["landing-header", {"examples-header": Boolean(sidebarLabel)}]}>
+  {sidebarLabel && <label id="mdbook-sidebar-toggle" class="sidebar-toggle" for="mdbook-sidebar-toggle-anchor" tabindex="0" role="button" aria-label={sidebarLabel} aria-controls="mdbook-sidebar" aria-expanded="true"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M1 3h14M1 8h14M1 13h14" fill="none" stroke="currentColor" /></svg></label>}
   <div class="landing-header-inner">
     <div
       class="landing-branding"

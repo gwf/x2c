@@ -1,0 +1,3 @@
+html:has(.examples-shell, .about-shell) { --sidebar-width: min(var(--sidebar-target-width), 80vw); --sidebar-resize-indicator-width: 8px; --sidebar-resize-indicator-space: 2px; --icons: var(--muted-dark); }
+:is(.examples-shell, .about-shell) { --sans-font: Archivo, Helvetica, sans-serif; --mono-font: "JetBrains Mono", monospace; }
+:is(.examples-shell, .about-shell) .sidebar { top: var(--landing-header-height, 69px); z-index: 19; border-right: 1px solid var(--line); font: 14px/1.4 Archivo, sans-serif; }

@@ -50,7 +50,7 @@ export function mdbookSidebarAssets() {
       css: between(general, ".page-wrapper {", ".content {") +
         between(chrome, ".sidebar {", "/* Theme Menu Popup */") +
         between(brand, "/* Sidebar */", "/* Footer pager */") +
-        `\n.examples-shell { --x2c-red-text: var(--red-text); ${colors} }`,
+        `\n:is(.examples-shell, .about-shell) { --x2c-red-text: var(--red-text); ${colors} }`,
     };
     return assets;
   } finally { rmSync(dir, {recursive: true, force: true}); }

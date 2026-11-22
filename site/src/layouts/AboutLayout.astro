@@ -1,0 +1,47 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import SiteFooter from "../components/SiteFooter.astro";
+import SiteHeader from "../components/SiteHeader.astro";
+import { mdbookSidebarAssets } from "../../mdbook-sidebar.mjs";
+import "../styles/section-sidebar.css";
+
+interface Props {
+  current: "backstory" | "notes" | "faq";
+  title: string;
+  description: string;
+}
+const { current, title, description } = Astro.props;
+const sidebar = mdbookSidebarAssets();
+const base = import.meta.env.BASE_URL;
+const pages = [
+  { id: "backstory", label: "Backstory", path: "about/" },
+  { id: "notes", label: "Technical Notes", path: "about/notes/" },
+  { id: "faq", label: "Future FAQ", path: "about/faq/" },
+];
+---
+<BaseLayout title={title} description={description}>
+  <SiteHeader slot="header" sidebarLabel="Toggle About index" />
+  <style is:inline set:html={sidebar.css} />
+  <div class="about-shell">
+    <input type="checkbox" id="mdbook-sidebar-toggle-anchor" hidden />
+    <script is:inline set:html={sidebar.init} />
+    <nav id="mdbook-sidebar" class="sidebar" aria-label="About index">
+      <div class="sidebar-scrollbox">
+        <ol class="chapter">
+          {pages.map((page, index) => <li class="chapter-item">
+            <a href={`${base}${page.path}`} class:list={{active: current === page.id}}
+              aria-current={current === page.id ? "page" : undefined}>
+              <strong>{index + 1}.</strong> {page.label}
+            </a>
+          </li>)}
+        </ol>
+      </div>
+      <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle"><div class="sidebar-resize-indicator"></div></div>
+    </nav>
+    <div class="page-wrapper">
+      <article class="about-page"><slot /></article>
+    </div>
+  </div>
+  <script is:inline set:html={sidebar.script} />
+  <SiteFooter slot="footer" />
+</BaseLayout>
