@@ -13,6 +13,8 @@ typedef Symbol Uuid;
 #include <errno.h>
 #ifdef __APPLE__
 #include <stdlib.h>
+#elif defined(__EMSCRIPTEN__)
+#include <unistd.h>
 #else
 #include <sys/random.h>
 #endif
@@ -87,7 +89,7 @@ long Random_below(Random * r, long bound){
   if(bound <= 0){
     Var _x2c_gensym_literal_part_0 = String_var(String_join(NULL, cons(String_var(String_new("Random.below")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/random.x",.function = "Random_below",.line = 73,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_0 = {.file = "../../lib/random.x",.function = "Random_below",.line = 76,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_0, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_0, Symbol_var(5221256), long_var(bound));
       __builtin_unreachable();
     }
@@ -124,7 +126,7 @@ Var Random_choice(Random * r, Array items){
     Var _x2c_gensym_literal_part_1 = String_var(String_join(NULL, cons(String_var(String_new("Random.choice")), NULL)));
     Var _x2c_gensym_literal_part_2 = String_var(String_join(NULL, cons(String_var(String_new("empty Array")), NULL)));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/random.x",.function = "Random_choice",.line = 101,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_1 = {.file = "../../lib/random.x",.function = "Random_choice",.line = 104,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_1, 4372499598, 2, Symbol_var(34096809266140), _x2c_gensym_literal_part_1, Symbol_var(1218550748), _x2c_gensym_literal_part_2);
       __builtin_unreachable();
     }
@@ -139,6 +141,13 @@ void Random_secure_fill(void * bytes, size_t count){
   if(! _init_guard_) _file_init_();
 #ifdef __APPLE__
   arc4random_buf(bytes, count);
+#elif defined(__EMSCRIPTEN__)
+  for(size_t done = 0;  done < count; ){
+    size_t chunk = count - done;
+    if(chunk > 256) chunk = 256;
+    if(getentropy((char *) bytes + done, chunk)) x2c_io_fail(String_var(_0), errno);
+    done += chunk;
+  }
 #else
   for(size_t done = 0;  done < count; ){
     ssize_t got = getrandom((char *) bytes + done, count - done, 0);
@@ -172,7 +181,7 @@ String Uuid_parse(String text){
     Var _x2c_gensym_literal_part_3 = String_var(String_join(NULL, cons(String_var(String_new("Uuid.parse")), NULL)));
     Var _x2c_gensym_literal_part_4 = String_var(_reason(offset));
     {
-      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/random.x",.function = "Uuid_parse",.line = 150,.runtime = 1};
+      static const X2CErrorSite _x2c_gensym_error_site_2 = {.file = "../../lib/random.x",.function = "Uuid_parse",.line = 161,.runtime = 1};
       x2c_error_raise_n(& _x2c_gensym_error_site_2, 28682226919752, 3, Symbol_var(34096809266140), _x2c_gensym_literal_part_3, Symbol_var(1218550748), _x2c_gensym_literal_part_4, Symbol_var(1019648360), int_var(offset));
       __builtin_unreachable();
     }

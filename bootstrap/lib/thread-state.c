@@ -2,6 +2,9 @@
 
 #define __GUARD_0x91771662__
 #include "common.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/stack.h>
+#endif
 _Thread_local int x2c_error_runtime_ready;
 
 _Thread_local unsigned long x2c_execution_stack_low;
@@ -37,7 +40,9 @@ unsigned long _x2c_stack_floor(void){
 }
 
 static unsigned long _native_stack_low(void){
-#if defined(__APPLE__)
+#if defined(__EMSCRIPTEN__)
+  native_stack_low = emscripten_stack_get_end();
+#elif defined(__APPLE__)
   pthread_t self = pthread_self();
   native_stack_low =(unsigned long) pthread_get_stackaddr_np(self) - pthread_get_stacksize_np(self);
 #elif defined(__GLIBC__)

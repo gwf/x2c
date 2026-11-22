@@ -17,7 +17,11 @@ void Lisp_cleanup(Lisp _x2c_gensym_macro_value_0);
 _Thread_local extern Lisp x2c_lisp_active;
 
 #define LISP_NATIVE_ARG_MAX  8
+#ifdef __EMSCRIPTEN__
+#define LISP_STACK_BYTES_MAX (1536L << 10)
+#else
 #define LISP_STACK_BYTES_MAX (6L << 20)
+#endif
 #define LISP_CALL_STEP_MAX 40000000
 void Lisp_call_budget(Lisp lisp, long budget);
 

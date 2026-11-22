@@ -17,6 +17,8 @@ typedef Symbol Uuid;
 #include <errno.h>
 #ifdef __APPLE__
 #include <stdlib.h>
+#elif defined(__EMSCRIPTEN__)
+#include <unistd.h>
 #else
 #include <sys/random.h>
 #endif

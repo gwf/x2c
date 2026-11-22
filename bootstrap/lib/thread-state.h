@@ -6,6 +6,9 @@
 #define __GUARD_0x91771662__
 
 #include "common.h"
+#ifdef __EMSCRIPTEN__
+#include <emscripten/stack.h>
+#endif
 extern _Thread_local int x2c_error_runtime_ready;
 
 extern _Thread_local unsigned long x2c_execution_stack_low;
