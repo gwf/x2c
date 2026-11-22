@@ -5,7 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import time
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--site", type=Path, required=True)
@@ -17,7 +17,9 @@ base = "https://staging.x2c-lang.dev/" if staging else "https://x2c-lang.dev/"
 for attempt in range(12):
     try:
         def read(path):
-            with urlopen(base + path + "?website=" + expected["source_sha"], timeout=30) as response:
+            url = base + path + "?website=" + expected["source_sha"]
+            request = Request(url, headers={"User-Agent": "x2c-website-verifier/1.0"})
+            with urlopen(request, timeout=30) as response:
                 return response.read()
         actual = json.loads(read("website-deployment.json"))
         if actual != expected:
