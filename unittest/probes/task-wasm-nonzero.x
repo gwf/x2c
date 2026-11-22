@@ -1,4 +1,4 @@
-/* A resumed main return must keep its exit status. */
+/* Optional: a resumed WebAssembly main return must keep its exit status. */
 #include "task.x"
 #include <stdlib.h>
 

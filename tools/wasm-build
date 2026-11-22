@@ -45,16 +45,17 @@ if [[ "$profile" == tasks ]]; then
   # An Asyncify fiber can finish after Emscripten's original main frame has
   # unwound. Record its actual return value for the host to finalize on exit.
   cat > "$scratch/x2c-wasm-entry.c" <<EOF
-#define main x2c_wasm_user_main
+/* Keep C's implicit return zero for main; rename only its linker symbol. */
+#pragma redefine_extname main x2c_wasm_user_main
 #include "$(basename "$source")"
-#undef main
 #include <emscripten/emscripten.h>
-int main(int argc, char **argv) {
+int x2c_wasm_entry(int argc, char **argv) __asm__("main");
+int x2c_wasm_entry(int argc, char **argv) {
   int result;
-  if (__builtin_types_compatible_p(__typeof__(&x2c_wasm_user_main), int (*)(void)))
-    result = ((int (*)(void))x2c_wasm_user_main)();
+  if (__builtin_types_compatible_p(__typeof__(&main), int (*)(void)))
+    result = ((int (*)(void))main)();
   else
-    result = ((int (*)(int, char **))x2c_wasm_user_main)(argc, argv);
+    result = ((int (*)(int, char **))main)(argc, argv);
   EM_ASM({ Module['x2cMainResult'] = \$0; }, result);
   return result;
 }

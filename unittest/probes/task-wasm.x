@@ -1,4 +1,4 @@
-/* Cooperative tasks through the optional WebAssembly fiber backend. */
+/* Optional: cooperative tasks and implicit main return through WebAssembly. */
 #include "task.x"
 
 int main(void) {
@@ -40,5 +40,4 @@ int main(void) {
   if (results.len() != 2 || results[0].int() != 7 || results[1].int() != 42)
     return 2;
   puts("Task.run WebAssembly probe passed");
-  return 0;
 }
