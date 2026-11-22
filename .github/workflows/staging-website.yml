@@ -84,8 +84,9 @@ jobs:
         run: |
           make -C source build-safe
           make -C source wasm-runtime
+          make -C source wasm-runtime-threads
       - name: Build complete runnable website
-        run: npm --prefix source/site run build
+        run: PLAYGROUND_THREADS=1 npm --prefix source/site run build
       - name: Install pinned PDF tools
         if: inputs.update_book
         env:
@@ -168,6 +169,7 @@ jobs:
           SITE_STAGED_SOURCE_REF: ${{ env.PRODUCTION_SOURCE_REF }}
           SITE_CANDIDATE_ID: ""
           SOURCE_SHA: ${{ inputs.source_sha }}
+          PLAYGROUND_THREADS: "1"
         run: |
           npm --prefix source/site run build
           python3 trusted/etc/release/prepare-website.py \

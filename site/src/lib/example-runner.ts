@@ -84,7 +84,7 @@ export function setupExampleRunner(root: HTMLElement) {
   };
   // A precompiled program runs the example as published.
   const fetchProgram = async (signal: AbortSignal) => {
-    const url = `${programs}${profile === "threads" ? "threaded/" : ""}${example.id}`;
+    const url = `${programs}${example.id}`;
     if (profile === "threads") return { url: new URL(`${url}.js`, location.href).href };
     const [loader, wasm] = await Promise.all([
       fetchOk(`${url}.js`, signal).then((response) => response.text()),

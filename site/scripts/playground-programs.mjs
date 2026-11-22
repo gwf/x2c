@@ -34,6 +34,7 @@ const threadedRuntime = path.join(root, "builds/wasm/threads/libx2c.a");
 const threadedManifest = path.join(cache, "threaded-programs.json");
 const wasmBuild = path.join(root, "tools/wasm-build");
 const output = path.join(siteRoot, "dist/playground/programs");
+const threadedOutput = path.join(siteRoot, "dist/workers/threaded");
 
 const digest = (...parts) => {
   const hash = createHash("sha256");
@@ -193,11 +194,11 @@ async function install() {
     await copyFile(threadedManifest,
       path.join(output, "threaded-programs.json"));
     for (const id of threaded) {
-      await mkdir(path.dirname(path.join(output, "threaded", id)),
+      await mkdir(path.dirname(path.join(threadedOutput, id)),
         { recursive: true });
       for (const suffix of [".js", ".wasm"])
         await copyFile(path.join(cache, "threaded", id + suffix),
-          path.join(output, "threaded", id + suffix));
+          path.join(threadedOutput, id + suffix));
     }
   }
 }

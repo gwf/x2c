@@ -51,6 +51,11 @@ export default defineConfig({
     assets: "assets"
   },
   vite: {
+    worker: {
+      rolldownOptions: {
+        output: { entryFileNames: "workers/[name]-[hash].js" }
+      }
+    },
     plugins: process.env.PLAYGROUND_THREADS === "1" ? [{
       name: "x2c-threaded-playground-headers",
       configureServer(server) {

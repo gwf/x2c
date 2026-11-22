@@ -12,7 +12,7 @@ title: Concurrently yours.
 ~#include <assert.h>
 
 ~int main(void) {
-  // A bounded channel carries values between native threads.
+  // A bounded channel carries values between worker threads.
   Channel lines = auto Channel.new(<string>, 4);
   Map counts = {};
 
