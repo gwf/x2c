@@ -57,7 +57,7 @@ Map totals = Path.new("src").walk().filter(Path.is_file)
 
 <!-- example: Magic -->
 
-Magic is C made reflective. It insists upon itself. Macros and decorators
+Magic is C made reflective. Patterns become primitives. Macros and decorators
 rewrite the program's syntax as it compiles, meta functions run ordinary x2c at
 compile time, and the compiler is itself written in x2c.
 
