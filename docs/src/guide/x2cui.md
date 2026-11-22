@@ -6,16 +6,16 @@ This chapter belongs to [Advanced Topics](../library/advanced-topics.md).
 
 The `x2cui` package draws windows and user interfaces from x2c. It is an
 interface to [CUI](https://github.com/yappologistic/CUI) revision
-`a5c9ef5efc39` (after 1.4.0), a C99
+`532c9c23fcbc` (after 1.4.0), a C99
 immediate-mode UI library that draws its own components. A program
 describes the whole screen with calls on every frame. CUI lays the screen
 out, handles the mouse and keyboard, and draws it in a window or into
 pixels. The entry unit is `packages/x2cui/src/x2cui.x`, and every public
 name compiles to `x2cui__*`.
 
-The package is experimental. The pinned revision passes off-screen checks on macOS
-arm64 and under Node with WebAssembly. Linux arm64 and x86_64 checks
-were last run with CUI 1.3.1; the Linux windowed path has not been tested.
+The package is experimental. The pinned revision builds and draws off screen
+on macOS arm64 and Ubuntu 24.04 arm64, and under Node with WebAssembly. The Linux
+windowed path remains untested.
 The package has
 no release bundle, so a program builds it from a checkout. A browser build
 of the gallery also exists. CUI has no accessibility tree, no inline

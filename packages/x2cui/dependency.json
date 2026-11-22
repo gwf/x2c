@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "name": "cui",
-  "version": "1.4.0-dev.a5c9ef5efc39",
+  "version": "1.4.0-dev.532c9c23fcbc",
   "profile": "static-app-x11-fonts",
   "sources": [
     {
       "name": "cui",
-      "url": "https://github.com/yappologistic/CUI/archive/a5c9ef5efc39b3fc783758362f6b8f9f130f5883.tar.gz",
-      "sha256": "c1814ad77ae16c3a1930a3512ca1c08001e9bcb89925ac6fdea76481cd9b866b",
-      "root": "CUI-a5c9ef5efc39b3fc783758362f6b8f9f130f5883"
+      "url": "https://github.com/yappologistic/CUI/archive/532c9c23fcbc5c8f916680f8ea9549227998eb68.tar.gz",
+      "sha256": "d547f5c75abcb5152144fc34ce3599c26cfdc873a1c889b329c3c71978a0a7fe",
+      "root": "CUI-532c9c23fcbc5c8f916680f8ea9549227998eb68"
     }
   ],
   "inputs": [
@@ -17,12 +17,8 @@
       "sha256": "66b33b791c7516e57f2a40126a627cadeb859a13d4aebd17d9feaec7bcc05262"
     },
     {
-      "path": "patches/focusable-canvas.patch",
-      "sha256": "c91497d21bceaa1cd9daa82b87fb199b6de8259f7c1ff3662900265ed123fde3"
-    },
-    {
-      "path": "patches/component-input.patch",
-      "sha256": "3021b9f041673fe82e2863e44ff00e9c95d4215acafffcb9c800d93d7b40f933"
+      "path": "patches/slanted-text.patch",
+      "sha256": "522c709ae7f1164a603bebd95d859560d3ae2205b0d2bf13621176d0370a40e3"
     }
   ],
   "steps": [
@@ -41,16 +37,7 @@
         "patch",
         "-p1",
         "-i",
-        "{package}/patches/focusable-canvas.patch"
-      ]
-    },
-    {
-      "cwd": "{source_cui}",
-      "argv": [
-        "patch",
-        "-p1",
-        "-i",
-        "{package}/patches/component-input.patch"
+        "{package}/patches/slanted-text.patch"
       ]
     },
     {

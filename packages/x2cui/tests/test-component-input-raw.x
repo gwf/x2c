@@ -17,8 +17,8 @@ static bool route(Ui ui, void *user, const cui_input_event *event) {
 }
 
 static void canvas(Ui ui, const char *name, bool component) {
-  int flags = CUI_CANVAS_FOCUSABLE | (component ? CUI_CANVAS_COMPONENT_INPUT : 0);
-  cui_canvas_ex(ui, name, CUI_PX(100), CUI_PX(40), NULL, NULL, 0, flags);
+  cui_canvas_opts opts = { .focusable = true, .component_input = component };
+  cui_canvas_ex(ui, name, CUI_PX(100), CUI_PX(40), NULL, NULL, 0, &opts);
 }
 
 static void ownership(void) {
