@@ -103,7 +103,7 @@ static bool _route_input(Ui ui, void *user, const cui_input_event *event) {
 cui_canvas_result Ui.canvas_input(Ui ui, String id, cui_size width, cui_size height,
                                   cui_paint_fn paint, const void *user, size_t user_size) =>
   cui_canvas_ex(ui, id, width, height, paint, user, user_size,
-                CUI_CANVAS_FOCUSABLE | CUI_CANVAS_COMPONENT_INPUT);
+                &(cui_canvas_opts){ .focusable = true, .component_input = true });
 
 // windows
 
@@ -474,7 +474,7 @@ RowState Ui.item_begin(Ui u, RowOptions opts) {
   ItemPaint paint = { id, *hovered, opts.selected, rule };
   cui_canvas_result result = cui_canvas_ex(
     u, "x2cui-item", CUI_FILL, CUI_FILL, _paint_item, &paint, sizeof paint,
-    CUI_CANVAS_FOCUSABLE);
+    &(cui_canvas_opts){ .focusable = true });
   *hovered = result.hovered;
   return (RowState){ result.hovered, result.pressed, result.clicked };
 }
@@ -810,7 +810,7 @@ expand %(
   cui_key_action_down cui_draw_text_slanted
   cui_input_file_hover cui_input_file_drop
   cui_dropped_file_count cui_dropped_file cui_file_drag_active
-  cui_set_platform cui_get_cursor cui_key_pressed cui_key_down cui_shortcut
+  cui_set_platform cui_set_cursor cui_get_cursor cui_key_pressed cui_key_down cui_shortcut
   cui_key_mods cui_mouse_pos cui_mouse_down cui_mouse_clicked
   cui_wants_keyboard cui_wants_mouse cui_set_theme cui_get_theme_mode
   cui_set_accent cui_get_accent cui_theme_get cui_set_reduced_motion

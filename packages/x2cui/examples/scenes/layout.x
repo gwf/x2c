@@ -77,6 +77,25 @@ static void scene_id_scope(Ui ui) {
   }
 }
 
+static void focus_scope_pane(Ui ui, String name, bool active) {
+  ui.id (name) ui.column (gap: 8) {
+    cui_push_focus_scope(ui, ui.make_id("pane"), active);
+    defer cui_pop_focus_scope(ui);
+    ui.label(name);
+    ui.button("Open");
+    ui.button("Save");
+  }
+}
+
+static void scene_focus_scope(Ui ui) {
+  static bool right = false;
+  ui.switch("Use right pane for Tab", right);
+  ui.row (gap: 24) {
+    focus_scope_pane(ui, "Left pane", !right);
+    focus_scope_pane(ui, "Right pane", right);
+  }
+}
+
 static void scene_disabled_scope(Ui ui) {
   static bool locked = true, notify = true;
   ui.switch("Lock the form", locked);
@@ -126,6 +145,7 @@ static Scene layout_scenes[] = {
   { "card", scene_card },
   { "scroll", scene_scroll },
   { "split", scene_split },
+  { "focus_scope", scene_focus_scope },
   { "id_scope", scene_id_scope },
   { "disabled_scope", scene_disabled_scope },
   { "text", scene_text },

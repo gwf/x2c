@@ -1,7 +1,7 @@
 # x2cui: CUI components from x2c
 
 This package provides an x2c interface to [CUI](https://github.com/yappologistic/CUI)
-revision `a5c9ef5efc39` (after 1.4.0), an immediate-mode UI library that draws its own components. A program
+revision `532c9c23fcbc` (after 1.4.0), an immediate-mode UI library that draws its own components. A program
 describes the screen with calls on every frame. CUI lays it out, handles the
 mouse and keyboard, and draws it in a window or into pixels. `PROFILE.md`
 records the build. The book's
@@ -79,16 +79,15 @@ conversion, typed dialog requests, and unhandled application shortcuts.
 
 ## Status
 
-The package is experimental. The pinned revision builds and passes off-screen
-checks on macOS arm64 and under Node with WebAssembly. Headless Chromium
-checks cover the new pages, sorting, and stress modes. Linux arm64 and x86_64
-checks were last run with CUI 1.3.1; the Linux windowed path is untested. The browser build needs
+The package is experimental. The pinned revision builds and draws off screen
+on macOS arm64 and Ubuntu 24.04 arm64, and under Node with WebAssembly.
+Headless Chromium checks cover the new pages, sorting, and stress modes.
+The Linux windowed path remains untested. The browser build needs
 Memory64, JavaScript Promise Integration, and WebGL 2.
 CUI has no accessibility tree, no inline
-input-method composition, and no bidirectional text. The package
-applies two patches to CUI, `table-row-state` and `focusable-canvas`
-(see `PROFILE.md`), which must be checked on each upgrade. A program
-draws from one thread.
+input-method composition, and no bidirectional text. A program draws from one thread.
+The pinned dependency profile lists the patches for native and browser builds
+in [PROFILE.md](PROFILE.md).
 
 CUI's records, enums, constants, and icons, such as `cui_box`,
 `CUI_BUTTON_PRIMARY`, `CUI_FILL`, and `CUI_ICON_PLUS`, arrive under their
@@ -654,7 +653,7 @@ policy.
 
 ## Experimental APIs
 
-This branch pins upstream revision `a5c9ef5efc39b3fc783758362f6b8f9f130f5883`.
+This branch pins upstream revision `532c9c23fcbc5c8f916680f8ea9549227998eb68`.
 It includes configurable spinners, creative controls, canvas toolbars and
 selection tools, presence indicators, voice displays, and loading patterns.
 The complete raw API remains available through the package import.

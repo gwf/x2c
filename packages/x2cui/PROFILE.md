@@ -1,41 +1,27 @@
 # CUI experimental profile
 
-- Upstream revision: `a5c9ef5efc39b3fc783758362f6b8f9f130f5883` of
+- Upstream revision: `532c9c23fcbc5c8f916680f8ea9549227998eb68` of
   `yappologistic/CUI`, after v1.4.0. The upstream header still reports 1.4.0.
-- Source archive: `https://github.com/yappologistic/CUI/archive/a5c9ef5efc39b3fc783758362f6b8f9f130f5883.tar.gz`
+- Source archive: `https://github.com/yappologistic/CUI/archive/532c9c23fcbc5c8f916680f8ea9549227998eb68.tar.gz`
 - Source archive SHA-256:
-  `c1814ad77ae16c3a1930a3512ca1c08001e9bcb89925ac6fdea76481cd9b866b`
+  `d547f5c75abcb5152144fc34ce3599c26cfdc873a1c889b329c3c71978a0a7fe`
 - Public header SHA-256 values: `headers.sha256` pins `cui/cui.h`,
   `cui/cui_app.h`, `cui/cui_icons.h`, and `cui/cui_render.h`
 - License: MIT, reproduced verbatim in `LICENSES/cui-1.4.0-MIT.txt`.
   `licenses.sha256` pins every file under `LICENSES/`.
 
-Every profile applies `patches/table-row-state.patch`. It adds two
-functions to CUI, `cui_table_row_hovered` and `cui_table_row_pressed`,
-which return the hover and press `cui_table_row` already computes for the
-row's highlight; CUI returns only the click. The patch adds a field to
-CUI's private table record and changes nothing CUI draws.
+This revision provides `cui_canvas_ex`, ordered input capture and dispatch,
+component focus, and the public `cui_set_cursor`. The x2c methods
+`Ui.item` and `Ui.canvas_input` build `cui_canvas_opts` for their
+respective keyboard behavior. `Ui.set_cursor` calls the public setter.
 
-Every profile then applies `patches/focusable-canvas.patch`. It adds
-`cui_canvas_ex`, which is `cui_canvas` with interaction flags, and
-`cui_focus_visible`, which a painter calls to learn whether an id has
-keyboard focus with its ring showing. With `CUI_CANVAS_FOCUSABLE` the
-canvas is in the Tab order, and Enter or Space clicks it, as CUI's
-interaction does for a button. `cui_canvas` calls `cui_canvas_ex` with no
-flags and behaves as before. `ui.item` uses the flag.
+Every profile applies `patches/table-row-state.patch`. It exposes the hover
+and press states that CUI uses to highlight a table row.
 
-Every profile also applies `patches/component-input.patch`. It adds ordered
-input capture, a synchronous component-first keyboard dispatcher, and custom
-component focus participation. The host retains its queue, key maps, commands,
-fallback scopes, and reconciliation. `cui_key_down` remains physical state;
-`cui_key_action_down` excludes consumed or inactive downs until release and is
-used by built-in held-key actions. Focus requests admit only participating
-canvases and expire at completed submission. No callback registry or CUI event
-queue is added. The same patch exposes baseline-sheared text drawing through
-`cui_draw_text_slanted`, so custom text components need no draw-vertex access.
+Every profile also applies `patches/slanted-text.patch`. It preserves the
+baseline-sheared drawing operation `cui_draw_text_slanted` for custom text.
 
-The patches add declarations to `cui.h`, so `headers.sha256` pins the patched
-header. The browser profile also applies its OpenGL ES patch; see
+The browser profile applies `patches/web-opengl-es.patch`; see
 [Browser](#browser).
 
 ## Build profile
@@ -82,10 +68,10 @@ pages off screen. No native window was opened for this integration.
 `libx11-dev` on Ubuntu. CUI loads OpenGL when a window opens, so linking
 needs no OpenGL package. Emoji draw only when the host has an emoji font.
 
-The previous CUI 1.3.1 profile was verified on Ubuntu 24.04 arm64 and
-x86_64 with `make check`, which draws off screen and needs no X server.
-The experimental revision has not been run on Linux. A window has not been opened
-on Linux.
+On Ubuntu 24.04 arm64 the current profile builds, draws the off-screen
+examples, and builds and runs a consumer from the installed native bundle.
+The previous CUI 1.3.1 profile was also checked on x86_64. The Linux
+windowed path remains untested.
 
 ## Browser
 

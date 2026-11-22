@@ -1,0 +1,24 @@
+--- a/include/cui/cui.h
++++ b/include/cui/cui.h
+@@ -5052,6 +5052,7 @@
+ CUI_API void cui_draw_circle(cui_ctx *ui, cui_vec2 center, float radius, cui_color color);
+ CUI_API void cui_draw_arc(cui_ctx *ui, cui_vec2 center, float radius, float a0, float a1, float thickness, cui_color color);
+ CUI_API void cui_draw_text(cui_ctx *ui, cui_font font, float size, cui_vec2 pos, cui_color color, const char *text, int len);
++CUI_API void cui_draw_text_slanted(cui_ctx *ui, cui_font font, float size, cui_vec2 pos, cui_color color, const char *text, int len, float shear);
+ CUI_API void cui_draw_icon(cui_ctx *ui, const char *icon, cui_rect r, float size, cui_color color);
+ CUI_API void cui_draw_image(cui_ctx *ui, cui_texture tex, cui_rect r, cui_rect uv, cui_corners radius, cui_color tint);
+ CUI_API void cui_push_clip(cui_ctx *ui, cui_rect r);
+--- a/src/cui_text.c
++++ b/src/cui_text.c
+@@ -1159,3 +1159,11 @@
+     float x = r.x + (r.w - size) * 0.5f, y = r.y + (r.h - size) * 0.5f;
+     cui__draw_text_line(ui, CUI_FONT_ICONS, size, x, y, color, icon, (int)strlen(icon), false);
+ }
++
++void cui_draw_text_slanted(cui_ctx *ui, cui_font font, float size, cui_vec2 pos, cui_color color, const char *text, int len, float shear) {
++    int v0 = ui->dl.vtx_count;
++    cui__draw_text_line(ui, font, size, pos.x, pos.y, color, text, len, false);
++    cui_xform x = ui->dl.xform_stack[ui->dl.xform_depth - 1];
++    float by = (pos.y + cui__font_ascent(ui, font, size)) * ui->scale * x.scale + x.oy;
++    for (int v = v0; v < ui->dl.vtx_count; v++) ui->dl.vtx[v].x += shear * (by - ui->dl.vtx[v].y);
++}
