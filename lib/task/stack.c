@@ -4,7 +4,79 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#if (defined(__APPLE__) || defined(__linux__)) && \
+#if defined(__EMSCRIPTEN__) && defined(X2C_WASM_TASKS)
+#include <emscripten/fiber.h>
+
+/* Asyncify saves the suspended C call chain separately from its C stack. */
+#define TASK_ASYNCIFY_BYTES (512u << 10)
+
+typedef struct TaskStack {
+  emscripten_fiber_t fiber;
+  void (*entry)(void *);
+  void *argument;
+  void *c_stack;
+  void *asyncify_stack;
+} TaskStack;
+
+static _Thread_local emscripten_fiber_t caller;
+static _Thread_local _Alignas(16) char caller_asyncify[TASK_ASYNCIFY_BYTES];
+
+static void task_stack_entry(void *value) {
+  TaskStack *stack = value;
+  stack->entry(stack->argument);
+  emscripten_fiber_swap(&stack->fiber, &caller);
+  abort();
+}
+
+int x2c_task_stack_supported(void) { return emscripten_has_asyncify() == 1; }
+
+void *x2c_task_jobs_new(size_t size) { return calloc(1, size); }
+void x2c_task_jobs_free(void *jobs, size_t size) { (void)size; free(jobs); }
+
+void *x2c_task_stack_new(void (*entry)(void *), void *argument, size_t size) {
+  TaskStack *stack = calloc(1, sizeof(*stack));
+  if (!stack) return NULL;
+  stack->c_stack = malloc(size);
+  stack->asyncify_stack = malloc(TASK_ASYNCIFY_BYTES);
+  if (!stack->c_stack || !stack->asyncify_stack) {
+    free(stack->asyncify_stack);
+    free(stack->c_stack);
+    free(stack);
+    errno = ENOMEM;
+    return NULL;
+  }
+  stack->entry = entry;
+  stack->argument = argument;
+  emscripten_fiber_init(&stack->fiber, task_stack_entry, stack,
+    stack->c_stack, size, stack->asyncify_stack, TASK_ASYNCIFY_BYTES);
+  return stack;
+}
+
+void x2c_task_stack_resume(void *value) {
+  TaskStack *stack = value;
+  emscripten_fiber_init_from_current_context(&caller,
+    caller_asyncify, sizeof(caller_asyncify));
+  emscripten_fiber_swap(&caller, &stack->fiber);
+}
+
+void x2c_task_stack_yield(void *value) {
+  TaskStack *stack = value;
+  emscripten_fiber_swap(&stack->fiber, &caller);
+}
+
+unsigned long x2c_task_stack_low(void *value) {
+  return (unsigned long)((TaskStack *)value)->c_stack;
+}
+
+void x2c_task_stack_free(void *value) {
+  TaskStack *stack = value;
+  if (!stack) return;
+  free(stack->asyncify_stack);
+  free(stack->c_stack);
+  free(stack);
+}
+
+#elif (defined(__APPLE__) || defined(__linux__)) && \
     (defined(__aarch64__) || defined(__x86_64__)) && !defined(__EMSCRIPTEN__)
 #include <sys/mman.h>
 #include <unistd.h>

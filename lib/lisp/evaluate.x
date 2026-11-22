@@ -33,8 +33,13 @@ static typedef struct FreeNames {
 /* C stack evaluator calls may use below the outermost one. Threads get 8 MB
    (lib/thread.x) and so does a default main thread; the rest is left for the
    host program and native calls, so a runaway raises `<call-stack>` instead
-   of crashing. Tail calls use none. */
+   of crashing. Emscripten's JavaScript call stack runs out before its C
+   stack, so leave a smaller evaluator share there. Tail calls use none. */
+#ifdef __EMSCRIPTEN__
+#define LISP_STACK_BYTES_MAX (1536L << 10)
+#else
 #define LISP_STACK_BYTES_MAX (6L << 20)
+#endif
 
 /* Calls one evaluation may make before it is stopped, unless
    `Lisp.call_budget` sets another budget. A loop that never ends makes calls

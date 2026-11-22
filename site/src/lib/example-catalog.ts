@@ -42,8 +42,10 @@ const galleryEntries = gallery.flatMap((entry) => {
     id, section: slide.frontmatter.section, path, source,
     label: slide.frontmatter.tab
       ?? id.split("/").pop()!.replaceAll("-", " "),
-    nativeReason: nativeReason(entry, source),
+    nativeReason: published.get(id)?.profile === "threads"
+      ? undefined : nativeReason(entry, source),
     program: published.get(id)?.program ?? false,
+    profile: published.get(id)?.profile,
     recipe: slide.frontmatter.run?.trim()
       ?? `x2c run ${flags ? flags + " " : ""}${path}`,
     output: outputFor(path), slide,
@@ -73,6 +75,7 @@ const programEntries = articles.map((article) => {
 export const exampleEntries: {
   id: string; section: string; path: string; source: string; label: string;
   nativeReason?: string; program: boolean; output?: string;
+  profile?: string;
   slide?: ExampleMarkdown;
   article?: ExampleMarkdown; recipe?: string; description?: string;
 }[] = [...galleryEntries, ...programEntries];

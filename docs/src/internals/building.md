@@ -180,6 +180,53 @@ behavior. In-memory HTTP parsing, routing, and response construction remain
 available. Browser execution requires Memory64;
 check the playground's support notice before running a program.
 
+The default runtime gets secure random bytes through Emscripten's
+`getentropy`; the browser provider uses Web Crypto. It also uses
+Emscripten's current C-stack bound for x2c's existing depth checks.
+The Lisp evaluator uses a smaller WebAssembly stack share so its existing
+`<call-stack>` error precedes the engine limit on tested nested forms.
+The WebAssembly engine can still reach its own call-stack limit first on
+other deeply recursive paths.
+
+### Optional pthread and task profiles
+
+`make wasm-runtime-threads` writes a separate pthread archive.
+`WASM_PROFILE=threads tools/wasm-build input.x output-stem` links against it.
+Run the generated loader on a dedicated Worker with a stable URL. The
+browser page and its workers need `Cross-Origin-Opener-Policy: same-origin`
+and `Cross-Origin-Embedder-Policy: require-corp`. The build prewarms four
+pthread workers by default; `WASM_PTHREAD_POOL_SIZE` changes that capacity.
+An exhausted browser pool reports a thread-start failure. Emscripten can
+grow the pool beyond its initial size under Node. The site includes threaded
+examples only when built with `PLAYGROUND_THREADS=1` and served with these
+headers. Its opt-in development server sets them.
+
+`make wasm-runtime-tasks` writes a separate Asyncify archive.
+`WASM_PROFILE=tasks tools/wasm-build input.x output-stem` links against it.
+The loader must read `module.x2cMainResult` after the module factory
+resolves. If Emscripten has not called `onExit`, the loader must call
+`module._emscripten_force_exit(module.x2cMainResult)` and handle its
+`ExitStatus`. This runs exit hooks and preserves a nonzero return after
+resumed tasks. A task keeps its requested C stack plus 512 KiB of Asyncify
+storage; the caller has another 512 KiB. The default task stack is 8 MiB.
+These profiles are separate; combining tasks with pthreads needs its own
+verification.
+
+### Browser files
+
+The site's default playground build embeds declared example fixtures.
+The `love/files` and `power/counting` examples also accept a selected
+file. The runner copies selected files to distinct `/input` directories,
+passes their virtual paths as arguments, and offers files written under
+`/output` for download after the run. Each run has a fresh MEMFS instance.
+The browser cannot access arbitrary host paths.
+
+An application can opt into persistent files through the runner's
+`persistence` key. The Worker mounts `/persistent/<key>` with IDBFS, loads
+it before `main`, and flushes a successful run before reporting completion.
+The browser's Web Locks API serializes runs for the same key across Workers.
+The site does not offer persistence to its current gallery examples.
+
 ## Installation layouts
 
 `make install` builds and installs into `$HOME/.local/x2c`; an explicit

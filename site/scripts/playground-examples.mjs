@@ -1,12 +1,13 @@
 // Select the gallery programs that can run in the browser playground.
 // The site pages and the precompiled-program build share this selection.
 
-// The browser has no host files, so programs that read input files cannot
-// run there.
-const needsHostFiles = /^(love\/files|power\/counting)$/;
-// The wasm runtime has no threads, channels, dispatch, workers, or processes.
+// The default wasm profile cannot start threads or native processes.
 const needsHostRuntime =
   /\b(Thread|Channel|Dispatch|Job)\b|Pool\.start|File\.popen/;
+const threadedIds = new Set([
+  "power/threads", "power/channels",
+  "tours/essentials/threads", "tours/language/threads",
+]);
 
 // Source-backed examples inside examples/ use the same IDs as generated ones.
 export function galleryExampleId(entry) {
@@ -18,19 +19,19 @@ export function nativeReason(entry, source) {
   const id = galleryExampleId(entry);
   if (!id || entry.optional)
     return "This program needs a package, so it runs only with the native toolchain.";
-  if (needsHostFiles.test(id))
-    return "This program reads files from disk, so it runs only with the native toolchain.";
   if (needsHostRuntime.test(source))
     return "This program uses threads, so it runs only with the native toolchain.";
   return undefined;
 }
 
-export function selectPlaygroundExamples(gallery, sourceFor) {
+export function selectPlaygroundExamples(gallery, sourceFor, profile = "default") {
   return gallery.flatMap((entry) => {
     if (entry.language) return [];
     const id = galleryExampleId(entry);
     const source = id && sourceFor(id);
-    if (!source || nativeReason(entry, source)) return [];
+    if (!source) return [];
+    if (profile === "threads" ? !threadedIds.has(id) : nativeReason(entry, source))
+      return [];
     return [{ id, slide: entry.slide, source }];
   });
 }

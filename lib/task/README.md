@@ -34,3 +34,24 @@ to its fake stack, outside the coroutine mapping. Bounds and metadata checks
 remain active. `unittest/probes/run-task-backend.sh` includes the focused
 sanitizer regression alongside the native layout and unsupported-target
 probes.
+
+## Optional WebAssembly backend
+
+The `X2C_WASM_TASKS` build selects Emscripten fibers with Asyncify. The
+backend gives each job its requested C stack (8 MiB by default) and a separate
+512 KiB continuation buffer. The calling thread also retains one 512 KiB
+continuation buffer. The runtime must compile and link with `-sASYNCIFY=1`.
+These buffers live in Wasm linear memory; Emscripten does not provide the
+native backend's inaccessible guard page.
+With the default 8 MiB C stack, a suspended 9,500-frame Node probe used
+228,492 bytes of continuation storage. The 512 KiB buffer leaves 295,796
+bytes for that workload. Chromium reached its JavaScript call-stack limit
+before the same probe could suspend. Other call chains can require more.
+
+The browser or Node loader owns final process status. Emscripten retains a
+keepalive count for a finished fiber, so the normal `onExit` callback does not
+run after a task batch. The task build records the resumed `main` return value
+through its entry shim. After the module factory resolves, the loader calls
+`_emscripten_force_exit` with that value to run Emscripten's exit hooks and
+report the correct status. Without the shim, a nonzero return after a task
+batch can appear as status zero.

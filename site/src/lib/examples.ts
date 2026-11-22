@@ -35,9 +35,19 @@ const built = Object.values(import.meta.glob(
   { import: "default", eager: true },
 ))[0] as string[] | undefined;
 const programs = new Set(built ?? []);
+const threadedBuilt = Object.values(import.meta.glob(
+  "../../../builds/wasm/playground/threaded-programs.json",
+  { import: "default", eager: true },
+))[0] as string[] | undefined;
+const threadedPrograms = new Set(threadedBuilt ?? []);
 
 const sourceFor = (id: string) =>
   sources[`../../../examples/${id}.x`] as string | undefined;
-export const playgroundExamples = selectPlaygroundExamples(gallery, sourceFor)
+export const playgroundExamples = [
+  ...selectPlaygroundExamples(gallery, sourceFor)
   .filter((entry) => programs.has(entry.id))
-  .map(({ id, source }) => ({ id, source, program: programs.has(id) }));
+  .map(({ id, source }) => ({ id, source, profile: "default", program: true })),
+  ...selectPlaygroundExamples(gallery, sourceFor, "threads")
+    .filter((entry) => threadedPrograms.has(entry.id))
+    .map(({ id, source }) => ({ id, source, profile: "threads", program: true })),
+];

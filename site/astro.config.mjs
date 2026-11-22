@@ -51,6 +51,16 @@ export default defineConfig({
     assets: "assets"
   },
   vite: {
+    plugins: process.env.PLAYGROUND_THREADS === "1" ? [{
+      name: "x2c-threaded-playground-headers",
+      configureServer(server) {
+        server.middlewares.use((request, response, next) => {
+          response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+          response.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
+          next();
+        });
+      }
+    }] : [],
     define: {
       "import.meta.env.X2C_REPOSITORY_ROOT": JSON.stringify(
         fileURLToPath(new URL("..", import.meta.url))
