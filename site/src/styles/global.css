@@ -1318,6 +1318,7 @@ a.docs-card:hover {
   color: var(--dark);
 }
 
+#install .button-secondary:hover,
 .landing-section:nth-of-type(even) .button-secondary:hover,
 .install-actions .button-primary:hover {
   border-color: var(--dark);
