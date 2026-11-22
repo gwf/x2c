@@ -187,9 +187,11 @@ jobs:
         run: |
           make -C source build-safe
           make -C source wasm-runtime
+          make -C source wasm-runtime-threads
       - name: Build both destination sites at selected source
         env:
           SOURCE_SHA: ${{ needs.select.outputs.source_sha }}
+          PLAYGROUND_THREADS: "1"
         run: |
           for destination in staging production; do
             if [ "$destination" = staging ]; then

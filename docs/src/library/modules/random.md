@@ -185,5 +185,6 @@ Source: `lib/random.x`
 
 `Random` is a seedable generator whose sequence its seed fixes; it is
 fast and unsuitable for secrets. `Random.secure_fill` reads the
-operating system's cryptographic generator, `arc4random_buf` on macOS
-and `getrandom` on Linux, and version 4 UUIDs take their bits from it.
+operating system's cryptographic generator, `arc4random_buf` on macOS,
+`getentropy` on WebAssembly, and `getrandom` on Linux. Version 4 UUIDs
+take their bits from it.

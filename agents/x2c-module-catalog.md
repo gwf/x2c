@@ -1409,7 +1409,7 @@ None. This module has no non-static function definitions.
 
 ### [lib/task.x](../lib/task.x)
 
-cooperative Channel jobs on stable native stacks.
+cooperative Channel jobs on dedicated stacks.
 
 Public functions:
 

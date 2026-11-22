@@ -30,8 +30,11 @@ const cache = path.join(root, "builds/wasm/playground");
 const manifest = path.join(cache, "programs.json");
 const compiler = path.join(root, "builds/0/x2c");
 const runtime = path.join(root, "builds/wasm/libx2c.a");
+const threadedRuntime = path.join(root, "builds/wasm/threads/libx2c.a");
+const threadedManifest = path.join(cache, "threaded-programs.json");
 const wasmBuild = path.join(root, "tools/wasm-build");
 const output = path.join(siteRoot, "dist/playground/programs");
+const threadedOutput = path.join(siteRoot, "dist/workers/threaded");
 
 const digest = (...parts) => {
   const hash = createHash("sha256");
@@ -66,8 +69,9 @@ function run(command, args, env) {
   });
 }
 
-async function compileOne(example, toolchain) {
-  const stem = path.join(cache, example.id);
+async function compileOne(example, toolchain, profile = "default") {
+  const stem = path.join(cache,
+    profile === "threads" ? "threaded" : "", example.id);
   const data = embeddedData(example.source);
   const stamp = digest(toolchain, example.source,
     ...(await Promise.all(data.map(dataDigest))));
@@ -81,18 +85,33 @@ async function compileOne(example, toolchain) {
   // A gallery program finds its data beside its source file, which the
   // browser does not have, so it receives the embedded copy as its argument.
   if (data.length) {
+    const sourceFile = example.source.match(
+      /example_data\("([\w-]+\/[\w.-]+)"\)/)?.[1];
+    const argument = sourceFile ? `examples/data/${sourceFile}` : data[0];
     await writeFile(`${stem}.pre.js`,
-      `Module["arguments"] = ${JSON.stringify([data[0]])};\n`);
+      `Module["arguments"] ??= ${JSON.stringify([argument])};\n`);
     embed.push(`--pre-js ${stem}.pre.js`);
   }
-  const ldflags = [process.env.WASM_LDFLAGS, ...embed].filter(Boolean);
+  const ldflags = [
+    ...(profile === "default"
+      ? ["-sEXPORTED_RUNTIME_METHODS=FS,IDBFS,addRunDependency,removeRunDependency",
+          "-lidbfs.js"] : []),
+    process.env.WASM_LDFLAGS, ...embed,
+  ].filter(Boolean);
   const { status, log } = await run(wasmBuild,
     [path.join(root, "examples", `${example.id}.x`), stem],
-    { ...process.env, WASM_LDFLAGS: ldflags.join(" ") });
+    { ...process.env, WASM_PROFILE: profile, WASM_LDFLAGS: ldflags.join(" ") });
   if (status !== 0)
     throw new Error(`playground: ${example.id} failed to build\n${log}`);
   await writeFile(stampFile, stamp);
   return true;
+}
+
+function runtimeIsStale(archive) {
+  const built = statSync(archive).mtimeMs;
+  const sources = path.join(root, "builds/0/lib");
+  return readdirSync(sources).some((name) => name.endsWith(".c") &&
+    statSync(path.join(sources, name)).mtimeMs > built);
 }
 
 function missingTool() {
@@ -101,10 +120,7 @@ function missingTool() {
   if (!existsSync(runtime))
     return "builds/wasm/libx2c.a is missing; run make wasm-runtime";
   // An archive older than the runtime C links into programs that trap.
-  const built = statSync(runtime).mtimeMs;
-  const sources = path.join(root, "builds/0/lib");
-  if (readdirSync(sources).some((name) => name.endsWith(".c") &&
-      statSync(path.join(sources, name)).mtimeMs > built))
+  if (runtimeIsStale(runtime))
     return "builds/wasm/libx2c.a is older than builds/0/lib; " +
       "run make wasm-runtime";
   return undefined;
@@ -112,6 +128,7 @@ function missingTool() {
 
 async function compile() {
   await rm(manifest, { force: true });
+  await rm(threadedManifest, { force: true });
   const missing = missingTool();
   if (missing) {
     if (process.env.PLAYGROUND_REQUIRED === "1")
@@ -127,7 +144,8 @@ async function compile() {
   });
   const toolchain = digest(emccVersion(), process.env.WASM_CFLAGS ?? "",
     process.env.WASM_LDFLAGS ?? "", await readFile(compiler),
-    await readFile(runtime), await readFile(wasmBuild));
+    await readFile(runtime), await readFile(wasmBuild),
+    await readFile(fileURLToPath(import.meta.url)));
   const started = Date.now();
   const queue = [...examples];
   let built = 0;
@@ -138,6 +156,23 @@ async function compile() {
   }));
   await writeFile(manifest,
     JSON.stringify(examples.map((example) => example.id)) + "\n");
+  if (process.env.PLAYGROUND_THREADS === "1") {
+    if (!existsSync(threadedRuntime))
+      throw new Error("playground: threaded runtime missing; run make wasm-runtime-threads.");
+    if (runtimeIsStale(threadedRuntime))
+      throw new Error("playground: threaded runtime is older than builds/0/lib; " +
+        "run make wasm-runtime-threads.");
+    const threaded = selectPlaygroundExamples(gallery, (id) => {
+      const file = path.join(root, "examples", `${id}.x`);
+      return existsSync(file) ? readFileSync(file, "utf8") : undefined;
+    }, "threads");
+    const threadedToolchain = digest(toolchain, await readFile(threadedRuntime),
+      process.env.WASM_PTHREAD_POOL_SIZE ?? "");
+    for (const example of threaded)
+      if (await compileOne(example, threadedToolchain, "threads")) built += 1;
+    await writeFile(threadedManifest,
+      JSON.stringify(threaded.map((example) => example.id)) + "\n");
+  }
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
   console.log(`playground: ${examples.length} precompiled programs ` +
     `(${built} rebuilt in ${seconds} s).`);
@@ -153,6 +188,18 @@ async function install() {
     for (const suffix of [".js", ".wasm"])
       await copyFile(path.join(cache, id + suffix),
         path.join(output, id + suffix));
+  }
+  if (existsSync(threadedManifest)) {
+    const threaded = JSON.parse(await readFile(threadedManifest, "utf8"));
+    await copyFile(threadedManifest,
+      path.join(output, "threaded-programs.json"));
+    for (const id of threaded) {
+      await mkdir(path.dirname(path.join(threadedOutput, id)),
+        { recursive: true });
+      for (const suffix of [".js", ".wasm"])
+        await copyFile(path.join(cache, "threaded", id + suffix),
+          path.join(threadedOutput, id + suffix));
+    }
   }
 }
 

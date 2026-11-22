@@ -36,7 +36,7 @@ static Var sum_squares(const void *input, size_t bytes) {
 ~}
 ```
 
-`Thread.start_raw` copies each batch's bytes and launches a native worker.
+`Thread.start_raw` copies each batch's bytes and launches a worker thread.
 Both workers start before either `Thread.join` returns a result; their
 partial sums combine to 91. `Thread.free` releases the finished handles.
 The workers need neither shared input pointers nor a shared accumulator.

@@ -156,14 +156,21 @@ a generated example's slide, run
 generated example separately. Source-owned package excerpts must stay faithful
 to their linked program. Gallery links use the same routes as the Examples
 index. The former `/playground/?example=...` interface redirects to those
-routes; `/playground/programs/` still holds the shared WebAssembly assets.
+routes; `/playground/programs/` still holds the default WebAssembly programs.
+Threaded program files are installed under `/workers/threaded/`.
 
 Complete programs use `src/content/examples/*.md` metadata and the shared
 article layout. The two Start here tours use the same topic layout as Love,
 Power, and Magic. Each lesson is a source-owned gallery entry with
 `home: false`. The gallery supplies the lesson title and order, and the
 manifest supplies its expected output. The browser runs each supported lesson
-independently. The threads lessons run locally. `/examples/` opens Essentials.
+independently. The thread lessons use a separate pthread build and need COOP
+and COEP response headers on the page and its Worker. The built Worker entry
+scripts and pthread program files are under `/workers/`. The entry filenames
+are hashed and can change. Build the thread runtime with
+`make wasm-runtime-threads`, then build the site with
+`PLAYGROUND_THREADS=1 npm --prefix site run build`.
+`/examples/` opens Essentials.
 
 
 A sample that genuinely cannot compile must

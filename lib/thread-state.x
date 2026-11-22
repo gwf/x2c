@@ -11,6 +11,10 @@
 
 #include "common.x"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/stack.h>
+#endif
+
 threaded int x2c_error_runtime_ready;
 threaded unsigned long x2c_execution_stack_low;
 static threaded unsigned long native_stack_low;
@@ -55,7 +59,9 @@ inline int _x2c_stack_below(unsigned long floor) =>
 /* Finds and keeps the native thread's lowest stack address, or 0 when the
    platform does not report it. */
 static unsigned long _native_stack_low(void) {
-#if defined(__APPLE__)
+#if defined(__EMSCRIPTEN__)
+  native_stack_low = emscripten_stack_get_end();
+#elif defined(__APPLE__)
   pthread_t self = pthread_self();
   native_stack_low = (unsigned long) pthread_get_stackaddr_np(self)
     - pthread_get_stacksize_np(self);

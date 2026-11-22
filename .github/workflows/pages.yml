@@ -49,13 +49,15 @@ jobs:
           version: 6.0.13
 
       - name: Build compiler for website demos
-        run: make build-safe
+        run: |
+          make build-safe
+          make wasm-runtime-threads
 
       - name: Install PDF renderer
         run: cd site && npx playwright install --with-deps chromium
 
       - name: Build public site and book
-        run: npm --prefix site run build
+        run: PLAYGROUND_THREADS=1 npm --prefix site run build
 
       - name: Configure Pages
         uses: actions/configure-pages@v6

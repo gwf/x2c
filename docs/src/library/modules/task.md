@@ -7,13 +7,13 @@ Source: `lib/task.x`
 
 Guide: [Contexts and Threads](../../guide/contexts-and-threads.md)
 
-Cooperative Channel jobs on stable native stacks.
+Cooperative Channel jobs on dedicated stacks.
 
 ## Primary API
 
 | Function | Summary |
 | --- | --- |
-| [`Task.run`](#Task.run) | Runs zero-argument jobs cooperatively on the calling native thread. |
+| [`Task.run`](#Task.run) | Runs zero-argument jobs cooperatively on the calling thread. |
 
 ### `Task`
 
@@ -22,7 +22,7 @@ Cooperative Channel jobs on stable native stacks.
 
 `void Task.run(Array jobs, Func completed)`
 
-Runs zero-argument jobs cooperatively on the calling native thread.
+Runs zero-argument jobs cooperatively on the calling thread.
 Channel waits park a job. The optional completed callback receives each
 successful result after job cleanup, under restored caller state, and
 must not wait for participant progress. Results retain ordinary owners.
@@ -34,11 +34,13 @@ Every exit finishes all jobs; failure stops unfinished participants.
 Thread.stop on the owner requests cooperative batch cancellation.
 Cleanup bodies must not suspend. Blocking native calls block all jobs.
 X2C_TASK_STACK_BYTES selects usable capacity before the call; the default
-is 8 MiB, rounded up to a native page. No job migrates between threads.
+is 8 MiB, rounded up to a native page on native builds. No job migrates
+between threads.
 
-**Raises:** bad-state for nested execution or an unsupported native target,
-bad-arg for invalid capacity/jobs, allocation/setup causes, join-fail for
-escaping job Errors, or completion-callback and owner-stop causes.
+**Raises:** bad-state for nested execution or an unsupported
+target, bad-arg for invalid capacity/jobs, allocation/setup causes,
+join-fail for escaping job Errors, or completion-callback and owner-stop
+causes.
 
 Source: `lib/task.x`
 

@@ -101,6 +101,22 @@ static void random_secure_fill_varies(void) {
   EXPECT_FALSE(a.next() == b.next());
 }
 
+static void random_secure_fill_lengths(void) {
+  $test.scoped();
+  Random.secure_fill(NULL, 0);
+  size_t lengths[] = {256, 257, 769};
+  for (size_t i = 0; i < sizeof lengths / sizeof lengths[0]; i++) {
+    unsigned char first[771] = {0}, second[771] = {0};
+    size_t count = lengths[i];
+    first[count] = second[count] = 0xa5;
+    Random.secure_fill(first, count);
+    Random.secure_fill(second, count);
+    EXPECT_TRUE(memcmp(first, second, count) != 0);
+    EXPECT_INT_EQ(first[count], 0xa5);
+    EXPECT_INT_EQ(second[count], 0xa5);
+  }
+}
+
 static void random_uuid_v4_is_canonical(void) {
   $test.scoped();
   String id = Uuid.v4();
@@ -133,6 +149,7 @@ void random_suite(void) {
   $test.run(random_shuffle_permutes_in_place);
   $test.run(random_choice_draws_an_element);
   $test.run(random_secure_fill_varies);
+  $test.run(random_secure_fill_lengths);
   $test.run(random_uuid_v4_is_canonical);
   $test.run(random_uuid_parse_validates);
 }

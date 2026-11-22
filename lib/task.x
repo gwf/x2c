@@ -1,4 +1,4 @@
-/*  task.x -- cooperative Channel jobs on stable native stacks
+/*  task.x -- cooperative Channel jobs on dedicated stacks
 */
 #pragma once
 #include "channel.x"
@@ -52,7 +52,7 @@ static threaded int task_batch_active;
 
 macro Expression $task.run.jobs(Expr $jobs) => Task.run($jobs);
 
-/** Runs zero-argument jobs cooperatively on the calling native thread.
+/** Runs zero-argument jobs cooperatively on the calling thread.
     Channel waits park a job. The optional completed callback receives each
     successful result after job cleanup, under restored caller state, and
     must not wait for participant progress. Results retain ordinary owners.
@@ -64,10 +64,11 @@ macro Expression $task.run.jobs(Expr $jobs) => Task.run($jobs);
     Thread.stop on the owner requests cooperative batch cancellation.
     Cleanup bodies must not suspend. Blocking native calls block all jobs.
     X2C_TASK_STACK_BYTES selects usable capacity before the call; the default
-    is 8 MiB, rounded up to a native page. No job migrates between threads.
-    Raises: bad-state for nested execution or an unsupported native target,
-    bad-arg for invalid capacity/jobs, allocation/setup causes, join-fail for
-    escaping job Errors, or completion-callback and owner-stop causes.
+    is 8 MiB, rounded up to a native page on native builds. No job migrates
+    between threads. Raises: bad-state for nested execution or an unsupported
+    target, bad-arg for invalid capacity/jobs, allocation/setup causes,
+    join-fail for escaping job Errors, or completion-callback and owner-stop
+    causes.
 */
 void Task.run(Array jobs, Func completed) {
   if (!x2c_task_stack_supported())
@@ -237,8 +238,8 @@ static void _prepare(TaskRun run, TaskJob job, Func function) {
 }
 
 /* The only bounds check on task stack capacity. 32768 is minicoro's
-   minimum stack; the backend rounds up to a page and adds a guard page,
-   which the 65536 of headroom covers for page sizes up to 32 KiB. */
+   minimum stack. The native backend adds a guard page after rounding up;
+   65536 of headroom covers native page sizes up to 32 KiB. */
 static size_t _stack_size(void) {
   const char *setting = getenv("X2C_TASK_STACK_BYTES");
   if (!setting) return 8u << 20;

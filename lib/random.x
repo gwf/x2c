@@ -4,8 +4,9 @@
 
     `Random` is a seedable generator whose sequence its seed fixes; it is
     fast and unsuitable for secrets. `Random.secure_fill` reads the
-    operating system's cryptographic generator, `arc4random_buf` on macOS
-    and `getrandom` on Linux, and version 4 UUIDs take their bits from it.
+    operating system's cryptographic generator, `arc4random_buf` on macOS,
+    `getentropy` on WebAssembly, and `getrandom` on Linux. Version 4 UUIDs
+    take their bits from it.
 */
 
 #pragma once
@@ -27,6 +28,8 @@ typedef Symbol Uuid;
 #include <errno.h>
 #ifdef __APPLE__
 #include <stdlib.h>
+#elif defined(__EMSCRIPTEN__)
+#include <unistd.h>
 #else
 #include <sys/random.h>
 #endif
@@ -111,6 +114,14 @@ Var Random.choice(Random &r, Array items) {
 void Random.secure_fill(void *bytes, size_t count) {
 #ifdef __APPLE__
   arc4random_buf(bytes, count);
+#elif defined(__EMSCRIPTEN__)
+  for (size_t done = 0; done < count;) {
+    size_t chunk = count - done;
+    if (chunk > 256) chunk = 256;
+    if (getentropy((char *) bytes + done, chunk))
+      x2c_io_fail("Random.secure_fill", errno);
+    done += chunk;
+  }
 #else
   for (size_t done = 0; done < count;) {
     ssize_t got = getrandom((char *) bytes + done, count - done, 0);

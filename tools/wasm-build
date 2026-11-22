@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 # Translate one x2c source and link an ES module loader plus Memory64 wasm.
+# WASM_PROFILE=threads uses `make wasm-runtime-threads` and Emscripten pthreads.
+# WASM_PTHREAD_POOL_SIZE (default 4) is the browser's concurrent worker limit;
+# Emscripten can grow the worker pool beyond that size under Node.
+# WASM_PROFILE=tasks uses `make wasm-runtime-tasks` and Asyncify fibers.
 set -euo pipefail
 if [[ $# != 2 || $1 != *.x ]]; then
   echo 'usage: tools/wasm-build input.x output-stem' >&2
@@ -9,21 +13,58 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 input=$(cd "$(dirname "$1")" && pwd)/$(basename "$1")
 mkdir -p "$(dirname "$2")"
 out=$(cd "$(dirname "$2")" && pwd)/$(basename "$2")
-if [[ ! -f "$root/builds/wasm/libx2c.a" ]]; then
-  echo 'wasm runtime missing; run make wasm-runtime first' >&2
+profile=${WASM_PROFILE:-default}
+case "$profile" in
+  default) archive="$root/builds/wasm/libx2c.a" ;;
+  threads) archive="$root/builds/wasm/threads/libx2c.a" ;;
+  tasks) archive="$root/builds/wasm/tasks/libx2c.a" ;;
+  *) echo "unknown WASM_PROFILE: $profile" >&2; exit 2 ;;
+esac
+if [[ ! -f "$archive" ]]; then
+  target=wasm-runtime
+  [[ "$profile" == default ]] || target+="-$profile"
+  echo "wasm runtime missing; run make $target" >&2
   exit 1
 fi
 scratch=$(mktemp -d "${TMPDIR:-/tmp}/x2c-wasm.XXXXXXXX")
 trap 'rm -rf "$scratch"' EXIT
 "$root/builds/0/x2c" translate --out-dir "$scratch" "$input"
+source="$scratch/$(basename "$input" .x).c"
 # These environment variables contain shell-style whitespace-separated flags,
 # as in Make's CFLAGS; no shell evaluation is performed.
 read -r -a cflags <<< "${WASM_CFLAGS:--fsigned-char -Os -m64 -sSUPPORT_LONGJMP=emscripten}"
 read -r -a ldflags <<< "${WASM_LDFLAGS:-}"
+if [[ "$profile" == threads ]]; then
+  cflags+=(-pthread)
+  ldflags+=(-pthread "-sPTHREAD_POOL_SIZE=${WASM_PTHREAD_POOL_SIZE:-4}"
+    -sPTHREAD_POOL_SIZE_STRICT=2)
+fi
+if [[ "$profile" == tasks ]]; then
+  cflags+=(-DX2C_WASM_TASKS)
+  ldflags+=(-sASYNCIFY=1 -sEXPORTED_FUNCTIONS=_main,_emscripten_force_exit)
+  # An Asyncify fiber can finish after Emscripten's original main frame has
+  # unwound. Record its actual return value for the host to finalize on exit.
+  cat > "$scratch/x2c-wasm-entry.c" <<EOF
+#define main x2c_wasm_user_main
+#include "$(basename "$source")"
+#undef main
+#include <emscripten/emscripten.h>
+int main(int argc, char **argv) {
+  int result;
+  if (__builtin_types_compatible_p(__typeof__(&x2c_wasm_user_main), int (*)(void)))
+    result = ((int (*)(void))x2c_wasm_user_main)();
+  else
+    result = ((int (*)(int, char **))x2c_wasm_user_main)(argc, argv);
+  EM_ASM({ Module['x2cMainResult'] = \$0; }, result);
+  return result;
+}
+EOF
+  source="$scratch/x2c-wasm-entry.c"
+fi
 "${WASM_CC:-emcc}" "${cflags[@]}" \
   -iquote "$root/builds/0/lib" -iquote "$root/include/x2c" \
-  "$scratch/$(basename "$input" .x).c" -o "$out.js" \
-  -Wl,--whole-archive "$root/builds/wasm/libx2c.a" -Wl,--no-whole-archive \
+  "$source" -o "$out.js" \
+  -Wl,--whole-archive "$archive" -Wl,--no-whole-archive \
   -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -sMODULARIZE=1 \
   -sEXPORT_ES6=1 -sENVIRONMENT=web,worker,node -sINITIAL_MEMORY=64MB \
   -sMAXIMUM_MEMORY=256MB -sSTACK_SIZE=8MB "${ldflags[@]}"

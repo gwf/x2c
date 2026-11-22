@@ -69,7 +69,7 @@ In a signature, `Self` is the receiver's static type; see
 | [Symbol](symbol.md) | `lib/symbol.x` | Immediate encoded names. |
 | [SymbolSet](symbolset.md) | `lib/symbolset.x` | Immutable ordered sets of compact `Symbol`s. |
 | [System Macros](system-macros.md) | `lib/system-macros.x` | Convenience macros for text, timing, and processes. |
-| [Task](task.md) | `lib/task.x` | Cooperative Channel jobs on stable native stacks. |
+| [Task](task.md) | `lib/task.x` | Cooperative Channel jobs on dedicated stacks. |
 | [Test](test.md) | `lib/test.x` | Registered tests and assertions for user programs. |
 | [Thread](thread.md) | `lib/thread.x` | Native workers with explicit result lifetimes. |
 | [Time](time.md) | `lib/time.x` | Clocks, durations, and calendar time. |

@@ -61,7 +61,10 @@ test("without WebAssembly, galleries still link to complete examples", () => {
 
 test("complete examples retain precompiled programs and expected output",
   { skip: !emcc && "emcc is not on PATH" }, () => {
-    const { page, home, love, essentials, language } = render({ PLAYGROUND_REQUIRED: "1" });
+    const threads = process.env.PLAYGROUND_THREADS === "1";
+    const { page, home, love, essentials, language } = render({
+      PLAYGROUND_REQUIRED: "1"
+    });
     assert.doesNotMatch(page, /data-playground/);
     assert.match(love, /data-programs="[^"]*playground\/programs\/"/);
     const examples = [...love.matchAll(
@@ -74,8 +77,8 @@ test("complete examples retain precompiled programs and expected output",
     assert.match(love, /data-expected-output/);
     assert.match(home, /examples\/love\/#love-collections/);
     for (const [tour, html, count] of [
-      ["essentials", essentials, 8],
-      ["language", language, 11],
+      ["essentials", essentials, threads ? 9 : 8],
+      ["language", language, threads ? 12 : 11],
     ]) {
       const lessons = [...html.matchAll(
         /<script type="application\/json" data-examples>([\s\S]*?)<\//g)]
@@ -86,7 +89,10 @@ test("complete examples retain precompiled programs and expected output",
       assert.match(html, /Site Examples/);
       assert.match(html, new RegExp(`id="tours-${tour}-threads"`));
       assert.ok(html.includes(`x2c run examples/tours/${tour}/threads.x`));
-      assert.ok(!lessons.some(lesson => lesson.id.endsWith("/threads")));
+      assert.equal(lessons.some(lesson =>
+        lesson.id.endsWith("/threads") && lesson.program), threads);
+      if (threads)
+        assert.match(html, /data-programs="[^"]*workers\/threaded\/" data-profile="threads"/);
     }
   });
 

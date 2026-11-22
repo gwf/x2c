@@ -13,7 +13,8 @@ include etc/build-config.mk
 CORE_TARGETS = build build-safe commands commands-check verify examples \
 	check precommit agent-pr-check sanity-check clean help stats
 BUILD_TARGETS = build-install bootstrap-build bootstrap-refresh \
-	stage-1 stage-2 stage-3 packages wasm-runtime
+	stage-1 stage-2 stage-3 packages wasm-runtime wasm-runtime-threads \
+	wasm-runtime-tasks
 VERIFY_TARGETS = verify-sanitize verify-fixtures verify-fixtures-update \
 	proof-artifact-atomicity proof-raw-symbols proof-conformance \
 	proof-cold-collection \
@@ -269,6 +270,30 @@ wasm-runtime: build					## Build the optional Memory64 runtime
 	@rm -f builds/wasm/libx2c.a
 	$(WASM_AR) rcs builds/wasm/libx2c.a \
 	  $(patsubst builds/0/lib/%.c,builds/wasm/lib/%.o,\
+	    $(wildcard builds/0/lib/*.c))
+
+# Pthread objects cannot be mixed with the default single-threaded archive.
+# Browsers need COOP/COEP headers; Node can grow beyond the prewarmed pool.
+wasm-runtime-threads: build				## Build the optional Memory64 pthread runtime
+	@mkdir -p builds/wasm/threads/lib
+	@set -e; for c in builds/0/lib/*.c; do \
+	  $(WASM_CC) $(WASM_CFLAGS) -pthread -iquote builds/0/lib -iquote include/x2c \
+	    -c "$$c" -o "builds/wasm/threads/lib/$$(basename "$$c" .c).o"; \
+	done
+	@rm -f builds/wasm/threads/libx2c.a
+	$(WASM_AR) rcs builds/wasm/threads/libx2c.a \
+	  $(patsubst builds/0/lib/%.c,builds/wasm/threads/lib/%.o,\
+	    $(wildcard builds/0/lib/*.c))
+
+wasm-runtime-tasks: build				## Build the optional Memory64 Asyncify runtime
+	@mkdir -p builds/wasm/tasks/lib
+	@set -e; for c in builds/0/lib/*.c; do \
+	  $(WASM_CC) $(WASM_CFLAGS) -DX2C_WASM_TASKS -iquote builds/0/lib -iquote include/x2c \
+	    -c "$$c" -o "builds/wasm/tasks/lib/$$(basename "$$c" .c).o"; \
+	done
+	@rm -f builds/wasm/tasks/libx2c.a
+	$(WASM_AR) rcs builds/wasm/tasks/libx2c.a \
+	  $(patsubst builds/0/lib/%.c,builds/wasm/tasks/lib/%.o,\
 	    $(wildcard builds/0/lib/*.c))
 
 ##@ Verification and proofs
