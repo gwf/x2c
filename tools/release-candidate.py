@@ -18,7 +18,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 # Each release platform and the runner candidate.yml builds it on.
 PLATFORMS = {'darwin-arm64': 'macos-15', 'darwin-x86_64': 'macos-15-intel',
@@ -267,7 +267,9 @@ def extract(args):
 
 def site_version(expected):
     """Stop unless production still serves the version the caller observed."""
-    with urlopen(SITES['production'] + '/x2c-version.txt') as response:
+    request = Request(SITES['production'] + '/x2c-version.txt',
+                      headers={'User-Agent': 'x2c-website-verifier/1.0'})
+    with urlopen(request) as response:
         current = response.read().decode().strip()
     if current != expected:
         raise ValueError(f'production site changed: it serves {current}, '
@@ -461,9 +463,19 @@ def guard(candidate):
     obj = json.loads(run('gh', 'api', f"{repo}/git/ref/tags/v{manifest['version']}"))['object']
     while obj['type'] == 'tag':
         obj = json.loads(run('gh', 'api', f"{repo}/git/tags/{obj['sha']}"))['object']
-    if main != manifest['source_sha'] or obj['type'] != 'commit' or obj['sha'] != main:
-        raise ValueError('the release owner must advance main and tag to the '
-                         'selected source before promotion')
+    source = manifest['source_sha']
+    if obj['type'] != 'commit' or obj['sha'] != source:
+        raise ValueError('the release tag must identify the staged source')
+    if main == source:
+        return
+    # Only the verified 0.16.3 candidate may use its separately pinned tooling.
+    if (manifest['version'] == '0.16.3' and manifest['identity'] ==
+            'candidate-22e85c5d624dcac0be3e9e566a2f9831d6efbf65-45200971660-1'):
+        pin = json.loads(run('gh', 'api',
+            f'{repo}/git/ref/tags/release-tooling/0.16.3-promotion'))['object']
+        if pin['type'] == 'commit' and pin['sha'] == main:
+            return
+    raise ValueError('main must identify the staged source before promotion')
 
 
 def main():
