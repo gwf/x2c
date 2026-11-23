@@ -105,9 +105,10 @@ for (const carousel of document.querySelectorAll<HTMLElement>(
   });
   viewport.addEventListener("pointercancel", () => { pointerStart = null; });
 
-  const initial = slides.findIndex((slide) =>
+  const initialId = fragmentId(location.hash);
+  const initial = initialId ? slides.findIndex((slide) =>
     [slide.id, ...(slide.dataset.aliases?.split(" ") ?? [])]
-      .includes(fragmentId(location.hash)));
+      .includes(initialId)) : -1;
   show(initial < 0 ? 0 : initial, initial < 0 ? undefined : "link", false, false);
   carousel.setAttribute("data-carousel-ready", "");
   count.setAttribute("aria-live", "polite");
