@@ -3,6 +3,14 @@
 Each section summarizes what changed for a user of the compiler, runtime,
 commands, and packages since the previous release.
 
+## 0.16.3 (2026-11-23)
+
+- The compiler resolves visible static methods on package types.
+- The WebAssembly runtime supports secure random bytes. Optional builds
+  support threads and cooperative tasks.
+- The website can run threaded WebAssembly examples. The About section
+  adds Technical Notes and a FAQ.
+
 ## 0.16.2 (2026-11-19)
 
 - The book has clearer explanations and a consolidated Compiler API index.
