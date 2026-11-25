@@ -1,0 +1,174 @@
+# x2cui builder redesign: tasks, not records
+
+> Status: proposal, 2026-11-25. Not approved and not started. It replaces
+> the interaction design of [the x2cui builder](x2cui-builder.md), whose
+> first version Gary judged far from usable on 2026-11-25: too many
+> options shown, and no clear way to get a wanted effect. The document
+> model, `View`, messages, and CUI's layout stay. Placement by
+> coordinates stays rejected.
+
+## What went wrong
+
+The first builder shows the toolkit's records. A selected row gets about
+40 editors in the record's declaration order, most of them free-text
+fields. A person building a UI has tasks instead: put these side by
+side, space them, make this one stretch, make this press do something.
+The audit of `examples/builder.x` found these concrete causes:
+
+- No outline of the tree. A block is visible only as a faint border, and
+  a click always selects the innermost component, so a row is reached by
+  clicking its padding or pressing Parent.
+- Gap and padding belong to the block, but a click selects the child.
+- No way to wrap components in a row or column, duplicate, or copy.
+- Numbers, sizes, and colors are typed as text. Each key is an undo step,
+  and a half-typed size raises.
+- The palette is a flat list of 31 names. A new component starts with its
+  own name as its label and no spacing.
+- A handler is added only by typing a Lisp form into `on_click`.
+
+## The six tasks and their controls
+
+The builder makes six tasks direct. Everything else is behind "All
+options". Each control below is copied from a tool that is known to work;
+the sources are in "Evidence".
+
+| Task | Control |
+| --- | --- |
+| Add | A palette in five groups (Layout, Text, Input, Display, Container) with a search field. A click adds after the selection or into a selected block. A drag from the palette shows the insertion line. A new component has visible content and a new block has gap 8. |
+| Arrange | An outline of the tree beside the canvas; selecting in either selects in both. Drag in either, with the insertion line. One command each for wrap in row, wrap in column, unwrap, duplicate, delete. Keys for parent, first child, next and previous sibling, and move among siblings. |
+| Space | For a selected block: direction as a segmented control, gap and padding as numbers that are dragged or typed, alignment as a 3 by 3 grid, and "space between". When a child is selected the inspector also shows its block's spacing under "In row" or "In column", so spacing is found from either end. |
+| Size | Width and height each as Fit, Fill, or Fixed, with a number for Fixed. The corner handle sets Fixed and the control shows it. |
+| Style | The few options that matter for the component, such as a button's variant and size, with editors by type. |
+| Wire | An Events group with one row per event the component reports. A row holds "send message NAME" or "call PROCEDURE". Run mode lists each event fired, the node that handled it, and the result. A one-line message box evaluates Lisp in the session. |
+
+Canvas handles for gap and padding come after the inspector controls
+work. Figma's users report changing padding by accident when resizing, so
+the handles appear only on a selected block and away from the corner.
+
+## Design
+
+### Three panes
+
+Left: the palette above the outline. Centre: the canvas. Right: the
+inspector. The toolbar keeps Run and Edit, undo, redo, and save.
+
+The outline is drawn with CUI's tree (`cui_tree_begin`,
+`cui_tree_clicked`). It lists every node, including a spacer, a
+separator, and a block hidden behind its children, which the canvas
+cannot select by click. A context menu (`cui_context_menu_begin`) on the
+canvas and the outline holds the Arrange commands, and `cui_shortcut`
+gives them keys.
+
+### An inspector built from a description of options
+
+The inspector is generated; no component has inspector code. It uses
+CUI's inspector rows: `cui_inspector_group`, `cui_prop_float_ex` (drag to
+change, with minimum, step, and suffix), `cui_prop_enum_ex`,
+`cui_prop_bool_ex`, and `cui_prop_color_ex`.
+
+`View.components()` already gives each option's name, kind, and enum
+members. It gives no grouping. The builder adds one table keyed by option
+name, not by component: `gap` is in Layout, common, step 1, minimum 0,
+with one line of help. Records share option names, so about 40 rows cover
+the 31 components. An option with no row falls under "All options" with
+the editor its kind gives. A component added to `View` later therefore
+appears in the builder with typed editors and no builder change.
+
+The default view shows the arguments, the common options, and any option
+the node has set. A set option has a reset control, and an unset one
+shows as unset, so the saved tree holds only what was changed. "All
+options" and a search field reach the rest.
+
+### Wiring
+
+The Events group reads the events from the component table: a component
+whose call reports a result has `on-click` or `on-change`. A block also
+lists the messages it handles, its `(on name form)` options, which the
+first inspector did not show. Choosing "send message" asks only for a
+name; the message goes up the blocks as it does today. Choosing "call"
+offers the procedures the session defines. Naming one that does not exist
+adds a stub to the tree's `FILE.lisp`, which Save then writes.
+
+### What changes in `View`
+
+- A percent size, which CUI has (`CUI_PCT`) and a tree cannot write.
+- The `gap` component, CUI's fixed space, beside `spacer`.
+- An id for every watched node, so a spacer or separator has a rectangle.
+- The record's `id` is not listed as an option beside the view's own.
+
+### What changes in the builder
+
+`examples/builder.x` is rewritten around the six tasks and split into a
+directory, as the first plan intended. Tree editing, undo, the id scope,
+drag aiming, and the off-screen check are kept. Typing in a field becomes
+one undo step per field visit, and redo is added.
+
+## Slices
+
+Each slice is usable alone and is shown to Gary in a window before the
+next starts.
+
+1. Outline, hierarchy keys, context menu, wrap, unwrap, duplicate.
+2. The generated inspector: Layout and Size controls, the option table,
+   common and all, "In row", undo by field.
+3. Palette groups, search, drag from the palette, useful defaults.
+4. Events group, stubs in `FILE.lisp`, the run log, the message box.
+5. Canvas handles for gap and padding.
+
+## Validation
+
+One scripted scenario is the acceptance test for slices 1 to 4, run by
+`builder --check` and by Gary in a window: build a sign-in form with a
+heading, two labelled inputs, and a row of two buttons 12 points apart
+at the right edge, then make the second button send a message that the
+form handles. It must need no typed option name and no typed Lisp other
+than the handler's body.
+
+## Evidence
+
+Three research reports from 2026-11-25. None of the tools was operated;
+the claims come from their documentation.
+
+- Outline synced with the canvas, and visible frames for layouts: Qt
+  Designer, Webflow Navigator, Android Studio Component Tree.
+- Wrap and unwrap in one command: Figma and Penpot (Shift+A), Qt Designer
+  (Ctrl+1, Ctrl+2, Ctrl+0), Xcode (Embed In, Unembed).
+- Fit, Fill, Fixed per axis: Figma (hug, fill, fixed), Plasmic, Framer.
+- Alignment grid beside a direction control: Figma, Webflow.
+- Common options first, all behind a toggle: Android Studio's Attributes
+  panel. Options grouped by effect: Webflow's Style panel.
+- Inspector generated from field descriptions: Godot export annotations,
+  Unity attributes, Storybook argTypes, Framer property controls.
+- Changed values marked with a reset: Qt Designer, Godot.
+- Events as rows on the component that create a named handler: Delphi's
+  Events page, Retool's event handlers. Messages that go up the
+  containers: HyperCard.
+- Reported mistakes to avoid: spacing handles that take resize drags
+  (Figma), hidden modifier keys for drop targets (Figma), a resize handle
+  that fixes a size without showing it (Android Studio), placement on a
+  fixed grid (Retool, which added a Stack to recover reflow).
+
+## Open questions for Gary
+
+1. Whether the five slices and their order are right, and whether slice 5
+   is wanted at all.
+2. Whether PRs gwf/x2c#751 to gwf/x2c#755, the first builder, go to
+   `dev` as they are or wait for slice 1.
+3. Whether the option table lives in the builder, as proposed, or in
+   `View.components()` so that other tools can use it.
+
+## Plan review
+
+- **Established facts.** CUI establishes layout and every rectangle. The
+  component table establishes option names, kinds, and enum members. The
+  builder's option table adds only presentation: group, common, step,
+  help. It does not restate types.
+- **Reuse and new mechanisms.** Reused: `View`, messages, the tree
+  operations, drag aiming, and CUI's tree, inspector rows, context menu,
+  and shortcuts, all of which x2cui already wraps. New: the option table,
+  the outline pane, wrap and unwrap, and the Events group.
+- **Idiom.** The document stays a List and edits stay List operations.
+  The inspector is a loop over a table, not code per component.
+- **Validators and diagnostics.** None added. A Fit block with a Fill
+  child on the same axis is shown as a warning in the inspector, not
+  rewritten.
