@@ -4,8 +4,11 @@
 > plan that day. It depends on
 > [the x2cui Lisp surface](x2cui-lisp-surface.md). Gary set the layout
 > direction on 2026-11-24: CUI's own layout is the default; free placement
-> is included only where it is low cost. "As built" below records what
-> exists and what does not; the design sections are kept as proposed.
+> is included only where it is low cost. On 2026-11-25 Gary rejected
+> placement by coordinates: a placed component cannot reflow, and spacing
+> belongs to padding, gap, alignment, and sizes. "As built" below records
+> what exists and what does not; the design sections are kept as
+> proposed, and their `free` container is not to be built.
 
 ## As built
 
@@ -28,17 +31,16 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
   draws a block with no children 72 by 32 points; within 6 points of a
   block's edge a drop goes beside the block; with nothing under the
   pointer it goes to the root. A running tree is not watched.
-- **Free placement** (added 2026-11-25): `patches/placed-node.patch` adds
-  `cui_place_begin` and `cui_place_end` to CUI, 13 lines, on all three
-  manifests. `(free (options) child ...)` in `View` is a box that places
-  each child at its `x` and `y` options. A drop into a `free` block sets
-  them; a drop elsewhere removes them.
+- **Free placement** was added and removed on 2026-11-25, with its CUI
+  patch, the `free` block, and the `x` and `y` options. See the status
+  note above.
+- **Layout options first** (2026-11-25): the inspector shows `width`,
+  `height`, `pad`, `gap`, `align`, and `justify` under "Layout", ahead of
+  the view's own options and the rest of the record.
 - **Resize handle** (added 2026-11-25): one square at the selection's
   corner sets `width` and `height` as fixed sizes, where the component
-  has those options. A placed node always fits its child, so size comes
-  only from the child's own options.
-- **Not built:** handles on the other corners and edges, and a scrolling
-  `free` block.
+  has those options.
+- **Not built:** handles on the other corners and edges.
 - **Ids.** CUI gives a box an id only when its record names one, and gives
   text none. While a watcher is installed the view gives each block an id
   by its place in the frame and draws each id-less component in a box
@@ -55,8 +57,8 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
 - **Checked:** `builder --check` selects, adds, runs, edits a label
   through the inspector, moves, deletes, undoes, saves, tells two equal
   nodes apart, drags a component into another block, before a sibling,
-  into an empty block, and beside a block, moves a child of a `free`
-  block, and resizes it, off screen.
+  into an empty block, and beside a block, resizes a component, and
+  edits a block's width in the inspector, off screen.
   No test opens a window.
 
 ## Result

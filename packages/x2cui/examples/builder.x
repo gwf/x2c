@@ -59,15 +59,12 @@ typedef struct Builder {
      moved far enough to be dragging, and a drag just released. */
   bool pressed, dragging, dropped;
   cui_vec2 press;
-  /* Where a drop would put the selection: a block and a position, with
-     a line there. Into a `free` block it is a point instead, with the
-     outline `ghost` there. */
-  bool aimed, placed;
+  // Where a drop would put the selection: a block, a position, a line.
+  bool aimed;
   Where target;
   cui_id target_id;
   int target_index;
-  cui_rect line, ghost;
-  cui_vec2 place;
+  cui_rect line;
   /* The selection's rectangle, the handle at its corner, and a press
      that began on the handle and so sizes the selection. */
   cui_rect chosen, handle;
@@ -77,7 +74,7 @@ typedef struct Builder {
   bool refill;
   int bound;
   // Where the check finds the builder's own controls.
-  cui_rect mode_button, add_button, free_button, first_field;
+  cui_rect mode_button, add_button, first_field;
 } Builder;
 
 static String sample = %"
@@ -179,12 +176,8 @@ static bool read_value(String text, Var &value) {
 
 // the document
 
-/* The table row that describes the component `name`. A `free` block is
-   a box that places its children, and has the box's row. */
-static List component(String name) {
-  String known = name == "free" ? "box" : name;
-  return View.components().find(%!(List row) => row[0] == known);
-}
+static List component(String name) =>
+  View.components().find(%!(List row) => row[0] == name);
 
 static bool has_option(List node, String name) {
   List row = component(spelled(node[0]));
@@ -422,11 +415,9 @@ static int aimed_block(Builder &b, Ui ui) {
   return -1;
 }
 
-/* Finds where a drop would put the selection. In a `free` block that is
-   the point that keeps the selection under the pointer as it was pressed.
-   In any other block it is the position before the first child whose
-   middle the pointer has not passed, along the block's direction, and
-   `line` is where that is. */
+/* Finds where a drop would put the selection: the position before the
+   first child whose middle the pointer has not passed, along the block's
+   direction. `line` is where that is. */
 static void aim(Builder &b, Ui ui) {
   int hit = aimed_block(b, ui);
   b.aimed = hit >= 0;
@@ -436,14 +427,6 @@ static void aim(Builder &b, Ui ui) {
   b.target = b.drawn[hit].where;
   b.target_id = b.drawn[hit].id;
   b.target_index = block.len();
-  b.placed = block[0] == <free>;
-  if (b.placed) {
-    b.ghost = (cui_rect){ b.chosen.x + b.pointer.x - b.press.x,
-                          b.chosen.y + b.pointer.y - b.press.y,
-                          b.chosen.w, b.chosen.h };
-    b.place = (cui_vec2){ b.ghost.x - area.x, b.ghost.y - area.y };
-    return;
-  }
   bool row = is_row(block);
   b.line = row ? (cui_rect){ area.x + 3, area.y + 3, 3, area.h - 6 }
                : (cui_rect){ area.x + 3, area.y + 3, area.w - 6, 3 };
@@ -469,26 +452,15 @@ static void aim(Builder &b, Ui ui) {
 static Var whole(float value) => (Var) (int) (value < 0 ? value - 0.5f
                                                         : value + 0.5f);
 
-/* Moves the selection to the aimed position. A node dropped into a
-   `free` block takes the point as its `x` and `y`, stays in its place
-   among its siblings when the block is its own, and goes last, which is
-   on top, when it is not. A node dropped anywhere else gives them up.
-   Taking the node out moves its later siblings down one place, and the
-   target with them when it is one of them or inside one. */
+/* Moves the selection to the aimed position. Taking the node out moves
+   its later siblings down one place, and the target with them when it is
+   one of them or inside one. */
 static void drop(Builder &b) {
   Where from = b.where, to = b.target;
   int index = b.target_index, at = from.at[--from.depth];
-  List was = node_at(b.tree, b.where);
-  List node = with_option(
-    with_option(was, "x", b.placed ? whole(b.place.x) : void),
-    "y", b.placed ? whole(b.place.y) : void);
+  List node = node_at(b.tree, b.where);
   if (same_place(to, from)) {
-    if (b.placed || index == at || index == at + 1) {
-      if ((void *) node != (void *) was)
-        change(b, replaced(b.tree, b.where, 0, node));
-      b.refill = true;
-      return;
-    }
+    if (index == at || index == at + 1) return;
     if (index > at) index--;
   }
   else if (inside(to, from) && to.at[from.depth] > at) to.at[from.depth]--;
@@ -587,9 +559,6 @@ static void palette(Ui ui, Builder &b) {
       if (ui.button(name, variant: ghost, size: sm, width: fill)) add(b, name);
       if (name == "button") b.add_button = ui.last_rect();
     }
-    if (ui.button("free", variant: ghost, size: sm, width: fill))
-      add(b, "free");
-    b.free_button = ui.last_rect();
   }
 }
 
@@ -613,9 +582,7 @@ static void canvas(Ui ui, Builder &b) {
   if (!b.editing) return;
   bool moving = b.dragging && !b.sizing && b.aimed;
   Marks marks = { &b, selected_id(b), moving ? b.target_id : 0,
-                  moving && !b.placed, b.dragging && (b.sizing || b.placed),
-                  b.line, b.sizing ? sized_to(b) : b.ghost };
-  if (b.dragging && !b.sizing && !b.aimed) marks.ghosted = false;
+                  moving, b.dragging && b.sizing, b.line, sized_to(b) };
   ui.canvas("marks", fill, fill, paint_marks, &marks, sizeof marks);
   if (b.dragging) ui.set_cursor(CUI_CURSOR_MOVE);
 }
@@ -645,6 +612,41 @@ static int edited(Ui ui, Builder &b, int slot, String label, String kind,
   return read_value(field.text(), out);
 }
 
+// The options that lay a component out, which the inspector shows first.
+static bool lays_out(String name) =>
+  name in %("width" "height" "pad" "gap" "align" "justify");
+
+/* One option of `node` in the inspector, by the kind the component table
+   gives it: a switch, a select of an enum's members, or a text field.
+   Returns the node with the option changed, or NULL. */
+static List option_edited(Ui ui, Builder &b, List node, List described,
+                          int &slot) {
+  String what = described[0], kind = described[1];
+  Var now = option(node, what), value = void;
+  if (kind == "bool") {
+    bool on = !now.is_void() && now.double() != 0;
+    return ui.switch(what, on)
+      ? with_option(node, what, on ? (Var) 1 : void) : NULL;
+  }
+  if (kind == "enum") {
+    List members = described.cdr().cdr();
+    int index = 0, i = 1;
+    foreach (String member in members) {
+      if (!now.is_void() && spelled(now) == member) index = i;
+      i++;
+    }
+    ui.muted(what);
+    return ui.select(%"inspect-$what", %("default" @members), index)
+      ? with_option(node, what, index
+          ? (Var) Atom.intern(members[index - 1]) : void)
+      : NULL;
+  }
+  int did = edited(ui, b, slot++, what, kind, now, value);
+  return did ? with_option(node, what, did == 1 ? value : void) : NULL;
+}
+
+/* Shows the selection's arguments, then the options that lay it out,
+   then the view's own options, then the rest of its record. */
 static void inspector(Ui ui, Builder &b) {
   ui.scroll (id: "inspector", width: 260, height: fill, pad: 12, gap: 8) {
     if (!b.selected) {
@@ -652,9 +654,9 @@ static void inspector(Ui ui, Builder &b) {
                          : "The tree is running. Edit to change it.");
       return;
     }
-    List node = node_at(b.tree, b.where), edit = NULL;
+    List node = node_at(b.tree, b.where), edit = NULL, changed = NULL;
     String name = spelled(node[0]);
-    List row = component(name);
+    List row = component(name), options = row ? (List) row[3] : %();
     ui.heading(name, 4);
     int slot = 0, at = 2;
     Var value = void;
@@ -667,36 +669,21 @@ static void inspector(Ui ui, Builder &b) {
       slot++;
       at++;
     }
-    foreach (String own in %("id" "bind" "on_click" "show" "x" "y")) {
+    ui.label("Layout");
+    foreach (List described in options)
+      if (lays_out(described[0]) &&
+          (changed = option_edited(ui, b, node, described, slot)))
+        edit = changed;
+    ui.separator();
+    foreach (String own in %("id" "bind" "on_click" "show")) {
       int did = edited(ui, b, slot++, own, "form", option(node, own), value);
       if (did) edit = with_option(node, own, did == 1 ? value : void);
     }
     ui.separator();
-    foreach (List described in row ? (List) row[3] : %()) {
-      String what = described[0], kind = described[1];
-      Var now = option(node, what);
-      if (kind == "bool") {
-        bool on = !now.is_void() && now.double() != 0;
-        if (ui.switch(what, on))
-          edit = with_option(node, what, on ? (Var) 1 : void);
-      }
-      else if (kind == "enum") {
-        List members = described.cdr().cdr();
-        int index = 0, i = 1;
-        foreach (String member in members) {
-          if (!now.is_void() && spelled(now) == member) index = i;
-          i++;
-        }
-        ui.muted(what);
-        if (ui.select(%"inspect-$what", %("default" @members), index))
-          edit = with_option(node, what, index
-            ? (Var) Atom.intern(members[index - 1]) : void);
-      }
-      else {
-        int did = edited(ui, b, slot++, what, kind, now, value);
-        if (did) edit = with_option(node, what, did == 1 ? value : void);
-      }
-    }
+    foreach (List described in options)
+      if (!lays_out(described[0]) &&
+          (changed = option_edited(ui, b, node, described, slot)))
+        edit = changed;
     b.refill = false;
     if (edit) change(b, replaced(b.tree, b.where, 0, edit));
   }
@@ -930,42 +917,38 @@ static int check(String image) {
     "(row () (button () \"Same\")) (row ()))";
   printf("drag beside: %s\n", written(b.tree));
 
-  /* A `free` block places its children at their `x` and `y`. A drag
-     inside it moves a child by as much as the pointer moved. */
-  Var placed = void;
-  read_value(%"(column ((pad 24))
-                 (free ((width 400) (height 300) (border 1))
-                   (button () \"A\") (button ((x 100) (y 50)) \"B\")))",
-             placed);
-  change(b, placed);
+  // A drag of the handle at the selection's corner sets a fixed size.
+  Var sized = void;
+  read_value(%"(column ((pad 24)) (button () \"B\"))", sized);
+  change(b, sized);
   b.selected = false;
   for (int i = 0; i < 3; i++) frame(screen, b);
-  Where inner = { 1, { 2 } }, second_child = { 2, { 2, 3 } };
-  cui_rect sheet = drawn_at(b, ui, inner);
-  cui_rect at = drawn_at(b, ui, second_child);
-  int places = at.x == sheet.x + 100 && at.y == sheet.y + 50;
-  printf("free: sheet at %g,%g, B at %g,%g\n", sheet.x, sheet.y, at.x, at.y);
-  drag(screen, b, at, at.x + at.w / 2 + 40, at.y + at.h / 2 + 30,
-       image + ".free.png");
-  for (int i = 0; i < 3; i++) frame(screen, b);
-  cui_rect now = drawn_at(b, ui, second_child);
-  int frees = now.x == at.x + 40 && now.y == at.y + 30 &&
-              option(node_at(b.tree, second_child), "x").int() == 140 &&
-              option(node_at(b.tree, second_child), "y").int() == 80;
-  printf("free drag: %s\n", written(b.tree));
-  // A drag of the handle at the selection's corner sets fixed sizes.
+  Where only = { 1, { 2 } };
+  cui_rect now = drawn_at(b, ui, only);
   for (int i = 0; i < 60; i++) frame(screen, b);
   click(screen, b, now);
   for (int i = 0; i < 3; i++) frame(screen, b);
   cui_rect corner = { now.x + now.w - 1, now.y + now.h - 1, 2, 2 };
   drag(screen, b, corner, now.x + now.w + 30, now.y + now.h + 10, NULL);
   for (int i = 0; i < 3; i++) frame(screen, b);
-  cui_rect grown = drawn_at(b, ui, second_child);
-  int sizes = grown.w == whole(now.w + 30).int() &&
-              option(node_at(b.tree, second_child), "x").int() == 140;
+  cui_rect grown = drawn_at(b, ui, only);
+  int sizes = grown.w == whole(now.w + 30).int();
   printf("resize: %g by %g to %g by %g, %s\n", now.w, now.h, grown.w,
          grown.h, written(b.tree));
-  return fills && besides && places && frees && sizes && selects && adds &&
+
+  // A block's layout options come first: its first field is its width.
+  b.where.depth = 0;
+  b.refill = true;
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  click(screen, b, b.first_field);
+  ui.input_text("300");
+  frame(screen, b);
+  frame(screen, b);
+  int lays = option(b.tree, "width").int() == 300 &&
+             option(b.tree, "pad").int() == 24;
+  printf("layout: %s\n", written(b.tree));
+  screen.write_png(image + ".layout.png");
+  return lays && fills && besides && sizes && selects && adds &&
          runs && edits && moves && removes && undoes &&
          saves && picks && keeps && reparents && reorders && stays ? 0 : 1;
 }

@@ -257,33 +257,6 @@ static void a_watcher_learns_each_node_and_its_id(void) {
   EXPECT_INT_EQ(seen.nodes, 8);
 }
 
-static void a_free_block_places_its_children(void) {
-  Lisp lisp = auto Lisp.new();
-  Offscreen screen = auto Offscreen.open(400, 300);
-  lisp.eval_string("(def clicks 0)");
-  lisp.eval_string("(def bump (lambda () (def clicks (+ clicks 1))))");
-  View view = start(lisp, %"
-    (def ui '(column ((pad 20))
-               (free ((width 300) (height 200))
-                 (button ((width 80)) \"A\")
-                 (button ((x 150) (y 90) (width 80) (on-click bump))
-                         \"B\"))))");
-  Seen seen = { .ui = screen.ui() };
-  view.watch(see, &seen);
-  frame(screen, view);
-  frame(screen, view);
-  // The last button reported is the one placed at 150, 90 in the block.
-  cui_rect placed = screen.ui().get_rect(seen.button);
-  EXPECT_INT_EQ((int) placed.x, 170);
-  EXPECT_INT_EQ((int) placed.y, 110);
-  EXPECT_INT_EQ((int) placed.w, 80);
-  view.watch(NULL, NULL);
-  click(screen, view, 180, 120);
-  EXPECT_INT_EQ((int) number(lisp, "clicks"), 1);
-  click(screen, view, 30, 30);
-  EXPECT_INT_EQ((int) number(lisp, "clicks"), 1);
-}
-
 static void a_watched_block_with_no_children_has_a_size(void) {
   Lisp lisp = auto Lisp.new();
   Offscreen screen = auto Offscreen.open(320, 200);
@@ -328,7 +301,6 @@ int main(void) {
   $test.run(a_handler_passes_and_sends);
   $test.run(cards_draw_the_child_their_option_names);
   $test.run(a_watcher_learns_each_node_and_its_id);
-  $test.run(a_free_block_places_its_children);
   $test.run(a_watched_block_with_no_children_has_a_size);
   $test.run(the_component_table_describes_each_component);
   return TestHarness_finish();

@@ -581,10 +581,6 @@ children. A name is spelled with `-` or `_`.
   with that node replaced, and `(ui-find tree id)` returns the node.
 - `(cards ((show name)) child ...)` draws only the child whose `id` is
   `name`, or the first child without the option.
-- `(free (options) child ...)` is a box that places each child at the
-  point its `(x number)` and `(y number)` options give, measured from the
-  box's corner and outside its layout. A later child draws over an
-  earlier one. Outside a `free` block the two options do nothing.
 
 A handler written `(send name argument ...)` sends a message instead of
 calling a procedure. The component and then each block around it is
@@ -652,18 +648,19 @@ The window draws the tree between a palette and an inspector. In edit
 mode a click selects the component under the pointer and does not press
 it; the palette adds a component after the selection or inside a
 selected block, the inspector edits the selection's arguments and
-options, and the toolbar selects the parent, moves the selection among
+options, with `width`, `height`, `pad`, `gap`, `align`, and `justify`
+first, and the toolbar selects the parent, moves the selection among
 its siblings, deletes it, undoes, and saves. Edit mode outlines every
 block and draws a block with no children 72 by 32 points. Dragging a
 component moves it to the line shown, in the block outlined: the block
 under the pointer, or the block around that one when the pointer is
-within 6 points of its edge. Dropped into a `free` block, a component
-goes to the point shown instead. Dragging the square at the selection's
+within 6 points of its edge. Dragging the square at the selection's
 corner sets a fixed width and height where the component has those
 options. Run mode makes the tree behave as it will in a program. `builder FILE` edits a tree saved as one
 datum, and evaluates `FILE.lisp` first when it exists. The builder uses
-CUI's layout: outside a `free` block a component's place is its position
-among its siblings. It has no copy and paste.
+CUI's layout: a component's place is its position among its siblings,
+and spacing comes from padding, gap, alignment, and sizes. It has no
+placement by coordinates and no copy and paste.
 `builder --check IMAGE.png` runs those operations off screen.
 
 `examples/gallery.x` is the broader application (`make example`). It is

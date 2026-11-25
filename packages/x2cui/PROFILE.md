@@ -21,10 +21,6 @@ and press states that CUI uses to highlight a table row.
 Every profile also applies `patches/slanted-text.patch`. It preserves the
 baseline-sheared drawing operation `cui_draw_text_slanted` for custom text.
 
-Every profile also applies `patches/placed-node.patch`. It adds
-`cui_place_begin` and `cui_place_end`, which place a node at a point inside
-the current box, outside its flow. The `free` container of `View` uses them.
-
 The browser profile applies `patches/web-opengl-es.patch`; see
 [Browser](#browser).
 

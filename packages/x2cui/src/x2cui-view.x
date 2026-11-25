@@ -29,8 +29,6 @@ static typedef struct ViewState {
   // What one draw collects: the events reported, and the open blocks.
   Array fired, path;
   int blocks;
-  // Set by a `free` node for the box that draws it: place its children.
-  int placing;
   /* For a watcher: the last id before a component's call, the id of the
      box around a component CUI gives none, and the components learned
      to need one. */
@@ -116,7 +114,7 @@ static Var _view_option(List node, String name) {
 
 static int _view_own(String name) =>
   name == "bind" || name == "on_click" || name == "on_change" ||
-  name == "id" || name == "on" || name == "x" || name == "y";
+  name == "id" || name == "on";
 
 /* Sets each row of the node's options in `record` through `set`. */
 static void _view_options(
@@ -265,12 +263,6 @@ static void _view_component(ViewState view, Ui ui, List node) {
 
 static void _view_node(ViewState view, Ui ui, List node) {
   if (node[0] == <cards>) return _view_cards(view, ui, node);
-  // A `free` node is a box that places its children.
-  if (node[0] == <free>) {
-    view.placing = 1;
-    if (!_view_component_draw(view, ui, "box", node)) view.placing = 0;
-    return;
-  }
   if (!view.hook || !_view_plain(view, node[0]))
     return _view_component(view, ui, node);
   /* A watched component with no id of its own is drawn in a box that
@@ -285,20 +277,7 @@ static void _view_node(ViewState view, Ui ui, List node) {
   _view_component(view, ui, node);
 }
 
-/* Draws `node` at the point its `x` and `y` options give inside the
-   block around it, outside that block's flow. */
-static void _view_placed(ViewState view, Ui ui, List node) {
-  Var x = _view_value(view, _view_option(node, "x"));
-  Var y = _view_value(view, _view_option(node, "y"));
-  cui_place_begin(ui, 0, x.is_void() ? 0 : (float) _view_number(x),
-                  y.is_void() ? 0 : (float) _view_number(y), 0, 0);
-  defer cui_place_end(ui);
-  _view_node(view, ui, node);
-}
-
 static void _view_children(ViewState view, Ui ui, List node, int from) {
-  int placing = view.placing;
-  view.placing = 0;
   view.path.push(node);
   defer view.path.pop();
   // A watcher points at blocks, and a block with no children has no size.
@@ -306,10 +285,7 @@ static void _view_children(ViewState view, Ui ui, List node, int from) {
     cui_box_begin(ui, &(cui_box){ .width = CUI_PX(72), .height = CUI_PX(32) });
     cui_box_end(ui);
   }
-  for (int i = from; i < node.len(); i++) {
-    if (placing) _view_placed(view, ui, node[i]);
-    else _view_node(view, ui, node[i]);
-  }
+  for (int i = from; i < node.len(); i++) _view_node(view, ui, node[i]);
 }
 
 // handlers and messages
@@ -436,8 +412,7 @@ List View.components(void) => $x2cui.view.table();
 // Whether the elements after the options of `tree` are child nodes.
 static int _view_has_children(List tree) =>
   tree.len() >= 2 &&
-  (tree[0] == <cards> || tree[0] == <free> ||
-   _view_is_block(_view_name(tree[0])));
+  (tree[0] == <cards> || _view_is_block(_view_name(tree[0])));
 
 $lisp.binding(x2cui_lisp, "ui-replace")
 static List _lisp_ui_replace(List tree, Var id, List node) {
