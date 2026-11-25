@@ -531,6 +531,26 @@ explicitly when a current-tree answer is required. A failed rebuild preserves
 the preceding snapshot. Inspection returns the saved source, not the current
 file contents.
 
+### Portable network export
+
+Run `x2c graph export-network SNAPSHOT OUTPUT.json` to write a saved analysis
+as UTF-8 JSON. Use the graph command from the compiler build that created the
+snapshot. Export reads saved records. The portable JSON can be opened without
+the compiler or the graph command.
+
+The document contains format `x2c-source-network`, integer version `1`, the
+snapshot identity in `snapshot`, and its `coverage`. The `entities` array
+retains entity IDs, kinds, declarations, locations, and saved source. A file
+entity includes its saved file text. Review the output before distributing
+it because it can contain source code and original file paths.
+
+The `occurrences` array contains every saved relationship in snapshot order,
+including repeated sites. Each row has a `source` entity ID, a `target`
+entity ID or JSON null, a `kind`, and a JSON boolean `resolved`. A known
+target can still be unresolved. Rows preserve available origin, location,
+reason, and target name. The output directory must exist. A failed export
+preserves an existing output file.
+
 ### Persistent queries
 
 Run `x2c graph serve SNAPSHOT` to load one snapshot and its entity, binding,

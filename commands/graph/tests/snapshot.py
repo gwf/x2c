@@ -162,6 +162,78 @@ def saved_queries(p, snapshot):
     return functions
 
 
+def network_export(p, snapshot, sources, saved_text, source_view, damaged):
+    output = p.root / "network.json"
+    receipt = p.command("export-network", snapshot, output)
+    assert receipt["path"] == str(output)
+    doc = json.loads(output.read_text(encoding="utf-8"))
+    assert doc["format"] == "x2c-source-network" and type(doc["version"]) is int
+    assert doc["version"] == 1 and doc["snapshot"] == receipt["snapshot"]
+    assert doc["coverage"] == receipt["coverage"]
+    entities = {row["id"]: row for row in doc["entities"]}
+    expected = p.query(snapshot, op="find", where={}, limit=10000)
+    assert set(entities) == {row["id"] for row in expected["results"]}
+    assert len(doc["entities"]) == len(entities)
+    helpers = [row for row in entities.values() if row["name"] == "snapshot_helper"]
+    assert len(helpers) == 2 and {row["unit"] for row in helpers} == set(map(str, sources))
+    files = [row for row in entities.values()
+             if row["kind"] == "file" and row["file"] == str(sources[0])]
+    assert len(files) == 1 and files[0]["source"] == saved_text
+    leaf = entities[source_view["results"][0]["id"]]
+    assert leaf["source"] == source_view["results"][0]["source"]
+    assert "snapshot_leaf" in leaf["declaration"]
+    edges = doc["occurrences"]
+    assert all(row["source"] in entities and type(row["resolved"]) is bool
+               and (row["target"] in entities or
+                    (row["target"] is None and not row["resolved"]))
+               for row in edges)
+    assert {"contains", "calls", "field-value", "field-pointer", "reads", "writes"} <= {
+        row["kind"] for row in edges
+    }
+    pairs = [(entities[row["source"]]["name"], entities[row["target"]]["name"])
+             for row in edges if row["kind"] == "calls" and row["resolved"]]
+    assert {("snapshot_entry", "snapshot_leaf"), ("snapshot_entry", "snapshot_middle"),
+            ("snapshot_middle", "snapshot_leaf"), ("snapshot_leaf", "snapshot_helper")} <= set(pairs)
+    assert pairs.count(("snapshot_entry", "snapshot_leaf")) == 1
+    unresolved = [row for row in edges if row["kind"] == "calls" and row["target"] is None]
+    assert any(entities[row["source"]]["name"] == "snapshot_callback"
+               and row["indirect"] and row["line"] > 0 and row["target_name"]
+               for row in unresolved)
+
+    repeat = p.root / "repeat.x"
+    repeat.write_text(
+        "int external(int);\n"
+        "int repeat(int x) {\n"
+        "  int a = external(x);\n"
+        "  return a + external(x + 1);\n"
+        "}\n",
+        encoding="utf-8",
+    )
+    repeated = p.root / "repeat"
+    p.command("snapshot", repeated, repeat)
+    repeat_output = p.root / "repeat.json"
+    p.command("export-network", repeated, repeat_output)
+    repeated_doc = json.loads(repeat_output.read_text(encoding="utf-8"))
+    repeated_calls = [row for row in repeated_doc["occurrences"]
+                      if row["kind"] == "calls" and row.get("target_name") == "external"]
+    assert len(repeated_calls) == 2
+    first, second = repeated_calls
+    assert first["target"] == second["target"] and first["target"]
+    assert not first["resolved"] and not second["resolved"]
+    assert first["line"] != second["line"]
+
+    before = output.read_bytes()
+    p.command("export-network", damaged, output, success=False)
+    assert output.read_bytes() == before
+    directory = p.root / "output-directory"
+    directory.mkdir()
+    retained = directory / "retained"
+    retained.write_text("keep")
+    p.command("export-network", snapshot, directory, success=False)
+    assert retained.read_text() == "keep"
+    assert not list(p.root.glob(".x2c-network-*"))
+
+
 def lifecycle(p, sources):
     snapshot = p.root / "before"
     p.command("snapshot", snapshot, *sources)
@@ -239,6 +311,7 @@ def lifecycle(p, sources):
     data_path.write_text(replaced)
     failure = p.command("status", damaged, success=False)
     assert "incompatible" in failure.stderr
+    network_export(p, snapshot, sources, original, source_view, damaged)
 
 
 def project_membership(p):
