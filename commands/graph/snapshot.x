@@ -205,6 +205,45 @@ static Path _snapshot_publish(Path destination, Map snapshot) {
   return destination;
 }
 
+static Map _snapshot_network(Map snapshot) {
+  Map files = {};
+  foreach (Map file, snapshot["files"].array()) files[file["path"]] = file["text"];
+  Array entities = [], occurrences = [];
+  foreach (Map entity, snapshot["entities"].array()) {
+    Map row = entity.copy();
+    if (entity["kind"] == "file") row["source"] = files[entity["file"]];
+    entities.push(row);
+  }
+  foreach (Map edge, snapshot["edges"].array()) {
+    Map row = edge.copy();
+    row.del("from");
+    row.del("to");
+    row["source"] = edge["from"];
+    String target = edge["to"];
+    row["target"] = target ? (Var) target : (Var) NULL;
+    row["resolved"] = Json.bool(edge["resolved"].int());
+    occurrences.push(row);
+  }
+  return {"format": "x2c-source-network", "version": 1,
+    "snapshot": snapshot["identity"], "coverage": snapshot["coverage"],
+    "entities": entities, "occurrences": occurrences};
+}
+
+static Path _snapshot_export_network(Path destination, Map snapshot) {
+  destination = Path.absolute(destination);
+  Path parent = destination.dirname();
+  String template = parent.join(".x2c-network-XXXXXX");
+  char *buffer = xmemdup(template, template.len() + 1);
+  if (!mkdtemp(buffer)) File.path_error("network export temporary", parent, errno);
+  Path temporary = String.new(buffer);
+  defer temporary.remove_tree();
+  Path staged = temporary.join("network.json");
+  Json.write_file(_snapshot_network(snapshot), staged);
+  if (rename(staged, destination))
+    File.path_error("network export rename", destination, errno);
+  return destination;
+}
+
 static Map _snapshot_status(Map snapshot, String executable) {
   Array changed = [], missing = [], added = [], removed = [];
   Map fingerprints = snapshot["fingerprints"];
@@ -278,6 +317,11 @@ int graph_snapshot_command(int argc, char **argv) {
         if (query is not <map>)
           raise %(bad-arg (reason "query object required"));
         result = graph_snapshot_query(snapshot, query);
+      }
+      else if (verb == "export-network" && argc == 4) {
+        Path destination = _snapshot_export_network(String.new(argv[3]), snapshot);
+        result = {"snapshot": snapshot["identity"], "path": destination,
+          "coverage": snapshot["coverage"]};
       }
       else if (verb == "diff" && argc == 4)
         result = graph_snapshot_diff(
