@@ -294,6 +294,12 @@ meta static String _parameter_name(String function, int i) {
   return row ? row[i] : %"p$i";
 }
 
+/** Returns CUI's name for parameter `i` of `function`, counted from 1
+    after the context.
+*/
+meta String x2cui_parameter_name(String function, int i) =>
+  _parameter_name(function, i);
+
 /** Returns the `Ui` method that forwards to the C function `target`, and
     its method form when it has one.
 */

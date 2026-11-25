@@ -150,6 +150,116 @@ static void options_convert_by_the_type_of_their_field(void) {
   EXPECT_TRUE(((List) lisp.eval_string("(ui-find ui 'absent)")).len() == 0);
 }
 
+static String text(Lisp lisp, String name) {
+  Var value = void;
+  EXPECT_TRUE(lisp.try_get(name, value));
+  return value;
+}
+
+static void a_message_goes_up_to_the_first_handler(void) {
+  Lisp lisp = auto Lisp.new();
+  Offscreen screen = auto Offscreen.open(320, 200);
+  lisp.eval_string("(def log \"\")");
+  lisp.eval_string("(def note (lambda (who what) (def log (ui-text log who what))))");
+  View view = start(lisp, %"
+    (def ui
+      '(column ((pad 20) (on save (lambda (what) (note \"outer:\" what))))
+         (row ((on save (lambda (what) (note \"inner:\" what))))
+           (button ((width 120) (on-click (send save \"a\"))) \"Save\"))))");
+  click(screen, view, 40, 36);
+  EXPECT_STR_EQ(text(lisp, "log"), "inner:a");
+}
+
+static void a_handler_passes_and_sends(void) {
+  Lisp lisp = auto Lisp.new();
+  Offscreen screen = auto Offscreen.open(320, 200);
+  lisp.eval_string("(def log \"\")");
+  lisp.eval_string("(def note (lambda (what) (def log (ui-text log what))))");
+  // A lambda has one body form; `then` evaluates two in order.
+  lisp.eval_string("(def then (lambda (first second) second))");
+  View view = start(lisp, %"
+    (def ui
+      '(column ((pad 20)
+                (on save (lambda () (then (note \"outer \") (ui-send 'done 7))))
+                (on done (lambda (n) (note n))))
+         (row ((on save (lambda () (then (note \"inner \") (ui-pass)))))
+           (button ((width 120) (on-click (send save))) \"Save\")
+           (button ((width 120) (on-click (send unheard))) \"Other\"))))");
+  click(screen, view, 40, 36);
+  EXPECT_STR_EQ(text(lisp, "log"), "inner outer 7");
+  // A message no node handles is dropped.
+  click(screen, view, 170, 36);
+  EXPECT_STR_EQ(text(lisp, "log"), "inner outer 7");
+  bool caught = false;
+  try lisp.eval_string("(ui-pass)");
+  catch %(bad-state *detail): caught = true;
+  EXPECT_TRUE(caught);
+}
+
+static void cards_draw_the_child_their_option_names(void) {
+  Lisp lisp = auto Lisp.new();
+  Offscreen screen = auto Offscreen.open(320, 200);
+  lisp.eval_string("(def page 'first)");
+  lisp.eval_string("(def seen \"\")");
+  View view = start(lisp, %"
+    (def ui
+      '(column ((pad 20))
+         (cards ((show (eval page)))
+           (button ((id first) (width 120)
+                    (on-click (lambda () (def page 'second)))) \"Next\")
+           (button ((id second) (width 120)
+                    (on-click (lambda () (def seen \"second\")))) \"Here\"))))");
+  click(screen, view, 40, 36);
+  EXPECT_STR_EQ(text(lisp, "seen"), "");
+  click(screen, view, 40, 36);
+  EXPECT_STR_EQ(text(lisp, "seen"), "second");
+}
+
+typedef struct Seen { Ui ui; int nodes; cui_id button; } Seen;
+
+static void see(void *user, List node, cui_id id) {
+  Seen *seen = user;
+  seen.nodes++;
+  if (node[0] == <button>) seen.button = id;
+}
+
+static void a_watcher_learns_each_node_and_its_id(void) {
+  Lisp lisp = auto Lisp.new();
+  Offscreen screen = auto Offscreen.open(320, 200);
+  View view = start(lisp, %"
+    (def ui '(column ((pad 20)) (row () (text () \"a\")
+                                        (button ((width 120)) \"Add\"))))");
+  Seen seen = { .ui = screen.ui() };
+  view.watch(see, &seen);
+  frame(screen, view);
+  EXPECT_INT_EQ(seen.nodes, 4);
+  frame(screen, view);
+  cui_rect button = screen.ui().get_rect(seen.button);
+  EXPECT_INT_EQ((int) button.w, 120);
+  EXPECT_TRUE(button.x > 20 && button.y >= 20);
+  view.watch(NULL, NULL);
+  frame(screen, view);
+  EXPECT_INT_EQ(seen.nodes, 8);
+}
+
+static void the_component_table_describes_each_component(void) {
+  List button = View.components().find(%!(List row) => row[0] == "button");
+  EXPECT_NOT_NULL(button);
+  EXPECT_INT_EQ((int) button[1], 0);
+  EXPECT_STR_EQ(((List) button[2]).repr(), "((\"label\" \"text\"))");
+  List options = button[3];
+  List variant = options.find(%!(List row) => row[0] == "variant");
+  EXPECT_STR_EQ((String) variant[1], "enum");
+  EXPECT_TRUE("primary" in variant);
+  List width = options.find(%!(List row) => row[0] == "width");
+  EXPECT_STR_EQ((String) width[1], "size");
+  List row = View.components().find(%!(List row) => row[0] == "row");
+  EXPECT_INT_EQ((int) row[1], 1);
+  List slider = View.components().find(%!(List row) => row[0] == "slider");
+  EXPECT_STR_EQ(((List) slider[2]).repr(),
+    "((\"label\" \"text\") (\"value\" \"bound\") (\"min\" \"number\") (\"max\" \"number\"))");
+}
+
 int main(void) {
   TestHarness_begin();
   $test.run(a_click_runs_the_handler_once);
@@ -158,5 +268,10 @@ int main(void) {
   $test.run(a_bound_input_edits_the_text_of_a_global);
   $test.run(a_misspelled_option_raises_and_closes_its_blocks);
   $test.run(options_convert_by_the_type_of_their_field);
+  $test.run(a_message_goes_up_to_the_first_handler);
+  $test.run(a_handler_passes_and_sends);
+  $test.run(cards_draw_the_child_their_option_names);
+  $test.run(a_watcher_learns_each_node_and_its_id);
+  $test.run(the_component_table_describes_each_component);
   return TestHarness_finish();
 }

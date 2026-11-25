@@ -34,7 +34,7 @@
     thread that draws.
 */
 
-#include "x2cui-options.x"
+#include "x2cui-generate.x"
 
 // generated draw functions
 
@@ -60,25 +60,44 @@ meta static String _view_component(String function) {
   return name.endswith("_begin") ? name[:name.len() - 6] : name;
 }
 
+/* How a tree gives a value of the C type `type`: "size", "color",
+   "text", "enum", "bool", or "number"; NULL for a type it cannot give. */
+meta static String _view_kind(Type type) {
+  if (type ~= %("cui_size")) return "size";
+  if (type ~= %("cui_color")) return "color";
+  if (Type.is_text(type)) return "text";
+  Type resolved = Type.resolve(type);
+  if (resolved ~= %(enum *)) return "enum";
+  if (_view_spelled(resolved, "(\"bool\")")) return "bool";
+  return Type.numeric(resolved) ? "number" : NULL;
+}
+
 /* The expression that converts the Var `value` to the C type `type`, or
    NULL for a type a tree cannot give. */
 meta static List _view_convert(Type type, List value) {
-  if (type ~= %("cui_size")) return $!( _view_size($value) );
-  if (type ~= %("cui_color")) return $!( _view_color($value) );
-  if (Type.is_text(type)) return $!( _view_string($value) );
-  Type resolved = Type.resolve(type);
-  if (resolved ~= %(enum *)) {
-    List members = Type.members(resolved);
-    int count = members.len();
-    List names = x2cui_member_names(members);
-    List constants = x2cui_member_constants(members);
-    return $!( ($type) _view_member(
-      $value, (const char *const[]){ @names }, (int[]){ @constants },
-      $count) );
-  }
-  if (_view_spelled(resolved, "(\"bool\")"))
-    return $!( _view_number($value) != 0 );
-  return Type.numeric(resolved) ? $!( ($type) _view_number($value) ) : NULL;
+  String kind = _view_kind(type);
+  if (!kind) return NULL;
+  if (kind == "size") return $!( _view_size($value) );
+  if (kind == "color") return $!( _view_color($value) );
+  if (kind == "text") return $!( _view_string($value) );
+  if (kind == "bool") return $!( _view_number($value) != 0 );
+  if (kind == "number") return $!( ($type) _view_number($value) );
+  List members = Type.members(Type.resolve(type));
+  int count = members.len();
+  List names = x2cui_member_names(members);
+  List constants = x2cui_member_constants(members);
+  return $!( ($type) _view_member(
+    $value, (const char *const[]){ @names }, (int[]){ @constants },
+    $count) );
+}
+
+/* One row of `x2cui_view_table` for a value named `name` of type `type`:
+   its name, its kind, and an enum's member names. */
+meta static List _view_described(String name, Type type) {
+  String kind = _view_kind(type);
+  if (kind != "enum") return %($name $kind);
+  List names = x2cui_member_names(Type.members(Type.resolve(type)));
+  return %($name $kind @names);
 }
 
 /* The function that sets one field of the option record `record` from a
@@ -172,15 +191,19 @@ meta static List _view_draw(String function) {
     }
   }
   List setup = before.list_free(), passed = args.list_free();
-  List kept = after.list_free();
   String name = _view_component(function);
   List draw = x2c_ident(%"_view_draw_$name");
   int block = function.endswith("_begin");
   int reports = !_view_spelled(result, "(void)") &&
                 !_view_spelled(result, "(\"cui_id\")");
+  int identified = _view_spelled(result, "(\"cui_id\")");
   List call = reports
     ? $!{ if ($target(@passed)) _view_fire($view, $node); }
-    : $!{ $target(@passed); };
+    : identified ? $!{ _view_drawn($view, $node, $target(@passed)); }
+                 : $!{ $target(@passed); };
+  if (!identified)
+    after.push($!{ _view_drawn($view, $node, cui_last_id($u)); });
+  List kept = after.list_free();
   if (!block)
     return $!Unit{
       static void $draw($view_type $view, $ui_type $u, List $node) {
@@ -194,6 +217,7 @@ meta static List _view_draw(String function) {
     static void $draw($view_type $view, $ui_type $u, List $node) {
       @setup
       $call
+      @kept
       defer $end($u);
       _view_children($view, $u, $node, $at);
     } };
@@ -213,6 +237,57 @@ meta static List _view_records(void) {
   }
   return records.list_free();
 }
+
+/** Returns one row for each component a tree can name:
+    `(name block arguments options)`. `block` is 1 for a component with
+    children. Each argument and option is `(name kind member...)`, where
+    `kind` is "text", "number", "bool", "size", "color", or "enum" with
+    its member names; an argument can also be "items" for a List of
+    labels, "bound" for a number kept by a `bind` option, and "field" for
+    text kept by one.
+*/
+meta List x2cui_view_table(void) {
+  Array rows = [];
+  foreach (String function in _view_functions) {
+    List types = Type.parameters(Code.type(x2c_ident(function)));
+    Array arguments = [], options = [];
+    int count = types.len();
+    for (int i = 1; i < count; i++) {
+      Type type = types[i];
+      Type next = i + 1 < count ? types[i + 1] : NULL;
+      String name = x2cui_parameter_name(function, i);
+      if (_view_spelled(type, "(* char)") && next &&
+          _view_spelled(next, "(\"size_t\")")) {
+        arguments.push(%($name "field"));
+        i++;
+      }
+      else if (_view_spelled(type, "(* const * const char)") && next &&
+               _view_spelled(next, "(int)")) {
+        arguments.push(%($name "items"));
+        i++;
+      }
+      else if (type.len() > 2 && type[0] == <*> && type[1] == <const> &&
+               x2cui_option_record(Type.element(type))) {
+        foreach (List field in Type.fields(Type.element(type))) {
+          String spelled = field.car();
+          if (spelled.startswith("_") || !_view_kind(field[1])) continue;
+          options.push(_view_described(spelled, field[1]));
+        }
+      }
+      else if (type.len() > 1 && type[0] == <*> && !Type.is_text(type))
+        arguments.push(%($name "bound"));
+      else arguments.push(_view_described(name, type));
+    }
+    int block = function.endswith("_begin");
+    rows.push(%($(_view_component(function)) $block
+                $(arguments.list_free()) $(options.list_free())));
+  }
+  return rows.list_free();
+}
+
+/** Expands to the List `x2cui_view_table` returns. */
+macro Expression $x2cui.view.table() =>
+  $_x2c_literal_list($x2cui_view_table());
 
 /** Returns the setters, the draw functions, and the function that draws
     a node by its component's name, for the functions `_view_functions`
