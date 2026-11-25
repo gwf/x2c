@@ -23,6 +23,10 @@
     {
       "path": "patches/slanted-text.patch",
       "sha256": "522c709ae7f1164a603bebd95d859560d3ae2205b0d2bf13621176d0370a40e3"
+    },
+    {
+      "path": "patches/placed-node.patch",
+      "sha256": "98cb06effb3cbc530ebcf1e308469022b200db058f1105b3553c43c413fbb9a4"
     }
   ],
   "steps": [
@@ -51,6 +55,15 @@
         "-p1",
         "-i",
         "{package}/patches/slanted-text.patch"
+      ]
+    },
+    {
+      "cwd": "{source_cui}",
+      "argv": [
+        "patch",
+        "-p1",
+        "-i",
+        "{package}/patches/placed-node.patch"
       ]
     },
     {

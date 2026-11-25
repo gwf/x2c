@@ -504,7 +504,8 @@ its window runs.
 
 A handler written `(send name argument ...)` sends a message. The
 component and then each block around it is offered the message, and the
-first with an `(on name form)` option handles it.
+first with an `(on name form)` option handles it. A `free` block places
+each child at the point its `x` and `y` options give.
 `packages/x2cui/examples/builder.x` edits a tree by pointing at it: a
 palette adds components, an inspector edits the selected component's
 options, and a run mode makes the tree behave as it will in a program.

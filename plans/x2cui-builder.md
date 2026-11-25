@@ -22,12 +22,23 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
 - **Dragging** (added 2026-11-24): a press that moves more than four
   points drags the selection. The drop goes to the innermost block under
   the pointer, before the first child whose middle the pointer has not
-  passed along the block's direction, and a line shows where. A block
-  with no children has no size and cannot be aimed at.
-- **Not built:** resize handles and the `free` container with its CUI
-  patch. The free container
-  needs a new CUI build on every platform's manifest, which is not low
-  cost, so it waits for its own change.
+  passed along the block's direction, and a line shows where.
+- **Drop targets** (repaired 2026-11-25, after Gary found dragging hard
+  to aim in a window): edit mode outlines every block; a watched view
+  draws a block with no children 72 by 32 points; within 6 points of a
+  block's edge a drop goes beside the block; with nothing under the
+  pointer it goes to the root. A running tree is not watched.
+- **Free placement** (added 2026-11-25): `patches/placed-node.patch` adds
+  `cui_place_begin` and `cui_place_end` to CUI, 13 lines, on all three
+  manifests. `(free (options) child ...)` in `View` is a box that places
+  each child at its `x` and `y` options. A drop into a `free` block sets
+  them; a drop elsewhere removes them.
+- **Resize handle** (added 2026-11-25): one square at the selection's
+  corner sets `width` and `height` as fixed sizes, where the component
+  has those options. A placed node always fits its child, so size comes
+  only from the child's own options.
+- **Not built:** handles on the other corners and edges, and a scrolling
+  `free` block.
 - **Ids.** CUI gives a box an id only when its record names one, and gives
   text none. While a watcher is installed the view gives each block an id
   by its place in the frame and draws each id-less component in a box
@@ -43,8 +54,9 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
   the inspector is one change.
 - **Checked:** `builder --check` selects, adds, runs, edits a label
   through the inspector, moves, deletes, undoes, saves, tells two equal
-  nodes apart, and drags a component into another block and before a
-  sibling, off screen.
+  nodes apart, drags a component into another block, before a sibling,
+  into an empty block, and beside a block, moves a child of a `free`
+  block, and resizes it, off screen.
   No test opens a window.
 
 ## Result
