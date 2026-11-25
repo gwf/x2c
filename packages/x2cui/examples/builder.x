@@ -28,8 +28,10 @@ enum { DEPTH = 32, DRAWN = 2048, FIELDS = 64, UNDO = 200 };
 // Where a node is: the position of each node on the way from the root.
 typedef struct Where { int depth; int at[DEPTH]; } Where;
 
-// A node the view drew this frame, and the id CUI gave its component.
-typedef struct Drawn { List node; cui_id id; } Drawn;
+/* A node the view drew this frame, the id CUI gave its component, and
+   where the node is. Equal Lists are one List, so two equal nodes are
+   told apart only by where they are. */
+typedef struct Drawn { List node; cui_id id; Where where; } Drawn;
 
 typedef struct Builder {
   Lisp lisp;
@@ -106,21 +108,6 @@ static List inserted(List node, int index, Var child) {
   }
   if (index >= node.len()) items.push(child);
   return items.list_free();
-}
-
-// Finds the node that is `target` itself, not one equal to it.
-static bool locate(List node, List target, Where &where, int level) {
-  if ((void *) node == (void *) target) {
-    where.depth = level;
-    return true;
-  }
-  if (level == DEPTH) return false;
-  for (int i = 2; i < node.len(); i++) {
-    if (!is_node(node[i])) continue;
-    where.at[level] = i;
-    if (locate(node[i], target, where, level + 1)) return true;
-  }
-  return false;
 }
 
 // The value of the option `name` of `node`, or void.
@@ -286,25 +273,50 @@ static void note_drawn(void *user, List node, cui_id id) {
   if (b.drawn_count < DRAWN) b.drawn[b.drawn_count++] = (Drawn){ node, id };
 }
 
+/* Gives each drawn node its place. The view reports nodes in the order
+   it draws them, a block before its children, so walking the tree in
+   that order meets them one by one; `next` is the report to meet. A
+   `cards` node is not reported and draws one child, the next reported. */
+static void place_drawn(Builder &b, List node, Where &where, int &next) {
+  bool cards = node[0] == <cards>;
+  if (!cards) {
+    if (next == b.drawn_count) return;
+    b.drawn[next++].where = where;
+    if (!is_block(node)) return;
+  }
+  if (where.depth == DEPTH) return;
+  for (int i = 2; i < node.len() && next < b.drawn_count; i++) {
+    if (cards && (void *) b.drawn[next].node != (void *) (List) node[i])
+      continue;
+    where.at[where.depth++] = i;
+    place_drawn(b, node[i], where, next);
+    where.depth--;
+    if (cards) return;
+  }
+}
+
+static bool same_place(Where a, Where b) =>
+  a.depth == b.depth && !memcmp(a.at, b.at, a.depth * sizeof a.at[0]);
+
 // Selects the innermost node drawn under the pointer: the last one drawn.
 static void select_under(Builder &b, Ui ui) {
-  List hit = NULL;
+  b.selected = false;
   for (int i = 0; i < b.drawn_count; i++) {
     cui_rect r = ui.get_rect(b.drawn[i].id);
-    if (b.pointer.x >= r.x && b.pointer.x < r.x + r.w &&
-        b.pointer.y >= r.y && b.pointer.y < r.y + r.h)
-      hit = b.drawn[i].node;
+    if (b.pointer.x < r.x || b.pointer.x >= r.x + r.w ||
+        b.pointer.y < r.y || b.pointer.y >= r.y + r.h)
+      continue;
+    b.where = b.drawn[i].where;
+    b.selected = true;
   }
-  b.selected = hit && locate(b.tree, hit, b.where, 0);
   b.refill = true;
 }
 
 // The id CUI gave the selected node's component this frame, or 0.
 static cui_id selected_id(Builder &b) {
   if (!b.selected) return 0;
-  List node = node_at(b.tree, b.where);
   for (int i = 0; i < b.drawn_count; i++)
-    if ((void *) b.drawn[i].node == (void *) node) return b.drawn[i].id;
+    if (same_place(b.drawn[i].where, b.where)) return b.drawn[i].id;
   return 0;
 }
 
@@ -363,6 +375,9 @@ static void canvas(Ui ui, Builder &b) {
     try b.view.draw(ui);
     catch %(?cause *detail): b.status = %"$(cause.repr()) $(detail.repr())";
   }
+  Where root = { 0 };
+  int next = 0;
+  place_drawn(b, b.tree, root, next);
   if (!b.editing) return;
   cui_id outline = selected_id(b);
   ui.canvas("outline", fill, fill, paint_outline, &outline, sizeof outline);
@@ -578,8 +593,33 @@ static int check(String image) {
   printf("move %d, delete %d, undo %d, save %d\n", moves, removes, undoes,
          saves);
   puts(written(b.tree));
+
+  /* Two equal nodes are one List: a click on the second selects the
+     second, and an edit changes only it. */
+  Var twins = void;
+  read_value(%"(column ((pad 24) (gap 16))
+                 (row () (button () \"Same\"))
+                 (row () (button () \"Same\")))", twins);
+  change(b, twins);
+  b.selected = false;
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  cui_rect second = { 0 };
+  for (int i = 0; i < b.drawn_count; i++)
+    if (b.drawn[i].node[0] == <button>) second = ui.get_rect(b.drawn[i].id);
+  click(screen, b, second);
+  int picks = b.selected && b.where.depth == 2 && b.where.at[0] == 3;
+  // A second press on the field this soon would be a double click.
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  click(screen, b, b.first_field);
+  ui.input_text("!");
+  frame(screen, b);
+  frame(screen, b);
+  int keeps = written(b.tree) ==
+    "(column ((pad 24) (gap 16)) (row () (button () \"Same\")) "
+    "(row () (button () \"Same!\")))";
+  printf("twins: selected child %d, %s\n", b.where.at[0], written(b.tree));
   return selects && adds && runs && edits && moves && removes && undoes &&
-         saves ? 0 : 1;
+         saves && picks && keeps ? 0 : 1;
 }
 
 int main(int argc, char **argv) {
