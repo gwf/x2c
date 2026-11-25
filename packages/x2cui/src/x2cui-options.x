@@ -547,6 +547,20 @@ meta static String _member(List members, String upper) {
   return NULL;
 }
 
+/** Returns the short name of each of an enum's `members`, in order:
+    `start`, `center`, and `end` for the `cui_align` members.
+*/
+meta List x2cui_member_names(List members) {
+  int skip = _prefix(members).len();
+  return members.map(%!(List m) => ((String) m.car())[skip:].lower());
+}
+
+/** Returns each of an enum's `members` as the expression that names it,
+    in order.
+*/
+meta List x2cui_member_constants(List members) =>
+  members.map(%!(List m) => _free_name((String) m.car()));
+
 /* `CUI_ALIGN_` for `CUI_ALIGN_START`, `CUI_ALIGN_CENTER`, ...: the common
    beginning of the names, up to its last underscore. */
 meta static String _prefix(List members) {
