@@ -2,246 +2,279 @@
 
 /*  x2cui-view.x -- a UI held as a List and drawn every frame
 
-    A `View` draws the tree a Lisp session holds in one global. Every node
-    of the tree has one shape:
-
-      (component (options) arguments-and-children)
-
-      (column ((pad 24) (gap 12))
-        (heading () "A tiny counter" 2)
-        (button ((variant primary) (on-click bump)) "Add one")
-        (text () (eval (string-append "Clicked " (string clicks)))))
-
-    The options are `(name value)` rows. Each sets the field `name` of the
-    option record the component's C function takes, and its value is
-    converted by the C type of that field: a name selects an enum member,
-    as `primary` does; a size is a number of pixels, `fill`, `fit`, or
-    `(grow w)`; a color is a number 0xRRGGBB. The arguments follow in the
-    order the C function takes them, and a block component's remaining
-    elements are its child nodes. A name is spelled with `-` or `_`.
-
-    An argument or option value written `(eval form)` is evaluated in the
-    session on every frame. Three options belong to the view, not to a
-    record: `(bind name)` keeps the value a component edits in the session
-    global `name`; `(on-click form)`, also spelled `on-change`, is
-    evaluated to a procedure that runs, after the frame's tree is drawn,
-    when the component reports its event; `(id name)` names a node for
-    `ui-replace`.
-
-    The draw function of each component is generated from the type of its
-    C function as the compiler read it from `cui.h`; `_view_functions`
-    lists them. The session, the tree, and a view are used from the one
-    thread that draws.
+    A `View` draws the tree a Lisp session holds in one global, with the
+    draw functions x2cui-view-generate.x builds from CUI's C signatures;
+    that file describes the tree. This is a unit of its own, so a program
+    that uses no `View` links neither it nor the Lisp runtime.
 */
 
-#include "x2cui-options.x"
+#include "x2cui.x"
+#include "lisp-bindings.x"
+#include "x2cui-view-generate.x"
 
-// generated draw functions
+// The text a bound input edits, kept between frames by its global's name.
+static typedef struct ViewField {
+  char *name;
+  TextField field;
+  struct ViewField *next;
+} ViewField;
 
-/* The CUI functions a tree can name, each as the component its `Ui`
-   method names: `cui_button_ex` is `button`, `cui_row_begin` is `row`. */
-meta static List _view_functions = %(
-  "cui_box_begin" "cui_row_begin" "cui_column_begin" "cui_card_begin"
-  "cui_scroll_begin" "cui_text_ex" "cui_heading" "cui_label" "cui_muted"
-  "cui_code" "cui_kbd" "cui_link" "cui_separator" "cui_spacer"
-  "cui_button_ex" "cui_checkbox_ex" "cui_switch_ex" "cui_radio_ex"
-  "cui_slider_ex" "cui_number_ex" "cui_input_ex" "cui_textarea_ex"
-  "cui_select_ex" "cui_segmented_ex" "cui_tabs_ex" "cui_chip_ex"
-  "cui_badge_ex" "cui_progress_ex" "cui_alert_ex" "cui_spinner_ex"
-  "cui_avatar_ex");
+// What a `View` points to; the type itself is declared in x2cui.x.
+static typedef struct ViewState {
+  Lisp lisp;
+  String global;
+  ViewField *fields;
+  Array fired;
+} *ViewState;
 
-meta static int _view_spelled(Type type, String shape) =>
-  type.repr() == shape;
+// values
 
-/* `button` for `cui_button_ex`, and `row` for `cui_row_begin`. */
-meta static String _view_component(String function) {
-  String name = function[4:];
-  if (name.endswith("_ex")) name = name[:name.len() - 3];
-  return name.endswith("_begin") ? name[:name.len() - 6] : name;
+/* The spelling of a name, with `-` as `_`: a compact Symbol reads both
+   as `-`, and CUI's fields are spelled with `_`. */
+static String _view_name(Var value) {
+  if (value is <string>) return value;
+  String spelled = ((Atom) value).str();
+  if (!spelled)
+    raise %(bad-arg (operation "View.draw") (reason "a name is expected")
+            (value $value));
+  return spelled.replace("-", "_");
 }
 
-/* The expression that converts the Var `value` to the C type `type`, or
-   NULL for a type a tree cannot give. */
-meta static List _view_convert(Type type, List value) {
-  if (type ~= %("cui_size")) return $!( _view_size($value) );
-  if (type ~= %("cui_color")) return $!( _view_color($value) );
-  if (Type.is_text(type)) return $!( _view_string($value) );
-  Type resolved = Type.resolve(type);
-  if (resolved ~= %(enum *)) {
-    List members = Type.members(resolved);
-    int count = members.len();
-    List names = x2cui_member_names(members);
-    List constants = x2cui_member_constants(members);
-    return $!( ($type) _view_member(
-      $value, (const char *const[]){ @names }, (int[]){ @constants },
-      $count) );
+// Text shows a String as it is and any other value as it is written.
+static String _view_string(Var value) =>
+  value is <string> ? (String) value : value.repr();
+
+static double _view_number(Var value) => value.double();
+
+static cui_size _view_size(Var value) {
+  if (value is <list>) return CUI_GROW(_view_number(((List) value)[1]));
+  if (value.is_atom()) {
+    String name = _view_name(value);
+    if (name == "fill") return CUI_FILL;
+    if (name == "fit") return CUI_FIT;
+    raise %(bad-arg (operation "View.draw") (reason "a size is expected")
+            (value $value));
   }
-  if (_view_spelled(resolved, "(\"bool\")"))
-    return $!( _view_number($value) != 0 );
-  return Type.numeric(resolved) ? $!( ($type) _view_number($value) ) : NULL;
+  return CUI_PX(_view_number(value));
 }
 
-/* The function that sets one field of the option record `record` from a
-   row's name and value, and reports whether the record has that field. */
-meta static List _view_setter(String record) {
-  Type type = %($record);
-  List o = x2c_ident("o"), p = x2c_ident("p");
-  List name = x2c_ident("name"), value = x2c_ident("value");
-  Array arms = [];
-  foreach (List field in Type.fields(type)) {
-    String spelled = field.car();
-    if (spelled.startswith("_")) continue;
-    List convert = _view_convert(field[1], value);
-    if (!convert) continue;
-    List member = x2c_ident(spelled);
-    arms.push($!{
-      if ($name == $spelled) { $o->$member = $convert; return 1; } });
+static cui_color _view_color(Var value) => CUI_RGB(value.int());
+
+/* The member of an enum that `value` names among `names`. */
+static int _view_member(
+  Var value, const char *const *names, int *members, int count) {
+  String name = _view_name(value);
+  for (int i = 0; i < count; i++)
+    if (name == String.new(names[i])) return members[i];
+  raise %(bad-arg (operation "View.draw") (reason "no such member")
+          (value $value));
+}
+
+// nodes
+
+/* The value at position `at` of `node`, with `(eval form)` evaluated. */
+static Var _view_value(ViewState view, Var value) {
+  if (value is not <list>) return value;
+  List form = value;
+  return form.len() == 2 && form[0] == <eval> ? view.lisp.eval(form[1])
+                                              : value;
+}
+
+static Var _view_argument(ViewState view, List node, int at) {
+  if (at >= node.len())
+    raise %(bad-arg (operation "View.draw") (reason "an argument is missing")
+            (node $node));
+  return _view_value(view, node[at]);
+}
+
+/* The value of the view's own option `name` on `node`, or void. */
+static Var _view_option(List node, String name) {
+  foreach (List row in (List) node[1])
+    if (_view_name(row[0]) == name) return row[1];
+  return void;
+}
+
+static int _view_own(String name) =>
+  name == "bind" || name == "on_click" || name == "on_change" ||
+  name == "id";
+
+/* Sets each row of the node's options in `record` through `set`. */
+static void _view_options(
+  ViewState view, List node, int (*set)(void *, String, Var), void *record) {
+  foreach (List row in (List) node[1]) {
+    String name = _view_name(row[0]);
+    if (_view_own(name)) continue;
+    if (!set(record, name, _view_value(view, row[1])))
+      raise %(bad-arg (operation "View.draw") (reason "no such option")
+              (option $name) (node $node));
   }
-  List body = arms.list_free();
-  List setter = x2c_ident(%"_view_set_$record");
-  return $!Unit{
-    static int $setter(void *$p, String $name, Var $value) {
-      $type *$o = $p;
-      @body
-      return 0;
-    } };
 }
 
-/* The draw function of the component `function` names: it reads the
-   node's arguments by the types of the C parameters, calls the function,
-   and reports the event a result other than an id stands for. A block
-   then draws the node's remaining elements as children before its end
-   call, which is deferred. */
-meta static List _view_draw(String function) {
-  List target = x2c_ident(function);
-  Type signature = Code.type(target);
-  List types = Type.parameters(signature);
-  Type result = Type.return_type(signature);
-  List view = x2c_ident("view"), u = x2c_ident("u");
-  List node = x2c_ident("node");
-  List field = x2c_ident("field"), items = x2c_ident("items");
-  List options = x2c_ident("options"), bound = x2c_ident("bound");
-  List was = x2c_ident("was"), fired = x2c_ident("fired");
-  Type view_type = %("View"), ui_type = %("Ui");
-  Array before = [], args = [], after = [];
-  args.push($!( $u ));
-  int at = 2, count = types.len();
-  for (int i = 1; i < count; i++) {
-    Type type = types[i];
-    Type next = i + 1 < count ? types[i + 1] : NULL;
-    if (_view_spelled(type, "(* char)") && next &&
-        _view_spelled(next, "(\"size_t\")")) {
-      Type text = %("TextField");
-      before.push($!{ $text $field = _view_field($view, $node); });
-      args.push($!( x2cui_buffer($field) ));
-      args.push($!( $field.capacity ));
-      after.push($!{ _view_field_keep($view, $node, $field); });
-      i++;
-    }
-    else if (_view_spelled(type, "(* const * const char)") && next &&
-             _view_spelled(next, "(int)")) {
-      before.push($!{ List $items = _view_argument($view, $node, $at); });
-      args.push($!( $items.c_strings() ));
-      args.push($!( (int) $items.len() ));
-      at++;
-      i++;
-    }
-    else if (type.len() > 2 && type[0] == <*> && type[1] == <const> &&
-             x2cui_option_record(Type.element(type))) {
-      Type record = Type.element(type);
-      List setter = x2c_ident(%"_view_set_$((String) record.car())");
-      before.push($!{ $record $options = {}; });
-      before.push($!{ _view_options($view, $node, $setter, &$options); });
-      args.push($!( &$options ));
-    }
-    else if (type.len() > 1 && type[0] == <*> && !Type.is_text(type)) {
-      Type value = Type.element(type);
-      before.push($!{ double $was = _view_bound($view, $node); });
-      before.push($!{ $value $bound = ($value) $was; });
-      args.push($!( &$bound ));
-      after.push($!{ _view_bound_keep($view, $node, $was, (double) $bound); });
-    }
-    else {
-      List convert = _view_convert(
-        type, $!( _view_argument($view, $node, $at) ));
-      if (!convert)
-        raise %(bad-arg (operation "x2cui view component")
-                (function $function) (reason "a parameter has no tree form"));
-      args.push(convert);
-      at++;
-    }
-  }
-  List setup = before.list_free(), passed = args.list_free();
-  List kept = after.list_free();
-  String name = _view_component(function);
-  List draw = x2c_ident(%"_view_draw_$name");
-  int block = function.endswith("_begin");
-  int reports = !_view_spelled(result, "(void)") &&
-                !_view_spelled(result, "(\"cui_id\")");
-  List call = reports
-    ? $!{ if ($target(@passed)) _view_fire($view, $node); }
-    : $!{ $target(@passed); };
-  if (!block)
-    return $!Unit{
-      static void $draw($view_type $view, $ui_type $u, List $node) {
-        @setup
-        $call
-        @kept
-      } };
-  List end = x2c_ident(
-    name == "row" || name == "column" ? "cui_box_end" : %"cui_$(name)_end");
-  return $!Unit{
-    static void $draw($view_type $view, $ui_type $u, List $node) {
-      @setup
-      $call
-      defer $end($u);
-      _view_children($view, $u, $node, $at);
-    } };
+static void _view_fire(ViewState view, List node) {
+  Var handler = _view_option(node, "on_click");
+  if (handler.is_void()) handler = _view_option(node, "on_change");
+  if (!handler.is_void()) view.fired.push(handler);
 }
 
-/* The option records the listed functions take, each once. */
-meta static List _view_records(void) {
-  Array records = [];
-  foreach (String function in _view_functions) {
-    List types = Type.parameters(Code.type(x2c_ident(function)));
-    Type last = types[types.len() - 1];
-    if (last.len() < 3 || last[0] != <*>) continue;
-    Type record = Type.element(last);
-    if (!x2cui_option_record(record)) continue;
-    String spelled = record.car();
-    if (!(spelled in records)) records.push(spelled);
-  }
-  return records.list_free();
+// bound values
+
+static String _view_bind(List node) {
+  Var name = _view_option(node, "bind");
+  if (name.is_void())
+    raise %(bad-arg (operation "View.draw")
+            (reason "the component needs a bind option") (node $node));
+  return ((Atom) name).str();
 }
 
-/** Returns the setters, the draw functions, and the function that draws
-    a node by its component's name, for the functions `_view_functions`
-    lists.
+static double _view_bound(ViewState view, List node) {
+  Var value = void;
+  return view.lisp.try_get(_view_bind(node), value) ? value.double() : 0;
+}
+
+static void _view_bound_keep(
+  ViewState view, List node, double was, double now) {
+  if (now != was) view.lisp.set_global(_view_bind(node), now);
+}
+
+// Called with the session's storage active, which then owns the field.
+static ViewField *_view_field_new(ViewState view, String name) {
+  ViewField *kept = xcalloc(1, sizeof *kept);
+  kept.name = xmalloc(name.len() + 1);
+  strcpy(kept.name, name);
+  kept.field = TextField.new(1024);
+  kept.next = view.fields;
+  return view.fields = kept;
+}
+
+/* The field that holds the text of the node's bound global. Text the
+   session set since the last frame replaces the field's. */
+static TextField _view_field(ViewState view, List node) {
+  String name = _view_bind(node);
+  ViewField *kept = view.fields;
+  while (kept && name != String.new(kept.name)) kept = kept.next;
+  if (!kept) auto (view.lisp.storage()) kept = _view_field_new(view, name);
+  TextField field = kept.field;
+  Var value = void;
+  if (view.lisp.try_get(name, value) && value is <string> &&
+      (String) value != field.text())
+    field.set(value);
+  return field;
+}
+
+static void _view_field_keep(ViewState view, List node, TextField field) {
+  String name = _view_bind(node);
+  Var value = void;
+  if (view.lisp.try_get(name, value) && value is <string> &&
+      (String) value == field.text())
+    return;
+  auto (view.lisp.storage()) view.lisp.set_global(name, field.text());
+}
+
+// drawing
+
+$x2cui.view();
+
+static void _view_node(ViewState view, Ui ui, List node) {
+  String name = _view_name(node[0]);
+  if (!_view_component_draw(view, ui, name, node))
+    raise %(bad-arg (operation "View.draw") (reason "no such component")
+            (component $name));
+}
+
+static void _view_children(ViewState view, Ui ui, List node, int from) {
+  for (int i = from; i < node.len(); i++) _view_node(view, ui, node[i]);
+}
+
+/** Returns a view of the tree the session `lisp` holds in the global
+    `global`. The session owns the view's storage and releases it when the
+    session is destroyed; the view is not used after that.
 */
-meta List x2cui_view(void) {
-  Array units = [];
-  foreach (String record in _view_records()) units.push(_view_setter(record));
-  List view = x2c_ident("view"), u = x2c_ident("u");
-  List node = x2c_ident("node"), name = x2c_ident("name");
-  Type view_type = %("View"), ui_type = %("Ui");
-  Array arms = [];
-  foreach (String function in _view_functions) {
-    units.push(_view_draw(function));
-    String component = _view_component(function);
-    List draw = x2c_ident(%"_view_draw_$component");
-    arms.push($!{
-      if ($name == $component) { $draw($view, $u, $node); return 1; } });
-  }
-  List body = arms.list_free();
-  List dispatch = x2c_ident("_view_component_draw");
-  units.push($!Unit{
-    static int $dispatch(
-      $view_type $view, $ui_type $u, String $name, List $node) {
-      @body
-      return 0;
-    } });
-  return units.list_free();
+View View.new(Lisp lisp, String global) {
+  ViewState view = NULL;
+  auto (lisp.storage()) view = xcalloc(1, sizeof *view);
+  view.lisp = lisp;
+  view.global = global;
+  return (View) view;
 }
 
-/** Defines the draw functions `x2cui_view` returns. */
-macro Unit $x2cui.view() { @x2cui_view() }
+/** Sets the tree the view draws: the session's global becomes `tree`,
+    which the session borrows.
+*/
+void View.set(View v, List tree) {
+  ViewState view = (ViewState) v;
+  view.lisp.set_global(view.global, tree);
+}
+
+/** Returns the tree the view draws, or NULL when the global is unset. */
+List View.tree(View v) {
+  ViewState view = (ViewState) v;
+  Var tree = void;
+  return view.lisp.try_get(view.global, tree) && tree is <list> ? tree : NULL;
+}
+
+/** Draws the tree into the frame `ui` has open, then runs the handler of
+    each component that reported its event, in the order drawn. A handler
+    may replace the tree; the next frame draws the new one.
+    Raises: `<bad-arg>` for a node, option, or value the tree misspells,
+    after closing the blocks it opened, or any cause a handler or an
+    `(eval form)` raises.
+*/
+void View.draw(View v, Ui ui) {
+  ViewState view = (ViewState) v;
+  List tree = v.tree();
+  if (!tree) return;
+  Array fired = [];
+  view.fired = fired;
+  _view_node(view, ui, tree);
+  foreach (Var handler in fired)
+    view.lisp.apply(view.lisp.eval(handler), %());
+}
+
+// Lisp
+
+/* Whether `node` is the node whose `id` option is `id`. A List argument,
+   such as the labels of a select, has no options and is no node. */
+static int _view_named(List node, Var id) {
+  if (node.len() < 2 || node[1] is not <list>) return 0;
+  Var own = _view_option(node, "id");
+  return !own.is_void() && own == id;
+}
+
+$lisp.binding(x2cui_lisp, "ui-replace")
+static List _lisp_ui_replace(List tree, Var id, List node) {
+  if (_view_named(tree, id)) return node;
+  // The component and its options stay; each child is searched.
+  Array items = [tree[0], tree[1]];
+  for (int i = 2; i < tree.len(); i++)
+    items.push(tree[i] is <list>
+                 ? (Var) _lisp_ui_replace(tree[i], id, node) : tree[i]);
+  return items.list_free();
+}
+
+$lisp.binding(x2cui_lisp, "ui-find")
+static List _lisp_ui_find(List tree, Var id) {
+  if (_view_named(tree, id)) return tree;
+  for (int i = 2; i < tree.len(); i++) {
+    if (tree[i] is not <list>) continue;
+    List found = _lisp_ui_find(tree[i], id);
+    if (found) return found;
+  }
+  return %();
+}
+
+$lisp.binding(x2cui_lisp, "ui-text")
+static String _lisp_ui_text(List @parts) {
+  Buffer out = auto Buffer.new();
+  foreach (Var part in parts) out.write(_view_string(part));
+  return out;
+}
+
+/** Binds `ui-replace`, `ui-find`, and `ui-text` into `lisp`.
+    `(ui-replace tree id node)` returns `tree` with the node whose `id`
+    option is `id` replaced by `node`, and `(ui-find tree id)` returns
+    that node, or the empty List. `(ui-text part ...)` returns the parts
+    as one String, each as a component shows it.
+*/
+void ViewLisp.install(Lisp lisp) {
+  $lisp.install(lisp, x2cui_lisp);
+}

@@ -1,10 +1,50 @@
 # x2cui Lisp surface: a UI described by a List
 
-> Status: proposed 2026-11-24. Not approved, not started. It reverses the
-> "No Lisp surface" decision in [the x2cui plan](x2cui-package.md) and the
-> package README, so it needs Gary's decision before any work. It is the
-> first of three linked plans; [the builder](x2cui-builder.md) and
-> [runtime native modules](runtime-native-modules.md) build on it.
+> Status: implemented in the package on 2026-11-24, after Gary approved
+> reversing the "No Lisp surface" decision in
+> [the x2cui plan](x2cui-package.md). "As built" below records where the
+> source differs from the design sections, which are kept as proposed.
+> [The builder](x2cui-builder.md) and
+> [runtime native modules](runtime-native-modules.md) build on it and are
+> not started.
+
+## As built
+
+The source is `packages/x2cui/src/x2cui-view-generate.x` (the generator)
+and `x2cui-view.x` (the `View` and its Lisp functions). The view is a unit
+of its own: a program that uses no `View` links neither it nor the Lisp
+runtime, and `examples/todo.x` builds to the same 2,527,496 bytes as
+before the change. `examples/live.x`, which uses a view, is 3,000,488.
+
+- **The tree is a Lisp global.** `View.new(lisp, "ui")` draws the value
+  of the session global `ui`. Lisp code changes the UI with `(def ui
+  ...)`, so there are no `ui-set` and `ui-tree` functions and no
+  `View.submit`. A host evaluates Lisp text in the session between
+  frames; `examples/live.x` reads the terminal that way.
+- **Bound state is a Lisp global.** `(bind name)` reads the global before
+  the component's call and sets it when the component changed the value.
+  The view keeps storage only for the text buffer of an input.
+- **`(eval form)`** as an argument or option value is evaluated on every
+  frame. The design had no way to show a changing value without replacing
+  the tree.
+- **Handlers are forms.** `(on-click form)` is evaluated after the frame
+  to a procedure, so a name and a `lambda` both work. `on-change` is the
+  same option.
+- **Storage.** The session's Scope owns the view and its input buffers,
+  so a view is released with its session and has no close.
+- **Functions bound:** `ui-replace`, `ui-find`, and `ui-text`.
+- **Generated code.** One setter per option record and one draw function
+  per component, from the C types; a chain of name comparisons selects
+  the draw function. There is no table object at run time.
+- **Names.** The reader gives a short name as a `Symbol` and a long one
+  as an `Atom`; both are compared by spelling, with `-` read as `_`.
+- **Components:** 31, listed in `_view_functions`. Grid, image, and icon
+  are not among them: an icon is a C macro and an image takes a texture.
+- **Measured.** Off screen on an Apple M4 Max, 1,251 components a frame
+  took 0.63 ms drawn from a tree and 0.14 ms drawn by the same calls in
+  x2c source, the mean of 200 frames, layout and painting excluded.
+- **Not done:** a browser build of the example, and a test in a real
+  window. The package's existing browser build (`make web`) still passes.
 
 ## Result
 
@@ -143,9 +183,9 @@ are rewritten to describe this layer.
 
 ## Questions for Gary
 
-1. Reverse the no-Lisp-surface decision for x2cui?
+1. Reverse the no-Lisp-surface decision for x2cui? Approved 2026-11-24.
 2. Accept the one-shape form `(component (options) ...)`, or prefer another
-   spelling?
+   spelling? Open; the implementation uses this form.
 
 ## Plan review
 

@@ -22,10 +22,10 @@ endif
 # Each example with files of its own keeps them in a directory beside it.
 PACKAGE_X_FLAGS += --x-include-dir examples
 
-.PHONY: run run-interactive run-gallery run-stress web web-check web-serve \
-	refused-literal
+.PHONY: run run-lisp run-interactive run-gallery run-stress web web-check \
+	web-serve refused-literal
 
-check: test run refused-literal
+check: test run run-lisp refused-literal
 
 # The form refuses an Array literal where CUI writes through the array,
 # one with a variable in an element, and a C array of CUI's records.
@@ -49,6 +49,11 @@ run: builds/todo builds/mail builds/orders builds/scenes builds/stress
 	./builds/stress --frames 30
 	./builds/scenes --shots builds/shots
 	./builds/scenes --check $(CUI_INCLUDE)/cui/cui.h
+
+# The window is a List a Lisp session holds; the gated run clicks it off
+# screen.
+run-lisp: builds/live
+	./builds/live --shot builds/live.png
 
 run-interactive: builds/todo
 	./builds/todo builds/todo.txt

@@ -22,7 +22,7 @@ static void click(Offscreen screen, View view, float x, float y) {
   frame(screen, view);
 }
 
-static View open(Lisp lisp, String source) {
+static View start(Lisp lisp, String source) {
   ViewLisp.install(lisp);
   lisp.eval_string(source);
   return View.new(lisp, "ui");
@@ -39,7 +39,7 @@ static void a_click_runs_the_handler_once(void) {
   Offscreen screen = auto Offscreen.open(320, 200);
   lisp.eval_string("(def clicks 0)");
   lisp.eval_string("(def bump (lambda () (def clicks (+ clicks 1))))");
-  View view = open(lisp, %"
+  View view = start(lisp, %"
     (def ui '(column ((pad 20) (gap 12))
                (button ((variant primary) (width 120) (on-click bump)) \"Add\")
                (text () (eval (ui-text \"Clicked \" clicks)))))");
@@ -54,7 +54,7 @@ static void a_click_runs_the_handler_once(void) {
 static void a_handler_replaces_part_of_the_tree(void) {
   Lisp lisp = auto Lisp.new();
   Offscreen screen = auto Offscreen.open(320, 200);
-  View view = open(lisp, %"
+  View view = start(lisp, %"
     (def ui '(column ((pad 20))
                (button ((width 120)
                         (on-click (lambda ()
@@ -76,7 +76,7 @@ static void a_bound_component_keeps_its_value_in_a_global(void) {
   Offscreen screen = auto Offscreen.open(320, 200);
   lisp.eval_string("(def agree 0)");
   lisp.eval_string("(def changes 0)");
-  View view = open(lisp, %"
+  View view = start(lisp, %"
     (def ui '(column ((pad 20))
                (checkbox ((bind agree)
                           (on-change (lambda () (def changes (+ changes 1)))))
@@ -93,7 +93,7 @@ static void a_bound_input_edits_the_text_of_a_global(void) {
   Lisp lisp = auto Lisp.new();
   Offscreen screen = auto Offscreen.open(320, 200);
   lisp.eval_string("(def name \"Ada\")");
-  View view = open(lisp, %"
+  View view = start(lisp, %"
     (def ui '(column ((pad 20)) (input ((bind name) (width 200)) \"name\")))");
   click(screen, view, 60, 36);
   screen.ui().input_text("!");
@@ -107,7 +107,7 @@ static void a_bound_input_edits_the_text_of_a_global(void) {
 static void a_misspelled_option_raises_and_closes_its_blocks(void) {
   Lisp lisp = auto Lisp.new();
   Offscreen screen = auto Offscreen.open(320, 200);
-  View view = open(lisp, %"
+  View view = start(lisp, %"
     (def ui '(column ((pad 20)) (row () (button ((colour 1)) \"Add\"))))");
   bool caught = false;
   screen.begin();
@@ -132,7 +132,7 @@ static void options_convert_by_the_type_of_their_field(void) {
   Offscreen screen = auto Offscreen.open(320, 200);
   lisp.eval_string("(def level 0.25)");
   lisp.eval_string("(def tab 1)");
-  View view = open(lisp, %"
+  View view = start(lisp, %"
     (def ui '(column ((pad 20) (gap 8) (min_width 200) (align center))
                (row ((gap 8) (width fill) (justify between))
                  (badge ((tone success)) \"ok\")
@@ -146,6 +146,8 @@ static void options_convert_by_the_type_of_their_field(void) {
   frame(screen, view);
   EXPECT_TRUE(screen.commands() > 0);
   EXPECT_INT_EQ((int) number(lisp, "tab"), 1);
+  // A List argument, such as the labels, is searched but is no node.
+  EXPECT_TRUE(((List) lisp.eval_string("(ui-find ui 'absent)")).len() == 0);
 }
 
 int main(void) {

@@ -470,8 +470,37 @@ Use the native API for what has no x2c form:
 - a custom renderer through `cui_renderer_iface`, and a custom platform
   layer.
 
-The package has no Lisp bindings, because a `Ui` is a native object that
-lasts across frames.
+## A UI a Lisp session holds
+
+A `View` draws a tree that a Lisp session holds in one global. Lisp code
+changes the running window by giving the global a new value:
+
+<!-- ignore: the sample needs the x2cui package and a window -->
+```x2c,ignore
+Lisp lisp = auto Lisp.new();
+ViewLisp.install(lisp);
+lisp.eval_string(source);
+View view = View.new(lisp, "ui");
+while (app.frame()) view.draw(app.ui());
+```
+
+```lisp
+(def clicks 0)
+(def bump (lambda () (def clicks (+ clicks 1))))
+(def ui
+  '(column ((pad 24) (gap 12))
+     (button ((variant primary) (on-click bump)) "Add one")
+     (text () (eval (ui-text "Clicked " clicks " times.")))))
+```
+
+Every node is `(component (options) arguments-and-children)`. An option
+sets a field of the component's CUI record and is converted by the field's
+C type. `(eval form)` is evaluated on every frame, `(bind name)` keeps the
+value a component edits in a global, and `(on-click form)` runs after the
+frame when the component reports its event. The package README lists the
+components and the functions `ViewLisp.install` binds.
+`packages/x2cui/examples/live.x` reads Lisp forms from the terminal while
+its window runs.
 
 ## Limits
 
