@@ -572,6 +572,11 @@ static void canvas(Ui ui, Builder &b) {
   // Only an edited tree is watched: a running one is drawn as it ships.
   b.view.watch(b.editing ? note_drawn : NULL, &b);
   ui.column (width: fill, height: fill) {
+    /* CUI finds a component by an id made from its label, so a tree
+       button labelled as a palette button would be that button. The
+       tree's ids are made under a name of their own. */
+    cui_push_id(ui, "edited-tree");
+    defer cui_pop_id(ui);
     // A tree the inspector left half typed raises; the next edit mends it.
     try b.view.draw(ui);
     catch %(?cause *detail): b.status = %"$(cause.repr()) $(detail.repr())";
@@ -812,10 +817,17 @@ static int check(String image) {
 
   // In run mode the same click presses the button.
   cui_rect pressed = drawn_rect(b, ui, <button>);
+  cui_rect added = drawn_at(b, ui, b.where);
   click(screen, b, b.mode_button);
   click(screen, b, pressed);
   int runs = !b.editing && clicks(b) == 1;
   printf("run: clicked %d\n", clicks(b));
+  /* The added button has the palette button's label. Pressing it presses
+     only it: the tree's ids are apart from the builder's own. */
+  click(screen, b, added);
+  int apart = b.tree.len() == before + 1;
+  printf("run: %d children after pressing the added button\n",
+         b.tree.len() - 2);
 
   // Back in edit mode, the inspector's first field edits the label.
   click(screen, b, b.mode_button);
@@ -948,7 +960,7 @@ static int check(String image) {
              option(b.tree, "pad").int() == 24;
   printf("layout: %s\n", written(b.tree));
   screen.write_png(image + ".layout.png");
-  return lays && fills && besides && sizes && selects && adds &&
+  return apart && lays && fills && besides && sizes && selects && adds &&
          runs && edits && moves && removes && undoes &&
          saves && picks && keeps && reparents && reorders && stays ? 0 : 1;
 }
