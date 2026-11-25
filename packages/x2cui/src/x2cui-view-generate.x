@@ -126,6 +126,13 @@ meta static List _view_setter(String record) {
     } };
 }
 
+// Whether the option record `record` has an `id` field.
+meta static int _view_has_id(Type record) {
+  foreach (List field in Type.fields(record))
+    if (field.car() == "id") return 1;
+  return 0;
+}
+
 /* The draw function of the component `function` names: it reads the
    node's arguments by the types of the C parameters, calls the function,
    and reports the event a result other than an id stands for. A block
@@ -143,6 +150,7 @@ meta static List _view_draw(String function) {
   List was = x2c_ident("was"), fired = x2c_ident("fired");
   Type view_type = %("ViewState"), ui_type = %("Ui");
   Array before = [], args = [], after = [];
+  List identity = NULL;
   args.push($!( $u ));
   int at = 2, count = types.len();
   for (int i = 1; i < count; i++) {
@@ -172,6 +180,9 @@ meta static List _view_draw(String function) {
       before.push($!{ $record $options = {}; });
       before.push($!{ _view_options($view, $node, $setter, &$options); });
       args.push($!( &$options ));
+      // A block is found again by the id its record carries.
+      if (_view_has_id(record))
+        identity = $!( _view_identify($view, $u, &($options).id) );
     }
     else if (type.len() > 1 && type[0] == <*> && !Type.is_text(type)) {
       Type value = Type.element(type);
@@ -190,20 +201,27 @@ meta static List _view_draw(String function) {
       at++;
     }
   }
-  List setup = before.list_free(), passed = args.list_free();
   String name = _view_component(function);
   List draw = x2c_ident(%"_view_draw_$name");
   int block = function.endswith("_begin");
+  /* A component is reported with the id CUI gave it, which the view
+     finds by comparing the last id before and after the call. A block has
+     an id only through its record, and is reported before it opens; a
+     block whose record has none is reported with 0. */
+  if (!block) {
+    before.push($!{ _view_mark($view, $u); });
+    after.push($!{ _view_drawn_leaf($view, $u, $node); });
+  }
+  else if (identity)
+    before.push($!{ _view_drawn($view, $node, $identity); });
+  else before.push($!{ _view_drawn($view, $node, 0); });
+  List setup = before.list_free(), passed = args.list_free();
+  List kept = after.list_free();
   int reports = !_view_spelled(result, "(void)") &&
                 !_view_spelled(result, "(\"cui_id\")");
-  int identified = _view_spelled(result, "(\"cui_id\")");
   List call = reports
     ? $!{ if ($target(@passed)) _view_fire($view, $node); }
-    : identified ? $!{ _view_drawn($view, $node, $target(@passed)); }
-                 : $!{ $target(@passed); };
-  if (!identified)
-    after.push($!{ _view_drawn($view, $node, cui_last_id($u)); });
-  List kept = after.list_free();
+    : $!{ $target(@passed); };
   if (!block)
     return $!Unit{
       static void $draw($view_type $view, $ui_type $u, List $node) {

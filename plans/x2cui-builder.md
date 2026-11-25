@@ -1,10 +1,45 @@
 # x2cui builder: edit a live UI by direct manipulation
 
-> Status: proposed 2026-11-24. Not approved, not started. It depends on
-> [the x2cui Lisp surface](x2cui-lisp-surface.md): the builder edits the
-> tree that plan defines and reads the component table that plan generates.
-> Gary set the layout direction on 2026-11-24: CUI's own layout is the
-> default; free placement is included only where it is low cost.
+> Status: first version implemented 2026-11-24, after Gary approved the
+> plan that day. It depends on
+> [the x2cui Lisp surface](x2cui-lisp-surface.md). Gary set the layout
+> direction on 2026-11-24: CUI's own layout is the default; free placement
+> is included only where it is low cost. "As built" below records what
+> exists and what does not; the design sections are kept as proposed.
+
+## As built
+
+`packages/x2cui/examples/builder.x` is the application. The library
+gained `View.watch`, `View.components`, messages (`send`, `on`,
+`ui-send`, `ui-pass`), and `cards`.
+
+- **Built:** selection by click in edit mode, with an outline; a palette
+  that adds a component after the selection or inside a selected block;
+  an inspector generated from the component table, with a text field,
+  switch, or select for each argument and option; Parent, Up, Down,
+  Delete, Undo, and Save; run mode; a tree file and an optional
+  `FILE.lisp` beside it.
+- **Not built:** dragging to reorder or reparent, resize handles, the
+  insertion line, moving a node into another block except by delete and
+  add, and the `free` container with its CUI patch. The free container
+  needs a new CUI build on every platform's manifest, which is not low
+  cost, so it waits for its own change.
+- **Ids.** CUI gives a box an id only when its record names one, and gives
+  text none. While a watcher is installed the view gives each block an id
+  by its place in the frame and draws each id-less component in a box
+  that has one. A card and a component with no arguments, such as a
+  spacer, are not selectable by click; Parent reaches a card.
+- **Rectangles.** `ui.get_rect` answers from the last frame's layout, and
+  the builder reads it at the start of a frame, before submitting.
+- **Messages** are an option form, `(on-click (send name ...))`, and the
+  Lisp functions are named `ui-send` and `ui-pass`, not `send` and
+  `pass`. `cards` takes `(show name)`; a handler changes cards by setting
+  the global the option evaluates, so there is no `go`.
+- **Undo** keeps whole trees, one per change, up to 200. Each key typed in
+  the inspector is one change.
+- **Checked:** `builder --check` selects, adds, runs, edits a label
+  through the inspector, moves, deletes, undoes, and saves, off screen.
+  No test opens a window.
 
 ## Result
 

@@ -22,8 +22,8 @@ endif
 # Each example with files of its own keeps them in a directory beside it.
 PACKAGE_X_FLAGS += --x-include-dir examples
 
-.PHONY: run run-lisp run-interactive run-gallery run-stress web web-check \
-	web-serve refused-literal
+.PHONY: run run-lisp run-interactive run-builder run-gallery run-stress \
+	web web-check web-serve refused-literal
 
 check: test run run-lisp refused-literal
 
@@ -42,18 +42,23 @@ example: builds/gallery builds/mail builds/orders
 
 # The gated runs draw off screen and write PNGs. A window needs a
 # WindowServer connection, which no gate has.
-run: builds/todo builds/mail builds/orders builds/scenes builds/stress
+run: builds/todo builds/mail builds/orders builds/scenes builds/stress \
+		builds/builder
 	./builds/todo --shot builds/todo.png
 	./builds/mail --shot builds/mail.png
 	./builds/orders --shot builds/orders.png
 	./builds/stress --frames 30
 	./builds/scenes --shots builds/shots
 	./builds/scenes --check $(CUI_INCLUDE)/cui/cui.h
+	./builds/builder --check builds/builder.png
 
 # The window is a List a Lisp session holds; the gated run clicks it off
 # screen.
 run-lisp: builds/live
 	./builds/live --shot builds/live.png
+
+run-builder: builds/builder
+	./builds/builder
 
 run-interactive: builds/todo
 	./builds/todo builds/todo.txt

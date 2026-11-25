@@ -160,7 +160,8 @@ static void a_message_goes_up_to_the_first_handler(void) {
   Lisp lisp = auto Lisp.new();
   Offscreen screen = auto Offscreen.open(320, 200);
   lisp.eval_string("(def log \"\")");
-  lisp.eval_string("(def note (lambda (who what) (def log (ui-text log who what))))");
+  lisp.eval_string(
+    "(def note (lambda (who what) (def log (ui-text log who what))))");
   View view = start(lisp, %"
     (def ui
       '(column ((pad 20) (on save (lambda (what) (note \"outer:\" what))))
@@ -180,7 +181,8 @@ static void a_handler_passes_and_sends(void) {
   View view = start(lisp, %"
     (def ui
       '(column ((pad 20)
-                (on save (lambda () (then (note \"outer \") (ui-send 'done 7))))
+                (on save (lambda ()
+                  (then (note \"outer \") (ui-send 'done 7))))
                 (on done (lambda (n) (note n))))
          (row ((on save (lambda () (then (note \"inner \") (ui-pass)))))
            (button ((width 120) (on-click (send save))) \"Save\")
@@ -208,19 +210,22 @@ static void cards_draw_the_child_their_option_names(void) {
            (button ((id first) (width 120)
                     (on-click (lambda () (def page 'second)))) \"Next\")
            (button ((id second) (width 120)
-                    (on-click (lambda () (def seen \"second\")))) \"Here\"))))");
+                    (on-click (lambda () (def seen \"second\"))))
+                   \"Here\"))))");
   click(screen, view, 40, 36);
   EXPECT_STR_EQ(text(lisp, "seen"), "");
   click(screen, view, 40, 36);
   EXPECT_STR_EQ(text(lisp, "seen"), "second");
 }
 
-typedef struct Seen { Ui ui; int nodes; cui_id button; } Seen;
+typedef struct Seen { Ui ui; int nodes; cui_id button, row, text; } Seen;
 
 static void see(void *user, List node, cui_id id) {
   Seen *seen = user;
   seen.nodes++;
   if (node[0] == <button>) seen.button = id;
+  if (node[0] == <row>) seen.row = id;
+  if (node[0] == <text>) seen.text = id;
 }
 
 static void a_watcher_learns_each_node_and_its_id(void) {
@@ -237,6 +242,12 @@ static void a_watcher_learns_each_node_and_its_id(void) {
   cui_rect button = screen.ui().get_rect(seen.button);
   EXPECT_INT_EQ((int) button.w, 120);
   EXPECT_TRUE(button.x > 20 && button.y >= 20);
+  // A block is found by an id the view gives it while it is watched.
+  cui_rect row = screen.ui().get_rect(seen.row);
+  EXPECT_TRUE(row.w >= button.w && row.h >= button.h);
+  // Text has no id in CUI; the view draws it in a box that has one.
+  cui_rect text = screen.ui().get_rect(seen.text);
+  EXPECT_TRUE(text.w > 0 && text.x < button.x);
   view.watch(NULL, NULL);
   frame(screen, view);
   EXPECT_INT_EQ(seen.nodes, 8);
@@ -257,7 +268,8 @@ static void the_component_table_describes_each_component(void) {
   EXPECT_INT_EQ((int) row[1], 1);
   List slider = View.components().find(%!(List row) => row[0] == "slider");
   EXPECT_STR_EQ(((List) slider[2]).repr(),
-    "((\"label\" \"text\") (\"value\" \"bound\") (\"min\" \"number\") (\"max\" \"number\"))");
+    "((\"label\" \"text\") (\"value\" \"bound\") "
+    "(\"min\" \"number\") (\"max\" \"number\"))");
 }
 
 int main(void) {

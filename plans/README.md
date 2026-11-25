@@ -49,14 +49,15 @@ File-scope and type-name method forms (`T.name(...)`) are merged into `dev`.
 
 ## Live UI and runtime loading
 
-Three linked plans from 2026-11-24.
-[x2cui Lisp surface](x2cui-lisp-surface.md) draws a UI held as a List and
-lets a Lisp session change it; Gary approved it that day and it is
-implemented in the package. [x2cui builder](x2cui-builder.md) edits that
-List by direct manipulation, with CUI's layout as the default, and
-[runtime native modules](runtime-native-modules.md) compiles and loads x2c
-in a running program. Those two are proposals, not approved or started;
-the third adds `dlopen` to the runtime.
+Three linked plans from 2026-11-24, the first two approved by Gary that
+day. [x2cui Lisp surface](x2cui-lisp-surface.md) draws a UI held as a List
+and lets a Lisp session change it; it is implemented in the package.
+[x2cui builder](x2cui-builder.md) edits that List by pointing at it, with
+CUI's layout; its first version is implemented as an example, without
+dragging or free placement.
+[Runtime native modules](runtime-native-modules.md) compiles and loads x2c
+in a running program; it is a proposal, not approved or started, and adds
+`dlopen` to the runtime.
 
 ## Current work
 

@@ -185,7 +185,7 @@ are rewritten to describe this layer.
 
 1. Reverse the no-Lisp-surface decision for x2cui? Approved 2026-11-24.
 2. Accept the one-shape form `(component (options) ...)`, or prefer another
-   spelling? Open; the implementation uses this form.
+   spelling? Accepted 2026-11-24.
 
 ## Plan review
 

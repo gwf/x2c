@@ -12,6 +12,8 @@
 #include "lisp-bindings.x"
 #include "x2cui-view-generate.x"
 
+enum { PLAIN = 64 };
+
 // The text a bound input edits, kept between frames by its global's name.
 static typedef struct ViewField {
   char *name;
@@ -26,6 +28,13 @@ static typedef struct ViewState {
   ViewField *fields;
   // What one draw collects: the events reported, and the open blocks.
   Array fired, path;
+  int blocks;
+  /* For a watcher: the last id before a component's call, the id of the
+     box around a component CUI gives none, and the components learned
+     to need one. */
+  cui_id marked, wrapped;
+  Var plain[PLAIN];
+  int plain_count;
   // The node a running handler belongs to, and whether it passed.
   List chain;
   int depth, passed;
@@ -133,6 +142,40 @@ static void _view_drawn(ViewState view, List node, cui_id id) {
   if (view.hook) view.hook(view.hook_user, node, id);
 }
 
+static void _view_mark(ViewState view, Ui ui) {
+  if (view.hook) view.marked = ui.last_id();
+}
+
+static int _view_plain(ViewState view, Var component) {
+  for (int i = 0; i < view.plain_count; i++)
+    if (view.plain[i] == component) return 1;
+  return 0;
+}
+
+/* Reports a component with the id of the box drawn around it, or with
+   the id its call left as the last one. A call that left the last id as
+   it was gave its component none, as text has none: the component is
+   reported with 0 this frame and is drawn in a box from the next. */
+static void _view_drawn_leaf(ViewState view, Ui ui, List node) {
+  if (!view.hook) return;
+  cui_id id = view.wrapped ? view.wrapped : ui.last_id();
+  if (!view.wrapped && id == view.marked) {
+    id = 0;
+    if (view.plain_count < PLAIN && node.len() > 2)
+      view.plain[view.plain_count++] = node[0];
+  }
+  view.wrapped = 0;
+  view.hook(view.hook_user, node, id);
+}
+
+/* The id CUI gives a block whose record's id field is `id`. A block the
+   tree gives no id has none in CUI, so while a watcher is installed it
+   gets one by its place in the frame's order of blocks. */
+static cui_id _view_identify(ViewState view, Ui ui, const char **id) {
+  if (!*id && view.hook) *id = %"x2cui-view-$(view.blocks++)";
+  return *id ? ui.make_id(String.new(*id)) : 0;
+}
+
 /* Whether `node` is the node whose `id` option is `id`. A List argument,
    such as the labels of a select, has no options and is no node. */
 static int _view_named(List node, Var id) {
@@ -212,12 +255,27 @@ static void _view_cards(ViewState view, Ui ui, List node) {
   }
 }
 
-static void _view_node(ViewState view, Ui ui, List node) {
+static void _view_component(ViewState view, Ui ui, List node) {
   String name = _view_name(node[0]);
-  if (name == "cards") return _view_cards(view, ui, node);
   if (!_view_component_draw(view, ui, name, node))
     raise %(bad-arg (operation "View.draw") (reason "no such component")
             (component $name));
+}
+
+static void _view_node(ViewState view, Ui ui, List node) {
+  if (node[0] == <cards>) return _view_cards(view, ui, node);
+  if (!view.hook || !_view_plain(view, node[0]))
+    return _view_component(view, ui, node);
+  /* A watched component with no id of its own is drawn in a box that
+     has one and takes the component's width. */
+  cui_box box = {};
+  Var width = _view_option(node, "width");
+  if (!width.is_void()) box.width = _view_size(_view_value(view, width));
+  cui_id id = _view_identify(view, ui, &box.id);
+  cui_box_begin(ui, &box);
+  defer cui_box_end(ui);
+  view.wrapped = id;
+  _view_component(view, ui, node);
 }
 
 static void _view_children(ViewState view, Ui ui, List node, int from) {
@@ -312,6 +370,7 @@ void View.draw(View v, Ui ui) {
   Array fired = [], path = [];
   view.fired = fired;
   view.path = path;
+  view.blocks = 0;
   _view_node(view, ui, tree);
   ViewState outer = _view_running;
   _view_running = view;
@@ -322,8 +381,13 @@ void View.draw(View v, Ui ui) {
 
 /** Calls `hook` with `user` for each node as it is drawn, with the id
     CUI gave the node's component, whose rectangle `ui.get_rect` then
-    returns. A NULL `hook` stops the calls. A `cards` node has no
-    component and is not reported.
+    returns. A NULL `hook` stops the calls. CUI gives some components no
+    id, so while a hook is installed the view supplies one: a box, row,
+    column, or scroll area the tree gives no id gets one by its place in
+    the frame, and a component such as text is drawn inside a box that
+    has one, from the frame after its first. A card, a component with no
+    arguments, and a component in its first frame are reported with id 0,
+    and a `cards` node, which has no component, is not reported.
 */
 void View.watch(
   View v, void (*hook)(void *user, List node, cui_id id), void *user) {

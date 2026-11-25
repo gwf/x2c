@@ -579,6 +579,33 @@ children. A name is spelled with `-` or `_`.
   reports its event.
 - `(id name)` names a node. `(ui-replace tree id node)` returns the tree
   with that node replaced, and `(ui-find tree id)` returns the node.
+- `(cards ((show name)) child ...)` draws only the child whose `id` is
+  `name`, or the first child without the option.
+
+A handler written `(send name argument ...)` sends a message instead of
+calling a procedure. The component and then each block around it is
+offered the message, innermost first, and the first with an `(on name
+form)` option handles it: `form` is evaluated to a procedure and applied
+to the arguments. Inside a handler, `(ui-pass)` lets the message go on to
+the next block out, and `(ui-send name argument ...)` sends another
+message from the same node. Messages are delivered after the frame's
+tree is drawn, in the order sent, and one that no node handles is
+dropped.
+
+```lisp
+(column ((on save (lambda (what) (def saved what))))
+  (row ()
+    (button ((on-click (send save "draft"))) "Save draft")))
+```
+
+A tool that edits a tree asks the view about it. `View.components()`
+returns one row for each component, `(name block arguments options)`,
+with the kind of every argument and option and the members of every
+enum. `view.watch(hook, user)` calls `hook(user, node, id)` for each node
+as it is drawn; `ui.get_rect(id)` then returns the node's rectangle. CUI
+gives a box and plain text no id, so while a hook is installed the view
+gives each block one and draws each id-less component inside a box that
+has one.
 
 The components are `box`, `row`, `column`, `card`, `scroll`, `text`,
 `heading`, `label`, `muted`, `code`, `kbd`, `link`, `separator`,
@@ -615,6 +642,19 @@ columns, sorted by the header clicked. `mail --shot IMAGE.png` and
 `examples/live.x` draws a window from a List that a Lisp session holds,
 and reads Lisp forms from the terminal while the window runs. `make
 run-lisp` draws it off screen and clicks its button.
+
+`examples/builder.x` edits a tree by pointing at it (`make run-builder`).
+The window draws the tree between a palette and an inspector. In edit
+mode a click selects the component under the pointer and does not press
+it; the palette adds a component after the selection or inside a
+selected block, the inspector edits the selection's arguments and
+options, and the toolbar selects the parent, moves the selection among
+its siblings, deletes it, undoes, and saves. Run mode makes the tree
+behave as it will in a program. `builder FILE` edits a tree saved as one
+datum, and evaluates `FILE.lisp` first when it exists. The builder uses
+CUI's layout: a component's place is its position among its siblings.
+It has no dragging, no free placement, and no copy and paste.
+`builder --check IMAGE.png` runs those operations off screen.
 
 `examples/gallery.x` is the broader application (`make example`). It is
 a port of CUI's own gallery, `examples/gallery_ui.c` and
