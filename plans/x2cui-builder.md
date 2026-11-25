@@ -19,9 +19,13 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
   switch, or select for each argument and option; Parent, Up, Down,
   Delete, Undo, and Save; run mode; a tree file and an optional
   `FILE.lisp` beside it.
-- **Not built:** dragging to reorder or reparent, resize handles, the
-  insertion line, moving a node into another block except by delete and
-  add, and the `free` container with its CUI patch. The free container
+- **Dragging** (added 2026-11-24): a press that moves more than four
+  points drags the selection. The drop goes to the innermost block under
+  the pointer, before the first child whose middle the pointer has not
+  passed along the block's direction, and a line shows where. A block
+  with no children has no size and cannot be aimed at.
+- **Not built:** resize handles and the `free` container with its CUI
+  patch. The free container
   needs a new CUI build on every platform's manifest, which is not low
   cost, so it waits for its own change.
 - **Ids.** CUI gives a box an id only when its record names one, and gives
@@ -38,7 +42,9 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
 - **Undo** keeps whole trees, one per change, up to 200. Each key typed in
   the inspector is one change.
 - **Checked:** `builder --check` selects, adds, runs, edits a label
-  through the inspector, moves, deletes, undoes, and saves, off screen.
+  through the inspector, moves, deletes, undoes, saves, tells two equal
+  nodes apart, and drags a component into another block and before a
+  sibling, off screen.
   No test opens a window.
 
 ## Result

@@ -649,11 +649,14 @@ mode a click selects the component under the pointer and does not press
 it; the palette adds a component after the selection or inside a
 selected block, the inspector edits the selection's arguments and
 options, and the toolbar selects the parent, moves the selection among
-its siblings, deletes it, undoes, and saves. Run mode makes the tree
+its siblings, deletes it, undoes, and saves. Dragging a component moves
+it to the line shown, among its siblings or into another block. Run mode makes the tree
 behave as it will in a program. `builder FILE` edits a tree saved as one
 datum, and evaluates `FILE.lisp` first when it exists. The builder uses
 CUI's layout: a component's place is its position among its siblings.
-It has no dragging, no free placement, and no copy and paste.
+It has no resize handles, no free placement, and no copy and paste. A
+block with no children has no size, so it takes a component from the
+palette, not from a drag.
 `builder --check IMAGE.png` runs those operations off screen.
 
 `examples/gallery.x` is the broader application (`make example`). It is

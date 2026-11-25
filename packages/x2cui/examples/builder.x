@@ -5,9 +5,10 @@
     click selects the component under the pointer instead of pressing it:
     the palette adds a component after the selection or inside a selected
     block, the inspector edits the selection's arguments and options, and
-    the toolbar moves or deletes it. In run mode the tree behaves as it
-    will in a program. The tree uses CUI's own layout, so a component's
-    place is its position among its siblings.
+    the toolbar moves or deletes it. Dragging a component moves it to the
+    line shown, among its siblings or into another block. In run mode the
+    tree behaves as it will in a program. The tree uses CUI's own layout,
+    so a component's place is its position among its siblings.
 
     Usage:
       builder [FILE]             edit FILE, a tree written as one datum
@@ -49,6 +50,15 @@ typedef struct Builder {
   cui_rect canvas;
   cui_vec2 pointer;
   bool clicked;
+  /* A press held on the tree, where it began, whether the pointer has
+     moved far enough to be dragging, and a drag just released. */
+  bool pressed, dragging, dropped;
+  cui_vec2 press;
+  // Where a drop would put the selection: a block, a position, a line.
+  bool aimed;
+  Where target;
+  int target_index;
+  cui_rect line;
   // The inspector's text, reloaded from the node when `refill` is set.
   TextField fields[FIELDS];
   bool refill;
@@ -254,17 +264,30 @@ static void save(Builder &b) {
 
 // input and selection
 
+static bool within(cui_rect r, cui_vec2 p) =>
+  p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h;
+
 /* In edit mode a press on the tree is kept for `select_under` and goes no
-   further, so the component under it is not pressed. */
+   further, so the component under it is not pressed. A press that moves
+   more than a few points becomes a drag, which its release drops. */
 static bool capture(cui_ctx *ui, const cui_input_event *event, void *user) {
   Builder *b = user;
-  if (event.kind == CUI_INPUT_MOUSE_MOVE) b.pointer = event.position;
+  if (event.kind == CUI_INPUT_MOUSE_MOVE) {
+    b.pointer = event.position;
+    float dx = b.pointer.x - b.press.x, dy = b.pointer.y - b.press.y;
+    if (b.pressed && dx * dx + dy * dy > 16) b.dragging = true;
+  }
   if (event.kind != CUI_INPUT_MOUSE_BUTTON || !b.editing) return false;
-  cui_rect area = b.canvas;
-  if (b.pointer.x < area.x || b.pointer.x >= area.x + area.w ||
-      b.pointer.y < area.y || b.pointer.y >= area.y + area.h)
-    return false;
-  if (event.down && event.button == CUI_MOUSE_LEFT) b.clicked = true;
+  if (event.button == CUI_MOUSE_LEFT && !event.down && b.pressed) {
+    b.dropped = b.dragging;
+    b.pressed = b.dragging = false;
+    return true;
+  }
+  if (!within(b.canvas, b.pointer)) return false;
+  if (event.down && event.button == CUI_MOUSE_LEFT) {
+    b.clicked = b.pressed = true;
+    b.press = b.pointer;
+  }
   return true;
 }
 
@@ -302,10 +325,7 @@ static bool same_place(Where a, Where b) =>
 static void select_under(Builder &b, Ui ui) {
   b.selected = false;
   for (int i = 0; i < b.drawn_count; i++) {
-    cui_rect r = ui.get_rect(b.drawn[i].id);
-    if (b.pointer.x < r.x || b.pointer.x >= r.x + r.w ||
-        b.pointer.y < r.y || b.pointer.y >= r.y + r.h)
-      continue;
+    if (!within(ui.get_rect(b.drawn[i].id), b.pointer)) continue;
     b.where = b.drawn[i].where;
     b.selected = true;
   }
@@ -320,14 +340,98 @@ static cui_id selected_id(Builder &b) {
   return 0;
 }
 
-// Paints when the frame ends, so the rectangle is this frame's layout.
-static void paint_outline(cui_ctx *ui, cui_rect area, void *user) {
-  cui_id *id = user;
-  cui_rect r = cui_get_rect(ui, *id);
-  if (!*id || r.w <= 0) return;
-  cui_draw_rect_border(
-    ui, (cui_rect){ r.x - 2, r.y - 2, r.w + 4, r.h + 4 }, CUI_CORNERS(4),
-    (cui_color){ 0 }, cui_color_of(ui, CUI_COLOR_ACCENT), 2);
+// dragging
+
+// Whether the node at `inner` is the node at `outer` or inside it.
+static bool inside(Where inner, Where outer) =>
+  inner.depth >= outer.depth &&
+  !memcmp(inner.at, outer.at, outer.depth * sizeof outer.at[0]);
+
+// The rectangle of the node drawn at `where`, or an empty one.
+static cui_rect drawn_at(Builder &b, Ui ui, Where where) {
+  for (int i = 0; i < b.drawn_count; i++)
+    if (same_place(b.drawn[i].where, where))
+      return ui.get_rect(b.drawn[i].id);
+  return (cui_rect){ 0 };
+}
+
+static bool is_row(List block) {
+  Var dir = option(block, "dir");
+  return block[0] == <row> || (!dir.is_void() && spelled(dir) == "row");
+}
+
+/* Finds where a drop would put the selection: the innermost block under
+   the pointer other than the selection and what is inside it, and the
+   position before the first child whose middle the pointer has not
+   passed, along the block's direction. `line` is where that is. */
+static void aim(Builder &b, Ui ui) {
+  int hit = -1;
+  for (int i = 0; i < b.drawn_count; i++) {
+    Drawn *drawn = &b.drawn[i];
+    if (is_block(drawn.node) && !inside(drawn.where, b.where) &&
+        within(ui.get_rect(drawn.id), b.pointer))
+      hit = i;
+  }
+  b.aimed = hit >= 0;
+  if (!b.aimed) return;
+  List block = b.drawn[hit].node;
+  cui_rect area = ui.get_rect(b.drawn[hit].id);
+  bool row = is_row(block);
+  b.target = b.drawn[hit].where;
+  b.target_index = block.len();
+  b.line = row ? (cui_rect){ area.x + 2, area.y + 2, 2, area.h - 4 }
+               : (cui_rect){ area.x + 2, area.y + 2, area.w - 4, 2 };
+  Where child = b.target;
+  child.depth++;
+  for (int i = 2; i < block.len(); i++) {
+    child.at[child.depth - 1] = i;
+    cui_rect r = drawn_at(b, ui, child);
+    if (r.w <= 0) continue;
+    bool before = row ? b.pointer.x < r.x + r.w / 2
+                      : b.pointer.y < r.y + r.h / 2;
+    // The line sits before this child, or after it for a later one.
+    float edge = row ? r.x + (before ? -3 : r.w + 1)
+                     : r.y + (before ? -3 : r.h + 1);
+    b.line = row ? (cui_rect){ edge, r.y, 2, r.h }
+                 : (cui_rect){ r.x, edge, r.w, 2 };
+    if (!before) continue;
+    b.target_index = i;
+    return;
+  }
+}
+
+/* Moves the selection to the aimed position. Taking the node out moves
+   its later siblings down one place, and the target with them when it is
+   one of them or inside one. */
+static void drop(Builder &b) {
+  Where from = b.where, to = b.target;
+  int index = b.target_index, at = from.at[--from.depth];
+  List node = node_at(b.tree, b.where);
+  if (same_place(to, from)) {
+    if (index == at || index == at + 1) return;
+    if (index > at) index--;
+  }
+  else if (inside(to, from) && to.at[from.depth] > at) to.at[from.depth]--;
+  List tree = replaced(b.tree, from, 0, without(node_at(b.tree, from), at));
+  change(b, replaced(tree, to, 0, inserted(node_at(tree, to), index, node)));
+  b.where = to;
+  b.where.at[b.where.depth++] = index;
+  b.refill = true;
+}
+
+// What the overlay paints: the selection's outline and the drop line.
+typedef struct Marks { cui_id selected; bool lined; cui_rect line; } Marks;
+
+// Paints when the frame ends, so the outline is this frame's layout.
+static void paint_marks(cui_ctx *ui, cui_rect area, void *user) {
+  Marks *marks = user;
+  cui_color accent = cui_color_of(ui, CUI_COLOR_ACCENT);
+  cui_rect r = cui_get_rect(ui, marks.selected);
+  if (marks.selected && r.w > 0)
+    cui_draw_rect_border(
+      ui, (cui_rect){ r.x - 2, r.y - 2, r.w + 4, r.h + 4 }, CUI_CORNERS(4),
+      (cui_color){ 0 }, accent, 2);
+  if (marks.lined) cui_draw_rect(ui, marks.line, CUI_CORNERS(1), accent);
 }
 
 // the window
@@ -379,8 +483,9 @@ static void canvas(Ui ui, Builder &b) {
   int next = 0;
   place_drawn(b, b.tree, root, next);
   if (!b.editing) return;
-  cui_id outline = selected_id(b);
-  ui.canvas("outline", fill, fill, paint_outline, &outline, sizeof outline);
+  Marks marks = { selected_id(b), b.dragging && b.aimed, b.line };
+  ui.canvas("marks", fill, fill, paint_marks, &marks, sizeof marks);
+  if (b.dragging) ui.set_cursor(CUI_CURSOR_MOVE);
 }
 
 /* One text field of the inspector, showing `value`. Returns 1 with `out`
@@ -471,6 +576,10 @@ static void draw(Ui ui, Builder &b) {
   b.canvas = ui.get_rect(b.canvas_id);
   if (b.clicked) select_under(b, ui);
   b.clicked = false;
+  b.aimed = false;
+  if ((b.dragging || b.dropped) && b.selected && b.where.depth) aim(b, ui);
+  if (b.dropped && b.aimed) drop(b);
+  b.dropped = false;
   ui.column (width: fill, height: fill) {
     toolbar(ui, b);
     ui.separator();
@@ -518,6 +627,24 @@ static void click(Offscreen screen, Builder &b, cui_rect target) {
   frame(screen, b);
   ui.input_mouse_button(left, true);
   frame(screen, b);
+  ui.input_mouse_button(left, false);
+  frame(screen, b);
+  frame(screen, b);
+}
+
+/* Presses at the centre of `from`, moves to `x`, `y`, and releases.
+   A `shot` is written while the button is still down. */
+static void drag(Offscreen screen, Builder &b, cui_rect from, float x,
+                 float y, String shot) {
+  Ui ui = screen.ui();
+  ui.input_mouse_move(from.x + from.w / 2, from.y + from.h / 2);
+  frame(screen, b);
+  ui.input_mouse_button(left, true);
+  frame(screen, b);
+  ui.input_mouse_move(x, y);
+  frame(screen, b);
+  frame(screen, b);
+  if (shot) screen.write_png(shot);
   ui.input_mouse_button(left, false);
   frame(screen, b);
   frame(screen, b);
@@ -618,8 +745,30 @@ static int check(String image) {
     "(column ((pad 24) (gap 16)) (row () (button () \"Same\")) "
     "(row () (button () \"Same!\")))";
   printf("twins: selected child %d, %s\n", b.where.at[0], written(b.tree));
+
+  // A drag moves the second button into the first row, after its button.
+  cui_rect first = drawn_rect(b, ui, <button>);
+  drag(screen, b, second, first.x + first.w - 4, first.y + first.h / 2,
+       image + ".drag.png");
+  int reparents = written(b.tree) ==
+    "(column ((pad 24) (gap 16)) (row () (button () \"Same\") "
+    "(button () \"Same!\")) (row ()))" &&
+    b.where.depth == 2 && b.where.at[0] == 2 && b.where.at[1] == 3;
+  printf("drag in: %s\n", written(b.tree));
+  // A second drag puts it before the first button; a click moves nothing.
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  cui_rect moved = drawn_at(b, ui, b.where);
+  first = drawn_rect(b, ui, <button>);
+  drag(screen, b, moved, first.x + 4, first.y + first.h / 2, NULL);
+  List row = b.tree[2];
+  int reorders = ((List) row[2])[2] == "Same!" && b.where.at[1] == 2;
+  int changes = b.undo.len();
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  click(screen, b, drawn_at(b, ui, b.where));
+  int stays = b.undo.len() == changes;
+  printf("drag before: %s\n", written(b.tree));
   return selects && adds && runs && edits && moves && removes && undoes &&
-         saves && picks && keeps ? 0 : 1;
+         saves && picks && keeps && reparents && reorders && stays ? 0 : 1;
 }
 
 int main(int argc, char **argv) {
