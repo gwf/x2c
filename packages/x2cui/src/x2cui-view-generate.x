@@ -214,9 +214,8 @@ meta static List _view_records(void) {
   return records.list_free();
 }
 
-/** Returns the setters, the draw functions, and the function that draws
-    a node by its component's name, for the functions `_view_functions`
-    lists.
+/** Returns the setters, draw functions, component dispatch, and block
+    lookup for the functions `_view_functions` lists.
 */
 meta List x2cui_view(void) {
   Array units = [];
@@ -224,20 +223,28 @@ meta List x2cui_view(void) {
   List view = x2c_ident("view"), u = x2c_ident("u");
   List node = x2c_ident("node"), name = x2c_ident("name");
   Type view_type = %("ViewState"), ui_type = %("Ui");
-  Array arms = [];
+  Array arms = [], blocks = [];
   foreach (String function in _view_functions) {
     units.push(_view_draw(function));
     String component = _view_component(function);
     List draw = x2c_ident(%"_view_draw_$component");
     arms.push($!{
       if ($name == $component) { $draw($view, $u, $node); return 1; } });
+    if (function.endswith("_begin"))
+      blocks.push($!{ if ($name == $component) return 1; });
   }
-  List body = arms.list_free();
+  List body = arms.list_free(), block_body = blocks.list_free();
   List dispatch = x2c_ident("_view_component_draw");
+  List is_block = x2c_ident("_view_is_block");
   units.push($!Unit{
     static int $dispatch(
       $view_type $view, $ui_type $u, String $name, List $node) {
       @body
+      return 0;
+    } });
+  units.push($!Unit{
+    static int $is_block(String $name) {
+      @block_body
       return 0;
     } });
   return units.list_free();

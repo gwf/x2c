@@ -232,8 +232,7 @@ void View.draw(View v, Ui ui) {
 
 // Lisp
 
-/* Whether `node` is the node whose `id` option is `id`. A List argument,
-   such as the labels of a select, has no options and is no node. */
+/* Whether `node` is the node whose `id` option is `id`. */
 static int _view_named(List node, Var id) {
   if (node.len() < 2 || node[1] is not <list>) return 0;
   Var own = _view_option(node, "id");
@@ -243,7 +242,8 @@ static int _view_named(List node, Var id) {
 $lisp.binding(x2cui_lisp, "ui-replace")
 static List _lisp_ui_replace(List tree, Var id, List node) {
   if (_view_named(tree, id)) return node;
-  // The component and its options stay; each child is searched.
+  if (tree.len() < 2 || !_view_is_block(_view_name(tree[0]))) return tree;
+  // Blocks have only child nodes after the options.
   Array items = [tree[0], tree[1]];
   for (int i = 2; i < tree.len(); i++)
     items.push(tree[i] is <list>
@@ -254,6 +254,7 @@ static List _lisp_ui_replace(List tree, Var id, List node) {
 $lisp.binding(x2cui_lisp, "ui-find")
 static List _lisp_ui_find(List tree, Var id) {
   if (_view_named(tree, id)) return tree;
+  if (tree.len() < 2 || !_view_is_block(_view_name(tree[0]))) return %();
   for (int i = 2; i < tree.len(); i++) {
     if (tree[i] is not <list>) continue;
     List found = _lisp_ui_find(tree[i], id);
