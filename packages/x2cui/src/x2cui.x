@@ -52,6 +52,16 @@ typedef struct TextField {
   size_t capacity;
 } *TextField;
 
+/** Draws the tree a Lisp session holds in one global, and runs the
+    session's handlers for the events its components report.
+*/
+typedef struct View *View;
+
+/** Names the installer of the tree functions for a Lisp session. */
+typedef enum ViewLisp {
+  VIEWLISP_NAMESPACE
+} ViewLisp;
+
 // The generator names Ui and TextField in the methods it builds.
 #include "x2cui-generate.x"
 #include "x2cui-containers.x"
@@ -1519,3 +1529,6 @@ macro Unit(Name $method, Literal @pairs) {
   @x2cui_form($method, $pairs)
 }
 /* gen-arrays: end generated forms */
+
+// A UI held as a List is a unit of its own, linked only when used.
+#include "x2cui-view.x"

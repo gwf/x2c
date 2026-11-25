@@ -537,10 +537,66 @@ Short names apply only where a component's parameter or field gives the
 C type, so a comparison, a flag test, or an assignment on a variable of a
 CUI enum type spells the constant: `status == CUI_STATUS_BUSY`.
 
-## No Lisp surface
+## A UI held as a List
 
-A `Ui` is a native object that lasts across frames, and every component
-call acts on it. This package has no Lisp bindings.
+A `View` draws a tree that a Lisp session holds in one global, so Lisp
+code changes a running window by changing a value:
+
+```x2c
+Lisp lisp = auto Lisp.new();
+ViewLisp.install(lisp);
+lisp.eval_string(source);
+View view = View.new(lisp, "ui");
+while (app.frame()) view.draw(app.ui());
+```
+
+```lisp
+(def clicks 0)
+(def bump (lambda () (def clicks (+ clicks 1))))
+(def ui
+  '(column ((pad 24) (gap 12))
+     (heading ((id title)) "A tiny counter" 2)
+     (button ((variant primary) (on-click bump)) "Add one")
+     (text () (eval (ui-text "Clicked " clicks " times.")))))
+```
+
+Every node is `(component (options) arguments-and-children)`. An option
+row `(name value)` sets the field `name` of the component's option
+record, converted by the C type of the field: a name selects an enum
+member, a size is a number of pixels, `fill`, `fit`, or `(grow w)`, and
+a color is a number 0xRRGGBB. The arguments follow in the order the C
+function takes them, and the remaining elements of a block are its
+children. A name is spelled with `-` or `_`.
+
+- `(eval form)` as an argument or an option value is evaluated in the
+  session on every frame.
+- `(bind name)` keeps the value a component edits in the global `name`: a
+  number for a checkbox, switch, radio, slider, number field, select,
+  segmented control, tabs, or chip, and text for an input or a text area.
+  The session reads and sets the global like any other.
+- `(on-click form)`, also spelled `on-change`, is evaluated to a
+  procedure. It runs after the frame's tree is drawn, when the component
+  reports its event.
+- `(id name)` names a node. `(ui-replace tree id node)` returns the tree
+  with that node replaced, and `(ui-find tree id)` returns the node.
+
+The components are `box`, `row`, `column`, `card`, `scroll`, `text`,
+`heading`, `label`, `muted`, `code`, `kbd`, `link`, `separator`,
+`spacer`, `button`, `checkbox`, `switch`, `radio`, `slider`, `number`,
+`input`, `textarea`, `select`, `segmented`, `tabs`, `chip`, `badge`,
+`progress`, `alert`, `spinner`, and `avatar`. Each is drawn by a function
+the package generates from the type of its C function, so its options are
+the fields of CUI's record. A component, an option, or an enum member the
+tree misspells raises `<bad-arg>` from `view.draw` after the blocks it
+opened are closed.
+
+A tree takes no icon names, arrays of records, or callbacks, and has no
+form for `ui.each`, tables, dialogs, or menus; write those in x2c. The
+session, the tree, and the view belong to the thread that draws. The view
+is a unit of its own in the package archive, so a program that uses no
+`View` links neither it nor the Lisp runtime. Drawing
+1,251 components from a tree took 0.63 ms a frame where the same calls in
+x2c source took 0.14 ms, off screen on an Apple M4 Max.
 
 ## Examples
 
@@ -555,6 +611,10 @@ one folder that match a search, one `ui.item` row each, with a context
 menu. `examples/orders.x` is a table of recent orders with a Map of
 columns, sorted by the header clicked. `mail --shot IMAGE.png` and
 `orders --shot IMAGE.png` draw them off screen.
+
+`examples/live.x` draws a window from a List that a Lisp session holds,
+and reads Lisp forms from the terminal while the window runs. `make
+run-lisp` draws it off screen and clicks its button.
 
 `examples/gallery.x` is the broader application (`make example`). It is
 a port of CUI's own gallery, `examples/gallery_ui.c` and

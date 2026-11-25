@@ -69,7 +69,8 @@ Gary decided these on 2026-11-10:
   package declares no
   `keyword` aliases.
 - Labels are ordinary Strings in the process pool. No per-frame pool.
-- No Lisp surface in this plan.
+- No Lisp surface in this plan. Gary approved one on 2026-11-24; see
+  [x2cui Lisp surface](x2cui-lisp-surface.md).
 - Completeness is measured against CUI's own component list, and a check
   counts it.
 - The component gallery is a deliverable.

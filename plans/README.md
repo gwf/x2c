@@ -47,6 +47,17 @@ sequence holes before final `Entry` rows are implemented with fixtures and
 a book section; the x2cui option lowering, decision 5, is package work.
 File-scope and type-name method forms (`T.name(...)`) are merged into `dev`.
 
+## Live UI and runtime loading
+
+Three linked plans from 2026-11-24.
+[x2cui Lisp surface](x2cui-lisp-surface.md) draws a UI held as a List and
+lets a Lisp session change it; Gary approved it that day and it is
+implemented in the package. [x2cui builder](x2cui-builder.md) edits that
+List by direct manipulation, with CUI's layout as the default, and
+[runtime native modules](runtime-native-modules.md) compiles and loads x2c
+in a running program. Those two are proposals, not approved or started;
+the third adds `dlopen` to the runtime.
+
 ## Current work
 
 Reevaluated on 2026-11-15 against `955dfde73`. The repair batch below
