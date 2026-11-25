@@ -61,6 +61,7 @@ static void a_handler_replaces_part_of_the_tree(void) {
                           (def ui (ui-replace ui 'note
                                     '(text ((id note)) \"after\"))))))
                        \"Swap\")
+               (segmented ((bind tab)) \"tabs\" (\"Only\"))
                (text ((id note)) \"before\")))");
   frame(screen, view);
   List note = lisp.eval_string("(ui-find ui 'note)");
@@ -146,7 +147,7 @@ static void options_convert_by_the_type_of_their_field(void) {
   frame(screen, view);
   EXPECT_TRUE(screen.commands() > 0);
   EXPECT_INT_EQ((int) number(lisp, "tab"), 1);
-  // A List argument, such as the labels, is searched but is no node.
+  // The search skips List arguments such as the labels.
   EXPECT_TRUE(((List) lisp.eval_string("(ui-find ui 'absent)")).len() == 0);
 }
 
@@ -216,6 +217,9 @@ static void cards_draw_the_child_their_option_names(void) {
   EXPECT_STR_EQ(text(lisp, "seen"), "");
   click(screen, view, 40, 36);
   EXPECT_STR_EQ(text(lisp, "seen"), "second");
+  // The tree functions look inside cards as inside any block.
+  List second = lisp.eval_string("(ui-find ui 'second)");
+  EXPECT_STR_EQ((String) second[2], "Here");
 }
 
 typedef struct Seen { Ui ui; int nodes; cui_id button, row, text; } Seen;
