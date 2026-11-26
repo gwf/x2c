@@ -6,7 +6,11 @@
     the palette adds a component after the selection or inside a selected
     block, the inspector edits the selection's arguments and options, and
     the toolbar moves or deletes it. Dragging a component moves it to the
-    line shown, among its siblings or into another block. In run mode the
+    line shown, among its siblings or into another block. An outline under
+    the palette lists every node, and a click on a line selects its node.
+    A right click on the tree or the outline, or a key, selects around the
+    selection, wraps it in a row or column, unwraps a block, duplicates,
+    moves, and deletes; `keys` lists them. In run mode the
     tree behaves as it will in a program. The tree uses CUI's own layout,
     so a component's place is its position among its siblings.
 
@@ -24,7 +28,7 @@ import "x2cui" with App, Offscreen, TextField, Ui, View, ViewLisp;
 #include <stdio.h>
 #include <string.h>
 
-enum { DEPTH = 32, DRAWN = 2048, FIELDS = 64, UNDO = 200 };
+enum { DEPTH = 32, DRAWN = 2048, FIELDS = 64, LISTED = 64, UNDO = 200 };
 
 // How near a block's edge a drop goes beside the block, not into it.
 static const float EDGE = 6;
@@ -38,6 +42,43 @@ typedef struct Where { int depth; int at[DEPTH]; } Where;
    where the node is. Equal Lists are one List, so two equal nodes are
    told apart only by where they are. */
 typedef struct Drawn { List node; cui_id id; Where where; } Drawn;
+
+// What a key or a menu item asks of the selection.
+typedef enum Command {
+  NOTHING, TO_PARENT, TO_CHILD, TO_PREVIOUS, TO_NEXT, MOVE_UP, MOVE_DOWN,
+  WRAP_ROW, WRAP_COLUMN, UNWRAP, DUPLICATE, DELETE, UNDO_LAST
+} Command;
+
+#ifdef __APPLE__
+#define PRIMARY "Cmd "
+#else
+#define PRIMARY "Ctrl "
+#endif
+
+/* A command's key, and for one the menu offers, its label and the key as
+   the menu shows it. */
+typedef struct Key {
+  Command command;
+  int mods;
+  cui_key key;
+  char *label, *shown;
+} Key;
+
+static Key keys[] = {
+  { WRAP_ROW, CUI_MOD_SHIFT, CUI_KEY_R, "Wrap in row", "Shift R" },
+  { WRAP_COLUMN, CUI_MOD_SHIFT, CUI_KEY_C, "Wrap in column", "Shift C" },
+  { UNWRAP, CUI_MOD_SHIFT, CUI_KEY_U, "Unwrap", "Shift U" },
+  { DUPLICATE, CUI_MOD_PRIMARY, CUI_KEY_D, "Duplicate", PRIMARY "D" },
+  { MOVE_UP, CUI_MOD_ALT, CUI_KEY_UP, "Move earlier", "Alt Up" },
+  { MOVE_DOWN, CUI_MOD_ALT, CUI_KEY_DOWN, "Move later", "Alt Down" },
+  { TO_PARENT, 0, CUI_KEY_LEFT, "Select parent", "Left" },
+  { TO_CHILD, 0, CUI_KEY_RIGHT, "Select first child", "Right" },
+  { DELETE, 0, CUI_KEY_DELETE, "Delete", "Delete" },
+  { DELETE, 0, CUI_KEY_BACKSPACE },
+  { TO_PREVIOUS, 0, CUI_KEY_UP },
+  { TO_NEXT, 0, CUI_KEY_DOWN },
+  { UNDO_LAST, CUI_MOD_PRIMARY, CUI_KEY_Z },
+};
 
 typedef struct Builder {
   Lisp lisp;
@@ -73,8 +114,13 @@ typedef struct Builder {
   TextField fields[FIELDS];
   bool refill;
   int bound;
+  // What a key or a menu item asked for, done when the next frame starts.
+  Command command;
+  // Whether a menu was open last frame, and whether one is open in this.
+  bool menu_open, menu_shown;
   // Where the check finds the builder's own controls.
   cui_rect mode_button, add_button, first_field;
+  cui_rect listed[LISTED];
 } Builder;
 
 static String sample = %"
@@ -273,6 +319,96 @@ static void move_selected(Builder &b, int step) {
   b.where.at[parent.depth] = other;
 }
 
+static void select_at(Builder &b, Where where) {
+  b.where = where;
+  b.selected = b.refill = true;
+}
+
+static void select_parent(Builder &b) {
+  if (!b.selected || !b.where.depth) return;
+  b.where.depth--;
+  b.refill = true;
+}
+
+static void select_child(Builder &b) {
+  if (!b.selected || b.where.depth == DEPTH) return;
+  List block = node_at(b.tree, b.where);
+  if (!is_block(block)) return;
+  for (int i = 2; i < block.len(); i++) {
+    if (!is_node(block[i])) continue;
+    b.where.at[b.where.depth++] = i;
+    b.refill = true;
+    return;
+  }
+}
+
+// Selects the sibling one place from the selection, toward `step`.
+static void select_sibling(Builder &b, int step) {
+  if (!b.selected || !b.where.depth) return;
+  int level = b.where.depth - 1, other = b.where.at[level] + step;
+  Where parent = b.where;
+  parent.depth--;
+  List block = node_at(b.tree, parent);
+  if (other < 2 || other >= block.len() || !is_node(block[other])) return;
+  b.where.at[level] = other;
+  b.refill = true;
+}
+
+// Puts the selection in a new block, `name`, which becomes the selection.
+static void wrap_selected(Builder &b, String name) {
+  if (!b.selected) return;
+  List node = node_at(b.tree, b.where);
+  List block = %( $(Atom.intern(name)) ((gap 8)) $node );
+  change(b, replaced(b.tree, b.where, 0, block));
+  b.refill = true;
+}
+
+/* Puts the selected block's children where the block was, and selects
+   the first of them. The root has no place to leave them. */
+static void unwrap_selected(Builder &b) {
+  if (!b.selected || !b.where.depth) return;
+  List block = node_at(b.tree, b.where);
+  if (!is_block(block)) return;
+  Where parent = b.where;
+  int index = parent.at[--parent.depth], next = index;
+  List around = without(node_at(b.tree, parent), index);
+  for (int i = 2; i < block.len(); i++)
+    if (is_node(block[i])) around = inserted(around, next++, block[i]);
+  change(b, replaced(b.tree, parent, 0, around));
+  b.selected = next > index;
+  b.refill = true;
+}
+
+// Adds a copy of the selection after it, and selects the copy.
+static void duplicate_selected(Builder &b) {
+  if (!b.selected || !b.where.depth) return;
+  Where parent = b.where;
+  int index = parent.at[--parent.depth];
+  List block = node_at(b.tree, parent);
+  change(b, replaced(b.tree, parent, 0,
+                     inserted(block, index + 1, block[index])));
+  b.where.at[parent.depth] = index + 1;
+  b.refill = true;
+}
+
+static void run(Builder &b, Command command) {
+  switch (command) {
+    case NOTHING: return;
+    case TO_PARENT: return select_parent(b);
+    case TO_CHILD: return select_child(b);
+    case TO_PREVIOUS: return select_sibling(b, -1);
+    case TO_NEXT: return select_sibling(b, 1);
+    case MOVE_UP: return move_selected(b, -1);
+    case MOVE_DOWN: return move_selected(b, 1);
+    case WRAP_ROW: return wrap_selected(b, "row");
+    case WRAP_COLUMN: return wrap_selected(b, "column");
+    case UNWRAP: return unwrap_selected(b);
+    case DUPLICATE: return duplicate_selected(b);
+    case DELETE: return remove_selected(b);
+    case UNDO_LAST: return undo(b);
+  }
+}
+
 static void save(Builder &b) {
   Path path = b.file;
   path.write_text(written(b.tree) + "\n");
@@ -295,6 +431,8 @@ static bool capture(cui_ctx *ui, const cui_input_event *event, void *user) {
     if (b.pressed && dx * dx + dy * dy > 16) b.dragging = true;
   }
   if (event.kind != CUI_INPUT_MOUSE_BUTTON || !b.editing) return false;
+  // An open menu lies over the tree, and a press on it is the menu's.
+  if (b.menu_open) return false;
   if (event.button == CUI_MOUSE_LEFT && !event.down && b.pressed) {
     b.dropped = b.dragging && !b.sizing;
     b.sized = b.dragging && b.sizing;
@@ -302,6 +440,11 @@ static bool capture(cui_ctx *ui, const cui_input_event *event, void *user) {
     return true;
   }
   if (!within(b.canvas, b.pointer)) return false;
+  // A right press selects, and goes on to open the menu.
+  if (event.button == CUI_MOUSE_RIGHT) {
+    b.clicked = b.clicked || event.down;
+    return false;
+  }
   if (event.down && event.button == CUI_MOUSE_LEFT) {
     b.pressed = true;
     b.sizing = b.selected && within(b.handle, b.pointer);
@@ -539,10 +682,7 @@ static void toolbar(Ui ui, Builder &b) {
     }
     b.mode_button = ui.last_rect();
     if (ui.button("Undo", size: sm)) undo(b);
-    if (ui.button("Parent", size: sm) && b.selected && b.where.depth) {
-      b.where.depth--;
-      b.refill = true;
-    }
+    if (ui.button("Parent", size: sm)) select_parent(b);
     if (ui.button("Up", size: sm)) move_selected(b, -1);
     if (ui.button("Down", size: sm)) move_selected(b, 1);
     if (ui.button("Delete", size: sm)) remove_selected(b);
@@ -552,11 +692,85 @@ static void toolbar(Ui ui, Builder &b) {
   }
 }
 
+// The menu of the commands that have a label. A choice is done next frame.
+static void node_menu(Ui ui, Builder &b, String id) {
+  ui.context_menu (id) {
+    b.menu_shown = true;
+    for (int i = 0; i < (int) (sizeof keys / sizeof keys[0]); i++) {
+      if (!keys[i].label) continue;
+      if (keys[i].command == MOVE_UP || keys[i].command == DELETE)
+        ui.menu_separator();
+      if (ui.menu_item(keys[i].label, shortcut: keys[i].shown,
+                       disabled: !b.selected,
+                       danger: keys[i].command == DELETE))
+        b.command = keys[i].command;
+    }
+  }
+}
+
+// A key asks for its command, unless a text field or a menu takes the keys.
+static void keyed(Ui ui, Builder &b) {
+  if (!b.editing || b.menu_open || ui.wants_keyboard()) return;
+  for (int i = 0; i < (int) (sizeof keys / sizeof keys[0]); i++)
+    if (ui.shortcut(keys[i].mods, keys[i].key)) b.command = keys[i].command;
+}
+
+// A node as the outline names it: its component and its first text.
+static String listed(List node) {
+  String name = written(node[0]);
+  return node.len() > 2 && node[2] is <string>
+    ? %"$name \"$((String) node[2])\"" : name;
+}
+
+/* One line of the outline for `node`, then its children's lines, each a
+   step further in. `row` counts the lines; equal nodes have equal names,
+   so a line's id is made under its count. */
+static void outline_rows(Ui ui, Builder &b, List node, Where &where,
+                         int &row) {
+  cui_push_id_int(ui, row);
+  ui.row (width: fill, align: center) {
+    if (where.depth) ui.gap(14 * where.depth);
+    bool chosen = b.selected && same_place(where, b.where);
+    bool picked = ui.list_item(listed(node), selected: chosen);
+    cui_rect line = ui.last_rect();
+    if (row < LISTED) b.listed[row] = line;
+    // Enter in an open menu also reaches the line that has the focus.
+    if ((picked && !b.menu_open) ||
+        (ui.mouse_clicked(CUI_MOUSE_RIGHT) && within(line, b.pointer)))
+      select_at(b, where);
+    if (b.selected && same_place(where, b.where))
+      node_menu(ui, b, "outline-menu");
+  }
+  cui_pop_id(ui);
+  row++;
+  if (!is_block(node) || where.depth == DEPTH) return;
+  for (int i = 2; i < node.len(); i++) {
+    if (!is_node(node[i])) continue;
+    where.at[where.depth++] = i;
+    outline_rows(ui, b, node[i], where, row);
+    where.depth--;
+  }
+}
+
+static void outline_pane(Ui ui, Builder &b) {
+  ui.row (pad: 8, gap: 8, align: center) {
+    ui.label("Outline");
+    ui.muted("Right-click for commands");
+  }
+  ui.scroll (id: "outline", width: fill, height: fill, pad: 4, gap: 0) {
+    Where root = { 0 };
+    int row = 0;
+    outline_rows(ui, b, b.tree, root, row);
+  }
+}
+
 static void palette(Ui ui, Builder &b) {
-  ui.scroll (id: "palette", width: 150, height: fill, pad: 8, gap: 2) {
+  // Two names to a line, so more of them show above the outline.
+  ui.scroll (id: "palette", width: fill, height: fill, pad: 8)
+  ui.row (width: fill, wrap: true, gap: 2) {
     foreach (List row in View.components()) {
       String name = row[0];
-      if (ui.button(name, variant: ghost, size: sm, width: fill)) add(b, name);
+      if (ui.button(name, variant: ghost, size: sm, width: 100)) add(b, name);
       if (name == "button") b.add_button = ui.last_rect();
     }
   }
@@ -589,6 +803,7 @@ static void canvas(Ui ui, Builder &b) {
   Marks marks = { &b, selected_id(b), moving ? b.target_id : 0,
                   moving, b.dragging && b.sizing, b.line, sized_to(b) };
   ui.canvas("marks", fill, fill, paint_marks, &marks, sizeof marks);
+  node_menu(ui, b, "tree-menu");
   if (b.dragging) ui.set_cursor(CUI_CURSOR_MOVE);
 }
 
@@ -712,11 +927,20 @@ static void draw(Ui ui, Builder &b) {
   if (b.dropped && b.aimed) drop(b);
   if (b.sized && b.selected) resize(b);
   b.dropped = b.sized = false;
+  b.menu_open = b.menu_shown;
+  b.menu_shown = false;
+  keyed(ui, b);
+  run(b, b.command);
+  b.command = NOTHING;
   ui.column (width: fill, height: fill) {
     toolbar(ui, b);
     ui.separator();
     ui.row (width: fill, height: fill) {
-      palette(ui, b);
+      ui.column (width: 220, height: fill) {
+        palette(ui, b);
+        ui.separator();
+        outline_pane(ui, b);
+      }
       canvas(ui, b);
       inspector(ui, b);
     }
@@ -777,6 +1001,15 @@ static void drag(Offscreen screen, Builder &b, cui_rect from, float x,
   frame(screen, b);
   if (shot) screen.write_png(shot);
   ui.input_mouse_button(left, false);
+  frame(screen, b);
+  frame(screen, b);
+}
+
+static void press(Offscreen screen, Builder &b, cui_key key, int mods) {
+  Ui ui = screen.ui();
+  ui.input_key(key, true, mods);
+  frame(screen, b);
+  ui.input_key(key, false, mods);
   frame(screen, b);
   frame(screen, b);
 }
@@ -960,6 +1193,79 @@ static int check(String image) {
              option(b.tree, "pad").int() == 24;
   printf("layout: %s\n", written(b.tree));
   screen.write_png(image + ".layout.png");
+
+  // A click on a line of the outline selects its node; keys select around.
+  Var counter = void;
+  read_value(sample, counter);
+  change(b, counter);
+  b.selected = false;
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  click(screen, b, b.listed[1]);
+  int lists = b.selected && b.where.depth == 1 && b.where.at[0] == 2;
+  press(screen, b, CUI_KEY_DOWN, 0);
+  int steps = b.where.at[0] == 3;
+  press(screen, b, CUI_KEY_LEFT, 0);
+  steps = steps && b.where.depth == 0;
+  press(screen, b, CUI_KEY_RIGHT, 0);
+  press(screen, b, CUI_KEY_DOWN, 0);
+  steps = steps && b.where.depth == 1 && b.where.at[0] == 3;
+  printf("outline: listed %d, keys %d\n", lists, steps);
+
+  // Keys wrap the selection in a row, unwrap it, duplicate, move, delete.
+  press(screen, b, CUI_KEY_R, CUI_MOD_SHIFT);
+  List wrapped = b.tree[3];
+  int wraps = wrapped[0] == <row> && wrapped[2] == ((List) counter)[3] &&
+              b.where.depth == 1;
+  printf("wrap: %s\n", written(wrapped));
+  screen.write_png(image + ".outline.png");
+  press(screen, b, CUI_KEY_U, CUI_MOD_SHIFT);
+  int unwraps = written(b.tree) == written(counter) && b.selected &&
+                b.where.at[0] == 3;
+  press(screen, b, CUI_KEY_D, CUI_MOD_PRIMARY);
+  int copies = b.tree.len() == 6 && b.tree[4] == b.tree[3] &&
+               b.where.at[0] == 4;
+  press(screen, b, CUI_KEY_UP, CUI_MOD_ALT);
+  press(screen, b, CUI_KEY_DELETE, 0);
+  int clears = written(b.tree) == written(counter) && !b.selected;
+  printf("unwrap %d, duplicate %d, move and delete %d\n", unwraps, copies,
+         clears);
+
+  /* A right click selects and opens the menu, whose fourth item
+     duplicates. The menu takes the keys while it is open. */
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  cui_rect text = drawn_rect(b, ui, <text>);
+  ui.input_mouse_move(text.x + 8, text.y + text.h / 2);
+  frame(screen, b);
+  ui.input_mouse_button(right, true);
+  frame(screen, b);
+  ui.input_mouse_button(right, false);
+  for (int i = 0; i < 30; i++) frame(screen, b);
+  int opens = b.menu_open && b.selected && b.where.at[0] == 4;
+  screen.write_png(image + ".menu.png");
+  for (int i = 0; i < 4; i++) press(screen, b, CUI_KEY_DOWN, 0);
+  int holds = b.where.at[0] == 4;
+  press(screen, b, CUI_KEY_ENTER, 0);
+  for (int i = 0; i < 30; i++) frame(screen, b);
+  int menus = opens && holds && !b.menu_open && b.tree.len() == 6 &&
+              written(b.tree[5]) == written(b.tree[4]);
+  printf("menu: opened %d, held %d, open %d, %d children\n", opens, holds,
+         b.menu_open, b.tree.len() - 2);
+  // A right click on a line of the outline does the same for its node.
+  cui_rect line = b.listed[1];
+  ui.input_mouse_move(line.x + line.w / 2, line.y + line.h / 2);
+  frame(screen, b);
+  ui.input_mouse_button(right, true);
+  frame(screen, b);
+  ui.input_mouse_button(right, false);
+  for (int i = 0; i < 30; i++) frame(screen, b);
+  int offers = b.menu_open && b.selected && b.where.at[0] == 2;
+  press(screen, b, CUI_KEY_ESCAPE, 0);
+  for (int i = 0; i < 30; i++) frame(screen, b);
+  offers = offers && !b.menu_open && b.tree.len() == 6;
+  printf("outline menu: %d\n", offers);
+  if (!(lists && steps && wraps && unwraps && copies && clears && menus &&
+        offers))
+    return 1;
   return apart && lays && fills && besides && sizes && selects && adds &&
          runs && edits && moves && removes && undoes &&
          saves && picks && keeps && reparents && reorders && stays ? 0 : 1;

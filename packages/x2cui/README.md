@@ -644,7 +644,8 @@ and reads Lisp forms from the terminal while the window runs. `make
 run-lisp` draws it off screen and clicks its button.
 
 `examples/builder.x` edits a tree by pointing at it (`make run-builder`).
-The window draws the tree between a palette and an inspector. In edit
+The window draws the tree between a palette and an inspector, with an
+outline of every node under the palette. In edit
 mode a click selects the component under the pointer and does not press
 it; the palette adds a component after the selection or inside a
 selected block, the inspector edits the selection's arguments and
@@ -656,11 +657,18 @@ component moves it to the line shown, in the block outlined: the block
 under the pointer, or the block around that one when the pointer is
 within 6 points of its edge. Dragging the square at the selection's
 corner sets a fixed width and height where the component has those
-options. Run mode makes the tree behave as it will in a program. `builder FILE` edits a tree saved as one
+options. A click on a line of the outline selects its node, which is how
+a spacer or a block hidden by its children is reached. A right click on
+the tree or the outline opens a menu, and each of its commands has a
+key: wrap in a row (Shift R) or a column (Shift C), unwrap a block
+(Shift U), duplicate (Cmd or Ctrl D), move earlier or later (Alt Up,
+Alt Down), select the parent (Left) or first child (Right), and delete.
+Up and Down select the previous and next sibling. Run mode makes the tree behave as it will in a program. `builder FILE` edits a tree saved as one
 datum, and evaluates `FILE.lisp` first when it exists. The builder uses
 CUI's layout: a component's place is its position among its siblings,
 and spacing comes from padding, gap, alignment, and sizes. It has no
-placement by coordinates and no copy and paste.
+placement by coordinates, no copy and paste, and no dragging in the
+outline.
 `builder --check IMAGE.png` runs those operations off screen.
 
 `examples/gallery.x` is the broader application (`make example`). It is

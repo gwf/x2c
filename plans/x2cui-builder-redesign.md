@@ -1,6 +1,7 @@
 # x2cui builder redesign: tasks, not records
 
-> Status: proposal, 2026-11-25. Not approved and not started. It replaces
+> Status: Gary approved slice 1 on 2026-11-26 and it is implemented; see
+> "Slice 1 as built". Slices 2 to 5 are not started. The plan replaces
 > the interaction design of [the x2cui builder](x2cui-builder.md), whose
 > first version Gary judged far from usable on 2026-11-25: too many
 > options shown, and no clear way to get a wanted effect. The document
@@ -114,6 +115,25 @@ next starts.
 3. Palette groups, search, drag from the palette, useful defaults.
 4. Events group, stubs in `FILE.lisp`, the run log, the message box.
 5. Canvas handles for gap and padding.
+
+## Slice 1 as built
+
+`examples/builder.x` gained the outline under the palette, the commands
+in the table `keys`, and one menu shown on a right click over the tree
+or a line of the outline. `builder --check` covers each of them off
+screen. It differs from the design in four ways:
+
+- The outline is drawn with CUI's list rows, not `cui_tree_begin`. A
+  click anywhere on a tree row opens or closes it, which would fight a
+  click that selects. The outline therefore does not collapse.
+- Nothing is dragged in the outline.
+- The palette shows two names to a line, so that it fits above the
+  outline. Its groups and search are slice 3.
+- The builder is still one file.
+
+One known fault: after a click on a line of the outline, CUI's keyboard
+focus stays on that line, and its focus ring does not follow a selection
+changed by a key. CUI has no public call that moves focus to a list row.
 
 ## Validation
 

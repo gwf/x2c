@@ -40,6 +40,8 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
 - **Resize handle** (added 2026-11-25): one square at the selection's
   corner sets `width` and `height` as fixed sizes, where the component
   has those options.
+- **Outline, commands, and keys** (2026-11-26): slice 1 of
+  [the redesign](x2cui-builder-redesign.md).
 - **Not built:** handles on the other corners and edges.
 - **Ids.** CUI gives a box an id only when its record names one, and gives
   text none. While a watcher is installed the view gives each block an id

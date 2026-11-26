@@ -55,9 +55,9 @@ and lets a Lisp session change it; it is implemented in the package.
 [x2cui builder](x2cui-builder.md) edits that List by pointing at it, with
 CUI's layout; its first version is implemented as an example, without
 dragging or free placement.
-[x2cui builder redesign](x2cui-builder-redesign.md) is a proposal from
-2026-11-25, not approved, to rebuild the builder's interaction around six
-tasks after Gary judged the first version far from usable.
+[x2cui builder redesign](x2cui-builder-redesign.md) rebuilds the
+builder's interaction around six tasks after Gary judged the first
+version far from usable. Slice 1 of five is implemented.
 [Runtime native modules](runtime-native-modules.md) compiles and loads x2c
 in a running program; it is a proposal, not approved or started, and adds
 `dlopen` to the runtime.
