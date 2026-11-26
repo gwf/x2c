@@ -6,12 +6,14 @@
     the palette adds a component after the selection or inside a selected
     block, the inspector edits the selection's arguments and options, and
     the toolbar moves or deletes it. Dragging a component moves it to the
-    line shown, among its siblings or into another block. An outline under
-    the palette lists every node, and a click on a line selects its node.
-    A right click on the tree or the outline, or a key, selects around the
+    line shown, among its siblings or into another block. The inspector
+    groups the options, sets a block's spacing and alignment, and gives
+    sizes as Auto, Fit, Fill, or Fixed. An outline under the palette
+    lists every node, and a click on a line selects its node. A right
+    click on the tree or the outline, or a key, selects around the
     selection, wraps it in a row or column, unwraps a block, duplicates,
-    moves, and deletes; `keys` lists them. In run mode the
-    tree behaves as it will in a program. The tree uses CUI's own layout,
+    moves, and deletes; `keys` lists them. In run mode the tree behaves
+    as it will in a program. The tree uses CUI's own layout,
     so a component's place is its position among its siblings.
 
     Usage:
@@ -34,6 +36,8 @@ enum { DEPTH = 32, DRAWN = 2048, FIELDS = 64, LISTED = 64, UNDO = 200 };
 static const float EDGE = 6;
 // The side of the square handle at the selection's corner.
 static const float HANDLE = 10;
+// The width of the inspector's labels.
+static const float LABEL = 96;
 
 // Where a node is: the position of each node on the way from the root.
 typedef struct Where { int depth; int at[DEPTH]; } Where;
@@ -46,8 +50,11 @@ typedef struct Drawn { List node; cui_id id; Where where; } Drawn;
 // What a key or a menu item asks of the selection.
 typedef enum Command {
   NOTHING, TO_PARENT, TO_CHILD, TO_PREVIOUS, TO_NEXT, MOVE_UP, MOVE_DOWN,
-  WRAP_ROW, WRAP_COLUMN, UNWRAP, DUPLICATE, DELETE, UNDO_LAST
+  WRAP_ROW, WRAP_COLUMN, UNWRAP, DUPLICATE, DELETE, UNDO_LAST, REDO_LAST
 } Command;
+
+// The inspector's groups of options.
+enum { CONTENT, LAYOUT, SIZE, STYLE, BEHAVIOR, OTHER, GROUPS };
 
 #ifdef __APPLE__
 #define PRIMARY "Cmd "
@@ -78,13 +85,15 @@ static Key keys[] = {
   { TO_PREVIOUS, 0, CUI_KEY_UP },
   { TO_NEXT, 0, CUI_KEY_DOWN },
   { UNDO_LAST, CUI_MOD_PRIMARY, CUI_KEY_Z },
+  { REDO_LAST, CUI_MOD_PRIMARY | CUI_MOD_SHIFT, CUI_KEY_Z },
 };
 
 typedef struct Builder {
   Lisp lisp;
   View view;
   List tree;
-  Array undo;
+  // Trees before each change, and trees an undo went back from.
+  Array undo, redo;
   String file, status;
   bool editing, selected;
   Where where;
@@ -113,14 +122,26 @@ typedef struct Builder {
   // The inspector's text, reloaded from the node when `refill` is set.
   TextField fields[FIELDS];
   bool refill;
-  int bound;
+  int bound, slot;
+  /* The field an edit of the inspector came from, while that field keeps
+     the keyboard or the pointer; its edits are one step of undo. */
+  String visiting;
+  // Open groups, whether every option shows, and the text that finds one.
+  bool open[GROUPS], open_around, all;
+  TextField search;
   // What a key or a menu item asked for, done when the next frame starts.
   Command command;
   // Whether a menu was open last frame, and whether one is open in this.
   bool menu_open, menu_shown;
+  /* The outline's area, each line and where its node is, and a press on
+     a line, kept by the input hook as the line's number plus one. */
+  cui_id outline_id;
+  cui_rect outline_area, listed[LISTED];
+  Where listed_where[LISTED];
+  int lines, picked;
   // Where the check finds the builder's own controls.
-  cui_rect mode_button, add_button, first_field;
-  cui_rect listed[LISTED];
+  cui_rect mode_button, add_button, first_field, all_switch;
+  Map located;
 } Builder;
 
 static String sample = %"
@@ -241,18 +262,27 @@ static bool is_block(List node) {
 static void change(Builder &b, List tree) {
   if (b.undo.len() == UNDO) b.undo.remove(0);
   b.undo.push(b.tree);
+  b.redo = [];
   b.tree = tree;
   b.view.set(tree);
   b.status = NULL;
+  b.visiting = NULL;
 }
 
-static void undo(Builder &b) {
-  if (!b.undo.len()) return;
-  b.tree = b.undo[b.undo.len() - 1];
-  b.undo.pop();
+// Moves the last tree of `from` to the tree shown, and the shown to `to`.
+static void step_back(Builder &b, Array from, Array to) {
+  if (!from.len()) return;
+  to.push(b.tree);
+  b.tree = from[from.len() - 1];
+  from.pop();
   b.view.set(b.tree);
   b.selected = false;
+  b.visiting = NULL;
 }
+
+static void undo(Builder &b) => step_back(b, b.undo, b.redo);
+
+static void redo(Builder &b) => step_back(b, b.redo, b.undo);
 
 // A new node of the component `row` describes, with an argument of each
 // kind filled in and a fresh global for a value it edits.
@@ -406,6 +436,7 @@ static void run(Builder &b, Command command) {
     case DUPLICATE: return duplicate_selected(b);
     case DELETE: return remove_selected(b);
     case UNDO_LAST: return undo(b);
+    case REDO_LAST: return redo(b);
   }
 }
 
@@ -439,6 +470,15 @@ static bool capture(cui_ctx *ui, const cui_input_event *event, void *user) {
     b.pressed = b.dragging = b.sizing = false;
     return true;
   }
+  /* A left press on a line of the outline is kept, so the line takes no
+     keyboard focus and its ring does not stay behind the selection. */
+  if (event.button == CUI_MOUSE_LEFT && event.down &&
+      within(b.outline_area, b.pointer))
+    for (int i = 0; i < b.lines && i < LISTED; i++)
+      if (within(b.listed[i], b.pointer)) {
+        b.picked = i + 1;
+        return true;
+      }
   if (!within(b.canvas, b.pointer)) return false;
   // A right press selects, and goes on to open the menu.
   if (event.button == CUI_MOUSE_RIGHT) {
@@ -681,7 +721,8 @@ static void toolbar(Ui ui, Builder &b) {
       b.status = NULL;
     }
     b.mode_button = ui.last_rect();
-    if (ui.button("Undo", size: sm)) undo(b);
+    if (ui.button("Undo", size: sm, disabled: !b.undo.len())) undo(b);
+    if (ui.button("Redo", size: sm, disabled: !b.redo.len())) redo(b);
     if (ui.button("Parent", size: sm)) select_parent(b);
     if (ui.button("Up", size: sm)) move_selected(b, -1);
     if (ui.button("Down", size: sm)) move_selected(b, 1);
@@ -731,12 +772,14 @@ static void outline_rows(Ui ui, Builder &b, List node, Where &where,
   ui.row (width: fill, align: center) {
     if (where.depth) ui.gap(14 * where.depth);
     bool chosen = b.selected && same_place(where, b.where);
-    bool picked = ui.list_item(listed(node), selected: chosen);
+    // A left press on the line is the input hook's; see `capture`.
+    ui.list_item(listed(node), selected: chosen);
     cui_rect line = ui.last_rect();
-    if (row < LISTED) b.listed[row] = line;
-    // Enter in an open menu also reaches the line that has the focus.
-    if ((picked && !b.menu_open) ||
-        (ui.mouse_clicked(CUI_MOUSE_RIGHT) && within(line, b.pointer)))
+    if (row < LISTED) {
+      b.listed[row] = line;
+      b.listed_where[row] = where;
+    }
+    if (ui.mouse_clicked(CUI_MOUSE_RIGHT) && within(line, b.pointer))
       select_at(b, where);
     if (b.selected && same_place(where, b.where))
       node_menu(ui, b, "outline-menu");
@@ -757,10 +800,14 @@ static void outline_pane(Ui ui, Builder &b) {
     ui.label("Outline");
     ui.muted("Right-click for commands");
   }
+  b.outline_id = cui_box_begin(ui, &(cui_box){
+    .id = "outline-area", .width = CUI_FILL, .height = CUI_FILL });
+  defer cui_box_end(ui);
   ui.scroll (id: "outline", width: fill, height: fill, pad: 4, gap: 0) {
     Where root = { 0 };
     int row = 0;
     outline_rows(ui, b, b.tree, root, row);
+    b.lines = row;
   }
 }
 
@@ -780,7 +827,7 @@ static void canvas(Ui ui, Builder &b) {
   // A box has an id, and so a rectangle to ask for, only when given one.
   b.canvas_id = cui_box_begin(ui, &(cui_box){
     .id = "canvas", .dir = CUI_STACK, .width = CUI_FILL,
-    .height = CUI_FILL, .border = 1 });
+    .height = CUI_FILL, .border = 1, .scroll_x = true, .scroll_y = true });
   defer cui_box_end(ui);
   b.drawn_count = 0;
   // Only an edited tree is watched: a running one is drawn as it ships.
@@ -807,105 +854,481 @@ static void canvas(Ui ui, Builder &b) {
   if (b.dragging) ui.set_cursor(CUI_CURSOR_MOVE);
 }
 
-/* One text field of the inspector, showing `value`. Returns 1 with `out`
-   set when the text was changed to something that reads as a value, and 2
-   when it was emptied. Text that starts a form is read, and other text
-   of a `text` kind is itself the value. */
-static int edited(Ui ui, Builder &b, int slot, String label, String kind,
-                  Var value, Var &out) {
-  if (slot >= FIELDS) return 0;
-  TextField field = b.fields[slot];
+// the inspector
+
+/* How the inspector shows an option: its group, whether it shows before
+   "All options", the step of a number, and a line of help. An option
+   with no row is in Other and shows under "All options" or once set. */
+typedef struct Shown {
+  char *name, *group;
+  bool common;
+  float step;
+  char *help;
+} Shown;
+
+static Shown shown[] = {
+  { "gap", "Layout", true, 1, "Space between the children" },
+  { "pad", "Layout", true, 1, "Space inside the edge" },
+  { "wrap", "Layout", false, 0, "Start a new line when the row is full" },
+  { "columns", "Layout", false, 1, "The columns of a grid" },
+  { "pad_x", "Layout", false, 1, "Space inside the left and right edges" },
+  { "pad_y", "Layout", false, 1, "Space inside the top and bottom edges" },
+  { "width", "Size", true, 1, "Fit the content, fill the space, or fixed" },
+  { "height", "Size", true, 1, "Fit the content, fill the space, or fixed" },
+  { "min_width", "Size", false, 1, "The least width" },
+  { "max_width", "Size", false, 1, "The greatest width" },
+  { "min_height", "Size", false, 1, "The least height" },
+  { "max_height", "Size", false, 1, "The greatest height" },
+  { "variant", "Style", true, 0, "The look of the button" },
+  { "size", "Style", true, 1, "How large it is" },
+  { "tone", "Style", true, 0, "Its color, by what it means" },
+  { "color", "Style", false, 0, "The color of its text or mark" },
+  { "bg", "Style", false, 0, "The background color" },
+  { "border", "Style", false, 1, "The width of the border" },
+  { "border_color", "Style", false, 0, "The color of the border" },
+  { "radius", "Style", false, 1, "How round the corners are" },
+  { "elevation", "Style", false, 0, "How far its shadow falls" },
+  { "label", "Content", true, 0, "The text beside the control" },
+  { "placeholder", "Content", true, 0, "The text shown while it is empty" },
+  { "description", "Content", false, 0, "A second line under the label" },
+  { "on_click", "Behavior", true, 0, "A Lisp form run on a press" },
+  { "on_change", "Behavior", false, 0, "A Lisp form run on a change" },
+  { "disabled", "Behavior", true, 0, "Ignore the pointer and the keys" },
+  { "bind", "Behavior", false, 0, "The Lisp global the control edits" },
+  { "id", "Behavior", false, 0, "A name that keeps the node's state" },
+  { "show", "Behavior", true, 0, "The id of the card to show" },
+};
+
+static char *group_names[] = {
+  "Content", "Layout", "Size", "Style", "Behavior", "Other"
+};
+
+// The view's own options, which no component's record lists.
+static List own_options = %(("on_click" "form") ("on_change" "form")
+                            ("bind" "form") ("id" "text"));
+
+// Options a block's Layout group draws with controls of their own.
+static bool laid_out(String name) =>
+  name in %("dir" "gap" "pad" "align" "justify");
+
+// A label beside a control, like the label of an inspector row.
+static void row_label(Ui ui, String text) =>
+  ui.text(text, width: LABEL,
+          color: cui_color_of(ui, CUI_COLOR_TEXT_SECONDARY));
+
+static Shown *shown_row(String name) {
+  for (int i = 0; i < (int) (sizeof shown / sizeof shown[0]); i++)
+    if (!strcmp(name, shown[i].name)) return &shown[i];
+  return NULL;
+}
+
+static int group_of(String name) {
+  Shown *row = shown_row(name);
+  for (int i = 0; row && i < OTHER; i++)
+    if (!strcmp(row.group, group_names[i])) return i;
+  return OTHER;
+}
+
+/* What the inspector draws: a node, where it is, and the node it asks
+   for, set when the frame's controls change the node. */
+typedef struct Inspecting {
+  Where where;
+  List node, edited;
+  // What was changed, which names one step of undo.
+  String field;
+  // Whether the rows edit the block around the selection.
+  bool around;
+} Inspecting;
+
+static List current(Inspecting &in) => in.edited ? in.edited : in.node;
+
+static void set_option(Inspecting &in, String name, Var value) {
+  in.edited = with_option(current(in), name, value);
+  in.field = name;
+}
+
+// The option value `name` when `on`, and otherwise void, the default.
+static Var unless_default(bool on, String name) =>
+  on ? (Var) Atom.intern(name) : void;
+
+static List renamed(List node, String name) =>
+  %( $(Atom.intern(name)) @(node.cdr()) );
+
+// Notes where a row is, for the check.
+static void locate(Builder &b, Inspecting &in, String name, cui_rect r) {
+  b.located[in.around ? %"around $name" : name] =
+    %( $((double) r.x) $((double) r.y) $((double) r.w) $((double) r.h) );
+}
+
+static cui_rect located(Builder &b, String name) {
+  List r = b.located[name];
+  return r ? (cui_rect){ r[0].double(), r[1].double(), r[2].double(),
+                         r[3].double() }
+           : (cui_rect){ 0 };
+}
+
+/* One text field of the inspector, showing `value`. Returns true with
+   `out` set when the text was changed to something that reads as a
+   value: void for no text, the text itself for a `text` kind that does
+   not start a form, and otherwise the form read. */
+static bool typed(Ui ui, Builder &b, String label, String kind, Var value,
+                  Var &out) {
+  if (b.slot >= FIELDS) return false;
+  TextField field = b.fields[b.slot++];
   if (b.refill) {
     field.buffer[0] = 0;
     if (!value.is_void())
       field.set(kind == "text" && value is <string> ? (String) value
                                                     : written(value));
   }
-  int flags = ui.input(%"inspect-$slot", field, label: label, size: sm);
-  if (!slot) b.first_field = ui.last_rect();
-  if (!(flags & CUI_CHANGED)) return 0;
-  if (field.empty()) return 2;
+  Shown *row = shown_row(label);
+  bool changed = ui.prop_text(label, field, tooltip: row ? row.help : NULL,
+                              placeholder: kind == "text" ? "" : "Lisp");
+  if (b.slot == 1) b.first_field = ui.last_rect();
+  if (!changed) return false;
+  out = void;
+  if (field.empty()) return true;
   if (kind == "text" && field.buffer[0] != '(') {
     out = field.text();
-    return 1;
+    return true;
   }
   return read_value(field.text(), out);
 }
 
-// The options that lay a component out, which the inspector shows first.
-static bool lays_out(String name) =>
-  name in %("width" "height" "pad" "gap" "align" "justify");
+static bool is_number(Var value) =>
+  value.is_integer() || value.is_floating();
 
-/* One option of `node` in the inspector, by the kind the component table
-   gives it: a switch, a select of an enum's members, or a text field.
-   Returns the node with the option changed, or NULL. */
-static List option_edited(Ui ui, Builder &b, List node, List described,
-                          int &slot) {
-  String what = described[0], kind = described[1];
-  Var now = option(node, what), value = void;
-  if (kind == "bool") {
-    bool on = !now.is_void() && now.double() != 0;
-    return ui.switch(what, on)
-      ? with_option(node, what, on ? (Var) 1 : void) : NULL;
-  }
-  if (kind == "enum") {
-    List members = described.cdr().cdr();
-    int index = 0, i = 1;
-    foreach (String member in members) {
-      if (!now.is_void() && spelled(now) == member) index = i;
-      i++;
-    }
-    ui.muted(what);
-    return ui.select(%"inspect-$what", %("default" @members), index)
-      ? with_option(node, what, index
-          ? (Var) Atom.intern(members[index - 1]) : void)
-      : NULL;
-  }
-  int did = edited(ui, b, slot++, what, kind, now, value);
-  return did ? with_option(node, what, did == 1 ? value : void) : NULL;
+// Whether `value` is what a control for `kind` shows, not a Lisp form.
+static bool plain(String kind, Var value) {
+  if (value.is_void()) return true;
+  if (kind == "number" || kind == "color" || kind == "bool")
+    return is_number(value);
+  if (kind == "size")
+    return is_number(value) || value.is_atom() || value is <list>;
+  return kind != "enum" || value.is_atom();
 }
 
-/* Shows the selection's arguments, then the options that lay it out,
-   then the view's own options, then the rest of its record. */
+static int index_of(List members, Var value) {
+  for (int i = 0; !value.is_void() && i < members.len(); i++)
+    if (spelled(value) == (String) members[i]) return i;
+  return -1;
+}
+
+static void enum_row(Ui ui, Inspecting &in, String what, List members,
+                     Var now, String help) {
+  int index = index_of(members, now) + 1;
+  if (ui.prop_enum(what, %("default" @members), index, tooltip: help))
+    set_option(in, what,
+               index ? (Var) Atom.intern(members[index - 1]) : void);
+}
+
+static void number_row(Ui ui, Inspecting &in, String what, Var now,
+                       Shown *row) {
+  float value = now.is_void() ? 0 : now.double(), step = row ? row.step : 0;
+  // A row with whole steps stays at zero or above.
+  if (ui.prop_float(what, value, step: step, min: 0,
+                    max: step >= 1 ? 4000 : 0,
+                    format: now.is_void() ? "default" : NULL,
+                    tooltip: row ? row.help : NULL))
+    set_option(in, what, step >= 1 ? whole(value) : (Var) (double) value);
+}
+
+static void color_row(Ui ui, Inspecting &in, String what, Var now,
+                      String help) {
+  cui_color color = now.is_void() ? (cui_color){ 0, 0, 0, 255 }
+                                  : CUI_RGB(now.int());
+  if (ui.prop_color(what, color, tooltip: help))
+    set_option(in, what,
+               (Var) (color.r << 16 | color.g << 8 | color.b));
+}
+
+/* A width or height as Auto, Fit, Fill, or Fixed, and for Fixed its
+   points. Fixed starts at the size the node is drawn. */
+static void size_row(Ui ui, Builder &b, Inspecting &in, String what,
+                     Var now) {
+  int index = now.is_void() ? 0 : is_number(now) ? 3
+            : now is <list> || spelled(now) == "fill" ? 2 : 1;
+  ui.row (width: fill, align: center, gap: 12) {
+    row_label(ui, what);
+    if (ui.segmented(%"size-$what", %("Auto" "Fit" "Fill" "Fixed"), index,
+                     size: sm)) {
+      cui_rect r = drawn_at(b, ui, in.where);
+      float drawn = what == "width" ? r.w : r.h;
+      Var sizes[] = { void, <fit>, <fill>, whole(drawn > 0 ? drawn : 100) };
+      set_option(in, what, sizes[index]);
+    }
+    locate(b, in, what, ui.last_rect());
+  }
+  if (index != 3) return;
+  float points = now.double();
+  if (ui.prop_float(%"$what points", points, step: 1, min: 1, max: 4000,
+                    suffix: "pt"))
+    set_option(in, what, whole(points));
+}
+
+/* The editor for one option of the node, by its kind. A value that is a
+   Lisp form, not the kind's own value, is edited as text. */
+static void editor(Ui ui, Builder &b, Inspecting &in, List described,
+                   Var now) {
+  String what = described[0], kind = described[1];
+  Shown *row = shown_row(what);
+  String help = row ? row.help : NULL;
+  if (!plain(kind, now)) kind = "form";
+  if (kind == "size") return size_row(ui, b, in, what, now);
+  if (kind == "enum")
+    enum_row(ui, in, what, described.cdr().cdr(), now, help);
+  else if (kind == "number") number_row(ui, in, what, now, row);
+  else if (kind == "color") color_row(ui, in, what, now, help);
+  else if (kind == "bool") {
+    bool on = !now.is_void() && now.double() != 0;
+    if (ui.prop_bool(what, on, tooltip: help))
+      set_option(in, what, on ? (Var) 1 : void);
+  }
+  else {
+    Var value = void;
+    if (typed(ui, b, what, kind, now, value)) set_option(in, what, value);
+  }
+  locate(b, in, what, ui.last_rect());
+}
+
+/* One option's row: its editor, and when the option is set, a button
+   that removes it, so the node goes back to the component's default. */
+static void option_row(Ui ui, Builder &b, Inspecting &in, List described) {
+  String what = described[0];
+  Var now = option(current(in), what);
+  cui_push_id(ui, what);
+  defer cui_pop_id(ui);
+  ui.row (width: fill, align: center, gap: 4) {
+    ui.column (width: fill, gap: 4) editor(ui, b, in, described, now);
+    if (now.is_void()) ui.gap(28);
+    else if (ui.icon_button(CUI_ICON_X, variant: ghost, size: sm, width: 28,
+                            tooltip: "Reset to the default")) {
+      set_option(in, what, void);
+    }
+    if (!now.is_void()) locate(b, in, %"reset $what", ui.last_rect());
+  }
+}
+
+/* The options the component of `node` has, and the view's own, which a
+   record may list too. */
+static List options_of(List node) {
+  List row = component(spelled(node[0]));
+  if (!row) return own_options;
+  Array options = [];
+  foreach (List described in (List) row[3]) options.push(described);
+  foreach (List own in own_options) {
+    List listed = ((List) row[3]).find(%!(List d) => d[0] == own[0]);
+    if (!listed) options.push(own);
+  }
+  return options.list_free();
+}
+
+static List described(List node, String name) =>
+  options_of(node).find(%!(List row) => row[0] == name);
+
+/* Column or row. A `row` or `column` becomes the other; a block of
+   another kind gets the option `dir`. */
+static void direction(Ui ui, Builder &b, Inspecting &in) {
+  List node = current(in);
+  int index = is_row(node);
+  ui.row (width: fill, align: center, gap: 12) {
+    row_label(ui, "direction");
+    if (ui.segmented("direction", %("Column" "Row"), index, size: sm,
+                     full_width: true)) {
+      String name = spelled(node[0]);
+      if (name == "row" || name == "column") {
+        in.edited = renamed(with_option(node, "dir", void),
+                            index ? "row" : "column");
+        in.field = "dir";
+      }
+      else set_option(in, "dir", unless_default(index, "row"));
+    }
+    locate(b, in, "direction", ui.last_rect());
+  }
+}
+
+/* Where the children sit, as a 3 by 3 grid: along the block by
+   `justify` and across it by `align`. Two switches give the spacing
+   CUI has besides: space between the children, and children stretched
+   across the block. */
+static void alignment(Ui ui, Builder &b, Inspecting &in) {
+  List node = current(in), places = %("start" "center" "end");
+  bool row = is_row(node);
+  Var align = option(node, "align"), justify = option(node, "justify");
+  int across = index_of(places, align), along = index_of(places, justify);
+  if (justify.is_void()) along = 0;
+  ui.row (width: fill, gap: 12, align: center) {
+    row_label(ui, "align");
+    ui.column (gap: 2) {
+      for (int y = 0; y < 3; y++)
+        ui.row (gap: 2) {
+          for (int x = 0; x < 3; x++) {
+            int on_along = row ? x : y, on_across = row ? y : x;
+            cui_push_id_int(ui, y * 3 + x);
+            bool here = on_along == along && on_across == across;
+            if (ui.button(" ", size: sm, width: 22,
+                          variant: here ? CUI_BUTTON_PRIMARY
+                                        : CUI_BUTTON_SECONDARY)) {
+              set_option(in, "justify",
+                         unless_default(on_along, places[on_along]));
+              set_option(in, "align", Atom.intern(places[on_across]));
+            }
+            if (y == 1 && x == 1) locate(b, in, "middle", ui.last_rect());
+            cui_pop_id(ui);
+          }
+        }
+    }
+    ui.column (gap: 4) {
+      bool between = !justify.is_void() && spelled(justify) == "between";
+      if (ui.switch("Space between", between))
+        set_option(in, "justify", unless_default(between, "between"));
+      bool stretch = !align.is_void() && spelled(align) == "stretch";
+      if (ui.switch("Stretch", stretch))
+        set_option(in, "align", unless_default(stretch, "stretch"));
+    }
+  }
+}
+
+// A block's spacing: direction, gap, padding, and where children sit.
+static void block_layout(Ui ui, Builder &b, Inspecting &in) {
+  List node = current(in);
+  if (described(node, "dir")) direction(ui, b, in);
+  foreach (String name in %("gap" "pad")) {
+    List row = described(node, name);
+    if (row) option_row(ui, b, in, row);
+  }
+  if (described(node, "align") && described(node, "justify"))
+    alignment(ui, b, in);
+}
+
+/* Whether the inspector shows the option `name` of `node` now. A block
+   reports no event, so its handlers are not common. */
+static bool showing(Builder &b, List node, String name) {
+  if (b.all)
+    return b.search.empty() || strstr(name, b.search.text()) != NULL;
+  Shown *row = shown_row(name);
+  bool common = row && row.common &&
+                !(is_block(node) && name.startswith("on_"));
+  return common || !option(node, name).is_void();
+}
+
+// The rows of one group: each option the group holds that shows now.
+static void group_rows(Ui ui, Builder &b, Inspecting &in, int group) {
+  List node = current(in);
+  bool block = is_block(node);
+  foreach (List row in options_of(node)) {
+    String name = row[0];
+    if (group_of(name) != group || (block && laid_out(name))) continue;
+    if (name == "show" && node[0] != <cards>) continue;
+    if (showing(b, node, name)) option_row(ui, b, in, row);
+  }
+}
+
+// Whether a group has a row to show.
+static bool group_shows(Builder &b, List node, int group) {
+  foreach (List row in options_of(node)) {
+    String name = row[0];
+    if (group_of(name) == group && !(is_block(node) && laid_out(name)) &&
+        (name != "show" || node[0] == <cards>) && showing(b, node, name))
+      return true;
+  }
+  return false;
+}
+
+// The node's arguments, as text or numbers, in the Content group.
+static void arguments(Ui ui, Builder &b, Inspecting &in) {
+  List node = in.node, row = component(spelled(node[0]));
+  int at = 2;
+  foreach (List argument in row ? (List) row[2] : %()) {
+    String kind = argument[1], what = argument[0];
+    if (kind == "bound" || kind == "field") continue;
+    if (at >= node.len()) break;
+    Var value = void;
+    if (kind == "number" && is_number(node[at])) {
+      float number = node[at].double();
+      if (ui.prop_float(what, number, step: 1)) {
+        in.edited = with_argument(current(in), at, whole(number));
+        in.field = what;
+      }
+    }
+    else if (typed(ui, b, what, kind, node[at], value)) {
+      in.edited = with_argument(current(in), at,
+                                value.is_void() ? (Var) "" : value);
+      in.field = what;
+    }
+    at++;
+  }
+}
+
+/* Changes the tree for an inspector edit. The changes from one field,
+   while it keeps the keyboard or the pointer, are one step of undo. */
+static void change_field(Builder &b, Inspecting &in) {
+  String key = %"$(in.field) $(in.around ? 1 : 0)";
+  for (int i = 0; i < in.where.depth; i++) key = %"$key/$(in.where.at[i])";
+  List tree = replaced(b.tree, in.where, 0, in.edited);
+  if (b.visiting && b.visiting == key) {
+    b.tree = tree;
+    b.view.set(tree);
+  }
+  else change(b, tree);
+  b.visiting = key;
+}
+
+/* Shows the selection's arguments; the spacing of the block it is in;
+   its own spacing when it is a block; and its options by group. Only
+   common and set options show until "All options" is on. */
 static void inspector(Ui ui, Builder &b) {
-  ui.scroll (id: "inspector", width: 260, height: fill, pad: 12, gap: 8) {
+  ui.scroll (id: "inspector", width: 400, height: fill, pad: 10, gap: 8) {
     if (!b.selected) {
       ui.muted(b.editing ? "Click a component to select it."
                          : "The tree is running. Edit to change it.");
       return;
     }
-    List node = node_at(b.tree, b.where), edit = NULL, changed = NULL;
-    String name = spelled(node[0]);
-    List row = component(name), options = row ? (List) row[3] : %();
-    ui.heading(name, 4);
-    int slot = 0, at = 2;
-    Var value = void;
-    foreach (List argument in row ? (List) row[2] : %()) {
-      String kind = argument[1];
-      if (kind == "bound" || kind == "field") continue;
-      if (at < node.len() &&
-          edited(ui, b, slot, argument[0], kind, node[at], value) == 1)
-        edit = with_argument(node, at, value);
-      slot++;
-      at++;
+    Inspecting own = { b.where, node_at(b.tree, b.where) }, around = { 0 };
+    ui.row (width: fill, align: center) {
+      ui.heading(spelled(own.node[0]), 4);
+      ui.spacer();
+      if (ui.switch("All options", b.all)) b.refill = true;
+      b.all_switch = ui.last_rect();
     }
-    ui.label("Layout");
-    foreach (List described in options)
-      if (lays_out(described[0]) &&
-          (changed = option_edited(ui, b, node, described, slot)))
-        edit = changed;
-    ui.separator();
-    foreach (String own in %("id" "bind" "on_click" "show")) {
-      int did = edited(ui, b, slot++, own, "form", option(node, own), value);
-      if (did) edit = with_option(node, own, did == 1 ? value : void);
+    if (b.all && ui.search("inspect-search", b.search, size: sm) &
+                 CUI_CHANGED)
+      b.refill = true;
+    b.slot = 0;
+    b.located = {};
+    cui_inspector_opts layout = { .label_width = LABEL };
+    if (ui.inspector_begin("inspect", layout)) {
+      List row = component(spelled(own.node[0]));
+      bool argued = row && ((List) row[2]).len();
+      if ((argued || group_shows(b, own.node, CONTENT)) &&
+          ui.inspector_group("Content", b.open[CONTENT])) {
+        arguments(ui, b, own);
+        group_rows(ui, b, own, CONTENT);
+      }
+      if (own.where.depth) {
+        around.where = own.where;
+        around.where.depth--;
+        around.node = node_at(b.tree, around.where);
+        around.around = true;
+        cui_push_id(ui, "around");
+        if (ui.inspector_group(is_row(around.node) ? "In row" : "In column",
+                               b.open_around))
+          block_layout(ui, b, around);
+        cui_pop_id(ui);
+      }
+      for (int group = LAYOUT; group < GROUPS; group++) {
+        bool block = group == LAYOUT && is_block(own.node);
+        if (!block && !group_shows(b, own.node, group)) continue;
+        if (!ui.inspector_group(group_names[group], b.open[group])) continue;
+        if (block) block_layout(ui, b, own);
+        group_rows(ui, b, own, group);
+      }
+      ui.inspector_end();
     }
-    ui.separator();
-    foreach (List described in options)
-      if (!lays_out(described[0]) &&
-          (changed = option_edited(ui, b, node, described, slot)))
-        edit = changed;
-    b.refill = false;
-    if (edit) change(b, replaced(b.tree, b.where, 0, edit));
+    if (own.edited) change_field(b, own);
+    else if (around.edited) change_field(b, around);
+    // Text the person is typing stays as typed.
+    b.refill = (own.edited || around.edited) && !ui.wants_keyboard();
   }
 }
 
@@ -913,6 +1336,7 @@ static void draw(Ui ui, Builder &b) {
   // Rectangles are read before this frame submits anything: they are the
   // last frame's layout, which is what the pointer was aimed at.
   b.canvas = ui.get_rect(b.canvas_id);
+  b.outline_area = ui.get_rect(b.outline_id);
   if (b.clicked) select_under(b, ui);
   b.clicked = false;
   if (!b.pressed || b.sizing)
@@ -927,6 +1351,10 @@ static void draw(Ui ui, Builder &b) {
   if (b.dropped && b.aimed) drop(b);
   if (b.sized && b.selected) resize(b);
   b.dropped = b.sized = false;
+  if (b.picked) select_at(b, b.listed_where[b.picked - 1]);
+  b.picked = 0;
+  if (!ui.wants_keyboard() && !ui.mouse_down(CUI_MOUSE_LEFT))
+    b.visiting = NULL;
   b.menu_open = b.menu_shown;
   b.menu_shown = false;
   keyed(ui, b);
@@ -963,6 +1391,11 @@ static void open_file(Builder &b, Ui ui, String file) {
             (reason "the file is not one tree"));
   b.tree = tree;
   b.undo = [];
+  b.redo = [];
+  b.located = {};
+  for (int i = 0; i < GROUPS; i++) b.open[i] = true;
+  b.open_around = true;
+  b.search = TextField.new(64);
   b.view = View.new(b.lisp, "ui");
   b.view.set(b.tree);
   b.editing = true;
@@ -1028,7 +1461,7 @@ static int clicks(Builder &b) {
 
 static int check(String image) {
   static Builder b;
-  Offscreen screen = auto Offscreen.open(1000, 640);
+  Offscreen screen = auto Offscreen.open(1200, 700);
   Ui ui = screen.ui();
   open_file(b, ui, NULL);
   for (int i = 0; i < 3; i++) frame(screen, b);
@@ -1181,18 +1614,71 @@ static int check(String image) {
   printf("resize: %g by %g to %g by %g, %s\n", now.w, now.h, grown.w,
          grown.h, written(b.tree));
 
-  // A block's layout options come first: its first field is its width.
+  /* The inspector spaces a block: typing a gap is one step of undo, the
+     grid's middle centres the children, and Row makes it a row. */
   b.where.depth = 0;
   b.refill = true;
   for (int i = 0; i < 60; i++) frame(screen, b);
-  click(screen, b, b.first_field);
-  ui.input_text("300");
+  int steps_before = b.undo.len();
+  click(screen, b, located(b, "gap"));
+  ui.input_text("20");
   frame(screen, b);
-  frame(screen, b);
-  int lays = option(b.tree, "width").int() == 300 &&
-             option(b.tree, "pad").int() == 24;
-  printf("layout: %s\n", written(b.tree));
+  press(screen, b, CUI_KEY_ENTER, 0);
+  int spaces = option(b.tree, "gap").int() == 20 &&
+               b.undo.len() == steps_before + 1;
+  printf("gap: %s, %d steps\n", written(b.tree),
+         (int) b.undo.len() - steps_before);
+  click(screen, b, located(b, "middle"));
+  int centres = spelled(option(b.tree, "align")) == "center" &&
+                spelled(option(b.tree, "justify")) == "center";
+  cui_rect turn = located(b, "direction");
+  turn.x += turn.w / 2;
+  turn.w /= 2;
+  click(screen, b, turn);
+  int turns = b.tree[0] == <row> && option(b.tree, "pad").int() == 24;
+  printf("align and direction: %s\n", written(b.tree));
   screen.write_png(image + ".layout.png");
+
+  /* A child's inspector shows its block's spacing under "In row", and
+     its own size as Auto, Fit, Fill, or Fixed. */
+  select_at(b, (Where){ 1, { 2 } });
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  click(screen, b, located(b, "around gap"));
+  ui.input_text("6");
+  frame(screen, b);
+  press(screen, b, CUI_KEY_ENTER, 0);
+  int arounds = option(b.tree, "gap").int() == 6 && b.where.depth == 1;
+  cui_rect fill_choice = located(b, "width");
+  fill_choice.x += fill_choice.w / 2;
+  fill_choice.w /= 4;
+  click(screen, b, fill_choice);
+  List button = node_at(b.tree, b.where);
+  int fills_size = spelled(option(button, "width")) == "fill";
+  // A rectangle is the last frame's: the fill moved the reset button.
+  frame(screen, b);
+  click(screen, b, located(b, "reset width"));
+  button = node_at(b.tree, b.where);
+  int resets = option(button, "width").is_void();
+  undo(b);
+  int back = spelled(option(node_at(b.tree, (Where){ 1, { 2 } }), "width"))
+             == "fill";
+  redo(b);
+  int forth = option(node_at(b.tree, (Where){ 1, { 2 } }), "width")
+              .is_void();
+  printf("in row %d, fill %d, reset %d, undo %d, redo %d: %s\n", arounds,
+         fills_size, resets, back, forth, written(b.tree));
+
+  // Only common and set options show until "All options" is on.
+  select_at(b, (Where){ 1, { 2 } });
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  int hidden = located(b, "tooltip").w == 0;
+  click(screen, b, b.all_switch);
+  int shows_all = b.all && located(b, "tooltip").w > 0;
+  screen.write_png(image + ".all.png");
+  click(screen, b, b.all_switch);
+  printf("all options: hidden %d, shown %d\n", hidden, shows_all);
+  int lays = spaces && centres && turns && arounds && fills_size && resets &&
+             back && forth && hidden && shows_all;
 
   // A click on a line of the outline selects its node; keys select around.
   Var counter = void;
@@ -1200,8 +1686,11 @@ static int check(String image) {
   change(b, counter);
   b.selected = false;
   for (int i = 0; i < 60; i++) frame(screen, b);
+  // The line takes no keyboard focus; the selection follows the keys.
+  cui_id focused = ui.focused_id();
   click(screen, b, b.listed[1]);
-  int lists = b.selected && b.where.depth == 1 && b.where.at[0] == 2;
+  int lists = b.selected && b.where.depth == 1 && b.where.at[0] == 2 &&
+              ui.focused_id() == focused;
   press(screen, b, CUI_KEY_DOWN, 0);
   int steps = b.where.at[0] == 3;
   press(screen, b, CUI_KEY_LEFT, 0);
@@ -1274,7 +1763,7 @@ static int check(String image) {
 int main(int argc, char **argv) {
   if (argc == 3 && !strcmp(argv[1], "--check")) return check(argv[2]);
   static Builder b;
-  App app = auto App.open(title: "Builder", width: 1100, height: 700);
+  App app = auto App.open(title: "Builder", width: 1280, height: 760);
   open_file(b, app.ui(), argc > 1 ? argv[1] : NULL);
   while (app.frame()) draw(app.ui(), b);
   return 0;

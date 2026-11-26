@@ -57,7 +57,7 @@ CUI's layout; its first version is implemented as an example, without
 dragging or free placement.
 [x2cui builder redesign](x2cui-builder-redesign.md) rebuilds the
 builder's interaction around six tasks after Gary judged the first
-version far from usable. Slice 1 of five is implemented.
+version far from usable. Slices 1 and 2 of five are implemented.
 [Runtime native modules](runtime-native-modules.md) compiles and loads x2c
 in a running program; it is a proposal, not approved or started, and adds
 `dlopen` to the runtime.

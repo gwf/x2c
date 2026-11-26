@@ -508,7 +508,8 @@ first with an `(on name form)` option handles it.
 `packages/x2cui/examples/builder.x` edits a tree by pointing at it: a
 palette adds components, an outline lists every node, a menu and keys
 wrap, unwrap, duplicate, move, and delete the selection, an inspector
-edits the selected component's options, and a run mode makes the tree behave as it will in a program.
+sets spacing, alignment, and sizes and groups the other options, and a
+run mode makes the tree behave as it will in a program.
 
 ## Limits
 

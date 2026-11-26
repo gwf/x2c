@@ -42,6 +42,9 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
   has those options.
 - **Outline, commands, and keys** (2026-11-26): slice 1 of
   [the redesign](x2cui-builder-redesign.md).
+- **Generated inspector** (2026-11-26): slice 2 of the redesign. It
+  replaces "Layout options first" and makes undo one step per field
+  visit, with redo.
 - **Not built:** handles on the other corners and edges.
 - **Ids.** CUI gives a box an id only when its record names one, and gives
   text none. While a watcher is installed the view gives each block an id

@@ -1,7 +1,9 @@
 # x2cui builder redesign: tasks, not records
 
 > Status: Gary approved slice 1 on 2026-11-26 and it is implemented; see
-> "Slice 1 as built". Slices 2 to 5 are not started. The plan replaces
+> "Slice 1 as built". He then asked for slice 2 and for slice 1's
+> faults to be fixed, both as seen fit; see "Slice 2 as built". Slices
+> 3 to 5 are not started. The plan replaces
 > the interaction design of [the x2cui builder](x2cui-builder.md), whose
 > first version Gary judged far from usable on 2026-11-25: too many
 > options shown, and no clear way to get a wanted effect. The document
@@ -131,9 +133,41 @@ screen. It differs from the design in four ways:
   outline. Its groups and search are slice 3.
 - The builder is still one file.
 
-One known fault: after a click on a line of the outline, CUI's keyboard
-focus stays on that line, and its focus ring does not follow a selection
-changed by a key. CUI has no public call that moves focus to a list row.
+One fault was found: after a click on a line of the outline, CUI's
+keyboard focus stayed on that line, and its focus ring did not follow a
+selection changed by a key. Slice 2 repairs it: the input hook keeps a
+left press on a line, so the line never takes focus.
+
+## Slice 2 as built
+
+The inspector is drawn from `View.components()` and the table `shown`
+in `examples/builder.x`, which gives about 30 option names a group,
+whether they are common, a step, and a line of help. Options group as
+Content, Layout, Size, Style, Behavior, and Other. Rows use CUI's
+inspector: `cui_prop_float_ex` for numbers, `cui_prop_enum_ex`,
+`cui_prop_bool_ex`, `cui_prop_color_ex`, and `cui_prop_text_ex`. A value
+that is a Lisp form is edited as text. A set option has a reset button.
+A block's Layout group, and the "In row" or "In column" group of a
+child, hold direction, gap, padding, and the alignment grid with "Space
+between" and "Stretch". `builder --check` covers each of them off
+screen, with typing a gap as one undo step, and undo and redo.
+
+It differs from the design in these ways:
+
+- Size has a fourth choice, Auto, which leaves the option unset. CUI's
+  default is not Fit for every component: a column stretches its
+  children.
+- Percent sizes are not offered; `View` cannot read one yet.
+- The inspector is 400 points wide, because CUI stacks a row's label
+  over its editor below 380. The window opens at 1280 by 760, and the
+  canvas scrolls rather than pushing the inspector out of the window.
+- A record that lists `id` shows it once; `View` still lists it as an
+  option of the record.
+- The builder is still one file, now about 1,700 lines.
+
+The alignment grid's highlight follows `align` and `justify` only for
+`start`, `center`, and `end`; a column's default, which stretches its
+children, highlights no cell.
 
 ## Validation
 

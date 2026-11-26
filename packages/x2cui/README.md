@@ -648,10 +648,18 @@ The window draws the tree between a palette and an inspector, with an
 outline of every node under the palette. In edit
 mode a click selects the component under the pointer and does not press
 it; the palette adds a component after the selection or inside a
-selected block, the inspector edits the selection's arguments and
-options, with `width`, `height`, `pad`, `gap`, `align`, and `justify`
-first, and the toolbar selects the parent, moves the selection among
-its siblings, deletes it, undoes, and saves. Edit mode outlines every
+selected block, and the toolbar selects the parent, moves the selection
+among its siblings, deletes it, undoes, redoes, and saves. The
+inspector groups the selection's options as Content, Layout, Size,
+Style, and Behavior. A block's Layout group sets its direction, gap,
+and padding, and where its children sit on a 3 by 3 grid, with space
+between them or stretched across. "In row" or "In column" shows the
+same controls for the block around the selection. Width and height are
+Auto, Fit, Fill, or Fixed. Numbers are dragged or typed, and a set
+option has a button that returns it to the default. Only common and
+set options show until "All options" is on, which adds a search field.
+The edits made in one field while it keeps the keyboard or the pointer
+are one step of undo. Edit mode outlines every
 block and draws a block with no children 72 by 32 points. Dragging a
 component moves it to the line shown, in the block outlined: the block
 under the pointer, or the block around that one when the pointer is
@@ -663,7 +671,9 @@ the tree or the outline opens a menu, and each of its commands has a
 key: wrap in a row (Shift R) or a column (Shift C), unwrap a block
 (Shift U), duplicate (Cmd or Ctrl D), move earlier or later (Alt Up,
 Alt Down), select the parent (Left) or first child (Right), and delete.
-Up and Down select the previous and next sibling. Run mode makes the tree behave as it will in a program. `builder FILE` edits a tree saved as one
+Up and Down select the previous and next sibling, and Shift with Cmd or
+Ctrl Z redoes. Run mode makes the tree behave as it will in a program.
+`builder FILE` edits a tree saved as one
 datum, and evaluates `FILE.lisp` first when it exists. The builder uses
 CUI's layout: a component's place is its position among its siblings,
 and spacing comes from padding, gap, alignment, and sizes. It has no
