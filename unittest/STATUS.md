@@ -1,5 +1,20 @@
 # Status
 
+## Symbolic-bound pointer arrays at file scope, 2026-11-26
+
+A deferred file-scope array whose bound is a constant expression, such as an
+enum constant, assigns each element through a choice whose fallback is a zero
+compound literal. Deferred assignment spelled that literal's type as
+declaration specifiers, so a pointer element emitted `(* char){0}`. The
+compound literal now casts to the element Type directly.
+`initializer-symbolic-pointers` checks string, const string, address, and
+designated elements.
+
+Open: a two-dimensional symbolic-bound file-scope array, such as
+`static int v[COUNT][2] = {{1, 2}, {3, 4}};`, still emits an assignment to
+an array element row. clang rejects it as "array type is not assignable".
+Before this repair it failed earlier, on a raw `dim` spelling.
+
 ## CPP arithmetic and Linux REPL providers, 2026-11-15
 
 CPP arithmetic no longer executes overflowing signed operations while deciding

@@ -110,7 +110,7 @@ List Compiler.zero_initializer(Compiler c, List value) {
         List zero = c.zero_initializer(input);
         match (zero)
           case %(expr ?type (!set ?body (composite *))):
-            zero = _initializer_rhs(type, NULL, NULL, type, body);
+            zero = _composite_value(type, body);
         zeroed.push($(condition, path, destination, zero));
       }
       return %(expr $type (initval @(zeroed.list_free())));
@@ -418,11 +418,10 @@ static List _array_assignment(
   Type resolved = c.sym.resolve_key(type);
   if (inner && resolved.is_array())
     return _array_block(c, slot, resolved, inner.cadr().cdr());
-  if (inner) rhs = _initializer_rhs(type, NULL, NULL, type, inner);
+  if (inner) rhs = _composite_value(type, inner);
   if (condition) {
-    List zero = _initializer_rhs(
-      type, NULL, NULL, type,
-      %(composite (commas (expr (int) (literal (int) "0")))));
+    List zero = _composite_value(
+      type, %(composite (commas (expr (int) (literal (int) "0")))));
     rhs = $!($type){ __builtin_choose_expr($condition, $rhs, $zero) };
   }
   return c.rebuild_statement($!{ $slot = $rhs; }).cadr();
@@ -459,9 +458,8 @@ static List _array_input(
   code = code.search_replace(%(!quote $formal), local);
   List initial = source;
   if (!unconditional) {
-    List zero = _initializer_rhs(
-      type, NULL, NULL, type,
-      %(composite (commas (expr (int) (literal (int) "0")))));
+    List zero = _composite_value(
+      type, %(composite (commas (expr (int) (literal (int) "0")))));
     initial = %(expr $type (op ? $applicable $source $zero));
   }
   List declaration =
@@ -474,11 +472,13 @@ static List _initializer_rhs(
   if (!(value ~= %(composite *))) return %(expr $type $value);
   List bound = %(bind $binding $mods);
   List decl_ast = %(declare $decltype (bindings $bound));
-  Type cast_type = decl_ast.type_from_ast();
-  if (cast_type) cast_type = cast_type.canonicalize();
-  List decl = %(decl $cast_type (bindings (bind () ())));
-  List literal = %(expr () $value), rhs_value = %(cast $decl $literal);
-  return %(expr $cast_type $rhs_value);
+  return _composite_value(decl_ast.type_from_ast(), value);
+}
+
+// A compound literal of `type`, spelled through its declarator.
+static List _composite_value(Type type, List value) {
+  if (type) type = type.canonicalize();
+  return %(expr $type (cast $type (expr () $value)));
 }
 
 // initializer batches
