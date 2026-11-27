@@ -143,6 +143,10 @@ static void a_text_field_sets_and_takes_text(void) {
   EXPECT_STR_EQ(field.text(), "longer ");
   EXPECT_STR_EQ(field.take(), "longer ");
   EXPECT_TRUE(field.empty());
+  // The empty String, which is NULL, empties the field.
+  field.set("abc");
+  field.set("");
+  EXPECT_TRUE(field.empty());
 }
 
 // A block left early must still end, or CUI's layout stack is unbalanced.
