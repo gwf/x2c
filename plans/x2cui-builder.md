@@ -48,7 +48,8 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
 - **Grouped palette** (2026-11-27): slice 3 of the redesign: groups,
   search, a drag from the palette, and useful defaults.
 - **Events and the run log** (2026-11-27): slice 4 of the redesign.
-- **Not built:** handles on the other corners and edges.
+- **Spacing handles** (2026-11-27): slice 5 of the redesign.
+- **Not built:** size handles on the other corners and edges.
 - **Ids.** CUI gives a box an id only when its record names one, and gives
   text none. While a watcher is installed the view gives each block an id
   by its place in the frame and draws each id-less component in a box

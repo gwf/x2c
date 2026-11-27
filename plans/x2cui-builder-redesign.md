@@ -3,8 +3,9 @@
 > Status: Gary approved slice 1 on 2026-11-26 and it is implemented; see
 > "Slice 1 as built". He then asked for slice 2 and for slice 1's
 > faults to be fixed, both as seen fit; see "Slice 2 as built". On
-> 2026-11-27 he asked for slice 3, then slice 4; see "Slice 3 as built"
-> and "Slice 4 as built". Slice 5 is not started. The plan replaces
+> 2026-11-27 he asked for slices 3, 4, and 5; see "Slice 3 as built",
+> "Slice 4 as built", and "Slice 5 as built". All five slices are
+> implemented. The plan replaces
 > the interaction design of [the x2cui builder](x2cui-builder.md), whose
 > first version Gary judged far from usable on 2026-11-25: too many
 > options shown, and no clear way to get a wanted effect. The document
@@ -232,6 +233,28 @@ It differs from the design in these ways:
   wrote `on_click` before.
 - A new input starts empty, not with the text `text`.
 - The builder is still one file, now about 2,440 lines.
+
+## Slice 5 as built
+
+A selected block shows a bar in the middle of each side's padding, away
+from the corner where the size handle is, and a bar in each gap between
+its children. A press on a bar holds it, so it neither selects nor
+moves a node. Dragging a padding bar inward sets the side's padding
+option: `pad-top` and the like or `pad-x` and `pad-y` when the node sets
+them, and otherwise `pad`, which sets every side. Dragging a gap bar
+sets `gap`; the bar between the k-th and next child changes the gap by
+the movement divided by k, so the bar follows the pointer. The toolbar
+shows the value while dragging, the cursor shows the axis, and one drag
+is one step of undo. `builder --check` drags the top padding and the
+second gap of a column and undoes the gap.
+
+It differs from the design in these ways:
+
+- An unset padding starts from 0, the box's default. A card, whose
+  default padding is not 0, jumps to the dragged value from 0.
+- A gap bar sits in the middle of the block across its axis, since a
+  watched child's box spans the block.
+- The builder is still one file, now about 2,600 lines.
 
 ## Validation
 

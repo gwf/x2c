@@ -8,9 +8,11 @@
     released. The inspector edits the selection's arguments and options,
     and the toolbar moves or deletes it. Dragging a component moves it to
     the line shown, among its siblings or into another block. The inspector
-    groups the options, sets a block's spacing and alignment, and gives
-    sizes as Auto, Fit, Fill, or Fixed. An outline under the palette
-    lists every node, and a click on a line selects its node. A right
+    groups the options, sets a block's spacing and alignment, and
+    gives sizes as Auto, Fit, Fill, or Fixed. A selected block also has
+    a handle in each side's padding and in each gap, which a drag sets.
+    An outline under the palette lists every node, and a click on a line
+    selects its node. A right
     click on the tree or the outline, or a key, selects around the
     selection, wraps it in a row or column, unwraps a block, duplicates,
     moves, and deletes; `keys` lists them. The inspector's Events group
@@ -37,7 +39,7 @@ import "x2cui" with App, Offscreen, TextField, Ui, View, ViewLisp;
 
 enum {
   DEPTH = 32, DRAWN = 2048, FIELDS = 64, LISTED = 64, OFFERED = 64,
-  UNDO = 200
+  SPACERS = 36, UNDO = 200
 };
 
 // How near a block's edge a drop goes beside the block, not into it.
@@ -54,6 +56,18 @@ typedef struct Where { int depth; int at[DEPTH]; } Where;
    where the node is. Equal Lists are one List, so two equal nodes are
    told apart only by where they are. */
 typedef struct Drawn { List node; cui_id id; Where where; } Drawn;
+
+/* A handle on a selected block that sets its spacing by a drag: where
+   it is, the option it sets and that option's value when drawn, the axis
+   it moves along (0 for x), and the points of the option one point of
+   movement makes. */
+typedef struct Spacer {
+  cui_rect at;
+  String option;
+  float value;
+  int axis;
+  float scale;
+} Spacer;
 
 // What a key or a menu item asks of the selection.
 typedef enum Command {
@@ -127,6 +141,13 @@ typedef struct Builder {
      that began on the handle and so sizes the selection. */
   cui_rect chosen, handle;
   bool sizing, sized;
+  /* The selected block's spacing handles; the one a press holds, as its
+     number plus one, with where the press began; and whether its drag
+     has changed the tree, which is one step of undo. */
+  Spacer spacers[SPACERS], held;
+  int spacer_count, holding;
+  cui_vec2 held_from;
+  bool held_changed;
   // The inspector's text, reloaded from the node when `refill` is set.
   TextField fields[FIELDS];
   bool refill;
@@ -567,6 +588,9 @@ static void save(Builder &b) {
 
 // input and selection
 
+static cui_rect grown(cui_rect r, float by) =>
+  (cui_rect){ r.x - by, r.y - by, r.w + 2 * by, r.h + 2 * by };
+
 static bool within(cui_rect r, cui_vec2 p) =>
   p.x >= r.x && p.x < r.x + r.w && p.y >= r.y && p.y < r.y + r.h;
 
@@ -600,6 +624,20 @@ static bool capture(cui_ctx *ui, const cui_input_event *event, void *user) {
         b.carry = i + 1;
         b.press = b.pointer;
         return false;
+      }
+  // A press on a spacing handle of the selected block drags the handle.
+  if (event.button == CUI_MOUSE_LEFT && !event.down && b.holding) {
+    b.holding = 0;
+    return true;
+  }
+  if (event.button == CUI_MOUSE_LEFT && event.down)
+    for (int i = 0; i < b.spacer_count; i++)
+      if (within(grown(b.spacers[i].at, 5), b.pointer)) {
+        b.holding = i + 1;
+        b.held = b.spacers[i];
+        b.held_from = b.pointer;
+        b.held_changed = false;
+        return true;
       }
   if (event.button == CUI_MOUSE_LEFT && !event.down && b.pressed) {
     b.dropped = b.dragging && !b.sizing;
@@ -850,6 +888,12 @@ static void paint_marks(cui_ctx *ui, cui_rect area, void *user) {
     cui_draw_rect(
       ui, (cui_rect){ r.x + r.w - HANDLE / 2, r.y + r.h - HANDLE / 2, HANDLE,
                       HANDLE }, CUI_CORNERS(2), accent);
+  // The selected block's spacing handles; the one held is full colour.
+  cui_color soft = accent;
+  soft.a = 150;
+  for (int i = 0; marks.selected && !marks.target && i < b.spacer_count; i++)
+    cui_draw_rect(ui, b.spacers[i].at, CUI_CORNERS(2),
+                  b.holding == i + 1 ? accent : soft);
   if (marks.lined) cui_draw_rect(ui, marks.line, CUI_CORNERS(1), accent);
   if (marks.ghosted) outline(ui, marks.ghost, 0, accent, 1);
 }
@@ -1035,6 +1079,12 @@ static void canvas(Ui ui, Builder &b) {
   ui.canvas("marks", fill, fill, paint_marks, &marks, sizeof marks);
   node_menu(ui, b, "tree-menu");
   if (b.dragging || b.carrying) ui.set_cursor(CUI_CURSOR_MOVE);
+  // A spacing handle, held or under the pointer, shows the way it moves.
+  for (int i = 0; i < b.spacer_count; i++)
+    if (b.holding == i + 1 ||
+        (!b.holding && within(grown(b.spacers[i].at, 5), b.pointer)))
+      ui.set_cursor(b.spacers[i].axis ? CUI_CURSOR_RESIZE_NS
+                                      : CUI_CURSOR_RESIZE_EW);
 }
 
 // the inspector
@@ -1789,6 +1839,103 @@ static void inspector(Ui ui, Builder &b) {
   }
 }
 
+// spacing handles
+
+/* The option that sets the padding of one side: the side's own, or its
+   axis's, when set, and otherwise `pad`. */
+static String padding_option(List node, String side, String axis) {
+  if (!option(node, side).is_void()) return side;
+  if (!option(node, axis).is_void()) return axis;
+  return "pad";
+}
+
+static float option_value(List node, String name) {
+  Var value = option(node, name);
+  return is_number(value) ? value.double() : 0;
+}
+
+// A handle's bar, centred at `x`, `y`, lying across the way it moves.
+static cui_rect bar(float x, float y, int axis) =>
+  axis ? (cui_rect){ x - 9, y - 2, 18, 4 } : (cui_rect){ x - 2, y - 9, 4, 18 };
+
+static void add_spacer(Builder &b, cui_rect at, String option, float value,
+                       int axis, float scale) {
+  if (b.spacer_count < SPACERS)
+    b.spacers[b.spacer_count++] = (Spacer){ at, option, value, axis, scale };
+}
+
+/* Places a selected block's handles from the last frame's layout: one in
+   the middle of each side's padding, never at a corner, where the size
+   handle is, and one in each gap between its children. Dragging a gap's
+   handle moves every child before it, so its option changes by the
+   movement shared among them. */
+static void place_spacers(Builder &b, Ui ui) {
+  b.spacer_count = 0;
+  if (!b.selected || !b.editing) return;
+  List node = node_at(b.tree, b.where);
+  cui_rect r = drawn_at(b, ui, b.where);
+  if (!is_block(node) || r.w <= 0) return;
+  if (has_option(node, "pad")) {
+    String sides[4][2] = { { "pad_top", "pad_y" }, { "pad_bottom", "pad_y" },
+                           { "pad_left", "pad_x" }, { "pad_right", "pad_x" } };
+    for (int i = 0; i < 4; i++) {
+      String name = padding_option(node, sides[i][0], sides[i][1]);
+      float value = option_value(node, name);
+      float inset = value / 2 > 3 ? value / 2 : 3;
+      int axis = i < 2;
+      float sign = i % 2 ? -1 : 1;
+      float x = axis ? r.x + r.w / 2 : i == 2 ? r.x + inset
+                                              : r.x + r.w - inset;
+      float y = !axis ? r.y + r.h / 2 : i == 0 ? r.y + inset
+                                               : r.y + r.h - inset;
+      add_spacer(b, bar(x, y, axis), name, value, axis, sign);
+    }
+  }
+  if (!has_option(node, "gap")) return;
+  bool row = is_row(node);
+  Where child = b.where;
+  child.depth++;
+  cui_rect before = { 0 };
+  int gaps = 0;
+  for (int i = 2; i < node.len(); i++) {
+    child.at[child.depth - 1] = i;
+    cui_rect next = drawn_at(b, ui, child);
+    if (next.w <= 0) continue;
+    if (before.w > 0) {
+      float apart = row ? next.x - (before.x + before.w)
+                        : next.y - (before.y + before.h);
+      float x = row ? next.x - apart / 2 : next.x + next.w / 2;
+      float y = row ? next.y + next.h / 2 : next.y - apart / 2;
+      gaps++;
+      add_spacer(b, bar(x, y, !row), "gap", apart, !row, 1.0f / gaps);
+    }
+    before = next;
+  }
+}
+
+/* Sets the held handle's option from how far the pointer has moved. The
+   first change of a drag is one step of undo, and the rest join it. */
+static void drag_spacer(Builder &b) {
+  Spacer held = b.held;
+  float moved = held.axis ? b.pointer.y - b.held_from.y
+                          : b.pointer.x - b.held_from.x;
+  float to = held.value + moved * held.scale;
+  int value = (int) (to > 0 ? to + 0.5f : 0);
+  List node = node_at(b.tree, b.where);
+  b.status = %"$(held.option.replace("_", "-")) $value";
+  if (is_number(option(node, held.option)) &&
+      option(node, held.option).int() == value)
+    return;
+  List tree = replaced(b.tree, b.where, 0,
+                       with_option(node, held.option, value));
+  if (b.held_changed) {
+    b.tree = tree;
+    b.view.set(tree);
+  }
+  else change(b, tree);
+  b.held_changed = b.refill = true;
+}
+
 static void draw(Ui ui, Builder &b) {
   // Rectangles are read before this frame submits anything: they are the
   // last frame's layout, which is what the pointer was aimed at.
@@ -1804,6 +1951,8 @@ static void draw(Ui ui, Builder &b) {
                          b.chosen.y + b.chosen.h - HANDLE, 2 * HANDLE,
                          2 * HANDLE };
   if (b.chosen.w <= 0) b.handle = (cui_rect){ 0 };
+  if (b.holding && b.selected) drag_spacer(b);
+  place_spacers(b, ui);
   b.aimed = false;
   bool over = within(b.canvas, b.pointer);
   if ((b.dragging || b.dropped) && b.selected && b.where.depth ||
@@ -2432,6 +2581,39 @@ static int check(String image) {
   printf("stub: %d\n", stubs);
   if (!(calls && sends && handled && bodies && logs && evaluates && stubs))
     return 1;
+
+  /* A selected block has a handle in each side's padding and in each
+     gap. Dragging the top one sets the padding, and dragging the second
+     gap's sets the gap, each one step of undo; a component has none. */
+  Var spaced = void;
+  read_value(%"(column ((pad 16) (gap 8))
+                 (button () \"A\") (button () \"B\") (button () \"C\"))",
+             spaced);
+  change(b, spaced);
+  select_at(b, (Where){ 0 });
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  int handles = b.spacer_count == 6;
+  cui_rect padding = b.spacers[0].at, second_gap = b.spacers[5].at;
+  int steps_at = b.undo.len();
+  drag(screen, b, padding, padding.x + padding.w / 2,
+       padding.y + padding.h / 2 + 10, image + ".spacing.png");
+  int pads = option(b.tree, "pad").int() == 26 &&
+             b.undo.len() == steps_at + 1;
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  second_gap = b.spacers[5].at;
+  drag(screen, b, second_gap, second_gap.x + second_gap.w / 2,
+       second_gap.y + second_gap.h / 2 + 8, NULL);
+  int gaps = option(b.tree, "gap").int() == 12 &&
+             b.undo.len() == steps_at + 2;
+  undo(b);
+  int undoes_gap = option(b.tree, "gap").int() == 8 &&
+                   option(b.tree, "pad").int() == 26;
+  select_at(b, (Where){ 1, { 2 } });
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  int none = b.spacer_count == 0;
+  printf("spacing: %d handles, pad %d, gap %d, undo %d, none %d: %s\n",
+         handles, pads, gaps, undoes_gap, none, written(b.tree));
+  if (!(handles && pads && gaps && undoes_gap && none)) return 1;
   return sign_in(screen, b, image);
 }
 

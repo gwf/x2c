@@ -679,7 +679,10 @@ component moves it to the line shown, in the block outlined: the block
 under the pointer, or the block around that one when the pointer is
 within 6 points of its edge. Dragging the square at the selection's
 corner sets a fixed width and height where the component has those
-options. A click on a line of the outline selects its node, which is how
+options. A selected block shows a bar in the middle of each side's
+padding and in each gap between its children; dragging one sets `pad`
+(or the side's own `pad-top` and so on, when set) or `gap`, as one step
+of undo, and the toolbar shows the value. A click on a line of the outline selects its node, which is how
 a spacer or a block hidden by its children is reached. A right click on
 the tree or the outline opens a menu, and each of its commands has a
 key: wrap in a row (Shift R) or a column (Shift C), unwrap a block
