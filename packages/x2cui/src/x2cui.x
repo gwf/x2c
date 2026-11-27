@@ -260,7 +260,8 @@ bool TextField.empty(TextField field) => !field.buffer[0];
 
 /** Replaces the field's text with `text`, cut to the field's capacity. */
 void TextField.set(TextField field, String text) {
-  strncpy(field.buffer, text, field.capacity - 1);
+  // The empty String is NULL.
+  strncpy(field.buffer, text ? text : "", field.capacity - 1);
   field.buffer[field.capacity - 1] = 0;
 }
 
