@@ -495,7 +495,12 @@ macro Unit $x2cui.block(Name $block, Name $end, Literal @pairs) {
     Stmt $body, Expr $ui, Expr @args, Entry @options) {
     {
       typeof($ui) ui = $ui;
-      if ($x2cui_begin(ui, $block, $pairs, $options, @args)) {
+      // A block that draws a control, as a menu does, is noted for tweaking.
+      cui_id before = ui.last_id();
+      bool open = $x2cui_begin(ui, $block, $pairs, $options, @args);
+      ui.tweak_component($x2cui_site_file(), $x2cui_site_line(),
+                         $x2cui_site_column(), before);
+      if (open) {
         defer ui.$end();
         $body
       }

@@ -111,6 +111,16 @@ Added the same day, at Gary's request after the window trial:
   "expression result unused" warning, because the statement expression
   returns the call's value. `make -C packages/x2cui check` passes.
 
+## Menus
+
+Gary found the menus could not be chosen. A menu is a block form whose
+begin call draws its button; the block template now notes the id after
+the begin call too. md-edit's Block type menu (`editor.x:1535`) became
+choosable, 36 by 36 points, with `variant` and `width`. An Alt and a
+click on an open menu's item still also runs the item. Which options to
+show beyond those written is surveyed in
+[the option survey](x2cui-option-survey.md).
+
 ## Answer to the question
 
 Visual fine-tuning of a finished program is reachable this way: the
