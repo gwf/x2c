@@ -729,7 +729,9 @@ static void toolbar(Ui ui, Builder &b) {
     if (ui.button("Delete", size: sm)) remove_selected(b);
     if (ui.button("Save", size: sm)) save(b);
     ui.spacer();
-    ui.muted(b.status ? b.status : b.file);
+    // The file's name only, so a long path does not squeeze the buttons.
+    char *slash = strrchr(b.file, '/');
+    ui.muted(b.status ? b.status : slash ? slash + 1 : b.file);
   }
 }
 
@@ -951,6 +953,10 @@ static void set_option(Inspecting &in, String name, Var value) {
 static Var unless_default(bool on, String name) =>
   on ? (Var) Atom.intern(name) : void;
 
+// `name` as an option value, or none when it is the default `usual`.
+static Var unless_usual(String name, String usual) =>
+  unless_default(strcmp(name, usual) != 0, name);
+
 static List renamed(List node, String name) =>
   %( $(Atom.intern(name)) @(node.cdr()) );
 
@@ -1025,12 +1031,13 @@ static void enum_row(Ui ui, Inspecting &in, String what, List members,
 static void number_row(Ui ui, Inspecting &in, String what, Var now,
                        Shown *row) {
   float value = now.is_void() ? 0 : now.double(), step = row ? row.step : 0;
-  // A row with whole steps stays at zero or above.
-  if (ui.prop_float(what, value, step: step, min: 0,
-                    max: step >= 1 ? 4000 : 0,
+  /* The row is unbounded, so CUI draws no range bar; a row with whole
+     steps stays at zero or above. */
+  if (ui.prop_float(what, value, step: step,
                     format: now.is_void() ? "default" : NULL,
                     tooltip: row ? row.help : NULL))
-    set_option(in, what, step >= 1 ? whole(value) : (Var) (double) value);
+    set_option(in, what, step >= 1 ? whole(value > 0 ? value : 0)
+                                    : (Var) (double) value);
 }
 
 static void color_row(Ui ui, Inspecting &in, String what, Var now,
@@ -1061,9 +1068,8 @@ static void size_row(Ui ui, Builder &b, Inspecting &in, String what,
   }
   if (index != 3) return;
   float points = now.double();
-  if (ui.prop_float(%"$what points", points, step: 1, min: 1, max: 4000,
-                    suffix: "pt"))
-    set_option(in, what, whole(points));
+  if (ui.prop_float(%"$what points", points, step: 1, suffix: "pt"))
+    set_option(in, what, whole(points > 1 ? points : 1));
 }
 
 /* The editor for one option of the node, by its kind. A value that is a
@@ -1150,13 +1156,21 @@ static void direction(Ui ui, Builder &b, Inspecting &in) {
 /* Where the children sit, as a 3 by 3 grid: along the block by
    `justify` and across it by `align`. Two switches give the spacing
    CUI has besides: space between the children, and children stretched
-   across the block. */
+   across the block. The grid shows CUI's defaults for an unset option:
+   children at the start, centred across a row, stretched across a
+   column. A stretch lights the whole line across the block, and space
+   between the whole line along it. */
 static void alignment(Ui ui, Builder &b, Inspecting &in) {
   List node = current(in), places = %("start" "center" "end");
   bool row = is_row(node);
+  String usual = row ? "center" : "stretch";
   Var align = option(node, "align"), justify = option(node, "justify");
-  int across = index_of(places, align), along = index_of(places, justify);
-  if (justify.is_void()) along = 0;
+  String across_is = align.is_void() ? usual : spelled(align);
+  String along_is = justify.is_void() ? "start" : spelled(justify);
+  bool stretch = strcmp(across_is, "stretch") == 0;
+  bool between = strcmp(along_is, "between") == 0;
+  int across = index_of(places, Atom.intern(across_is));
+  int along = index_of(places, Atom.intern(along_is));
   ui.row (width: fill, gap: 12, align: center) {
     row_label(ui, "align");
     ui.column (gap: 2) {
@@ -1165,13 +1179,15 @@ static void alignment(Ui ui, Builder &b, Inspecting &in) {
           for (int x = 0; x < 3; x++) {
             int on_along = row ? x : y, on_across = row ? y : x;
             cui_push_id_int(ui, y * 3 + x);
-            bool here = on_along == along && on_across == across;
+            bool here = (between || on_along == along)
+                     && (stretch || on_across == across);
             if (ui.button(" ", size: sm, width: 22,
                           variant: here ? CUI_BUTTON_PRIMARY
                                         : CUI_BUTTON_SECONDARY)) {
               set_option(in, "justify",
                          unless_default(on_along, places[on_along]));
-              set_option(in, "align", Atom.intern(places[on_across]));
+              set_option(in, "align",
+                         unless_usual(places[on_across], usual));
             }
             if (y == 1 && x == 1) locate(b, in, "middle", ui.last_rect());
             cui_pop_id(ui);
@@ -1179,12 +1195,13 @@ static void alignment(Ui ui, Builder &b, Inspecting &in) {
         }
     }
     ui.column (gap: 4) {
-      bool between = !justify.is_void() && spelled(justify) == "between";
       if (ui.switch("Space between", between))
         set_option(in, "justify", unless_default(between, "between"));
-      bool stretch = !align.is_void() && spelled(align) == "stretch";
       if (ui.switch("Stretch", stretch))
-        set_option(in, "align", unless_default(stretch, "stretch"));
+        set_option(in, "align",
+                   unless_usual(stretch ? "stretch" : row ? "center"
+                                                          : "start",
+                                usual));
     }
   }
 }

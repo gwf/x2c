@@ -165,9 +165,13 @@ It differs from the design in these ways:
   option of the record.
 - The builder is still one file, now about 1,700 lines.
 
-The alignment grid's highlight follows `align` and `justify` only for
-`start`, `center`, and `end`; a column's default, which stretches its
-children, highlights no cell.
+Three faults found in the check's pictures were repaired after
+gwf/x2c#757. The alignment grid and the Stretch switch now show CUI's
+defaults for an unset option: centred across a row, stretched across a
+column. A stretch lights a whole line of the grid, and so does space
+between. Number rows are unbounded, so CUI draws no range bar under
+them. The toolbar shows the file's name, not its path, which had
+squeezed the buttons' labels.
 
 ## Validation
 
