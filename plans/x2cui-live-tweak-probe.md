@@ -58,9 +58,6 @@ Pictures: `.context/tweak-probe/before-original.png` and
   from the call, and an edit changes them all, as editing the code would.
 - **Structure.** Adding, removing, or moving components stays a code
   edit.
-- **A window.** Selection by Alt and a click, and the panel, ran only
-  off screen through the scripted hooks. md-edit's own input hook may
-  take the click first in a window.
 - **Identity.** While tweaking, a box gets a new id from its call site,
   which can change state CUI keys by id, such as a scroll position.
 - **Overhead when built in.** Every x2cui program now carries the calls.
@@ -75,6 +72,21 @@ Pictures: `.context/tweak-probe/before-original.png` and
   unit with a module block: recorded literals, overrides, boxes, the
   marks, the panel, write-back, and scripted hooks for the check.
 - `make -C packages/x2cui check` passes with the probe built in.
+
+## In a window
+
+Gary ran the probed md-edit in a window on 2026-11-27. Alt and a click
+chose boxes, the panel's number fields took clicks and typing while the
+editor had focus, live changes applied, and Write saved them. He judged
+the live change more useful than editing the code.
+
+What could be chosen was exactly the boxes: the Bold and Strikethrough
+tools (each `md_painted_tool` draws its glyph in a `ui.box`), the
+dividers, the toolbar, the pin tool's box, the app container, and the
+footer. The other tools are components drawn by `md_tool` with no box
+around them, and the document, margins included, is one painted canvas
+(`ui.canvas_input("paper", ...)`) whose spacing comes from md-edit's
+appearance settings, not from option literals.
 
 ## Answer to the question
 
