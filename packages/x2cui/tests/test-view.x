@@ -2,6 +2,7 @@
     CUI's own input functions. */
 import "x2cui" with Offscreen, Ui, View, ViewLisp;
 #include "test-support.x"
+#include "datum.x"
 #include "../../../unittest/test-macros.x"
 
 static void frame(Offscreen screen, View view) {
@@ -199,6 +200,45 @@ static void a_handler_passes_and_sends(void) {
   EXPECT_TRUE(caught);
 }
 
+// What the tracer saw: one line for each handler run.
+static Array traced;
+
+static String written(Var value) {
+  Buffer out = auto Buffer.new();
+  out.write_datum(value, 0);
+  return out;
+}
+
+static void trace(void *user, List node, Var event, Var result) {
+  (void) user;
+  String who = node ? written(node[0]) : "none";
+  String what = result.is_void() ? "void" : written(result);
+  traced.push(%"$who $(written(event)) $what");
+}
+
+static void the_tracer_sees_each_handler_run(void) {
+  Lisp lisp = auto Lisp.new();
+  Offscreen screen = auto Offscreen.open(320, 200);
+  lisp.eval_string("(def bump (lambda () 5))");
+  View view = start(lisp, %"
+    (def ui
+      '(column ((pad 20) (on save (lambda () 'kept)))
+         (row ()
+           (button ((width 120) (on-click (send save))) \"Save\")
+           (button ((width 120) (on-click bump)) \"Bump\"))
+         (row ()
+           (button ((width 120) (on-click (send unheard))) \"Other\"))))");
+  traced = [];
+  view.trace(trace, NULL);
+  click(screen, view, 40, 36);
+  click(screen, view, 170, 36);
+  frame(screen, view);
+  EXPECT_INT_EQ((int) traced.len(), 3);
+  EXPECT_STR_EQ((String) traced[0], "button on-click (send save)");
+  EXPECT_STR_EQ((String) traced[1], "column save kept");
+  EXPECT_STR_EQ((String) traced[2], "button on-click 5");
+}
+
 static void cards_draw_the_child_their_option_names(void) {
   Lisp lisp = auto Lisp.new();
   Offscreen screen = auto Offscreen.open(320, 200);
@@ -274,6 +314,7 @@ static void the_component_table_describes_each_component(void) {
   List button = View.components().find(%!(List row) => row[0] == "button");
   EXPECT_NOT_NULL(button);
   EXPECT_INT_EQ((int) button[1], 0);
+  EXPECT_INT_EQ((int) button[4], 1);
   EXPECT_STR_EQ(((List) button[2]).repr(), "((\"label\" \"text\"))");
   List options = button[3];
   List variant = options.find(%!(List row) => row[0] == "variant");
@@ -283,6 +324,9 @@ static void the_component_table_describes_each_component(void) {
   EXPECT_STR_EQ((String) width[1], "size");
   List row = View.components().find(%!(List row) => row[0] == "row");
   EXPECT_INT_EQ((int) row[1], 1);
+  EXPECT_INT_EQ((int) row[4], 0);
+  List text = View.components().find(%!(List row) => row[0] == "text");
+  EXPECT_INT_EQ((int) text[4], 0);
   List slider = View.components().find(%!(List row) => row[0] == "slider");
   EXPECT_STR_EQ(((List) slider[2]).repr(),
     "((\"label\" \"text\") (\"value\" \"bound\") "
@@ -299,6 +343,7 @@ int main(void) {
   $test.run(options_convert_by_the_type_of_their_field);
   $test.run(a_message_goes_up_to_the_first_handler);
   $test.run(a_handler_passes_and_sends);
+  $test.run(the_tracer_sees_each_handler_run);
   $test.run(cards_draw_the_child_their_option_names);
   $test.run(a_watcher_learns_each_node_and_its_id);
   $test.run(a_watched_block_with_no_children_has_a_size);

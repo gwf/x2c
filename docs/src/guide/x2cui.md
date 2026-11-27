@@ -509,8 +509,9 @@ first with an `(on name form)` option handles it.
 grouped palette with a search adds components by click or drag, an
 outline lists every node, a menu and keys
 wrap, unwrap, duplicate, move, and delete the selection, an inspector
-sets spacing, alignment, and sizes and groups the other options, and a
-run mode makes the tree behave as it will in a program.
+sets spacing, alignment, and sizes, wires events to messages and
+procedures, and groups the other options, and a run mode makes the tree
+behave as it will in a program while listing each handler it runs.
 
 ## Limits
 

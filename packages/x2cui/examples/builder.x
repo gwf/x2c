@@ -6,23 +6,27 @@
     the palette, grouped and searched, adds a component after the
     selection or inside a selected block, or where a drag of its name is
     released. The inspector edits the selection's arguments and options,
-    and the toolbar moves or deletes it. Dragging a component moves it to the
-    line shown, among its siblings or into another block. The inspector
+    and the toolbar moves or deletes it. Dragging a component moves it to
+    the line shown, among its siblings or into another block. The inspector
     groups the options, sets a block's spacing and alignment, and gives
     sizes as Auto, Fit, Fill, or Fixed. An outline under the palette
     lists every node, and a click on a line selects its node. A right
     click on the tree or the outline, or a key, selects around the
     selection, wraps it in a row or column, unwraps a block, duplicates,
-    moves, and deletes; `keys` lists them. In run mode the tree behaves
-    as it will in a program. The tree uses CUI's own layout,
-    so a component's place is its position among its siblings.
+    moves, and deletes; `keys` lists them. The inspector's Events group
+    makes a component send a message or call a procedure, and makes a
+    block handle the messages sent inside it. In run mode the tree
+    behaves as it will in a program, and the inspector's place shows each
+    handler run and a box that evaluates Lisp. The tree uses CUI's own
+    layout, so a component's place is its position among its siblings.
 
     Usage:
       builder [FILE]             edit FILE, a tree written as one datum
       builder --check IMAGE.png  select, add, and run off screen
 
     A file `FILE.lisp` beside FILE, when there is one, is evaluated first
-    and defines what the tree's handlers call.
+    and defines what the tree's handlers call. A procedure the tree calls
+    and the file lacks gets a stub there when the tree runs or is saved.
 */
 import "x2cui" with App, Offscreen, TextField, Ui, View, ViewLisp;
 
@@ -58,7 +62,7 @@ typedef enum Command {
 } Command;
 
 // The inspector's groups of options.
-enum { CONTENT, LAYOUT, SIZE, STYLE, BEHAVIOR, OTHER, GROUPS };
+enum { CONTENT, LAYOUT, SIZE, STYLE, EVENTS, BEHAVIOR, OTHER, GROUPS };
 
 #ifdef __APPLE__
 #define PRIMARY "Cmd "
@@ -152,8 +156,14 @@ typedef struct Builder {
   String offered_name[OFFERED];
   int offered_count, carry;
   bool carrying, placed;
+  /* The text of the tree's `FILE.lisp`, which Save writes; the run log;
+     and the message box, whose Lisp the session evaluates. */
+  String program;
+  Array log;
+  TextField message;
   // Where the check finds the builder's own controls.
   cui_rect mode_button, add_button, first_field, all_switch, find_field;
+  cui_rect message_field;
   Map located;
 } Builder;
 
@@ -260,7 +270,8 @@ static List with_option(List node, String name, Var value) {
       placed = true;
     }
   }
-  if (!placed) rows.push(%( $(Atom.intern(name)) $value ));
+  // A tree spells a name with `-`, as `on-click`.
+  if (!placed) rows.push(%( $(Atom.intern(name.replace("_", "-"))) $value ));
   Array items = [node[0], rows.list_free()];
   for (int i = 2; i < node.len(); i++) items.push(node[i]);
   return items.list_free();
@@ -350,7 +361,7 @@ static List fresh(Builder &b, String name) {
     String kind = argument[1], what = argument[0];
     if (kind == "bound" || kind == "field") {
       String global = %"value$(++b.bound)";
-      b.lisp.set_global(global, kind == "field" ? (Var) "text" : (Var) 0);
+      b.lisp.set_global(global, kind == "field" ? (Var) "" : (Var) 0);
       options.push(%( bind $(Atom.intern(global)) ));
     }
     else if (kind == "text")
@@ -504,9 +515,53 @@ static void run(Builder &b, Command command) {
   }
 }
 
+// handlers
+
+// Whether the session has a global `name`.
+static bool defined(Builder &b, String name) {
+  Var value = void;
+  return b.lisp.try_get(name, value);
+}
+
+// Adds a line to the run log.
+static void note(Builder &b, String line) => b.log.push(line);
+
+/* The procedures a handler of `node` or a node inside it calls by name:
+   an `on-click` or `on-change` that is a name, and an `(on name form)`
+   whose form is one. */
+static void called(List node, Array &names) {
+  foreach (List row in (List) node[1]) {
+    Var handler = row.len() == 3 && spelled(row[0]) == "on" ? row[2]
+                : row.len() == 2 && spelled(row[0]).startswith("on_")
+                  ? row[1] : void;
+    if (handler.is_atom() && !(written(handler) in names))
+      names.push(written(handler));
+  }
+  if (!is_block(node)) return;
+  for (int i = 2; i < node.len(); i++)
+    if (is_node(node[i])) called(node[i], names);
+}
+
+/* Gives each procedure the tree calls and the session lacks a stub in
+   `FILE.lisp` that returns its own name, so a run shows it was called. */
+static void add_stubs(Builder &b) {
+  Array names = [];
+  called(b.tree, names);
+  foreach (String name in names) {
+    if (defined(b, name)) continue;
+    String stub = %"(def $name (lambda () '$name))\n";
+    b.program = b.program + stub;
+    b.lisp.eval_string(stub);
+    note(b, %"Added a stub for $name to $(b.file).lisp");
+  }
+}
+
+// Writes the tree, and its `FILE.lisp` when it has one.
 static void save(Builder &b) {
-  Path path = b.file;
+  add_stubs(b);
+  Path path = b.file, program = %"$(b.file).lisp";
   path.write_text(written(b.tree) + "\n");
+  if (b.program.len()) program.write_text(b.program);
   b.status = %"Saved $(b.file)";
 }
 
@@ -804,6 +859,7 @@ static void paint_marks(cui_ctx *ui, cui_rect area, void *user) {
 static void toolbar(Ui ui, Builder &b) {
   ui.row (gap: 8, align: center, pad: 8) {
     if (ui.button(b.editing ? "Run" : "Edit", variant: primary, size: sm)) {
+      if (b.editing) add_stubs(b);
       b.editing = !b.editing;
       b.status = NULL;
     }
@@ -964,7 +1020,10 @@ static void canvas(Ui ui, Builder &b) {
     defer cui_pop_id(ui);
     // A tree the inspector left half typed raises; the next edit mends it.
     try b.view.draw(ui);
-    catch %(?cause *detail): b.status = %"$(cause.repr()) $(detail.repr())";
+    catch %(?cause *detail): {
+      b.status = %"$(cause.repr()) $(detail.repr())";
+      if (!b.editing) note(b, b.status);
+    }
   }
   Where root = { 0 };
   int next = 0;
@@ -1015,8 +1074,8 @@ static Shown shown[] = {
   { "label", "Content", true, 0, "The text beside the control" },
   { "placeholder", "Content", true, 0, "The text shown while it is empty" },
   { "description", "Content", false, 0, "A second line under the label" },
-  { "on_click", "Behavior", true, 0, "A Lisp form run on a press" },
-  { "on_change", "Behavior", false, 0, "A Lisp form run on a change" },
+  { "on_click", "Events", true, 0, "What a press does" },
+  { "on_change", "Events", true, 0, "What a change does" },
   { "disabled", "Behavior", true, 0, "Ignore the pointer and the keys" },
   { "bind", "Behavior", false, 0, "The Lisp global the control edits" },
   { "id", "Behavior", false, 0, "A name that keeps the node's state" },
@@ -1024,7 +1083,7 @@ static Shown shown[] = {
 };
 
 static char *group_names[] = {
-  "Content", "Layout", "Size", "Style", "Behavior", "Other"
+  "Content", "Layout", "Size", "Style", "Events", "Behavior", "Other"
 };
 
 // The view's own options, which no component's record lists.
@@ -1311,7 +1370,7 @@ static void alignment(Ui ui, Builder &b, Inspecting &in) {
               set_option(in, "align",
                          unless_usual(places[on_across], usual));
             }
-            if (y == 1 && x == 1) locate(b, in, "middle", ui.last_rect());
+            locate(b, in, %"cell $x $y", ui.last_rect());
             cui_pop_id(ui);
           }
         }
@@ -1399,6 +1458,225 @@ static void arguments(Ui ui, Builder &b, Inspecting &in) {
   }
 }
 
+/* The handler option of the event `node` reports, `on_change` for a
+   component that edits a value and `on_click` for another, or NULL when
+   it reports none. */
+static String event_of(List node) {
+  List row = component(spelled(node[0]));
+  if (!row || row.len() < 5 || !row[4].int()) return NULL;
+  foreach (List argument in (List) row[2])
+    if ((String) argument[1] == "bound" || (String) argument[1] == "field")
+      return "on_change";
+  return "on_click";
+}
+
+/* A name for what `node` does, from its first text: "Sign in" gives
+   `sign-in`. A node with no text gives its component's name. */
+static String suggested(List node) {
+  if (node.len() < 3 || !(node[2] is <string>)) return spelled(node[0]);
+  Array kept = [];
+  bool gap = false;
+  foreach (char c in (String) node[2]) {
+    if (isalnum(c)) {
+      if (gap && kept.len()) kept.push("-");
+      kept.push(%"$((char) tolower(c))");
+      gap = false;
+    }
+    else gap = true;
+  }
+  return kept.len() ? kept.join("") : spelled(node[0]);
+}
+
+// The procedures `FILE.lisp` defines as `(def name (lambda ...))`.
+static List procedures(Builder &b) {
+  Array names = [];
+  unsigned cursor = 0;
+  Var form = void;
+  try {
+    while (b.lisp.read(b.program, cursor, form) != <eof>)
+      match (form) {
+        case %(def ?name (lambda *body)): names.push(written(name));
+      }
+  }
+  catch %(?cause *detail): b.status = "FILE.lisp does not read";
+  return names.list_free();
+}
+
+/* How a handler is written: 0 for none, 1 for `(send name)`, 2 for a
+   procedure's name, and 3 for another Lisp form. */
+static int handler_mode(Var handler) {
+  if (handler.is_void()) return 0;
+  if (handler.is_atom()) return 2;
+  match (handler) {
+    case %(send ?name): return name.is_atom() ? 1 : 3;
+  }
+  return 3;
+}
+
+/* The row of the event option `what`: None, Send a message, or Call a
+   procedure, with the message's or procedure's name. A procedure the
+   session lacks gets a stub when the tree runs or is saved. */
+static void event_row(Ui ui, Builder &b, Inspecting &in, String what) {
+  List node = current(in);
+  Var now = option(node, what);
+  int mode = handler_mode(now), chosen = mode;
+  String shown = what.replace("_", "-");
+  cui_push_id(ui, what);
+  defer cui_pop_id(ui);
+  ui.row (width: fill, align: center, gap: 12) {
+    row_label(ui, shown);
+    List choices = mode == 3 ? %("None" "Send" "Call" "Lisp")
+                             : %("None" "Send" "Call");
+    if (ui.segmented("mode", choices, chosen, size: sm) && chosen != mode) {
+      Atom name = Atom.intern(suggested(node));
+      Var made[] = { void, %(send $name), name, now };
+      set_option(in, what, made[chosen]);
+      b.refill = true;
+    }
+    locate(b, in, %"$what mode", ui.last_rect());
+  }
+  Var value = void;
+  if (mode == 1) {
+    Var name = ((List) now)[1];
+    if (typed(ui, b, "message", "text", name, value) && !value.is_void())
+      set_option(in, what, %(send $(Atom.intern(value))));
+    locate(b, in, %"$what message", ui.last_rect());
+  }
+  else if (mode == 2) {
+    List known = procedures(b);
+    int index = index_of(known, now) + 1;
+    if (known.len() &&
+        ui.prop_enum("procedure", %("choose" @known), index) && index) {
+      set_option(in, what, Atom.intern(known[index - 1]));
+      b.refill = true;
+    }
+    if (typed(ui, b, "name", "text", now, value) && !value.is_void())
+      set_option(in, what, Atom.intern(value));
+    locate(b, in, %"$what name", ui.last_rect());
+    if (!defined(b, written(now)))
+      ui.muted(%"Run or Save adds a stub for $(written(now)) to FILE.lisp.");
+  }
+  else if (mode == 3) {
+    if (typed(ui, b, shown, "form", now, value)) set_option(in, what, value);
+  }
+}
+
+// `node` with its handler of the message `name` set to `form`, or none.
+static List with_handler(List node, Var name, Var form) {
+  Array rows = [];
+  bool placed = form.is_void();
+  foreach (List row in (List) node[1]) {
+    bool same = row.len() == 3 && spelled(row[0]) == "on" && row[1] == name;
+    if (!same) rows.push(row);
+    else if (!placed) {
+      rows.push(%( on $name $form ));
+      placed = true;
+    }
+  }
+  if (!placed) rows.push(%( on $name $form ));
+  return %( $(node[0]) $(rows.list_free()) @(node.cdr().cdr()) );
+}
+
+static void set_handler(Inspecting &in, Var name, Var form) {
+  in.edited = with_handler(current(in), name, form);
+  in.field = %"on $(written(name))";
+}
+
+// Whether `block` has an `(on name form)` option for the message `name`.
+static bool handles(List block, Var name) {
+  foreach (List row in (List) block[1])
+    if (row.len() == 3 && spelled(row[0]) == "on" && row[1] == name)
+      return true;
+  return false;
+}
+
+/* The messages a handler in `node` or a node inside it sends, as names,
+   that `block` does not handle. */
+static void sent(List node, List block, Array &names) {
+  foreach (List row in (List) node[1]) {
+    if (row.len() != 2 || !spelled(row[0]).startswith("on_")) continue;
+    match (row[1]) {
+      case %(send ?name *rest): {
+        if (!handles(block, name) && !(written(name) in names))
+          names.push(written(name));
+      }
+    }
+  }
+  if (!is_block(node)) return;
+  for (int i = 2; i < node.len(); i++)
+    if (is_node(node[i])) sent(node[i], block, names);
+}
+
+/* A block's handlers: one row for each message it handles, whose
+   handler body is edited as Lisp, and a Handle button for each message
+   sent inside it that it does not handle yet. */
+static void block_handlers(Ui ui, Builder &b, Inspecting &in) {
+  List node = current(in);
+  foreach (List row in (List) node[1]) {
+    if (row.len() != 3 || spelled(row[0]) != "on") continue;
+    String name = written(row[1]);
+    Var form = row[2], body = form, value = void;
+    bool simple = false;
+    match (form) {
+      case %(lambda () ?inner): { body = inner; simple = true; }
+    }
+    cui_push_id(ui, name);
+    ui.row (width: fill, align: center, gap: 4) {
+      ui.column (width: fill) {
+        if (typed(ui, b, %"on $name", "form", body, value) &&
+            !value.is_void())
+          set_handler(in, row[1], simple ? %(lambda () $value) : value);
+        locate(b, in, %"on $name", ui.last_rect());
+      }
+      if (ui.icon_button(CUI_ICON_X, variant: ghost, size: sm, width: 28,
+                         tooltip: "Stop handling the message"))
+        set_handler(in, row[1], void);
+    }
+    cui_pop_id(ui);
+  }
+  Array unhandled = [];
+  for (int i = 2; i < node.len(); i++)
+    if (is_node(node[i])) sent(node[i], node, unhandled);
+  foreach (String name in unhandled) {
+    cui_push_id(ui, %"handle $name");
+    ui.row (width: fill, align: center, gap: 12) {
+      row_label(ui, name);
+      ui.muted("is sent inside");
+      ui.spacer();
+      if (ui.button("Handle", size: sm)) {
+        Atom message = Atom.intern(name);
+        set_handler(in, message, %(lambda () (quote $message)));
+        b.refill = true;
+      }
+      locate(b, in, %"handle $name", ui.last_rect());
+    }
+    cui_pop_id(ui);
+  }
+}
+
+// Whether the Events group has a row for `node`.
+static bool has_events(List node) {
+  if (event_of(node)) return true;
+  if (!is_block(node)) return false;
+  foreach (List row in (List) node[1])
+    if (row.len() == 3 && spelled(row[0]) == "on") return true;
+  Array unhandled = [];
+  for (int i = 2; i < node.len(); i++)
+    if (is_node(node[i])) sent(node[i], node, unhandled);
+  return unhandled.len() > 0;
+}
+
+// The Events group: the node's event, or the messages a block handles.
+static void events(Ui ui, Builder &b, Inspecting &in) {
+  List node = current(in);
+  String event = event_of(node);
+  if (event) event_row(ui, b, in, event);
+  foreach (String other in %("on_click" "on_change"))
+    if (other != event && !option(node, other).is_void())
+      event_row(ui, b, in, other);
+  if (is_block(node)) block_handlers(ui, b, in);
+}
+
 /* Changes the tree for an inspector edit. The changes from one field,
    while it keeps the keyboard or the pointer, are one step of undo. */
 static void change_field(Builder &b, Inspecting &in) {
@@ -1416,11 +1694,48 @@ static void change_field(Builder &b, Inspecting &in) {
 /* Shows the selection's arguments; the spacing of the block it is in;
    its own spacing when it is a block; and its options by group. Only
    common and set options show until "All options" is on. */
+/* The spacing of the block around the selection, as "In row" or "In
+   column". The root has none. */
+static void around_group(Ui ui, Builder &b, Inspecting &around) {
+  if (!around.node) return;
+  cui_push_id(ui, "around");
+  if (ui.inspector_group(is_row(around.node) ? "In row" : "In column",
+                         b.open_around))
+    block_layout(ui, b, around);
+  cui_pop_id(ui);
+}
+
+/* In run mode the inspector's place shows the run log, newest first,
+   and a message box whose Lisp the session evaluates on Return. */
+static void run_pane(Ui ui, Builder &b) {
+  ui.column (width: 400, height: fill, pad: 10, gap: 8) {
+    ui.heading("Run", 4);
+    ui.muted("Each handler run, the node it belongs to, and its result.");
+    ui.row (width: fill) {
+      int typed = ui.input("message-box", b.message,
+                           placeholder: "Lisp, such as (bump)");
+      b.message_field = ui.last_rect();
+      if (typed & CUI_SUBMITTED && !b.message.empty()) {
+        String text = b.message.text();
+        try note(b, %"> $text: $(written(b.lisp.eval_string(text)))");
+        catch %(?cause *detail):
+          note(b, %"> $text: raised $(cause.repr()) $(detail.repr())");
+        b.message.buffer[0] = 0;
+      }
+    }
+    ui.scroll (id: "run-log", width: fill, height: fill, gap: 2) {
+      int shown = 0;
+      for (int i = b.log.len() - 1; i >= 0 && shown < 100; i--, shown++)
+        ui.text((String) b.log[i], width: fill);
+    }
+  }
+}
+
 static void inspector(Ui ui, Builder &b) {
+  if (!b.editing) return run_pane(ui, b);
   ui.scroll (id: "inspector", width: 400, height: fill, pad: 10, gap: 8) {
     if (!b.selected) {
-      ui.muted(b.editing ? "Click a component to select it."
-                         : "The tree is running. Edit to change it.");
+      ui.muted("Click a component to select it.");
       return;
     }
     Inspecting own = { b.where, node_at(b.tree, b.where) }, around = { 0 };
@@ -1444,22 +1759,25 @@ static void inspector(Ui ui, Builder &b) {
         arguments(ui, b, own);
         group_rows(ui, b, own, CONTENT);
       }
+      // What the node does comes next to what it shows.
+      if (has_events(own.node) &&
+          ui.inspector_group("Events", b.open[EVENTS]))
+        events(ui, b, own);
       if (own.where.depth) {
         around.where = own.where;
         around.where.depth--;
         around.node = node_at(b.tree, around.where);
         around.around = true;
-        cui_push_id(ui, "around");
-        if (ui.inspector_group(is_row(around.node) ? "In row" : "In column",
-                               b.open_around))
-          block_layout(ui, b, around);
-        cui_pop_id(ui);
       }
+      // A block's own spacing comes before the spacing of the one around.
+      bool block = is_block(own.node);
       for (int group = LAYOUT; group < GROUPS; group++) {
-        bool block = group == LAYOUT && is_block(own.node);
-        if (!block && !group_shows(b, own.node, group)) continue;
+        if (group == LAYOUT + block) around_group(ui, b, around);
+        if (group == EVENTS) continue;
+        bool laid = group == LAYOUT && block;
+        if (!laid && !group_shows(b, own.node, group)) continue;
         if (!ui.inspector_group(group_names[group], b.open[group])) continue;
-        if (block) block_layout(ui, b, own);
+        if (laid) block_layout(ui, b, own);
         group_rows(ui, b, own, group);
       }
       ui.inspector_end();
@@ -1525,14 +1843,23 @@ static void draw(Ui ui, Builder &b) {
 
 // starting
 
+// Notes each handler the running tree runs in the run log.
+static void logged(void *user, List node, Var event, Var result) {
+  Builder *b = user;
+  if (!node) return note(*b, %"$(written(event)): no block handles it");
+  String line = %"$(listed(node)) $(written(event))";
+  note(*b, result.is_void() ? line : %"$line: $(written(result))");
+}
+
 static void open_file(Builder &b, Ui ui, String file) {
   b.lisp = Lisp.new();
   ViewLisp.install(b.lisp);
   b.file = file ? file : "builder.tree";
   Path saved = b.file, program = %"$(b.file).lisp";
   String text = file && saved.exists() ? saved.read_text() : sample;
-  if (program.exists()) b.lisp.eval_string(program.read_text());
-  else if (!file) b.lisp.eval_string(sample_program);
+  b.program = program.exists() ? program.read_text()
+            : !file ? sample_program : "";
+  b.lisp.eval_string(b.program);
   Var tree = void;
   if (!read_value(text, tree) || !is_node(tree))
     raise %(bad-arg (operation "builder") (path $(b.file))
@@ -1545,8 +1872,11 @@ static void open_file(Builder &b, Ui ui, String file) {
   b.open_around = true;
   b.search = TextField.new(64);
   b.find = TextField.new(64);
+  b.message = TextField.new(256);
+  b.log = [];
   b.view = View.new(b.lisp, "ui");
   b.view.set(b.tree);
+  b.view.trace(logged, &b);
   b.editing = true;
   for (int i = 0; i < FIELDS; i++) b.fields[i] = TextField.new(512);
   ui.set_input_hook(capture, &b);
@@ -1613,6 +1943,87 @@ static cui_rect offered_rect(Builder &b, String name) {
 static int clicks(Builder &b) {
   Var value = void;
   return b.lisp.try_get("clicks", value) ? value.int() : -1;
+}
+
+// Finds the component `name` with the palette's search, and adds it.
+static void find_and_add(Offscreen screen, Builder &b, String name) {
+  b.find.buffer[0] = 0;
+  click(screen, b, b.find_field);
+  screen.ui().input_text(name);
+  frame(screen, b);
+  press(screen, b, CUI_KEY_ENTER, 0);
+}
+
+/* Replaces the text of the inspector field named `field` with `text`. A
+   number field selects its text when clicked; a text field is emptied. */
+static void retype(Offscreen screen, Builder &b, String field,
+                   bool number, String text) {
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  click(screen, b, located(b, field));
+  if (!number) {
+    press(screen, b, CUI_KEY_END, 0);
+    for (int i = 0; i < 24; i++) press(screen, b, CUI_KEY_BACKSPACE, 0);
+  }
+  screen.ui().input_text(text);
+  frame(screen, b);
+  press(screen, b, CUI_KEY_ENTER, 0);
+}
+
+/* Selects the node at `where` with a click on the canvas `dx`, `dy`
+   points in from its top left corner, or from its right edge when `dx`
+   is negative. */
+static void pick(Offscreen screen, Builder &b, Where where, float dx,
+                 float dy) {
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  cui_rect r = drawn_at(b, screen.ui(), where);
+  click(screen, b, (cui_rect){ dx < 0 ? r.x + r.w + dx : r.x + dx,
+                               r.y + dy, 1, 1 });
+}
+
+/* The plan's acceptance test: a sign-in form with a heading, two
+   labelled inputs, and a row of two buttons 12 points apart at the
+   right edge, whose second button sends a message the form handles.
+   Nothing is typed but component names, numbers, and the handler's
+   body. */
+static int sign_in(Offscreen screen, Builder &b, String image) {
+  Var empty = void;
+  read_value("(column ((pad 24) (gap 12)))", empty);
+  change(b, empty);
+  select_at(b, (Where){ 0 });
+  foreach (String name in %("heading" "label" "input" "label" "input"
+                            "row" "button" "button"))
+    find_and_add(screen, b, name);
+  // The row is the column's seventh element; a click right of its buttons.
+  pick(screen, b, (Where){ 1, { 7 } }, -10, 10);
+  retype(screen, b, "gap", true, "12");
+  click(screen, b, located(b, "cell 2 1"));
+  pick(screen, b, (Where){ 2, { 7, 3 } }, 10, 10);
+  cui_rect modes = located(b, "on_click mode");
+  modes.x += modes.w / 3;
+  modes.w /= 3;
+  click(screen, b, modes);
+  pick(screen, b, (Where){ 0 }, 6, 6);
+  click(screen, b, located(b, "handle button"));
+  retype(screen, b, "on button", false, "(def signed-in 1)");
+  List row = b.tree[7];
+  int spaced = row[0] == <row> && option(row, "gap").int() == 12 &&
+               spelled(option(row, "justify")) == "end";
+  // At the right edge: the second button ends where the row's padding
+  // would begin, and the row has none.
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  cui_rect across = drawn_at(b, screen.ui(), (Where){ 1, { 7 } });
+  cui_rect second = drawn_at(b, screen.ui(), (Where){ 2, { 7, 3 } });
+  int right = fabsf(second.x + second.w - (across.x + across.w)) < 2;
+  screen.write_png(image + ".sign-in.png");
+  click(screen, b, b.mode_button);
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  click(screen, b, second);
+  Var signed_in = void;
+  int handles_it = b.lisp.try_get("signed-in", signed_in) &&
+                   signed_in.int() == 1;
+  printf("sign-in: spaced %d, right %d, handled %d, %s\n", spaced, right,
+         handles_it, written(b.tree));
+  return spaced && right && handles_it ? 0 : 1;
 }
 
 static int check(String image) {
@@ -1785,7 +2196,7 @@ static int check(String image) {
                b.undo.len() == steps_before + 1;
   printf("gap: %s, %d steps\n", written(b.tree),
          (int) b.undo.len() - steps_before);
-  click(screen, b, located(b, "middle"));
+  click(screen, b, located(b, "cell 1 1"));
   int centres = spelled(option(b.tree, "align")) == "center" &&
                 spelled(option(b.tree, "justify")) == "center";
   cui_rect turn = located(b, "direction");
@@ -1913,6 +2324,11 @@ static int check(String image) {
         offers))
     return 1;
 
+  if (!(apart && lays && fills && besides && sizes && selects && adds &&
+        runs && edits && moves && removes && undoes && saves && picks &&
+        keeps && reparents && reorders && stays))
+    return 1;
+
   /* A drag from the palette puts a new row, spaced 8 points, where the
      line shows: before the button. */
   change(b, counter);
@@ -1939,9 +2355,84 @@ static int check(String image) {
                 slider[4].int() == 100 && b.where.depth == 2;
   printf("find: %d found, added %s\n", b.offered_count, written(slider));
   if (!(carries && finds && submits)) return 1;
-  return apart && lays && fills && besides && sizes && selects && adds &&
-         runs && edits && moves && removes && undoes &&
-         saves && picks && keeps && reparents && reorders && stays ? 0 : 1;
+
+  /* The counter's button calls `bump`. Send makes it send a message
+     named from its label, which the column handles with a typed body. */
+  change(b, counter);
+  select_at(b, (Where){ 1, { 3 } });
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  int calls = handler_mode(option(b.tree[3], "on_click")) == 2;
+  cui_rect modes = located(b, "on_click mode");
+  modes.x += modes.w / 3;
+  modes.w /= 3;
+  click(screen, b, modes);
+  int sends = written(option(b.tree[3], "on_click")) == "(send add-one)";
+  screen.write_png(image + ".events.png");
+  select_at(b, (Where){ 0 });
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  click(screen, b, located(b, "handle add-one"));
+  Atom message = Atom.intern("add-one");
+  int handled = handles(b.tree, message);
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  click(screen, b, located(b, "on add-one"));
+  press(screen, b, CUI_KEY_END, 0);
+  for (int i = 0; i < 20; i++) press(screen, b, CUI_KEY_BACKSPACE, 0);
+  ui.input_text("(bump)");
+  frame(screen, b);
+  press(screen, b, CUI_KEY_ENTER, 0);
+  List handler = ((List) b.tree[1]).find(
+    %!(List row) => row.len() == 3 && row[1] == message);
+  int bodies = handler &&
+               written(handler) == "(on add-one (lambda () (bump)))";
+  printf("events: calls %d, sends %d, handled %d, %s\n", calls, sends,
+         handled, written(b.tree[1]));
+
+  /* In run mode a press logs the message sent and the block that
+     handled it, and the message box evaluates Lisp in the session. */
+  int clicked = clicks(b);
+  /* A running tree is not watched, so the button is found before, and
+     is pressed near its left edge: unwatched, it is only as wide as its
+     label. */
+  cui_rect pressing = drawn_rect(b, ui, <button>);
+  pressing.w = 20;
+  click(screen, b, b.mode_button);
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  click(screen, b, pressing);
+  int lines = b.log.len();
+  String sent_line = lines >= 2 ? (String) b.log[lines - 2] : "none";
+  String handled_line = lines >= 1 ? (String) b.log[lines - 1] : "none";
+  int logs = strstr(sent_line, "on-click: (send add-one)") &&
+             strstr(handled_line, "column add-one") &&
+             clicks(b) == clicked + 1;
+  printf("run: %s / %s\n", sent_line, handled_line);
+  click(screen, b, b.message_field);
+  ui.input_text("(bump)");
+  frame(screen, b);
+  press(screen, b, CUI_KEY_ENTER, 0);
+  String last = b.log.len() ? (String) b.log[b.log.len() - 1] : "none";
+  int evaluates = strstr(last, "> (bump)") && clicks(b) == clicked + 2;
+  screen.write_png(image + ".run.png");
+  printf("run log: %d lines, last %s\n", (int) b.log.len(), last);
+
+  // Calling a procedure FILE.lisp lacks gives it a stub, which Save writes.
+  click(screen, b, b.mode_button);
+  select_at(b, (Where){ 1, { 3 } });
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  modes = located(b, "on_click mode");
+  modes.x += modes.w * 2 / 3;
+  modes.w /= 3;
+  click(screen, b, modes);
+  b.file = image + ".events.tree";
+  save(b);
+  Path program = %"$(b.file).lisp";
+  int stubs = option(b.tree[3], "on_click") == message &&
+              program.exists() &&
+              strstr(program.read_text(),
+                     "(def add-one (lambda () 'add-one))");
+  printf("stub: %d\n", stubs);
+  if (!(calls && sends && handled && bodies && logs && evaluates && stubs))
+    return 1;
+  return sign_in(screen, b, image);
 }
 
 int main(int argc, char **argv) {

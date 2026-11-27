@@ -3,8 +3,8 @@
 > Status: Gary approved slice 1 on 2026-11-26 and it is implemented; see
 > "Slice 1 as built". He then asked for slice 2 and for slice 1's
 > faults to be fixed, both as seen fit; see "Slice 2 as built". On
-> 2026-11-27 he asked for slice 3; see "Slice 3 as built". Slices 4 and
-> 5 are not started. The plan replaces
+> 2026-11-27 he asked for slice 3, then slice 4; see "Slice 3 as built"
+> and "Slice 4 as built". Slice 5 is not started. The plan replaces
 > the interaction design of [the x2cui builder](x2cui-builder.md), whose
 > first version Gary judged far from usable on 2026-11-25: too many
 > options shown, and no clear way to get a wanted effect. The document
@@ -98,6 +98,7 @@ adds a stub to the tree's `FILE.lisp`, which Save then writes.
 - A percent size, which CUI has (`CUI_PCT`) and a tree cannot write.
 - The `gap` component, CUI's fixed space, beside `spacer`.
 - An id for every watched node, so a spacer or separator has a rectangle.
+- Built in slice 4: `reports` in each component row, and `View.trace`.
 - The record's `id` is not listed as an option beside the view's own.
 
 ### What changes in the builder
@@ -196,6 +197,41 @@ It differs from the design in these ways:
 - Nothing follows the pointer while carrying; the insertion line and the
   outlined block show where the component will go.
 - The builder is still one file, now about 1,900 lines.
+
+## Slice 4 as built
+
+The inspector's Events group follows Content. A component whose call
+reports an event, which `View.components()` now marks with a fifth
+element, `reports`, has one row: `on-click`, or `on-change` for a
+component that edits a value. The row is None, Send, or Call, and a
+fourth choice, Lisp, appears for a handler written otherwise. Send and
+Call take a name, first made from the component's text ("Sign in" gives
+`sign-in`); Call also offers the procedures `FILE.lisp` defines. A block
+lists its `(on name form)` options, each with the body of its
+`(lambda () body)` edited as Lisp, and offers Handle for each message
+sent inside it that it does not handle.
+
+A procedure the tree calls by name and the session lacks gets
+`(def name (lambda () 'name))` in `FILE.lisp` when Run is pressed or
+the tree is saved; Save writes the file. `View.trace` reports each
+handler run with its node, event or message, and result. In run mode
+the inspector's place lists them, newest first, under a one-line box
+that evaluates Lisp in the session.
+
+`builder --check` runs the scenario under "Validation" below, selecting
+nodes by clicks on the canvas, and checks the message, the log, the
+message box, and a stub written by Save.
+
+It differs from the design in these ways:
+
+- The procedures offered are those `FILE.lisp` defines, read from its
+  text; the session itself cannot list its globals.
+- A selected block shows its own Layout group before "In row" or "In
+  column"; a component shows the block around it first.
+- The builder writes option names with `-`, as a tree spells them; it
+  wrote `on_click` before.
+- A new input starts empty, not with the text `text`.
+- The builder is still one file, now about 2,440 lines.
 
 ## Validation
 

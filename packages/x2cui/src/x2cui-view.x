@@ -40,6 +40,8 @@ static typedef struct ViewState {
   int depth, passed;
   void (*hook)(void *user, List node, cui_id id);
   void *hook_user;
+  void (*tracer)(void *user, List node, Var event, Var result);
+  void *tracer_user;
 } *ViewState;
 
 // The view whose handlers are running, for `ui-send` and `ui-pass`.
@@ -128,14 +130,22 @@ static void _view_options(
   }
 }
 
-/* Records the event `node` reported, with the blocks open around it. */
+/* Records the event `node` reported, its handler, and the blocks open
+   around it. */
 static void _view_fire(ViewState view, List node) {
-  Var handler = _view_option(node, "on_click");
-  if (handler.is_void()) handler = _view_option(node, "on_change");
+  Var event = <on-click>, handler = _view_option(node, "on_click");
+  if (handler.is_void()) {
+    event = <on-change>;
+    handler = _view_option(node, "on_change");
+  }
   if (handler.is_void()) return;
   view.path.push(node);
-  view.fired.push(%( $(view.path.list()) $handler ));
+  view.fired.push(%( $(view.path.list()) $handler $event ));
   view.path.pop();
+}
+
+static void _view_trace(ViewState view, List node, Var event, Var result) {
+  if (view.tracer) view.tracer(view.tracer_user, node, event, result);
 }
 
 static void _view_drawn(ViewState view, List node, cui_id id) {
@@ -293,9 +303,11 @@ static void _view_children(ViewState view, Ui ui, List node, int from) {
 /* Offers the message `name` to the node at `depth` of `chain` and then to
    each block around it. The first `(on name form)` option that matches
    handles it, and the message goes further up only when that handler
-   calls `ui-pass`. A message no node handles is dropped. */
+   calls `ui-pass`. A message no node handles is dropped, and traced
+   with no node. */
 static void _view_deliver(
   ViewState view, List chain, int depth, Var name, List arguments) {
+  bool handled = false;
   for (int i = depth; i >= 0; i--) {
     foreach (List row in (List) ((List) chain[i])[1]) {
       if (row.len() != 3 || _view_name(row[0]) != "on" || row[1] != name)
@@ -303,15 +315,19 @@ static void _view_deliver(
       view.chain = chain;
       view.depth = i;
       view.passed = 0;
-      view.lisp.apply(view.lisp.eval(row[2]), arguments);
+      handled = true;
+      Var result = view.lisp.apply(view.lisp.eval(row[2]), arguments);
+      _view_trace(view, chain[i], name, result);
       if (!view.passed) return;
       break;
     }
   }
+  if (!handled) _view_trace(view, NULL, name, void);
 }
 
-/* Runs one entry of `fired`: `(chain handler)` for a reported event, or
-   `(chain depth name arguments)` for a message a handler sent. */
+/* Runs one entry of `fired`: `(chain handler event)` for a reported
+   event, or `(chain depth name arguments)` for a message a handler
+   sent. */
 static void _view_run(ViewState view, List entry) {
   List chain = entry[0];
   if (entry.len() == 4)
@@ -321,13 +337,15 @@ static void _view_run(ViewState view, List entry) {
   view.depth = depth;
   match (entry[1]) {
     case %(send ?name *arguments): {
+      _view_trace(view, chain[depth], entry[2], entry[1]);
       Array values = [];
       foreach (Var argument in arguments)
         values.push(_view_value(view, argument));
       return _view_deliver(view, chain, depth, name, values.list_free());
     }
   }
-  view.lisp.apply(view.lisp.eval(entry[1]), %());
+  Var result = view.lisp.apply(view.lisp.eval(entry[1]), %());
+  _view_trace(view, chain[depth], entry[2], result);
 }
 
 /** Returns a view of the tree the session `lisp` holds in the global
@@ -402,8 +420,24 @@ void View.watch(
   view.hook_user = user;
 }
 
+/** Calls `tracer` with `user` after each handler runs: with the node
+    whose handler ran, the event (`on-click` or `on-change`) or message
+    name, and the handler's result. A handler that sends a message is
+    traced with its `(send ...)` form as the result, before the message
+    is delivered. A message no node handles is traced with a NULL node
+    and a void result. A NULL `tracer` stops the calls.
+*/
+void View.trace(
+  View v, void (*tracer)(void *user, List node, Var event, Var result),
+  void *user) {
+  ViewState view = (ViewState) v;
+  view.tracer = tracer;
+  view.tracer_user = user;
+}
+
 /** Returns one row for each component a tree can name, as
-    `(name block arguments options)`; `x2cui_view_table` describes a row.
+    `(name block arguments options reports)`; `x2cui_view_table`
+    describes a row.
 */
 List View.components(void) => $x2cui.view.table();
 

@@ -599,9 +599,13 @@ dropped.
 ```
 
 A tool that edits a tree asks the view about it. `View.components()`
-returns one row for each component, `(name block arguments options)`,
-with the kind of every argument and option and the members of every
-enum. `view.watch(hook, user)` calls `hook(user, node, id)` for each node
+returns one row for each component,
+`(name block arguments options reports)`, with the kind of every
+argument and option and the members of every enum; `reports` is 1 for a
+component that runs an `on-click` or `on-change` handler.
+`view.trace(tracer, user)` calls `tracer(user, node, event, result)`
+after each handler runs, with the event or message name, and with a
+NULL node for a message no block handles. `view.watch(hook, user)` calls `hook(user, node, id)` for each node
 as it is drawn; `ui.get_rect(id)` then returns the node's rectangle. CUI
 gives a box and plain text no id, so while a hook is installed the view
 gives each block one and draws each id-less component inside a box that
@@ -655,8 +659,13 @@ the line shown. A new component shows text that says what it is, and a
 new block spaces its children 8 points apart. The toolbar selects the
 parent, moves the selection
 among its siblings, deletes it, undoes, redoes, and saves. The
-inspector groups the selection's options as Content, Layout, Size,
-Style, and Behavior. A block's Layout group sets its direction, gap,
+inspector groups the selection's options as Content, Events, Layout,
+Size, Style, and Behavior. Events gives a component's `on-click` or
+`on-change` as None, Send a message, or Call a procedure, each with its
+name; a new name is taken from the component's text. A block's Events
+lists the messages it handles, each with its handler's body as Lisp,
+and offers Handle for each message sent inside it that it does not
+handle yet. A block's Layout group sets its direction, gap,
 and padding, and where its children sit on a 3 by 3 grid, with space
 between them or stretched across. "In row" or "In column" shows the
 same controls for the block around the selection. Width and height are
@@ -677,9 +686,13 @@ key: wrap in a row (Shift R) or a column (Shift C), unwrap a block
 (Shift U), duplicate (Cmd or Ctrl D), move earlier or later (Alt Up,
 Alt Down), select the parent (Left) or first child (Right), and delete.
 Up and Down select the previous and next sibling, and Shift with Cmd or
-Ctrl Z redoes. Run mode makes the tree behave as it will in a program.
+Ctrl Z redoes. Run mode makes the tree behave as it will in a program;
+the inspector's place lists each handler run, with its node and result,
+and a box evaluates Lisp in the session on Return.
 `builder FILE` edits a tree saved as one
-datum, and evaluates `FILE.lisp` first when it exists. The builder uses
+datum, and evaluates `FILE.lisp` first when it exists. A procedure the
+tree calls and the session lacks gets a stub in `FILE.lisp` that returns
+its own name; Run adds it, and Save writes the file. The builder uses
 CUI's layout: a component's place is its position among its siblings,
 and spacing comes from padding, gap, alignment, and sizes. It has no
 placement by coordinates, no copy and paste, and no dragging in the

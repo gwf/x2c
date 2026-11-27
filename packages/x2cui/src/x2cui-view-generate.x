@@ -133,6 +133,10 @@ meta static int _view_has_id(Type record) {
   return 0;
 }
 
+// Whether a call's result stands for an event: not void and not an id.
+meta static int _view_reports(Type result) =>
+  !_view_spelled(result, "(void)") && !_view_spelled(result, "(\"cui_id\")");
+
 /* The draw function of the component `function` names: it reads the
    node's arguments by the types of the C parameters, calls the function,
    and reports the event a result other than an id stands for. A block
@@ -217,9 +221,7 @@ meta static List _view_draw(String function) {
   else before.push($!{ _view_drawn($view, $node, 0); });
   List setup = before.list_free(), passed = args.list_free();
   List kept = after.list_free();
-  int reports = !_view_spelled(result, "(void)") &&
-                !_view_spelled(result, "(\"cui_id\")");
-  List call = reports
+  List call = _view_reports(result)
     ? $!{ if ($target(@passed)) _view_fire($view, $node); }
     : $!{ $target(@passed); };
   if (!block)
@@ -257,8 +259,10 @@ meta static List _view_records(void) {
 }
 
 /** Returns one row for each component a tree can name:
-    `(name block arguments options)`. `block` is 1 for a component with
-    children. Each argument and option is `(name kind member...)`, where
+    `(name block arguments options reports)`. `block` is 1 for a component
+    with children, and `reports` is 1 for a component without children
+    whose call reports an event, which runs its `on-click` or `on-change`
+    handler. Each argument and option is `(name kind member...)`, where
     `kind` is "text", "number", "bool", "size", "color", or "enum" with
     its member names; an argument can also be "items" for a List of
     labels, "bound" for a number kept by a `bind` option, and "field" for
@@ -297,8 +301,10 @@ meta List x2cui_view_table(void) {
       else arguments.push(_view_described(name, type));
     }
     int block = function.endswith("_begin");
+    Type result = Type.return_type(Code.type(x2c_ident(function)));
+    int reports = !block && _view_reports(result);
     rows.push(%($(_view_component(function)) $block
-                $(arguments.list_free()) $(options.list_free())));
+                $(arguments.list_free()) $(options.list_free()) $reports));
   }
   return rows.list_free();
 }
