@@ -57,6 +57,18 @@ macro Expression $x2cui.count(Expr $array) =>
    0 * (int) sizeof(char[1 - 2 * __builtin_types_compatible_p(
      __typeof__($array), __typeof__(&($array)[0]))]));
 
+/* The receiver of the form whose option record is being built, through
+   which its literals are tweaked; NULL for a record built otherwise. */
+meta static List _tweak_receiver = NULL;
+
+/* `file` from the directory the compiler runs in, so that a tweaked
+   literal is written back to the file it was read from. */
+meta static String _absolute(String file) {
+  if (file.startswith("/")) return file;
+  char here[4096];
+  return getcwd(here, sizeof here) ? %"$(String.new(here))/$file" : file;
+}
+
 /** Returns the arguments of the `Ui` method `method` on `ui`: `args`,
     and `options` as the record of the option parameter that follows them.
     `pairs` are the positions, among the method's parameters after the
@@ -98,9 +110,11 @@ meta List x2cui_arguments(
     passed.push(x2cui_value(type, value));
   }
   while (at < args.len()) passed.push(args[at++]);
+  _tweak_receiver = ui;
   if (record) passed.push(x2cui_record(types[ordinary], options));
   // A row a method has no record for stays, and the call reports it.
   else foreach (List row in options) passed.push(row);
+  _tweak_receiver = NULL;
   return passed.list_free();
 }
 
@@ -213,7 +227,10 @@ meta List x2cui_columns(String record, List options) {
 meta List x2cui_options(List ui, String method, List options) {
   List types = Type.parameters(_signature(ui, method));
   List rest = options.filter(%!(List row) => _key(row) != "columns");
-  return x2cui_record(types[types.len() - 1], rest);
+  _tweak_receiver = ui;
+  List record = x2cui_record(types[types.len() - 1], rest);
+  _tweak_receiver = NULL;
+  return record;
 }
 
 // calls
@@ -234,7 +251,30 @@ meta static List _field(List fields, List row, Array statics) {
   Type type = field ? field[1] : NULL;
   if (type && Type.is_text(type) && _icon_field(name)) type = _icon();
   if (type && type.car() == <*> && _icons_field(name)) type = _icons();
-  return %(dotinit ($name) $(_lower(type, row[2], statics)));
+  List value = row[2];
+  if (_tweak_receiver && statics == NULL && type && _literal_number(value))
+    value = _tweaked(name, value);
+  return %(dotinit ($name) $(_lower(type, value, statics)));
+}
+
+// Whether `value` is a number written as a literal.
+meta static int _literal_number(List value) {
+  match (value) {
+    case %(expr ? (literal *)):
+      return Type.numeric(Code.type(value)) != NULL;
+  }
+  return 0;
+}
+
+/* `value`, the literal option `name`, through `Ui.tweak_value`, which can
+   replace it while a program is tweaked; see x2cui-tweak.x. */
+meta static List _tweaked(String name, List value) {
+  String file = _absolute(x2c_invocation_file());
+  int line = x2c_invocation_line(), column = x2c_invocation_column();
+  List ui = _tweak_receiver;
+  List call = $!( $ui.tweak_value($file, $line, $column, $name, $value) );
+  Type type = Code.type(value);
+  return $!( ($type) $call );
 }
 
 /* The count field that follows the array field `name`: `part_count`
@@ -319,6 +359,16 @@ meta static int _number(List literal) {
 meta static List _initializers(Type record, List options, Array statics) {
   List fields = Type.fields(record);
   Array rows = [];
+  /* A box whose call names no id gets one from its call site while a
+     program is tweaked, so that its rectangle can be found. */
+  if (_tweak_receiver && statics == NULL && record ~= %("cui_box") &&
+      !_option(options, "id")) {
+    String file = _absolute(x2c_invocation_file());
+    int line = x2c_invocation_line(), column = x2c_invocation_column();
+    List ui = _tweak_receiver;
+    List id = $!( $ui.tweak_id($file, $line, $column) );
+    rows.push(%(dotinit (id) $id));
+  }
   foreach (List row in options) {
     rows.push(_field(fields, row, statics));
     String count = _count_field(fields, _key(row));

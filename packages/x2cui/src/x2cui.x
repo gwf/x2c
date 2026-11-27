@@ -1532,3 +1532,7 @@ macro Unit(Name $method, Literal @pairs) {
 
 // A UI held as a List is a unit of its own, linked only when used.
 #include "x2cui-view.x"
+// Tweaking literal options in a running program (probe), in this unit.
+module {
+  "tweak/tweak.x",
+}
