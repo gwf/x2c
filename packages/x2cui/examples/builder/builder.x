@@ -31,7 +31,8 @@
     and the file lacks gets a stub there when the tree runs or is saved.
 
     This file holds the shared types and the frame; the module block
-    below splices the rest into one unit: document.x for the tree and its
+    below splices the rest into one unit: notebook.x for the tree opened
+    when no file is given, document.x for the tree and its
     edits, canvas.x for the pointer over the tree, panes.x for the
     toolbar, outline, and palette, inspector.x and events.x for the
     inspector, and check.x for `--check`.
@@ -200,12 +201,13 @@ module String sample = %"
     (button ((variant primary) (on-click bump)) \"Add one\")
     (text () (eval (ui-text \"Clicked \" clicks \" times.\"))))";
 
-static String sample_program = %"
+module String sample_program = %"
   (def clicks 0)
   (def bump (lambda () (def clicks (+ clicks 1))))";
 
 // The rest of the builder, in the order its types are needed.
 module {
+  "notebook.x",
   "document.x",
   "canvas.x",
   "panes.x",
@@ -268,14 +270,17 @@ module void draw(Ui ui, Builder &b) {
   }
 }
 
-module void open_file(Builder &b, Ui ui, String file) {
+/* Opens `file`, or with no file the tree `start` and its program
+   `start_program`, saved as builder.tree. */
+module void open_file(Builder &b, Ui ui, String file, String start,
+                      String start_program) {
   b.lisp = Lisp.new();
   ViewLisp.install(b.lisp);
   b.file = file ? file : "builder.tree";
   Path saved = b.file, program = %"$(b.file).lisp";
-  String text = file && saved.exists() ? saved.read_text() : sample;
+  String text = file && saved.exists() ? saved.read_text() : start;
   b.program = program.exists() ? program.read_text()
-            : !file ? sample_program : "";
+            : !file ? start_program : "";
   b.lisp.eval_string(b.program);
   Var tree = void;
   if (!read_value(text, tree) || !is_node(tree))
@@ -302,8 +307,10 @@ module void open_file(Builder &b, Ui ui, String file) {
 int main(int argc, char **argv) {
   if (argc == 3 && !strcmp(argv[1], "--check")) return check(argv[2]);
   static Builder b;
-  App app = auto App.open(title: "Builder", width: 1280, height: 760);
-  open_file(b, app.ui(), argc > 1 ? argv[1] : NULL);
+  // Wide enough that a window such as the notebook fits on the canvas.
+  App app = auto App.open(title: "Builder", width: 1640, height: 980);
+  open_file(b, app.ui(), argc > 1 ? argv[1] : NULL, notebook,
+            notebook_program);
   while (app.frame()) draw(app.ui(), b);
   return 0;
 }

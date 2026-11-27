@@ -152,7 +152,24 @@ module int check(String image) {
   static Builder b;
   Offscreen screen = auto Offscreen.open(1200, 700);
   Ui ui = screen.ui();
-  open_file(b, ui, NULL);
+
+  /* The notebook the builder opens by default draws without an error,
+     and a click on its formatting toolbar's padding selects that row. */
+  open_file(b, ui, NULL, notebook, notebook_program);
+  for (int i = 0; i < 30; i++) frame(screen, b);
+  int notes = !b.status && b.drawn_count > 30;
+  cui_rect toolbar_row = drawn_at(b, ui, (Where){ 2, { 4, 2 } });
+  click(screen, b, (cui_rect){ toolbar_row.x + 3, toolbar_row.y + 3, 1, 1 });
+  for (int i = 0; i < 30; i++) frame(screen, b);
+  notes = notes && b.selected && b.where.depth == 2 &&
+          node_at(b.tree, b.where)[0] == <row>;
+  screen.write_png(image + ".notebook.png");
+  printf("notebook: %d nodes drawn, status %s, selected %s\n",
+         b.drawn_count, b.status ? (char *) b.status : "none",
+         b.selected ? written(node_at(b.tree, b.where)[0]) : "nothing");
+  if (!notes) return 1;
+
+  open_file(b, ui, NULL, sample, sample_program);
   for (int i = 0; i < 3; i++) frame(screen, b);
 
   // In edit mode a click selects the button and does not press it.

@@ -303,12 +303,13 @@ static void paint_marks(cui_ctx *ui, cui_rect area, void *user) {
     cui_draw_rect(
       ui, (cui_rect){ r.x + r.w - HANDLE / 2, r.y + r.h - HANDLE / 2, HANDLE,
                       HANDLE }, CUI_CORNERS(2), accent);
-  // The selected block's spacing handles; the one held is full colour.
-  cui_color soft = accent;
-  soft.a = 150;
+  /* The selected block's spacing handles, in a colour no tree draws, so
+     they are not taken for separators; the one held is full colour. */
+  cui_color spacing = { 230, 40, 140, 255 }, soft = spacing;
+  soft.a = 170;
   for (int i = 0; marks.selected && !marks.target && i < b.spacer_count; i++)
     cui_draw_rect(ui, b.spacers[i].at, CUI_CORNERS(2),
-                  b.holding == i + 1 ? accent : soft);
+                  b.holding == i + 1 ? spacing : soft);
   if (marks.lined) cui_draw_rect(ui, marks.line, CUI_CORNERS(1), accent);
   if (marks.ghosted) outline(ui, marks.ghost, 0, accent, 1);
 }

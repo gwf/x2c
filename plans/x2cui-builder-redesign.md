@@ -266,6 +266,18 @@ shared types, the frame, and `main`, and a module block splices
 `module`; every other file-scope name stays `static` to its file. The
 code is moved, not changed, and `builder --check` passes unchanged.
 
+## Starting from a finished layout
+
+On 2026-11-27, after trying the builder, Gary judged building a UI from
+nothing too hard, and asked to focus on adjusting a mostly finished one.
+Given no file, the builder now opens `notebook.x`: md-edit's window
+written as a tree, with a textarea in place of md-edit's own editor and
+text labels in place of its icons. The window opens at 1640 by 980 so
+the notebook fits on the canvas. Spacing handles are pink, so that they
+are not taken for separators, and a block's Events group follows its
+Layout group. `builder --check` opens the notebook first and selects its
+formatting toolbar.
+
 ## Validation
 
 One scripted scenario is the acceptance test for slices 1 to 4, run by

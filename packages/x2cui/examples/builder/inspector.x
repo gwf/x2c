@@ -479,8 +479,10 @@ module void inspector(Ui ui, Builder &b) {
         arguments(ui, b, own);
         group_rows(ui, b, own, CONTENT);
       }
-      // What the node does comes next to what it shows.
-      if (has_events(own.node) &&
+      /* What a component does comes next to what it shows. A block's
+         Events, the messages sent inside it, comes after its spacing. */
+      bool block = is_block(own.node);
+      if (!block && has_events(own.node) &&
           ui.inspector_group("Events", b.open[EVENTS]))
         events(ui, b, own);
       if (own.where.depth) {
@@ -490,10 +492,14 @@ module void inspector(Ui ui, Builder &b) {
         around.around = true;
       }
       // A block's own spacing comes before the spacing of the one around.
-      bool block = is_block(own.node);
       for (int group = LAYOUT; group < GROUPS; group++) {
         if (group == LAYOUT + block) around_group(ui, b, around);
-        if (group == EVENTS) continue;
+        if (group == EVENTS) {
+          if (block && has_events(own.node) &&
+              ui.inspector_group("Events", b.open[EVENTS]))
+            events(ui, b, own);
+          continue;
+        }
         bool laid = group == LAYOUT && block;
         if (!laid && !group_shows(b, own.node, group)) continue;
         if (!ui.inspector_group(group_names[group], b.open[group])) continue;

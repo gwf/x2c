@@ -649,7 +649,9 @@ run-lisp` draws it off screen and clicks its button.
 
 `examples/builder/` edits a tree by pointing at it (`make run-builder`).
 Its entry, `builder.x`, splices the other files of the directory into one
-unit with a module block.
+unit with a module block. Given no file, it opens a notes window laid out
+after md-edit (`notebook.x`), with a textarea in place of md-edit's own
+editor, so there is a finished layout to adjust.
 The window draws the tree between a palette and an inspector, with an
 outline of every node under the palette. In edit
 mode a click selects the component under the pointer and does not press
