@@ -46,13 +46,10 @@ Pictures: `.context/tweak-probe/before-original.png` and
 ## What the probe did not cover
 
 - **Other kinds of value.** Of md_editor's 251 named options, 54 are
-  numeric literals, which the probe edits. 147 are names such as
-  `bg: surface`, `size: sm`, `variant: primary`, and `align: center`;
-  each is an enum or theme member and could get a picker the same way.
-  50 are expressions such as `e.split_toolbar ? 36 : 41`; they are shown
-  as computed and stay code.
-- **Components.** Only boxes are chosen. A button, an icon, or text has
-  no record id; choosing one needs its id after the call (`last_id`).
+  numeric literals and 147 are names; names now have pickers when they
+  are enum members or theme colours, but not sizes such as `fill`. 50
+  are expressions such as `e.split_toolbar ? 36 : 41`; they stay code
+  and the panel does not list them.
 - **Shared helpers.** A literal inside a helper such as `md_tool` is one
   call site for every tool it draws; the panel says how many were drawn
   from the call, and an edit changes them all, as editing the code would.
@@ -87,6 +84,32 @@ footer. The other tools are components drawn by `md_tool` with no box
 around them, and the document, margins included, is one painted canvas
 (`ui.canvas_input("paper", ...)`) whose spacing comes from md-edit's
 appearance settings, not from option literals.
+
+## Components and named values
+
+Added the same day, at Gary's request after the window trial:
+
+- **Components.** A component's form is now a statement expression that
+  reads `last_id` before and after the call and notes the component when
+  CUI gave it a new id (`$x2cui.widget` and `$x2cui.widget_void` in
+  `x2cui-generate.x`, chosen by the method's result type). md-edit's
+  icon tools, drawn by `md_tool` at `editor.x:1414`, became selectable
+  (30 by 30 points). Text, which CUI gives no id, still is not.
+- **Named values.** A short name for an enum member, such as `variant:
+  ghost`, passes through `ui.tweak_choice` with the enum's members, and
+  a theme colour, such as `bg: surface`, through `ui.tweak_color` with
+  CUI's colour tokens. The panel shows each as a select box, and Write
+  replaces the name in the source.
+- **Checked on md-edit.** One scripted run set the toolbar row's
+  spacing, the icon tools' `variant` to `secondary`, and the toolbar's
+  `bg` to `accent_subtle`; all three showed on the next frame and were
+  written back: `variant: ghost` to `secondary` at line 1414, `bg:
+  surface` to `accent_subtle` at line 1618, `gap: 2` to `14` at 1624.
+  md-edit rebuilt from the written names, with tweaking off, drew the
+  same result.
+- **Cost.** Every component call ignored as a statement now gives C's
+  "expression result unused" warning, because the statement expression
+  returns the call's value. `make -C packages/x2cui check` passes.
 
 ## Answer to the question
 

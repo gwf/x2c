@@ -1,35 +1,40 @@
 /*  tweak.x -- adjust a running program's literal options (probe)
 
-    Every `name: 3` option a form receives as a numeric literal reaches
-    CUI through `Ui.tweak_value`, which reports the literal's call site and
-    returns it, or the value set for that site and name while tweaking.
-    A box whose call names no id gets one made from its call site, so
-    its rectangle can be found. `ui.tweak_marks()` paints the box under
-    the pointer and the chosen one; `ui.tweak_panel()` lists the chosen
-    box's literals with editors, and writes one back to its source line.
-    Tweaking is on when the environment sets X2CUI_TWEAK; otherwise each
-    call returns its value and records nothing.
+    Each option a form receives as a literal reaches CUI through a tweak
+    call that reports the literal's call site and returns it, or the
+    value set for that site and name while tweaking: `Ui.tweak_value`
+    for a number, `Ui.tweak_choice` for a member of an enum such as
+    `variant: primary`, and `Ui.tweak_color` for a theme colour such as
+    `bg: surface`. A box whose call names no id gets one made from its
+    call site, and a component is noted with the id CUI gave it, so that
+    their rectangles can be found. `ui.tweak_marks()` paints the node
+    under the pointer and the chosen one; `ui.tweak_panel()` lists the
+    chosen node's literals with editors, and writes one back to its
+    source. Tweaking is on when the environment sets X2CUI_TWEAK;
+    otherwise each call returns its value and records nothing.
 */
 
 #include "path.x"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-// A call site's literals, by name, and where it is: (file line column).
+/* A call site's literals by name, each `(number original used)` or
+   `(choice original used names values)` or the same with `color`, where
+   `used` is the member's position. */
 static Map _tweak_sites = NULL;
 // Values set while tweaking, by "file:line:column:name".
 static Map _tweak_set = NULL;
-// The boxes drawn this frame, as (id site), and each site's count.
-static Array _tweak_boxes = NULL;
-// The boxes the last whole frame drew, for a choice between frames.
+/* The nodes drawn this frame and the last whole frame, as (id site), and
+   how many each site drew this frame. */
+static Array _tweak_nodes = NULL;
 static List _tweak_last = NULL;
 static Map _tweak_counts = NULL;
 static Array _tweak_ids = NULL;
-static cui_ctx *_tweak_ui = NULL;
 static int _tweak_on = -1;
 static String _tweak_chosen = NULL;
-static cui_id _tweak_chosen_id = 0, _tweak_hovered = 0;
+static cui_id _tweak_chosen_id = 0;
 static String _tweak_note = NULL;
 
 static bool _tweaking(void) {
@@ -37,7 +42,7 @@ static bool _tweaking(void) {
     _tweak_on = getenv("X2CUI_TWEAK") != NULL;
     _tweak_sites = {};
     _tweak_set = {};
-    _tweak_boxes = [];
+    _tweak_nodes = [];
     _tweak_counts = {};
     _tweak_ids = [];
   }
@@ -47,23 +52,93 @@ static bool _tweaking(void) {
 static String _site(const char *file, int line, int column) =>
   %"$(String.new(file)):$line:$column";
 
-/** Returns `value`, the literal option `name` written at `file`, `line`,
-    and `column`, or the value set for it while tweaking.
+static Var _setting(String site, String name) =>
+  _tweak_set[%"$site:$name"];
+
+static Map _literals(String site) {
+  Var known = _tweak_sites[site];
+  if (!known.is_void()) return known;
+  Map literals = {};
+  _tweak_sites[site] = literals;
+  return literals;
+}
+
+/** Returns `value`, the numeric literal option `name` written at `file`,
+    `line`, and `column`, or the value set for it while tweaking.
 */
 double Ui.tweak_value(Ui ui, const char *file, int line, int column,
                       const char *name, double value) {
   if (!_tweaking()) return value;
-  _tweak_ui = (cui_ctx *) ui;
-  String site = _site(file, line, column), key = %"$site:$(String.new(name))";
-  Var set = _tweak_set[key], known = _tweak_sites[site];
+  String site = _site(file, line, column), field = String.new(name);
+  Var set = _setting(site, field);
   double used = set.is_void() ? value : set.double();
-  Map literals = known.is_void() ? NULL : (Map) known;
-  if (!literals) {
-    literals = {};
-    _tweak_sites[site] = literals;
-  }
-  literals[String.new(name)] = %( $value $used );
+  _literals(site)[field] = %( number $value $used );
   return used;
+}
+
+/* The position of the member a choice uses: the one set while tweaking,
+   or the one written, `current`. Records the choice. */
+static int _choose(Symbol kind, const char *file, int line, int column,
+                   const char *name, const char *current, const char **names,
+                   int *values, int count) {
+  String site = _site(file, line, column), field = String.new(name);
+  int written = 0;
+  for (int i = 0; i < count; i++)
+    if (!strcmp(names[i], current)) written = i;
+  Var set = _setting(site, field);
+  int used = set.is_void() ? written : set.int();
+  Map literals = _literals(site);
+  if (literals[field].is_void()) {
+    Array spelled = [], numbers = [];
+    for (int i = 0; i < count; i++) {
+      spelled.push(String.new(names[i]));
+      numbers.push(values[i]);
+    }
+    literals[field] = %( $kind $written $used $(spelled.list())
+                         $(numbers.list()) );
+  }
+  else {
+    List old = literals[field];
+    literals[field] = %( $kind $written $used $(old[3]) $(old[4]) );
+  }
+  return used;
+}
+
+/** Returns the value of the enum member `current`, the literal option
+    `name` written at `file`, `line`, and `column`, or of the member set
+    for it while tweaking. `names` and `values` are the enum's members.
+*/
+int Ui.tweak_choice(Ui ui, const char *file, int line, int column,
+                    const char *name, const char *current,
+                    const char **names, int *values, int count) {
+  int written = 0;
+  for (int i = 0; i < count; i++)
+    if (!strcmp(names[i], current)) written = i;
+  if (!_tweaking()) return values[written];
+  return values[_choose(<choice>, file, line, column, name, current, names,
+                        values, count)];
+}
+
+/** Returns the theme colour `current`, the literal option `name` written
+    at `file`, `line`, and `column`, or the colour set for it while
+    tweaking. `names` and `values` are CUI's colour tokens.
+*/
+cui_color Ui.tweak_color(Ui ui, const char *file, int line, int column,
+                         const char *name, const char *current,
+                         const char **names, int *values, int count) {
+  int at = 0;
+  for (int i = 0; i < count; i++)
+    if (!strcmp(names[i], current)) at = i;
+  if (_tweaking())
+    at = _choose(<color>, file, line, column, name, current, names, values,
+                 count);
+  return CUI_TOKEN_COLOR(values[at]);
+}
+
+static void _note_node(cui_id id, String site) {
+  Var seen = _tweak_counts[site];
+  _tweak_counts[site] = (seen.is_void() ? 0 : seen.int()) + 1;
+  _tweak_nodes.push(%( $((double) id) $site ));
 }
 
 /** Returns an id for a box written at `file`, `line`, and `column` whose
@@ -72,32 +147,40 @@ double Ui.tweak_value(Ui ui, const char *file, int line, int column,
 */
 const char *Ui.tweak_id(Ui ui, const char *file, int line, int column) {
   if (!_tweaking()) return NULL;
-  _tweak_ui = (cui_ctx *) ui;
   String site = _site(file, line, column);
   Var seen = _tweak_counts[site];
-  int n = seen.is_void() ? 0 : seen.int();
-  _tweak_counts[site] = n + 1;
-  String id = %"tweak:$site#$n";
+  String id = %"tweak:$site#$(seen.is_void() ? 0 : seen.int())";
   _tweak_ids.push(id);
-  _tweak_boxes.push(%( $((double) cui_make_id(_tweak_ui, id)) $site ));
+  _note_node(ui.make_id(id), site);
   return id;
 }
 
-static cui_rect _box_rect(Ui ui, List box) =>
-  ui.get_rect((cui_id) box[0].double());
+/** Notes the component a form at `file`, `line`, and `column` has just
+    drawn, when CUI gave it an id other than `before`, the last id before
+    the call. A component CUI gives no id, such as text, is not noted.
+*/
+void Ui.tweak_component(Ui ui, const char *file, int line, int column,
+                        cui_id before) {
+  if (!_tweaking()) return;
+  cui_id id = ui.last_id();
+  if (id && id != before) _note_node(id, _site(file, line, column));
+}
 
-// The smallest box drawn under the pointer, or NULL.
-static List _box_under(Ui ui) {
+static cui_rect _node_rect(Ui ui, List node) =>
+  ui.get_rect((cui_id) node[0].double());
+
+// The smallest node drawn under the pointer, or NULL.
+static List _node_under(Ui ui) {
   cui_vec2 p = ui.mouse_pos();
   List best = NULL;
   float area = 0;
-  foreach (List box in _tweak_boxes) {
-    cui_rect r = _box_rect(ui, box);
+  foreach (List node in _tweak_nodes) {
+    cui_rect r = _node_rect(ui, node);
     if (r.w <= 0 || p.x < r.x || p.y < r.y || p.x >= r.x + r.w ||
         p.y >= r.y + r.h)
       continue;
     if (!best || r.w * r.h < area) {
-      best = box;
+      best = node;
       area = r.w * r.h;
     }
   }
@@ -117,17 +200,15 @@ static void _paint_marks(cui_ctx *ui, cui_rect area, void *user) {
                          pink, 2);
 }
 
-/** Paints, over what was drawn before it in a stack, the box under the
-    pointer while Alt is held and the box chosen with Alt and a click.
+/** Paints, over what was drawn before it in a stack, the node under the
+    pointer while Alt is held and the node chosen with Alt and a click.
 */
 void Ui.tweak_marks(Ui ui) {
   if (!_tweaking()) return;
-  _tweak_ui = (cui_ctx *) ui;
   bool alt = (ui.key_mods() & CUI_MOD_ALT) != 0;
-  List under = alt ? _box_under(ui) : NULL;
-  _tweak_hovered = 0;
+  List under = alt ? _node_under(ui) : NULL;
   TweakMarks marks = { { 0 }, { 0 } };
-  if (under) marks.hovered = _box_rect(ui, under);
+  if (under) marks.hovered = _node_rect(ui, under);
   if (under && ui.mouse_clicked(CUI_MOUSE_LEFT)) {
     _tweak_chosen = under[1];
     _tweak_chosen_id = (cui_id) under[0].double();
@@ -148,54 +229,84 @@ static List _site_parts(String site) {
 static String _number_text(double value) =>
   value == (long) value ? %"$((long) value)" : %"$value";
 
-/* Writes `value` over the literal of `name` in the call at `site`: the
-   first `name:` followed by a number after the call's position, before
-   the call's parentheses close. */
-static String _write_back(String site, String name, double value) {
+static bool _word(char c) => isalnum(c) || c == '_' || c == '-' || c == '.';
+
+/* Writes `text` over the value of `name` in the call at `site`: the
+   number or name after the first `name:` that follows the call's
+   position, before the call's parentheses close. */
+static String _write_back(String site, String name, String text) {
   List parts = _site_parts(site);
   Path path = (String) parts[0];
   if (!path.exists()) return %"No file $(parts[0])";
-  String text = path.read_text();
+  String source = path.read_text();
   int line = parts[1].int(), column = parts[2].int(), at = 0;
   for (int l = 1; l < line && at >= 0; l++) {
-    int next = text[at:].find("\n");
+    int next = source[at:].find("\n");
     at = next < 0 ? -1 : at + next + 1;
   }
   if (at < 0) return "The line is gone";
   at += column > 0 ? column - 1 : 0;
-  int depth = 0, n = text.len(), nl = name.len();
+  int depth = 0, n = source.len(), nl = name.len();
   for (int i = at; i < n; i++) {
-    char c = text[i];
+    char c = source[i];
     if (c == '(') depth++;
     if (c == ')' && --depth <= 0) break;
-    bool word = i + nl <= n && text[i:i + nl] == name &&
-                (i == 0 || !(isalnum(text[i - 1]) || text[i - 1] == '_'));
+    bool word = i + nl <= n && source[i:i + nl] == name &&
+                (i == 0 || !_word(source[i - 1]));
     if (!word) continue;
     int j = i + nl;
-    while (j < n && text[j] == ' ') j++;
-    if (j >= n || text[j] != ':') continue;
+    while (j < n && source[j] == ' ') j++;
+    if (j >= n || source[j] != ':') continue;
     j++;
-    while (j < n && text[j] == ' ') j++;
+    while (j < n && source[j] == ' ') j++;
     int k = j;
-    while (k < n && (isdigit(text[k]) || text[k] == '.' || text[k] == '-'))
-      k++;
-    if (k == j) return %"$name is not a number at the call";
-    path.write_text(text[:j] + _number_text(value) + text[k:]);
-    return %"Wrote $name: $(_number_text(value)) to $(parts[0]):$line";
+    while (k < n && _word(source[k])) k++;
+    if (k == j) return %"$name is not a literal at the call";
+    path.write_text(source[:j] + text + source[k:]);
+    return %"Wrote $name: $text to $(path.basename()):$line";
   }
   return %"No $name: at the call";
 }
 
-/** Lists the chosen box's literal options with an editor for each, which
+// The text a literal is written as now.
+static String _literal_text(List literal) {
+  if (literal[0] == <number>) return _number_text(literal[2].double());
+  return ((List) literal[3])[literal[2].int()];
+}
+
+/* One row of the panel: an editor for the literal `name` of the chosen
+   site, and a button that writes it back. */
+static void _literal_row(Ui ui, String name, List literal) {
+  String key = %"$_tweak_chosen:$name";
+  ui.push_id(name);
+  ui.row (width: fill, gap: 6, align: center) {
+    ui.text(name, width: 96);
+    if (literal[0] == <number>) {
+      double value = literal[2].double();
+      if (ui.number(name, value, -1000, 4000, step: 1, width: 150))
+        _tweak_set[key] = value;
+    }
+    else {
+      int index = literal[2].int();
+      if (ui.select(name, literal[3], index, width: 150))
+        _tweak_set[key] = index;
+    }
+    if (ui.button("Write", size: sm))
+      _tweak_note = _write_back(_tweak_chosen, name, _literal_text(literal));
+  }
+  ui.pop_id();
+}
+
+/** Lists the chosen node's literal options with an editor for each, which
     sets the value the program uses from the next frame, and a button
-    that writes the value back to the call's source line. Clears what
-    the frame recorded, so it is called once, after everything else.
+    that writes the value back to the call's source. Clears what the
+    frame recorded, so it is called once, after everything else.
 */
 void Ui.tweak_panel(Ui ui) {
   if (!_tweaking()) return;
-  ui.column (width: 300, height: fill, pad: 12, gap: 8, bg: surface) {
+  ui.column (width: 360, height: fill, pad: 12, gap: 8, bg: surface) {
     ui.heading("Tweak", 4);
-    ui.muted("Alt and a click chooses a box.");
+    ui.muted("Alt and a click chooses a node.");
     Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
     Map literals = known.is_void() ? NULL : (Map) known;
     if (_tweak_chosen) {
@@ -203,61 +314,74 @@ void Ui.tweak_panel(Ui ui) {
       Path path = (String) parts[0];
       ui.text(%"$(path.basename()):$(parts[1])", width: fill);
       Var drawn = _tweak_counts[_tweak_chosen];
-      int count = drawn.is_void() ? 0 : drawn.int();
-      ui.muted(%"$count drawn from this call");
+      ui.muted(%"$(drawn.is_void() ? 0 : drawn.int()) drawn from this call");
     }
-    if (literals) foreach (String name in literals.keys()) {
-      List pair = literals[name];
-      double value = pair[1].double();
-      ui.push_id(name);
-      ui.row (width: fill, gap: 6, align: center) {
-        ui.text(name, width: 96);
-        if (ui.number(name, value, -1000, 4000, step: 1, width: 110))
-          _tweak_set[%"$_tweak_chosen:$name"] = value;
-        if (ui.button("Write", size: sm))
-          _tweak_note = _write_back(_tweak_chosen, name, value);
-      }
-      ui.pop_id();
-    }
+    if (literals)
+      foreach (String name in literals.keys())
+        _literal_row(ui, name, literals[name]);
     if (_tweak_chosen && !literals) ui.muted("No literal options here.");
     if (_tweak_note) ui.text(_tweak_note, width: fill);
   }
-  _tweak_last = _tweak_boxes;
-  _tweak_boxes = [];
+  _tweak_last = _tweak_nodes;
+  _tweak_nodes = [];
   _tweak_counts = {};
   _tweak_ids = [];
 }
 
 // Scripted use, for a check that drives the probe without a pointer.
 
-/** Chooses the first box drawn last frame from a call at `line` of a file
-    whose path ends with `file`. Returns whether there was one.
+/** Chooses the `nth` node drawn last frame from a call at `line` of a
+    file whose path ends with `file`. Returns whether there was one.
 */
-bool Ui.tweak_choose(Ui ui, String file, int line) {
-  foreach (List box in _tweak_last ? _tweak_last : %()) {
-    List parts = _site_parts(box[1]);
+bool Ui.tweak_choose(Ui ui, String file, int line, int nth) {
+  int seen = 0;
+  foreach (List node in _tweak_last ? _tweak_last : %()) {
+    List parts = _site_parts(node[1]);
     if (!((String) parts[0]).endswith(file) || parts[1].int() != line)
       continue;
-    _tweak_chosen = box[1];
-    _tweak_chosen_id = (cui_id) box[0].double();
+    if (seen++ < nth) continue;
+    _tweak_chosen = node[1];
+    _tweak_chosen_id = (cui_id) node[0].double();
     return true;
   }
   return false;
 }
 
-/** Sets the chosen box's literal `name` to `value` from the next frame. */
-void Ui.tweak_assign(Ui ui, String name, double value) {
-  if (_tweak_chosen) _tweak_set[%"$_tweak_chosen:$name"] = value;
+/** Sets the chosen node's literal `name` to `value`: a number, or the
+    name of a member. Returns whether the node has that literal.
+*/
+bool Ui.tweak_assign(Ui ui, String name, Var value) {
+  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
+  if (known.is_void() || ((Map) known)[name].is_void()) return false;
+  List literal = ((Map) known)[name];
+  if (literal[0] == <number>) {
+    _tweak_set[%"$_tweak_chosen:$name"] = value.double();
+    return true;
+  }
+  List names = literal[3];
+  for (int i = 0; i < names.len(); i++)
+    if ((String) names[i] == (String) value) {
+      _tweak_set[%"$_tweak_chosen:$name"] = i;
+      return true;
+    }
+  return false;
 }
 
-/** Writes the chosen box's value of `name` back to its source line, and
-    returns what was done.
+/** Writes the chosen node's literal `name`, as it is used now, back to
+    its source, and returns what was done.
 */
 String Ui.tweak_write(Ui ui, String name) {
-  Var set = _tweak_set[%"$_tweak_chosen:$name"];
-  return _tweak_chosen && !set.is_void()
-    ? _write_back(_tweak_chosen, name, set.double()) : "Nothing to write";
+  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
+  if (known.is_void() || ((Map) known)[name].is_void())
+    return "Nothing to write";
+  return _write_back(_tweak_chosen, name, _literal_text(((Map) known)[name]));
 }
 
-/** Returns the chosen box's rectangle in the last frame's layout. */
+/** Returns the names of the chosen node's literals. */
+List Ui.tweak_literals(Ui ui) {
+  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
+  return known.is_void() ? %() : ((Map) known).keys().list();
+}
+
+/** Returns the chosen node's rectangle in the last frame's layout. */
 cui_rect Ui.tweak_chosen_rect(Ui ui) => ui.get_rect(_tweak_chosen_id);

@@ -377,7 +377,8 @@ meta List x2cui_method(String function) {
   Type last = types[count - 1];
   int options = count > 1 && _const_pointer(last) &&
                 x2cui_option_record(Type.element(last));
-  List form = _method_form(name, options || lowers, pairs.list_free());
+  List form = _method_form(name, options || lowers, pairs.list_free(),
+                           result);
   return form ? %($unit $form) : $(unit);
 }
 
@@ -441,12 +442,49 @@ meta List x2cui_begin(
   return block in _openings ? call : $!( ($call, 1) );
 }
 
+/** Returns the file of the form being expanded, from the directory the
+    compiler runs in, for a tweak call; see tweak/tweak.x.
+*/
+meta List x2cui_site_file(void) {
+  String file = x2cui_absolute(x2c_invocation_file());
+  return $!( $file );
+}
+
+/** Returns the line of the form being expanded, for a tweak call. */
+meta List x2cui_site_line(void) {
+  int line = x2c_invocation_line();
+  return $!( $line );
+}
+
+/** Returns the column of the form being expanded, for a tweak call. */
+meta List x2cui_site_column(void) {
+  int column = x2c_invocation_column();
+  return $!( $column );
+}
+
 /* The template of a component's form. `pairs` are the positions of its
    arrays whose count follows them; see `x2cui_arguments`. */
-macro Unit $x2cui.widget(Name $method, Literal @pairs) {
-  macro Expression $Ui.$method(Expr $ui, Expr @args, Entry @options) =>
-    $ui.$method(@x2cui_arguments($ui, $method, $pairs, $options, @args));
+macro Unit $x2cui.widget(Name $method, Type $result, Literal @pairs) {
+  macro Expression $Ui.$method(Expr $ui, Expr @args, Entry @options) => ({
+    cui_id before = $ui.last_id();
+    $result value =
+      $ui.$method(@x2cui_arguments($ui, $method, $pairs, $options, @args));
+    $ui.tweak_component($x2cui_site_file(), $x2cui_site_line(),
+                        $x2cui_site_column(), before);
+    value;
+  });
 }
+
+/* The template of the form of a component whose call returns nothing. */
+macro Unit $x2cui.widget_void(Name $method, Literal @pairs) {
+  macro Expression $Ui.$method(Expr $ui, Expr @args, Entry @options) => ({
+    cui_id before = $ui.last_id();
+    $ui.$method(@x2cui_arguments($ui, $method, $pairs, $options, @args));
+    $ui.tweak_component($x2cui_site_file(), $x2cui_site_line(),
+                        $x2cui_site_column(), before);
+  });
+}
+
 
 /* The template of a block's form. The receiver is evaluated once; the end
    call is deferred, so it also runs when the block leaves early; a block
@@ -474,13 +512,16 @@ meta static String _end_method(String block) =>
    has a component form when `lowered` is set, as it is when the method
    takes an option record, a value `x2cui_value` lowers, or an array.
    NULL when it has none. */
-meta static List _method_form(String method, int lowered, List pairs) {
+meta static List _method_form(String method, int lowered, List pairs,
+                               Type result) {
   String block = method.endswith("_begin") ? method[:method.len() - 6] : NULL;
   if (block && (block in _scopes || block in _openings))
     return Macro_apply(
       $x2cui.block, %($block $(_end_method(block)) @pairs));
-  return (lowered || pairs) && !block
-    ? Macro_apply($x2cui.widget, %($method @pairs)) : NULL;
+  if (!(lowered || pairs) || block) return NULL;
+  return result ~= %(void)
+    ? Macro_apply($x2cui.widget_void, %($method @pairs))
+    : Macro_apply($x2cui.widget, %($method $result @pairs));
 }
 
 /** Returns the method form of `method`, a `Ui` method written in x2c
@@ -492,6 +533,7 @@ meta List x2cui_form(String method, List pairs) {
   List types = Type.parameters(Type.resolve_member(ui, method, 1)[2]).cdr();
   int lowered = 0;
   for (int i = 0; i < types.len(); i++) lowered |= _lowers(types[i]);
-  List form = _method_form(method, lowered, pairs);
+  Type result = Type.return_type(Type.resolve_member(ui, method, 1)[2]);
+  List form = _method_form(method, lowered, pairs, result);
   return form ? $(form) : %();
 }

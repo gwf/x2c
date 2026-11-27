@@ -61,9 +61,10 @@ macro Expression $x2cui.count(Expr $array) =>
    which its literals are tweaked; NULL for a record built otherwise. */
 meta static List _tweak_receiver = NULL;
 
-/* `file` from the directory the compiler runs in, so that a tweaked
-   literal is written back to the file it was read from. */
-meta static String _absolute(String file) {
+/** Returns `file` from the directory the compiler runs in, so that a
+    tweaked literal is written back to the file it was read from.
+*/
+meta String x2cui_absolute(String file) {
   if (file.startswith("/")) return file;
   char here[4096];
   return getcwd(here, sizeof here) ? %"$(String.new(here))/$file" : file;
@@ -254,7 +255,49 @@ meta static List _field(List fields, List row, Array statics) {
   List value = row[2];
   if (_tweak_receiver && statics == NULL && type && _literal_number(value))
     value = _tweaked(name, value);
+  List chosen = _tweak_receiver && statics == NULL && type
+    ? _tweaked_name(type, name, value) : NULL;
+  if (chosen) return %(dotinit ($name) $chosen);
   return %(dotinit ($name) $(_lower(type, value, statics)));
+}
+
+/* The call site of the form whose record is being built, as the
+   arguments `file, line, column` of a tweak call. */
+meta static List _tweak_site(void) {
+  String file = x2cui_absolute(x2c_invocation_file());
+  int line = x2c_invocation_line(), column = x2c_invocation_column();
+  return %( $($!( $file )) $($!( $line )) $($!( $column )) );
+}
+
+/* A short name such as `primary` or `surface` that names a member of the
+   field's enum or a theme colour, through `Ui.tweak_choice` or
+   `Ui.tweak_color`, which can replace it with another member while a
+   program is tweaked; NULL for any other value. */
+meta static List _tweaked_name(Type type, String field, List value) {
+  String name = NULL;
+  match (value) {
+    case %(expr () (ident (binding ? ?(String spelled)))): name = spelled;
+  }
+  if (!name || name != name.lower()) return NULL;
+  List ui = _tweak_receiver, site = _tweak_site();
+  Type resolved = Type.resolve(type);
+  int color = type ~= %("cui_color");
+  List members = color ? Type.members(Type.resolve(%("cui_token")))
+               : resolved ~= %(enum *) ? Type.members(resolved) : NULL;
+  if (!members) return NULL;
+  List names = x2cui_member_names(members);
+  if (!(name in names)) return NULL;
+  List spelled = names.map(%!(String n) => $!( $n ));
+  List values = x2cui_member_constants(members);
+  int count = names.len();
+  List file = site[0], line = site[1], column = site[2];
+  if (color)
+    return $!( $ui.tweak_color($file, $line, $column, $field, $name,
+                               (const char *[]){ @spelled },
+                               (int[]){ @values }, $count) );
+  return $!( ($type) $ui.tweak_choice($file, $line, $column, $field, $name,
+                                      (const char *[]){ @spelled },
+                                      (int[]){ @values }, $count) );
 }
 
 // Whether `value` is a number written as a literal.
@@ -269,7 +312,7 @@ meta static int _literal_number(List value) {
 /* `value`, the literal option `name`, through `Ui.tweak_value`, which can
    replace it while a program is tweaked; see x2cui-tweak.x. */
 meta static List _tweaked(String name, List value) {
-  String file = _absolute(x2c_invocation_file());
+  String file = x2cui_absolute(x2c_invocation_file());
   int line = x2c_invocation_line(), column = x2c_invocation_column();
   List ui = _tweak_receiver;
   List call = $!( $ui.tweak_value($file, $line, $column, $name, $value) );
@@ -363,7 +406,7 @@ meta static List _initializers(Type record, List options, Array statics) {
      program is tweaked, so that its rectangle can be found. */
   if (_tweak_receiver && statics == NULL && record ~= %("cui_box") &&
       !_option(options, "id")) {
-    String file = _absolute(x2c_invocation_file());
+    String file = x2cui_absolute(x2c_invocation_file());
     int line = x2c_invocation_line(), column = x2c_invocation_column();
     List ui = _tweak_receiver;
     List id = $!( $ui.tweak_id($file, $line, $column) );
