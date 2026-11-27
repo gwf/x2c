@@ -50,8 +50,8 @@ static String _site(const char *file, int line, int column) =>
 /** Returns `value`, the literal option `name` written at `file`, `line`,
     and `column`, or the value set for it while tweaking.
 */
-double Ui.tweak_value(Ui ui, const char *file, int line, int column, const char *name,
-                   double value) {
+double Ui.tweak_value(Ui ui, const char *file, int line, int column,
+                      const char *name, double value) {
   if (!_tweaking()) return value;
   _tweak_ui = (cui_ctx *) ui;
   String site = _site(file, line, column), key = %"$site:$(String.new(name))";
