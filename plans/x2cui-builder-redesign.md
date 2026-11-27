@@ -134,7 +134,7 @@ screen. It differs from the design in four ways:
 - Nothing is dragged in the outline.
 - The palette shows two names to a line, so that it fits above the
   outline. Its groups and search are slice 3.
-- The builder is still one file.
+- The builder was then still one file.
 
 One fault was found: after a click on a line of the outline, CUI's
 keyboard focus stayed on that line, and its focus ring did not follow a
@@ -166,7 +166,7 @@ It differs from the design in these ways:
   canvas scrolls rather than pushing the inspector out of the window.
 - A record that lists `id` shows it once; `View` still lists it as an
   option of the record.
-- The builder is still one file, now about 1,700 lines.
+- The builder was then still one file, about 1,700 lines.
 
 Three faults found in the check's pictures were repaired after
 gwf/x2c#757. The alignment grid and the Stretch switch now show CUI's
@@ -197,7 +197,7 @@ It differs from the design in these ways:
   700-point height. The palette scrolls for the rest.
 - Nothing follows the pointer while carrying; the insertion line and the
   outlined block show where the component will go.
-- The builder is still one file, now about 1,900 lines.
+- The builder was then still one file, about 1,900 lines.
 
 ## Slice 4 as built
 
@@ -232,7 +232,7 @@ It differs from the design in these ways:
 - The builder writes option names with `-`, as a tree spells them; it
   wrote `on_click` before.
 - A new input starts empty, not with the text `text`.
-- The builder is still one file, now about 2,440 lines.
+- The builder was then still one file, about 2,440 lines.
 
 ## Slice 5 as built
 
@@ -254,7 +254,17 @@ It differs from the design in these ways:
   default padding is not 0, jumps to the dragged value from 0.
 - A gap bar sits in the middle of the block across its axis, since a
   watched child's box spans the block.
-- The builder is still one file, now about 2,600 lines.
+- The builder was still one file, about 2,600 lines; see "Split".
+
+## Split
+
+`examples/builder.x` became the directory `examples/builder/` on
+2026-11-27, after the five slices. The entry `builder.x` holds the
+shared types, the frame, and `main`, and a module block splices
+`document.x`, `canvas.x`, `panes.x`, `inspector.x`, `events.x`, and
+`check.x` into the same unit. A name another file uses is declared
+`module`; every other file-scope name stays `static` to its file. The
+code is moved, not changed, and `builder --check` passes unchanged.
 
 ## Validation
 

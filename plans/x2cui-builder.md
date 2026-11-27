@@ -12,7 +12,8 @@
 
 ## As built
 
-`packages/x2cui/examples/builder.x` is the application. The library
+`packages/x2cui/examples/builder/` is the application; its entry is
+`builder.x`. The library
 gained `View.watch`, `View.components`, messages (`send`, `on`,
 `ui-send`, `ui-pass`), and `cards`.
 

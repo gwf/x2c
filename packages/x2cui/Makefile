@@ -57,6 +57,12 @@ run: builds/todo builds/mail builds/orders builds/scenes builds/stress \
 run-lisp: builds/live
 	./builds/live --shot builds/live.png
 
+# The builder is one unit whose entry splices the files beside it.
+builds/builder: examples/builder/builder.x $(wildcard examples/builder/*.x) \
+		$(PACKAGE_CONSUMER_DEPS) | builds
+	"$(X2C)" build --output $@ --build-dir builds/builder-build \
+	  $(PACKAGE_X_FLAGS) $(PACKAGE_C_FLAGS) $<
+
 run-builder: builds/builder
 	./builds/builder
 

@@ -647,7 +647,9 @@ columns, sorted by the header clicked. `mail --shot IMAGE.png` and
 and reads Lisp forms from the terminal while the window runs. `make
 run-lisp` draws it off screen and clicks its button.
 
-`examples/builder.x` edits a tree by pointing at it (`make run-builder`).
+`examples/builder/` edits a tree by pointing at it (`make run-builder`).
+Its entry, `builder.x`, splices the other files of the directory into one
+unit with a module block.
 The window draws the tree between a palette and an inspector, with an
 outline of every node under the palette. In edit
 mode a click selects the component under the pointer and does not press
