@@ -63,8 +63,13 @@ static bool _tweaking(void) {
 static String _site(const char *file, int line, int column) =>
   %"$(String.new(file)):$line:$column";
 
-static Var _setting(String site, String name) =>
-  _tweak_set[%"$site:$name"];
+/* The value set for `name` at `site` while tweaking, or void when none is
+   set. A Map holds no void, so going back to the default stores the
+   Symbol `default`, which reads as void. */
+static Var _setting(String site, String name) {
+  Var set = _tweak_set[%"$site:$name"];
+  return set.is_atom() ? void : set;
+}
 
 static Map _options_at(String site) {
   Var known = _tweak_sites[site];
@@ -431,7 +436,7 @@ static String _option_text(List option, Var set) {
    site, and a button that writes it back. */
 static void _option_row(Ui ui, String name, List option) {
   String key = %"$_tweak_chosen:$name";
-  Var set = _tweak_set[key];
+  Var set = _setting(_tweak_chosen, name);
   bool unset = option[1] == <unset>;
   ui.push_id(name);
   ui.row (width: fill, gap: 6, align: center) {
@@ -453,7 +458,7 @@ static void _option_row(Ui ui, String name, List option) {
       List items = unset ? %("default" @names) : names;
       if (ui.select(name, items, shown, width: 150)) {
         int chosen = unset ? shown - 1 : shown;
-        if (chosen < 0) _tweak_set[key] = void;
+        if (chosen < 0) _tweak_set[key] = <default>;
         else _tweak_set[key] = chosen;
       }
     }
@@ -546,8 +551,9 @@ static List _chosen_option(String name) {
   return ((Map) known)[name];
 }
 
-/** Sets the chosen node's option `name` to `value`: a number, or the
-    name of a member. Returns whether the node has that option.
+/** Sets the chosen node's option `name` to `value`: a number, the name
+    of a member, or "default" for an option the call leaves unset.
+    Returns whether the node has that option.
 */
 bool Ui.tweak_assign(Ui ui, String name, Var value) {
   List option = _chosen_option(name);
@@ -558,6 +564,10 @@ bool Ui.tweak_assign(Ui ui, String name, Var value) {
     return true;
   }
   List names = option[3];
+  if ((String) value == "default" && option[1] == <unset>) {
+    _tweak_set[key] = <default>;
+    return true;
+  }
   for (int i = 0; i < names.len(); i++)
     if ((String) names[i] == (String) value) {
       _tweak_set[key] = i;
