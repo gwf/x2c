@@ -506,7 +506,8 @@ A handler written `(send name argument ...)` sends a message. The
 component and then each block around it is offered the message, and the
 first with an `(on name form)` option handles it.
 `packages/x2cui/examples/builder.x` edits a tree by pointing at it: a
-palette adds components, an outline lists every node, a menu and keys
+grouped palette with a search adds components by click or drag, an
+outline lists every node, a menu and keys
 wrap, unwrap, duplicate, move, and delete the selection, an inspector
 sets spacing, alignment, and sizes and groups the other options, and a
 run mode makes the tree behave as it will in a program.

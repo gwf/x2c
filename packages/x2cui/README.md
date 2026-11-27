@@ -647,8 +647,13 @@ run-lisp` draws it off screen and clicks its button.
 The window draws the tree between a palette and an inspector, with an
 outline of every node under the palette. In edit
 mode a click selects the component under the pointer and does not press
-it; the palette adds a component after the selection or inside a
-selected block, and the toolbar selects the parent, moves the selection
+it. The palette lists the components in groups (Layout, Text, Input,
+Display, Container) under a search field; a click adds a component after
+the selection or inside a selected block, Return in the search adds the
+first name found, and a drag from the palette puts a new component at
+the line shown. A new component shows text that says what it is, and a
+new block spaces its children 8 points apart. The toolbar selects the
+parent, moves the selection
 among its siblings, deletes it, undoes, redoes, and saves. The
 inspector groups the selection's options as Content, Layout, Size,
 Style, and Behavior. A block's Layout group sets its direction, gap,

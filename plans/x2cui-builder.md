@@ -45,6 +45,8 @@ gained `View.watch`, `View.components`, messages (`send`, `on`,
 - **Generated inspector** (2026-11-26): slice 2 of the redesign. It
   replaces "Layout options first" and makes undo one step per field
   visit, with redo.
+- **Grouped palette** (2026-11-27): slice 3 of the redesign: groups,
+  search, a drag from the palette, and useful defaults.
 - **Not built:** handles on the other corners and edges.
 - **Ids.** CUI gives a box an id only when its record names one, and gives
   text none. While a watcher is installed the view gives each block an id

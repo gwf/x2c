@@ -2,8 +2,9 @@
 
 > Status: Gary approved slice 1 on 2026-11-26 and it is implemented; see
 > "Slice 1 as built". He then asked for slice 2 and for slice 1's
-> faults to be fixed, both as seen fit; see "Slice 2 as built". Slices
-> 3 to 5 are not started. The plan replaces
+> faults to be fixed, both as seen fit; see "Slice 2 as built". On
+> 2026-11-27 he asked for slice 3; see "Slice 3 as built". Slices 4 and
+> 5 are not started. The plan replaces
 > the interaction design of [the x2cui builder](x2cui-builder.md), whose
 > first version Gary judged far from usable on 2026-11-25: too many
 > options shown, and no clear way to get a wanted effect. The document
@@ -172,6 +173,29 @@ column. A stretch lights a whole line of the grid, and so does space
 between. Number rows are unbounded, so CUI draws no range bar under
 them. The toolbar shows the file's name, not its path, which had
 squeezed the buttons' labels.
+
+## Slice 3 as built
+
+The palette lists the components under Layout, Text, Input, Display, and
+Container, from the table `offers` in `examples/builder.x`; a component
+the table does not name is listed under Other. A search field above it
+keeps the names that contain its text, and Return adds the first. A
+press on a name that moves more than four points carries a new
+component: the canvas shows the block aimed at and the insertion line,
+as for a moved component, and the release puts it there. The same table
+gives a new component its text, such as "Button" or "Heading". A new
+range runs to 100, a new progress bar is half full, a new spinner is 20
+points, and a new block has gap 8. `builder --check` drags a row from
+the palette before a button, and finds and adds a slider by search.
+
+It differs from the design in these ways:
+
+- The palette takes three fifths of the left column and the outline two,
+  so that Layout, Text, and the start of Input show at the check's
+  700-point height. The palette scrolls for the rest.
+- Nothing follows the pointer while carrying; the insertion line and the
+  outlined block show where the component will go.
+- The builder is still one file, now about 1,900 lines.
 
 ## Validation
 

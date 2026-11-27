@@ -3,9 +3,10 @@
     The window draws a tree with a `View`, as a finished program would,
     between a palette of components and an inspector. In edit mode a
     click selects the component under the pointer instead of pressing it:
-    the palette adds a component after the selection or inside a selected
-    block, the inspector edits the selection's arguments and options, and
-    the toolbar moves or deletes it. Dragging a component moves it to the
+    the palette, grouped and searched, adds a component after the
+    selection or inside a selected block, or where a drag of its name is
+    released. The inspector edits the selection's arguments and options,
+    and the toolbar moves or deletes it. Dragging a component moves it to the
     line shown, among its siblings or into another block. The inspector
     groups the options, sets a block's spacing and alignment, and gives
     sizes as Auto, Fit, Fill, or Fixed. An outline under the palette
@@ -30,7 +31,10 @@ import "x2cui" with App, Offscreen, TextField, Ui, View, ViewLisp;
 #include <stdio.h>
 #include <string.h>
 
-enum { DEPTH = 32, DRAWN = 2048, FIELDS = 64, LISTED = 64, UNDO = 200 };
+enum {
+  DEPTH = 32, DRAWN = 2048, FIELDS = 64, LISTED = 64, OFFERED = 64,
+  UNDO = 200
+};
 
 // How near a block's edge a drop goes beside the block, not into it.
 static const float EDGE = 6;
@@ -139,8 +143,17 @@ typedef struct Builder {
   cui_rect outline_area, listed[LISTED];
   Where listed_where[LISTED];
   int lines, picked;
+  /* The palette's search, its area, and each name it offers. A press on
+     a name is `carry`, the name's number plus one; once the pointer moves
+     it is `carrying` a new component, and `placed` when released. */
+  TextField find;
+  cui_id palette_id;
+  cui_rect palette_area, offered[OFFERED];
+  String offered_name[OFFERED];
+  int offered_count, carry;
+  bool carrying, placed;
   // Where the check finds the builder's own controls.
-  cui_rect mode_button, add_button, first_field, all_switch;
+  cui_rect mode_button, add_button, first_field, all_switch, find_field;
   Map located;
 } Builder;
 
@@ -153,6 +166,38 @@ static String sample = %"
 static String sample_program = %"
   (def clicks 0)
   (def bump (lambda () (def clicks (+ clicks 1))))";
+
+/* A component's group in the palette, and the text a new one shows. A
+   component this table does not name is offered under Other. */
+typedef struct Offer { char *name, *group, *sample; } Offer;
+
+static Offer offers[] = {
+  { "row", "Layout" }, { "column", "Layout" }, { "box", "Layout" },
+  { "spacer", "Layout" }, { "separator", "Layout" },
+  { "heading", "Text", "Heading" }, { "text", "Text", "Some text" },
+  { "label", "Text", "Label" }, { "muted", "Text", "A note" },
+  { "code", "Text", "code" }, { "kbd", "Text", "Cmd K" },
+  { "link", "Text", "A link" },
+  { "button", "Input", "Button" }, { "input", "Input" },
+  { "textarea", "Input" }, { "checkbox", "Input", "Option" },
+  { "switch", "Input", "Setting" }, { "radio", "Input", "Choice" },
+  { "slider", "Input", "Amount" }, { "number", "Input" },
+  { "select", "Input" }, { "segmented", "Input" }, { "tabs", "Input" },
+  { "chip", "Input", "Tag" },
+  { "badge", "Display", "New" }, { "progress", "Display" },
+  { "spinner", "Display" }, { "alert", "Display", "Something to know" },
+  { "avatar", "Display", "Ada Lovelace" },
+  { "card", "Container" }, { "scroll", "Container" },
+};
+
+static List offer_groups =
+  %("Layout" "Text" "Input" "Display" "Container" "Other");
+
+static Offer *offer_of(String name) {
+  for (int i = 0; i < (int) (sizeof offers / sizeof offers[0]); i++)
+    if (!strcmp(offers[i].name, name)) return &offers[i];
+  return NULL;
+}
 
 // trees
 
@@ -284,10 +329,22 @@ static void undo(Builder &b) => step_back(b, b.undo, b.redo);
 
 static void redo(Builder &b) => step_back(b, b.redo, b.undo);
 
-// A new node of the component `row` describes, with an argument of each
-// kind filled in and a fresh global for a value it edits.
+/* A number a new component starts with: a range up to 100, a heading
+   of level 2, a bar half full, a spinner of 20 points. */
+static Var fresh_number(String name, String what) {
+  if (what == "max") return 100;
+  if (what == "level") return 2;
+  if (what == "size") return 20;
+  return name == "progress" ? (Var) 0.5 : (Var) 0;
+}
+
+/* A new node of the component `name`, with an argument of each kind
+   filled in, text that shows what it is, and a fresh global for a value
+   it edits. A new block spaces its children 8 points apart. */
 static List fresh(Builder &b, String name) {
   List row = component(name);
+  Offer *offered = offer_of(name);
+  String shown = offered && offered.sample ? offered.sample : name;
   Array options = [], items = [];
   foreach (List argument in (List) row[2]) {
     String kind = argument[1], what = argument[0];
@@ -297,19 +354,30 @@ static List fresh(Builder &b, String name) {
       options.push(%( bind $(Atom.intern(global)) ));
     }
     else if (kind == "text")
-      items.push(what == "id" ? %"$name$(++b.bound)" : name);
+      items.push(what == "id" ? %"$name$(++b.bound)" : shown);
     else if (kind == "items") items.push(%("One" "Two" "Three"));
     else if (kind == "enum") items.push(Atom.intern(argument[2]));
-    else items.push(what == "max" ? 1 : what == "level" ? 2 : 0);
+    else items.push(fresh_number(name, what));
   }
-  return %( $(Atom.intern(name)) $(options.list_free())
-            @(items.list_free()) );
+  List node = %( $(Atom.intern(name)) $(options.list_free())
+                 @(items.list_free()) );
+  return is_block(node) && has_option(node, "gap")
+    ? with_option(node, "gap", 8) : node;
+}
+
+// Puts `node` at `index` in the block at `where`, and selects it.
+static void put(Builder &b, Where where, int index, List node) {
+  List block = node_at(b.tree, where);
+  if (index > block.len()) index = block.len();
+  change(b, replaced(b.tree, where, 0, inserted(block, index, node)));
+  b.where = where;
+  b.where.at[b.where.depth++] = index;
+  b.selected = b.refill = true;
 }
 
 /* Adds a node inside the selected block, after the selected component, or
    at the end of the root. */
 static void add(Builder &b, String name) {
-  List node = fresh(b, name);
   Where where = b.where;
   if (!b.selected) where.depth = 0;
   List target = node_at(b.tree, where);
@@ -320,12 +388,8 @@ static void add(Builder &b, String name) {
       return;
     }
     index = where.at[--where.depth] + 1;
-    target = node_at(b.tree, where);
   }
-  change(b, replaced(b.tree, where, 0, inserted(target, index, node)));
-  b.where = where;
-  b.where.at[b.where.depth++] = index;
-  b.selected = b.refill = true;
+  put(b, where, index, fresh(b, name));
 }
 
 static void remove_selected(Builder &b) {
@@ -460,10 +524,28 @@ static bool capture(cui_ctx *ui, const cui_input_event *event, void *user) {
     b.pointer = event.position;
     float dx = b.pointer.x - b.press.x, dy = b.pointer.y - b.press.y;
     if (b.pressed && dx * dx + dy * dy > 16) b.dragging = true;
+    if (b.carry && dx * dx + dy * dy > 16) b.carrying = true;
   }
   if (event.kind != CUI_INPUT_MOUSE_BUTTON || !b.editing) return false;
   // An open menu lies over the tree, and a press on it is the menu's.
   if (b.menu_open) return false;
+  /* A press on a name in the palette goes on to its button, which adds
+     the component on a click. Moved far enough, it carries a new one,
+     placed where it is released. */
+  if (event.button == CUI_MOUSE_LEFT && !event.down && b.carry) {
+    b.placed = b.carrying;
+    if (!b.placed) b.carry = 0;
+    b.carrying = false;
+    return false;
+  }
+  if (event.button == CUI_MOUSE_LEFT && event.down &&
+      within(b.palette_area, b.pointer))
+    for (int i = 0; i < b.offered_count; i++)
+      if (within(b.offered[i], b.pointer)) {
+        b.carry = i + 1;
+        b.press = b.pointer;
+        return false;
+      }
   if (event.button == CUI_MOUSE_LEFT && !event.down && b.pressed) {
     b.dropped = b.dragging && !b.sizing;
     b.sized = b.dragging && b.sizing;
@@ -550,6 +632,11 @@ static bool inside(Where inner, Where outer) =>
   inner.depth >= outer.depth &&
   !memcmp(inner.at, outer.at, outer.depth * sizeof outer.at[0]);
 
+/* Whether the node at `where` moves with a drag: the selection and what
+   is inside it, unless the drag carries a new component. */
+static bool carried(Builder &b, Where where) =>
+  !b.carry && inside(where, b.where);
+
 // The rectangle of the node drawn at `where`, or an empty one.
 static cui_rect drawn_at(Builder &b, Ui ui, Where where) {
   for (int i = 0; i < b.drawn_count; i++)
@@ -574,12 +661,12 @@ static int drawn_index(Builder &b, Where where) {
    under the pointer, when it is a block and the pointer is not near its
    edge, and otherwise the block around that node. Near the edge of a
    block that fits its children tightly, this reaches the block around
-   it. The selection and what is inside it are passed over, and with
-   nothing under the pointer the block is the root. Returns -1 for none. */
+   it. What moves with the drag is passed over, and with nothing under
+   the pointer the block is the root. Returns -1 for none. */
 static int aimed_block(Builder &b, Ui ui) {
   int hit = -1;
   for (int i = 0; i < b.drawn_count; i++)
-    if (!inside(b.drawn[i].where, b.where) &&
+    if (!carried(b, b.drawn[i].where) &&
         within(ui.get_rect(b.drawn[i].id), b.pointer))
       hit = i;
   if (hit < 0) return b.drawn_count && is_block(b.drawn[0].node) ? 0 : -1;
@@ -618,7 +705,7 @@ static void aim(Builder &b, Ui ui) {
   for (int i = 2; i < block.len(); i++) {
     child.at[child.depth - 1] = i;
     cui_rect r = drawn_at(b, ui, child);
-    if (r.w <= 0 || same_place(child, b.where)) continue;
+    if (r.w <= 0 || carried(b, child)) continue;
     bool before = row ? b.pointer.x < r.x + r.w / 2
                       : b.pointer.y < r.y + r.h / 2;
     // The line sits before this child, or after it for a later one.
@@ -813,14 +900,49 @@ static void outline_pane(Ui ui, Builder &b) {
   }
 }
 
+// The names of the palette's group `group` that the search finds.
+static List offered_in(Builder &b, String group) {
+  Array names = [];
+  foreach (List row in View.components()) {
+    String name = row[0];
+    Offer *offered = offer_of(name);
+    if (strcmp(offered ? offered.group : "Other", group) == 0 &&
+        (b.find.empty() || strstr(name, b.find.text())))
+      names.push(name);
+  }
+  return names.list_free();
+}
+
+/* The components by group, two names to a line so that more show above
+   the outline. A click on a name adds it, and Return in the search adds
+   the first name found. */
 static void palette(Ui ui, Builder &b) {
-  // Two names to a line, so more of them show above the outline.
-  ui.scroll (id: "palette", width: fill, height: fill, pad: 8)
-  ui.row (width: fill, wrap: true, gap: 2) {
-    foreach (List row in View.components()) {
-      String name = row[0];
-      if (ui.button(name, variant: ghost, size: sm, width: 100)) add(b, name);
-      if (name == "button") b.add_button = ui.last_rect();
+  ui.row (width: fill, pad: 8) {
+    int typed = ui.search("palette-search", b.find, size: sm,
+                          placeholder: "Find a component");
+    b.find_field = ui.last_rect();
+    if (typed & CUI_SUBMITTED && b.offered_count) add(b, b.offered_name[0]);
+  }
+  b.palette_id = cui_box_begin(ui, &(cui_box){
+    .id = "palette-area", .width = CUI_FILL, .height = CUI_FILL });
+  defer cui_box_end(ui);
+  b.offered_count = 0;
+  ui.scroll (id: "palette", width: fill, height: fill, pad: 8, gap: 4) {
+    foreach (String group in offer_groups) {
+      List names = offered_in(b, group);
+      if (!names.len()) continue;
+      ui.muted(group);
+      ui.row (width: fill, wrap: true, gap: 2) {
+        foreach (String name in names) {
+          if (ui.button(name, variant: ghost, size: sm, width: 100))
+            add(b, name);
+          if (b.offered_count < OFFERED) {
+            b.offered[b.offered_count] = ui.last_rect();
+            b.offered_name[b.offered_count++] = name;
+          }
+          if (name == "button") b.add_button = ui.last_rect();
+        }
+      }
     }
   }
 }
@@ -848,12 +970,12 @@ static void canvas(Ui ui, Builder &b) {
   int next = 0;
   place_drawn(b, b.tree, root, next);
   if (!b.editing) return;
-  bool moving = b.dragging && !b.sizing && b.aimed;
+  bool moving = (b.dragging && !b.sizing || b.carrying) && b.aimed;
   Marks marks = { &b, selected_id(b), moving ? b.target_id : 0,
                   moving, b.dragging && b.sizing, b.line, sized_to(b) };
   ui.canvas("marks", fill, fill, paint_marks, &marks, sizeof marks);
   node_menu(ui, b, "tree-menu");
-  if (b.dragging) ui.set_cursor(CUI_CURSOR_MOVE);
+  if (b.dragging || b.carrying) ui.set_cursor(CUI_CURSOR_MOVE);
 }
 
 // the inspector
@@ -1354,6 +1476,7 @@ static void draw(Ui ui, Builder &b) {
   // last frame's layout, which is what the pointer was aimed at.
   b.canvas = ui.get_rect(b.canvas_id);
   b.outline_area = ui.get_rect(b.outline_id);
+  b.palette_area = ui.get_rect(b.palette_id);
   if (b.clicked) select_under(b, ui);
   b.clicked = false;
   if (!b.pressed || b.sizing)
@@ -1364,10 +1487,17 @@ static void draw(Ui ui, Builder &b) {
                          2 * HANDLE };
   if (b.chosen.w <= 0) b.handle = (cui_rect){ 0 };
   b.aimed = false;
-  if ((b.dragging || b.dropped) && b.selected && b.where.depth) aim(b, ui);
+  bool over = within(b.canvas, b.pointer);
+  if ((b.dragging || b.dropped) && b.selected && b.where.depth ||
+      (b.carrying || b.placed) && over)
+    aim(b, ui);
   if (b.dropped && b.aimed) drop(b);
+  if (b.placed && b.aimed)
+    put(b, b.target, b.target_index,
+        fresh(b, b.offered_name[b.carry - 1]));
+  if (b.placed) b.carry = 0;
   if (b.sized && b.selected) resize(b);
-  b.dropped = b.sized = false;
+  b.dropped = b.sized = b.placed = false;
   if (b.picked) select_at(b, b.listed_where[b.picked - 1]);
   b.picked = 0;
   if (!ui.wants_keyboard() && !ui.mouse_down(CUI_MOUSE_LEFT))
@@ -1381,10 +1511,11 @@ static void draw(Ui ui, Builder &b) {
     toolbar(ui, b);
     ui.separator();
     ui.row (width: fill, height: fill) {
+      // The palette takes three fifths of the height, the outline two.
       ui.column (width: 220, height: fill) {
-        palette(ui, b);
+        ui.column (width: fill, height: CUI_GROW(3)) palette(ui, b);
         ui.separator();
-        outline_pane(ui, b);
+        ui.column (width: fill, height: CUI_GROW(2)) outline_pane(ui, b);
       }
       canvas(ui, b);
       inspector(ui, b);
@@ -1413,6 +1544,7 @@ static void open_file(Builder &b, Ui ui, String file) {
   for (int i = 0; i < GROUPS; i++) b.open[i] = true;
   b.open_around = true;
   b.search = TextField.new(64);
+  b.find = TextField.new(64);
   b.view = View.new(b.lisp, "ui");
   b.view.set(b.tree);
   b.editing = true;
@@ -1471,6 +1603,13 @@ static cui_rect drawn_rect(Builder &b, Ui ui, Symbol name) {
   return (cui_rect){ 0 };
 }
 
+// Where the palette offers the component `name`.
+static cui_rect offered_rect(Builder &b, String name) {
+  for (int i = 0; i < b.offered_count; i++)
+    if (b.offered_name[i] == name) return b.offered[i];
+  return (cui_rect){ 0 };
+}
+
 static int clicks(Builder &b) {
   Var value = void;
   return b.lisp.try_get("clicks", value) ? value.int() : -1;
@@ -1491,10 +1630,11 @@ static int check(String image) {
          b.selected ? written(node_at(b.tree, b.where)[0]) : "nothing",
          clicks(b));
 
-  // The palette adds a button after the selection.
+  // The palette adds a button after the selection, with a label.
   int before = b.tree.len();
   click(screen, b, b.add_button);
-  int adds = b.tree.len() == before + 1 && is_node(b.tree[4]);
+  int adds = b.tree.len() == before + 1 && is_node(b.tree[4]) &&
+             (String) ((List) b.tree[4])[2] == "Button";
   printf("add: %d children, selected position %d\n", b.tree.len() - 2,
          b.where.at[0]);
 
@@ -1772,6 +1912,33 @@ static int check(String image) {
   if (!(lists && steps && wraps && unwraps && copies && clears && menus &&
         offers))
     return 1;
+
+  /* A drag from the palette puts a new row, spaced 8 points, where the
+     line shows: before the button. */
+  change(b, counter);
+  b.selected = false;
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  cui_rect aimed = drawn_rect(b, ui, <button>);
+  drag(screen, b, offered_rect(b, "row"), aimed.x + 20, aimed.y + 3,
+       image + ".carry.png");
+  List placed = b.tree[3];
+  int carries = b.tree.len() == ((List) counter).len() + 1 &&
+                placed[0] == <row> && option(placed, "gap").int() == 8 &&
+                b.selected && b.where.depth == 1 && b.where.at[0] == 3;
+  printf("carry: %s\n", written(b.tree));
+  // The search finds a name, and Return adds it into the selected row.
+  for (int i = 0; i < 60; i++) frame(screen, b);
+  click(screen, b, b.find_field);
+  ui.input_text("sli");
+  for (int i = 0; i < 3; i++) frame(screen, b);
+  int finds = b.offered_count == 1 && b.offered_name[0] == "slider";
+  screen.write_png(image + ".find.png");
+  press(screen, b, CUI_KEY_ENTER, 0);
+  List slider = node_at(b.tree, b.where);
+  int submits = slider[0] == <slider> && (String) slider[2] == "Amount" &&
+                slider[4].int() == 100 && b.where.depth == 2;
+  printf("find: %d found, added %s\n", b.offered_count, written(slider));
+  if (!(carries && finds && submits)) return 1;
   return apart && lays && fills && besides && sizes && selects && adds &&
          runs && edits && moves && removes && undoes &&
          saves && picks && keeps && reparents && reorders && stays ? 0 : 1;
