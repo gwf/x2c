@@ -1,17 +1,21 @@
-/*  tweak.x -- adjust a running program's literal options (probe)
+/*  tweak.x -- adjust a running program's options (probe)
 
-    Each option a form receives as a literal reaches CUI through a tweak
-    call that reports the literal's call site and returns it, or the
-    value set for that site and name while tweaking: `Ui.tweak_value`
-    for a number, `Ui.tweak_choice` for a member of an enum such as
-    `variant: primary`, and `Ui.tweak_color` for a theme colour such as
-    `bg: surface`. A box whose call names no id gets one made from its
-    call site, and a component is noted with the id CUI gave it, so that
-    their rectangles can be found. `ui.tweak_marks()` paints the node
-    under the pointer and the chosen one; `ui.tweak_panel()` lists the
-    chosen node's literals with editors, and writes one back to its
-    source. Tweaking is on when the environment sets X2CUI_TWEAK;
-    otherwise each call returns its value and records nothing.
+    While a program is tweaked, every option of a form's record reaches
+    CUI through a tweak call that names its call site and returns the
+    value the program uses: the value the call writes, or for an option
+    the call leaves unset the field's zero, which CUI reads as its
+    default, unless the panel has set another. Numbers, sizes, members
+    of an enum, theme colours, and switches can be set; other written
+    values are noted with their source text. A box whose call names no
+    id gets one made from its call site, and a component or a block that
+    draws a control is noted with the id CUI gave it, so that their
+    rectangles can be found. `ui.tweak_marks()` paints the node under the
+    pointer and the chosen one; `ui.tweak_panel()` lists the chosen
+    node's options in three tiers (those the call writes, those programs
+    commonly set, and all others) and writes a value back to the call,
+    replacing it or adding it. Tweaking is on when the environment sets
+    X2CUI_TWEAK; otherwise each call returns its value and records
+    nothing.
 */
 
 #include "path.x"
@@ -20,9 +24,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* A call site's literals by name, each `(number original used)` or
-   `(choice original used names values)` or the same with `color`, where
-   `used` is the member's position. */
+/* Each call site's options by name, as
+   `(kind state written names values tier text)`: `kind` is `number`,
+   `size`, `choice`, `color`, or `computed`; `state` is `written` or
+   `unset`; `written` is the number or the member's position the call
+   writes; `names` and `values` are a choice's members; `tier` is 0 for
+   written, 1 for common, and 2 for another option; `text` is a computed
+   option's source. */
 static Map _tweak_sites = NULL;
 // Values set while tweaking, by "file:line:column:name".
 static Map _tweak_set = NULL;
@@ -36,6 +44,9 @@ static int _tweak_on = -1;
 static String _tweak_chosen = NULL;
 static cui_id _tweak_chosen_id = 0;
 static String _tweak_note = NULL;
+// The panel's "All options" switch and search.
+static bool _tweak_all = false;
+static TextField _tweak_search = NULL;
 
 static bool _tweaking(void) {
   if (_tweak_on < 0) {
@@ -55,84 +66,151 @@ static String _site(const char *file, int line, int column) =>
 static Var _setting(String site, String name) =>
   _tweak_set[%"$site:$name"];
 
-static Map _literals(String site) {
+static Map _options_at(String site) {
   Var known = _tweak_sites[site];
   if (!known.is_void()) return known;
-  Map literals = {};
-  _tweak_sites[site] = literals;
-  return literals;
+  Map options = {};
+  _tweak_sites[site] = options;
+  return options;
 }
 
-/** Returns `value`, the numeric literal option `name` written at `file`,
-    `line`, and `column`, or the value set for it while tweaking.
+/* Records the option `name` at `site` the first time it is seen. */
+static void _record(String site, String name, Symbol kind, Symbol state,
+                    Var written, List names, List values, int tier,
+                    String text) {
+  Map options = _options_at(site);
+  if (options[name].is_void())
+    options[name] = %( $kind $state $written $names $values $tier $text );
+}
+
+static List _strings(const char **names, int count) {
+  Array out = [];
+  for (int i = 0; i < count; i++) out.push(String.new(names[i]));
+  return out.list_free();
+}
+
+static List _ints(int *values, int count) {
+  Array out = [];
+  for (int i = 0; i < count; i++) out.push(values[i]);
+  return out.list_free();
+}
+
+static int _position(const char **names, int count, const char *name) {
+  for (int i = 0; i < count; i++)
+    if (!strcmp(names[i], name)) return i;
+  return 0;
+}
+
+/** Returns `value`, the number the call at `file`, `line`, and `column`
+    writes for its option `name`, or the value set for it while tweaking.
 */
 double Ui.tweak_value(Ui ui, const char *file, int line, int column,
                       const char *name, double value) {
   if (!_tweaking()) return value;
   String site = _site(file, line, column), field = String.new(name);
+  _record(site, field, <number>, <written>, value, %(), %(), 0, "");
   Var set = _setting(site, field);
-  double used = set.is_void() ? value : set.double();
-  _literals(site)[field] = %( number $value $used );
-  return used;
+  return set.is_void() ? value : set.double();
 }
 
-/* The position of the member a choice uses: the one set while tweaking,
-   or the one written, `current`. Records the choice. */
-static int _choose(Symbol kind, const char *file, int line, int column,
-                   const char *name, const char *current, const char **names,
-                   int *values, int count) {
-  String site = _site(file, line, column), field = String.new(name);
-  int written = 0;
-  for (int i = 0; i < count; i++)
-    if (!strcmp(names[i], current)) written = i;
-  Var set = _setting(site, field);
-  int used = set.is_void() ? written : set.int();
-  Map literals = _literals(site);
-  if (literals[field].is_void()) {
-    Array spelled = [], numbers = [];
-    for (int i = 0; i < count; i++) {
-      spelled.push(String.new(names[i]));
-      numbers.push(values[i]);
-    }
-    literals[field] = %( $kind $written $used $(spelled.list())
-                         $(numbers.list()) );
-  }
-  else {
-    List old = literals[field];
-    literals[field] = %( $kind $written $used $(old[3]) $(old[4]) );
-  }
-  return used;
-}
-
-/** Returns the value of the enum member `current`, the literal option
-    `name` written at `file`, `line`, and `column`, or of the member set
-    for it while tweaking. `names` and `values` are the enum's members.
+/** Returns the value of the enum member `current` the call writes for
+    its option `name`, or of the member set for it while tweaking.
+    `names` and `values` are the enum's members.
 */
 int Ui.tweak_choice(Ui ui, const char *file, int line, int column,
                     const char *name, const char *current,
                     const char **names, int *values, int count) {
-  int written = 0;
-  for (int i = 0; i < count; i++)
-    if (!strcmp(names[i], current)) written = i;
+  int written = _position(names, count, current);
   if (!_tweaking()) return values[written];
-  return values[_choose(<choice>, file, line, column, name, current, names,
-                        values, count)];
+  String site = _site(file, line, column), field = String.new(name);
+  _record(site, field, <choice>, <written>, written, _strings(names, count),
+          _ints(values, count), 0, "");
+  Var set = _setting(site, field);
+  return values[set.is_void() ? written : set.int()];
 }
 
-/** Returns the theme colour `current`, the literal option `name` written
-    at `file`, `line`, and `column`, or the colour set for it while
-    tweaking. `names` and `values` are CUI's colour tokens.
+/** Returns the theme colour `current` the call writes for its option
+    `name`, or the colour set for it while tweaking. `names` and `values`
+    are CUI's colour tokens.
 */
 cui_color Ui.tweak_color(Ui ui, const char *file, int line, int column,
                          const char *name, const char *current,
                          const char **names, int *values, int count) {
-  int at = 0;
-  for (int i = 0; i < count; i++)
-    if (!strcmp(names[i], current)) at = i;
+  int written = _position(names, count, current);
+  if (!_tweaking()) return CUI_TOKEN_COLOR(values[written]);
+  String site = _site(file, line, column), field = String.new(name);
+  _record(site, field, <color>, <written>, written, _strings(names, count),
+          _ints(values, count), 0, "");
+  Var set = _setting(site, field);
+  return CUI_TOKEN_COLOR(values[set.is_void() ? written : set.int()]);
+}
+
+/** Notes that the call at `file`, `line`, and `column` writes its option
+    `name` as an expression or a name the panel does not edit; the panel
+    shows its text from the source. Returns 0, so that a comma can
+    follow it.
+*/
+int Ui.tweak_note(Ui ui, const char *file, int line, int column,
+                  const char *name) {
   if (_tweaking())
-    at = _choose(<color>, file, line, column, name, current, names, values,
-                 count);
-  return CUI_TOKEN_COLOR(values[at]);
+    _record(_site(file, line, column), String.new(name), <computed>,
+            <written>, 0, %(), %(), 0, "");
+  return 0;
+}
+
+/** Returns 0 for the number option `name` the call at `file`, `line`,
+    and `column` leaves unset, or the value set for it while tweaking.
+    `tier` is 1 for an option programs commonly set and 2 for another.
+*/
+double Ui.tweak_unset_number(Ui ui, const char *file, int line, int column,
+                             const char *name, int tier) {
+  if (!_tweaking()) return 0;
+  String site = _site(file, line, column), field = String.new(name);
+  _record(site, field, <number>, <unset>, 0, %(), %(), tier, "");
+  Var set = _setting(site, field);
+  return set.is_void() ? 0 : set.double();
+}
+
+/** Returns the default size for the option `name` the call leaves unset,
+    or a fixed size in points set for it while tweaking.
+*/
+cui_size Ui.tweak_unset_size(Ui ui, const char *file, int line, int column,
+                             const char *name, int tier) {
+  cui_size none = { 0 };
+  if (!_tweaking()) return none;
+  String site = _site(file, line, column), field = String.new(name);
+  _record(site, field, <size>, <unset>, 0, %(), %(), tier, "");
+  Var set = _setting(site, field);
+  return set.is_void() ? none : CUI_PX(set.double());
+}
+
+/** Returns 0 for the enum or switch option `name` the call leaves unset,
+    or the value of the member set for it while tweaking.
+*/
+int Ui.tweak_unset_choice(Ui ui, const char *file, int line, int column,
+                          const char *name, int tier, const char **names,
+                          int *values, int count) {
+  if (!_tweaking()) return 0;
+  String site = _site(file, line, column), field = String.new(name);
+  _record(site, field, <choice>, <unset>, -1, _strings(names, count),
+          _ints(values, count), tier, "");
+  Var set = _setting(site, field);
+  return set.is_void() ? 0 : values[set.int()];
+}
+
+/** Returns the default colour for the option `name` the call leaves
+    unset, or the theme colour set for it while tweaking.
+*/
+cui_color Ui.tweak_unset_color(Ui ui, const char *file, int line, int column,
+                               const char *name, int tier,
+                               const char **names, int *values, int count) {
+  cui_color none = { 0 };
+  if (!_tweaking()) return none;
+  String site = _site(file, line, column), field = String.new(name);
+  _record(site, field, <color>, <unset>, -1, _strings(names, count),
+          _ints(values, count), tier, "");
+  Var set = _setting(site, field);
+  return set.is_void() ? none : CUI_TOKEN_COLOR(values[set.int()]);
 }
 
 static void _note_node(cui_id id, String site) {
@@ -231,21 +309,58 @@ static String _number_text(double value) =>
 
 static bool _word(char c) => isalnum(c) || c == '_' || c == '-' || c == '.';
 
-/* Writes `text` over the value of `name` in the call at `site`: the
-   number or name after the first `name:` that follows the call's
-   position, before the call's parentheses close. */
-static String _write_back(String site, String name, String text) {
-  List parts = _site_parts(site);
-  Path path = (String) parts[0];
-  if (!path.exists()) return %"No file $(parts[0])";
-  String source = path.read_text();
-  int line = parts[1].int(), column = parts[2].int(), at = 0;
+// The offset of the call at `line` and `column` of `source`, or -1.
+static int _call_at(String source, int line, int column) {
+  int at = 0;
   for (int l = 1; l < line && at >= 0; l++) {
     int next = source[at:].find("\n");
     at = next < 0 ? -1 : at + next + 1;
   }
-  if (at < 0) return "The line is gone";
-  at += column > 0 ? column - 1 : 0;
+  return at < 0 ? -1 : at + (column > 0 ? column - 1 : 0);
+}
+
+/* The text of the value the call at `site` writes for `name`, up to the
+   comma or parenthesis that ends it, or "" when it cannot be read. */
+static Map _tweak_texts = NULL;
+
+static String _written_text(String site, String name) {
+  if (!_tweak_texts) _tweak_texts = {};
+  String key = %"$site:$name";
+  Var known = _tweak_texts[key];
+  if (!known.is_void()) return known;
+  String text = _read_written_text(site, name);
+  _tweak_texts[key] = text;
+  return text;
+}
+
+static String _read_written_text(String site, String name) {
+  List parts = _site_parts(site);
+  Path path = (String) parts[0];
+  if (!path.exists()) return "";
+  String source = path.read_text();
+  int at = _call_at(source, parts[1].int(), parts[2].int());
+  int n = source.len(), nl = name.len();
+  for (int i = at < 0 ? n : at; i + nl < n; i++) {
+    if (source[i:i + nl] != name || (i > 0 && _word(source[i - 1]))) continue;
+    int j = i + nl;
+    while (j < n && source[j] == ' ') j++;
+    if (j >= n || source[j] != ':') continue;
+    int k = ++j, depth = 0;
+    for (; k < n; k++) {
+      char c = source[k];
+      if (c == '(' || c == '[' || c == '{') depth++;
+      if ((c == ')' || c == ']' || c == '}') && depth-- == 0) break;
+      if (c == ',' && depth == 0) break;
+    }
+    return source[j:k].strip().replace("\n", " ");
+  }
+  return "";
+}
+
+/* `source` with `text` over the value of `name` in the call at `at`: the
+   number or name after the first `name:` that follows, before the call's
+   parentheses close. NULL when the call writes no `name:`. */
+static String _replaced(String source, int at, String name, String text) {
   int depth = 0, n = source.len(), nl = name.len();
   for (int i = at; i < n; i++) {
     char c = source[i];
@@ -261,65 +376,143 @@ static String _write_back(String site, String name, String text) {
     while (j < n && source[j] == ' ') j++;
     int k = j;
     while (k < n && _word(source[k])) k++;
-    if (k == j) return %"$name is not a literal at the call";
-    path.write_text(source[:j] + text + source[k:]);
-    return %"Wrote $name: $text to $(path.basename()):$line";
+    return k == j ? NULL : source[:j] + text + source[k:];
   }
-  return %"No $name: at the call";
+  return NULL;
 }
 
-// The text a literal is written as now.
-static String _literal_text(List literal) {
-  if (literal[0] == <number>) return _number_text(literal[2].double());
-  return ((List) literal[3])[literal[2].int()];
+/* `source` with `name: text` added as the last argument of the call at
+   `at`, before its closing parenthesis. NULL when it has none. */
+static String _added(String source, int at, String name, String text) {
+  int open = source[at:].find("(");
+  if (open < 0) return NULL;
+  open += at;
+  int depth = 0, n = source.len();
+  for (int i = open; i < n; i++) {
+    if (source[i] == '(') depth++;
+    if (source[i] != ')' || --depth > 0) continue;
+    int last = i - 1;
+    while (last > open && isspace(source[last])) last--;
+    String joint = last == open ? "" : ", ";
+    return source[:last + 1] + joint + %"$name: $text" + source[last + 1:];
+  }
+  return NULL;
 }
 
-/* One row of the panel: an editor for the literal `name` of the chosen
+/* Writes `text` as the value of `name` in the call at `site`, replacing
+   the value the call writes, or adding `name: text` when `add` is set. */
+static String _write_back(String site, String name, String text, bool add) {
+  List parts = _site_parts(site);
+  Path path = (String) parts[0];
+  if (!path.exists()) return %"No file $(parts[0])";
+  String source = path.read_text();
+  int at = _call_at(source, parts[1].int(), parts[2].int());
+  if (at < 0) return "The line is gone";
+  String written = add ? _added(source, at, name, text)
+                       : _replaced(source, at, name, text);
+  if (!written) return %"Could not find where $name goes in the call";
+  path.write_text(written);
+  _tweak_texts = {};
+  return %"Wrote $name: $text to $(path.basename()):$(parts[1])";
+}
+
+/* The value set for an option while tweaking, or void. */
+static Var _set_for(String name) => _setting(_tweak_chosen, name);
+
+// The text an option is written as with the value it is set to now.
+static String _option_text(List option, Var set) {
+  if (option[0] == <number> || option[0] == <size>)
+    return _number_text(set.is_void() ? option[2].double() : set.double());
+  int at = set.is_void() ? option[2].int() : set.int();
+  return ((List) option[3])[at];
+}
+
+/* One row of the panel: an editor for the option `name` of the chosen
    site, and a button that writes it back. */
-static void _literal_row(Ui ui, String name, List literal) {
+static void _option_row(Ui ui, String name, List option) {
   String key = %"$_tweak_chosen:$name";
+  Var set = _tweak_set[key];
+  bool unset = option[1] == <unset>;
   ui.push_id(name);
   ui.row (width: fill, gap: 6, align: center) {
-    ui.text(name, width: 96);
-    if (literal[0] == <number>) {
-      double value = literal[2].double();
+    ui.text(name, width: 110,
+            color: unset && set.is_void() ? text_secondary : foreground);
+    if (option[0] == <computed>)
+      ui.text(_written_text(_tweak_chosen, name), width: fill,
+              color: text_secondary);
+    else if (option[0] == <number> || option[0] == <size>) {
+      double value = set.is_void() ? option[2].double() : set.double();
       if (ui.number(name, value, -1000, 4000, step: 1, width: 150))
         _tweak_set[key] = value;
     }
     else {
-      int index = literal[2].int();
-      if (ui.select(name, literal[3], index, width: 150))
-        _tweak_set[key] = index;
+      // An unset choice starts at "default", before the members.
+      List names = option[3];
+      int index = set.is_void() ? option[2].int() : set.int();
+      int shown = unset ? index + 1 : index;
+      List items = unset ? %("default" @names) : names;
+      if (ui.select(name, items, shown, width: 150)) {
+        int chosen = unset ? shown - 1 : shown;
+        if (chosen < 0) _tweak_set[key] = void;
+        else _tweak_set[key] = chosen;
+      }
     }
-    if (ui.button("Write", size: sm))
-      _tweak_note = _write_back(_tweak_chosen, name, _literal_text(literal));
+    bool writable = option[0] != <computed> && (!unset || !set.is_void());
+    if (writable && ui.button("Write", size: sm))
+      _tweak_note = _write_back(_tweak_chosen, name, _option_text(option, set),
+                                unset);
   }
   ui.pop_id();
 }
 
-/** Lists the chosen node's literal options with an editor for each, which
-    sets the value the program uses from the next frame, and a button
-    that writes the value back to the call's source. Clears what the
-    frame recorded, so it is called once, after everything else.
+// The chosen site's options of `tier`, in the order recorded.
+static List _options_of(int tier) {
+  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
+  if (known.is_void()) return %();
+  Array names = [];
+  foreach (String name in ((Map) known).keys()) {
+    List option = ((Map) known)[name];
+    if (option[5].int() == tier) names.push(name);
+  }
+  return names.list_free();
+}
+
+/** Lists the chosen node's options with an editor for each, which sets
+    the value the program uses from the next frame, and a button that
+    writes the value back to the call. The options the call writes come
+    first, then those programs commonly set, then, under "All options",
+    the rest. Clears what the frame recorded, so it is called once,
+    after everything else.
 */
 void Ui.tweak_panel(Ui ui) {
   if (!_tweaking()) return;
-  ui.column (width: 360, height: fill, pad: 12, gap: 8, bg: surface) {
+  if (!_tweak_search) _tweak_search = TextField.new(64);
+  ui.column (width: 380, height: fill, bg: surface)
+  ui.scroll (id: "tweak-panel", width: fill, height: fill, pad: 12, gap: 8) {
     ui.heading("Tweak", 4);
     ui.muted("Alt and a click chooses a node.");
-    Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
-    Map literals = known.is_void() ? NULL : (Map) known;
     if (_tweak_chosen) {
       List parts = _site_parts(_tweak_chosen);
       Path path = (String) parts[0];
       ui.text(%"$(path.basename()):$(parts[1])", width: fill);
       Var drawn = _tweak_counts[_tweak_chosen];
       ui.muted(%"$(drawn.is_void() ? 0 : drawn.int()) drawn from this call");
+      Map known = _tweak_sites[_tweak_chosen].is_void()
+                ? {} : (Map) _tweak_sites[_tweak_chosen];
+      List written = _options_of(0), common = _options_of(1);
+      if (written.len()) ui.label("Written");
+      foreach (String name in written) _option_row(ui, name, known[name]);
+      if (common.len()) ui.label("Common");
+      foreach (String name in common) _option_row(ui, name, known[name]);
+      if (ui.switch("All options", _tweak_all)) _tweak_search.set("");
+      if (_tweak_all) {
+        ui.search("tweak-search", _tweak_search, size: sm);
+        String wanted = _tweak_search.text();
+        foreach (String name in _options_of(2))
+          if (!wanted.len() || name.find(wanted) >= 0)
+            _option_row(ui, name, known[name]);
+      }
     }
-    if (literals)
-      foreach (String name in literals.keys())
-        _literal_row(ui, name, literals[name]);
-    if (_tweak_chosen && !literals) ui.muted("No literal options here.");
     if (_tweak_note) ui.text(_tweak_note, width: fill);
   }
   _tweak_last = _tweak_nodes;
@@ -347,41 +540,52 @@ bool Ui.tweak_choose(Ui ui, String file, int line, int nth) {
   return false;
 }
 
-/** Sets the chosen node's literal `name` to `value`: a number, or the
-    name of a member. Returns whether the node has that literal.
+static List _chosen_option(String name) {
+  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
+  if (known.is_void() || ((Map) known)[name].is_void()) return NULL;
+  return ((Map) known)[name];
+}
+
+/** Sets the chosen node's option `name` to `value`: a number, or the
+    name of a member. Returns whether the node has that option.
 */
 bool Ui.tweak_assign(Ui ui, String name, Var value) {
-  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
-  if (known.is_void() || ((Map) known)[name].is_void()) return false;
-  List literal = ((Map) known)[name];
-  if (literal[0] == <number>) {
-    _tweak_set[%"$_tweak_chosen:$name"] = value.double();
+  List option = _chosen_option(name);
+  if (!option || option[0] == <computed>) return false;
+  String key = %"$_tweak_chosen:$name";
+  if (option[0] == <number> || option[0] == <size>) {
+    _tweak_set[key] = value.double();
     return true;
   }
-  List names = literal[3];
+  List names = option[3];
   for (int i = 0; i < names.len(); i++)
     if ((String) names[i] == (String) value) {
-      _tweak_set[%"$_tweak_chosen:$name"] = i;
+      _tweak_set[key] = i;
       return true;
     }
   return false;
 }
 
-/** Writes the chosen node's literal `name`, as it is used now, back to
-    its source, and returns what was done.
+/** Writes the chosen node's option `name`, as it is used now, back to its
+    call, and returns what was done.
 */
 String Ui.tweak_write(Ui ui, String name) {
-  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
-  if (known.is_void() || ((Map) known)[name].is_void())
-    return "Nothing to write";
-  return _write_back(_tweak_chosen, name, _literal_text(((Map) known)[name]));
+  List option = _chosen_option(name);
+  if (!option || option[0] == <computed>) return "Nothing to write";
+  Var set = _set_for(name);
+  if (option[1] == <unset> && set.is_void()) return "Nothing set to write";
+  return _write_back(_tweak_chosen, name, _option_text(option, set),
+                     option[1] == <unset>);
 }
 
-/** Returns the names of the chosen node's literals. */
-List Ui.tweak_literals(Ui ui) {
-  Var known = _tweak_chosen ? _tweak_sites[_tweak_chosen] : void;
-  return known.is_void() ? %() : ((Map) known).keys().list();
-}
+/** Returns the chosen node's options of `tier`: 0 for those its call
+    writes, 1 for those programs commonly set, 2 for the rest.
+*/
+List Ui.tweak_options(Ui ui, int tier) => _options_of(tier);
+
+/** Returns the source text the chosen node's call writes for `name`. */
+String Ui.tweak_text(Ui ui, String name) =>
+  _tweak_chosen ? _written_text(_tweak_chosen, name) : "";
 
 /** Returns the chosen node's rectangle in the last frame's layout. */
 cui_rect Ui.tweak_chosen_rect(Ui ui) => ui.get_rect(_tweak_chosen_id);

@@ -2,8 +2,8 @@
 
 > Status: survey run 2026-11-27 at Gary's request, to decide how the
 > tweak panel ([probe](x2cui-live-tweak-probe.md)) shows more than the
-> options a call writes and less than every field. A proposal; nothing
-> beyond the probe is built.
+> options a call writes and less than every field. Gary asked for the
+> proposal to be built the same day; see "As built".
 
 ## Result
 
@@ -82,10 +82,37 @@ hand-written `shown` table and answers open question 3 of the builder
 redesign (where the option table lives): in x2cui, beside the forms
 that read it.
 
+## As built
+
+On branch `x2cui-tweak-probe`:
+
+- `_tweak_common` in `packages/x2cui/src/x2cui-options.x` holds the
+  table: 54 components, 186 options, generated from the survey counts by
+  `.context/tweak-probe/survey/common.py`.
+- While a form's record is built, each field its call leaves unset, of a
+  kind the panel edits (number, size, enum, theme colour, switch), gets
+  a tweak call that returns the field's zero unless the panel has set a
+  value, and records whether it is common. A field written as an
+  expression or a name the panel does not edit is noted, and the panel
+  shows its text read from the source.
+- The panel lists Written, then Common, then, under an "All options"
+  switch with a search field, the rest. Write replaces a written value
+  or adds `name: value` as the call's last argument.
+- On md-edit's toolbar row (`editor.x:1623`) the panel lists written
+  `width` (`fill`), `pad_right`, `pad_left`, `gap`, and `height`
+  (`e.split_toolbar ? 36 : 41`); common `wrap`, `pad_x`, and `align`;
+  and 26 others. Setting the toolbar column's unset `pad` to 20 moved
+  the first divider 20 points, and Write added `pad: 20` to the
+  two-line call at line 1618. md-edit rebuilt from the written source.
+- Cost with tweaking off: 300 offscreen md-edit frames took 4.21 to
+  4.64 ms CPU per frame before this change and 4.25 to 4.55 ms after,
+  run alternately under the same machine load (load average about 10).
+  md_editor carries 486 unset-field calls.
+- Only a form whose receiver has the tweak methods is instrumented, so
+  a form over another receiver, as in `tests/test-x2cui.x`, is not.
+
 ## What this needs beyond the probe
 
-- Write-back that inserts an option into a call, not only replaces one.
-- Tweak calls for unset common options, generated from the table.
 - Editors for sizes (`fill`, `fit`, a number), icons, and text, which
   the probe does not yet edit.
 - A decision whether the common list is a fixed survey result or is

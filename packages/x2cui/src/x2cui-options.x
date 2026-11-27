@@ -58,8 +58,66 @@ macro Expression $x2cui.count(Expr $array) =>
      __typeof__($array), __typeof__(&($array)[0]))]));
 
 /* The receiver of the form whose option record is being built, through
-   which its literals are tweaked; NULL for a record built otherwise. */
+   which its literals are tweaked, and the form's method; NULL for a
+   record built otherwise. */
 meta static List _tweak_receiver = NULL;
+meta static String _tweak_method = NULL;
+// How deep the record being built is; only the form's own is tweaked.
+meta static int _tweak_depth = 0;
+
+/* Whether `ui`, a form's receiver, has the tweak methods a `Ui` has; a
+   form over another receiver is not tweaked. */
+meta static int _tweaks(List ui) =>
+  Type.resolve_member(Code.type(ui), "tweak_unset_number", 1) != NULL;
+
+// Whether a field of the record being built is tweaked.
+meta static int _tweaking_here(Array statics) =>
+  _tweak_receiver && _tweak_depth == 1 && statics == NULL;
+
+/* The options programs set in at least 10% of a component's calls, most
+   used first, from plans/x2cui-option-survey.md. While tweaking they
+   show for a chosen node even when its call leaves them unset. */
+meta static List _tweak_common = %(
+  ("agent_plan" "title") ("agent_status" "seconds" "status")
+  ("avatar" "size" "status") ("badge" "tone" "dot" "icon")
+  ("box" "width" "height" "dir" "bg" "align" "radius" "justify" "gap")
+  ("button" "variant" "size" "icon" "disabled")
+  ("card" "gap" "width" "min_width" "pad")
+  ("chat_composer" "attachment_count" "attachments" "busy" "model"
+   "model_count" "models" "placeholder" "removed") ("chat_message" "mine")
+  ("checkbox" "description") ("code_editor" "height")
+  ("column" "width" "gap" "height" "pad" "bg")
+  ("context_meter" "part_count" "parts") ("dialog" "width" "description")
+  ("donut_chart" "format" "height")
+  ("dot_chart" "annotation_count" "annotations" "height" "max" "min" "no_axis"
+   "unit" "x_max" "x_min" "x_units") ("dot_display" "accent" "pitch" "width")
+  ("empty_state" "description" "icon" "action")
+  ("event_track" "label_step" "selected" "step" "units")
+  ("icon_button" "tooltip" "size" "variant" "color")
+  ("input" "label" "width" "placeholder" "autofocus" "icon" "size")
+  ("line_chart" "area" "format" "height" "label_count" "labels" "smooth"
+   "no_legend") ("list_item" "subtitle" "icon" "trailing" "avatar" "selected")
+  ("menu" "icon" "icon_only" "variant" "placement" "width")
+  ("menu_item" "icon" "checked" "danger") ("model_picker" "ghost" "placement")
+  ("nav_item" "icon" "selected" "group" "badge")
+  ("number" "label" "step" "decimals" "width") ("number_roll" "font" "size")
+  ("popover" "width" "gap" "pad" "placement") ("progress" "height" "tone")
+  ("prompt_suggestions" "columns") ("readout" "detail" "size" "unit" "accent")
+  ("reasoning" "seconds" "thinking") ("response_actions" "copy_text" "vote")
+  ("row" "gap" "align" "width" "pad_x" "wrap" "height")
+  ("scroll" "gap" "fade_edges" "height" "width" "pad")
+  ("search" "placeholder" "size") ("segmented" "size" "full_width" "icons")
+  ("select" "label" "searchable") ("sheet" "size" "side" "description")
+  ("slider" "width" "step" "format" "show_value")
+  ("split" "min_first" "min_second" "height" "width") ("switch" "description")
+  ("table" "selectable" "sort") ("tabs" "variant" "icons")
+  ("text" "size" "color" "font" "nowrap" "width")
+  ("textarea" "height" "placeholder" "hint" "label")
+  ("timeline_item" "icon" "time" "tone" "description" "last")
+  ("toast" "tone" "description" "action")
+  ("tool_call" "detail" "icon" "input" "output" "seconds" "status")
+  ("toolbar_button" "label") ("typewriter" "caret" "size" "speed")
+  ("user_menu" "detail" "status"));
 
 /** Returns `file` from the directory the compiler runs in, so that a
     tweaked literal is written back to the file it was read from.
@@ -111,7 +169,8 @@ meta List x2cui_arguments(
     passed.push(x2cui_value(type, value));
   }
   while (at < args.len()) passed.push(args[at++]);
-  _tweak_receiver = ui;
+  _tweak_receiver = _tweaks(ui) ? ui : NULL;
+  _tweak_method = method;
   if (record) passed.push(x2cui_record(types[ordinary], options));
   // A row a method has no record for stays, and the call reports it.
   else foreach (List row in options) passed.push(row);
@@ -228,7 +287,8 @@ meta List x2cui_columns(String record, List options) {
 meta List x2cui_options(List ui, String method, List options) {
   List types = Type.parameters(_signature(ui, method));
   List rest = options.filter(%!(List row) => _key(row) != "columns");
-  _tweak_receiver = ui;
+  _tweak_receiver = _tweaks(ui) ? ui : NULL;
+  _tweak_method = method;
   List record = x2cui_record(types[types.len() - 1], rest);
   _tweak_receiver = NULL;
   return record;
@@ -253,12 +313,78 @@ meta static List _field(List fields, List row, Array statics) {
   if (type && Type.is_text(type) && _icon_field(name)) type = _icon();
   if (type && type.car() == <*> && _icons_field(name)) type = _icons();
   List value = row[2];
-  if (_tweak_receiver && statics == NULL && type && _literal_number(value))
+  if (_tweaking_here(statics) && type && _literal_number(value))
     value = _tweaked(name, value);
-  List chosen = _tweak_receiver && statics == NULL && type
+  List chosen = _tweaking_here(statics) && type
     ? _tweaked_name(type, name, value) : NULL;
   if (chosen) return %(dotinit ($name) $chosen);
-  return %(dotinit ($name) $(_lower(type, value, statics)));
+  List lowered = _lower(type, value, statics);
+  if (_tweaking_here(statics) && type && _tweak_kind(type) &&
+      !_literal_number(row[2]))
+    lowered = _tweaked_computed(name, lowered);
+  return %(dotinit ($name) $lowered);
+}
+
+/* What a tweak call edits for a field of `type`: "number", "size",
+   "color", "enum", or "bool"; NULL for text and other fields. */
+meta static String _tweak_kind(Type type) {
+  if (type ~= %("cui_size")) return "size";
+  if (type ~= %("cui_color")) return "color";
+  if (Type.is_text(type)) return NULL;
+  Type resolved = Type.resolve(type);
+  if (resolved ~= %(enum *)) return "enum";
+  if (resolved.repr() == "(\"bool\")") return "bool";
+  return Type.numeric(resolved) ? "number" : NULL;
+}
+
+// 1 for an option common to the form's component, 2 for another.
+meta static int _tweak_tier(String name) {
+  String component = _tweak_method;
+  if (component.endswith("_begin"))
+    component = component[:component.len() - 6];
+  List row = _tweak_common.find(%!(List r) => r.car() == component);
+  return row && name in row.cdr() ? 1 : 2;
+}
+
+/* `lowered`, an option written as an expression or a name the panel does
+   not edit, after a note that the call writes it; the panel reads its
+   text from the source. */
+meta static List _tweaked_computed(String name, List lowered) {
+  List ui = _tweak_receiver, site = _tweak_site();
+  List file = site[0], line = site[1], column = site[2];
+  return $!( ($ui.tweak_note($file, $line, $column, $name), $lowered) );
+}
+
+/* The initializer of the field `name` of `type` that the form's call
+   leaves unset: a tweak call that returns the field's zero, which CUI
+   reads as its default, or the value set while tweaking. NULL for a
+   field the panel does not edit. */
+meta static List _tweaked_unset(Type type, String name) {
+  String kind = _tweak_kind(type);
+  if (!kind || name == "count" || name.endswith("_count")) return NULL;
+  List ui = _tweak_receiver, site = _tweak_site();
+  List file = site[0], line = site[1], column = site[2];
+  int tier = _tweak_tier(name);
+  if (kind == "number")
+    return $!( ($type) $ui.tweak_unset_number($file, $line, $column, $name,
+                                               $tier) );
+  if (kind == "size")
+    return $!( $ui.tweak_unset_size($file, $line, $column, $name, $tier) );
+  List members = kind == "color" ? Type.members(Type.resolve(%("cui_token")))
+               : kind == "enum" ? Type.members(Type.resolve(type)) : NULL;
+  List names = members ? x2cui_member_names(members) : %("false" "true");
+  List values = members ? x2cui_member_constants(members)
+                        : %( $($!( 0 )) $($!( 1 )) );
+  List spelled = names.map(%!(String n) => $!( $n ));
+  int count = names.len();
+  if (kind == "color")
+    return $!( $ui.tweak_unset_color($file, $line, $column, $name, $tier,
+                                     (const char *[]){ @spelled },
+                                     (int[]){ @values }, $count) );
+  List call = $!( $ui.tweak_unset_choice($file, $line, $column, $name, $tier,
+                                         (const char *[]){ @spelled },
+                                         (int[]){ @values }, $count) );
+  return kind == "bool" ? $!( $call != 0 ) : $!( ($type) $call );
 }
 
 /* The call site of the form whose record is being built, as the
@@ -402,9 +528,18 @@ meta static int _number(List literal) {
 meta static List _initializers(Type record, List options, Array statics) {
   List fields = Type.fields(record);
   Array rows = [];
+  _tweak_depth++;
+  List made = _initializer_rows(record, fields, options, statics, rows);
+  _tweak_depth--;
+  return made;
+}
+
+meta static List _initializer_rows(Type record, List fields, List options,
+                                   Array statics, Array rows) {
   /* A box whose call names no id gets one from its call site while a
      program is tweaked, so that its rectangle can be found. */
-  if (_tweak_receiver && statics == NULL && record ~= %("cui_box") &&
+  if (_tweaking_here(statics) &&
+      record ~= %("cui_box") &&
       !_option(options, "id")) {
     String file = x2cui_absolute(x2c_invocation_file());
     int line = x2c_invocation_line(), column = x2c_invocation_column();
@@ -412,6 +547,17 @@ meta static List _initializers(Type record, List options, Array statics) {
     List id = $!( $ui.tweak_id($file, $line, $column) );
     rows.push(%(dotinit (id) $id));
   }
+  /* While tweaking, each field the call leaves unset can be set from the
+     panel; see tweak/tweak.x. */
+  if (_tweaking_here(statics))
+    foreach (List field in fields) {
+      String field_name = field.car();
+      if (field_name.startswith("_") || field_name == "id" ||
+          _option(options, field_name))
+        continue;
+      List unset = _tweaked_unset(field[1], field_name);
+      if (unset) rows.push(%(dotinit ($field_name) $unset));
+    }
   foreach (List row in options) {
     rows.push(_field(fields, row, statics));
     String count = _count_field(fields, _key(row));
